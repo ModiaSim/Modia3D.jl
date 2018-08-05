@@ -1,0 +1,3 @@
+# exclude following files
+docs/build/
+docs/site/
