@@ -1,15 +1,15 @@
 # Modia3D
 
-[Modia3D](https://github.com/ModiaSim/Modia3D.jl) is a Julia package to model fixed and 
+[Modia3D](https://github.com/ModiaSim/Modia3D.jl) is a Julia package to model fixed and
 moving objects in 3D (*e.g.* visual shapes, rigid bodies).
-These objects are driven kinematically by pre-defined time functions or are moving dynamically by 
+These objects are driven kinematically by pre-defined time functions or are moving dynamically by
 solving Differential Algebraic Equations (DAEs)
 with a variable-step DAE solver.
 
 Collision handling with elastic response calculation is
 performed for objects that are defined with a contact material and (a) have a convex geometry, or
 (b) can be approximated by a set of convex geometries, or (c) have a concave geometry
-that is (automatically) approximated by its convex hull. 
+that is (automatically) approximated by its convex hull.
 Papers about Modia3D:
 
 - *[Collision Handling with Variable-Step Integrators](../resources/documentation/CollisionHandling_Neumayr_Otter_2017.pdf)* ([EOOLT 2017, December](http://www.eoolt.org/2017/))
@@ -17,7 +17,7 @@ Papers about Modia3D:
   [American Modelica Conference 2018, October 9-10](https://www.modelica.org/events/modelica2018Americas/index_html)
 
 Before releasing version 1.0, Modia3D shall be
-easily combinable with [Modia](https://github.com/Modia/Modia.jl), for example to define a controlled 
+easily combinable with [Modia](https://github.com/ModiaSim/Modia.jl), for example to define a controlled
 electrical motor with Modia, and add 3D behavior/visualization with Modia3D.
 By this approach the best of both worlds can be combined:
 Special 3D algorithms (Modia3D) + power/flexibility of equation based modeling (Modia).
@@ -32,7 +32,7 @@ The following Object3Ds are currently supported:
 
 ### Object3Ds with a solid part
 
-Solid parts can be associated with a [`Modia3D.Object3D`](@ref). 
+Solid parts can be associated with a [`Modia3D.Object3D`](@ref).
 They are defined with struct [`Modia3D.Solid`](@ref) consisting of an **optional** solid geometry:
 
 ![Solids](../resources/images/SolidGeos.jpg)
@@ -109,7 +109,7 @@ There are the following operations on an instance of an assembly:
 - [`Modia3D.visualizeAssembly!`](@ref)`(assembly)` to visualize the initial
   configuration of the assembly without simulating anything.
 - [`Modia3D.SimulationModel`](@ref)`(assembly; analysis=xxx, <other arguments>)` to generate a
-  `simulationModel` of the assembly that can be simulated with `ModiaMath.simulate!`. 
+  `simulationModel` of the assembly that can be simulated with `ModiaMath.simulate!`.
   The `analysis` keyword defines which analysis shall be carried out on the model.
   Currently supported are `KinematicAnalysis` to kinematically move the assembly, or
   `DynamicAnalysis` to solve the equations of motion of the assembly.
@@ -118,7 +118,7 @@ There are the following operations on an instance of an assembly:
 
 ## Main developers
 
-[Andrea Neumayr](mailto:andrea.neumayr@dlr.de) and 
+[Andrea Neumayr](mailto:andrea.neumayr@dlr.de) and
 [Martin Otter](https://rmc.dlr.de/sr/de/staff/martin.otter/)
 
 [DLR - Institute of System Dynamics and Control](https://www.dlr.de/sr/en)
