@@ -4,3 +4,4 @@ StaticArrays
 DataFrames
 DataStructures
 Unitful
+JSON
