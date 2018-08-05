@@ -13,7 +13,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Home",
     "title": "Modia3D",
     "category": "section",
-    "text": "Modia3D is a Julia package to model fixed and  moving objects in 3D (e.g. visual shapes, rigid bodies). These objects are driven kinematically by pre-defined time functions or are moving dynamically by  solving Differential Algebraic Equations (DAEs) with a variable-step DAE solver.Collision handling with elastic response calculation is performed for objects that are defined with a contact material and (a) have a convex geometry, or (b) can be approximated by a set of convex geometries, or (c) have a concave geometry that is (automatically) approximated by its convex hull.  Papers about Modia3D:Collision Handling with Variable-Step Integrators (EOOLT 2017, December)\nComponent-Based 3D Modeling Combined with Equation-Based Modeling, accepted for publication at the American Modelica Conference 2018, October 9-10Before releasing version 1.0, Modia3D shall be easily combinable with Modia, for example to define a controlled  electrical motor with Modia, and add 3D behavior/visualization with Modia3D. By this approach the best of both worlds can be combined: Special 3D algorithms (Modia3D) + power/flexibility of equation based modeling (Modia)."
+    "text": "Modia3D is a Julia package to model fixed and moving objects in 3D (e.g. visual shapes, rigid bodies). These objects are driven kinematically by pre-defined time functions or are moving dynamically by solving Differential Algebraic Equations (DAEs) with a variable-step DAE solver.Collision handling with elastic response calculation is performed for objects that are defined with a contact material and (a) have a convex geometry, or (b) can be approximated by a set of convex geometries, or (c) have a concave geometry that is (automatically) approximated by its convex hull. Papers about Modia3D:Collision Handling with Variable-Step Integrators (EOOLT 2017, December)\nComponent-Based 3D Modeling Combined with Equation-Based Modeling, accepted for publication at the American Modelica Conference 2018, October 9-10Before releasing version 1.0, Modia3D shall be easily combinable with Modia, for example to define a controlled electrical motor with Modia, and add 3D behavior/visualization with Modia3D. By this approach the best of both worlds can be combined: Special 3D algorithms (Modia3D) + power/flexibility of equation based modeling (Modia)."
 },
 
 {
@@ -29,7 +29,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Home",
     "title": "Object3Ds with a solid part",
     "category": "section",
-    "text": "Solid parts can be associated with a Modia3D.Object3D.  They are defined with struct Modia3D.Solid consisting of an optional solid geometry:(Image: Solids)and other optional properties:mass propreties (defined by geometry+material-name, geometry+density, or directly defined mass properties),\ncontact material (for elastic response calculation),\nvisualization material (for visualization, see below).Since the solid geometry itself is optional, it is possible to just define a coordinate system with associated mass and inertia matrix.The following functions are provided for a solid geometry geo that is associated with an Object3D object3D:volume(geo),\ncentroid(geo),\ninertiaMatrix(geo, mass),\nboundingBox(geo, <other arguments>),\nsupportPoint(geo, <other arguments>),\nisVisible(object3D, renderer),\nhasMass(object3D),\ncanCollide(object3D),\nand other functions."
+    "text": "Solid parts can be associated with a Modia3D.Object3D. They are defined with struct Modia3D.Solid consisting of an optional solid geometry:(Image: Solids)and other optional properties:mass propreties (defined by geometry+material-name, geometry+density, or directly defined mass properties),\ncontact material (for elastic response calculation),\nvisualization material (for visualization, see below).Since the solid geometry itself is optional, it is possible to just define a coordinate system with associated mass and inertia matrix.The following functions are provided for a solid geometry geo that is associated with an Object3D object3D:volume(geo),\ncentroid(geo),\ninertiaMatrix(geo, mass),\nboundingBox(geo, <other arguments>),\nsupportPoint(geo, <other arguments>),\nisVisible(object3D, renderer),\nhasMass(object3D),\ncanCollide(object3D),\nand other functions."
 },
 
 {
@@ -53,7 +53,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Home",
     "title": "Assemblies of Object3Ds",
     "category": "section",
-    "text": "Object3D definitions can be collected together with the Modia3D.@assembly macro in hierarchical structures. For example, in the following four bar mechanism (consisting of 3 bars and the ground as 4th bar), a bar is defined as an assembly consisting of a light-blue SolidBeam Object3D and two red Cylinder Object3Ds. Such a bar is then in turn assembled in the assembly FourBar shown below:(Image: fourbar)There are the following operations on an instance of an assembly:Modia3D.visualizeAssembly!(assembly) to visualize the initial configuration of the assembly without simulating anything.\nModia3D.SimulationModel(assembly; analysis=xxx, <other arguments>) to generate a simulationModel of the assembly that can be simulated with ModiaMath.simulate!.  The analysis keyword defines which analysis shall be carried out on the model. Currently supported are KinematicAnalysis to kinematically move the assembly, or DynamicAnalysis to solve the equations of motion of the assembly. In the future it is planned to support QuasiStaticAnalysis as well."
+    "text": "Object3D definitions can be collected together with the Modia3D.@assembly macro in hierarchical structures. For example, in the following four bar mechanism (consisting of 3 bars and the ground as 4th bar), a bar is defined as an assembly consisting of a light-blue SolidBeam Object3D and two red Cylinder Object3Ds. Such a bar is then in turn assembled in the assembly FourBar shown below:(Image: fourbar)There are the following operations on an instance of an assembly:Modia3D.visualizeAssembly!(assembly) to visualize the initial configuration of the assembly without simulating anything.\nModia3D.SimulationModel(assembly; analysis=xxx, <other arguments>) to generate a simulationModel of the assembly that can be simulated with ModiaMath.simulate!. The analysis keyword defines which analysis shall be carried out on the model. Currently supported are KinematicAnalysis to kinematically move the assembly, or DynamicAnalysis to solve the equations of motion of the assembly. In the future it is planned to support QuasiStaticAnalysis as well."
 },
 
 {
@@ -61,7 +61,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Home",
     "title": "Main developers",
     "category": "section",
-    "text": "Andrea Neumayr and  Martin OtterDLR - Institute of System Dynamics and ControlLicense: MIT (expat)"
+    "text": "Andrea Neumayr and Martin OtterDLR - Institute of System Dynamics and ControlLicense: MIT (expat)"
 },
 
 {
