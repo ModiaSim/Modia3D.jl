@@ -2,7 +2,7 @@
     module Simulate_FallingBall4
 
 Models and simulates a sphere that is falling downwards as 6 dof body
-(described by quaternions), **without** collision handling.
+(described by quaternions), **with** collision handling.
 
 See also models
 
