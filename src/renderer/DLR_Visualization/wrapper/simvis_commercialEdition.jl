@@ -57,8 +57,8 @@ function SimVis_setTextObject(ID::Ptr{Void},
                               alignment::Cint,
                               digits::Cint)
    ccall(simVisFunctions.setTextObject, Void,
-           (Ptr{Void},Cint,Cstring,Cdouble,Cint,MVector{3,Float64},MMatrix{3,3,Float64,9},Cdouble,
-            Cstring,Ptr{Cint},Cdouble,Ptr{Cdouble},Cint,Cint),
+           (Ptr{Void},Cint,Cstring,Cdouble,Cint,Ref{MVector{3,Float64}},Ref{MMatrix{3,3,Float64,9}},Cdouble,
+            Cstring,Ref{MVector{3,Cint}},Cdouble,Ref{MVector{3,Float64}},Cint,Cint),
            ID, screenAlignment, text, textvalue, valueactive, pos, T, charsize,
            fontname, color, alpha, offset, alignment, digits)
 end
@@ -79,8 +79,8 @@ function SimVis_setTextObject(ID::Ptr{Void},
                               alignment::Cint,
                               digits::Cint)
    ccall(simVisFunctions.setTextObject, Void,
-           (Ptr{Void},Cint,Cstring,Cdouble,Cint,SVector{3,Cdouble},SMatrix{3,3,Cdouble,9},Cdouble,
-            Cstring,Ptr{Cint},Cdouble,Ptr{Cdouble},Cint,Cint),
+           (Ptr{Void},Cint,Cstring,Cdouble,Cint,Ref{SVector{3,Cdouble}},Ref{SMatrix{3,3,Cdouble,9}},Cdouble,
+            Cstring,Ref{MVector{3,Cint}},Cdouble,Ref{MVector{3,Float64}},Cint,Cint),
            ID, screenAlignment, text, textvalue, valueactive, pos, T, charsize,
            fontname, color, alpha, offset, alignment, digits)
 end
