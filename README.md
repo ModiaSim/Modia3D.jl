@@ -105,7 +105,7 @@ ModiaMath.plot(result, ["revolute.phi", "revolute.w"]);
 
 ## Status
 
-The package is tested against Julia `0.6` on Windows 7.
+The package is tested against Julia `0.6` on Windows 7, Kubuntu 18.04, Ubuntu 14.04, OpenSUSE42 and Fedora 28.
 The actual version number is 0.2.0-beta.1 and functionality and robustness is planned to be improved for the 1.0 version.
 
 Especially note, the collision handling has still bugs and the elastic response calculation is not
