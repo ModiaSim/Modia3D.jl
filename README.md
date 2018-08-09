@@ -40,8 +40,7 @@ to first install `PyPlot` as described in the
 Modia3D visualizes the movement of 3D objects with a renderer.
 Currently, the (free) community or the (commercial) professional version of the
 [DLR Visualization](http://www.systemcontrolinnovationlab.de/the-dlr-visualization-library/) library
-are supported. To install the free version for *Windows* perform the following steps
-(the free *Linux* version will become available in a few days):
+are supported. To install the free version for *Windows* or for *Linux* perform the following steps:
 
 1. Go to [https://visualization.ltx.de/](https://visualization.ltx.de/),
    provide your contact information and click on *Request download* for *Community Edition*.
