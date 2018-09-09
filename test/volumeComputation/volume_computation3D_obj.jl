@@ -1,8 +1,8 @@
 module volume_computation3D_obj
 
 using Modia3D
-using ModiaMath
-using Unitful
+using Modia3D.ModiaMath
+using Modia3D.Unitful
 
 # filename = joinpath(Modia3D.path, "objects", "pascal", "pascal.obj")
 # filename = joinpath(Modia3D.path, "objects", "pascal", "convexSolids_pascal.obj", "pascal-0.obj")

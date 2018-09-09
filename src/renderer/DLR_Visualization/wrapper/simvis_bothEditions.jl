@@ -6,22 +6,22 @@
 
 # Function available for community and commercial version of SimVis 
 function SimVis_shutdown()
-   ccall(simVisFunctions.shutdown, Void,())
+   ccall(simVisFunctions.shutdown, NOTHING,())
 end
 
 function SimVis_getObjectID(emptyObjectID::Int)
-   ccall(simVisFunctions.getObjectID, Ptr{Void},(Cint,), emptyObjectID)
+   ccall(simVisFunctions.getObjectID, Ptr{NOTHING},(Cint,), emptyObjectID)
 end
 
-function SimVis_freeObjectID(obj::Ptr{Void})
-   ccall(simVisFunctions.freeObjectID, Void,(Ptr{Void},), obj)
+function SimVis_freeObjectID(obj::Ptr{NOTHING})
+   ccall(simVisFunctions.freeObjectID, NOTHING,(Ptr{NOTHING},), obj)
 end
 
 function SimVis_setTime(time::Float64)
-   ccall(simVisFunctions.setTime, Void,(Cdouble,), time)
+   ccall(simVisFunctions.setTime, NOTHING,(Cdouble,), time)
 end
 
-function SimVis_setBaseObject(ID::Ptr{Void},
+function SimVis_setBaseObject(ID::Ptr{NOTHING},
                               state::Cint,
                               baseObjType::Cint,
                               pos::MVector{3,Float64},
@@ -35,12 +35,12 @@ function SimVis_setBaseObject(ID::Ptr{Void},
                               alpha::Float64,
                               canCollide::Cint,
                               shadowMask::Cint)
-   ccall(simVisFunctions.setBaseObject, Void,
-           (Ptr{Void},Cint,Cint,Ref{SVector{3,Float64}},Ref{SMatrix{3,3,Float64,9}},Ref{MVector{3,Float64}},Ref{MVector{3,Cint}},Cint,Cint,Cdouble,Ref{MVector{3,Float64}},Cdouble,Cint,Cint),
+   ccall(simVisFunctions.setBaseObject, NOTHING,
+           (Ptr{NOTHING},Cint,Cint,Ref{SVector{3,Float64}},Ref{SMatrix{3,3,Float64,9}},Ref{MVector{3,Float64}},Ref{MVector{3,Cint}},Cint,Cint,Cdouble,Ref{MVector{3,Float64}},Cdouble,Cint,Cint),
            ID,state,baseObjType,pos,T,scale,color,wireframe,reflectslight,specularCoefficient,extra,alpha,canCollide,shadowMask)
 end
 
-function SimVis_setBaseObject(ID::Ptr{Void},
+function SimVis_setBaseObject(ID::Ptr{NOTHING},
                               state::Cint,
                               baseObjType::Cint,
                               pos::SVector{3,Float64},
@@ -54,13 +54,13 @@ function SimVis_setBaseObject(ID::Ptr{Void},
                               alpha::Float64,
                               canCollide::Cint,
                               shadowMask::Cint)
-   ccall(simVisFunctions.setBaseObject, Void,
-           (Ptr{Void},Cint,Cint,Ref{SVector{3,Float64}},Ref{SMatrix{3,3,Float64,9}},Ref{MVector{3,Float64}},Ref{MVector{3,Cint}},Cint,Cint,Cdouble,Ref{MVector{3,Float64}},Cdouble,Cint,Cint),
+   ccall(simVisFunctions.setBaseObject, NOTHING,
+           (Ptr{NOTHING},Cint,Cint,Ref{SVector{3,Float64}},Ref{SMatrix{3,3,Float64,9}},Ref{MVector{3,Float64}},Ref{MVector{3,Cint}},Cint,Cint,Cdouble,Ref{MVector{3,Float64}},Cdouble,Cint,Cint),
            ID,state,baseObjType,pos,T,scale,color,wireframe,reflectslight,specularCoefficient,extra,alpha,canCollide,shadowMask)
 end
 
 
-function SimVis_setFileObject(ID::Ptr{Void},
+function SimVis_setFileObject(ID::Ptr{NOTHING},
                               state::Cint,
                               pos::MVector{3,Float64},
                               T::MMatrix{3,3,Float64,9},
@@ -76,14 +76,14 @@ function SimVis_setFileObject(ID::Ptr{Void},
                               color::MVector{3,Cint},
                               shadowMask::Cint,
                               shaderName::String)
-   ccall(simVisFunctions.setFileObject, Void,
-            (Ptr{Void},Cint,Ref{MVector{3,Float64}},Ref{MVector{3,Float64}},Ref{MVector{3,Float64}},Cint,Cdouble,Cdouble,Cint,Cint,Cstring,Cint,Cint,Ref{MVector{3,Cint}},Cint,Cstring),
+   ccall(simVisFunctions.setFileObject, NOTHING,
+            (Ptr{NOTHING},Cint,Ref{MVector{3,Float64}},Ref{MVector{3,Float64}},Ref{MVector{3,Float64}},Cint,Cdouble,Cdouble,Cint,Cint,Cstring,Cint,Cint,Ref{MVector{3,Cint}},Cint,Cstring),
              ID,state,pos,T,scale,reflectslight,specularCoefficient,alpha,wireframe,canCollide,filename,smooth,overwriteColor,color,shadowMask,shaderName)
 end
 
 
 
-function SimVis_setFileObject(ID::Ptr{Void},
+function SimVis_setFileObject(ID::Ptr{NOTHING},
                               state::Cint,
                               pos::SVector{3,Float64},
                               T::SMatrix{3,3,Float64,9},
@@ -99,7 +99,7 @@ function SimVis_setFileObject(ID::Ptr{Void},
                               color::MVector{3,Cint},
                               shadowMask::Cint,
                               shaderName::String)
-   ccall(simVisFunctions.setFileObject, Void,
-            (Ptr{Void},Cint,Ref{SVector{3,Cdouble}},Ref{SMatrix{3,3,Cdouble,9}},Ref{MVector{3,Float64}},Cint,Cdouble,Cdouble,Cint,Cint,Cstring,Cint,Cint,Ref{MVector{3,Cint}},Cint,Cstring),
+   ccall(simVisFunctions.setFileObject, NOTHING,
+            (Ptr{NOTHING},Cint,Ref{SVector{3,Cdouble}},Ref{SMatrix{3,3,Cdouble,9}},Ref{MVector{3,Float64}},Cint,Cdouble,Cdouble,Cint,Cint,Cstring,Cint,Cint,Ref{MVector{3,Cint}},Cint,Cstring),
              ID,state,pos,T, scale,reflectslight,specularCoefficient,alpha,wireframe,canCollide,filename,smooth,overwriteColor,color,shadowMask,shaderName)
 end

@@ -55,7 +55,14 @@ waves = Signals()
 
 
 Modia3D.initAnalysis!(pendulum, Modia3D.SceneOptions(visualizeFrames=true, defaultFrameLength=0.3, enableContactDetection=false))
-for time = linspace(0.0, 2*pi, 101)
+
+@static if VERSION >= v"0.7.0-DEV.2005"
+    LINSPACE(start,stop,length) = range(0.0, stop=stop, length=length)
+else
+    LINSPACE(start,stop,length) = linspace(start,stop,length)
+end
+
+for time = LINSPACE(0.0, 2*pi, 101)
   setSignal!(waves,time)
   Modia3D.setAngle!(pendulum.rev1, waves.sinWave.output)
   Modia3D.setAngle!(pendulum.rev2, waves.cosWave.output)

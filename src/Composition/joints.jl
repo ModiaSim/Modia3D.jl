@@ -7,7 +7,7 @@
 
 
 # Utility function that should not be directly called (only to be called from attach(..)
-function attachAndReverseParents(newParent::Object3D, obj::Object3D)::Void
+function attachAndReverseParents(newParent::Object3D, obj::Object3D)::NOTHING
    @assert(!(newParent ≡ obj))
 
    # Save elements of obj
@@ -52,7 +52,7 @@ function attachAndReverseParents(newParent::Object3D, obj::Object3D)::Void
 
    # If scene != nothing, visit all objs and set scene
 #=
-   if typeof(scene) != Void
+   if typeof(scene) != NOTHING
       stack = scene.stack
       empty!(stack)
       append!(stack, obj.children)
@@ -99,15 +99,15 @@ end
 
 function connect(obj1::Object3D, obj2::Object3D;
                  r::AbstractVector = ModiaMath.ZeroVector3D,
-                 R::Union{ModiaMath.RotationMatrix,Void} = nothing,
-                 q::Union{ModiaMath.Quaternion,Void} = nothing,
-                 fixed::Bool = true)::Void
-   if typeof(R) != Void && typeof(q) != Void
+                 R::Union{ModiaMath.RotationMatrix,NOTHING} = nothing,
+                 q::Union{ModiaMath.Quaternion,NOTHING} = nothing,
+                 fixed::Bool = true)::NOTHING
+   if typeof(R) != NOTHING && typeof(q) != NOTHING
       error("Modia3D.connect(...): either R or q must be nothing but both have a value.")
    end
-   if typeof(R) != Void
+   if typeof(R) != NOTHING
       ModiaMath.assertRotationMatrix(R)
-   elseif typeof(q) != Void
+   elseif typeof(q) != NOTHING
       ModiaMath.assertQuaternion(q)
    end
 
@@ -122,8 +122,8 @@ function connect(obj1::Object3D, obj2::Object3D;
    end
 
    r_rel = SVector{3,Float64}(r)
-   R_rel = typeof(R) != Void ? R                   : 
-           typeof(q) != Void ? ModiaMath.from_q(q) : ModiaMath.NullRotation
+   R_rel = typeof(R) != NOTHING ? R                   : 
+           typeof(q) != NOTHING ? ModiaMath.from_q(q) : ModiaMath.NullRotation
 
    obj.r_rel = obj===obj2 ? r_rel : -R_rel*r_rel
    obj.R_rel = obj===obj2 ? R_rel :  R_rel'
@@ -135,8 +135,8 @@ function connect(obj1::Object3D, obj2::Object3D;
    if fixed
       obj.joint = fixedJoint
    else
-      q_start = typeof(R) != Void ? ModiaMath.from_R(R) : 
-                typeof(q) != Void ? q                   : ModiaMath.NullQuaternion
+      q_start = typeof(R) != NOTHING ? ModiaMath.from_R(R) : 
+                typeof(q) != NOTHING ? q                   : ModiaMath.NullQuaternion
       q_start = obj===obj2 ? q_start : ModiaMath.inverseRotation(q_start)
 
       obj.joint = FreeMotion(obj, r_start = obj.r_rel, q_start = q_start)
@@ -146,7 +146,7 @@ end
 
 
 updatePosition!(assembly::Modia3D.AbstractAssembly) = updatePosition!(assembly._internal.referenceObject3D)
-function updatePosition!(frame::Object3D)::Void
+function updatePosition!(frame::Object3D)::NOTHING
    stack = Object3D[]
    # Push initial children on stack
    append!(stack, frame.children)
@@ -170,7 +170,7 @@ function updatePosition!(frame::Object3D)::Void
          frame.R_abs = frame.R_rel*parent.R_abs
       end
 =# 
-      if typeof(frame.visualizationFrame) != Void
+      if typeof(frame.visualizationFrame) != NOTHING
          frame.visualizationFrame.r_abs = frame.r_abs
          frame.visualizationFrame.R_abs = frame.R_abs
       end

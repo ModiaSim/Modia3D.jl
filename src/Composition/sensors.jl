@@ -46,7 +46,12 @@ function planarRotationAngle(frame1::Object3D, frame2::Object3D)
               "The origins of the two frames coincide (this is not allowed for this measurement.")
    end
    r12n = r12/norm(r12)
-   return atan2(dot(cross(e1x,r12n), e1z), dot(e1x,r12n) )
+
+   @static if VERSION >= v"0.7.0-DEV.2005"
+       return atan(dot(cross(e1x,r12n), e1z), dot(e1x,r12n) )
+   else
+       return atan2(dot(cross(e1x,r12n), e1z), dot(e1x,r12n) )
+   end
 end
 
 

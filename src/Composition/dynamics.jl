@@ -12,7 +12,7 @@
 
 The function traverses assembly and stores all frames without a parent frame in vector frames.
 """
-function get_Object3DsWithoutParent!(assembly::Modia3D.AbstractAssembly, frames::AbstractVector)::Void
+function get_Object3DsWithoutParent!(assembly::Modia3D.AbstractAssembly, frames::AbstractVector)::NOTHING
    assemblyType = typeof(assembly)
    for i = 1:nfields(assemblyType)
       field     = getfield(assembly, fieldname(assemblyType,i))
@@ -102,7 +102,7 @@ struct SimulationModel <: ModiaMath.AbstractSimulationModel
 
       # Construct Scene(..) object
       so = assembly._internal.sceneOptions
-      sceneOptions::SceneOptions = typeof(so) == Void ? SceneOptions() : so
+      sceneOptions::SceneOptions = typeof(so) == NOTHING ? SceneOptions() : so
       scene = Scene(sceneOptions)
       scene.analysis = analysis
       assembly._internal.scene = scene
@@ -266,7 +266,7 @@ open("log.txt", "a") do file
       # Compute kinematics
       computeKinematics!(obj.joint, obj, analysis, time)
 
-      if typeof(obj.visualizationFrame) != Void
+      if typeof(obj.visualizationFrame) != NOTHING
          obj.visualizationFrame.r_abs = obj.r_abs
          obj.visualizationFrame.R_abs = obj.R_abs
       end
@@ -325,8 +325,8 @@ open("log.txt", "a") do file
             if ModiaMath.isInitial(sim)
                str = ""   # when logging, do not print z
             else
-               name1 = typeof(obj1) == Void ? "nothing" : ModiaMath.instanceName(obj1)
-               name2 = typeof(obj2) == Void ? "nothing" : ModiaMath.instanceName(obj2)         
+               name1 = typeof(obj1) == NOTHING ? "nothing" : ModiaMath.instanceName(obj1)
+               name2 = typeof(obj2) == NOTHING ? "nothing" : ModiaMath.instanceName(obj2)         
                str   = "distance(" * string(name1) * "," * string(name2) * ")"
             end
          else

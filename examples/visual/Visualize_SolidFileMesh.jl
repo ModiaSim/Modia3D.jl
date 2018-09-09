@@ -1,7 +1,7 @@
 module Visualize_SolidFileMesh
 
 using Modia3D
-using StaticArrays
+using Modia3D.StaticArrays
 
 vmat1 = Modia3D.Material(color="LightBlue" , transparency=0.5)    # material of SolidFileMesh
 vmat2 = deepcopy(vmat1)                                           # material of convex decomposition of SolidFileMesh

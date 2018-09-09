@@ -8,8 +8,8 @@ See also models [`Simulate_FallingBall2`](@ref) (falling ball with collision han
 """
 module Simulate_FallingBall1
 
-using Modia3D
-import ModiaMath
+using  Modia3D
+import Modia3D.ModiaMath
 
 @assembly FallingBall(;h=1.0) begin
    world  = Object3D()

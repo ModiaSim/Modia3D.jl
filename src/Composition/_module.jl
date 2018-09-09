@@ -81,9 +81,15 @@ import Modia3D.Graphics
 import Modia3D.Signals
 import JSON
 
-const MaterialOrVoid                = Union{Graphics.Material,Void}
-const MassPropertiesOrVoid          = Union{Solids.MassProperties,Void}
-const AbstractContactMaterialOrVoid = Union{Modia3D.AbstractContactMaterial,Void}
+@static if VERSION >= v"0.7.0-DEV.2005"
+    const NOTHING = Nothing
+else
+    const NOTHING = Void
+end
+
+const MaterialOrNothing                = Union{Graphics.Material,NOTHING}
+const MassPropertiesOrNothing          = Union{Solids.MassProperties,NOTHING}
+const AbstractContactMaterialOrNothing = Union{Modia3D.AbstractContactMaterial,NOTHING}
 
 include("flange.jl")
 include("object3D.jl")

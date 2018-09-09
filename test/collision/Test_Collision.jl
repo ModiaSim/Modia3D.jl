@@ -1,9 +1,9 @@
 module Test_Collision
 
 using Modia3D
-using StaticArrays
-using ModiaMath
-using Unitful
+using Modia3D.StaticArrays
+using Modia3D.ModiaMath
+using Modia3D.Unitful
 
 
 # Materials
@@ -99,7 +99,14 @@ AABB = collisionTest._internal.scene.options.contactDetection.contactPairs.AABB
 
 tStart=0.0
 tEnd  =1.0
-for time = linspace(tStart, tEnd, 101)
+
+@static if VERSION >= v"0.7.0-DEV.2005"
+    LINSPACE(start,stop,length) = range(0.0, stop=stop, length=length)
+else
+    LINSPACE(start,stop,length) = linspace(start,stop,length)
+end
+
+for time = LINSPACE(tStart, tEnd, 101)
   s = Modia3D.linearMovement(2*Lx, tStart, tEnd, time)
   delta_phi = Modia3D.linearMovement(pi/3, tStart, tEnd, time)
 

@@ -3,7 +3,7 @@
 
 module Modia3D
 println(" \nWelcome to Modia3D - Modeling and simulation of 3D systems")
-println("   Version : 0.2.0-beta.1")
+println("   Version : 0.2.0-beta.2 (2018-09-09)")
 
 const path = dirname(dirname(@__FILE__))   # Absolute path of Modia3D Julia package directory
 
@@ -81,5 +81,15 @@ export @bus
 export @forceElement
 export Object3D
 
+
+# Add import clauses used in examples and test
+import StaticArrays
+import Unitful
+import ModiaMath
+
+@static if VERSION >= v"0.7.0-DEV.2005"
+    import LinearAlgebra
+    import Test
+end
 
 end # module

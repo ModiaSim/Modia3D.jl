@@ -1,9 +1,9 @@
 module Test_Solids
 
 using Modia3D
-using StaticArrays
-using Unitful
-using ModiaMath
+using Modia3D.StaticArrays
+using Modia3D.Unitful
+using Modia3D.ModiaMath
 
 
 massProperties = "Aluminium"
@@ -113,7 +113,14 @@ AABB = as._internal.scene.options.contactDetection.contactPairs.AABB
 tStart=0.0
 tEnd  =1.0
 #tEnd = 0.01
-for time =  linspace(tStart, tEnd, 101)  # 0:0.01:0.01
+
+@static if VERSION >= v"0.7.0-DEV.2005"
+    LINSPACE(start,stop,length) = range(0.0, stop=stop, length=length)
+else
+    LINSPACE(start,stop,length) = linspace(start,stop,length)
+end
+
+for time =  LINSPACE(tStart, tEnd, 101)  # 0:0.01:0.01
   s = Modia3D.linearMovement(2*length1, tStart, tEnd, time)
   sdeg = 10*s*u"°"
   Modia3D.set_q!(as.rotM1.frame0, ModiaMath.qrot1(sdeg))

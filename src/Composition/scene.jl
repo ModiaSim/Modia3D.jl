@@ -20,7 +20,7 @@ include(joinpath(Modia3D.path, "src", "renderer", "NoRenderer", "NoRenderer.jl")
 
 #-------------------------------------- Default Contact Detection -------------------------------
 
-doc"""
+"""
     ContactPairs(nzmax, celements, cantCollide, dummyObject3D)
 
 Generate a new ContactPairs structure used for communication between the Object3D handler and a ContactDetection handler.
@@ -36,7 +36,6 @@ Generate a new ContactPairs structure used for communication between the Object3
 - DummyObject3D::Modia3D.AbstractObject3Ddata: A dummy Object3D that can be used in the struct as element of a vector of Object3Ds
   to fill the array with a dummy value of the correct type.
 """
-
 struct ContactPairs
    # Solid shapes used in contact detection (provided by Object3D handler)
    celements::Array{Array{Object3D}}
@@ -57,8 +56,8 @@ struct ContactPairs
    contactPoint2::Vector{MVector{3,Float64}}       # Absolute position vector to second contact point on contactObj2
    contactNormal::Vector{MVector{3,Float64}}       # Unit normal to surface on contactPoint1 (in world frame)
 
-   contactObj1::Vector{Union{Object3D,Void}}
-   contactObj2::Vector{Union{Object3D,Void}}
+   contactObj1::Vector{Union{Object3D,NOTHING}}
+   contactObj2::Vector{Union{Object3D,NOTHING}}
 
    function ContactPairs(celements::Array{Array{Object3D}} ,
                          cantCollide::Array{Array{Int64,1}},
@@ -111,8 +110,8 @@ struct ContactPairs
       contactPoint1  = [defaultPoint for i = 1:nz]
       contactPoint2  = [defaultPoint for i = 1:nz]
       contactNormal  = [defaultPoint for i = 1:nz]
-      contactObj1    = Vector{Union{Object3D,Void}}(nz)
-      contactObj2    = Vector{Union{Object3D,Void}}(nz)
+      contactObj1    = Vector{Union{Object3D,NOTHING}}(nz)
+      contactObj2    = Vector{Union{Object3D,NOTHING}}(nz)
       for i = 1:nz
          contactObj1[i] = nothing
          contactObj2[i] = nothing

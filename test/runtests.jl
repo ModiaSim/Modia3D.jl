@@ -1,7 +1,10 @@
+
+import Modia3D
+
 @static if VERSION < v"0.7.0-DEV.2005"
     using Base.Test
 else
-    using Test
+    using Modia3D.Test
 end
 
 @testset "Test Modia3D" begin
@@ -17,3 +20,4 @@ end
 
    println("\n... success of all tests!")
 end
+

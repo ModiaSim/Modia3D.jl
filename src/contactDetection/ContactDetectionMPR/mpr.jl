@@ -8,7 +8,7 @@
 
 # Collision detection algorithm
 
-type SupportPoint
+mutable struct SupportPoint
    p::SVector{3,Float64}    # support point
    n::SVector{3,Float64}    # support normal unit vector
    a::SVector{3,Float64}    # point on shapeA

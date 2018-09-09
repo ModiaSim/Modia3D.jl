@@ -1,7 +1,7 @@
 module Move_SolidFileMesh
 
 using Modia3D
-using StaticArrays
+using Modia3D.StaticArrays
 
 vmat1 = Modia3D.Material(color="LightBlue" , transparency=0.5)    # material of SolidFileMesh
 vmat2 = deepcopy(vmat1)                                           # material of convex decomposition of SolidFileMesh
@@ -27,7 +27,14 @@ fileMeshes = FileMeshes(sceneOptions=Modia3D.SceneOptions(visualizeFrames=true,d
 # Kinematic simulation
 Modia3D.initAnalysis!(fileMeshes)
 
-for time = linspace(0.0, 2.0, 101)
+
+@static if VERSION >= v"0.7.0-DEV.2005"
+    LINSPACE(start,stop,length) = range(0.0, stop=stop, length=length)
+else
+    LINSPACE(start,stop,length) = linspace(start,stop,length)
+end
+
+for time = LINSPACE(0.0, 2.0, 101)
   r1[3]  = 2*time
   Modia3D.set_r!(fileMeshes.fileMesh1, r1)
 

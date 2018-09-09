@@ -1,7 +1,8 @@
 module Simulate_DamperMacro
 
-import ModiaMath
-using Modia3D
+using  Modia3D
+import Modia3D.ModiaMath
+
 
 
 # Damper

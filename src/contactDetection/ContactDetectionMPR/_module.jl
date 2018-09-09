@@ -25,6 +25,12 @@ import ModiaMath
 using StaticArrays
 using DataStructures
 
+@static if VERSION >= v"0.7.0-DEV.2005"
+    const NOTHING = Nothing
+else
+    const NOTHING = Void
+end
+
 include("utilities.jl")
 include("mpr.jl")
 include("handler.jl")

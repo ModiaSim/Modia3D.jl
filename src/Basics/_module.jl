@@ -26,7 +26,9 @@ export PositionMVector, RotationMMatrix, assertRotationMatrix
 
 using StaticArrays
 
-
+@static if VERSION >= v"0.7.0-DEV.2005"
+    using LinearAlgebra
+end
 
 include("environment.jl")
 include("constantsAndFunctions.jl")

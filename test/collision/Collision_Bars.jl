@@ -1,9 +1,11 @@
 module Collision_Bars
 
-using StaticArrays
-using Unitful
-import ModiaMath
 using Modia3D
+
+import Modia3D.ModiaMath
+using  Modia3D.StaticArrays
+using  Modia3D.Unitful
+
 
 
 vgreen  = Modia3D.Material(color="Green", transparency=0.5)
@@ -120,7 +122,14 @@ AABB = coll._internal.scene.options.contactDetection.contactPairs.AABB
 
 tStart = 0.0
 tEnd   = 2*pi
-for time =  linspace(tStart, tEnd, 101)
+
+@static if VERSION >= v"0.7.0-DEV.2005"
+    LINSPACE(start,stop,length) = range(0.0, stop=stop, length=length)
+else
+    LINSPACE(start,stop,length) = linspace(start,stop,length)
+end
+
+for time =  LINSPACE(tStart, tEnd, 101)
   Modia3D.update!(coll, time, tStart, tEnd)
   Modia3D.selectContactPairs!(coll)
   # Modia3D.getDistances!(coll)

@@ -6,7 +6,7 @@
 #
 
 
-function build_tree_and_velements!(scene::Scene, world::Object3D)::Void
+function build_tree_and_velements!(scene::Scene, world::Object3D)::NOTHING
    options             = scene.options
    visualizeFrames     = options.visualizeFrames
    renderer            = options.renderer
@@ -76,7 +76,7 @@ end
 
 
 # all visible elements are build here
-function build_velements!(scene::Scene, world::Object3D)::Void
+function build_velements!(scene::Scene, world::Object3D)::NOTHING
    options         = scene.options
    visualizeFrames = options.visualizeFrames
    renderer        = options.renderer
@@ -146,7 +146,7 @@ end
 #     these elements form together a super object
 #   elements which are directly connected with a joint can't collide
 #     these elements are excluded from the collision list
-function build_celements!(scene::Scene, world::Object3D)::Void
+function build_celements!(scene::Scene, world::Object3D)::NOTHING
   stack = scene.stack
   queue = scene.queue
   empty!(stack)
@@ -236,9 +236,9 @@ function build_SignalObject3DConnections!(assembly::Modia3D.AbstractAssembly)
     assembly = pop!(assemblyStack)
 
     # for checking if there are any sub assemblies
-    for v in fieldnames(assembly)
+    for v in fieldnames(typeof(assembly))
       subAssembly = getAssembly(getfield(assembly,v))
-      if typeof(subAssembly) != Void && typeof(subAssembly) != Modia3D.Composition.Part
+      if typeof(subAssembly) != NOTHING && typeof(subAssembly) != Modia3D.Composition.Part
         push!(assemblyStack, subAssembly)
       end
     end
@@ -273,7 +273,7 @@ build_SignalObject3DConnections!(dummy) = nothing
 Visualize the `assembly` defined with macro [`Modia3D.@assembly`](@ref)
 in its initial configuration (but without simulating it).
 """
-function visualizeAssembly!(assembly::Modia3D.AbstractAssembly)::Void
+function visualizeAssembly!(assembly::Modia3D.AbstractAssembly)::NOTHING
    Modia3D.initAnalysis!(assembly)
    Modia3D.updatePosition!(assembly)
    Modia3D.visualize!(assembly,0.0)
@@ -283,7 +283,7 @@ function visualizeAssembly!(assembly::Modia3D.AbstractAssembly)::Void
 end
 
 
-function visualizeWorld!(world::Object3D; sceneOptions = SceneOptions())::Void
+function visualizeWorld!(world::Object3D; sceneOptions = SceneOptions())::NOTHING
    scene = Scene(sceneOptions)
    scene.analysis = ModiaMath.KinematicAnalysis
    initAnalysis!(world, scene)
@@ -320,7 +320,7 @@ end
 function initAnalysis!(assembly::Modia3D.AbstractAssembly;
                        analysis::ModiaMath.AnalysisType=ModiaMath.KinematicAnalysis)
    # Add visual elements to scene.velements
-   if typeof(assembly._internal.referenceObject3D) == Void
+   if typeof(assembly._internal.referenceObject3D) == NOTHING
       error("\nError message from Modia3D.initAnalysis!(..):\n",
             typeof(assembly), " has no reference frame.")
    end
@@ -328,7 +328,7 @@ function initAnalysis!(assembly::Modia3D.AbstractAssembly;
    # Construct Scene(..) object
    world = assembly._internal.referenceObject3D
    so    = assembly._internal.sceneOptions
-   sceneOptions::SceneOptions = typeof(so) == Void ? SceneOptions() : so
+   sceneOptions::SceneOptions = typeof(so) == NOTHING ? SceneOptions() : so
    scene = Scene(sceneOptions)
    scene.analysis = analysis
    assembly._internal.scene = scene
@@ -357,7 +357,7 @@ end
 #=
 function initAnalysis!(assembly::Modia3D.AbstractAssembly)
    # Add visual elements to scene.velements
-   if typeof(assembly._internal.referenceObject3D) == Void
+   if typeof(assembly._internal.referenceObject3D) == NOTHING
       error("\nError message from Modia3D.initAnalysis!(..):\n",
             typeof(assembly), " has no reference frame.")
    end
@@ -515,4 +515,4 @@ function closeAnalysis!(scene::Scene)
      scene.initAnalysis = false
 end
 
-closeAnalysis!(assembly::Modia3D.AbstractAssembly) = typeof(assembly._internal.scene) != Void ? closeAnalysis!(assembly._internal.scene) : nothing
+closeAnalysis!(assembly::Modia3D.AbstractAssembly) = typeof(assembly._internal.scene) != NOTHING ? closeAnalysis!(assembly._internal.scene) : nothing

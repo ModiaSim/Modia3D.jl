@@ -241,7 +241,7 @@ function setDistance!(joint::TreeJointPrismatic, s::Float64)
 end
 
 
-function computeKinematics!(joint::TreeJointPrismatic, obj::Object3D, analysis::ModiaMath.AnalysisType, time::Float64)::Void
+function computeKinematics!(joint::TreeJointPrismatic, obj::Object3D, analysis::ModiaMath.AnalysisType, time::Float64)::NOTHING
    parent::Object3D = obj.parent
 
    obj.r_rel = joint.eAxis*joint.s.value
@@ -264,7 +264,7 @@ function computeKinematics!(joint::TreeJointPrismatic, obj::Object3D, analysis::
 end
 
 
-function computeForceTorqueAndResidue!(joint::TreeJointPrismatic, obj::Object3D, analysis::ModiaMath.AnalysisType, time::Float64)::Void
+function computeForceTorqueAndResidue!(joint::TreeJointPrismatic, obj::Object3D, analysis::ModiaMath.AnalysisType, time::Float64)::NOTHING
    parent::Object3D                 = obj.parent
    dynamics::Object3Ddynamics       = obj.dynamics
    parentDynamics::Object3Ddynamics = parent.dynamics

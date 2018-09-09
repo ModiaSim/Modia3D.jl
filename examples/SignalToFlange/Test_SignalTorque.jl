@@ -1,7 +1,7 @@
 module Test_SignalTorque
 
-import ModiaMath
-using Modia3D
+using  Modia3D
+import Modia3D.ModiaMath
 
 
 @signal Signal(;A=0.1) begin

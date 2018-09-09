@@ -1,7 +1,7 @@
 module Test_SignalAngle
 
-import ModiaMath
-using Modia3D
+using  Modia3D
+import Modia3D.ModiaMath
 
 @signal Signal(;A=5.0, B=2.0) begin
    y = ModiaMath.RealScalar("y", causality=ModiaMath.Output, numericType=ModiaMath.WR)

@@ -20,6 +20,12 @@ import Modia3D.Graphics
 import Modia3D.Solids
 import Modia3D.Composition
 
+@static if VERSION >= v"0.7.0-DEV.2005"
+    const NOTHING = Nothing
+else
+    const NOTHING = Void
+end
+
 include(joinpath("wrapper","simvis.jl"))
 
 if !simVisInfo.isNoRenderer

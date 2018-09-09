@@ -21,7 +21,7 @@ getVisualElement(data::Solids.Solid) = data.geo
 getVisualizeFunction(data) = getfield(DLR_Visualization, Symbol("visualize", Basics.trailingPartOfTypeAsString( getVisualElement(data) )))
 
 
-function Composition.initializeVisualization(renderer::Composition.DLR_Visualization_renderer, velements::Vector{Composition.Object3D})::Void
+function Composition.initializeVisualization(renderer::Composition.DLR_Visualization_renderer, velements::Vector{Composition.Object3D})::NOTHING
   @assert(length(velements) > 0)
   if renderer.isInitialized
      Composition.closeVisualization(renderer)

@@ -17,7 +17,7 @@ Generate a new (rigid) solid with optional solid geometry, mass, visualization a
 A solid can be associated to a [`Modia3D.Object3D`](@ref).
 
 # Arguments
-- `geo::Union{Modia3D.AbstractSolidGeometry,Void}`: Optional solid geometry object
+- `geo::Union{Modia3D.AbstractSolidGeometry,NOTHING}`: Optional solid geometry object
   (such as `Modia3D.SolidSphere,.SolidBox,.SolidFileMesh`).
 - Mass properties (mass, center of mass, inertia matrix) of geo are computed by one of:
   * `solidMaterialName::AbstractString`: Name of a solid material defined in
@@ -28,9 +28,9 @@ A solid can be associated to a [`Modia3D.Object3D`](@ref).
   * `massProperties::Modia3D.MassProperties`: Mass properties (mass, center of mass, inertia matrix)
     are explicitly given.
   * `nothing`: geo has no mass.
-- `material::Union{`[`Modia3D.Material`](@ref)`,Void}`: Visualization material of `geo`.
+- `material::Union{`[`Modia3D.Material`](@ref)`,NOTHING}`: Visualization material of `geo`.
    If `material=nothing`, geo is not shown in the visualization.
-- `contactMaterial::Union{Modia3D.AbstractContactMaterial,Void}`: Contact material of `geo`.
+- `contactMaterial::Union{Modia3D.AbstractContactMaterial,NOTHING}`: Contact material of `geo`.
    If `contactMaterial=nothing`, no collision handling takes place for geo.
 
 ![Solids](../../resources/images/SolidGeos.jpg)
@@ -54,16 +54,16 @@ solid6 = Modia3D.Solid(nothing, massProperties)
 ```
 """
 struct Solid <: Modia3D.AbstractObject3Ddata
-   geo::Union{Modia3D.AbstractSolidGeometry,Void}
-   massProperties::Union{Solids.MassProperties,Void}
-   material::Union{Graphics.Material,Void}
-   contactMaterial::Union{Modia3D.AbstractContactMaterial,Void}
+   geo::Union{Modia3D.AbstractSolidGeometry,NOTHING}
+   massProperties::Union{Solids.MassProperties,NOTHING}
+   material::Union{Graphics.Material,NOTHING}
+   contactMaterial::Union{Modia3D.AbstractContactMaterial,NOTHING}
 
-   function Solid(geo::Union{Modia3D.AbstractSolidGeometry,Void},
-                  massProperties::Union{Solids.MassProperties,Number,AbstractString,Solids.SolidMaterial,Void} = nothing,
-                  material::Union{Graphics.Material,Void} = Graphics.Material();
-                  contactMaterial::Union{Modia3D.AbstractContactMaterial,Void} = nothing)::Solid
-      if typeof(massProperties) == Void
+   function Solid(geo::Union{Modia3D.AbstractSolidGeometry,NOTHING},
+                  massProperties::Union{Solids.MassProperties,Number,AbstractString,Solids.SolidMaterial,NOTHING} = nothing,
+                  material::Union{Graphics.Material,NOTHING} = Graphics.Material();
+                  contactMaterial::Union{Modia3D.AbstractContactMaterial,NOTHING} = nothing)::Solid
+      if typeof(massProperties) == NOTHING
          solid = new(geo, nothing, material, contactMaterial)
       else
          massprop::Solids.MassProperties = typeof(massProperties) == Solids.MassProperties ? massProperties :
@@ -74,9 +74,9 @@ struct Solid <: Modia3D.AbstractObject3Ddata
    end
 
    function Solid(geo::Vector{Modia3D.Solids.SolidFileMesh},
-                  massProperties::Union{Solids.MassProperties,Number,AbstractString,Solids.SolidMaterial,Void},
-                  material::Union{Graphics.Material,Void} = Graphics.Material();
-                  contactMaterial::Union{Modia3D.AbstractContactMaterial,Void} = nothing)::Solid
+                  massProperties::Union{Solids.MassProperties,Number,AbstractString,Solids.SolidMaterial,NOTHING},
+                  material::Union{Graphics.Material,NOTHING} = Graphics.Material();
+                  contactMaterial::Union{Modia3D.AbstractContactMaterial,NOTHING} = nothing)::Solid
      solids = Vector{Solid}()
      for geoParts in geo
        push!(solids, Solid(geoParts, massProperties, material; contactMaterial=contactMaterial))
@@ -88,7 +88,7 @@ end
 #=
 function canCollide(data::Solid)
   println("bin im canCollide Solid")
-  return typeof(data.contactMaterial) != Void && typeof(data.geo) != Void
+  return typeof(data.contactMaterial) != NOTHING && typeof(data.geo) != NOTHING
 end
 =#
 
@@ -111,13 +111,13 @@ struct SolidWithConvexDecomposition
 
    function SolidWithConvexDecomposition(
                   geo::SolidFileMesh,
-                  massProperties::Union{Solids.MassProperties,Number,AbstractString,Solids.SolidMaterial,Void},
-                  material::Union{Graphics.Material,Void} = Graphics.Material(),
-                  convexDecompositionMaterial::Union{Graphics.Material,Void} = Graphics.Material();
-                  contactMaterial::Union{Modia3D.AbstractContactMaterial,Void} = nothing)::SolidWithConvexDecomposition
+                  massProperties::Union{Solids.MassProperties,Number,AbstractString,Solids.SolidMaterial,NOTHING},
+                  material::Union{Graphics.Material,NOTHING} = Graphics.Material(),
+                  convexDecompositionMaterial::Union{Graphics.Material,NOTHING} = Graphics.Material();
+                  contactMaterial::Union{Modia3D.AbstractContactMaterial,NOTHING} = nothing)::SolidWithConvexDecomposition
 
       # Construct solid of SolidFileMesh
-      if typeof(massProperties) == Void
+      if typeof(massProperties) == NOTHING
          solid = Solid(geo, nothing, material)
       else
          massprop::Solids.MassProperties = typeof(massProperties) == Solids.MassProperties ? massProperties :

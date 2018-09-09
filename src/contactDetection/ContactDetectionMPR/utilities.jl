@@ -81,7 +81,7 @@ end
 
 # Functions to test properties of portal
 
-doc"""
+"""
     (onPortal, b21, b31) = isPointOnPortal(r4,r1,r2,r3) - Determine whether point r4 is on the portal triangle
 
 - onPortal = true, if r4 is on the portal r1,r2,r3 and false if it is outside of the portal.
@@ -117,7 +117,7 @@ end
 
 
 
-doc"""
+"""
     (r, onPortal, b21, b31) = isNormalRayOnPortal(r1,r2,r3) - Determine whether normal ray through origin is on the portal triangle
 
 - r: Intersection of normal ray through origin with portal plane
@@ -143,7 +143,7 @@ end
 
 
 
-doc"""
+"""
     (r, onPortal, b21, b31) = isr0RayOnPortal(r0,r1,r2,r3) - Determine whether ray from r0 through origin is on the portal triangle
 
 - r: Intersection of ray through origin with portal plane
@@ -168,7 +168,7 @@ function isr0RayOnPortal(r0::SVector{3,Float64}, r1::SVector{3,Float64}, r2::SVe
 end
 
 
-doc"""
+"""
     Test functions
 """
 function testIntersectionWithPortal()
@@ -194,14 +194,14 @@ function testIntersectionWithPortal()
 end
 
 
-doc"""
+"""
     (r4,d4) = signedDistanceToLineSegment(r1,r2,r21,e,r4_old=nothing,d4_old=0.0) - Determine closest point on line
 
 - r4: Point on line r1 + lambda*r21 that is closest to the origin with 0<=lambda<=1, or r4_old, if it is closer.
 - d4: Signed distance of r4 to the origin or d4_old if abs(d4_old) < norm(r1 + lambda*r21)
 """
 function signedDistanceToLineSegment(r1::SVector{3,Float64}, r2::SVector{3,Float64}, r21::SVector{3,Float64}, e::SVector{3,Float64},
-                                     r4_old::Union{SVector{3,Float64},Void}=nothing, d4_old::Float64=0.0)
+                                     r4_old::Union{SVector{3,Float64},NOTHING}=nothing, d4_old::Float64=0.0)
     # r = r1 + lambda*r21  (0 <= lambda <= 1)
     #
     # The closest point to the line is point r4, such that r21*r4 = 0
@@ -212,7 +212,7 @@ function signedDistanceToLineSegment(r1::SVector{3,Float64}, r2::SVector{3,Float
     if dot(r4,e) > 0.0
        d4 = -d4
     end
-    if typeof(r4_old) == Void || abs(d4) <= abs(d4_old)
+    if typeof(r4_old) == NOTHING || abs(d4) <= abs(d4_old)
        return (r4,d4)
     else
        return (r4_old, d4_old)
@@ -221,7 +221,7 @@ end
 
 
 
-doc"""
+"""
     (r4,d) = signedDistanceToPortal(r0,r1,r2,r3) - Determine closest point on portal
 
 - r4: Point on triangle portal r1, r2, r3 that is closest to the origin.
@@ -272,7 +272,7 @@ function signedDistanceToPortal(r0::SVector{3,Float64}, r1::SVector{3,Float64}, 
 end
 
 
-doc"""
+"""
     Test functions
 """
 function testSignedDistanceToPortal()

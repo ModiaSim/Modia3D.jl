@@ -4,7 +4,12 @@
 # This file is part of module
 #   Modia3D.Composition (Modia3D/Composition/_module.jl)
 #
-
+@static if VERSION >= v"0.7.0-DEV.2005"
+    using LinearAlgebra
+    EYE3() = Matrix(1.0I,3,3)
+else
+    EYE3() = eye(3)
+end
 
 mutable struct TreeJointRevolute <: Modia3D.AbstractRevolute
    _internal::ModiaMath.ComponentInternal  # Data common to assembly component classes
@@ -148,7 +153,7 @@ function Revolute(frame1::Object3D, frame2::Object3D;
          if diff_R_abs > Basics.neps
             warn("Warning from Modia3D.Revolute(", ModiaMath.fullName(frame1), ", ", ModiaMath.fullName(frame2), ", ...):\n",
                  "The orientations of the provided frames do not coincide.\n",
-                 "( norm(R2_abs*frame2.R_abs' - eye(3)) = ", string(diff_R_abs), " > ", Basics.neps,")")
+                 "( norm(R2_abs*frame2.R_abs' - EYE3()) = ", string(diff_R_abs), " > ", Basics.neps,")")
          end
       end
 
@@ -207,7 +212,7 @@ function setAngle!(joint::TreeJointRevolute, phi::Float64)
 end
 
 
-function computeKinematics!(joint::TreeJointRevolute, obj::Object3D, analysis::ModiaMath.AnalysisType, time::Float64)::Void
+function computeKinematics!(joint::TreeJointRevolute, obj::Object3D, analysis::ModiaMath.AnalysisType, time::Float64)::NOTHING
    parent::Object3D = obj.parent
 
    obj.r_abs = parent.r_abs
@@ -231,7 +236,7 @@ function computeKinematics!(joint::TreeJointRevolute, obj::Object3D, analysis::M
 end
 
 
-function computeForceTorqueAndResidue!(joint::TreeJointRevolute, obj::Object3D, analysis::ModiaMath.AnalysisType, time::Float64)::Void
+function computeForceTorqueAndResidue!(joint::TreeJointRevolute, obj::Object3D, analysis::ModiaMath.AnalysisType, time::Float64)::NOTHING
    parent::Object3D                 = obj.parent
    dynamics::Object3Ddynamics       = obj.dynamics
    parentDynamics::Object3Ddynamics = parent.dynamics
@@ -309,7 +314,7 @@ end
 
 
 function assignRevoluteFlange(flange::Flange, revFlange::RevoluteFlange, joint::Modia3D.AbstractRevolute, assembly::Modia3D.Composition.AssemblyInternal)
-  names = fieldnames(flange)
+  names = fieldnames(typeof(flange))
   for val in names
     flange_val    = getfield(flange, val)
     revFlange_val = getfield(revFlange,val)

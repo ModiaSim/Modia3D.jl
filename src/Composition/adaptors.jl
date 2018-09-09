@@ -10,8 +10,8 @@ mutable struct SignalToFlangeAngle <: Modia3D.AbstractSignalAdaptor
     _internal::ModiaMath.ComponentInternal
     signal::Modia3D.AbstractSignal
     flange::Flange
-    function SignalToFlangeAngle(phi::Union{ModiaMath.RealScalar,Void}=nothing)
-        if typeof(phi) != Void
+    function SignalToFlangeAngle(phi::Union{ModiaMath.RealScalar,NOTHING}=nothing)
+        if typeof(phi) != NOTHING
             flange = Flange(;phiCausality=ModiaMath.Output)
             signal = phi._internal.within
             flange.phi = phi
@@ -26,8 +26,8 @@ mutable struct SignalToFlangeTorque <: Modia3D.AbstractSignalAdaptor
     _internal::ModiaMath.ComponentInternal
     signal::Modia3D.AbstractSignal
     flange::Flange
-    function SignalToFlangeTorque(tau::Union{ModiaMath.RealScalar,Void}=nothing)
-        if typeof(tau) != Void
+    function SignalToFlangeTorque(tau::Union{ModiaMath.RealScalar,NOTHING}=nothing)
+        if typeof(tau) != NOTHING
             flange = Flange(;tauCausality=ModiaMath.Output, tauFlow=true)
             signal = tau._internal.within
             tau.flow   = true
@@ -44,38 +44,38 @@ mutable struct AdaptorForceElementToFlange <: Modia3D.AbstractForceAdaptor
     _internal::ModiaMath.ComponentInternal
     forceElement::Modia3D.AbstractForceTorque
     flange::Flange
-    function AdaptorForceElementToFlange(;phi::Union{ModiaMath.RealScalar,Void}=nothing,
-                                          w::Union{ModiaMath.RealScalar,Void}=nothing,
-                                          a::Union{ModiaMath.RealScalar,Void}=nothing,
-                                          tau::Union{ModiaMath.RealScalar,Void}=nothing)
+    function AdaptorForceElementToFlange(;phi::Union{ModiaMath.RealScalar,NOTHING}=nothing,
+                                          w::Union{ModiaMath.RealScalar,NOTHING}=nothing,
+                                          a::Union{ModiaMath.RealScalar,NOTHING}=nothing,
+                                          tau::Union{ModiaMath.RealScalar,NOTHING}=nothing)
         flange = Flange()
         forceElement  = nothing
         forceElement1 = nothing
         forceElement2 = nothing
         forceElement3 = nothing
         forceElement4 = nothing
-        if typeof(phi) != Void
+        if typeof(phi) != NOTHING
             flange.phi = phi
             forceElement1 = phi._internal.within
             forceElement  = forceElement1
         end
-        if typeof(w) != Void
+        if typeof(w) != NOTHING
             flange.w = w
             forceElement2 = w._internal.within
-            ((typeof(forceElement)==Void) ? (forceElement=forceElement2) : ( (typeof(forceElement)!=typeof(forceElement2)) ? (error("from Modia3D.AdaptorForceElementToFlange: all arguments should be of the same @forceElement.")) :() ) )
+            ((typeof(forceElement)==NOTHING) ? (forceElement=forceElement2) : ( (typeof(forceElement)!=typeof(forceElement2)) ? (error("from Modia3D.AdaptorForceElementToFlange: all arguments should be of the same @forceElement.")) : () ) )
         end
-        if typeof(a) != Void
+        if typeof(a) != NOTHING
             flange.a = a
             forceElement3 = a._internal.within
-            ((typeof(forceElement)==Void) ? (forceElement=forceElement3) : ( (typeof(forceElement)!=typeof(forceElement3)) ? (error("from Modia3D.AdaptorForceElementToFlange: all arguments should be of the same @forceElement.")) :() ) )
+            ((typeof(forceElement)==NOTHING) ? (forceElement=forceElement3) : ( (typeof(forceElement)!=typeof(forceElement3)) ? (error("from Modia3D.AdaptorForceElementToFlange: all arguments should be of the same @forceElement.")) : () ) )
         end
-        if typeof(tau) != Void
+        if typeof(tau) != NOTHING
             tau.flow   = true
             flange.tau = tau
             forceElement4 = tau._internal.within
-            ((typeof(forceElement)==Void) ? (forceElement=forceElement4) : ( (typeof(forceElement)!=typeof(forceElement4)) ? (error("from Modia3D.AdaptorForceElementToFlange: all arguments should be of the same @forceElement.")) :() ) )
+            ((typeof(forceElement)==NOTHING) ? (forceElement=forceElement4) : ( (typeof(forceElement)!=typeof(forceElement4)) ? (error("from Modia3D.AdaptorForceElementToFlange: all arguments should be of the same @forceElement.")) : () ) )
         end
-        if typeof(forceElement) != Void
+        if typeof(forceElement) != NOTHING
             new(ModiaMath.ComponentInternal(),forceElement,flange)
         else
             error("from Modia3D.SignalToFlangeTorque: There is no forceElement to convert.")

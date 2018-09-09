@@ -4,7 +4,12 @@
 # This file is part of module
 #   Modia3D.ContactDetectionMPR (Modia3D/contactDetection/ContactDetectionMPR/_module.jl)
 #
-
+@static if VERSION >= v"0.7.0-DEV.2005"
+    using LinearAlgebra
+    EYE3() = Matrix(1.0I,3,3)
+else
+    EYE3() = eye(3)
+end
 
 AABB_collision(aabb1::Basics.BoundingBox, aabb2::Basics.BoundingBox) = aabb1.x_max > aabb2.x_min && aabb1.x_min < aabb2.x_max &&
                                            aabb1.y_max > aabb2.y_min && aabb1.y_min < aabb2.y_max &&
@@ -35,13 +40,13 @@ function Composition.initializeContactDetection!(world::Composition.Object3D, sc
       obj = Shapes.Sphere(0.05; visible=true, collide=false, material=Shapes.Material(; color=[0,0,0]))
       Shapes.defineZeroShapePosition!(obj)
       obj.r_abs = SVector{3,Float64}(0.0,0.0,0.0)
-      obj.R_abs = SMatrix{3,3,Float64,9}(eye(3))
+      obj.R_abs = SMatrix{3,3,Float64,9}(EYE3())
       push!(ch.contactPointShape1, obj)
 
       obj2 = Shapes.Sphere(0.05; visible=true, collide=false, material=Shapes.Material(; color=[0,0,0]))
       Shapes.defineZeroShapePosition!(obj2)
       obj2.r_abs = SVector{3,Float64}(0.0,0.0,0.0)
-      obj2.R_abs = SMatrix{3,3,Float64,9}(eye(3))
+      obj2.R_abs = SMatrix{3,3,Float64,9}(EYE3())
       push!(ch.contactPointShape2, obj2)
     end
   end

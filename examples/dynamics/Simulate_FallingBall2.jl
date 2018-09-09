@@ -14,8 +14,8 @@ See also models [`Simulate_FallingBall1`](@ref) (falling ball without collision 
 """
 module Simulate_FallingBall2
 
-using Modia3D
-import ModiaMath
+using  Modia3D
+import Modia3D.ModiaMath
 
 groundMaterial  = Modia3D.Material(color="DarkGreen", transparency=0.5)
 ballMaterial    = Modia3D.Material(color="LightBlue", transparency=0.5)

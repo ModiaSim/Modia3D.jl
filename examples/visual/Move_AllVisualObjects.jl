@@ -41,7 +41,14 @@ visualObjects = VisualObjects(sceneOptions=Modia3D.SceneOptions(visualizeFrames=
 # Kinematic simulation
 Modia3D.initAnalysis!(visualObjects)
 
-for time = linspace(0.0, 2.0, 101)
+
+@static if VERSION >= v"0.7.0-DEV.2005"
+    LINSPACE(start,stop,length) = range(0.0, stop=stop, length=length)
+else
+    LINSPACE(start,stop,length) = linspace(start,stop,length)
+end
+
+for time = LINSPACE(0.0, 2.0, 101)
   # update positional degrees of freedom
   r1[3] = 2*time
   Modia3D.set_r!(visualObjects.shape1,r1)

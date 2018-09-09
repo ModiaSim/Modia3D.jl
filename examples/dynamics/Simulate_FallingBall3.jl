@@ -11,8 +11,8 @@ See also models
 """
 module Simulate_FallingBall3
 
-import ModiaMath
-using Modia3D
+using  Modia3D
+import Modia3D.ModiaMath
 
 # Solids
 groundMaterial = Modia3D.Material(color="DarkGreen", transparency=0.5)

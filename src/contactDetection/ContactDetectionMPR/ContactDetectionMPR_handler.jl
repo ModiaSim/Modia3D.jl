@@ -8,7 +8,7 @@
 
 using DataStructures
 
-const Dict1ValueType = Tuple{Int64, MVector{3,Float64}, MVector{3,Float64}, MVector{3,Float64}, Union{Object3D,Void}, Union{Object3D,Void}}
+const Dict1ValueType = Tuple{Int64, MVector{3,Float64}, MVector{3,Float64}, MVector{3,Float64}, Union{Object3D,NOTHING}, Union{Object3D,NOTHING}}
 
 mutable struct ContactDetectionMPR_handler <: Modia3D.AbstractContactDetection
   contactPairs::Composition.ContactPairs
@@ -24,8 +24,8 @@ mutable struct ContactDetectionMPR_handler <: Modia3D.AbstractContactDetection
    contactPoint2::Vector{MVector{3,Float64}}       # Absolute position vector to second contact point on contactObj2
    contactNormal::Vector{MVector{3,Float64}}       # Unit normal to surface on contactPoint1 (in world frame)
 
-   contactObj1::Vector{Union{Object3D,Void}}
-   contactObj2::Vector{Union{Object3D,Void}}
+   contactObj1::Vector{Union{Object3D,NOTHING}}
+   contactObj2::Vector{Union{Object3D,NOTHING}}
 
 
 

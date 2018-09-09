@@ -1,7 +1,7 @@
 module Move_DoublePendulum
 
-import ModiaMath
-using Modia3D
+using  Modia3D
+import Modia3D.ModiaMath
 
 vmat1 = Modia3D.Material(color="Red", transparency=0.5)
 vmat2 = Modia3D.Material(color="Blue", transparency=0.5)

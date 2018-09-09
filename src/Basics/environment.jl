@@ -6,7 +6,7 @@
 #
 
 
-doc"""
+"""
     getAndCheckFullLibraryPath(dir,libname)
     
 Return joinpath(dir,libname). The returned full path must be a DLL.
@@ -28,7 +28,7 @@ function getAndCheckFullLibraryPath(dir,libname)
 end
 
 
-doc"""
+"""
     value = getEnvironmentVariable(name, description)
     
 Returns the value of the environment variable `name`. 

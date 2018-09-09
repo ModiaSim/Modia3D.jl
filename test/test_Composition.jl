@@ -1,16 +1,16 @@
 module Test_Composition
 
+using Modia3D
+
 @static if VERSION < v"0.7.0-DEV.2005"
     using Base.Test
 else
-    using Test
+    using Modia3D.Test
+    using Modia3D.LinearAlgebra
 end
 
-
-
-using Modia3D
-using ModiaMath
-using Unitful
+using Modia3D.ModiaMath
+using Modia3D.Unitful
 
 
 r2 = [2.0,3.0,4.0]
@@ -94,7 +94,14 @@ end
 # Test other objects
 testObject3D = TestObject3D()
 Modia3D.initAnalysis!(testObject3D)
-for time = linspace(0.0, 2.0, 101)
+
+@static if VERSION >= v"0.7.0-DEV.2005"
+    LINSPACE(start,stop,length) = range(0.0, stop=stop, length=length)
+else
+    LINSPACE(start,stop,length) = linspace(start,stop,length)
+end
+
+for time = LINSPACE(0.0, 2.0, 101)
    r2 .+= 0.01*sin.([time, 2*time, 3*time])
    Modia3D.set_r!(testObject3D.frame2,r2)
    Modia3D.updatePosition!(testObject3D)  # absolute position of frame2 and frame3 updated

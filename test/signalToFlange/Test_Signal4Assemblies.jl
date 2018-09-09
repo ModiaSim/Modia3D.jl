@@ -1,8 +1,8 @@
 module Test_Signal4Assemblies
 
-using Modia3D
-using StaticArrays
-import ModiaMath
+using  Modia3D
+using  Modia3D.StaticArrays
+import Modia3D.ModiaMath
 
 vgreen  = Modia3D.Material(color="Green", transparency=0.5)
 vyellow = Modia3D.Material(color="Yellow", transparency=0.5)

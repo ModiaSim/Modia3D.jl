@@ -8,10 +8,10 @@
 
 mutable struct AssemblyInternal <: ModiaMath.AbstractComponentInternal
    name::Symbol                                   # Instance name of assembly within parent assembly (is set by parent assembly)
-   within::Union{Modia3D.AbstractAssembly,Void}   # Parent assembly (if within==nothing, there is no parent assembly yet)
-   scene::Union{Scene,Void}                       # Scene in which the Assembly is present (if scene==nothing, Assembly is not yet in a scene)
-   sceneOptions::Union{SceneOptions,Void}         # SceneOptions defined for the Assembly (if sceneOptions==nothing, no sceneOptions are defined)
-   referenceObject3D::Union{Object3D,Void}        # Reference frame of assembly (if referenceObject3D==nothing, Assembly has not yet a reference frame)
+   within::Union{Modia3D.AbstractAssembly,NOTHING}   # Parent assembly (if within==nothing, there is no parent assembly yet)
+   scene::Union{Scene,NOTHING}                       # Scene in which the Assembly is present (if scene==nothing, Assembly is not yet in a scene)
+   sceneOptions::Union{SceneOptions,NOTHING}         # SceneOptions defined for the Assembly (if sceneOptions==nothing, no sceneOptions are defined)
+   referenceObject3D::Union{Object3D,NOTHING}        # Reference frame of assembly (if referenceObject3D==nothing, Assembly has not yet a reference frame)
 
    uniqueSignals::Array{Modia3D.AbstractSignal}
    uniqueForceTorques::Array{Modia3D.AbstractForceTorque}
@@ -24,12 +24,12 @@ mutable struct AssemblyInternal <: ModiaMath.AbstractComponentInternal
 end
 
 
-function initAssemblyComponent!(within::Modia3D.AbstractAssembly, component::Any, name)::Void
+function initAssemblyComponent!(within::Modia3D.AbstractAssembly, component::Any, name)::NOTHING
     setfield!(within, Symbol(name), component)
     return nothing
 end
 
-function initAssemblyComponent!(within::Modia3D.AbstractAssembly, component::Modia3D.AbstractAssemblyComponent, name)::Void
+function initAssemblyComponent!(within::Modia3D.AbstractAssembly, component::Modia3D.AbstractAssemblyComponent, name)::NOTHING
    component._internal.within = within
    component._internal.name   = Symbol(name)
 
@@ -38,11 +38,11 @@ function initAssemblyComponent!(within::Modia3D.AbstractAssembly, component::Mod
    return nothing
 end
 
-function initAssemblyComponent!(within::Modia3D.AbstractAssembly, component::Object3D, name)::Void
+function initAssemblyComponent!(within::Modia3D.AbstractAssembly, component::Object3D, name)::NOTHING
    component._internal.within = within
    component._internal.name   = Symbol(name)
 
-   if component === component.parent && typeof(within._internal.referenceObject3D) == Void
+   if component === component.parent && typeof(within._internal.referenceObject3D) == NOTHING
       within._internal.referenceObject3D = component
    end
 
@@ -51,7 +51,7 @@ function initAssemblyComponent!(within::Modia3D.AbstractAssembly, component::Obj
    return nothing
 end
 
-function initAssemblyComponent!(within::Modia3D.AbstractAssembly, component::AbstractVector, name)::Void
+function initAssemblyComponent!(within::Modia3D.AbstractAssembly, component::AbstractVector, name)::NOTHING
    for i in eachindex(component)
       component[i]._internal.within = within
       component[i]._internal.name   = Symbol( string(name) * "[" * string(i) * "]" )
@@ -66,13 +66,13 @@ end
 
 #-------------------------  Print assemblies -----------------------------
 function Base.show(io::IO, a::Modia3D.AbstractAssemblyComponent)
-   #if typeof(a._internal.scene) == Void
+   #if typeof(a._internal.scene) == NOTHING
       print(io, typeof(a), "(\n")
    #else
    #   print(io, typeof(a), "(scene=[...],")
    #end
 
-   for c in fieldnames(a)
+   for c in fieldnames(typeof(a))
       field = getfield(a,c)
       if typeof(field) <: Modia3D.AbstractAssembly
          println(io,"\n   ", c, " = ", field)
@@ -91,7 +91,7 @@ end
 
 #=
 """    printObject3DAndAllChildren(frame) - print frame and all of its children"""
-function printObject3DAndAllChildren(frame::Object3D)::Void
+function printObject3DAndAllChildren(frame::Object3D)::NOTHING
    twoObject3Dobjects = ObjectIdDict()
    if hasParent(frame)
       stack = frame.scene.stack
@@ -225,7 +225,7 @@ end
 
 Write frame and all of its children in JSON format on file
 """
-function writeObject3DAndAllChildrenOnJsonFile(frame::Object3D; file = frame.name*".json")::Void
+function writeObject3DAndAllChildrenOnJsonFile(frame::Object3D; file = frame.name*".json")::NOTHING
    if notInScene(frame)
       error("\nError from writeObject3DAndAllChildrenOnJsonFile:\n",
             "Can currently only write frames on file that are in a scene, but ", frame.name, " is not.")

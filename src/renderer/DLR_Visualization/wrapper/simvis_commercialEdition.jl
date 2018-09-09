@@ -7,42 +7,46 @@
 #
 # This file contains functionality specific to the commercial edition of SimVis 
 
-mutable struct SimVisFunctions
+struct SimVisFunctions
   # SimVis DLL
-  dll::Ptr{Void}
+  dll::Ptr{NOTHING}
 
   # SimVis functions
-  init::Ptr{Void}
-  shutdown::Ptr{Void}
-  getObjectID::Ptr{Void}
-  freeObjectID::Ptr{Void}
-  setTime::Ptr{Void}
-  setBaseObject::Ptr{Void}
-  setFileObject::Ptr{Void}
-  setTextObject::Ptr{Void}
+  init::Ptr{NOTHING}
+  shutdown::Ptr{NOTHING}
+  getObjectID::Ptr{NOTHING}
+  freeObjectID::Ptr{NOTHING}
+  setTime::Ptr{NOTHING}
+  setBaseObject::Ptr{NOTHING}
+  setFileObject::Ptr{NOTHING}
+  setTextObject::Ptr{NOTHING}
 
-  SimVisFunctions() = new(Base.Libdl.dlopen(simVisInfo.dll_name))
+  function SimVisFunctions()
+      dll           = Libdl.dlopen(simVisInfo.dll_name)
+      init          = Libdl.dlsym(dll, :SimVis_init)
+      shutdown      = Libdl.dlsym(dll, :SimVis_shutdown)
+      getObjectID   = Libdl.dlsym(dll, :SimVis_getObjectID)
+      freeObjectID  = Libdl.dlsym(dll, :SimVis_freeObjectID) 
+      setTime       = Libdl.dlsym(dll, :SimVis_setTime)
+      setBaseObject = Libdl.dlsym(dll, :SimVis_setBaseObject)    
+      setFileObject = Libdl.dlsym(dll, :SimVis_setFileObject)
+      setTextObject = Libdl.dlsym(dll, :SimVis_setTextObject)
+
+      new(dll, init, shutdown, getObjectID, freeObjectID, setTime, setBaseObject,
+          setFileObject, setTextObject)
+  end
 end
 
 const simVisFunctions = SimVisFunctions()
 
-function SimVis_init(SimVisHost::String, SimVisPort::Int, sync::Int)
-   #simVisFunctions.dll           = Base.Libdl.dlopen(simVisInfo.dll_name)
-   simVisFunctions.init          = Base.Libdl.dlsym(simVisFunctions.dll, :SimVis_init)
-   simVisFunctions.shutdown      = Base.Libdl.dlsym(simVisFunctions.dll, :SimVis_shutdown)
-   simVisFunctions.getObjectID   = Base.Libdl.dlsym(simVisFunctions.dll, :SimVis_getObjectID)
-   simVisFunctions.freeObjectID  = Base.Libdl.dlsym(simVisFunctions.dll, :SimVis_freeObjectID) 
-   simVisFunctions.setTime       = Base.Libdl.dlsym(simVisFunctions.dll, :SimVis_setTime)
-   simVisFunctions.setBaseObject = Base.Libdl.dlsym(simVisFunctions.dll, :SimVis_setBaseObject)    
-   simVisFunctions.setFileObject = Base.Libdl.dlsym(simVisFunctions.dll, :SimVis_setFileObject)
-   simVisFunctions.setTextObject = Base.Libdl.dlsym(simVisFunctions.dll, :SimVis_setTextObject)
 
-   ccall(simVisFunctions.init, Void,(Cstring,Cstring,Cint,Cint),
+function SimVis_init(SimVisHost::String, SimVisPort::Int, sync::Int)
+   ccall(simVisFunctions.init, NOTHING,(Cstring,Cstring,Cint,Cint),
                                      simVisInfo.directory,SimVisHost,SimVisPort,sync)
 end
 
 
-function SimVis_setTextObject(ID::Ptr{Void},
+function SimVis_setTextObject(ID::Ptr{NOTHING},
                               screenAlignment::Cint,
                               text::String,
                               textvalue::Float64,
@@ -56,15 +60,15 @@ function SimVis_setTextObject(ID::Ptr{Void},
                               offset::MVector{3,Float64},  
                               alignment::Cint,
                               digits::Cint)
-   ccall(simVisFunctions.setTextObject, Void,
-           (Ptr{Void},Cint,Cstring,Cdouble,Cint,Ref{MVector{3,Float64}},Ref{MMatrix{3,3,Float64,9}},Cdouble,
+   ccall(simVisFunctions.setTextObject, NOTHING,
+           (Ptr{NOTHING},Cint,Cstring,Cdouble,Cint,Ref{MVector{3,Float64}},Ref{MMatrix{3,3,Float64,9}},Cdouble,
             Cstring,Ref{MVector{3,Cint}},Cdouble,Ref{MVector{3,Float64}},Cint,Cint),
            ID, screenAlignment, text, textvalue, valueactive, pos, T, charsize,
            fontname, color, alpha, offset, alignment, digits)
 end
 
 
-function SimVis_setTextObject(ID::Ptr{Void},
+function SimVis_setTextObject(ID::Ptr{NOTHING},
                               screenAlignment::Cint,
                               text::String,
                               textvalue::Float64,
@@ -78,8 +82,8 @@ function SimVis_setTextObject(ID::Ptr{Void},
                               offset::MVector{3,Float64},  
                               alignment::Cint,
                               digits::Cint)
-   ccall(simVisFunctions.setTextObject, Void,
-           (Ptr{Void},Cint,Cstring,Cdouble,Cint,Ref{SVector{3,Cdouble}},Ref{SMatrix{3,3,Cdouble,9}},Cdouble,
+   ccall(simVisFunctions.setTextObject, NOTHING,
+           (Ptr{NOTHING},Cint,Cstring,Cdouble,Cint,Ref{SVector{3,Cdouble}},Ref{SMatrix{3,3,Cdouble,9}},Cdouble,
             Cstring,Ref{MVector{3,Cint}},Cdouble,Ref{MVector{3,Float64}},Cint,Cint),
            ID, screenAlignment, text, textvalue, valueactive, pos, T, charsize,
            fontname, color, alpha, offset, alignment, digits)
@@ -87,5 +91,5 @@ end
 
 
 Composition.isVisible(data::Modia3D.AbstractVisualElement, renderer::Composition.DLR_Visualization_renderer) = true
-Composition.isVisible(data::Solids.Solid, renderer::Composition.DLR_Visualization_renderer) = typeof(data.material) != Void && typeof(data.geo) != Void
+Composition.isVisible(data::Solids.Solid, renderer::Composition.DLR_Visualization_renderer) = typeof(data.material) != NOTHING && typeof(data.geo) != NOTHING
 

@@ -5,7 +5,7 @@
 #   Modia3D.DLR_Visualization (Modia3D/renderer/DLR_Visualization/_module.jl)
 #
 
-function Composition.initializeVisualization(renderer::Composition.NoRenderer, velements::Vector{Composition.Object3D})::Void
+function Composition.initializeVisualization(renderer::Composition.NoRenderer, velements::Vector{Composition.Object3D})::NOTHING
 end
 
 

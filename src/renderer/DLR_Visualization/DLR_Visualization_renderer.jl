@@ -11,7 +11,7 @@
 
 mutable struct DLR_Visualization_renderer <: Modia3D.AbstractRenderer
   velements::Vector{Composition.Object3D}  # Objects to be visualized
-  ids::Vector{Ptr{Void}}             # ids[i] is the SimVis id of velements[i]
+  ids::Vector{Ptr{NOTHING}}             # ids[i] is the SimVis id of velements[i]
   visualize::Vector{Function}        # visualize[i] is the function to visualize velements[i]
   isInitialized::Bool                # = true, if SimVis is initialized (SimVis_init was called)
 
@@ -20,5 +20,5 @@ mutable struct DLR_Visualization_renderer <: Modia3D.AbstractRenderer
   sync::Bool
 
   DLR_Visualization_renderer(; host="127.0.0.1",port=11000,sync=false) = 
-      new(Any[], Ptr{Void}[], Function[], false, host, port, sync)
+      new(Any[], Ptr{NOTHING}[], Function[], false, host, port, sync)
 end

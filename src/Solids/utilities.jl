@@ -25,36 +25,73 @@ function getObjInfos(filename::AbstractString, scaleFactor::MVector{3,Float64})
     z_max = Float64
     z_min = Float64
     sum = ModiaMath.ZeroVector3D
-    for line in eachline(file; chomp=false)
-      if isequal(line[1],'v') && isequal(line[2],' ')
-        i += 1
-        tmp = rsplit(line,' ')
-        push!(objPoints,[parse(Float64,tmp[end-2])*scaleFactor[1],parse(Float64,tmp[end-1])*scaleFactor[2],parse(Float64,tmp[end])*scaleFactor[3]])
-        if i == 1
-          x_max = objPoints[i][1]
-          x_min = objPoints[i][1]
-          y_max = objPoints[i][2]
-          y_min = objPoints[i][2]
-          z_max = objPoints[i][3]
-          z_min = objPoints[i][3]
-        else
-          (x_min, x_max) = check_MinMax(x_min, x_max, objPoints[i][1])
-          (y_min, y_max) = check_MinMax(y_min, y_max, objPoints[i][2])
-          (z_min, z_max) = check_MinMax(z_min, z_max, objPoints[i][3])
-        end
-        sum += objPoints[i]
-      end
-      if isequal(line[1],'f') && isequal(line[2],' ')
-        if areTriangles
-            tmp = rsplit(line,' ')
-            if length(tmp) == 4 || ( length(tmp) == 5 && isequal(tmp[5],"\r\n") )
-                push!(facesIndizes,[parse(Int64,rsplit(tmp[2],"/")[1]), parse(Int64,rsplit(tmp[3],"/")[1]), parse(Int64,rsplit(tmp[4],"/")[1])])
-            else
-                areTriangles = false
+
+    @static if VERSION >= v"0.7.0-DEV.2005"
+        for line in eachline(file; keep=true)
+            if isequal(line[1],'v') && isequal(line[2],' ')
+              i += 1
+              tmp = rsplit(line,' ')
+              push!(objPoints,[parse(Float64,tmp[end-2])*scaleFactor[1],parse(Float64,tmp[end-1])*scaleFactor[2],parse(Float64,tmp[end])*scaleFactor[3]])
+              if i == 1
+                x_max = objPoints[i][1]
+                x_min = objPoints[i][1]
+                y_max = objPoints[i][2]
+                y_min = objPoints[i][2]
+                z_max = objPoints[i][3]
+                z_min = objPoints[i][3]
+              else
+                (x_min, x_max) = check_MinMax(x_min, x_max, objPoints[i][1])
+                (y_min, y_max) = check_MinMax(y_min, y_max, objPoints[i][2])
+                (z_min, z_max) = check_MinMax(z_min, z_max, objPoints[i][3])
+              end
+              sum += objPoints[i]
+            end
+            if isequal(line[1],'f') && isequal(line[2],' ')
+              if areTriangles
+                  tmp = rsplit(line,' ')
+                  if length(tmp) == 4 || ( length(tmp) == 5 && isequal(tmp[5],"\r\n") )
+                      push!(facesIndizes,[parse(Int64,rsplit(tmp[2],"/")[1]), parse(Int64,rsplit(tmp[3],"/")[1]), parse(Int64,rsplit(tmp[4],"/")[1])])
+                  else
+                      areTriangles = false
+                  end
+              end
             end
         end
-      end
+    else
+        for line in eachline(file; chomp=false)
+            if isequal(line[1],'v') && isequal(line[2],' ')
+              i += 1
+              tmp = rsplit(line,' ')
+              push!(objPoints,[parse(Float64,tmp[end-2])*scaleFactor[1],parse(Float64,tmp[end-1])*scaleFactor[2],parse(Float64,tmp[end])*scaleFactor[3]])
+              if i == 1
+                x_max = objPoints[i][1]
+                x_min = objPoints[i][1]
+                y_max = objPoints[i][2]
+                y_min = objPoints[i][2]
+                z_max = objPoints[i][3]
+                z_min = objPoints[i][3]
+              else
+                (x_min, x_max) = check_MinMax(x_min, x_max, objPoints[i][1])
+                (y_min, y_max) = check_MinMax(y_min, y_max, objPoints[i][2])
+                (z_min, z_max) = check_MinMax(z_min, z_max, objPoints[i][3])
+              end
+              sum += objPoints[i]
+            end
+            if isequal(line[1],'f') && isequal(line[2],' ')
+              if areTriangles
+                  tmp = rsplit(line,' ')
+                  if length(tmp) == 4 || ( length(tmp) == 5 && isequal(tmp[5],"\r\n") )
+                      push!(facesIndizes,[parse(Int64,rsplit(tmp[2],"/")[1]), parse(Int64,rsplit(tmp[3],"/")[1]), parse(Int64,rsplit(tmp[4],"/")[1])])
+                  else
+                      areTriangles = false
+                  end
+              end
+            end
+        end
     end
+
+
+
     if length(objPoints) != 0
       centroid = sum / length(objPoints)
     else
@@ -86,7 +123,7 @@ function check_MinMax(act_min::Float64, act_max::Float64, value)
 end
 
 
-doc"""
+"""
 VHACD(filename::String, outputDirectory::String, outputBasename::String;
               showLog=false, resolution=100000, depth=20, concavity=0.0025, planeDownsampling=4, convexhullDownsampling=4,
               alpha=0.05, beta=0.05, gamma=0.00125, delta=0.05, pca=false, mode=false, convexhullApproximation=true,
@@ -116,7 +153,6 @@ maxNumVerticesPerCH ... Controls the maximum number of triangles per convex-hull
 minVolumePerCH ... Controls the adaptive sampling of the generated convex-hulls (default=0.0001, range=0.0-0.01)
 convexhullApproximation ... Enable/disable approximation when computing convex-hulls
 """
-
 function VHACD(filename::String, concaveProperties::ConcaveProperties)
   @assert(isfile(filename))
   @assert(filename[end-3:end] == ".obj")

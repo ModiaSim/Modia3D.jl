@@ -1,14 +1,15 @@
 module TestDynamicExamples
 
+import Modia3D
+
 @static if VERSION < v"0.7.0-DEV.2005"
     using Base.Test
 else
-    using Test
+    using Modia3D.Test
 end
 
+import Modia3D.ModiaMath
 
-import ModiaMath
-import Modia3D
 
 # Test Modia3D - Dynamic Examples
 

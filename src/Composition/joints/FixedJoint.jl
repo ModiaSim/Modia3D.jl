@@ -9,7 +9,7 @@
 # since Object3D references FreeMotion and FreeMotion references Object3D
 
 
-function computeKinematics!(joint::FixedJoint, obj::Object3D, analysis::ModiaMath.AnalysisType, time::Float64)::Void
+function computeKinematics!(joint::FixedJoint, obj::Object3D, analysis::ModiaMath.AnalysisType, time::Float64)::NOTHING
    parent::Object3D    = obj.parent
    noTranslation::Bool = obj.r_rel ≡ ModiaMath.ZeroVector3D
    noRotation::Bool    = obj.R_rel ≡ ModiaMath.NullRotation
@@ -42,7 +42,7 @@ function computeKinematics!(joint::FixedJoint, obj::Object3D, analysis::ModiaMat
 end
 
 
-function computeForceTorqueAndResidue!(joint::FixedJoint, obj::Object3D, analysis::ModiaMath.AnalysisType, time::Float64)::Void
+function computeForceTorqueAndResidue!(joint::FixedJoint, obj::Object3D, analysis::ModiaMath.AnalysisType, time::Float64)::NOTHING
    parent::Object3D = obj.parent
 
    if obj.R_rel ≡ ModiaMath.NullRotation

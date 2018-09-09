@@ -99,7 +99,7 @@ end
 function checkCausalityOfOneFlange(flange::RevoluteFlange)
   potentialCausality = ModiaMath.Local
   flowCausality = flange.tau.causality
-  names = fieldnames(flange)
+  names = fieldnames(typeof(flange))
 
   for val in names
       if val != :tau && val != :isInitialized

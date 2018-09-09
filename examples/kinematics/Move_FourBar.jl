@@ -1,7 +1,7 @@
 module Move_FourBar
 
-import ModiaMath
-using Modia3D
+using  Modia3D
+import Modia3D.ModiaMath
 
 
 # Solids

@@ -49,15 +49,18 @@ export volume, centroid, bottomArea, topArea, longestEdge, lengthGeo, inertiaMat
 export MassProperties, SolidMaterial, ContactMaterialElastic
 export solidMaterial, solidMaterialPalette, defaultContactMaterial
 
-
-
-
 using StaticArrays
 import JSON
 import Modia3D
 import Modia3D.Basics
 import Modia3D.Graphics
 import ModiaMath
+
+@static if VERSION >= v"0.7.0-DEV.2005"
+    const NOTHING = Nothing
+else
+    const NOTHING = Void
+end
 
 include("concaveProperties.jl")
 include("geometry.jl")

@@ -20,7 +20,7 @@ function driveJoint!(joint::FreeMotion)
 end
 
 
-function computeKinematics!(joint::FreeMotion, obj::Object3D, analysis::ModiaMath.AnalysisType, time::Float64)::Void
+function computeKinematics!(joint::FreeMotion, obj::Object3D, analysis::ModiaMath.AnalysisType, time::Float64)::NOTHING
    parent::Object3D = obj.parent
    absolute::Bool   = parent.r_abs ≡ ModiaMath.ZeroVector3D && parent.R_abs ≡ ModiaMath.NullRotation
 
@@ -63,7 +63,7 @@ function computeKinematics!(joint::FreeMotion, obj::Object3D, analysis::ModiaMat
 end
 
 
-function computeForceTorqueAndResidue!(joint::FreeMotion, obj::Object3D, analysis::ModiaMath.AnalysisType, time::Float64)::Void
+function computeForceTorqueAndResidue!(joint::FreeMotion, obj::Object3D, analysis::ModiaMath.AnalysisType, time::Float64)::NOTHING
    joint.residue_f.value = obj.dynamics.f
    joint.residue_t.value = obj.dynamics.t
    return nothing
@@ -72,7 +72,7 @@ end
 
 
 # Sets the relative position vector
-function set_r!(obj::Object3D, r::ModiaMath.Vector3D)::Void
+function set_r!(obj::Object3D, r::ModiaMath.Vector3D)::NOTHING
    if isNotFree(obj) 
       error("Not allowed to call set_r!(..) on Object3D ", ModiaMath.fullName(obj), " because not freely moving")
    end
@@ -80,12 +80,12 @@ function set_r!(obj::Object3D, r::ModiaMath.Vector3D)::Void
    obj.r_rel         = r
    return nothing
 end
-set_r!(obj::Object3D, r::AbstractVector)::Void = set_r!(obj, ModiaMath.Vector3D(r))
+set_r!(obj::Object3D, r::AbstractVector)::NOTHING = set_r!(obj, ModiaMath.Vector3D(r))
 
 
 
 # Sets the relative quaternion
-function set_q!(obj::Object3D, q::ModiaMath.Quaternion)::Void
+function set_q!(obj::Object3D, q::ModiaMath.Quaternion)::NOTHING
    if isNotFree(obj) 
       error("Not allowed to call set_q!(..) on Object3D ", ModiaMath.fullName(obj), " because not freely moving")
    end
@@ -93,5 +93,5 @@ function set_q!(obj::Object3D, q::ModiaMath.Quaternion)::Void
    obj.R_rel         = ModiaMath.from_q(q)
    return nothing
 end
-set_q!(obj::Object3D, q::AbstractVector)::Void = set_q!(obj, ModiaMath.Quaternion(q))
+set_q!(obj::Object3D, q::AbstractVector)::NOTHING = set_q!(obj, ModiaMath.Quaternion(q))
 

@@ -1,8 +1,8 @@
 module Visualize_Solids
 
 using Modia3D
-using ModiaMath
-using Unitful
+using Modia3D.ModiaMath
+using Modia3D.Unitful
 
 filename = joinpath(Modia3D.path, "objects", "pascal", "pascal.obj")
 

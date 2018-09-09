@@ -11,9 +11,9 @@ See also models
 """
 module Simulate_FallingBodies
 
-import ModiaMath
-using Modia3D
-using StaticArrays
+using  Modia3D
+import Modia3D.ModiaMath
+using  Modia3D.StaticArrays
 
 # Solids
 groundMaterial  = Modia3D.Material(color="DarkGreen", transparency=0.5)

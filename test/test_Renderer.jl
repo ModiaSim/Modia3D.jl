@@ -1,13 +1,15 @@
 module TestRenderer
 
+import Modia3D
+
 @static if VERSION < v"0.7.0-DEV.2005"
     using Base.Test
 else
-    using Test
+    using Modia3D.Test
 end
 
-import Modia3D
-using StaticArrays
+using Modia3D.StaticArrays
+
 
 sphere = Modia3D.Object3D( Modia3D.Sphere(0.1) )
 velements = Modia3D.Object3D[]

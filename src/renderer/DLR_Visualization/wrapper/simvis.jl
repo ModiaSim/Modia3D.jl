@@ -5,6 +5,16 @@
 
 using StaticArrays
 
+@static if VERSION >= v"0.7.0-DEV.2005"
+    using Libdl
+    ISWINDOWS() = Sys.iswindows()
+    ISLINUX()   = Sys.islinux()
+else
+    using Base.Libdl
+    ISWINDOWS() = is_windows()
+    ISLINUX()   = is_linux()
+end
+
 
 struct SimVisInfo
    directory::String               # Directory Visualization/Extras
@@ -32,7 +42,7 @@ struct SimVisInfo
       end
 
       # Check whether commercial or community edition or on windows or on linux
-      if is_windows()         
+      if ISWINDOWS()         
          dll_name1 = joinpath(directory, "windows", "SimVisInterface_ProfessionalEdition.dll")
          if isfile( dll_name1 )
             dll_name = dll_name1
@@ -52,7 +62,7 @@ struct SimVisInfo
             end
          end
 
-      elseif is_linux()
+      elseif ISLINUX()
          dll_name1 = joinpath(directory, "linux", "SimVisInterface_ProfessionalEdition.so")
          if isfile( dll_name1 )
             dll_name = dll_name1
@@ -78,13 +88,13 @@ struct SimVisInfo
       end
 
       # Try to open the found DLL/SO
-      dll = Base.Libdl.dlopen_e(dll_name)
+      dll = Libdl.dlopen_e(dll_name)
       if dll != C_NULL
-         Base.Libdl.dlclose(dll)
+         Libdl.dlclose(dll)
       else
          warn("\n\nModia3D: DLR Visualization interface library:",
               "\n   ", dll_name, 
-              "\nexist, but could not be opened with Base.Libdl.dlopen_e.",
+              "\nexist, but could not be opened with Libdl.dlopen_e.",
               "\nnNo Renderer is used in Modia3D (so, animation is switched off).")
          return new(directory,dll_name,false,true)
       end

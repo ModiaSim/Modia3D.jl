@@ -1,13 +1,14 @@
 module TestGraphics
 
+import Modia3D
+
 @static if VERSION < v"0.7.0-DEV.2005"
     using Base.Test
 else
-    using Test
+    using Modia3D.Test
 end
 
-import Modia3D
-using StaticArrays
+using Modia3D.StaticArrays
 
 
 material1 = Modia3D.Material(;color="DarkRed", wireframe=true)

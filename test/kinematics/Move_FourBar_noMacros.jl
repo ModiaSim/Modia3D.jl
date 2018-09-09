@@ -1,8 +1,8 @@
 module Move_FourBar_noMacros
 
 import Modia3D
-using ModiaMath
-using Unitful
+using  Modia3D.ModiaMath
+using  Modia3D.Unitful
 
 # Solids
 groundMaterial = Modia3D.Material(color="DarkGreen", transparency=0.5)
@@ -154,7 +154,13 @@ tEnd  =1.0
 Modia3D.driveJoint!(fourbar.rev1)  # Define that rev1 is driven (setAngle! can be called on it)
 Modia3D.driveJoint!(fourbar.rev2)  # Define that rev2 is driven (setAngle! can be called on it)
 
-for time = linspace(tStart, tEnd, 101)
+@static if VERSION >= v"0.7.0-DEV.2005"
+    LINSPACE(start,stop,length) = range(0.0, stop=stop, length=length)
+else
+    LINSPACE(start,stop,length) = linspace(start,stop,length)
+end
+
+for time = LINSPACE(tStart, tEnd, 101)
   # update positional degrees of freedom
   delta_phi = Modia3D.linearMovement(pi/3, tStart, tEnd, time)
   Modia3D.setAngle!(fourbar.rev1,  pi/2 - delta_phi)

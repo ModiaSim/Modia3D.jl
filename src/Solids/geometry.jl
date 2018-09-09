@@ -18,6 +18,14 @@
 #    https://en.wikipedia.org/wiki/List_of_moments_of_inertia
 #    https://en.wikipedia.org/wiki/List_of_second_moments_of_area
 
+@static if VERSION >= v"0.7.0-DEV.2005"
+    using LinearAlgebra
+    EYE3() = Matrix(1.0I,3,3)
+else
+    EYE3() = eye(3)
+end
+
+
 const InertiaMatrix  = SMatrix{3,3,Float64,9}
 
 
@@ -308,7 +316,7 @@ end
 
 
 #------------------------inertia matrix of geometries-----------------------------------
-inertiaMatrix(geo::SolidSphere, mass::Number) = InertiaMatrix(mass/10*geo.Dx^2*eye(3))
+inertiaMatrix(geo::SolidSphere, mass::Number) = InertiaMatrix(mass/10*geo.Dx^2*EYE3())
 inertiaMatrix(geo::SolidEllipsoid, mass::Number) = InertiaMatrix(mass/20*Diagonal([geo.Dy^2 + geo.Dz^2,
                                                                                    geo.Dx^2 + geo.Dz^2,
                                                                                    geo.Dx^2 + geo.Dy^2]))

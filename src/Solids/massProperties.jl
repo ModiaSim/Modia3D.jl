@@ -25,8 +25,6 @@ MassProperties(;m::Number=0.0, rCM=ModiaMath.ZeroVector3D,
                                                                                     Ixy Iyy Iyz;
                                                                                     Ixz Iyz Izz])
 
-MassProperties{Geo<:Modia3D.AbstractSolidGeometry}(geo::Geo, mass::Number)                 = MassProperties(mass, centroid(geo), inertiaMatrix(geo,mass))
-
-MassProperties{Geo<:Modia3D.AbstractSolidGeometry}(geo::Geo, material::SolidMaterial)      = MassProperties(geo, material.density*volume(geo))
-
-MassProperties{Geo<:Modia3D.AbstractSolidGeometry}(geo::Geo, materialName::AbstractString) = MassProperties(geo, solidMaterialPalette[materialName])
+MassProperties(geo::Geo, mass::Number)                 where Geo <: Modia3D.AbstractSolidGeometry = MassProperties(mass, centroid(geo), inertiaMatrix(geo,mass))
+MassProperties(geo::Geo, material::SolidMaterial)      where Geo <: Modia3D.AbstractSolidGeometry = MassProperties(geo, material.density*volume(geo))
+MassProperties(geo::Geo, materialName::AbstractString) where Geo <: Modia3D.AbstractSolidGeometry = MassProperties(geo, solidMaterialPalette[materialName])
