@@ -59,7 +59,11 @@ function trailingPartOfTypeAsString(obj)::String
    name = string( typeof(obj) )
 
    # Determine trailing solid (after last ".")
-   i = rsearchindex(name, ".")
+   @static if VERSION >= v"0.7.0-DEV.2005"
+       i = first(something(findlast(".", name), 0:-1))
+   else
+       i = rsearchindex(name, ".")
+   end
    return i > 0 && i < length(name) ? name[i+1:end] : name
 end
 

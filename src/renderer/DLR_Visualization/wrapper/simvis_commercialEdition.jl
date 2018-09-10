@@ -7,7 +7,7 @@
 #
 # This file contains functionality specific to the commercial edition of SimVis 
 
-struct SimVisFunctions
+mutable struct SimVisFunctions
   # SimVis DLL
   dll::Ptr{NOTHING}
 
@@ -21,26 +21,22 @@ struct SimVisFunctions
   setFileObject::Ptr{NOTHING}
   setTextObject::Ptr{NOTHING}
 
-  function SimVisFunctions()
-      dll           = Libdl.dlopen(simVisInfo.dll_name)
-      init          = Libdl.dlsym(dll, :SimVis_init)
-      shutdown      = Libdl.dlsym(dll, :SimVis_shutdown)
-      getObjectID   = Libdl.dlsym(dll, :SimVis_getObjectID)
-      freeObjectID  = Libdl.dlsym(dll, :SimVis_freeObjectID) 
-      setTime       = Libdl.dlsym(dll, :SimVis_setTime)
-      setBaseObject = Libdl.dlsym(dll, :SimVis_setBaseObject)    
-      setFileObject = Libdl.dlsym(dll, :SimVis_setFileObject)
-      setTextObject = Libdl.dlsym(dll, :SimVis_setTextObject)
-
-      new(dll, init, shutdown, getObjectID, freeObjectID, setTime, setBaseObject,
-          setFileObject, setTextObject)
-  end
+  SimVisFunctions() = new()
 end
 
 const simVisFunctions = SimVisFunctions()
 
-
 function SimVis_init(SimVisHost::String, SimVisPort::Int, sync::Int)
+   dll = Libdl.dlopen(simVisInfo.dll_name)
+   simVisFunctions.dll           = dll
+   simVisFunctions.init          = Libdl.dlsym(dll, :SimVis_init)
+   simVisFunctions.shutdown      = Libdl.dlsym(dll, :SimVis_shutdown)
+   simVisFunctions.getObjectID   = Libdl.dlsym(dll, :SimVis_getObjectID)
+   simVisFunctions.freeObjectID  = Libdl.dlsym(dll, :SimVis_freeObjectID) 
+   simVisFunctions.setTime       = Libdl.dlsym(dll, :SimVis_setTime)
+   simVisFunctions.setBaseObject = Libdl.dlsym(dll, :SimVis_setBaseObject)    
+   simVisFunctions.setFileObject = Libdl.dlsym(dll, :SimVis_setFileObject)
+   simVisFunctions.setTextObject = Libdl.dlsym(dll, :SimVis_setTextObject)
    ccall(simVisFunctions.init, NOTHING,(Cstring,Cstring,Cint,Cint),
                                      simVisInfo.directory,SimVisHost,SimVisPort,sync)
 end

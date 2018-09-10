@@ -123,5 +123,3 @@ else
    include("simvis_communityEdition.jl")
    include("simvis_bothEditions.jl") 
 end
-
-
