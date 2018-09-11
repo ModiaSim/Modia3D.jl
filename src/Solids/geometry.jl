@@ -330,7 +330,12 @@ function inertiaMatrix(geo::SolidCylinder, mass::Number)
                                         1/4*((geo.Dx/2)^2 + (geo.Dy/2)^2)]))
 end
 function inertiaMatrix(geo::SolidCapsule, massGeo::Number)
-    warn("from Modia3D.inertiaMatrix(SolidCapsule): inertia matrix is not fully tested yet!")
+     @static if VERSION >= v"0.7.0-DEV.2005"
+         @warn "from Modia3D.inertiaMatrix(SolidCapsule): inertia matrix is not fully tested yet!"
+     else
+         warn("from Modia3D.inertiaMatrix(SolidCapsule): inertia matrix is not fully tested yet!")
+     end
+
     # mass = rho * volume
     #=
     volGeo = volume(geo)

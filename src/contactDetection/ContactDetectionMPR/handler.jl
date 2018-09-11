@@ -25,8 +25,13 @@ function Composition.initializeContactDetection!(world::Composition.Object3D, sc
   if ch.contactPairs.nz == 0
      Composition.closeContactDetection!(ch)
      scene.collide = false
-     warn("\n... From Modia3D collision handler: Collision handling switched off, since no contacts can take place (nz=0).\n",
-          "... You might need to set canCollide=true at joints.\n")
+     @static if VERSION >= v"0.7.0-DEV.2005"
+         @warn "... From Modia3D collision handler: Collision handling switched off, since no contacts can take place (nz=0).\n" *
+               "... You might need to set canCollide=true at joints.\n"
+     else
+         warn("\n... From Modia3D collision handler: Collision handling switched off, since no contacts can take place (nz=0).\n",
+                "... You might need to set canCollide=true at joints.\n")
+     end
      return
   end
   @assert(ch.contactPairs.ne > 0)

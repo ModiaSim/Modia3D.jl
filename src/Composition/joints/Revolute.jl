@@ -135,25 +135,55 @@ function Revolute(frame1::Object3D, frame2::Object3D;
       # rotating from frame_a along z-axis with angle phi gives frame_b (or compute rphi_start if phi_start = NaN)
       diff_r_abs = norm(frame_b.r_abs - frame_a.r_abs)
       if diff_r_abs > Basics.neps
-         warn("\nWarning from Modia3D.Revolute(", ModiaMath.fullName(frame1), ", ", ModiaMath.fullName(frame2), ", ...):\n",
-              "The origins of the provided frames do not coincide.\n",
-              "( norm(frame2.r_abs - frame1.r_abs) = ", string(diff_r_abs), " > ", Basics.neps, ")")
+         @static if VERSION >= v"0.7.0-DEV.2005"
+             @warn begin
+                 name_frame1 = ModiaMath.fullName(frame1)
+                 name_frame2 = ModiaMath.fullName(frame2)
+                 "Warning from Modia3D.Revolute($name_frame1, $name_frame2, ....):\n" *
+                 "The origins of the provided frames do not coincide.\n" *
+                 "( norm(frame2.r_abs - frame1.r_abs) = $diff_r_abs > $(Basics.neps) )"
+             end
+         else
+             warn("\nWarning from Modia3D.Revolute(", ModiaMath.fullName(frame1), ", ", ModiaMath.fullName(frame2), ", ...):\n",
+                  "The origins of the provided frames do not coincide.\n",
+                  "( norm(frame2.r_abs - frame1.r_abs) = ", string(diff_r_abs), " > ", Basics.neps, ")")
+         end
       end
       if isnan(rphi_start)
          # Compute angle between the two z-axes
          angle = acos( dot(frame_a.R_abs[3,:], frame_b.R_abs[3,:]) )
          if abs(angle) > Basics.neps
-            warn("\nWarning from Modia3D.Revolute(", ModiaMath.fullName(frame1), ", ", ModiaMath.fullName(frame2), ", ...):\n",
-                 "The z-axes of the two frames do not coincide.\n",
-                 "( angle(zaxis(frame1), zaxis(frame2)) = ", string(angle*Basics.radToDeg), " > ", Basics.neps, ")")
+             @static if VERSION >= v"0.7.0-DEV.2005"
+                 @warn begin
+                     name_frame1 = ModiaMath.fullName(frame1)
+                     name_frame2 = ModiaMath.fullName(frame2)
+                     "Warning from Modia3D.Revolute($name_frame1, $name_frame2, ....):\n" *
+                     "The z-axes of the two frames do not coincide.\n" *
+                     "( angle(zaxis(frame1), zaxis(frame2)) = $zaxes_angle > $(Basics.neps) )"
+                 end
+             else
+                 warn("\nWarning from Modia3D.Revolute(", ModiaMath.fullName(frame1), ", ", ModiaMath.fullName(frame2), ", ...):\n",
+                      "The z-axes of the two frames do not coincide.\n",
+                      "( angle(zaxis(frame1), zaxis(frame2)) = ", string(), " > ", Basics.neps, ")")
+             end
          end
       else
          R2_abs     = ModiaMath.rot3(axis > 0 ? rphi_start : -rphi_start)*frame_a.R_abs
          diff_R_abs = norm(R2_abs*frame_b.R_abs' - ModiaMath.NullRotation)
          if diff_R_abs > Basics.neps
-            warn("Warning from Modia3D.Revolute(", ModiaMath.fullName(frame1), ", ", ModiaMath.fullName(frame2), ", ...):\n",
-                 "The orientations of the provided frames do not coincide.\n",
-                 "( norm(R2_abs*frame2.R_abs' - EYE3()) = ", string(diff_R_abs), " > ", Basics.neps,")")
+             @static if VERSION >= v"0.7.0-DEV.2005"
+                 @warn begin
+                     name_frame1 = ModiaMath.fullName(frame1)
+                     name_frame2 = ModiaMath.fullName(frame2)
+                     "Warning from Modia3D.Revolute($name_frame1, $name_frame2, ....):\n" *
+                     "The orientations of the provided frames do not coincide.\n" *
+                     "( norm(R2_abs*frame2.R_abs' - EYE3()) = $diff_R_abs > $(Basics.neps) )"
+                 end
+             else
+                 warn("Warning from Modia3D.Revolute(", ModiaMath.fullName(frame1), ", ", ModiaMath.fullName(frame2), ", ...):\n",
+                      "The orientations of the provided frames do not coincide.\n",
+                      "( norm(R2_abs*frame2.R_abs' - EYE3()) = ", string(diff_R_abs), " > ", Basics.neps,")")
+             end
          end
       end
 
