@@ -23,6 +23,8 @@ struct SimVisInfo
    isNoRenderer::Bool              # = true, if SimVis DLL is not available and the NoRenderer renderer is used
 
    function SimVisInfo()
+      dll_name = ""
+
       # Get directory of SimVis2.exe
       if haskey(ENV, "DLR_VISUALIZATION")
          directory = ENV["DLR_VISUALIZATION"]
@@ -101,10 +103,13 @@ struct SimVisInfo
 
       # Print info message
       if isCommercialEdition
-         println("   Renderer: Commercial edition of the DLR_Visualization library.\n")
+         println("   Renderer: Commercial edition of the DLR_Visualization library.\n",
+                 "             (", dll_name, ")")
+         
       else
          println("   Renderer: Community edition of the DLR_Visualization library",
-               "\n             (-> the renderer supports only a subset of the Modia3D functionalities).\n")
+               "\n             (", dll_name, ",", 
+               "\n              -> the renderer supports only a subset of the Modia3D functionalities).\n")
       end
 
       new(directory, dll_name, isCommercialEdition, false)   

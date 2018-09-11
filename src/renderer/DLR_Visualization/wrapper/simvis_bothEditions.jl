@@ -7,6 +7,10 @@
 # Function available for community and commercial version of SimVis 
 function SimVis_shutdown()
    ccall(simVisFunctions.shutdown, NOTHING,())
+
+   # If dlclose is included, there are many warning messages in runtests:
+   #     [SimVis Client Error] Connection to SimVis was interupted!
+   # Libdl.dlclose(simVisFunctions.dll_handle)
 end
 
 function SimVis_getObjectID(emptyObjectID::Int)

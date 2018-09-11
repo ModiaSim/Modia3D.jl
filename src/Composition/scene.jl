@@ -110,8 +110,15 @@ struct ContactPairs
       contactPoint1  = [defaultPoint for i = 1:nz]
       contactPoint2  = [defaultPoint for i = 1:nz]
       contactNormal  = [defaultPoint for i = 1:nz]
-      contactObj1    = Vector{Union{Object3D,NOTHING}}(nz)
-      contactObj2    = Vector{Union{Object3D,NOTHING}}(nz)
+
+      @static if VERSION >= v"0.7.0-DEV.2005"
+          contactObj1    = Vector{Union{Object3D,NOTHING}}(nothing,nz)
+          contactObj2    = Vector{Union{Object3D,NOTHING}}(nothing,nz)
+      else
+          contactObj1    = Vector{Union{Object3D,NOTHING}}(nz)
+          contactObj2    = Vector{Union{Object3D,NOTHING}}(nz)
+      end
+
       for i = 1:nz
          contactObj1[i] = nothing
          contactObj2[i] = nothing

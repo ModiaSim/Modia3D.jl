@@ -8,8 +8,8 @@
 # This file contains functionality specific to the community edition of SimVis 
 
 mutable struct SimVisFunctions
-  # SimVis DLL
-  dll::Ptr{NOTHING}
+  # Handle for SimVis DLL
+  dll_handle::Ptr{NOTHING}
 
   # SimVis functions
   init::Ptr{NOTHING}
@@ -20,24 +20,26 @@ mutable struct SimVisFunctions
   setBaseObject::Ptr{NOTHING}
   setFileObject::Ptr{NOTHING}
 
-  SimVisFunctions() = new(Base.Libdl.dlopen(simVisInfo.dll_name))
+  SimVisFunctions() = new()
 end
 
 const simVisFunctions = SimVisFunctions()
 
 function SimVis_init(SimVisHost::String, SimVisPort::Int, sync::Int)
-   #simVisFunctions.dll           = Base.Libdl.dlopen(simVisInfo.dll_name)
-   simVisFunctions.init          = Base.Libdl.dlsym(simVisFunctions.dll, :SimVis_init)
-   simVisFunctions.shutdown      = Base.Libdl.dlsym(simVisFunctions.dll, :SimVis_shutdown)
-   simVisFunctions.getObjectID   = Base.Libdl.dlsym(simVisFunctions.dll, :SimVis_getObjectID)
-   simVisFunctions.freeObjectID  = Base.Libdl.dlsym(simVisFunctions.dll, :SimVis_freeObjectID) 
-   simVisFunctions.setTime       = Base.Libdl.dlsym(simVisFunctions.dll, :SimVis_setTime)
-   simVisFunctions.setBaseObject = Base.Libdl.dlsym(simVisFunctions.dll, :SimVis_setBaseObject)    
-   simVisFunctions.setFileObject = Base.Libdl.dlsym(simVisFunctions.dll, :SimVis_setFileObject)
+   simVisFunctions.dll_handle    = Libdl.dlopen(simVisInfo.dll_name)
+   dll_handle                    = simVisFunctions.dll_handle
+   simVisFunctions.init          = Libdl.dlsym(dll_handle, :SimVis_init)
+   simVisFunctions.shutdown      = Libdl.dlsym(dll_handle, :SimVis_shutdown)
+   simVisFunctions.getObjectID   = Libdl.dlsym(dll_handle, :SimVis_getObjectID)
+   simVisFunctions.freeObjectID  = Libdl.dlsym(dll_handle, :SimVis_freeObjectID) 
+   simVisFunctions.setTime       = Libdl.dlsym(dll_handle, :SimVis_setTime)
+   simVisFunctions.setBaseObject = Libdl.dlsym(dll_handle, :SimVis_setBaseObject)    
+   simVisFunctions.setFileObject = Libdl.dlsym(dll_handle, :SimVis_setFileObject)
 
    ccall(simVisFunctions.init, NOTHING,(Cstring,Cstring,Cint,Cint),
                                      simVisInfo.directory,SimVisHost,SimVisPort,sync)
 end
+
 
 
 Composition.isVisible(data::Graphics.Spring          , renderer::Composition.DLR_Visualization_renderer) = true

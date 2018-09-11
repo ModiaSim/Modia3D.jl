@@ -330,7 +330,7 @@ function Object3D(parent::Object3D,
    for i in eachindex(elements)
       obj_element = Object3D(obj, elements[i]; visualizeFrame=Modia3D.False)
       obj_element._internal.within = obj
-      obj_element._internal.name   = names[i]
+      obj_element._internal.name   = Symbol(names[i])
    end
    return obj;
 end
