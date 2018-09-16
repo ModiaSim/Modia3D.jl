@@ -3,7 +3,7 @@
 
 module Modia3D
 println(" \nWelcome to Modia3D - Modeling and simulation of 3D systems")
-println("   Version : 0.2.0-beta.2 (2018-09-09)")
+println("   Version : 0.2.0-beta.3 (2018-09-16)")
 
 const path = dirname(dirname(@__FILE__))   # Absolute path of Modia3D Julia package directory
 
@@ -25,8 +25,9 @@ abstract type AbstractSolidGeometry     end   # Immutable shape type that  has a
 abstract type AbstractSolidMaterial     end   # Material properties of a solid (e.g. density)
 abstract type AbstractContactMaterial   end   # Contact properties of a solid (e.g. spring constant)
 abstract type AbstractContactDetection  end   # Contact detection type
-abstract type AbstractRenderer          end   # Renderer type
 abstract type AbstractGravityField      end   # Gravity field type
+abstract type AbstractRenderer          end   # Renderer type
+abstract type AbstractDLR_VisualizationRenderer <: AbstractRenderer end   # Community or Professional edition of DLR_Visualization renderer
 #abstract type AbstractSignal            end   # Signals
 #abstract type AbstractBus               end   # Bus: is a collection of signals
 
@@ -52,6 +53,14 @@ abstract type AbstractForceAdaptor   <: AbstractAssemblyComponent end
 @enum VariableAnalysisType AllAnalysis       QuasiStaticAndDynamicAnalysis OnlyDynamicAnalysis NotUsedInAnalysis
 
 
+# Used renderer (actual value is defined with __init__() below)
+@static if VERSION >= v"0.7.0-DEV.2005"
+    const renderer = Vector{AbstractRenderer}(undef,1)
+else
+    const renderer = Vector{AbstractRenderer}(1)
+end
+
+
 # Include sub-modules
 include(joinpath("Basics"          , "_module.jl"))
 include(joinpath("Signals"         , "_module.jl"))
@@ -65,14 +74,32 @@ include(joinpath("contactDetection", "ContactDetectionMPR", "_module.jl"))
 
 
 # Make symbols available that have been exported in sub-modules
-using .Basics
-using .Signals
-using .ForceElements
-using .Solids
-using .Graphics
-using .Composition
+using  .Basics
+using  .Signals
+using  .ForceElements
+using  .Solids
+using  .Graphics
+using  .Composition
+import .DLR_Visualization
+import .NoRenderer
 const Pipe     = Graphics.Pipe        # Pipe cannot be directly exported, due to a conflict with Base.Pipe
 const connect  = Composition.connect  # connect cannot be directly exported, due to a conflict with Base.connect
+
+
+# Called implicitely at the first import/using of Modia3D (when loading Modia3D to the current Julia session)
+function __init__() 
+    info = DLR_Visualization.getSimVisInfo()
+    (directory, dll_name, isProfessionalEdition, isNoRenderer) = info
+
+    if isNoRenderer
+        renderer[1] = NoRenderer.DummyRenderer(info)
+    elseif isProfessionalEdition
+        renderer[1] = DLR_Visualization.ProfessionalEdition(info)
+    else
+        renderer[1] = DLR_Visualization.CommunityEdition(info)
+    end
+end
+
 
 
 export @assembly
@@ -83,7 +110,7 @@ export Object3D
 
 
 # Add import clauses used in examples and test
-import StaticArrays
+import StaticArrays 
 import Unitful
 import ModiaMath
 

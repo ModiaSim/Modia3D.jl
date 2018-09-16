@@ -21,20 +21,20 @@ import Modia3D.Solids
 import Modia3D.Composition
 
 @static if VERSION >= v"0.7.0-DEV.2005"
+    using Libdl
+    ISWINDOWS() = Sys.iswindows()
+    ISLINUX()   = Sys.islinux()
     const NOTHING = Nothing
 else
+    using Base.Libdl
+    ISWINDOWS() = is_windows()
+    ISLINUX()   = is_linux()
     const NOTHING = Void
 end
 
+include("renderer.jl")
 include(joinpath("wrapper","simvis.jl"))
-
-if !simVisInfo.isNoRenderer
-   include("handler.jl")
-   include("visualize.jl")
-
-   if simVisInfo.isCommercialEdition
-      include("visualize_commercialEdition.jl")
-   end
-end
+include("handler.jl")
+include("visualize.jl")
 
 end

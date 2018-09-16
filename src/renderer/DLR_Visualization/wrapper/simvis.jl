@@ -1,169 +1,167 @@
+# License for this file: MIT (expat)
+# Copyright 2017-2018, DLR Institute of System Dynamics and Control
 #
 # This file is part of module
 #   Modia3D.DLR_Visualization (Modia3D/renderer/DLR_Visualization/_module.jl)
 #
 
-using StaticArrays
 
-@static if VERSION >= v"0.7.0-DEV.2005"
-    using Libdl
-    ISWINDOWS() = Sys.iswindows()
-    ISLINUX()   = Sys.islinux()
-else
-    using Base.Libdl
-    ISWINDOWS() = is_windows()
-    ISLINUX()   = is_linux()
+
+### Functions available for community and professional edition of SimVis  
+
+function SimVis_init(simVis::SimVis_Renderer)
+   ccall(simVis.init, NOTHING,(Cstring,Cstring,Cint,Cint),
+                               simVis.directory, simVis.host, simVis.port, Int(simVis.sync))
+end
+
+function SimVis_shutdown(simVis::SimVis_Renderer)
+   ccall(simVis.shutdown, NOTHING,())
+end
+
+function SimVis_getObjectID(simVis::SimVis_Renderer, emptyObjectID::Int)
+   ccall(simVis.getObjectID, Ptr{NOTHING},(Cint,), emptyObjectID)
+end
+
+function SimVis_freeObjectID(simVis::SimVis_Renderer, obj::Ptr{NOTHING})
+   ccall(simVis.freeObjectID, NOTHING,(Ptr{NOTHING},), obj)
+end
+
+function SimVis_setTime(simVis::SimVis_Renderer, time::Float64)
+   ccall(simVis.setTime, NOTHING,(Cdouble,), time)
+end
+
+function SimVis_setBaseObject(simVis::SimVis_Renderer,
+                              ID::Ptr{NOTHING},
+                              state::Cint,
+                              baseObjType::Cint,
+                              pos::MVector{3,Float64},
+                              T::MMatrix{3,3,Float64,9},
+                              scale::MVector{3,Float64},
+                              color::MVector{3,Cint},
+                              wireframe::Cint,
+                              reflectslight::Cint,
+                              specularCoefficient::Float64,
+                              extra::MVector{3,Float64},
+                              alpha::Float64,
+                              canCollide::Cint,
+                              shadowMask::Cint)
+   ccall(simVis.setBaseObject, NOTHING,
+           (Ptr{NOTHING},Cint,Cint,Ref{SVector{3,Float64}},Ref{SMatrix{3,3,Float64,9}},Ref{MVector{3,Float64}},Ref{MVector{3,Cint}},Cint,Cint,Cdouble,Ref{MVector{3,Float64}},Cdouble,Cint,Cint),
+           ID,state,baseObjType,pos,T,scale,color,wireframe,reflectslight,specularCoefficient,extra,alpha,canCollide,shadowMask)
+end
+
+function SimVis_setBaseObject(simVis::SimVis_Renderer,
+                              ID::Ptr{NOTHING},
+                              state::Cint,
+                              baseObjType::Cint,
+                              pos::SVector{3,Float64},
+                              T::SMatrix{3,3,Float64,9},
+                              scale::MVector{3,Float64},
+                              color::MVector{3,Cint},
+                              wireframe::Cint,
+                              reflectslight::Cint,
+                              specularCoefficient::Float64,
+                              extra::MVector{3,Float64},
+                              alpha::Float64,
+                              canCollide::Cint,
+                              shadowMask::Cint)
+   ccall(simVis.setBaseObject, NOTHING,
+           (Ptr{NOTHING},Cint,Cint,Ref{SVector{3,Float64}},Ref{SMatrix{3,3,Float64,9}},Ref{MVector{3,Float64}},Ref{MVector{3,Cint}},Cint,Cint,Cdouble,Ref{MVector{3,Float64}},Cdouble,Cint,Cint),
+           ID,state,baseObjType,pos,T,scale,color,wireframe,reflectslight,specularCoefficient,extra,alpha,canCollide,shadowMask)
 end
 
 
-struct SimVisInfo
-   directory::String               # Directory Visualization/Extras
-   dll_name::String                # Absolute path of SimVis DLL as string 
-   isCommercialEdition::Bool       # = true, if DLL is commercial SimVis edition otherwise community edition
-   isNoRenderer::Bool              # = true, if SimVis DLL is not available and the NoRenderer renderer is used
-
-   function SimVisInfo()
-      dll_name = ""
-
-      # Get directory of SimVis2.exe
-      if haskey(ENV, "DLR_VISUALIZATION")
-         directory = ENV["DLR_VISUALIZATION"]
-      else
-         directory = "???"
-         @static if VERSION >= v"0.7.0-DEV.2005"
-             @warn "\n\nEnvironment variable \"DLR_VISUALIZATION\" not defined.\n" *
-                   "Include ENV[\"DLR_VISUALIZATION\"] = <path-to-Visualization/Extras/SimVis> into your HOME/.julia/config/startup.jl file.\n" *
-                   "\nNo Renderer is used in Modia3D (so, animation is switched off)."
-         else
-             warn("\n\nEnvironment variable \"DLR_VISUALIZATION\" not defined.\n",
-                  "Include ENV[\"DLR_VISUALIZATION\"] = <path-to-Visualization/Extras/SimVis> into your HOME/.juliarc.jl file.\n",
-                  "\nNo Renderer is used in Modia3D (so, animation is switched off).")
-         end
-         return new(directory,"???",false,true)
-      end
-
-      # Check for 64 bit
-      if Base.Sys.WORD_SIZE != 64
-         @static if VERSION >= v"0.7.0-DEV.2005"
-             @warn "DLR Visualization library only supported for 64-bit system but not for $(Base.Sys.WORD_SIZE) bit.\n" *
-                   "\nNo Renderer is used in Modia3D (so, animation is switched off)."
-         else
-             warn("DLR Visualization library only supported for 64-bit system but not for ", Base.Sys.WORD_SIZE, "bit.\n",
-                  "\nNo Renderer is used in Modia3D (so, animation is switched off).")
-         end
-         return new(directory,"???",false,true)
-      end
-
-      # Check whether commercial or community edition or on windows or on linux
-      if ISWINDOWS()         
-         dll_name1 = joinpath(directory, "windows", "SimVisInterface_ProfessionalEdition.dll")
-         if isfile( dll_name1 )
-            dll_name = dll_name1
-            isCommercialEdition = true
-         else
-            dll_name2 = joinpath(directory, "windows", "SimVisInterface_CommunityEdition.dll")
-            if isfile( dll_name2 )
-               dll_name = dll_name2
-               isCommercialEdition = false
-            else
-               @static if VERSION >= v"0.7.0-DEV.2005"
-                   @warn "\n\nModia3D: DLL of DLR-Visualization library not found. Neither of these files\n" * 
-                         "   $dll_name1, \n" *
-                         "   $dll_name2, \n" *
-                         "exists. Check whether ENV[\"DLR_VISUALIZATION\"] is correct." *
-                         "\nNo Renderer is used in Modia3D (so, animation is switched off)."
-               else
-                   warn("\n\nModia3D: DLL of DLR-Visualization library not found. Neither of these files\n",
-                        "   ", dll_name1, "\n",
-                        "   ", dll_name2, "\n",
-                        "exist. Check whether ENV[\"DLR_VISUALIZATION\"] is correct.",
-                        "\nNo Renderer is used in Modia3D (so, animation is switched off).")
-               end
-               return new(directory,"???",false,true)
-            end
-         end
-
-      elseif ISLINUX()
-         dll_name1 = joinpath(directory, "linux", "SimVisInterface_ProfessionalEdition.so")
-         if isfile( dll_name1 )
-            dll_name = dll_name1
-            isCommercialEdition = true
-         else
-            dll_name2 = joinpath(directory, "linux", "SimVisInterface_CommunityEdition.so")
-            if isfile( dll_name2 )
-               dll_name = dll_name2
-               isCommercialEdition = false
-            else
-               @static if VERSION >= v"0.7.0-DEV.2005"
-                   @warn "\n\nModia3D: *.so of DLR-Visualization library not found. Neither of these files\n" * 
-                         "   $dll_name1, \n" *
-                         "   $dll_name2, \n" *
-                         "exists. Check whether ENV[\"DLR_VISUALIZATION\"] is correct." *
-                         "\nNo Renderer is used in Modia3D (so, animation is switched off)."
-               else
-                   warn("\n\nModia3D: *.so of DLR-Visualization library not found. Neither of these files\n",
-                        "   ", dll_name1, "\n",
-                        "   ", dll_name2, "\n",
-                        "exist. Check whether ENV[\"DLR_VISUALIZATION\"] is correct.",
-                        "\nNo Renderer is used in Modia3D (so, animation is switched off).")
-               end
-               return new(directory,"???",false,true)
-            end
-         end
-      else
-         @static if VERSION >= v"0.7.0-DEV.2005"
-             @warn "\n\nModia3D: DLR Visualization library only supported for Windows or Linux.\n" *
-                   "\nNo Renderer is used in Modia3D (so, animation is switched off)."
-         else
-             warn("\n\nModia3D: DLR Visualization library only supported for Windows or Linux.\n",
-                  "\nNo Renderer is used in Modia3D (so, animation is switched off).")
-         end
-         return new(directory,"???",false,true)
-      end
-
-      # Try to open the found DLL/SO
-      dll = Libdl.dlopen_e(dll_name)
-      if dll != C_NULL
-         Libdl.dlclose(dll)
-      else
-         @static if VERSION >= v"0.7.0-DEV.2005"
-             @warn "\n\nModia3D: DLR Visualization interface library:" *
-                   "\n   $dll_name" * 
-                   "\nexists, but could not be opened with Libdl.dlopen_e." *
-                   "\nNo Renderer is used in Modia3D (so, animation is switched off)."
-         else
-             warn("\n\nModia3D: DLR Visualization interface library:",
-                  "\n   ", dll_name, 
-                  "\nexist, but could not be opened with Libdl.dlopen_e.",
-                  "\nNo Renderer is used in Modia3D (so, animation is switched off).")
-         end
-         return new(directory,dll_name,false,true)
-      end
-
-      # Print info message
-      if isCommercialEdition
-         println("   Renderer: Commercial edition of the DLR_Visualization library.\n",
-                 "             (", dll_name, ")")
-         
-      else
-         println("   Renderer: Community edition of the DLR_Visualization library",
-               "\n             (", dll_name, ",", 
-               "\n              -> the renderer supports only a subset of the Modia3D functionalities).\n")
-      end
-
-      new(directory, dll_name, isCommercialEdition, false)   
-   end 
+function SimVis_setFileObject(simVis::SimVis_Renderer,
+                              ID::Ptr{NOTHING},
+                              state::Cint,
+                              pos::MVector{3,Float64},
+                              T::MMatrix{3,3,Float64,9},
+                              scale::MVector{3,Float64},
+                              reflectslight::Cint,
+                              specularCoefficient::Float64,
+                              alpha::Float64,
+                              wireframe::Cint,
+                              canCollide::Cint,
+                              filename::String,
+                              smooth::Cint,
+                              overwriteColor::Bool,
+                              color::MVector{3,Cint},
+                              shadowMask::Cint,
+                              shaderName::String)
+   ccall(simVis.setFileObject, NOTHING,
+            (Ptr{NOTHING},Cint,Ref{MVector{3,Float64}},Ref{MVector{3,Float64}},Ref{MVector{3,Float64}},Cint,Cdouble,Cdouble,Cint,Cint,Cstring,Cint,Cint,Ref{MVector{3,Cint}},Cint,Cstring),
+             ID,state,pos,T,scale,reflectslight,specularCoefficient,alpha,wireframe,canCollide,filename,smooth,overwriteColor,color,shadowMask,shaderName)
 end
 
 
-const simVisInfo = SimVisInfo()
 
-if simVisInfo.isNoRenderer
-   # include nothing
-elseif simVisInfo.isCommercialEdition
-   include("simvis_commercialEdition.jl") 
-   include("simvis_bothEditions.jl") 
-else
-   include("simvis_communityEdition.jl")
-   include("simvis_bothEditions.jl") 
+function SimVis_setFileObject(simVis::SimVis_Renderer,
+                              ID::Ptr{NOTHING},
+                              state::Cint,
+                              pos::SVector{3,Float64},
+                              T::SMatrix{3,3,Float64,9},
+                              scale::MVector{3,Float64},
+                              reflectslight::Cint,
+                              specularCoefficient::Float64,
+                              alpha::Float64,
+                              wireframe::Cint,
+                              canCollide::Cint,
+                              filename::String,
+                              smooth::Cint,
+                              overwriteColor::Bool,
+                              color::MVector{3,Cint},
+                              shadowMask::Cint,
+                              shaderName::String)
+   ccall(simVis.setFileObject, NOTHING,
+            (Ptr{NOTHING},Cint,Ref{SVector{3,Cdouble}},Ref{SMatrix{3,3,Cdouble,9}},Ref{MVector{3,Float64}},Cint,Cdouble,Cdouble,Cint,Cint,Cstring,Cint,Cint,Ref{MVector{3,Cint}},Cint,Cstring),
+             ID,state,pos,T, scale,reflectslight,specularCoefficient,alpha,wireframe,canCollide,filename,smooth,overwriteColor,color,shadowMask,shaderName)
 end
+
+
+
+### Functions only available for professional edition of SimVis  
+function SimVis_setTextObject(simVis::SimVis_Renderer,
+                              ID::Ptr{NOTHING},
+                              screenAlignment::Cint,
+                              text::String,
+                              textvalue::Float64,
+                              valueactive::Cint,
+                              pos::MVector{3,Float64},
+                              T::MMatrix{3,3,Float64,9},
+                              charsize::Float64,
+                              fontname::String,
+                              color::MVector{3,Cint},
+                              alpha::Float64,  
+                              offset::MVector{3,Float64},  
+                              alignment::Cint,
+                              digits::Cint)
+   ccall(simVis.setTextObject, NOTHING,
+           (Ptr{NOTHING},Cint,Cstring,Cdouble,Cint,Ref{MVector{3,Float64}},Ref{MMatrix{3,3,Float64,9}},Cdouble,
+            Cstring,Ref{MVector{3,Cint}},Cdouble,Ref{MVector{3,Float64}},Cint,Cint),
+           ID, screenAlignment, text, textvalue, valueactive, pos, T, charsize,
+           fontname, color, alpha, offset, alignment, digits)
+end
+
+
+function SimVis_setTextObject(simVis::SimVis_Renderer,
+                              ID::Ptr{NOTHING},
+                              screenAlignment::Cint,
+                              text::String,
+                              textvalue::Float64,
+                              valueactive::Cint,
+                              pos::SVector{3,Float64},
+                              T::SMatrix{3,3,Float64,9},
+                              charsize::Float64,
+                              fontname::String,
+                              color::MVector{3,Cint},
+                              alpha::Float64,  
+                              offset::MVector{3,Float64},  
+                              alignment::Cint,
+                              digits::Cint)
+   ccall(simVis.setTextObject, NOTHING,
+           (Ptr{NOTHING},Cint,Cstring,Cdouble,Cint,Ref{SVector{3,Cdouble}},Ref{SMatrix{3,3,Cdouble,9}},Cdouble,
+            Cstring,Ref{MVector{3,Cint}},Cdouble,Ref{MVector{3,Float64}},Cint,Cint),
+           ID, screenAlignment, text, textvalue, valueactive, pos, T, charsize,
+           fontname, color, alpha, offset, alignment, digits)
+end
+

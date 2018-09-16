@@ -13,10 +13,6 @@ initializeVisualization(renderer::Modia3D.AbstractRenderer, velements::Vector{Ob
 visualize!(renderer::Modia3D.AbstractRenderer, time::Float64) = error("No renderer defined.")
 closeVisualization(renderer::Modia3D.AbstractRenderer)        = error("No renderer defined.")
 
-include(joinpath(Modia3D.path, "src", "renderer", "DLR_Visualization", "DLR_Visualization_renderer.jl"))
-
-include(joinpath(Modia3D.path, "src", "renderer", "NoRenderer", "NoRenderer.jl"))
-
 
 #-------------------------------------- Default Contact Detection -------------------------------
 
@@ -216,9 +212,6 @@ gravityAcceleration(grav::PointGravityField, r_abs::AbstractVector) = -(grav.mue
 #-------------------------------------- Global Scene Options -------------------------------
 
 struct SceneOptions
-   # Renderer used for visualization
-   renderer::Modia3D.AbstractRenderer
-
    # Handler used for contact detection
    contactDetection::Modia3D.AbstractContactDetection
    nz_max::Int                    # Maximum number of zero crossing functions used for
@@ -251,8 +244,7 @@ struct SceneOptions
    # ContactDetection
    enableContactDetection::Bool   # = true, if contact detection is enabled
 
-   function SceneOptions(;renderer               = Modia3D.DLR_Visualization.simVisInfo.isNoRenderer ? NoRenderer() : DLR_Visualization_renderer(),
-                          contactDetection       = ContactDetectionMPR_handler(),
+   function SceneOptions(;contactDetection       = ContactDetectionMPR_handler(),
                           nz_max                 = 100,
                           gravityField           = UniformGravityField(),
                           enableVisualization    = true,
@@ -285,8 +277,7 @@ struct SceneOptions
       @assert(defaultN_to_m > 0.0)
       @assert(defaultNm_to_m  > 0.0)
 
-      new(renderer,
-          contactDetection,
+      new(contactDetection,
           nz_max,
           gravityField,
           enableVisualization,

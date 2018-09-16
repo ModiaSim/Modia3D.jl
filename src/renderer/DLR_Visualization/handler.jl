@@ -5,7 +5,7 @@
 #   Modia3D.DLR_Visualization (Modia3D/renderer/DLR_Visualization/_module.jl)
 #
 
-getVisualElement(data)                = data
+getVisualElement(data)               = data
 getVisualElement(data::Solids.Solid) = data.geo
 
 
@@ -21,52 +21,68 @@ getVisualElement(data::Solids.Solid) = data.geo
 getVisualizeFunction(data) = getfield(DLR_Visualization, Symbol("visualize", Basics.trailingPartOfTypeAsString( getVisualElement(data) )))
 
 
-function Composition.initializeVisualization(renderer::Composition.DLR_Visualization_renderer, velements::Vector{Composition.Object3D})::NOTHING
+function Composition.initializeVisualization(renderer::Modia3D.AbstractDLR_VisualizationRenderer, velements::Vector{Composition.Object3D})::NOTHING
+  simVis = renderer.simVis
   @assert(length(velements) > 0)
-  if renderer.isInitialized
-     Composition.closeVisualization(renderer)
+  if simVis.isInitialized
+     closeVisualization(renderer)
   end
 
   # Initialize SimVis
-  SimVis_init(renderer.host, renderer.port, Int(renderer.sync))
+  SimVis_init(simVis)
 
   # Determine visualize functions and ids of visual elements
   for i in eachindex(velements)
-    push!(renderer.visualize, getVisualizeFunction(velements[i].data))
-    push!(renderer.ids      , SimVis_getObjectID(0))
+    push!(simVis.visualize, getVisualizeFunction(velements[i].data))
+    push!(simVis.ids      , SimVis_getObjectID(simVis,0))
   end
-  renderer.velements = velements
-  renderer.isInitialized = true
+  simVis.velements = velements
+  simVis.isInitialized = true
   return nothing
 end
 
 
-function Composition.visualize!(renderer::Composition.DLR_Visualization_renderer, time::Float64)
-  @assert(length(renderer.velements) > 0)
-  if renderer.isInitialized
-     velements = renderer.velements
-     visualize = renderer.visualize
-     ids       = renderer.ids
+function Composition.visualize!(renderer::Modia3D.AbstractDLR_VisualizationRenderer, time::Float64)
+  simVis = renderer.simVis
+  @assert(length(simVis.velements) > 0)
+  if simVis.isInitialized
+     velements = simVis.velements
+     visualize = simVis.visualize
+     ids       = simVis.ids
      for i in eachindex(velements)
-        visualize[i](velements[i].data, velements[i], ids[i])
+        visualize[i](velements[i].data, velements[i], ids[i], simVis)
      end
-     SimVis_setTime(time)
+     SimVis_setTime(simVis, time)
   else
      error("visualize! called without initializing visualization first.")
   end
 end
 
 
-function Composition.closeVisualization(renderer::Composition.DLR_Visualization_renderer)
-  if renderer.isInitialized
+function Composition.closeVisualization(renderer::Modia3D.AbstractDLR_VisualizationRenderer)
+  simVis = renderer.simVis
+  if simVis.isInitialized
     sleep(0.2)
-    for id in renderer.ids
-      SimVis_freeObjectID(id)
+    for id in simVis.ids
+      SimVis_freeObjectID(simVis, id)
     end
-    SimVis_shutdown()
+    SimVis_shutdown(simVis)
   end
-  empty!(renderer.ids)
-  empty!(renderer.visualize)
-  empty!(renderer.velements)
-  renderer.isInitialized = false
+  empty!(simVis.ids)
+  empty!(simVis.visualize)
+  empty!(simVis.velements)
+  simVis.isInitialized = false
 end
+
+
+Composition.isVisible(data::Modia3D.AbstractVisualElement, renderer::ProfessionalEdition) = true
+Composition.isVisible(data::Solids.Solid                 , renderer::ProfessionalEdition) = typeof(data.material) != NOTHING && typeof(data.geo) != NOTHING
+
+Composition.isVisible(data::Graphics.Spring              , renderer::CommunityEdition) = true
+Composition.isVisible(data::Graphics.GearWheel           , renderer::CommunityEdition) = true
+Composition.isVisible(data::Graphics.CoordinateSystem    , renderer::CommunityEdition) = true
+Composition.isVisible(data::Modia3D.AbstractGeometry     , renderer::CommunityEdition) = true
+Composition.isVisible(data::Solids.Solid                 , renderer::CommunityEdition) = typeof(data.material) != NOTHING && typeof(data.geo) != NOTHING
+
+
+

@@ -9,7 +9,7 @@
 function build_tree_and_velements!(scene::Scene, world::Object3D)::NOTHING
    options             = scene.options
    visualizeFrames     = options.visualizeFrames
-   renderer            = options.renderer
+   renderer            = Modia3D.renderer[1]
    autoCoordsys        = scene.autoCoordsys
    velements           = scene.velements
    tree                = scene.tree
@@ -79,7 +79,7 @@ end
 function build_velements!(scene::Scene, world::Object3D)::NOTHING
    options         = scene.options
    visualizeFrames = options.visualizeFrames
-   renderer        = options.renderer
+   renderer        = Modia3D.renderer[1]
    autoCoordsys    = scene.autoCoordsys
    velements       = scene.velements
    stack           = scene.stack
@@ -288,8 +288,8 @@ function visualizeWorld!(world::Object3D; sceneOptions = SceneOptions())::NOTHIN
    scene.analysis = ModiaMath.KinematicAnalysis
    initAnalysis!(world, scene)
    updatePosition!(world)
-   visualize!(scene.options.renderer, 0.0)
-   visualize!(scene.options.renderer, 1.0)
+   visualize!(Modia3D.renderer[1], 0.0)
+   visualize!(Modia3D.renderer[1], 1.0)
    closeAnalysis!(scene)
    return nothing
 end
@@ -298,7 +298,7 @@ function initAnalysis!(world::Object3D, scene::Scene)
    # Initialize spanning tree and visualization (if visualization desired and visual elements present)
    build_tree_and_velements!(scene, world)
    if scene.visualize
-      initializeVisualization(scene.options.renderer, scene.velements)
+      initializeVisualization(Modia3D.renderer[1], scene.velements)
    end
 
    # Initialize contact detection if contact detection desired and objects with contactMaterial are present
@@ -336,7 +336,7 @@ function initAnalysis!(assembly::Modia3D.AbstractAssembly;
    # Initialize spanning tree and visualization (if visualization desired and visual elements present)
    build_tree_and_velements!(scene, world)
    if scene.visualize
-      initializeVisualization(scene.options.renderer, scene.velements)
+      initializeVisualization(Modia3D.renderer[1], scene.velements)
    end
 
    # Initialize contact detection if contact detection desired and objects with contactMaterial are present
@@ -371,7 +371,7 @@ function initAnalysis!(assembly::Modia3D.AbstractAssembly)
    if scene.options.enableVisualization
       build_velements!(scene,world)
       if scene.visualize
-        initializeVisualization(scene.options.renderer, scene.velements)
+        initializeVisualization(Modia3D.renderer[1], scene.velements)
       end
    end
 
@@ -411,13 +411,13 @@ function visualize!(assembly::Modia3D.AbstractAssembly, time::Float64)
   assertInitAnalysis(assembly, "Modia3D.visualize!(..)")
   scene = assembly._internal.scene
   if scene.visualize
-    visualize!(scene.options.renderer, time)
+    visualize!(Modia3D.renderer[1], time)
   end
 end
 
 function visualize!(scene::Scene, time::Float64)
   if scene.visualize
-    visualize!(scene.options.renderer, time)
+    visualize!(Modia3D.renderer[1], time)
   end
 end
 
@@ -468,7 +468,7 @@ function performAnalysis!(assembly::Modia3D.AbstractAssembly, time::Float64)
    end
 
    if scene.visualize
-      visualize!(scene.options.renderer, time)
+      visualize!(Modia3D.renderer[1], time)
    end
 end
 
@@ -486,7 +486,7 @@ end
 
 function closeAnalysis!(scene::Scene)
      # Close Visualisation
-     closeVisualization(scene.options.renderer)
+     closeVisualization(Modia3D.renderer[1])
      Basics.emptyArray!(scene.velements)
      scene.visualize = false
 

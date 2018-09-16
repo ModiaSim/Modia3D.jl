@@ -226,7 +226,7 @@ function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64
    if ModiaMath.isInitial(sim)
       # println("... isInitial = true")
       if scene.visualize
-         initializeVisualization(scene.options.renderer, scene.velements)
+         initializeVisualization(Modia3D.renderer[1], scene.velements)
       end
       if scene.options.enableContactDetection && scene.collide
          initializeContactDetection!(world, scene)
@@ -237,7 +237,7 @@ function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64
       # println("... isTerminal = true")
       if scene.visualize
          # println("... visualization closing")
-         closeVisualization(scene.options.renderer)
+         closeVisualization(Modia3D.renderer[1])
       end
       if scene.collide
          closeContactDetection!(m.assembly)
@@ -397,7 +397,7 @@ open("log.txt", "a") do file
 
    # Visualize at a communication point
    if scene.visualize && storeResults
-      visualize!(scene.options.renderer, time)
+      visualize!(Modia3D.renderer[1], time)
    end
 
    # Copy variables to residues
