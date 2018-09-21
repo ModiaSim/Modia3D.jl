@@ -99,6 +99,7 @@ deps = ["Base64"]
 uuid = "d6f4376e-aef5-505a-96c1-9c027394607a"
 
 [[Missings]]
+deps = ["Dates", "InteractiveUtils", "SparseArrays", "Test"]
 git-tree-sha1 = "196528fa1df03df435025f52f9c1ff8356f94738"
 uuid = "e1d29d7a-bbdc-5cf2-9ac0-f12de2c33e28"
 version = "0.3.0"
@@ -108,11 +109,11 @@ uuid = "a63ad114-7e13-5084-954f-fe012c677804"
 
 [[ModiaMath]]
 deps = ["DataFrames", "DataStructures", "LinearAlgebra", "Printf", "Requires", "StaticArrays", "Sundials", "Test", "Unitful"]
-git-tree-sha1 = "78fdb4fca613fe01ee881efcedea8a471085c646"
+git-tree-sha1 = "5262546e3d26ed09a19e343f9f764b1a7067ab94"
 repo-rev = "master"
 repo-url = "ModiaMath"
-uuid = "80923050-9e1b-11e8-0c9e-c9f8e684994a"
-version = "0.2.2"
+uuid = "67ccffd1-116d-535b-ad39-76a8fd0cbf71"
+version = "0.2.3"
 
 [[Pkg]]
 deps = ["Dates", "LibGit2", "Markdown", "Printf", "REPL", "Random", "SHA", "UUIDs"]
@@ -200,7 +201,7 @@ uuid = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 version = "0.25.0"
 
 [[Sundials]]
-deps = ["BinaryProvider", "DataStructures", "DiffEqBase", "Libdl", "Reexport", "Roots"]
+deps = ["BinaryProvider", "DataStructures", "DiffEqBase", "Libdl", "LinearAlgebra", "Reexport", "Roots", "SparseArrays", "Test"]
 git-tree-sha1 = "8656056f267acb7fbeedbacb1d23cb2c1c56d7af"
 uuid = "c3572dad-4567-51f8-b174-8c6c989267f4"
 version = "2.4.0"
