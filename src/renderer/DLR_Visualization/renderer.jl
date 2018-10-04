@@ -30,9 +30,9 @@ mutable struct SimVis_Renderer
   setTime::Ptr{NOTHING}
   setBaseObject::Ptr{NOTHING}
   setFileObject::Ptr{NOTHING}
-  setTextObject::Ptr{NOTHING}
+  setTextObject::Union{Ptr{NOTHING}, NOTHING}
 
-  function SimVis_Renderer(info; host="127.0.0.1",port=11000,sync=false)
+  function SimVis_Renderer(info; host="127.0.0.1",port=11000,sync=false, professionalEdition=true)
       (directory, dll_name, isProfessionalEdition, isNoRenderer) = info
 
       dll_handle    = Libdl.dlopen(dll_name)
@@ -43,7 +43,11 @@ mutable struct SimVis_Renderer
       setTime       = Libdl.dlsym(dll_handle, :SimVis_setTime)
       setBaseObject = Libdl.dlsym(dll_handle, :SimVis_setBaseObject)    
       setFileObject = Libdl.dlsym(dll_handle, :SimVis_setFileObject)
-      setTextObject = Libdl.dlsym(dll_handle, :SimVis_setTextObject)
+      if professionalEdition
+         setTextObject = Libdl.dlsym(dll_handle, :SimVis_setTextObject)
+      else
+         setTextObject = nothing
+      end
 
       new(Any[], Ptr{NOTHING}[], Function[], false, host, port, sync,
           directory, dll_name, isProfessionalEdition, isNoRenderer,
@@ -65,7 +69,7 @@ struct CommunityEdition <: Modia3D.AbstractDLR_VisualizationRenderer
     simVis::SimVis_Renderer
  
     CommunityEdition(info; host="127.0.0.1",port=11000,sync=false) =
-        new( SimVis_Renderer(info, host=host,port=port,sync=sync) )
+        new( SimVis_Renderer(info, host=host,port=port,sync=sync,professionalEdition=false) )
 end
 
 
