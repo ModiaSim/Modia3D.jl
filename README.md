@@ -19,7 +19,7 @@ A more detailed overview of the available features is given in the
 Papers about Modia3D:
 
 - *[Collision Handling with Variable-Step Integrators](docs/resources/documentation/CollisionHandling_Neumayr_Otter_2017.pdf)* ([EOOLT 2017, December](http://www.eoolt.org/2017/))
-- *Component-Based 3D Modeling Combined with Equation-Based Modeling*, accepted for publication at the
+- *Component-Based 3D Modeling of Dynamic Systems*, to be presented at the
   [American Modelica Conference 2018, October 9-10](https://www.modelica.org/events/modelica2018Americas/index_html)
 
 Before releasing version 1.0, Modia3D shall be
@@ -31,11 +31,18 @@ Special 3D algorithms (Modia3D) + power/flexibility of equation based modeling (
 
 ## Installation
 
-This package is not yet registered in `METADATA.jl`and need to be installed with `Pkg.clone`:
+**Modia3D** is registered in METADATA.jl and can be installed with Pkg.add:
 
-```
-julia> Pkg.clone("https://github.com/ModiaSim/ModiaMath.jl")
-julia> Pkg.clone("https://github.com/ModiaSim/Modia3D.jl")
+```julia
+# Julia 0.6:
+julia> Pkg.add("Modia3D")
+julia> Pkg.add("ModiaMath")   # in order to use simulate!(..) and plot(..)
+julia> Pkg.add("PyPlot")      # in order that plots are shown
+
+# Julia 0.7 and 1.0 (registration is pending)
+julia> ]add Modia3D
+        add ModiaMath  # in order to use simulate!(..) and plot(..)
+        add PyPlot     # in order that plots are shown
 ```
 
 Modia3D uses [PyPlot](https://github.com/JuliaPy/PyPlot.jl) for plotting.
@@ -55,8 +62,14 @@ are supported. To install the free version for *Windows* or for *Linux* perform 
 1. Go to [https://visualization.ltx.de/](https://visualization.ltx.de/),
    provide your contact information and click on *Request download* for *Community Edition*.
    Afterwards, you get a link to download the library and you need to unzip the file.
-2. In your `HOME/.juliarc.jl` file, include the environment variable
+
+2. In your Julia **startup file** (Julia 0.6: `HOME/.juliarc.jl`, Julia 0.7 and 1.0:
+   `HOME/.julia/config/startup.jl`) include the environment variable
    `ENV["DLR_VISUALIZATION"] = "<path-to-library>/Visualization/Extras/SimVis"`.
+   Make sure that the SimVis executable under this directory has execution rights.
+   For example in Linux with command:
+   `chmod +x <path-to-library>/Visualization/Extras/SimVis`
+
 3. Start Julia and run one of the examples, for example
    `include("$(Modia3D.path)/examples/dynamics/Simulate_DoublePendulumWithDampers.jl")`
 
@@ -102,6 +115,7 @@ ModiaMath.plot(result, ["revolute.phi", "revolute.w"]);
 
 ### To run examples
 ```julia
+  import Modia3D
   include("$(Modia3D.path)/examples/dynamics/Simulate_DoublePendulumWithDampers.jl")
   include("$(Modia3D.path)/examples/dynamics/Simulate_FallingBall4.jl")
   include("$(Modia3D.path)/examples/kinematics/Move_FourBar.jl")
@@ -110,15 +124,16 @@ ModiaMath.plot(result, ["revolute.phi", "revolute.w"]);
 
 ### To run tests
 ```julia
+  import Modia3D
   include("$(Modia3D.path)/test/runtests.jl")
 ```
 
 ## Status
 
-The package is tested against Julia `0.6` on Windows 7, Kubuntu 18.04, Ubuntu 14.04, OpenSUSE42 and Fedora 28.
-The actual version number is 0.2.0-beta.1 and functionality and robustness is planned to be improved for the 1.0 version.
+The package has been tested with Julia `0.6.4`, `0.7.0`, `1.0.0`, `1.0.1` on Windows 7
+and via the TravisCL on Linux (x86_64-pc-linux-gnu) and macOS (x86_64-apple-darwin14.5.0).
 
-Especially note, the collision handling has still bugs and the elastic response calculation is not
+Note, the collision handling has still bugs and the elastic response calculation is not
 yet robust. This needs to be improved.
 
 Furthermore, kinematic loops are currently only supported for 2D loops and if they are driven kinematically.

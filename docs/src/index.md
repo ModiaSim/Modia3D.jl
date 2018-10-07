@@ -13,7 +13,7 @@ that is (automatically) approximated by its convex hull.
 Papers about Modia3D:
 
 - *[Collision Handling with Variable-Step Integrators](../resources/documentation/CollisionHandling_Neumayr_Otter_2017.pdf)* ([EOOLT 2017, December](http://www.eoolt.org/2017/))
-- *Component-Based 3D Modeling Combined with Equation-Based Modeling*, accepted for publication at the
+- *Component-Based 3D Modeling of Dynamic Systems*, to be presented at the
   [American Modelica Conference 2018, October 9-10](https://www.modelica.org/events/modelica2018Americas/index_html)
 
 Before releasing version 1.0, Modia3D shall be
