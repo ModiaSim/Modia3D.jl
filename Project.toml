@@ -1,7 +1,7 @@
 name = "Modia3D"
 uuid = "9eeeb1f0-b440-11e8-152a-c19cc3a383d5"
 authors = ["Andrea Neumayr <andrea.neumayr@dlr.de>", "Martin Otter <Martin.Otter@dlr.de>"]
-version = "0.2.0"
+version = "0.2.1"
 
 [deps]
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"

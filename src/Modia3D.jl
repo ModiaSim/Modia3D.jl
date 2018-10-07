@@ -3,7 +3,7 @@
 
 module Modia3D
 println(" \nWelcome to Modia3D - Modeling and simulation of 3D systems")
-println("   Version : 0.2.0 (2018-10-07)")
+println("   Version : 0.2.1 (2018-10-07)")
 
 const path = dirname(dirname(@__FILE__))   # Absolute path of Modia3D Julia package directory
 
