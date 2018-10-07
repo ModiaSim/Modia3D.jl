@@ -3,7 +3,7 @@
 
 module Modia3D
 println(" \nWelcome to Modia3D - Modeling and simulation of 3D systems")
-println("   Version : 0.2.0-beta.3 (2018-09-16)")
+println("   Version : 0.2.0 (2018-10-07)")
 
 const path = dirname(dirname(@__FILE__))   # Absolute path of Modia3D Julia package directory
 
@@ -87,7 +87,7 @@ const connect  = Composition.connect  # connect cannot be directly exported, due
 
 
 # Called implicitely at the first import/using of Modia3D (when loading Modia3D to the current Julia session)
-function __init__() 
+function __init__()
     info = DLR_Visualization.getSimVisInfo()
     (directory, dll_name, isProfessionalEdition, isNoRenderer) = info
 
@@ -110,7 +110,7 @@ export Object3D
 
 
 # Add import clauses used in examples and test
-import StaticArrays 
+import StaticArrays
 import Unitful
 import ModiaMath
 
