@@ -1,5 +1,12 @@
 # Modia3D
 
+[![Travis](https://travis-ci.org/ModiaSim/Modia3D.jl.svg?branch=master)](https://travis-ci.org/ModiaSim/Modia3D.jl)
+[![Coverage Status](https://coveralls.io/repos/github/ModiaSim/Modia3D.jl/badge.svg?branch=master)](https://coveralls.io/github/ModiaSim/Modia3D.jl?branch=master)
+[![codecov.io](http://codecov.io/github/ModiaSim/Modia3D.jl/coverage.svg?branch=master)](http://codecov.io/github/ModiaSim/Modia3D.jl?branch=master)
+[![Latest](https://img.shields.io/badge/docs-latest-blue.svg)](https://ModiaSim.github.io/Modia3D.jl/latest)
+[![The MIT License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](https://github.com/ModiaSim/Modia3D.jl/blob/master/LICENSE.md)
+
+
 Modia3D is a Julia package to model fixed and moving objects in 3D (*e.g.* visual shapes, rigid bodies).
 These objects are driven kinematically by pre-defined time functions or are moving dynamically by
 solving Differential Algebraic Equations (DAEs)
