@@ -1,6 +1,6 @@
 # Modia3D
 
-[![Travis](https://travis-ci.org/ModiaSim/Modia3D.jl.svg?branch=master&?logo=travis)](https://travis-ci.org/ModiaSim/Modia3D.jl)
+[![Travis](https://travis-ci.org/ModiaSim/Modia3D.jl/badge.svg&?logo=travis&?branch=master)](https://travis-ci.org/ModiaSim/Modia3D.jl)
 [![Coverage Status](https://coveralls.io/repos/github/ModiaSim/Modia3D.jl/badge.svg?branch=master)](https://coveralls.io/github/ModiaSim/Modia3D.jl?branch=master)
 [![codecov.io](http://codecov.io/github/ModiaSim/Modia3D.jl/coverage.svg?branch=master)](http://codecov.io/github/ModiaSim/Modia3D.jl?branch=master)
 [![Latest](https://img.shields.io/badge/docs-latest-blue.svg)](https://ModiaSim.github.io/Modia3D.jl/latest)
