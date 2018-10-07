@@ -38,11 +38,14 @@ julia> Pkg.clone("https://github.com/ModiaSim/ModiaMath.jl")
 julia> Pkg.clone("https://github.com/ModiaSim/Modia3D.jl")
 ```
 
-Modia3D performs simulation and plotting with ModiaMath. ModiaMath in turn
-uses `PyPlot` as basis for the plotting. Since installation of `PyPlot` is not
-robust with the automatic installation procedure of current Julia, it is recommended
-to first install `PyPlot` as described in the
-[installation procedure of ModiaMath](https://modiasim.github.io/ModiaMath.jl/latest/index.html#Installation-1).
+Modia3D uses [PyPlot](https://github.com/JuliaPy/PyPlot.jl) for plotting.
+If `PyPlot` is not available in your current Julia environment
+an information message is printed and all `plot(..)` calls are ignored.
+
+In order that plot windows are displayed, you need to add `PyPlot` to your current environment
+via `]add PyPlot`. Often this automatic installation fails and it is recommended to follow
+the instructions
+[Installing PyPlot in a robust way](https://github.com/ModiaSim/ModiaMath.jl/wiki/Installing-PyPlot-in-a-robust-way).
 
 Modia3D visualizes the movement of 3D objects with a renderer.
 Currently, the (free) community or the (commercial) professional version of the
@@ -59,6 +62,7 @@ are supported. To install the free version for *Windows* or for *Linux* perform 
 
 If Modia3D cannot use one of the renderers above, it will continue with renderer **NoRenderer**
 that is animation is switched off.
+
 
 ## Documentation
 
