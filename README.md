@@ -2,7 +2,6 @@
 
 [![Travis](https://travis-ci.org/ModiaSim/Modia3D.jl.svg?branch=master)](https://travis-ci.org/ModiaSim/Modia3D.jl)
 [![AppVoyer](https://ci.appveyor.com/api/projects/status/github/ModiaSim/Modia3D.jl?svg=true)](https://ci.appveyor.com/project/MartinOtter/modia3d-jl)
-[![Coverage Status](https://coveralls.io/repos/github/ModiaSim/Modia3D.jl/badge.svg?branch=master)](https://coveralls.io/github/ModiaSim/Modia3D.jl?branch=master)
 [![codecov.io](http://codecov.io/github/ModiaSim/Modia3D.jl/coverage.svg?branch=master)](http://codecov.io/github/ModiaSim/Modia3D.jl?branch=master)
 [![Latest](https://img.shields.io/badge/docs-latest-blue.svg)](https://ModiaSim.github.io/Modia3D.jl/latest)
 [![The MIT License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](https://github.com/ModiaSim/Modia3D.jl/blob/master/LICENSE.md)
@@ -131,8 +130,9 @@ ModiaMath.plot(result, ["revolute.phi", "revolute.w"]);
 
 ## Status
 
-The package has been tested with Julia `0.6.4`, `0.7.0`, `1.0.0`, `1.0.1` on Windows 7
-and via the TravisCL on Linux (x86_64-pc-linux-gnu) and macOS (x86_64-apple-darwin14.5.0).
+The package has been tested with Julia `0.6.4`, `0.7.0`, `1.0.0`, `1.0.1` on Windows 7,
+via the TravisCL on Linux (x86_64-pc-linux-gnu) and macOS (x86_64-apple-darwin14.5.0)
+and via the Appveyor CL on Windows.
 
 Note, the collision handling has still bugs and the elastic response calculation is not
 yet robust. This needs to be improved.
