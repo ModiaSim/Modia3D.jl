@@ -1,6 +1,7 @@
 # Modia3D
 
 [![Travis](https://travis-ci.org/ModiaSim/Modia3D.jl.svg?branch=master)](https://travis-ci.org/ModiaSim/Modia3D.jl)
+[![AppVoyer](https://ci.appveyor.com/api/projects/status/github/ModiaSim/Modia3D.jl?svg=true)](https://ci.appveyor.com/project/MartinOtter/modia3d-jl)
 [![Coverage Status](https://coveralls.io/repos/github/ModiaSim/Modia3D.jl/badge.svg?branch=master)](https://coveralls.io/github/ModiaSim/Modia3D.jl?branch=master)
 [![codecov.io](http://codecov.io/github/ModiaSim/Modia3D.jl/coverage.svg?branch=master)](http://codecov.io/github/ModiaSim/Modia3D.jl?branch=master)
 [![Latest](https://img.shields.io/badge/docs-latest-blue.svg)](https://ModiaSim.github.io/Modia3D.jl/latest)
@@ -39,7 +40,7 @@ julia> Pkg.add("Modia3D")
 julia> Pkg.add("ModiaMath")   # in order to use simulate!(..) and plot(..)
 julia> Pkg.add("PyPlot")      # in order that plots are shown
 
-# Julia 0.7 and 1.0 (registration is pending)
+# Julia 0.7 and 1.0
 julia> ]add Modia3D
         add ModiaMath  # in order to use simulate!(..) and plot(..)
         add PyPlot     # in order that plots are shown
