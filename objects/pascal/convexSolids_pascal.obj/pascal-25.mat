@@ -1,0 +1,7 @@
+newmtl default
+Ns 0
+Ka 0.5 0.06 0.01
+Kd 0.5 0.06 0.01
+Ks 0.5 0.5 0.5
+d 1
+illum 2
