@@ -189,7 +189,7 @@ function build_celements!(scene::Scene, world::Object3D)::NOTHING
     actPos += 1
   end
 
-
+#=
   println("scene.cantCollide ", scene.cantCollide)
   for a in scene.celements
     println("[")
@@ -198,7 +198,7 @@ function build_celements!(scene::Scene, world::Object3D)::NOTHING
     end
     println("]")
   end
-
+=#
 
   if length(scene.celements) > 1
     scene.collide = true

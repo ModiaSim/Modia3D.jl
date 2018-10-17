@@ -25,8 +25,8 @@ fixedJoint = FixedJoint()
 
 
 # FreeMotion is used if an Object3D is moving freely with respect to its parent Object3D
-mutable struct FreeMotion <: Modia3D.AbstractJoint 
-   canCollide::Bool                        # = true, if collision detection is enabled between the two Object3Ds connected by the FreeMotion joint (default = true) 
+mutable struct FreeMotion <: Modia3D.AbstractJoint
+   canCollide::Bool                        # = true, if collision detection is enabled between the two Object3Ds connected by the FreeMotion joint (default = true)
    isDriven::Bool                          # = true, if joint is driven; = false, if generalized coordinates are used as states
 
    # Definitions special to FreeMotions joints
@@ -51,8 +51,8 @@ mutable struct FreeMotion <: Modia3D.AbstractJoint
 
       r    = ModiaMath.RealSVector3(  :r   , numericType=ModiaMath.XD_EXP                ,             unit="m"    , start=r_start, fixed=true , analysis=ModiaMath.OnlyDynamicAnalysis, info="Relative position vector from origin of obj 1 to origin of obj 2, resolved in obj1")
       v    = ModiaMath.RealSVector3(  :v   , numericType=ModiaMath.XD_IMP                , integral=r, unit="m/s"  , start=v_start, fixed=true , analysis=ModiaMath.OnlyDynamicAnalysis, info="der(r): relative velocity of origin of obj 2 with respect to origin of obj 1, resolved in obj 1")
-      a    = ModiaMath.RealSVector3(  :a   , numericType=ModiaMath.DER_XD_IMP            , integral=v, unit="m/s^2",                                                                     info="der(v): relative acceleration of origin of obj 2 with respect to origin of obj 1, resolved in obj 1")   
-     
+      a    = ModiaMath.RealSVector3(  :a   , numericType=ModiaMath.DER_XD_IMP            , integral=v, unit="m/s^2",                                                                     info="der(v): relative acceleration of origin of obj 2 with respect to origin of obj 1, resolved in obj 1")
+
       q    = ModiaMath.RealSVector{4}(:q   , numericType=ModiaMath.XD_IMP                ,               start=q_start, fixed=true ,                                         info="Relative quaternion to rotate obj 1 into obj 2")
       derq = ModiaMath.RealSVector{4}(:derq, numericType=ModiaMath.DER_XD_IMP, integral=q, unit="1/s",                               analysis=ModiaMath.OnlyDynamicAnalysis, info="der(q)")
       w    = ModiaMath.RealSVector3(  :w   , numericType=ModiaMath.XD_IMP                , unit="rad/s", start=w_start, fixed=true , analysis=ModiaMath.OnlyDynamicAnalysis, info="Relative angular velocity of obj 2 with respect to obj 1, resolved in obj 2")
@@ -63,7 +63,7 @@ mutable struct FreeMotion <: Modia3D.AbstractJoint
       residue_t = ModiaMath.RealSVector3(:residue_t, numericType=ModiaMath.FD_IMP, analysis=ModiaMath.OnlyDynamicAnalysis, info="Angular momentum equation residue")
       residue_q = ModiaMath.RealScalar(  :residue_q, numericType=ModiaMath.FC    ,                                         info="Quaternion constraint residue")
 
-      joint = new(true, false, r, v, a, q, derq, w, z, residue_w, residue_f, residue_t, residue_q) 
+      joint = new(true, false, r, v, a, q, derq, w, z, residue_w, residue_f, residue_t, residue_q)
       joint.r._internal.within = obj
       joint.v._internal.within = obj
       joint.a._internal.within = obj
@@ -116,14 +116,14 @@ end
 
 """
     obj1 = Object3D([data]; visualizeFrame=Modia3D.Inherited)
-    obj2 = Object3D(parent [, data]; fixed=true, r=zeros(3), R=nothing, q=nothing, 
-                    v_start=zeros(3), w_start=zeros(3), 
+    obj2 = Object3D(parent [, data]; fixed=true, r=zeros(3), R=nothing, q=nothing,
+                    v_start=zeros(3), w_start=zeros(3),
                     visualizeFrame=Modia3D.Inherited)
 
 Generate a new Object3D object, that is a coordinate system (= frame) with associated data.
 If `parent` is present, the Object3D is defined relatively
 to the parent Object3D. If `parent` is not present, the Object3D is either a reference object
-(such as the world-object), or the object is connected later with a joint to another 
+(such as the world-object), or the object is connected later with a joint to another
 Object3D. If `fixed=true`, the object is rigidly connect to its parent; otherwise
 it is moving freely relative to its parent (mathematically described by quaternions).
 
@@ -138,15 +138,15 @@ ModiaMath.RotationMatrix `R` or a ModiaMath.Quaternion `q`.
 
 - `fixed::Bool`:
    - `fixed = true`, if the Object3D is fixed relatively to its parent Object3D at position `r,R,q`.
-     It is best to provide the rotation information via `R` in this case. 
-   - `fixed = false`, if Object3D can move freely relatively to its parent Object3D and is 
+     It is best to provide the rotation information via `R` in this case.
+   - `fixed = false`, if Object3D can move freely relatively to its parent Object3D and is
       initially placed at `r,R,q`. The movement is internally described with Quaternion vector `q`.
       Therefore, it is best to provide the rotation information via `q` in this case.
 
-- `r::AbstractVector`: Initial relative position vector from frame of parent object to 
+- `r::AbstractVector`: Initial relative position vector from frame of parent object to
    origin of frame object, resolved in parent frame.
 
-- `R::Union{ModiaMath.RotationMatrix,NOTHING}`: Initial rotation matrix defining the rotation 
+- `R::Union{ModiaMath.RotationMatrix,NOTHING}`: Initial rotation matrix defining the rotation
    from frame of parent object to frame of Object3D. If both `R = nothing` and `q = nothing`,
    a null rotation is defined.
 
@@ -272,8 +272,8 @@ mutable struct Object3D <: Modia3D.AbstractAssemblyComponent
                 Modia3D.AbstractTwoObject3DObject[], visualizeFrame2, nothing, nothing)
 
       if !fixed
-         obj.joint = FreeMotion(obj; r_start = r_rel, 
-                                q_start = typeof(R) != NOTHING ? ModiaMath.from_R(R) : 
+         obj.joint = FreeMotion(obj; r_start = r_rel,
+                                q_start = typeof(R) != NOTHING ? ModiaMath.from_R(R) :
                                           typeof(q) != NOTHING ? q : ModiaMath.NullQuaternion,
                                 v_start = SVector{3,Float64}(v_start),
                                 w_start = SVector{3,Float64}(w_start) )
@@ -286,7 +286,7 @@ mutable struct Object3D <: Modia3D.AbstractAssemblyComponent
 
    # Constructor used only for internal purposes (not to be directly used by the user)
    Object3D(_internal::ModiaMath.ComponentInternal,
-            parent::Object3D, children::Vector{Object3D}, 
+            parent::Object3D, children::Vector{Object3D},
             joint::Modia3D.AbstractJoint, r_rel::SVector{3,Float64},
             R_rel::SMatrix{3,3,Float64,9}, r_abs::SVector{3,Float64},
             R_abs::SMatrix{3,3,Float64,9}, data::Modia3D.AbstractObject3Ddata,
@@ -433,7 +433,16 @@ function Base.show(io::IO, frame::Object3D)
          print(io,", ")
       end
       typeName = string( typeof(frame.data) )
+      # julia 0.6
+      #=
       s = search(typeName, "Modia3D")
+      if s.start == 1
+         typeName = "Modia3D." * Basics.trailingPartOfName( typeName )
+      end
+      print(io, typeName, "(...)")
+      =#
+      # julia 1.0
+      s = findfirst("Modia3D", typeName) # search 0.6
       if s.start == 1
          typeName = "Modia3D." * Basics.trailingPartOfName( typeName )
       end
