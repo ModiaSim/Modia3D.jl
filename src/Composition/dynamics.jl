@@ -110,8 +110,9 @@ struct SimulationModel <: ModiaMath.AbstractSimulationModel
 
       # Set initial values for x
       x = zeros(var.nx)
-      x_fixed = fill(false,var.nx)
-      ModiaMath.copy_start_to_x!(var, x, x_fixed)
+      x_fixed   = fill(false,var.nx)
+      x_nominal = fill(1.0  ,var.nx)
+      ModiaMath.copy_start_to_x!(var, x, x_fixed, x_nominal)
       # println("... x0 = ", x)
 
       # Construct Scene(..) object
@@ -138,7 +139,8 @@ struct SimulationModel <: ModiaMath.AbstractSimulationModel
 
       # Generate simulationState
       simulationState = ModiaMath.SimulationState(modelName, getModelResidues!, x, ModiaMath.Variables.getVariableName;
-                                x_fixed = x_fixed,
+                                x_fixed   = x_fixed,
+                                x_nominal = x_nominal,
                                 nc = var.nfc,
                                 nz = nz,
                                 defaultStartTime = startTime,
@@ -154,8 +156,8 @@ struct SimulationModel <: ModiaMath.AbstractSimulationModel
    end
 end
 
-print_ModelVariables(model::SimulationModel) = ModiaMath.print_ModelVariables(model.var)
-
+ModiaMath.print_ModelVariables(model::SimulationModel) = ModiaMath.print_ModelVariables(model.var)
+print_ModelVariables(          model::SimulationModel) = ModiaMath.print_ModelVariables(model.var)
 
 getResultNames(model::SimulationModel) = model.var.result_names
 
@@ -336,13 +338,13 @@ open("log.txt", "a") do file
          obj2  = chpairs.contactObj2[i]
 
          if ModiaMath.isLogEvents(sim)
-            if ModiaMath.isInitial(sim)
-               str = ""   # when logging, do not print z
-            else
+            #if ModiaMath.isInitial(sim)
+            #   str = ""   # when logging, do not print z
+            #else
                name1 = typeof(obj1) == NOTHING ? "nothing" : ModiaMath.instanceName(obj1)
                name2 = typeof(obj2) == NOTHING ? "nothing" : ModiaMath.instanceName(obj2)         
                str   = "distance(" * string(name1) * "," * string(name2) * ")"
-            end
+            #end
          else
             str = str_DUMMY
          end

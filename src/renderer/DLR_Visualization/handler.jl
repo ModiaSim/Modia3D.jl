@@ -25,7 +25,7 @@ function Composition.initializeVisualization(renderer::Modia3D.AbstractDLR_Visua
   simVis = renderer.simVis
   @assert(length(velements) > 0)
   if simVis.isInitialized
-     closeVisualization(renderer)
+     Composition.closeVisualization(renderer)
   end
 
   # Initialize SimVis
