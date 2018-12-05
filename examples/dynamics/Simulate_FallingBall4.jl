@@ -37,7 +37,7 @@ simulationModel = Modia3D.SimulationModel( fallingBall, stopTime=2.5, scaleConst
 #Modia3D.print_ModelVariables(simulationModel)
 result = ModiaMath.simulate!(simulationModel, log=true)
 
-ModiaMath.plot(result, ["ball.r[2]"; "ball.v[1]"; "ball.v[3]"])
+ModiaMath.plot(result, ["ball.r[2]"; "ball.v[1]"; "ball.v[2]"; "ball.v[3]"])
 
 
 
