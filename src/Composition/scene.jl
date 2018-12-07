@@ -9,7 +9,7 @@
 
 #-------------------------------------- Default Renderer -------------------------------
 
-initializeVisualization(renderer::Modia3D.AbstractRenderer, velements::Vector{Object3D}) = error("No renderer defined.")
+initializeVisualization(renderer::Modia3D.AbstractRenderer, allVisuElements::Vector{Object3D}) = error("No renderer defined.")
 visualize!(renderer::Modia3D.AbstractRenderer, time::Float64) = error("No renderer defined.")
 closeVisualization(renderer::Modia3D.AbstractRenderer)        = error("No renderer defined.")
 
@@ -17,7 +17,7 @@ closeVisualization(renderer::Modia3D.AbstractRenderer)        = error("No render
 #-------------------------------------- Default Contact Detection -------------------------------
 
 """
-    ContactPairs(nzmax, celements, cantCollide, dummyObject3D)
+    ContactPairs(nzmax, celements, noCPairs, dummyObject3D)
 
 Generate a new ContactPairs structure used for communication between the Object3D handler and a ContactDetection handler.
 
@@ -26,8 +26,8 @@ Generate a new ContactPairs structure used for communication between the Object3
   celements[i] is a vector of Objects3D that are rigidly fixed to each other.
   Note, for ever Object3D in this vector, the following holds:
   c1i = celement[i] -> canCollide(c1i[j]) = true; c1i[j].geo <: AbstractSolidGeometry
-- cantCollide::Vector{Vector{Int}}: Objects3D where contact detection shall be switched off.
-  If c2i = cantCollide[i] then c2i[j] > i, and collision detections between celements[i][:] and
+- noCPairs::Vector{Vector{Int}}: Objects3D where contact detection shall be switched off.
+  If c2i = noCPairs[i] then c2i[j] > i, and collision detections between celements[i][:] and
   celements[c2i[j]][:] shall not take place.
 - DummyObject3D::Modia3D.AbstractObject3Ddata: A dummy Object3D that can be used in the struct as element of a vector of Object3Ds
   to fill the array with a dummy value of the correct type.
@@ -35,7 +35,7 @@ Generate a new ContactPairs structure used for communication between the Object3
 struct ContactPairs
    # Solid shapes used in contact detection (provided by Object3D handler)
    celements::Array{Array{Object3D}}
-   cantCollide::Array{Array{Int64,1}}
+   noCPairs::Array{Array{Int64,1}}
    AABB::Array{Array{Basics.BoundingBox}}
    dummyObject3D::Modia3D.AbstractObject3Ddata         # Dummy Object3D for non-used elements of z-Vector.
 
@@ -56,11 +56,11 @@ struct ContactPairs
    contactObj2::Vector{Union{Object3D,NOTHING}}
 
    function ContactPairs(celements::Array{Array{Object3D}} ,
-                         cantCollide::Array{Array{Int64,1}},
+                         noCPairs::Array{Array{Int64,1}},
                          AABB::Array{Array{Basics.BoundingBox}},
                          nz_max::Int)
       @assert(length(celements) > 0)
-      @assert(length(cantCollide) == length(celements))
+      @assert(length(noCPairs) == length(celements))
       @assert(nz_max > 0)
       dummyObject3D = Composition.emptyObject3DData
 
@@ -81,7 +81,7 @@ struct ContactPairs
          for i_obj = 1:length(superObj)
             obj = superObj[i_obj]      # determine contact from this Object3D with all Object3Ds that have larger indices
             for i_next_superObj = i_superObj+1:length(celements)
-              if !(i_next_superObj in cantCollide[i_superObj]) # index is not in objects which cant collide
+              if !(i_next_superObj in noCPairs[i_superObj]) # index is not in objects which cant collide
                 for nextObj in celements[i_next_superObj]
                   nz += 1
                   if nz >= nz_max
@@ -93,7 +93,7 @@ struct ContactPairs
          end
       end
       @label AfterLoops
-      if nz <= nz_max 
+      if nz <= nz_max
          allPossibleContactPairsInz = true
       else
          allPossibleContactPairsInz = false
@@ -119,12 +119,12 @@ struct ContactPairs
          contactObj1[i] = nothing
          contactObj2[i] = nothing
       end
-      new(celements, cantCollide, AABB, dummyObject3D, length(celements), nz, allPossibleContactPairsInz,
+      new(celements, noCPairs, AABB, dummyObject3D, length(celements), nz, allPossibleContactPairsInz,
           z, contactPoint1, contactPoint2, contactNormal, contactObj1, contactObj2)
    end
 end
 
-initializeContactDetection!(ch::Modia3D.AbstractContactDetection, celements::Array{Array{Modia3D.AbstractObject3Ddata}}, cantCollide::Array{Array{Int64,1}}) = error("No contact detection handler defined.")
+initializeContactDetection!(ch::Modia3D.AbstractContactDetection, celements::Array{Array{Modia3D.AbstractObject3Ddata}}, noCPairs::Array{Array{Int64,1}}) = error("No contact detection handler defined.")
 selectContactPairs!(ch::Modia3D.AbstractContactDetection)            = error("No contact detection handler defined.")
 getDistances!(ch::Modia3D.AbstractContactDetection)                  = error("No contact detection handler defined.")
 setComputationFlag(ch::Modia3D.AbstractContactDetection)             = error("No contact detection handler defined.")
@@ -306,7 +306,7 @@ end
 mutable struct Scene
    autoCoordsys::Graphics.CoordinateSystem  # Coordinate system that is automatically included (e.g. due to visualizeFrames=true)
    stack::Vector{Object3D}                     # Stack to traverse frames
-   queue::Vector{Object3D}
+   buffer::Vector{Object3D}
 
    options::SceneOptions                    # Global options defined for the scene
 
@@ -316,12 +316,19 @@ mutable struct Scene
    # initialization of analysis
    initAnalysis::Bool                       # = true, if analysis is initialized
    analysis::ModiaMath.AnalysisType           # Type of analysis
+   superObjs::Array{SuperObjsRow,1}
    tree::Vector{Object3D}                      # Spanning tree of the frames in depth-first order (without world)
    cutJoints::Vector{Modia3D.AbstractJoint} # Vector of all cut-joints
-   velements::Vector{Object3D}                 # Object3Ds (including Object3Ds.data) that shall be visualized
+   allVisuElements::Vector{Object3D}                 # Object3Ds (including Object3Ds.data) that shall be visualized
    celements::Array{Array{Object3D}}           # Object3Ds that can collide;  celements[i][:] cannot collide with each other
-   cantCollide::Array{Array{Int64,1}}       # Indices of frames (with respect to celements) that can't collide in general (e.g. objects are connected via joints)
+   noCPairs::Array{Array{Int64,1}}       # Indices of frames (with respect to celements) that can't collide in general (e.g. objects are connected via joints)
+   noCPairsHelp::Array{Array{Int64,1},1}
    AABB::Array{Array{Basics.BoundingBox}}   # Bounding boxes of elements that can collide
+
+
+   # forceElements::Array{Int64,1}
+
+
 
    uniqueSignals::Array{Modia3D.AbstractSignal}
    uniqueForceTorques::Array{Modia3D.AbstractForceTorque}
@@ -338,10 +345,12 @@ mutable struct Scene
                   false,
                   false,
                   ModiaMath.KinematicAnalysis,
+                  Array{SuperObjsRow,1}(),
                   Vector{Object3D}[],
                   Vector{Modia3D.AbstractJoint}[],
                   Vector{Object3D}[],
                   Array{Array{Solids.Solid,1},1}(),
+                  Array{Array{Int64,1},1}(),
                   Array{Array{Int64,1},1}(),
                   Array{Array{Basics.BoundingBox,1},1}(),
                   Array{Modia3D.AbstractSignal,1}(),

@@ -15,7 +15,7 @@ The function traverses assembly and stores all frames without a parent frame in 
 function get_Object3DsWithoutParent!(assembly::Modia3D.AbstractAssembly, frames::AbstractVector)::NOTHING
    assemblyType = typeof(assembly)
 
-   @static if VERSION >= v"0.7.0-DEV.2005"  
+   @static if VERSION >= v"0.7.0-DEV.2005"
        for i = 1:fieldcount(assemblyType)
           field     = getfield(assembly, fieldname(assemblyType,i))
           fieldType = typeof(field)
@@ -122,14 +122,14 @@ struct SimulationModel <: ModiaMath.AbstractSimulationModel
       scene.analysis = analysis
       assembly._internal.scene = scene
 
-      # Build tree (for multibody computation), velements (for visualization), celements (for contact handling)
-      build_tree_and_velements!(scene, world)
+      # Build tree (for multibody computation), allVisuElements (for visualization), celements (for contact handling)
+      build_tree_and_allVisuElements!(scene, world)
       nz = 0
       if scene.options.enableContactDetection
          build_celements!(scene, world)
          if scene.collide
             initializeContactDetection!(world, scene)
-            nz = scene.options.contactDetection.contactPairs.nz 
+            nz = scene.options.contactDetection.contactPairs.nz
          end
       end
 
@@ -228,7 +228,7 @@ function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64
    if ModiaMath.isInitial(sim)
       # println("... isInitial = true")
       if scene.visualize
-         initializeVisualization(Modia3D.renderer[1], scene.velements)
+         initializeVisualization(Modia3D.renderer[1], scene.allVisuElements)
       end
       if scene.options.enableContactDetection && scene.collide
          initializeContactDetection!(world, scene)
@@ -246,7 +246,7 @@ function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64
       end
       return
    end
- 
+
    # Check input arguments
    @assert(length(_x)    == var.nx)
    @assert(length(_derx) == var.nx)
@@ -342,19 +342,19 @@ open("log.txt", "a") do file
             #   str = ""   # when logging, do not print z
             #else
                name1 = typeof(obj1) == NOTHING ? "nothing" : ModiaMath.instanceName(obj1)
-               name2 = typeof(obj2) == NOTHING ? "nothing" : ModiaMath.instanceName(obj2)         
+               name2 = typeof(obj2) == NOTHING ? "nothing" : ModiaMath.instanceName(obj2)
                str   = "distance(" * string(name1) * "," * string(name2) * ")"
             #end
          else
             str = str_DUMMY
          end
- 
+
          # Penetration depth
-         s = chpairs.z[i] 
-     
+         s = chpairs.z[i]
+
          # Generate state event, if s < 0 changes
          contact = ModiaMath.negative!(sim, i, s, str)
-           
+
          if contact
             #println("... Contact ", str, " active at time = ", sim.time)
             r1 = ModiaMath.Vector3D(chpairs.contactPoint1[i])
@@ -365,12 +365,12 @@ open("log.txt", "a") do file
                                                 obj2.data.contactMaterial,
                                                 obj1, obj2, s, rContact,
                                                 ModiaMath.Vector3D(chpairs.contactNormal[i]), time, file)
-           
+
             # Transform forces/torques in local part frames
             obj1.dynamics.f += obj1.R_abs*f1
             obj1.dynamics.t += obj1.R_abs*t1
             obj2.dynamics.f += obj2.R_abs*f2
-            obj2.dynamics.t += obj2.R_abs*t2        
+            obj2.dynamics.t += obj2.R_abs*t2
          end
       end
    end

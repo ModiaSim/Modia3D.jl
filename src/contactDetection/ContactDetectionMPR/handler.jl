@@ -18,10 +18,10 @@ AABB_collision(aabb1::Basics.BoundingBox, aabb2::Basics.BoundingBox) = aabb1.x_m
 
 
 function Composition.initializeContactDetection!(world::Composition.Object3D, scene::Composition.Scene)
-  # ch::Composition.ContactDetectionMPR_handler, celements::Array{Array{Composition.Object3D}}, cantCollide::Array{Array{Int64,1}}, AABB::Array{Array{Basics.BoundingBox}})
-  # scene.options.contactDetection, scene.celements, scene.cantCollide, scene.AABB
+  # ch::Composition.ContactDetectionMPR_handler, celements::Array{Array{Composition.Object3D}}, noCPairs::Array{Array{Int64,1}}, AABB::Array{Array{Basics.BoundingBox}})
+  # scene.options.contactDetection, scene.celements, scene.noCPairs, scene.AABB
   ch = scene.options.contactDetection
-  ch.contactPairs = Composition.ContactPairs(scene.celements, scene.cantCollide, scene.AABB, scene.options.nz_max)
+  ch.contactPairs = Composition.ContactPairs(scene.celements, scene.noCPairs, scene.AABB, scene.options.nz_max)
   if ch.contactPairs.nz == 0
      Composition.closeContactDetection!(ch)
      scene.collide = false
@@ -116,7 +116,7 @@ end
 
 function computeDistances(ch::Composition.ContactDetectionMPR_handler, phase2::Bool)
   celements = ch.contactPairs.celements
-  cantCollide = ch.contactPairs.cantCollide
+  noCPairs = ch.contactPairs.noCPairs
   AABB = ch.contactPairs.AABB
   if length(celements) > 1
     for i = 1:length(celements)
@@ -139,7 +139,7 @@ function computeDistances(ch::Composition.ContactDetectionMPR_handler, phase2::B
         obj = superObj[i_obj]      # determine contact from this Object3D with all Object3Ds that have larger indices
         aabb = superAABB[i_obj]
         for i_next_superObj = i_superObj+1:length(celements)
-          if !(i_next_superObj in cantCollide[i_superObj]) # index is not in objects which cant collide
+          if !(i_next_superObj in noCPairs[i_superObj]) # index is not in objects which cant collide
             nextSuperObj = celements[i_next_superObj]
             nextSuperAABB = AABB[i_next_superObj]
             for i_nextObj = 1:length(nextSuperObj)
@@ -245,7 +245,7 @@ function Composition.closeContactDetection!(ch::Composition.ContactDetectionMPR_
   Basics.emptyArray!(ch.dict1)
   Basics.emptyArray!(ch.dict2)
   Basics.emptyArray!(ch.contactPairs.celements)
-  Basics.emptyArray!(ch.contactPairs.cantCollide)
+  Basics.emptyArray!(ch.contactPairs.noCPairs)
   Basics.emptyArray!(ch.contactPairs.z)
   Basics.emptyArray!(ch.contactPairs.contactPoint1)
   Basics.emptyArray!(ch.contactPairs.contactPoint2)
