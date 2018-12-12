@@ -42,13 +42,13 @@ function build_elements!(scene::Scene, world::Object3D)::NOTHING
     obj = buffer[actPos]
 
     if obj != world
-      superObj = assignAll(scene,obj,superObj)
+      assignAll(scene, obj, superObj, actPos)
     end
-    fillStackOrBuffer!(scene,obj,superObj)
+    fillStackOrBuffer!(scene, obj, superObj)
 
     while length(stack) > 0
       objChild       = pop!(stack)
-      assignAll(scene,objChild,superObj)
+      assignAll(scene, objChild, superObj, actPos)
       fillStackOrBuffer!(scene,objChild,superObj)
     end
 

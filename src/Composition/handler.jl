@@ -7,28 +7,33 @@
 
 
 function build_tree_and_allVisuElements!(scene::Scene, world::Object3D)::NOTHING
+
+println("build_tree_and_allVisuElements wird aufgerufen")
+
    options             = scene.options
    visualizeFrames     = options.visualizeFrames
    renderer            = Modia3D.renderer[1]
    autoCoordsys        = scene.autoCoordsys
-   allVisuElements     = scene.allVisuElements
+#  allVisuElements     = scene.allVisuElements
    tree                = scene.tree
    cutJoints           = scene.cutJoints
    stack               = scene.stack
-   enableVisualization = scene.options.enableVisualization
+#   enableVisualization = scene.options.enableVisualization
    analysis            = scene.analysis
-   empty!(allVisuElements)
+#   empty!(allVisuElements)
    empty!(tree)
    empty!(stack)
 
    # Handle world (do not push world on stack and do not include it on scene.tree)
    #if analysis != ModiaMath.KinematicAnalysis
       world.dynamics = Object3Ddynamics()
+#=
       if visualizeFrames && isNotCoordinateSystem(world) && world.visualizeFrame != Modia3D.False
          # Visualize world frame
          world.visualizationFrame = copyObject3D(world, Graphics.CoordinateSystem(2*options.defaultFrameLength))
          push!(allVisuElements, world.visualizationFrame)
       end
+=#
    #end
 
    # Traverse all frames (starting from the children of world) and put frames on tree and visible elements on allVisuElements
@@ -53,6 +58,7 @@ function build_tree_and_allVisuElements!(scene::Scene, world::Object3D)::NOTHING
          end
       end
 
+#=
       # If visualization desired, push frame on allVisuElements
       if enableVisualization
          if visualizeFrames && frame != world && isNotCoordinateSystem(frame) && frame.visualizeFrame != Modia3D.False
@@ -65,18 +71,20 @@ function build_tree_and_allVisuElements!(scene::Scene, world::Object3D)::NOTHING
             push!(allVisuElements, frame)
          end
       end
-
+=#
       # Visit children of frame
       append!(stack, frame.children)
    end
 
-   scene.visualize = length(scene.allVisuElements) > 0
+#  scene.visualize = length(scene.allVisuElements) > 0
    return nothing
 end
 
-
+#=
 # all visible elements are build here
 function build_allVisuElements!(scene::Scene, world::Object3D)::NOTHING
+
+   #println("build_allVisuElements wird aufgerufen")
    options         = scene.options
    visualizeFrames = options.visualizeFrames
    renderer        = Modia3D.renderer[1]
@@ -111,6 +119,7 @@ function build_allVisuElements!(scene::Scene, world::Object3D)::NOTHING
    end
    return nothing
 end
+=#
 
 
 # the indices of super objects, which can't collide, are stored in a list
@@ -151,6 +160,7 @@ function build_celements!(scene::Scene, world::Object3D)::NOTHING
   buffer = scene.buffer
   empty!(stack)
   empty!(buffer)
+  empty!(scene.allVisuElements)
 
   push!(buffer, world)
   actPos = 1
@@ -164,13 +174,22 @@ function build_celements!(scene::Scene, world::Object3D)::NOTHING
     AABBrow          = Array{Basics.BoundingBox,1}()
     frameRoot = buffer[actPos]
 
+    dummy_superObjs = SuperObjsRow()
+
+
     if frameRoot != world
+
+      assignAll(scene,dummy_superObjs,world,actPos)
+
       superObj = checkCollision(scene,frameRoot,superObj)
     end
     cantCollSuperObj = fillStackOrBuffer!(scene,frameRoot,cantCollSuperObj)
 
     while length(stack) > 0
       frameChild       = pop!(stack)
+
+      assignAll(scene,dummy_superObjs,frameChild,actPos)
+
       superObj         = checkCollision(scene,frameChild,superObj)
       cantCollSuperObj = fillStackOrBuffer!(scene,frameChild,cantCollSuperObj)
     end
@@ -296,18 +315,18 @@ end
 
 function initAnalysis!(world::Object3D, scene::Scene)
    # Initialize spanning tree and visualization (if visualization desired and visual elements present)
-   build_tree_and_allVisuElements!(scene, world)
+  build_tree_and_allVisuElements!(scene, world)
+  build_celements!(scene, world)
+
+   # Initialize contact detection if contact detection desired and objects with contactMaterial are present
+   #if scene.options.enableContactDetection
    if scene.visualize
       initializeVisualization(Modia3D.renderer[1], scene.allVisuElements)
    end
-
-   # Initialize contact detection if contact detection desired and objects with contactMaterial are present
-   if scene.options.enableContactDetection
-      build_celements!(scene, world)
-      if scene.collide
+   if scene.collide
         initializeContactDetection!(world, scene) # scene.options.contactDetection, scene.celements, scene.noCPairs, scene.AABB)
-      end
-   end
+    end
+   #end
 
    # Initialize connections between signals and frames, joints, ...
    # build_SignalObject3DConnections!(assembly)
@@ -335,13 +354,14 @@ function initAnalysis!(assembly::Modia3D.AbstractAssembly;
 
    # Initialize spanning tree and visualization (if visualization desired and visual elements present)
    build_tree_and_allVisuElements!(scene, world)
+   build_celements!(scene, world)
    if scene.visualize
       initializeVisualization(Modia3D.renderer[1], scene.allVisuElements)
    end
 
    # Initialize contact detection if contact detection desired and objects with contactMaterial are present
    if scene.options.enableContactDetection
-      build_celements!(scene, world)
+
       if scene.collide
         initializeContactDetection!(world, scene) # scene.options.contactDetection, scene.celements, scene.noCPairs, scene.AABB)
       end

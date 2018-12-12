@@ -83,6 +83,3 @@ Composition.isVisible(data::Graphics.GearWheel           , renderer::CommunityEd
 Composition.isVisible(data::Graphics.CoordinateSystem    , renderer::CommunityEdition) = true
 Composition.isVisible(data::Modia3D.AbstractGeometry     , renderer::CommunityEdition) = true
 Composition.isVisible(data::Solids.Solid                 , renderer::CommunityEdition) = typeof(data.material) != NOTHING && typeof(data.geo) != NOTHING
-
-
-

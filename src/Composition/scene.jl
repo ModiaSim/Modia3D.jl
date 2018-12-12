@@ -325,9 +325,7 @@ mutable struct Scene
    noCPairsHelp::Array{Array{Int64,1},1}
    AABB::Array{Array{Basics.BoundingBox}}   # Bounding boxes of elements that can collide
 
-
    # forceElements::Array{Int64,1}
-
 
 
    uniqueSignals::Array{Modia3D.AbstractSignal}
