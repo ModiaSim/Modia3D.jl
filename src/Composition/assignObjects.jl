@@ -1,14 +1,18 @@
 
 function assignObj(superObjType::SuperObjCollision, obj::Object3D)
+  #=
     if canCollide(obj)
       push!(superObjType.superObj, obj)
     end
+    =#
 end
 
 function assignObj(superObjType::SuperObjMass, obj::Object3D)
+  #=
     if hasMass(obj)
       push!(superObjType.superObj, obj)
     end
+    =#
 end
 
 
@@ -33,7 +37,7 @@ end
 assignObj(superObjType, obj) = nothing # println("das ist ein dummy wert")
 
 
-function assignAll(scene::Scene, superObj::SuperObjsRow, obj::Object3D, actPos::Int64)
+function assignAll(scene::Scene, superObj::SuperObjsRow, obj::Object3D, world::Object3D, actPos::Int64)
     names = fieldnames(typeof(superObj))
     for val in names
         # println("val $val")
@@ -58,52 +62,42 @@ function assignAll(scene::Scene, superObj::SuperObjsRow, obj::Object3D, actPos::
         end
     end
 =#
-
-    fillVisuElements(scene, obj)
 end
 
 
-function fillVisuElements(scene::Scene, obj::Object3D)
+function fillVisuElements(scene::Scene, obj::Object3D, world::Object3D)
   renderer            = Modia3D.renderer[1]
-  allVisuElements     = scene.allVisuElements
-  options             = scene.options
-  visualizeFrames     = options.visualizeFrames
-  enableVisualization = options.enableVisualization
+  visualizeFrames     = scene.options.visualizeFrames
+  enableVisualization = scene.options.enableVisualization
 
   if enableVisualization
     if visualizeFrames && isNotCoordinateSystem(obj) && obj.visualizeFrame != Modia3D.False
-      if isWorld(obj)
-        obj.visualizationFrame = copyObject3D(obj, Graphics.CoordinateSystem(2*options.defaultFrameLength))
-      else
+      if obj != world
         obj.visualizationFrame = copyObject3D(obj, scene.autoCoordsys)
+      else
+        obj.visualizationFrame = copyObject3D(obj, Graphics.CoordinateSystem(2*scene.options.defaultFrameLength))
       end
-      println("es kommt ein KoordinatenSystem dazu!!")
-      push!(allVisuElements, obj.visualizationFrame)
+      push!(scene.allVisuElements, obj.visualizationFrame)
     end
-    if isVisible(obj.data, renderer)
-       # Visualize Object3D
-       println("bin im Visible!!")
-       push!(allVisuElements, obj)
+    if isVisible(obj, renderer) # isVisible(obj.data, renderer)
+       push!(scene.allVisuElements, obj)
     end
   end
-#=
-  if isWorld(obj)
-    if visualizeFrames && isNotCoordinateSystem(obj) && obj.visualizeFrame != Modia3D.False
-      obj.visualizationFrame = copyObject3D(obj, Graphics.CoordinateSystem(2*options.defaultFrameLength))
-      push!(allVisuElements, obj.visualizationFrame)
-    end
-  elseif enableVisualization && isNotWorld(obj)
-    if visualizeFrames && isNotCoordinateSystem(obj) && obj.visualizeFrame != Modia3D.False
-      obj.visualizationFrame = copyObject3D(obj, scene.autoCoordsys)
-      push!(allVisuElements, obj.visualizationFrame)
-    end
-    if isVisible(obj.data, renderer)
-       # Visualize Object3D
-       push!(allVisuElements, obj)
-    end
-  end
-=#
+
   scene.visualize = length(scene.allVisuElements) > 0
-  println("length(scene.allVisuElements) = ", length(scene.allVisuElements))
+  # println("length(scene.allVisuElements) = ", length(scene.allVisuElements))
   return nothing
+end
+
+
+function createCutJoints(scene::Scene, obj::Object3D)
+  for cutJoint in obj.twoObject3Dobject
+    if typeof(cutJoint) <: Modia3D.AbstractJoint
+      if !cutJoint.visited
+        println("\n... Cut-joint ", ModiaMath.instanceName(cutJoint), " pushed on scene.cutJoints vector")
+        push!(scene.cutJoints, cutJoint)
+        cutJoint.visited = true
+      end
+    end
+  end
 end

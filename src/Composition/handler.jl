@@ -7,26 +7,25 @@
 
 
 function build_tree_and_allVisuElements!(scene::Scene, world::Object3D)::NOTHING
-
-println("build_tree_and_allVisuElements wird aufgerufen")
-
    options             = scene.options
    visualizeFrames     = options.visualizeFrames
    renderer            = Modia3D.renderer[1]
    autoCoordsys        = scene.autoCoordsys
-#  allVisuElements     = scene.allVisuElements
+   allVisuElements     = scene.allVisuElements
    tree                = scene.tree
    cutJoints           = scene.cutJoints
    stack               = scene.stack
-#   enableVisualization = scene.options.enableVisualization
+   enableVisualization = scene.options.enableVisualization
    analysis            = scene.analysis
 #   empty!(allVisuElements)
    empty!(tree)
    empty!(stack)
+#   println("build_tree_and_allVisuElements")
 
    # Handle world (do not push world on stack and do not include it on scene.tree)
    #if analysis != ModiaMath.KinematicAnalysis
       world.dynamics = Object3Ddynamics()
+
 #=
       if visualizeFrames && isNotCoordinateSystem(world) && world.visualizeFrame != Modia3D.False
          # Visualize world frame
@@ -34,6 +33,7 @@ println("build_tree_and_allVisuElements wird aufgerufen")
          push!(allVisuElements, world.visualizationFrame)
       end
 =#
+
    #end
 
    # Traverse all frames (starting from the children of world) and put frames on tree and visible elements on allVisuElements
@@ -47,6 +47,7 @@ println("build_tree_and_allVisuElements wird aufgerufen")
       #end
       push!(tree,frame)
 
+#=
       # Determine whether cut-joints are connected to the frame
       for obj in frame.twoObject3Dobject
          if typeof(obj) <: Modia3D.AbstractJoint
@@ -57,6 +58,8 @@ println("build_tree_and_allVisuElements wird aufgerufen")
             end
          end
       end
+=#
+
 
 #=
       # If visualization desired, push frame on allVisuElements
@@ -76,51 +79,10 @@ println("build_tree_and_allVisuElements wird aufgerufen")
       append!(stack, frame.children)
    end
 
-#  scene.visualize = length(scene.allVisuElements) > 0
+#   scene.visualize = length(scene.allVisuElements) > 0
+#   println("length(scene.allVisuElements) = ", length(scene.allVisuElements))
    return nothing
 end
-
-#=
-# all visible elements are build here
-function build_allVisuElements!(scene::Scene, world::Object3D)::NOTHING
-
-   #println("build_allVisuElements wird aufgerufen")
-   options         = scene.options
-   visualizeFrames = options.visualizeFrames
-   renderer        = Modia3D.renderer[1]
-   autoCoordsys    = scene.autoCoordsys
-   allVisuElements = scene.allVisuElements
-   stack           = scene.stack
-   empty!(allVisuElements)
-   empty!(stack)
-
-
-   if options.visualizeWorld
-      # Visualize world
-      push!(allVisuElements, copyObject3D(world, scene.worldCoordinateSystem))
-   end
-
-   # Traverse all frames and put visible elements on allVisuElements
-   push!(stack, world)
-   while length(stack) > 0
-      frame = pop!(stack)
-      if visualizeFrames && isNotCoordinateSystem(frame) && frame.visualizeFrame != Modia3D.False
-         # Visualize coordinate system of frame
-         push!(allVisuElements, copyObject3D(frame, autoCoordsys))
-      end
-      if isVisible(frame.data, renderer)
-         # Visualize frame (including frame.data)
-         push!(allVisuElements, frame)
-      end
-      append!(stack, frame.children)
-   end
-   if length(scene.allVisuElements) > 0
-      scene.visualize = true
-   end
-   return nothing
-end
-=#
-
 
 # the indices of super objects, which can't collide, are stored in a list
 function fillStackOrBuffer!(scene::Scene, frame::Object3D, cantCollSuperObj::Array{Int64,1})
@@ -156,6 +118,7 @@ end
 #   elements which are directly connected with a joint can't collide
 #     these elements are excluded from the collision list
 function build_celements!(scene::Scene, world::Object3D)::NOTHING
+  # println("build_celements")
   stack = scene.stack
   buffer = scene.buffer
   empty!(stack)
@@ -176,22 +139,25 @@ function build_celements!(scene::Scene, world::Object3D)::NOTHING
 
     dummy_superObjs = SuperObjsRow()
 
-
+    fillVisuElements(scene, frameRoot, world)
+    createCutJoints(scene, frameRoot)
     if frameRoot != world
 
-      assignAll(scene,dummy_superObjs,world,actPos)
+      # assignAll(scene, dummy_superObjs, frameRoot, world, actPos)
 
       superObj = checkCollision(scene,frameRoot,superObj)
     end
     cantCollSuperObj = fillStackOrBuffer!(scene,frameRoot,cantCollSuperObj)
 
     while length(stack) > 0
-      frameChild       = pop!(stack)
+      frameChild = pop!(stack)
 
-      assignAll(scene,dummy_superObjs,frameChild,actPos)
+      fillVisuElements(scene, frameChild, world)
+      createCutJoints(scene, frameChild)
+    #   assignAll(scene, dummy_superObjs, frameChild, world, actPos)
 
       superObj         = checkCollision(scene,frameChild,superObj)
-      cantCollSuperObj = fillStackOrBuffer!(scene,frameChild,cantCollSuperObj)
+      cantCollSuperObj = fillStackOrBuffer!(scene,frameChild, cantCollSuperObj)
     end
 
     if length(superObj) > 0
@@ -315,6 +281,7 @@ end
 
 function initAnalysis!(world::Object3D, scene::Scene)
    # Initialize spanning tree and visualization (if visualization desired and visual elements present)
+   println("initAnalysis!(world::Object3D, scene::Scene)")
   build_tree_and_allVisuElements!(scene, world)
   build_celements!(scene, world)
 
@@ -343,7 +310,7 @@ function initAnalysis!(assembly::Modia3D.AbstractAssembly;
       error("\nError message from Modia3D.initAnalysis!(..):\n",
             typeof(assembly), " has no reference frame.")
    end
-
+   println("initAnalysis!(assembly::Modia3D.AbstractAssembly;                        analysis::ModiaMath.AnalysisType=ModiaMath.KinematicAnalysis)")
    # Construct Scene(..) object
    world = assembly._internal.referenceObject3D
    so    = assembly._internal.sceneOptions
