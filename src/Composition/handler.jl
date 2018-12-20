@@ -142,9 +142,7 @@ function build_celements!(scene::Scene, world::Object3D)::NOTHING
     fillVisuElements(scene, frameRoot, world)
     createCutJoints(scene, frameRoot)
     if frameRoot != world
-
       # assignAll(scene, dummy_superObjs, frameRoot, world, actPos)
-
       superObj = checkCollision(scene,frameRoot,superObj)
     end
     cantCollSuperObj = fillStackOrBuffer!(scene,frameRoot,cantCollSuperObj)
@@ -154,7 +152,7 @@ function build_celements!(scene::Scene, world::Object3D)::NOTHING
 
       fillVisuElements(scene, frameChild, world)
       createCutJoints(scene, frameChild)
-    #   assignAll(scene, dummy_superObjs, frameChild, world, actPos)
+      # assignAll(scene, dummy_superObjs, frameChild, world, actPos)
 
       superObj         = checkCollision(scene,frameChild,superObj)
       cantCollSuperObj = fillStackOrBuffer!(scene,frameChild, cantCollSuperObj)

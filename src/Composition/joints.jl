@@ -68,31 +68,31 @@ end
 
 
 """
-    (frame1, frame2, cutJoint) = attach(frame_a, frame_b)
+    (obj1, obj2, cutJoint) = attach(frame_a, frame_b)
 
 If frame_a and frame_b do not have the same root, they are attached to each other
 and cutJoint = false is returned.
 
 If they have the same root, the tree is not modified and cutJoint=true is returned.
 """
-function attach(frame1::Object3D, frame2::Object3D)
-   root1 = rootObject3D(frame1)
-   root2 = rootObject3D(frame2)
-   #println("attach: frame1 = ", ModiaMath.fullName(frame1), ", root = ", ModiaMath.fullName(root1))
-   #println("attach: frame2 = ", ModiaMath.fullName(frame2), ", root = ", ModiaMath.fullName(root2))
+function attach(obj1::Object3D, obj2::Object3D)
+   root1 = rootObject3D(obj1)
+   root2 = rootObject3D(obj2)
+   #println("attach: obj1 = ", ModiaMath.fullName(obj1), ", root = ", ModiaMath.fullName(root1))
+   #println("attach: obj2 = ", ModiaMath.fullName(obj2), ", root = ", ModiaMath.fullName(root2))
 
    if root1 ≡ root2
       # Compute absolute positions
       updatePosition!(root1)
-      return (frame1,frame2,true)
+      return (obj1,obj2,true)
    end
 
    if isWorld(root2)
-      attachAndReverseParents(frame2, frame1)
-      return (frame2,frame1,false)
+      attachAndReverseParents(obj2, obj1)
+      return (obj2,obj1,false)
    else
-      attachAndReverseParents(frame1, frame2)
-      return (frame1,frame2,false)
+      attachAndReverseParents(obj1, obj2)
+      return (obj1,obj2,false)
    end
 end
 
@@ -122,7 +122,7 @@ function connect(obj1::Object3D, obj2::Object3D;
    end
 
    r_rel = SVector{3,Float64}(r)
-   R_rel = typeof(R) != NOTHING ? R                   : 
+   R_rel = typeof(R) != NOTHING ? R                   :
            typeof(q) != NOTHING ? ModiaMath.from_q(q) : ModiaMath.NullRotation
 
    obj.r_rel = obj===obj2 ? r_rel : -R_rel*r_rel
@@ -135,7 +135,7 @@ function connect(obj1::Object3D, obj2::Object3D;
    if fixed
       obj.joint = fixedJoint
    else
-      q_start = typeof(R) != NOTHING ? ModiaMath.from_R(R) : 
+      q_start = typeof(R) != NOTHING ? ModiaMath.from_R(R) :
                 typeof(q) != NOTHING ? q                   : ModiaMath.NullQuaternion
       q_start = obj===obj2 ? q_start : ModiaMath.inverseRotation(q_start)
 
@@ -169,7 +169,7 @@ function updatePosition!(frame::Object3D)::NOTHING
       else
          frame.R_abs = frame.R_rel*parent.R_abs
       end
-=# 
+=#
       if typeof(frame.visualizationFrame) != NOTHING
          frame.visualizationFrame.r_abs = frame.r_abs
          frame.visualizationFrame.R_abs = frame.R_abs

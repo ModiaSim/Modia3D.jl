@@ -8,9 +8,9 @@
 
 mutable struct TreeJointPrismatic <: Modia3D.AbstractPrismatic
    _internal::ModiaMath.ComponentInternal  # Data common to assembly component classes
-   frame1::Object3D                        # Translation of frame1 to frame2 along axis of frame1
-   frame2::Object3D
-   canCollide::Bool                        # = true, if collision detection is enabled between the two Object3Ds connected by the Prismatic joint (default = false) 
+   obj1::Object3D                        # Translation of obj1 to obj2 along axis of obj1
+   obj2::Object3D
+   canCollide::Bool                        # = true, if collision detection is enabled between the two Object3Ds connected by the Prismatic joint (default = false)
    isDriven::Bool                          # = true, if setDistance!(..) can be called on the joint
 
    # Definitions special to Prismatic joints
@@ -23,18 +23,18 @@ mutable struct TreeJointPrismatic <: Modia3D.AbstractPrismatic
    f::ModiaMath.RealScalar
    residue::ModiaMath.RealScalar
 
-   P::ModiaMath.RealScalar       # Total power flowing in frame1, frame2, axis computed at communication points (must be zero; = computed with interpolated values of x,derx)
+   P::ModiaMath.RealScalar       # Total power flowing in obj1, obj2, axis computed at communication points (must be zero; = computed with interpolated values of x,derx)
 
    # flange::PrismaticFlange
 
-   TreeJointPrismatic(_internal, frame1, frame2, canCollide, isDriven, axis, eAxis) = new(_internal, frame1, frame2, canCollide, isDriven, axis, eAxis)
+   TreeJointPrismatic(_internal, obj1, obj2, canCollide, isDriven, axis, eAxis) = new(_internal, obj1, obj2, canCollide, isDriven, axis, eAxis)
 end
 
 
 mutable struct CutJointPrismatic <: Modia3D.AbstractPrismatic
    _internal::ModiaMath.ComponentInternal  # Data common to assembly component classes
-   frame1::Object3D                                # Translation of frame1 to frame2 along axis of frame1
-   frame2::Object3D
+   obj1::Object3D                                # Translation of obj1 to obj2 along axis of obj1
+   obj2::Object3D
 
    # Definitions special to Prismatic joints
    visited::Bool                                   # = true, if already visited when traversing the spanning tree
@@ -44,7 +44,7 @@ mutable struct CutJointPrismatic <: Modia3D.AbstractPrismatic
    eAxis::ModiaMath.Vector3D      # Unit vector in direction of axis
    e_lambda1::ModiaMath.Vector3D  # Unit vector in direction of lambda1
    e_lambda2::ModiaMath.Vector3D  # Unit vector in direction of lambda2
-   
+
    lambda1::ModiaMath.RealScalar
    lambda2::ModiaMath.RealScalar
    mue1::ModiaMath.RealScalar
@@ -54,13 +54,13 @@ mutable struct CutJointPrismatic <: Modia3D.AbstractPrismatic
    residue1d::ModiaMath.RealScalar
    residue2d::ModiaMath.RealScalar
 
-   CutJointPrismatic(_internal, frame1, frame2, visited, axis, eAxis, e_lambda1, e_lambda2) = new(_internal, frame1, frame2, visited, axis, eAxis, e_lambda1, e_lambda2)
+   CutJointPrismatic(_internal, obj1, obj2, visited, axis, eAxis, e_lambda1, e_lambda2) = new(_internal, obj1, obj2, visited, axis, eAxis, e_lambda1, e_lambda2)
 end
 
 
 function Base.show(io::IO, joint::TreeJointPrismatic)
-   print(io,"Prismatic(", ModiaMath.fullName(joint.frame1),
-                   ", ", ModiaMath.fullName(joint.frame2),
+   print(io,"Prismatic(", ModiaMath.fullName(joint.obj1),
+                   ", ", ModiaMath.fullName(joint.obj2),
                       ", axis = ", joint.axis,
                       ", s_start = ", joint.s.start, " m)")
 end
@@ -69,8 +69,8 @@ end
 function JSON.show_json(io::JSON.StructuralContext,
                          s::JSON.CommonSerialization, joint::TreeJointPrismatic)
    JSON.begin_object(io)
-      JSON.show_pair(io, s, "frame_a"  , joint.frame1.name)
-      JSON.show_pair(io, s, "frame_b"  , joint.frame2.name)
+      JSON.show_pair(io, s, "obj_a"  , joint.obj1.name)
+      JSON.show_pair(io, s, "obj_b"  , joint.obj2.name)
       JSON.show_pair(io, s, "driven"   , joint.driven)
       JSON.show_pair(io, s, "cutJoint" , joint.cutJoint)
       JSON.show_pair(io, s, "axis"     , joint.axis)
@@ -102,7 +102,7 @@ If `canCollide=false`, no collision detection will occur between `obj1` and `obj
 
 If a `Prismatic` joint *closes a kinematic loop*, then the already present objects must be consistent
 to the `Prismatic` joint that is the frames of `obj1` and `obj2` must be *parallel* to each other and
-movement of `obj1` along its axis `axis` with `s_start` results in `obj2`. If `s_start=NaN`, 
+movement of `obj1` along its axis `axis` with `s_start` results in `obj2`. If `s_start=NaN`,
 its value is computed in this case.
 
 # Examples
@@ -115,7 +115,7 @@ import ModiaMath
    sphere = Object3D( Modia3D.Solid(Modia3D.SolidSphere(0.1), "Aluminium") )
 
    # Constrain sphere movement (initial placement at position [0,h,0])
-   prismatic = Modia3D.Prismatic(world, sphere, axis=2, s_start=h)  
+   prismatic = Modia3D.Prismatic(world, sphere, axis=2, s_start=h)
 end
 
 simulationModel = Modia3D.SimulationModel( FallingBall(h=1.5), stopTime=1.0 )
@@ -123,7 +123,7 @@ result          = ModiaMath.simulate!(simulationModel)
 ModiaMath.plot(result, ("prismatic.s", "prismatic.v"))
 ```
 """
-function Prismatic(frame1::Object3D, frame2::Object3D;
+function Prismatic(obj1::Object3D, obj2::Object3D;
                    axis::Int = 1,
                    s_start::Number = 0.0,
                    v_start::Number = 0.0,
@@ -131,8 +131,8 @@ function Prismatic(frame1::Object3D, frame2::Object3D;
    eAxis = get_eAxis(axis)
    rs_start = Float64(s_start)
    rv_start = Float64(v_start)
-   (frame_a,frame_b,cutJoint) = attach(frame1, frame2)
-   if frame_b === frame2 
+   (obj_a,obj_b,cutJoint) = attach(obj1, obj2)
+   if obj_b === obj2
       axis2 = axis
    else
       axis2 = -axis
@@ -140,13 +140,13 @@ function Prismatic(frame1::Object3D, frame2::Object3D;
    end
 
    if cutJoint  # Currently only planar cut-joint, without checking that it is planar
-      println("... Prismatic joint connecting ", ModiaMath.fullName(frame1), " with ", ModiaMath.fullName(frame2), " is a cut-joint")
+      println("... Prismatic joint connecting ", ModiaMath.fullName(obj1), " with ", ModiaMath.fullName(obj2), " is a cut-joint")
 
-      # Check that frame1 and frame2 are parallel to each other
-      R_rel = frame_b.R_abs*frame_a.R_abs
+      # Check that obj1 and obj2 are parallel to each other
+      R_rel = obj_b.R_abs*obj_a.R_abs
       diff1 = norm(R_rel - ModiaMath.NullRotation)
       if diff1 > Basics.neps
-         error("\nError from Modia3D.Prismatic(", ModiaMath.fullName(frame1), ", ", ModiaMath.fullName(frame2), ", ...):\n",
+         error("\nError from Modia3D.Prismatic(", ModiaMath.fullName(obj1), ", ", ModiaMath.fullName(obj2), ", ...):\n",
                "The coordinate systems of the provided Object3Ds are not parallel to each other.\n",
                "( norm(R_rel - nullRotation()) = ", string(diff1), " > ", Basics.neps, ")")
       end
@@ -154,27 +154,27 @@ function Prismatic(frame1::Object3D, frame2::Object3D;
 
       if isnan(rs_start)
          # Compute distance along axis
-         r_rel = frame_b.r_abs - frame_a.r_abs
+         r_rel = obj_b.r_abs - obj_a.r_abs
          diff2 = cross(eAxis, r_rel)
          if diff2 > Basics.neps
-            error("\nError from Modia3D.Prismatic(", ModiaMath.fullName(frame1), ", ", ModiaMath.fullName(frame2), ", ...):\n",
+            error("\nError from Modia3D.Prismatic(", ModiaMath.fullName(obj1), ", ", ModiaMath.fullName(obj2), ", ...):\n",
                   "Moving from obj1 along its axis axis does not arrive at obj2.\n",
                   "( sin( angle(obj2.r_abs - obj1.r_abs, axis(obj1) )))  = ", string(diff2), " > ", Basics.neps, ")")
          end
 
       else
-         r2 = frame_a.r_abs + frame_a.R_abs'*(eAxis*s_start) 
-         diff3 = frame_b.r_abs - r2
+         r2 = obj_a.r_abs + obj_a.R_abs'*(eAxis*s_start)
+         diff3 = obj_b.r_abs - r2
 
          if diff3 > Basics.neps
-            error("\nError from Modia3D.Prismatic(", ModiaMath.fullName(frame1), ", ", ModiaMath.fullName(frame2), ", ...):\n",
+            error("\nError from Modia3D.Prismatic(", ModiaMath.fullName(obj1), ", ", ModiaMath.fullName(obj2), ", ...):\n",
                  "The origins of the provided Object3Ds are not along axis/s_start.\n",
                  "( norm( <obj2 position> - <obj1.position+s_start along axis>) = ", string(diff33), " > ", Basics.neps,")")
          end
       end
 
       # Define variables of cut-joint
-      joint    =  CutJointPrismatic(ModiaMath.ComponentInternal(),frame_a, frame_b, false, axis, e_lambda1, e_lambda2)
+      joint    =  CutJointPrismatic(ModiaMath.ComponentInternal(),obj_a, obj_b, false, axis, e_lambda1, e_lambda2)
       lambda1   = ModiaMath.RealScalar("lambda1"  , joint, unit="N", info="Constraint force in direction1"   , numericType=ModiaMath.LAMBDA, analysis=ModiaMath.QuasiStaticAndDynamicAnalysis)
       lambda2   = ModiaMath.RealScalar("lambda2"  , joint, unit="N", info="Constraint force in direction2"   , numericType=ModiaMath.LAMBDA, analysis=ModiaMath.QuasiStaticAndDynamicAnalysis)
       mue1      = ModiaMath.RealScalar("mue1"     , joint,           info="Stabilizing mue in direction1"    , numericType=ModiaMath.MUE   , analysis=ModiaMath.OnlyDynamicAnalysis)
@@ -195,18 +195,19 @@ function Prismatic(frame1::Object3D, frame2::Object3D;
          e_lambda1 = ModiaMath.Vector3D(1,0,0)
          e_lambda2 = ModiaMath.Vector3D(0,1,0)
       end
-      
-      # Add joint to the frames
-      push!(frame_a.twoObject3Dobject, joint)
-      push!(frame_b.twoObject3Dobject, joint)
 
+      # Add joint to the frames
+      push!(obj_a.twoObject3Dobject, joint)
+      push!(obj_b.twoObject3Dobject, joint)
+      obj_a.hasCutJoint = true
+      obj_b.hasCutJoint = true
    else
       # Joint in the spanning tree
       if isnan(rs_start)
-         error("\nerror from Modia3D.Prismatic(", ModiaMath.fullName(frame1), ", ", ModiaMath.fullName(frame2), ", s_start=NaN):\n",
+         error("\nerror from Modia3D.Prismatic(", ModiaMath.fullName(obj1), ", ", ModiaMath.fullName(obj2), ", s_start=NaN):\n",
               "Argument s_start = NaN (Not-a-Number). However, this is not allowed if the joint is in the spanning tree")
       end
-      joint   = TreeJointPrismatic(ModiaMath.ComponentInternal(), frame_a, frame_b, canCollide, false, axis, eAxis)
+      joint   = TreeJointPrismatic(ModiaMath.ComponentInternal(), obj_a, obj_b, canCollide, false, axis, eAxis)
       s       = ModiaMath.RealScalar(:s      , joint, unit="m"    , start=rs_start, fixed=true, info="Relative distance along axis         "    , numericType=ModiaMath.XD_EXP)
       v       = ModiaMath.RealScalar(:v      , joint, unit="m/s"  , start=rv_start, fixed=true, info="=der(s): Relative velocity along axis"    , numericType=ModiaMath.XD_IMP    , integral=s, analysis=ModiaMath.OnlyDynamicAnalysis)
       a       = ModiaMath.RealScalar(:a      , joint, unit="m/s^2", start=0.0     ,             info="=der(v): Relative acceleration along axis", numericType=ModiaMath.DER_XD_IMP, integral=v, analysis=ModiaMath.OnlyDynamicAnalysis)
@@ -215,11 +216,11 @@ function Prismatic(frame1::Object3D, frame2::Object3D;
 
       P       = ModiaMath.RealScalar(:P      , joint, unit="J", info="Total power computed with interpolated x,derx, values (should be zero)", numericType=ModiaMath.WC, analysis=ModiaMath.OnlyDynamicAnalysis)
 
-      frame_b.joint = joint
-      frame_b.r_rel = eAxis*rs_start
-      frame_b.r_abs = frame_a.r_abs + frame_a.R_abs'*frame_b.r_rel
-      frame_b.R_rel = ModiaMath.NullRotation
-      frame_b.R_abs = frame_a.R_abs
+      obj_b.joint = joint
+      obj_b.r_rel = eAxis*rs_start
+      obj_b.r_abs = obj_a.r_abs + obj_a.R_abs'*obj_b.r_rel
+      obj_b.R_rel = ModiaMath.NullRotation
+      obj_b.R_abs = obj_a.R_abs
    end
    return joint
 end
@@ -236,7 +237,7 @@ end
 function setDistance!(joint::TreeJointPrismatic, s::Float64)
    @assert( joint.isDriven )
    joint.s.value = s
-   joint.frame2.r_rel = joint.eAxis*s
+   joint.obj2.r_rel = joint.eAxis*s
    return joint
 end
 
@@ -276,8 +277,8 @@ function computeForceTorqueAndResidue!(joint::TreeJointPrismatic, obj::Object3D,
    joint.residue.value = -joint.f.value + dot(joint.eAxis,dynamics.f)
 
    # For checking: compute total power
-   joint.P.value = dot(parentDynamics.f, joint.frame1.R_abs*parentDynamics.v0) +
-                   dot(dynamics.f      , joint.frame2.R_abs*dynamics.v0) +
+   joint.P.value = dot(parentDynamics.f, joint.obj1.R_abs*parentDynamics.v0) +
+                   dot(dynamics.f      , joint.obj2.R_abs*dynamics.v0) +
                    dot(parentDynamics.t, parentDynamics.w) +
                    dot(dynamics.t      , dynamics.w) -
                    joint.f.value*joint.v.value
@@ -286,15 +287,15 @@ end
 
 
 function computePositionResidues!(joint::CutJointPrismatic, time::Float64)
-   r_rel = joint.frame1.R_abs*(joint.frame2.r_abs - joint.frame1.r_abs)
+   r_rel = joint.obj1.R_abs*(joint.obj2.r_abs - joint.obj1.r_abs)
    joint.residue_x.value = dot(joint.e_lambda1, r_rel)
    joint.residue_y.value = dot(joint.e_lambda2, r_rel)
    return nothing
 end
- 
+
 
 function computeVelocityResidues!(joint::CutJointPrismatic, time::Float64)
-   v_rel = joint.frame1.R_abs*(joint.frame2.dynamics.v0 - joint.frame1.dynamics.v0)
+   v_rel = joint.obj1.R_abs*(joint.obj2.dynamics.v0 - joint.obj1.dynamics.v0)
    joint.residue_vx.value = dot(joint.e_lambda1, v_rel)
    joint.residue_vy.value = dot(joint.e_lambda2, v_rel)
    return nothing
@@ -305,4 +306,3 @@ function computeCutForcesAndToques!(joint::CutJointPrismatic, time::Float64)
    dynamics1.f += joint.e_lambda1*lambda1 + joint.e_lambda2*lambda2
    dynamics2.f += dynamics.f
 end
-
