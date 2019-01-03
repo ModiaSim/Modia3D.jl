@@ -7,46 +7,41 @@ function assignObj(superObjType::SuperObjCollision, obj::Object3D)
 end
 
 function assignObj(superObjType::SuperObjMass, obj::Object3D)
-  #=
     if hasMass(obj)
-      println("hat masse")
+      #println("hat masse")
       push!(superObjType.superObj, obj)
     end
-    =#
 end
 
 
 function assignObj(superObjType::SuperObjForce, obj::Object3D)
-  #=
     if canCollide(obj) || hasJoint(obj) || hasForceElement(obj)
-      println("ist ein ObjForce")
+    println("ist ein ObjForce, canCollide = ", canCollide(obj), " hasJoint = ", hasJoint(obj), " hasForceElement = ", hasForceElement(obj))
       push!(superObjType.superObj, obj)
     end
-    =#
 end
 
 
 
 function assignObj(superObjType::SuperObjVisu, obj::Object3D)
-  #=
     renderer = Modia3D.renderer[1]
     if isVisible(obj, renderer) && !hasJoint(obj) && !hasMass(obj) && !canCollide(obj) && !hasForceElement(obj) && !hasCutJoint(obj)
-      println("ist ein VisuObj")
+     # println("ist ein VisuObj")
       push!(superObjType.superObj, obj)
     end
-    =#
 end
 
-assignObj(superObjType, obj) = nothing # println("das ist ein dummy wert")
+assignObj(superObjType, obj) = nothing
 
 
 function assignAll(scene::Scene, superObj::SuperObjsRow, obj::Object3D, world::Object3D, actPos::Int64)
     names = fieldnames(typeof(superObj))
     for val in names
         # println("val $val")
-        #tmp = getfield(scene,superObj,val)
-        #assignObj(tmp,obj)
+        tmp = getfield(superObj,val)
+        assignObj(tmp,obj)
     end
+    println(" ")
 
 #=
     if hasCutJoints(obj)

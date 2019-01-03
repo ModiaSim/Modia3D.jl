@@ -85,29 +85,20 @@ function build_tree_and_allVisuElements!(scene::Scene, world::Object3D)::NOTHING
 end
 
 # the indices of super objects, which can't collide, are stored in a list
-function fillStackOrBuffer!(scene::Scene, frame::Object3D, cantCollSuperObj::Array{Int64,1})
-  for child in frame.children
+function fillStackOrBuffer!(scene::Scene, superObj::SuperObjsRow, obj::Object3D)
+  for child in obj.children
     if isNotWorld(child)
       if isNotFixed(child)
         push!(scene.buffer, child)
-        if !child.joint.canCollide    # !isFree(child) &&  !( typeof(child.joint) <: Modia3D.AbstractPrismatic )
-          push!(cantCollSuperObj, length(scene.buffer))
-        end
+        #if !child.joint.canCollide    # !isFree(child) &&  !( typeof(child.joint) <: Modia3D.AbstractPrismatic )
+          push!(superObj.noCPair, length(scene.buffer))
+        #end
       else
         push!(scene.stack, child)
       end
     end
   end
-  return cantCollSuperObj
-end
-
-
-# creates super objects, they are rigidly attached
-function checkCollision(scene::Scene, frame::Object3D, superObj::Array{Object3D,1})
-  if canCollide(frame)
-    push!(superObj, frame)
-  end
-  return superObj
+  return nothing
 end
 
 
@@ -132,48 +123,43 @@ function build_celements!(scene::Scene, world::Object3D)::NOTHING
   # println("world = ", world.children)
 
   while actPos <= nPos
-    superObj         = Array{Object3D,1}()
-    cantCollSuperObj = Array{Int64,1}()
-    AABBrow          = Array{Basics.BoundingBox,1}()
+    superObjsRow = SuperObjsRow()
+    AABBrow      = Array{Basics.BoundingBox,1}()
     frameRoot = buffer[actPos]
-
-    dummy_superObjs = SuperObjsRow()
 
     fillVisuElements(scene, frameRoot, world)
     createCutJoints(scene, frameRoot)
     if frameRoot != world
-      # assignAll(scene, dummy_superObjs, frameRoot, world, actPos)
-      superObj = checkCollision(scene,frameRoot,superObj)
+      assignAll(scene, superObjsRow, frameRoot, world, actPos)
     end
-    cantCollSuperObj = fillStackOrBuffer!(scene,frameRoot,cantCollSuperObj)
+    fillStackOrBuffer!(scene, superObjsRow, frameRoot)
 
     while length(stack) > 0
       frameChild = pop!(stack)
 
       fillVisuElements(scene, frameChild, world)
       createCutJoints(scene, frameChild)
-      # assignAll(scene, dummy_superObjs, frameChild, world, actPos)
-
-      superObj         = checkCollision(scene,frameChild,superObj)
-      cantCollSuperObj = fillStackOrBuffer!(scene,frameChild, cantCollSuperObj)
+      assignAll(scene, superObjsRow, frameChild, world, actPos)
+      fillStackOrBuffer!(scene, superObjsRow, frameChild)
     end
 
-    if length(superObj) > 0
-      AABBrow = [Basics.BoundingBox() for i = 1:length(superObj)]
-      push!(scene.celements, superObj)
+    if length(superObjsRow.superObjCollision.superObj) > 0
+      AABBrow = [Basics.BoundingBox() for i = 1:length(superObjsRow.superObjCollision.superObj)]
+      push!(scene.celements, superObjsRow.superObjCollision.superObj)
       push!(scene.AABB, AABBrow)
-      if isempty(cantCollSuperObj)
+      if isempty(superObjsRow.noCPair)
         push!(scene.noCPairs, [0])
       else
-        push!(scene.noCPairs, cantCollSuperObj)
+        push!(scene.noCPairs, superObjsRow.noCPair)
       end
     end
     nPos = length(buffer)
     actPos += 1
   end
 
-#=
+
   println("scene.noCPairs ", scene.noCPairs)
+  #=
   for a in scene.celements
     println("[")
     for b in a
@@ -182,6 +168,7 @@ function build_celements!(scene::Scene, world::Object3D)::NOTHING
     println("]")
   end
 =#
+
 
   if length(scene.celements) > 1
     scene.collide = true
