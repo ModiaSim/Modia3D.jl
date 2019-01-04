@@ -1,7 +1,7 @@
 
 function assignObj(superObjType::SuperObjCollision, obj::Object3D)
     if canCollide(obj)
-      println("can collidieren")
+      #println("can collidieren")
       push!(superObjType.superObj, obj)
     end
 end
@@ -16,7 +16,7 @@ end
 
 function assignObj(superObjType::SuperObjForce, obj::Object3D)
     if canCollide(obj) || hasJoint(obj) || hasForceElement(obj)
-    println("ist ein ObjForce, canCollide = ", canCollide(obj), " hasJoint = ", hasJoint(obj), " hasForceElement = ", hasForceElement(obj))
+    #println("ist ein ObjForce, canCollide = ", canCollide(obj), " hasJoint = ", hasJoint(obj), " hasForceElement = ", hasForceElement(obj))
       push!(superObjType.superObj, obj)
     end
 end
@@ -37,14 +37,14 @@ assignObj(superObjType, obj) = nothing
 function assignAll(scene::Scene, superObj::SuperObjsRow, obj::Object3D, world::Object3D, actPos::Int64)
     names = fieldnames(typeof(superObj))
     for val in names
-        # println("val $val")
         tmp = getfield(superObj,val)
         assignObj(tmp,obj)
     end
-    println(" ")
 
-#=
-    if hasCutJoints(obj)
+    if hasCutJoint(obj)
+      println("obj = ", obj)
+      println("actPos = ", actPos)
+      #=
         if !(obj.cutJoint in scene.cutJoints)
             push!(scene.cutJoints, obj.cutJoint)
             push!(scene.noCPairsHelp, [actPos])
@@ -52,8 +52,10 @@ function assignAll(scene::Scene, superObj::SuperObjsRow, obj::Object3D, world::O
             i = indexin(obj.cutJoint, scene.cutJoints)
             push!(scene.noCPairsHelp[i][], actPos)
         end
+        =#
     end
 
+#=
     if hasForceElement(obj)
         if !(obj.forceElement in scene.forceElements)
             push!(scene.forceElements,obj.forceElement)

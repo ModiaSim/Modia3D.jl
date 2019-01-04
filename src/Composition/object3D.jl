@@ -440,7 +440,7 @@ function Base.show(io::IO, frame::Object3D)
          print(io,", ")
       end
       typeName = string( typeof(frame.data) )
-      s = search(typeName, "Modia3D")
+      s = findfirst("Modia3D", typeName) # search(typeName, "Modia3D")
       if s.start == 1
          typeName = "Modia3D." * Basics.trailingPartOfName( typeName )
       end

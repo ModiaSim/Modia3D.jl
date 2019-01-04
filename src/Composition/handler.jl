@@ -166,9 +166,9 @@ function build_celements!(scene::Scene, world::Object3D)::NOTHING
       println(b)
     end
     println("]")
+    println(" ")
   end
-=#
-
+  =#
 
   if length(scene.celements) > 1
     scene.collide = true
