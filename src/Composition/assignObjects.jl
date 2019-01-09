@@ -42,17 +42,13 @@ function assignAll(scene::Scene, superObj::SuperObjsRow, obj::Object3D, world::O
     end
 
     if hasCutJoint(obj)
-      println("obj = ", obj)
-      println("actPos = ", actPos)
-      #=
-        if !(obj.cutJoint in scene.cutJoints)
-            push!(scene.cutJoints, obj.cutJoint)
-            push!(scene.noCPairsHelp, [actPos])
-        else
-            i = indexin(obj.cutJoint, scene.cutJoints)
-            push!(scene.noCPairsHelp[i][], actPos)
+      for cutJoint in obj.twoObject3Dobject
+        if typeof(cutJoint) <: Modia3D.AbstractJoint
+          if cutJoint.visited
+            push!(scene.noCPairsHelp[cutJoint], actPos)
+          end
         end
-        =#
+      end
     end
 
 #=
@@ -97,6 +93,7 @@ function createCutJoints(scene::Scene, obj::Object3D)
       if !cutJoint.visited
         println("\n... Cut-joint ", ModiaMath.instanceName(cutJoint), " pushed on scene.cutJoints vector")
         push!(scene.cutJoints, cutJoint)
+        push!(scene.noCPairsHelp, cutJoint => [])
         cutJoint.visited = true
       end
     end

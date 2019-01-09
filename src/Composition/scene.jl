@@ -322,7 +322,7 @@ mutable struct Scene
    allVisuElements::Vector{Object3D}                 # Object3Ds (including Object3Ds.data) that shall be visualized
    celements::Array{Array{Object3D}}           # Object3Ds that can collide;  celements[i][:] cannot collide with each other
    noCPairs::Array{Array{Int64,1}}       # Indices of frames (with respect to celements) that can't collide in general (e.g. objects are connected via joints)
-   noCPairsHelp::Array{Array{Int64,1},1}
+   noCPairsHelp::Dict{Modia3D.AbstractJoint,Array{Int64,1}}
    AABB::Array{Array{Basics.BoundingBox}}   # Bounding boxes of elements that can collide
 
    # forceElements::Array{Int64,1}
@@ -349,7 +349,7 @@ mutable struct Scene
                   Vector{Object3D}[],
                   Array{Array{Solids.Solid,1},1}(),
                   Array{Array{Int64,1},1}(),
-                  Array{Array{Int64,1},1}(),
+                  Dict{Modia3D.AbstractJoint,Array{Int64,1}}(),
                   Array{Array{Basics.BoundingBox,1},1}(),
                   Array{Modia3D.AbstractSignal,1}(),
                   Array{Modia3D.AbstractForceTorque,1}(),

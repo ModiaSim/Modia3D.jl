@@ -90,15 +90,29 @@ function fillStackOrBuffer!(scene::Scene, superObj::SuperObjsRow, obj::Object3D)
     if isNotWorld(child)
       if isNotFixed(child)
         push!(scene.buffer, child)
-        #if !child.joint.canCollide    # !isFree(child) &&  !( typeof(child.joint) <: Modia3D.AbstractPrismatic )
+        if !child.joint.canCollide    # !isFree(child) &&  !( typeof(child.joint) <: Modia3D.AbstractPrismatic )
           push!(superObj.noCPair, length(scene.buffer))
-        #end
+        end
       else
         push!(scene.stack, child)
       end
     end
   end
   return nothing
+end
+
+
+insert_and_dedup!(v::Vector, x) = (splice!(v, searchsorted(v,x), x); v)
+
+function addIndicesOfCutJointsToSuperObj(scene::Scene)
+  tmp = collect(values(scene.noCPairsHelp))
+  for i=1:length(tmp)
+    if length(tmp[i]) == 2
+      insert_and_dedup!(scene.noCPairs[minimum(tmp[i])], maximum(tmp[i]))
+    else
+      error("...from addIndicesOfCutJointsToSuperObj: problems with amount of cut joints")
+    end
+  end
 end
 
 
@@ -156,7 +170,7 @@ function build_celements!(scene::Scene, world::Object3D)::NOTHING
     nPos = length(buffer)
     actPos += 1
   end
-
+  addIndicesOfCutJointsToSuperObj(scene)
 
   println("scene.noCPairs ", scene.noCPairs)
   #=
