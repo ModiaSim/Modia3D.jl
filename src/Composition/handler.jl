@@ -86,18 +86,24 @@ end
 
 # the indices of super objects, which can't collide, are stored in a list
 function fillStackOrBuffer!(scene::Scene, superObj::SuperObjsRow, obj::Object3D)
+  println("begin fillStackOrBuffer")
   for child in obj.children
+    println("child = ", child)
     if isNotWorld(child)
       if isNotFixed(child)
         push!(scene.buffer, child)
         if !child.joint.canCollide    # !isFree(child) &&  !( typeof(child.joint) <: Modia3D.AbstractPrismatic )
           push!(superObj.noCPair, length(scene.buffer))
+        #  println("suberObj = ", superObj)
+          println("length(scene.buffer) = ", length(scene.buffer))
         end
       else
         push!(scene.stack, child)
       end
     end
   end
+  println("end fillStackOrBuffer")
+  println(" ")
   return nothing
 end
 
@@ -108,6 +114,7 @@ function addIndicesOfCutJointsToSuperObj(scene::Scene)
   tmp = collect(values(scene.noCPairsHelp))
   for i=1:length(tmp)
     if length(tmp[i]) == 2
+      # println("tmp[$i] = ", tmp[i])
       insert_and_dedup!(scene.noCPairs[minimum(tmp[i])], maximum(tmp[i]))
     else
       error("...from addIndicesOfCutJointsToSuperObj: problems with amount of cut joints")
@@ -123,7 +130,6 @@ end
 #   elements which are directly connected with a joint can't collide
 #     these elements are excluded from the collision list
 function build_celements!(scene::Scene, world::Object3D)::NOTHING
-  # println("build_celements")
   stack = scene.stack
   buffer = scene.buffer
   empty!(stack)
@@ -133,8 +139,6 @@ function build_celements!(scene::Scene, world::Object3D)::NOTHING
   push!(buffer, world)
   actPos = 1
   nPos   = 1
-
-  # println("world = ", world.children)
 
   while actPos <= nPos
     superObjsRow = SuperObjsRow()
@@ -173,7 +177,7 @@ function build_celements!(scene::Scene, world::Object3D)::NOTHING
   addIndicesOfCutJointsToSuperObj(scene)
 
   println("scene.noCPairs ", scene.noCPairs)
-  #=
+#=
   for a in scene.celements
     println("[")
     for b in a
@@ -182,7 +186,7 @@ function build_celements!(scene::Scene, world::Object3D)::NOTHING
     println("]")
     println(" ")
   end
-  =#
+=#
 
   if length(scene.celements) > 1
     scene.collide = true

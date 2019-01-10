@@ -15,9 +15,9 @@ cmat    = Modia3D.defaultContactMaterial()
    frame0 = Modia3D.Object3D(Modia3D.Solid(Modia3D.SolidBeam(Lx,Ly,Lz), nothing, vmat1; contactMaterial = cmat)) #
    frame1 = Modia3D.Object3D(frame0; r=[-Lx/2, 0.0, 0.0])
    frame2 = Modia3D.Object3D(frame0; r=[ Lx/2, 0.0, 0.0])
-   #cyl    = Modia3D.Cylinder(Ly/2,1.2*Ly; material=vmat2)
-   #cyl1   = Modia3D.Object3D(frame1, cyl)
-   #cyl2   = Modia3D.Object3D(frame2, cyl)
+   cyl    = Modia3D.Cylinder(Ly/2,1.2*Ly; material=vmat2)
+   cyl1   = Modia3D.Object3D(frame1, cyl)
+   cyl2   = Modia3D.Object3D(frame2, cyl)
 end
 
 @assembly Fourbar(;Lx = 0.1, Ly=Lx/5, Lz=Ly, groundWidth=Lx, groundHeight=0.1*Lx) begin
@@ -31,10 +31,6 @@ end
    bar2 = Bar(Lx=Lx, Ly=Ly, Lz=Lz)
    bar3 = Bar(Lx=Lx, Ly=Ly, Lz=Lz)
    bar4 = Bar(Lx=Lx, Ly=Ly, Lz=Lz)
-   #bar5 = Bar(Lx=Lx, Ly=Ly, Lz=Lz)
-   #bar6 = Bar(Lx=Lx, Ly=Ly, Lz=Lz)
-   #bar7 = Bar(Lx=Lx, Ly=Ly, Lz=Lz)
-   #bar8 = Bar(Lx=Lx, Ly=Ly, Lz=Lz)
 
    Modia3D.connect(frame1, bar4.frame0)
 
@@ -42,22 +38,7 @@ end
    rev2 = Modia3D.Revolute(bar1.frame2, bar2.frame1; phi_start = -pi/2)
    rev3 = Modia3D.Revolute(bar2.frame2, bar3.frame2; phi_start =  pi/2)
    rev4 = Modia3D.Revolute(bar3.frame1, bar4.frame2; phi_start =  NaN)   # phi_start = -pi/2
-
-   #rev5 = Modia3D.Revolute(bar8.frame2, bar5.frame1; phi_start =  pi/2)
-   #rev6 = Modia3D.Revolute(bar5.frame2, bar6.frame1; phi_start = -pi/2)
-   #rev7 = Modia3D.Revolute(bar6.frame2, bar7.frame2; phi_start =  pi/2)
-   #rev8 = Modia3D.Revolute(bar7.frame1, bar8.frame1; phi_start =  NaN)
-
-   #rev9 = Modia3D.Revolute(bar2.frame2, bar5.frame1; phi_start =  pi/2)
 end
-
-
-#@signal LinearMovement(;yStart = 0.0, yDelta = 1.0) begin
-#   y = ModiaMath.RealScalar(causality=ModiaMath.Output, numericType=ModiaMath.WR)
-#end
-#function Modia3D.computeSignal(signal::LinearMovement, sim::ModiaMath.SimulationState)
-#    signal.y.value = signal.yStart + signal.yDelta*(sim.time-sim.startTime)/(sim.stopTime-sim.startTime)
-#end
 
 @signal Sine(;yStart = 0.0, A = 1.0, freqHz = 1.0) begin
    y = ModiaMath.RealScalar(causality=ModiaMath.Output, numericType=ModiaMath.WR)

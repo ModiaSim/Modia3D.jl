@@ -93,7 +93,9 @@ function createCutJoints(scene::Scene, obj::Object3D)
       if !cutJoint.visited
         println("\n... Cut-joint ", ModiaMath.instanceName(cutJoint), " pushed on scene.cutJoints vector")
         push!(scene.cutJoints, cutJoint)
+        #println("length scene.cutJoints = ", length(scene.cutJoints))
         push!(scene.noCPairsHelp, cutJoint => [])
+        #println("length scene.noCPairsHelp = ", length(scene.noCPairsHelp))
         cutJoint.visited = true
       end
     end
