@@ -38,10 +38,10 @@ end
 
    Modia3D.connect(frame1, bar4.frame0)
 
-   rev1 = Modia3D.Revolute(bar4.frame2, bar1.frame1; phi_start =  pi/2)
+   rev1 = Modia3D.Revolute(bar4.frame1, bar1.frame1; phi_start =  pi/2)
    rev2 = Modia3D.Revolute(bar1.frame2, bar2.frame1; phi_start = -pi/2)
    rev3 = Modia3D.Revolute(bar2.frame2, bar3.frame2; phi_start =  pi/2)
-   rev4 = Modia3D.Revolute(bar3.frame1, bar4.frame1; phi_start =  NaN)   # phi_start = -pi/2
+   rev4 = Modia3D.Revolute(bar3.frame1, bar4.frame2; phi_start =  NaN)   # phi_start = -pi/2
 
    #rev5 = Modia3D.Revolute(bar8.frame2, bar5.frame1; phi_start =  pi/2)
    #rev6 = Modia3D.Revolute(bar5.frame2, bar6.frame1; phi_start = -pi/2)
@@ -77,7 +77,7 @@ Lx = 1.0
 end
 
 model  = Modia3D.SimulationModel( Move(), analysis=ModiaMath.KinematicAnalysis )
-#result = ModiaMath.simulate!(model, stopTime=3.0, log=false)
+result = ModiaMath.simulate!(model, stopTime=3.0, log=false)
 
 println("... success of Move_FourBar.jl!")
 end
