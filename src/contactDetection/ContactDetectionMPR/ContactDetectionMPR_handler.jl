@@ -20,14 +20,12 @@ mutable struct ContactDetectionMPR_handler <: Modia3D.AbstractContactDetection
   dict2::SortedDict{Int,Array{Float64,1}}
 
 
-   contactPoint1::Vector{MVector{3,Float64}}       # Absolute position vector to first contact point on contactObj1
-   contactPoint2::Vector{MVector{3,Float64}}       # Absolute position vector to second contact point on contactObj2
-   contactNormal::Vector{MVector{3,Float64}}       # Unit normal to surface on contactPoint1 (in world frame)
+  contactPoint1::Vector{MVector{3,Float64}}       # Absolute position vector to first contact point on contactObj1
+  contactPoint2::Vector{MVector{3,Float64}}       # Absolute position vector to second contact point on contactObj2
+  contactNormal::Vector{MVector{3,Float64}}       # Unit normal to surface on contactPoint1 (in world frame)
 
-   contactObj1::Vector{Union{Object3D,NOTHING}}
-   contactObj2::Vector{Union{Object3D,NOTHING}}
-
-
+  contactObj1::Vector{Union{Object3D,NOTHING}}
+  contactObj2::Vector{Union{Object3D,NOTHING}}
 
   tol_rel::Float64
   niter_max::Int

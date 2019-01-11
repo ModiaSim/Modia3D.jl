@@ -86,24 +86,26 @@ end
 
 # the indices of super objects, which can't collide, are stored in a list
 function fillStackOrBuffer!(scene::Scene, superObj::SuperObjsRow, obj::Object3D)
-  println("begin fillStackOrBuffer")
+  #println("begin fillStackOrBuffer")
   for child in obj.children
-    println("child = ", child)
+    #println("child = ", child)
     if isNotWorld(child)
       if isNotFixed(child)
         push!(scene.buffer, child)
+        println("in scene.buffer: child = $child")
         if !child.joint.canCollide    # !isFree(child) &&  !( typeof(child.joint) <: Modia3D.AbstractPrismatic )
           push!(superObj.noCPair, length(scene.buffer))
+          println("in scene.buffer: length(scene.buffer) = ", length(scene.buffer))
         #  println("suberObj = ", superObj)
-          println("length(scene.buffer) = ", length(scene.buffer))
+          #println("length(scene.buffer) = ", length(scene.buffer))
         end
       else
         push!(scene.stack, child)
       end
     end
   end
-  println("end fillStackOrBuffer")
-  println(" ")
+  #println("end fillStackOrBuffer")
+#  println(" ")
   return nothing
 end
 
@@ -136,19 +138,29 @@ function build_celements!(scene::Scene, world::Object3D)::NOTHING
   empty!(buffer)
   empty!(scene.allVisuElements)
 
-  push!(buffer, world)
-  actPos = 1
+  # push!(buffer, world)
+  actPos = 0
   nPos   = 1
 
   while actPos <= nPos
     superObjsRow = SuperObjsRow()
     AABBrow      = Array{Basics.BoundingBox,1}()
-    frameRoot = buffer[actPos]
+    if actPos == 0
+      frameRoot = world
+    else
+      frameRoot = buffer[actPos]
+    end
+
 
     fillVisuElements(scene, frameRoot, world)
     createCutJoints(scene, frameRoot)
     if frameRoot != world
       assignAll(scene, superObjsRow, frameRoot, world, actPos)
+    elseif frameRoot == world
+      # assignAll(scene, superObjsRow, frameRoot, world, actPos)
+      for child in frameRoot.children
+        println("child von world hat einen Joint = ", hasJoint(child))
+      end
     end
     fillStackOrBuffer!(scene, superObjsRow, frameRoot)
 
@@ -177,7 +189,7 @@ function build_celements!(scene::Scene, world::Object3D)::NOTHING
   addIndicesOfCutJointsToSuperObj(scene)
 
   println("scene.noCPairs ", scene.noCPairs)
-#=
+
   for a in scene.celements
     println("[")
     for b in a
@@ -186,7 +198,7 @@ function build_celements!(scene::Scene, world::Object3D)::NOTHING
     println("]")
     println(" ")
   end
-=#
+
 
   if length(scene.celements) > 1
     scene.collide = true

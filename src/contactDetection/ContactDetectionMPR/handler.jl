@@ -92,8 +92,8 @@ function Composition.selectContactPairs!(ch::Composition.ContactDetectionMPR_han
       ch.contactPairs.z[i] = 42.0
     end
   end
-  #println("ch.contactPairs.z = ", ch.contactPairs.z)
-  #println("\n")
+  println("ch.contactPairs.z = ", ch.contactPairs.z)
+  println("\n")
   ch.distanceComputed = true
 end
 
@@ -117,6 +117,7 @@ end
 function computeDistances(ch::Composition.ContactDetectionMPR_handler, phase2::Bool)
   celements = ch.contactPairs.celements
   noCPairs = ch.contactPairs.noCPairs
+
   AABB = ch.contactPairs.AABB
   if length(celements) > 1
     for i = 1:length(celements)
@@ -177,6 +178,7 @@ function computeDistances(ch::Composition.ContactDetectionMPR_handler, phase2::B
                       ch.contactPairs.contactObj2[j]   = nextObj
                     else
                       if distance < 0.0
+                        #println("distance = $distance")
                         error("\nNumber of max. collision pairs nz (= ", ch.contactPairs.nz, ") is too low.",
                               "\nProvide a large nz_max with Modia3D.SceneOptions(nz_max=xxx).")
                       end
