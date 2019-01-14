@@ -17,96 +17,35 @@ function build_tree_and_allVisuElements!(scene::Scene, world::Object3D)::NOTHING
    stack               = scene.stack
    enableVisualization = scene.options.enableVisualization
    analysis            = scene.analysis
-#   empty!(allVisuElements)
    empty!(tree)
    empty!(stack)
-#   println("build_tree_and_allVisuElements")
 
-   # Handle world (do not push world on stack and do not include it on scene.tree)
-   #if analysis != ModiaMath.KinematicAnalysis
-      world.dynamics = Object3Ddynamics()
-
-#=
-      if visualizeFrames && isNotCoordinateSystem(world) && world.visualizeFrame != Modia3D.False
-         # Visualize world frame
-         world.visualizationFrame = copyObject3D(world, Graphics.CoordinateSystem(2*options.defaultFrameLength))
-         push!(allVisuElements, world.visualizationFrame)
-      end
-=#
-
-   #end
-
-   # Traverse all frames (starting from the children of world) and put frames on tree and visible elements on allVisuElements
+   world.dynamics = Object3Ddynamics()
    push!(stack, world)
    while length(stack) > 0
       frame = pop!(stack)
-
-      # Initialize dynamic part of frame and push frame on tree
-      #if analysis != ModiaMath.KinematicAnalysis
-         frame.dynamics = Object3Ddynamics()
-      #end
+      frame.dynamics = Object3Ddynamics()
       push!(tree,frame)
-
-#=
-      # Determine whether cut-joints are connected to the frame
-      for obj in frame.twoObject3Dobject
-         if typeof(obj) <: Modia3D.AbstractJoint
-            if !obj.visited
-               println("\n... Cut-joint ", ModiaMath.instanceName(obj), " pushed on scene.cutJoints vector")
-               push!(cutJoints, obj)
-               obj.visited = true
-            end
-         end
-      end
-=#
-
-
-#=
-      # If visualization desired, push frame on allVisuElements
-      if enableVisualization
-         if visualizeFrames && frame != world && isNotCoordinateSystem(frame) && frame.visualizeFrame != Modia3D.False
-            # Visualize coordinate system of Object3D
-            frame.visualizationFrame = copyObject3D(frame, autoCoordsys)
-            push!(allVisuElements, frame.visualizationFrame)
-         end
-         if isVisible(frame.data, renderer)
-            # Visualize Object3D
-            push!(allVisuElements, frame)
-         end
-      end
-=#
       # Visit children of frame
       append!(stack, frame.children)
    end
-
-#   scene.visualize = length(scene.allVisuElements) > 0
-#   println("length(scene.allVisuElements) = ", length(scene.allVisuElements))
    return nothing
 end
 
 # the indices of super objects, which can't collide, are stored in a list
-function fillStackOrBuffer!(scene::Scene, superObj::SuperObjsRow, obj::Object3D)
-  #println("begin fillStackOrBuffer")
+function fillStackOrBuffer!(scene::Scene, superObj::SuperObjsRow, obj::Object3D)::NOTHING
   for child in obj.children
-    #println("child = ", child)
     if isNotWorld(child)
       if isNotFixed(child)
         push!(scene.buffer, child)
-        println("in scene.buffer: child = $child")
         if !child.joint.canCollide    # !isFree(child) &&  !( typeof(child.joint) <: Modia3D.AbstractPrismatic )
           push!(superObj.noCPair, length(scene.buffer))
-          println("in scene.buffer: length(scene.buffer) = ", length(scene.buffer))
-        #  println("suberObj = ", superObj)
-          #println("length(scene.buffer) = ", length(scene.buffer))
         end
       else
         push!(scene.stack, child)
       end
     end
   end
-  #println("end fillStackOrBuffer")
-#  println(" ")
-  return nothing
 end
 
 
@@ -138,51 +77,44 @@ function build_celements!(scene::Scene, world::Object3D)::NOTHING
   empty!(buffer)
   empty!(scene.allVisuElements)
 
-  # push!(buffer, world)
-  actPos = 0
+  push!(buffer, world)
+
+  actPos = 1
   nPos   = 1
 
   while actPos <= nPos
     superObjsRow = SuperObjsRow()
     AABBrow      = Array{Basics.BoundingBox,1}()
-    if actPos == 0
-      frameRoot = world
-    else
-      frameRoot = buffer[actPos]
-    end
-
-
-    fillVisuElements(scene, frameRoot, world)
-    createCutJoints(scene, frameRoot)
+    frameRoot = buffer[actPos]
+    assign_Visu_CutJoint_Dynamics!(scene, frameRoot, world)
     if frameRoot != world
       assignAll(scene, superObjsRow, frameRoot, world, actPos)
-    elseif frameRoot == world
-      # assignAll(scene, superObjsRow, frameRoot, world, actPos)
-      for child in frameRoot.children
-        println("child von world hat einen Joint = ", hasJoint(child))
-      end
     end
     fillStackOrBuffer!(scene, superObjsRow, frameRoot)
 
     while length(stack) > 0
       frameChild = pop!(stack)
-
-      fillVisuElements(scene, frameChild, world)
-      createCutJoints(scene, frameChild)
+      assign_Visu_CutJoint_Dynamics!(scene, frameChild, world)
       assignAll(scene, superObjsRow, frameChild, world, actPos)
       fillStackOrBuffer!(scene, superObjsRow, frameChild)
     end
 
+
+    push!(scene.celements, superObjsRow.superObjCollision.superObj)
+    if length(superObjsRow.superObjCollision.superObj) > 0 && !isempty(superObjsRow.noCPair)
+        push!(scene.noCPairs, superObjsRow.noCPair)
+    else
+      push!(scene.noCPairs, [0])
+    end
+
     if length(superObjsRow.superObjCollision.superObj) > 0
       AABBrow = [Basics.BoundingBox() for i = 1:length(superObjsRow.superObjCollision.superObj)]
-      push!(scene.celements, superObjsRow.superObjCollision.superObj)
       push!(scene.AABB, AABBrow)
-      if isempty(superObjsRow.noCPair)
-        push!(scene.noCPairs, [0])
-      else
-        push!(scene.noCPairs, superObjsRow.noCPair)
-      end
+    else
+      push!(scene.AABB, [])
     end
+
+    push!(scene.superObjs, superObjsRow)
     nPos = length(buffer)
     actPos += 1
   end
@@ -191,6 +123,15 @@ function build_celements!(scene::Scene, world::Object3D)::NOTHING
   println("scene.noCPairs ", scene.noCPairs)
 
   for a in scene.celements
+    println("[")
+    for b in a
+      println(b)
+    end
+    println("]")
+    println(" ")
+  end
+
+  for a in scene.AABB
     println("[")
     for b in a
       println(b)

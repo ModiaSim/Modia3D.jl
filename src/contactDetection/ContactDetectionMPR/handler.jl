@@ -92,8 +92,8 @@ function Composition.selectContactPairs!(ch::Composition.ContactDetectionMPR_han
       ch.contactPairs.z[i] = 42.0
     end
   end
-  println("ch.contactPairs.z = ", ch.contactPairs.z)
-  println("\n")
+  #println("ch.contactPairs.z = ", ch.contactPairs.z)
+  #println("\n")
   ch.distanceComputed = true
 end
 
@@ -135,7 +135,8 @@ function computeDistances(ch::Composition.ContactDetectionMPR_handler, phase2::B
 
     for i_superObj = 1:length(celements)
       superObj = celements[i_superObj]
-      superAABB = AABB[i_superObj]
+      if !isempty(superObj)
+        superAABB = AABB[i_superObj]
       for i_obj = 1:length(superObj)
         obj = superObj[i_obj]      # determine contact from this Object3D with all Object3Ds that have larger indices
         aabb = superAABB[i_obj]
@@ -189,6 +190,7 @@ function computeDistances(ch::Composition.ContactDetectionMPR_handler, phase2::B
             end
           end
         end
+      end
       end
     end
     #visualizeContactPoints()

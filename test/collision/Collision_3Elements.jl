@@ -19,7 +19,7 @@ end
 
 @assembly CollisionWithoutJoint(;length=1.0, width=0.2) begin
    world = Modia3D.Object3D(Modia3D.CoordinateSystem(0.6))
-   world_f1 = Modia3D.Object3D(world , r=[0.5, 0.0, 0.5])
+   #world_f1 = Modia3D.Object3D(world , r=[0.5, 0.0, 0.5])
 
    red = Modia3D.Part(Modia3D.Solid(Modia3D.SolidBox(length,width,width), "Aluminium", vmat1;contactMaterial = cmat),
                         [ [-length/2,0,0],
@@ -30,7 +30,7 @@ end
    green = Modia3D.Part(Modia3D.Solid(Modia3D.SolidBox(length,width,width), "Aluminium", vmat3;contactMaterial = cmat),
                         [ [-length/2,0,0] ])
 
-   Modia3D.connect(world_f1, red.frames[1])
+   Modia3D.connect(world, red.frames[1])
    rev2 = Modia3D.Revolute(red.frames[2], blue.frames[1]) #; canCollide = true)
    rev3 = Modia3D.Revolute(blue.frames[2], green.frames[1]) #; canCollide = true)
 
@@ -53,9 +53,13 @@ end
    red = Modia3D.Part(Modia3D.Solid(Modia3D.SolidBox(length,width,width), "Aluminium", vmat1;contactMaterial = cmat),
                         [ [-length/2,0,0],
                           [ length/2,0,0] ])
-   blue = Modia3D.Part(Modia3D.Solid(Modia3D.SolidBox(length,width,width), "Aluminium", vmat2;contactMaterial = cmat),
-                        [ [-length/2,0,0],
-                          [ length/2,0,0] ])
+   #blue = Modia3D.Part(Modia3D.Solid(Modia3D.SolidBox(length,width,width), "Aluminium", vmat2;contactMaterial = cmat),
+   #                     [ [-length/2,0,0],
+   #                       [ length/2,0,0] ])
+   blue = Modia3D.Part(Modia3D.Box(length,width,width, material=vmat2),
+                                               [ [-length/2,0,0],
+                                                 [ length/2,0,0] ])
+
    green = Modia3D.Part(Modia3D.Solid(Modia3D.SolidBox(length,width,width), "Aluminium", vmat3;contactMaterial = cmat),
                         [ [-length/2,0,0] ])
 
@@ -83,7 +87,7 @@ collWithJoint=CollisionWithJoint(sceneOptions=Modia3D.SceneOptions(visualizeFram
 
 #model = Modia3D.SimulationModel(collWithoutJoint, analysis=ModiaMath.KinematicAnalysis )
 model = Modia3D.SimulationModel(collWithJoint, analysis=ModiaMath.KinematicAnalysis )
-result = ModiaMath.simulate!(model, stopTime=0.005)
+result = ModiaMath.simulate!(model, stopTime=0.01)
 
 ModiaMath.plot(result, ("rev1.phi", "rev2.phi") )
 
