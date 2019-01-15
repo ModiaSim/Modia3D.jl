@@ -122,7 +122,7 @@ struct SimulationModel <: ModiaMath.AbstractSimulationModel
       scene.analysis = analysis
       assembly._internal.scene = scene
 
-      # Build tree (for multibody computation), allVisuElements (for visualization), celements (for contact handling)
+      # Build tree (for multibody computation), allVisuElements (for visualization), super objects (for contact handling)
       build_tree_and_allVisuElements!(scene, world)
       build_superObjs!(scene, world)
       nz = 0

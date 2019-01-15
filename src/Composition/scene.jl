@@ -66,15 +66,6 @@ struct ContactPairs
 
       # Determine the dimension of vector z (<= nzmax, but at most the number of all possible contact point combinations)
       nz = 0
-#=
-      for superObj in celements
-        println("[")
-        for obj in superObj
-          println(obj.name)
-        end
-        println("]")
-      end
-=#
 
       for i_superObj = 1:length(celements)
          superObj = celements[i_superObj]

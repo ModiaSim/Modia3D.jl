@@ -128,13 +128,15 @@ function build_superObjs!(scene::Scene, world::Object3D)::NOTHING
     actPos += 1
   end
   addIndicesOfCutJointsToSuperObj(scene)
-#=
-  println("scene.noCPairs ", scene.noCPairs)
 
-  for a in scene.celements
+#  println("scene.noCPairs ", scene.noCPairs)
+
+
+#=
+  for superObjRow in scene.superObjs
     println("[")
-    for b in a
-      println(b)
+    for a in superObjRow.superObjCollision.superObj
+      println(a)
     end
     println("]")
     println(" ")
@@ -151,7 +153,7 @@ function build_superObjs!(scene::Scene, world::Object3D)::NOTHING
     println(" ")
   end
 =#
-  println("super objs sind initialisiert")
+
   hasMoreCollisionSuperObj ? (scene.collide = true) : (scene.collide = false)
   scene.initSuperObj = true
   end
@@ -256,7 +258,7 @@ function initAnalysis!(world::Object3D, scene::Scene)
       initializeVisualization(Modia3D.renderer[1], scene.allVisuElements)
    end
    if scene.collide
-        initializeContactDetection!(world, scene) # scene.options.contactDetection, scene.celements, scene.noCPairs, scene.AABB)
+        initializeContactDetection!(world, scene)
     end
    #end
 
@@ -295,7 +297,7 @@ function initAnalysis!(assembly::Modia3D.AbstractAssembly;
   # if scene.options.enableContactDetection
 
       if scene.collide
-        initializeContactDetection!(world, scene) # scene.options.contactDetection, scene.celements, scene.noCPairs, scene.AABB)
+        initializeContactDetection!(world, scene)
       end
   # end
 
@@ -332,7 +334,7 @@ function initAnalysis!(assembly::Modia3D.AbstractAssembly)
    if scene.options.enableContactDetection
       build_superObjs!(scene, world)
       if scene.collide
-        initializeContactDetection!(world, scene) # scene.options.contactDetection, scene.celements, scene.noCPairs, scene.AABB)
+        initializeContactDetection!(world, scene)
       end
    end
 
@@ -444,7 +446,7 @@ function closeAnalysis!(scene::Scene)
      end
      Basics.emptyArray!(scene.stack)
      Basics.emptyArray!(scene.buffer)
-     Basics.emptyArray!(scene.celements)
+     Basics.emptyArray!(scene.superObjs)
      Basics.emptyArray!(scene.noCPairs)
      scene.collide = false
 
