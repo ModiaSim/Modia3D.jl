@@ -54,7 +54,7 @@ filenameMesh = joinpath(Modia3D.path, "objects", "bunny", "bunny.obj")
    mesh = Modia3D.Object3D(world, Modia3D.SolidWithConvexDecomposition(Modia3D.SolidFileMesh(filenameMesh,0.1), nothing, vyellow, vyellow; contactMaterial = cmat); r=[-2.0, 0.0, 0.0], fixed=false)
 
 
-   # 
+   #
    lPipe = 2.0
    dPipe = 0.5
    wPipe = 0.7
@@ -137,60 +137,60 @@ for time =  LINSPACE(tStart, tEnd, 101)  # 0:0.01:0.01
   Modia3D.updatePosition!(as)
   Modia3D.selectContactPairs!(as)
 
-  as.rotM1AABB.data.Lx = abs(AABB[1][1].x_max - AABB[1][1].x_min)
-  as.rotM1AABB.data.Ly = abs(AABB[1][1].y_max - AABB[1][1].y_min)
-  as.rotM1AABB.data.Lz = abs(AABB[1][1].z_max - AABB[1][1].z_min)
-  as.rotM1AABB.r_abs = [(AABB[1][1].x_max+AABB[1][1].x_min)/2,(AABB[1][1].y_max+AABB[1][1].y_min)/2,(AABB[1][1].z_max+AABB[1][1].z_min)/2 ]
+  as.rotM1AABB.data.Lx = abs(AABB[2][1].x_max - AABB[2][1].x_min)
+  as.rotM1AABB.data.Ly = abs(AABB[2][1].y_max - AABB[2][1].y_min)
+  as.rotM1AABB.data.Lz = abs(AABB[2][1].z_max - AABB[2][1].z_min)
+  as.rotM1AABB.r_abs = [(AABB[2][1].x_max+AABB[2][1].x_min)/2,(AABB[2][1].y_max+AABB[2][1].y_min)/2,(AABB[2][1].z_max+AABB[2][1].z_min)/2 ]
 
-  as.world_min.r_abs = [AABB[1][1].x_min, AABB[1][1].y_min, AABB[1][1].z_min]
-  as.world_max.r_abs = [AABB[1][1].x_max, AABB[1][1].y_max, AABB[1][1].z_max]
+  as.world_min.r_abs = [AABB[2][1].x_min, AABB[2][1].y_min, AABB[2][1].z_min]
+  as.world_max.r_abs = [AABB[2][1].x_max, AABB[2][1].y_max, AABB[2][1].z_max]
 
-  as.cameAABB.data.Lx = abs(AABB[2][1].x_max - AABB[2][1].x_min)
-  as.cameAABB.data.Ly = abs(AABB[2][1].y_max - AABB[2][1].y_min)
-  as.cameAABB.data.Lz = abs(AABB[2][1].z_max - AABB[2][1].z_min)
-  as.cameAABB.r_abs = [(AABB[2][1].x_max+AABB[2][1].x_min)/2,(AABB[2][1].y_max+AABB[2][1].y_min)/2,(AABB[2][1].z_max+AABB[2][1].z_min)/2 ]
+  as.cameAABB.data.Lx = abs(AABB[3][1].x_max - AABB[3][1].x_min)
+  as.cameAABB.data.Ly = abs(AABB[3][1].y_max - AABB[3][1].y_min)
+  as.cameAABB.data.Lz = abs(AABB[3][1].z_max - AABB[3][1].z_min)
+  as.cameAABB.r_abs = [(AABB[3][1].x_max+AABB[3][1].x_min)/2,(AABB[3][1].y_max+AABB[3][1].y_min)/2,(AABB[3][1].z_max+AABB[3][1].z_min)/2 ]
 
-  as.cameAABB1.data.Lx = abs(AABB[2][2].x_max - AABB[2][2].x_min)
-  as.cameAABB1.data.Ly = abs(AABB[2][2].y_max - AABB[2][2].y_min)
-  as.cameAABB1.data.Lz = abs(AABB[2][2].z_max - AABB[2][2].z_min)
-  as.cameAABB1.r_abs = [(AABB[2][2].x_max+AABB[2][2].x_min)/2,(AABB[2][2].y_max+AABB[2][2].y_min)/2,(AABB[2][2].z_max+AABB[2][2].z_min)/2 ]
+  as.cameAABB1.data.Lx = abs(AABB[3][2].x_max - AABB[3][2].x_min)
+  as.cameAABB1.data.Ly = abs(AABB[3][2].y_max - AABB[3][2].y_min)
+  as.cameAABB1.data.Lz = abs(AABB[3][2].z_max - AABB[3][2].z_min)
+  as.cameAABB1.r_abs = [(AABB[3][2].x_max+AABB[3][2].x_min)/2,(AABB[3][2].y_max+AABB[3][2].y_min)/2,(AABB[3][2].z_max+AABB[3][2].z_min)/2 ]
 
-  as.cameAABB2.data.Lx = abs(AABB[2][3].x_max - AABB[2][3].x_min)
-  as.cameAABB2.data.Ly = abs(AABB[2][3].y_max - AABB[2][3].y_min)
-  as.cameAABB2.data.Lz = abs(AABB[2][3].z_max - AABB[2][3].z_min)
-  as.cameAABB2.r_abs = [(AABB[2][3].x_max+AABB[2][3].x_min)/2,(AABB[2][3].y_max+AABB[2][3].y_min)/2,(AABB[2][3].z_max+AABB[2][3].z_min)/2 ]
+  as.cameAABB2.data.Lx = abs(AABB[3][3].x_max - AABB[3][3].x_min)
+  as.cameAABB2.data.Ly = abs(AABB[3][3].y_max - AABB[3][3].y_min)
+  as.cameAABB2.data.Lz = abs(AABB[3][3].z_max - AABB[3][3].z_min)
+  as.cameAABB2.r_abs = [(AABB[3][3].x_max+AABB[3][3].x_min)/2,(AABB[3][3].y_max+AABB[3][3].y_min)/2,(AABB[3][3].z_max+AABB[3][3].z_min)/2 ]
 
-  as.cameAABB3.data.Lx = abs(AABB[2][4].x_max - AABB[2][4].x_min)
-  as.cameAABB3.data.Ly = abs(AABB[2][4].y_max - AABB[2][4].y_min)
-  as.cameAABB3.data.Lz = abs(AABB[2][4].z_max - AABB[2][4].z_min)
-  as.cameAABB3.r_abs = [(AABB[2][4].x_max+AABB[2][4].x_min)/2,(AABB[2][4].y_max+AABB[2][4].y_min)/2,(AABB[2][4].z_max+AABB[2][4].z_min)/2 ]
+  as.cameAABB3.data.Lx = abs(AABB[3][4].x_max - AABB[3][4].x_min)
+  as.cameAABB3.data.Ly = abs(AABB[3][4].y_max - AABB[3][4].y_min)
+  as.cameAABB3.data.Lz = abs(AABB[3][4].z_max - AABB[3][4].z_min)
+  as.cameAABB3.r_abs = [(AABB[3][4].x_max+AABB[3][4].x_min)/2,(AABB[3][4].y_max+AABB[3][4].y_min)/2,(AABB[3][4].z_max+AABB[3][4].z_min)/2 ]
 
-  as.cameAABB4.data.Lx = abs(AABB[2][5].x_max - AABB[2][5].x_min)
-  as.cameAABB4.data.Ly = abs(AABB[2][5].y_max - AABB[2][5].y_min)
-  as.cameAABB4.data.Lz = abs(AABB[2][5].z_max - AABB[2][5].z_min)
-  as.cameAABB4.r_abs = [(AABB[2][5].x_max+AABB[2][5].x_min)/2,(AABB[2][5].y_max+AABB[2][5].y_min)/2,(AABB[2][5].z_max+AABB[2][5].z_min)/2 ]
+  as.cameAABB4.data.Lx = abs(AABB[3][5].x_max - AABB[3][5].x_min)
+  as.cameAABB4.data.Ly = abs(AABB[3][5].y_max - AABB[3][5].y_min)
+  as.cameAABB4.data.Lz = abs(AABB[3][5].z_max - AABB[3][5].z_min)
+  as.cameAABB4.r_abs = [(AABB[3][5].x_max+AABB[3][5].x_min)/2,(AABB[3][5].y_max+AABB[3][5].y_min)/2,(AABB[3][5].z_max+AABB[3][5].z_min)/2 ]
 
-  as.cameAABB5.data.Lx = abs(AABB[2][6].x_max - AABB[2][6].x_min)
-  as.cameAABB5.data.Ly = abs(AABB[2][6].y_max - AABB[2][6].y_min)
-  as.cameAABB5.data.Lz = abs(AABB[2][6].z_max - AABB[2][6].z_min)
-  as.cameAABB5.r_abs = [(AABB[2][6].x_max+AABB[2][6].x_min)/2,(AABB[2][6].y_max+AABB[2][6].y_min)/2,(AABB[2][6].z_max+AABB[2][6].z_min)/2 ]
+  as.cameAABB5.data.Lx = abs(AABB[3][6].x_max - AABB[3][6].x_min)
+  as.cameAABB5.data.Ly = abs(AABB[3][6].y_max - AABB[3][6].y_min)
+  as.cameAABB5.data.Lz = abs(AABB[3][6].z_max - AABB[3][6].z_min)
+  as.cameAABB5.r_abs = [(AABB[3][6].x_max+AABB[3][6].x_min)/2,(AABB[3][6].y_max+AABB[3][6].y_min)/2,(AABB[3][6].z_max+AABB[3][6].z_min)/2 ]
 
-  as.rotM2AABB.data.Lx = abs(AABB[3][1].x_max - AABB[3][1].x_min)
-  as.rotM2AABB.data.Ly = abs(AABB[3][1].y_max - AABB[3][1].y_min)
-  as.rotM2AABB.data.Lz = abs(AABB[3][1].z_max - AABB[3][1].z_min)
+  as.rotM2AABB.data.Lx = abs(AABB[4][1].x_max - AABB[4][1].x_min)
+  as.rotM2AABB.data.Ly = abs(AABB[4][1].y_max - AABB[4][1].y_min)
+  as.rotM2AABB.data.Lz = abs(AABB[4][1].z_max - AABB[4][1].z_min)
   as.rotM2AABB.r_abs = as.rotM2.frame0.r_abs
 
-  as.world_cylinder_min.r_abs = [AABB[3][1].x_min, AABB[3][1].y_min, AABB[3][1].z_min]
-  as.world_cylinder_max.r_abs = [AABB[3][1].x_max, AABB[3][1].y_max, AABB[3][1].z_max]
+  as.world_cylinder_min.r_abs = [AABB[4][1].x_min, AABB[4][1].y_min, AABB[4][1].z_min]
+  as.world_cylinder_max.r_abs = [AABB[4][1].x_max, AABB[4][1].y_max, AABB[3][1].z_max]
 
-  as.greenAABB.data.Lx = abs(AABB[4][1].x_max - AABB[4][1].x_min)
-  as.greenAABB.data.Ly = abs(AABB[4][1].y_max - AABB[4][1].y_min)
-  as.greenAABB.data.Lz = abs(AABB[4][1].z_max - AABB[4][1].z_min)
+  as.greenAABB.data.Lx = abs(AABB[5][1].x_max - AABB[5][1].x_min)
+  as.greenAABB.data.Ly = abs(AABB[5][1].y_max - AABB[5][1].y_min)
+  as.greenAABB.data.Lz = abs(AABB[5][1].z_max - AABB[5][1].z_min)
   as.greenAABB.r_abs = as.green.frame0.r_abs
 
-  as.green2AABB.data.Lx = abs(AABB[6][1].x_max - AABB[6][1].x_min)
-  as.green2AABB.data.Ly = abs(AABB[6][1].y_max - AABB[6][1].y_min)
-  as.green2AABB.data.Lz = abs(AABB[6][1].z_max - AABB[6][1].z_min)
+  as.green2AABB.data.Lx = abs(AABB[7][1].x_max - AABB[7][1].x_min)
+  as.green2AABB.data.Ly = abs(AABB[7][1].y_max - AABB[7][1].y_min)
+  as.green2AABB.data.Lz = abs(AABB[7][1].z_max - AABB[7][1].z_min)
   as.green2AABB.r_abs = as.green2.frame0.r_abs
 
 

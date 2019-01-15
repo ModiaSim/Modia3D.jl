@@ -55,7 +55,6 @@ function addIndicesOfCutJointsToSuperObj(scene::Scene)
   tmp = collect(values(scene.noCPairsHelp))
   for i=1:length(tmp)
     if length(tmp[i]) == 2
-      # println("tmp[$i] = ", tmp[i])
       insert_and_dedup!(scene.noCPairs[minimum(tmp[i])], maximum(tmp[i]))
     else
       error("...from addIndicesOfCutJointsToSuperObj: problems with amount of cut joints")
@@ -70,7 +69,8 @@ end
 #     these elements form together a super object
 #   elements which are directly connected with a joint can't collide
 #     these elements are excluded from the collision list
-function build_celements!(scene::Scene, world::Object3D)::NOTHING
+function build_superObjs!(scene::Scene, world::Object3D)::NOTHING
+  if !scene.initSuperObj
   stack = scene.stack
   buffer = scene.buffer
   empty!(stack)
@@ -78,9 +78,11 @@ function build_celements!(scene::Scene, world::Object3D)::NOTHING
   empty!(scene.allVisuElements)
 
   push!(buffer, world)
-
   actPos = 1
   nPos   = 1
+
+  hasOneCollisionSuperObj = false
+  hasMoreCollisionSuperObj = false
 
   while actPos <= nPos
     superObjsRow = SuperObjsRow()
@@ -101,6 +103,13 @@ function build_celements!(scene::Scene, world::Object3D)::NOTHING
 
 
     push!(scene.celements, superObjsRow.superObjCollision.superObj)
+
+    if length(superObjsRow.superObjCollision.superObj) > 0 && hasOneCollisionSuperObj == true
+      hasMoreCollisionSuperObj = true
+    elseif length(superObjsRow.superObjCollision.superObj) > 0
+      hasOneCollisionSuperObj = true
+    end
+
     if length(superObjsRow.superObjCollision.superObj) > 0 && !isempty(superObjsRow.noCPair)
         push!(scene.noCPairs, superObjsRow.noCPair)
     else
@@ -119,7 +128,7 @@ function build_celements!(scene::Scene, world::Object3D)::NOTHING
     actPos += 1
   end
   addIndicesOfCutJointsToSuperObj(scene)
-
+#=
   println("scene.noCPairs ", scene.noCPairs)
 
   for a in scene.celements
@@ -131,6 +140,8 @@ function build_celements!(scene::Scene, world::Object3D)::NOTHING
     println(" ")
   end
 
+  println("geht mit AABB weiter ")
+
   for a in scene.AABB
     println("[")
     for b in a
@@ -139,12 +150,10 @@ function build_celements!(scene::Scene, world::Object3D)::NOTHING
     println("]")
     println(" ")
   end
-
-
-  if length(scene.celements) > 1
-    scene.collide = true
-  else
-    scene.collide = false
+=#
+  println("super objs sind initialisiert")
+  hasMoreCollisionSuperObj ? (scene.collide = true) : (scene.collide = false)
+  scene.initSuperObj = true
   end
   return nothing
 end
@@ -237,9 +246,9 @@ end
 
 function initAnalysis!(world::Object3D, scene::Scene)
    # Initialize spanning tree and visualization (if visualization desired and visual elements present)
-   println("initAnalysis!(world::Object3D, scene::Scene)")
+  println("initAnalysis!(world::Object3D, scene::Scene)")
   build_tree_and_allVisuElements!(scene, world)
-  build_celements!(scene, world)
+  build_superObjs!(scene, world)
 
    # Initialize contact detection if contact detection desired and objects with contactMaterial are present
    #if scene.options.enableContactDetection
@@ -277,21 +286,21 @@ function initAnalysis!(assembly::Modia3D.AbstractAssembly;
 
    # Initialize spanning tree and visualization (if visualization desired and visual elements present)
    build_tree_and_allVisuElements!(scene, world)
-   build_celements!(scene, world)
+   build_superObjs!(scene, world)
    if scene.visualize
       initializeVisualization(Modia3D.renderer[1], scene.allVisuElements)
    end
 
    # Initialize contact detection if contact detection desired and objects with contactMaterial are present
-   if scene.options.enableContactDetection
+  # if scene.options.enableContactDetection
 
       if scene.collide
         initializeContactDetection!(world, scene) # scene.options.contactDetection, scene.celements, scene.noCPairs, scene.AABB)
       end
-   end
+  # end
 
    # Initialize connections between signals and frames, joints, ...
-   build_SignalObject3DConnections!(assembly)
+   #build_SignalObject3DConnections!(assembly)
 
    scene.initAnalysis = true
 end
@@ -299,6 +308,7 @@ end
 
 #=
 function initAnalysis!(assembly::Modia3D.AbstractAssembly)
+  println("bin in initAnalysis!(assembly::Modia3D.AbstractAssembly)")
    # Add visual elements to scene.allVisuElements
    if typeof(assembly._internal.referenceObject3D) == NOTHING
       error("\nError message from Modia3D.initAnalysis!(..):\n",
@@ -320,7 +330,7 @@ function initAnalysis!(assembly::Modia3D.AbstractAssembly)
 
    # Initialize contact detection if contact detection desired and objects with contactMaterial are present
    if scene.options.enableContactDetection
-      build_celements!(scene, world)
+      build_superObjs!(scene, world)
       if scene.collide
         initializeContactDetection!(world, scene) # scene.options.contactDetection, scene.celements, scene.noCPairs, scene.AABB)
       end
@@ -331,10 +341,6 @@ function initAnalysis!(assembly::Modia3D.AbstractAssembly)
    scene.initAnalysis = true
 end
 =#
-
-
-
-
 
 # Error Messages
 function assertInitAnalysis(assembly::Modia3D.AbstractAssembly, functionName::String)
@@ -432,7 +438,6 @@ function closeAnalysis!(scene::Scene)
      closeVisualization(Modia3D.renderer[1])
      Basics.emptyArray!(scene.allVisuElements)
      scene.visualize = false
-
      # Close Collision detection
      if scene.collide
         closeContactDetection!(scene.options.contactDetection)
@@ -442,6 +447,8 @@ function closeAnalysis!(scene::Scene)
      Basics.emptyArray!(scene.celements)
      Basics.emptyArray!(scene.noCPairs)
      scene.collide = false
+
+     scene.initSuperObj = false
 
      # Close signals and Forces and Torques
      Basics.emptyArray!(scene.uniqueSignals)

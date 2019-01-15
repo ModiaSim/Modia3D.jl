@@ -314,12 +314,13 @@ mutable struct Scene
    collide::Bool                            # = true, if elements for contact detection available
 
    # initialization of analysis
-   initAnalysis::Bool                       # = true, if analysis is initialized
+   initAnalysis::Bool                         # = true, if analysis is initialized
+   initSuperObj::Bool                         # = true, if super objects are initialized
    analysis::ModiaMath.AnalysisType           # Type of analysis
-   superObjs::Array{SuperObjsRow,1}
+   superObjs::Array{SuperObjsRow,1}            # super objects
    tree::Vector{Object3D}                      # Spanning tree of the frames in depth-first order (without world)
-   cutJoints::Vector{Modia3D.AbstractJoint} # Vector of all cut-joints
-   allVisuElements::Vector{Object3D}                 # Object3Ds (including Object3Ds.data) that shall be visualized
+   cutJoints::Vector{Modia3D.AbstractJoint}    # Vector of all cut-joints
+   allVisuElements::Vector{Object3D}           # Object3Ds (including Object3Ds.data) that shall be visualized
    celements::Array{Array{Object3D}}           # Object3Ds that can collide;  celements[i][:] cannot collide with each other
    noCPairs::Array{Array{Int64,1}}       # Indices of frames (with respect to celements) that can't collide in general (e.g. objects are connected via joints)
    noCPairsHelp::Dict{Modia3D.AbstractJoint,Array{Int64,1}}
@@ -339,6 +340,7 @@ mutable struct Scene
                   Vector{Object3D}[],
                   Vector{Object3D}[],
                   sceneOptions,
+                  false,
                   false,
                   false,
                   false,

@@ -1,4 +1,4 @@
-module Move_FourBar
+module Move_FourBarCollision1
 
 using  Modia3D
 import Modia3D.ModiaMath
@@ -60,5 +60,5 @@ end
 model  = Modia3D.SimulationModel( Move(), analysis=ModiaMath.KinematicAnalysis )
 result = ModiaMath.simulate!(model, stopTime=3.0, log=false)
 
-println("... success of Move_FourBar.jl!")
+println("... success of Move_FourBarCollision1.jl!")
 end

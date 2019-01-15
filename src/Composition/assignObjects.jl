@@ -62,6 +62,27 @@ function assignAll(scene::Scene, superObj::SuperObjsRow, obj::Object3D, world::O
 end
 
 
+function assignDynamics!(obj::Object3D)
+  obj.dynamics = Object3Ddynamics()
+end
+
+
+function createCutJoints!(scene::Scene, obj::Object3D)
+  for cutJoint in obj.twoObject3Dobject
+    if typeof(cutJoint) <: Modia3D.AbstractJoint
+      if !cutJoint.visited
+        println("\n... Cut-joint ", ModiaMath.instanceName(cutJoint), " pushed on scene.cutJoints vector")
+        push!(scene.cutJoints, cutJoint)
+        #println("length scene.cutJoints = ", length(scene.cutJoints))
+        push!(scene.noCPairsHelp, cutJoint => [])
+        #println("length scene.noCPairsHelp = ", length(scene.noCPairsHelp))
+        cutJoint.visited = true
+      end
+    end
+  end
+end
+
+
 function fillVisuElements!(scene::Scene, obj::Object3D, world::Object3D)
   renderer            = Modia3D.renderer[1]
   visualizeFrames     = scene.options.visualizeFrames
@@ -87,28 +108,8 @@ function fillVisuElements!(scene::Scene, obj::Object3D, world::Object3D)
 end
 
 
-function createCutJoints!(scene::Scene, obj::Object3D)
-  for cutJoint in obj.twoObject3Dobject
-    if typeof(cutJoint) <: Modia3D.AbstractJoint
-      if !cutJoint.visited
-        println("\n... Cut-joint ", ModiaMath.instanceName(cutJoint), " pushed on scene.cutJoints vector")
-        push!(scene.cutJoints, cutJoint)
-        #println("length scene.cutJoints = ", length(scene.cutJoints))
-        push!(scene.noCPairsHelp, cutJoint => [])
-        #println("length scene.noCPairsHelp = ", length(scene.noCPairsHelp))
-        cutJoint.visited = true
-      end
-    end
-  end
-end
-
-
-function assignDynamics!(obj::Object3D)
-  obj.dynamics = Object3Ddynamics()
-end
-
 function assign_Visu_CutJoint_Dynamics!(scene::Scene, obj::Object3D, world::Object3D)
-  fillVisuElements!(scene, obj, world)
-  createCutJoints!(scene, obj)
   assignDynamics!(obj)
+  createCutJoints!(scene, obj)
+  fillVisuElements!(scene, obj, world)
 end

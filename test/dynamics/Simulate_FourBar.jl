@@ -37,12 +37,14 @@ end
    rev4   = Modia3D.Revolute(bar3.frame2, bar2.frame2; phi_start = -pi/2)
 end
 
-fourbar = Fourbar(Lx=1.0, sceneOptions=Modia3D.SceneOptions(visualizeFrames=true, 
+#hier wird eine scene erstellt
+fourbar = Fourbar(Lx=1.0, sceneOptions=Modia3D.SceneOptions(visualizeFrames=true,
                                                     defaultFrameLength=0.3,
                                                     enableContactDetection=false))
+#hier wird wieder eine scene erstellt
 model = Modia3D.SimulationModel(fourbar)
 
-Modia3D.visualizeAssembly!( fourbar )
- 
+# Modia3D.visualizeAssembly!( fourbar )
+
 println("... success of Simulate_FourBar.jl!")
 end

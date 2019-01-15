@@ -124,7 +124,7 @@ struct SimulationModel <: ModiaMath.AbstractSimulationModel
 
       # Build tree (for multibody computation), allVisuElements (for visualization), celements (for contact handling)
       build_tree_and_allVisuElements!(scene, world)
-      build_celements!(scene, world)
+      build_superObjs!(scene, world)
       nz = 0
       if scene.options.enableContactDetection
          if scene.collide
