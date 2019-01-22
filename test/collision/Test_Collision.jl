@@ -118,7 +118,7 @@ for time = LINSPACE(tStart, tEnd, 101)
   Modia3D.set_r!(collisionTest.collisionSolids.rotM1.frames[1], [0, 0, -s])
 
   Modia3D.updatePosition!(collisionTest)
-  Modia3D.getDistances!(collisionTest)
+  Modia3D.selectContactPairs!(collisionTest)
 
   collisionTest.boundingBoxes.blau1AABB.data.Lx = abs(AABB[1][1].x_max - AABB[1][1].x_min)
   collisionTest.boundingBoxes.blau1AABB.data.Ly = abs(AABB[1][1].y_max - AABB[1][1].y_min)

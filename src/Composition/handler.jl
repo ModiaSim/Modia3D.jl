@@ -129,10 +129,8 @@ function build_superObjs!(scene::Scene, world::Object3D)::NOTHING
   end
   addIndicesOfCutJointsToSuperObj(scene)
 
-#  println("scene.noCPairs ", scene.noCPairs)
-
-
 #=
+  println("scene.noCPairs ", scene.noCPairs)
   for superObjRow in scene.superObjs
     println("[")
     for a in superObjRow.superObjCollision.superObj
@@ -143,7 +141,6 @@ function build_superObjs!(scene::Scene, world::Object3D)::NOTHING
   end
 
   println("geht mit AABB weiter ")
-
   for a in scene.AABB
     println("[")
     for b in a
@@ -155,6 +152,9 @@ function build_superObjs!(scene::Scene, world::Object3D)::NOTHING
 =#
 
   hasMoreCollisionSuperObj ? (scene.collide = true) : (scene.collide = false)
+
+  # println("scene.collide = ", scene.collide)
+
   scene.initSuperObj = true
   end
   return nothing

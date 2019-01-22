@@ -90,7 +90,7 @@ struct ContactPairs
          allPossibleContactPairsInz = false
          nz = nz_max
       end
-
+      # println("nz = $nz , nz_max = $nz_max")
       # Allocate storage
       z = fill(42.0, nz)
       defaultPoint   = MVector{3,Float64}(0.0,0.0,0.0)

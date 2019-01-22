@@ -103,7 +103,7 @@ filenameMesh = joinpath(Modia3D.path, "objects", "bunny", "bunny.obj")
    world_cylinder_max = Modia3D.Object3D(world , r=[0.50151, 0.0, 0.0])
 end
 
-as = collisionSolids(sceneOptions=Modia3D.SceneOptions(visualizeFrames=true, defaultFrameLength=0.3, nz_max = 3))
+as = collisionSolids(sceneOptions=Modia3D.SceneOptions(visualizeFrames=true, defaultFrameLength=0.3, nz_max = 8))
 
 # Kinematic simulation
 Modia3D.initAnalysis!(as)
