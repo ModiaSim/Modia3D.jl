@@ -18,10 +18,10 @@ AABB_collision(aabb1::Basics.BoundingBox, aabb2::Basics.BoundingBox) = aabb1.x_m
 
 
 function Composition.initializeContactDetection!(world::Composition.Object3D, scene::Composition.Scene)
-  # ch::Composition.ContactDetectionMPR_handler, celements::Array{Array{Composition.Object3D}}, noCPairs::Array{Array{Int64,1}}, AABB::Array{Array{Basics.BoundingBox}})
-  # scene.options.contactDetection, scene.celements, scene.noCPairs, scene.AABB
+  # ch::Composition.ContactDetectionMPR_handler, collSuperObjs::Array{Array{Composition.Object3D}}, noCPairs::Array{Array{Int64,1}}, AABB::Array{Array{Basics.BoundingBox}})
+  # scene.options.contactDetection, scene.collSuperObjs, scene.noCPairs, scene.AABB
   ch = scene.options.contactDetection
-  ch.contactPairs = Composition.ContactPairs(scene.celements, scene.noCPairs, scene.AABB, scene.options.nz_max)
+  ch.contactPairs = Composition.ContactPairs(scene.superObjs, scene.noCPairs, scene.AABB, scene.options.nz_max)
   if ch.contactPairs.nz == 0
      Composition.closeContactDetection!(ch)
      scene.collide = false
@@ -115,13 +115,13 @@ end
 
 
 function computeDistances(ch::Composition.ContactDetectionMPR_handler, phase2::Bool)
-  celements = ch.contactPairs.celements
+  collSuperObjs = ch.contactPairs.collSuperObjs
   noCPairs = ch.contactPairs.noCPairs
 
   AABB = ch.contactPairs.AABB
-  if length(celements) > 1
-    for i = 1:length(celements)
-      superObj = celements[i]
+  if length(collSuperObjs) > 1
+    for i = 1:length(collSuperObjs)
+      superObj = collSuperObjs[i]
       for j = 1:length(superObj)
         obj = superObj[j]
         AABB[i][j] = Solids.boundingBox!(obj.data.geo, AABB[i][j], obj.r_abs, obj.R_abs; tight=true, scaleFactor=0.1)
@@ -133,16 +133,16 @@ function computeDistances(ch::Composition.ContactDetectionMPR_handler, phase2::B
       empty!(ch.dict1)
     end
 
-    for i_superObj = 1:length(celements)
-      superObj = celements[i_superObj]
+    for i_superObj = 1:length(collSuperObjs)
+      superObj = collSuperObjs[i_superObj]
       if !isempty(superObj)
         superAABB = AABB[i_superObj]
       for i_obj = 1:length(superObj)
         obj = superObj[i_obj]      # determine contact from this Object3D with all Object3Ds that have larger indices
         aabb = superAABB[i_obj]
-        for i_next_superObj = i_superObj+1:length(celements)
+        for i_next_superObj = i_superObj+1:length(collSuperObjs)
           if !(i_next_superObj in noCPairs[i_superObj]) # index is not in objects which cant collide
-            nextSuperObj = celements[i_next_superObj]
+            nextSuperObj = collSuperObjs[i_next_superObj]
             nextSuperAABB = AABB[i_next_superObj]
             for i_nextObj = 1:length(nextSuperObj)
               nextObj = nextSuperObj[i_nextObj]
@@ -182,17 +182,7 @@ function computeDistances(ch::Composition.ContactDetectionMPR_handler, phase2::B
                         #println("distance = $distance")
                         error("\nNumber of max. collision pairs nz (= ", ch.contactPairs.nz, ") is too low.",
                               "\nProvide a large nz_max with Modia3D.SceneOptions(nz_max=xxx).")
-                      end
-                    end
-                  end
-                end
-              end
-            end
-          end
-        end
-      end
-      end
-    end
+    end; end; end; end; end; end; end; end; end; end; end
     #visualizeContactPoints()
     #visualizeSupportPoints()
  end
@@ -248,7 +238,7 @@ end
 function Composition.closeContactDetection!(ch::Composition.ContactDetectionMPR_handler)
   Basics.emptyArray!(ch.dict1)
   Basics.emptyArray!(ch.dict2)
-  Basics.emptyArray!(ch.contactPairs.celements)
+  Basics.emptyArray!(ch.contactPairs.collSuperObjs)
   Basics.emptyArray!(ch.contactPairs.noCPairs)
   Basics.emptyArray!(ch.contactPairs.z)
   Basics.emptyArray!(ch.contactPairs.contactPoint1)

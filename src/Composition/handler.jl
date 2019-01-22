@@ -63,6 +63,22 @@ function addIndicesOfCutJointsToSuperObj(scene::Scene)
 end
 
 
+function createAABB_noCPairs(scene::Scene, superObjsRow::SuperObjsRow)
+  if length(superObjsRow.superObjCollision.superObj) > 0 && !isempty(superObjsRow.noCPair)
+      push!(scene.noCPairs, superObjsRow.noCPair)
+  else
+    push!(scene.noCPairs, [0])
+  end
+
+  if length(superObjsRow.superObjCollision.superObj) > 0
+    AABBrow = [Basics.BoundingBox() for i = 1:length(superObjsRow.superObjCollision.superObj)]
+    push!(scene.AABB, AABBrow)
+  else
+    push!(scene.AABB, [])
+  end
+end
+
+
 # it builds the elements which may collide
 # to reduce the amount of collision pairs, some assumptions are made:
 #   elements which are rigidly attached, can't collide
@@ -81,7 +97,7 @@ function build_superObjs!(scene::Scene, world::Object3D)::NOTHING
   actPos = 1
   nPos   = 1
 
-  hasOneCollisionSuperObj = false
+  hasOneCollisionSuperObj  = false
   hasMoreCollisionSuperObj = false
 
   while actPos <= nPos
@@ -101,28 +117,13 @@ function build_superObjs!(scene::Scene, world::Object3D)::NOTHING
       fillStackOrBuffer!(scene, superObjsRow, frameChild)
     end
 
-
-    push!(scene.celements, superObjsRow.superObjCollision.superObj)
-
     if length(superObjsRow.superObjCollision.superObj) > 0 && hasOneCollisionSuperObj == true
       hasMoreCollisionSuperObj = true
     elseif length(superObjsRow.superObjCollision.superObj) > 0
       hasOneCollisionSuperObj = true
     end
 
-    if length(superObjsRow.superObjCollision.superObj) > 0 && !isempty(superObjsRow.noCPair)
-        push!(scene.noCPairs, superObjsRow.noCPair)
-    else
-      push!(scene.noCPairs, [0])
-    end
-
-    if length(superObjsRow.superObjCollision.superObj) > 0
-      AABBrow = [Basics.BoundingBox() for i = 1:length(superObjsRow.superObjCollision.superObj)]
-      push!(scene.AABB, AABBrow)
-    else
-      push!(scene.AABB, [])
-    end
-
+    createAABB_noCPairs(scene, superObjsRow)
     push!(scene.superObjs, superObjsRow)
     nPos = length(buffer)
     actPos += 1
@@ -152,9 +153,6 @@ function build_superObjs!(scene::Scene, world::Object3D)::NOTHING
 =#
 
   hasMoreCollisionSuperObj ? (scene.collide = true) : (scene.collide = false)
-
-  # println("scene.collide = ", scene.collide)
-
   scene.initSuperObj = true
   end
   return nothing
