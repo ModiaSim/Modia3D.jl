@@ -418,8 +418,8 @@ function removeChild!(frame::Object3D, child::Object3D)::NOTHING
          return nothing
       end
    end
-   error("\nError from Modia3D.Composition.removeChild!(", frame.name, ", ", child.name, ")\n",
-         child.name, " is not a child of frame ", frame.name)
+   error("\nError from Modia3D.Composition.removeChild!(", frame, ", ", child, ")\n",
+         child, " is not a child of frame ", frame)
 end
 
 

@@ -32,23 +32,6 @@ function build_tree_and_allVisuElements!(scene::Scene, world::Object3D)::NOTHING
    return nothing
 end
 
-# the indices of super objects, which can't collide, are stored in a list
-function fillStackOrBuffer!(scene::Scene, superObj::SuperObjsRow, obj::Object3D)::NOTHING
-  for child in obj.children
-    if isNotWorld(child)
-      if isNotFixed(child)
-        push!(scene.buffer, child)
-        if !child.joint.canCollide    # !isFree(child) &&  !( typeof(child.joint) <: Modia3D.AbstractPrismatic )
-          push!(superObj.noCPair, length(scene.buffer))
-        end
-      else
-        push!(scene.stack, child)
-      end
-    end
-  end
-end
-
-
 insert_and_dedup!(v::Vector, x) = (splice!(v, searchsorted(v,x), x); v)
 
 function addIndicesOfCutJointsToSuperObj(scene::Scene)
@@ -79,6 +62,92 @@ function createAABB_noCPairs(scene::Scene, superObjsRow::SuperObjsRow)
 end
 
 
+function changeParentToRootObj(newParent::Object3D, obj::Object3D)
+#=
+  # Save elements of obj
+  child_r_rel  = obj.r_rel
+  child_R_rel  = obj.R_rel
+  parent_r_rel = obj.parent.r_rel
+  parent_R_rel = obj.parent.R_rel
+  parent = obj.parent
+
+  child_r_abs  = obj.r_abs
+  child_R_abs  = obj.R_abs
+  parent_r_abs = obj.parent.r_abs
+  parent_R_abs = obj.parent.R_abs
+
+  r_new = parent_r_rel + parent_R_rel' * child_r_rel
+  R_new = child_R_rel * parent_R_rel
+  obj.r_rel = r_new
+  obj.R_rel = R_new
+
+  # Reverse obj, so that newParent is the new parent
+  obj.parent = newParent
+  push!(newParent.children, obj)
+
+  #obj.r_abs = parent_r_abs + parent_R_abs'*r_new
+  #obj.R_abs = R_new*parent_R_abs
+=#
+
+
+  # Save elements of obj
+   r_rel  = obj.r_rel
+   R_rel  = obj.R_rel
+   oldParent = obj.parent
+   parent_r_rel = oldParent.r_rel
+   parent_R_rel = oldParent.R_rel
+
+   # Reverse obj, so that newParent is the new parent
+   obj.parent = newParent
+   push!(newParent.children, obj)
+
+  if r_rel ≡ ModiaMath.ZeroVector3D
+    oldParent.r_rel = ModiaMath.ZeroVector3D
+    oldParent.r_abs = obj.r_abs
+  else
+    oldParent.r_rel = -R_rel*r_rel
+  end
+
+  if R_rel ≡ ModiaMath.NullRotation
+    oldParent.R_rel = ModiaMath.NullRotation
+    oldParent.R_abs = obj.R_abs
+  else
+    oldParent.R_rel = R_rel'
+  end
+
+  return nothing
+end
+
+
+# the indices of super objects, which can't collide, are stored in a list
+function fillStackOrBuffer!(scene::Scene, superObj::SuperObjsRow, obj::Object3D, rootSuperObj::Object3D)::NOTHING
+  for child in obj.children
+    if isNotWorld(child)
+      if isNotFixed(child)
+        push!(scene.buffer, child)
+        if !child.joint.canCollide    # !isFree(child) &&  !( typeof(child.joint) <: Modia3D.AbstractPrismatic )
+          push!(superObj.noCPair, length(scene.buffer))
+        end
+      else
+        push!(scene.stack, child)
+      end
+    end
+
+    if !(obj == rootSuperObj)
+      #changeParentToRootObj(rootSuperObj, child)
+    end
+  end
+
+  if !(obj == rootSuperObj)
+    if !isempty(obj.children)
+      #empty!(obj.children)
+    end
+  end
+
+  return nothing
+end
+
+
 # it builds the elements which may collide
 # to reduce the amount of collision pairs, some assumptions are made:
 #   elements which are rigidly attached, can't collide
@@ -103,18 +172,18 @@ function build_superObjs!(scene::Scene, world::Object3D)::NOTHING
   while actPos <= nPos
     superObjsRow = SuperObjsRow()
     AABBrow      = Array{Basics.BoundingBox,1}()
-    frameRoot = buffer[actPos]
-    assign_Visu_CutJoint_Dynamics!(scene, frameRoot, world)
-    if frameRoot != world
-      assignAll(scene, superObjsRow, frameRoot, world, actPos)
+    rootSuperObj = buffer[actPos]
+    assign_Visu_CutJoint_Dynamics!(scene, rootSuperObj, world)
+    if rootSuperObj != world
+      assignAll(scene, superObjsRow, rootSuperObj, world, actPos)
     end
-    fillStackOrBuffer!(scene, superObjsRow, frameRoot)
+    fillStackOrBuffer!(scene, superObjsRow, rootSuperObj, rootSuperObj)
 
     while length(stack) > 0
       frameChild = pop!(stack)
       assign_Visu_CutJoint_Dynamics!(scene, frameChild, world)
       assignAll(scene, superObjsRow, frameChild, world, actPos)
-      fillStackOrBuffer!(scene, superObjsRow, frameChild)
+      fillStackOrBuffer!(scene, superObjsRow, frameChild, rootSuperObj)
     end
 
     if length(superObjsRow.superObjCollision.superObj) > 0 && hasOneCollisionSuperObj == true
@@ -127,10 +196,11 @@ function build_superObjs!(scene::Scene, world::Object3D)::NOTHING
     push!(scene.superObjs, superObjsRow)
     nPos = length(buffer)
     actPos += 1
+    println(" ")
   end
   addIndicesOfCutJointsToSuperObj(scene)
 
-#=
+
   println("scene.noCPairs ", scene.noCPairs)
   for superObjRow in scene.superObjs
     println("[")
@@ -140,7 +210,7 @@ function build_superObjs!(scene::Scene, world::Object3D)::NOTHING
     println("]")
     println(" ")
   end
-
+#=
   println("geht mit AABB weiter ")
   for a in scene.AABB
     println("[")

@@ -86,10 +86,10 @@ end
   world = Modia3D.Object3D(Modia3D.CoordinateSystem(1.0))
 
   collisionSolids = CollisionSolids(world)
-  boundingBoxes   = BoundingBoxes(world)
+  # boundingBoxes   = BoundingBoxes(world)
 end
 
-collisionTest = CollisionTest(sceneOptions=Modia3D.SceneOptions(nz_max = 80))
+collisionTest = CollisionTest(sceneOptions=Modia3D.SceneOptions(visualizeFrames=true, defaultFrameLength=0.3,nz_max = 80))
 
 # collisionTest = CollisionTest()
 Modia3D.initAnalysis!(collisionTest)
@@ -118,8 +118,8 @@ for time = LINSPACE(tStart, tEnd, 101)
   Modia3D.set_r!(collisionTest.collisionSolids.rotM1.frames[1], [0, 0, -s])
 
   Modia3D.updatePosition!(collisionTest)
-  Modia3D.selectContactPairs!(collisionTest)
-
+#  Modia3D.selectContactPairs!(collisionTest)
+#=
   collisionTest.boundingBoxes.blau1AABB.data.Lx = abs(AABB[1][1].x_max - AABB[1][1].x_min)
   collisionTest.boundingBoxes.blau1AABB.data.Ly = abs(AABB[1][1].y_max - AABB[1][1].y_min)
   collisionTest.boundingBoxes.blau1AABB.data.Lz = abs(AABB[1][1].z_max - AABB[1][1].z_min)
@@ -174,9 +174,9 @@ for time = LINSPACE(tStart, tEnd, 101)
   collisionTest.boundingBoxes.gelb3AABB.data.Ly = abs(AABB[6][3].y_max - AABB[6][3].y_min)
   collisionTest.boundingBoxes.gelb3AABB.data.Lz = abs(AABB[6][3].z_max - AABB[6][3].z_min)
   collisionTest.boundingBoxes.gelb3AABB.r_abs = collisionTest.collisionSolids.gelb2.frame0.r_abs
+=#
 
-
-  Modia3D.setComputationFlag(collisionTest)
+#  Modia3D.setComputationFlag(collisionTest)
   Modia3D.visualize!(collisionTest,time)
 
 #=

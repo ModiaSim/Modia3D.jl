@@ -106,13 +106,13 @@ function collision(ch::Composition.ContactDetectionMPR_handler, shapeA::Composit
 
    r0 = SupportPoint(centroidA-centroidB, SVector{3,Float64}(0.0,0.0,0.0), SVector{3,Float64}(0.0,0.0,0.0), SVector{3,Float64}(0.0,0.0,0.0))
    if norm(r0.p) <= neps # centers of shapes are overlapping
-     error("MPR: Too large penetration (prerequisite of MPR violated). Centers are overlapping. Look at shapeA = ", shapeA.name, " shapeB = ", shapeB.name)
+     error("MPR: Too large penetration (prerequisite of MPR violated). Centers are overlapping. Look at shapeA = ", shapeA, " shapeB = ", shapeB)
    end
    r1   = getSupportPoint(shapeA, shapeB, Basics.normalizeVector(-r0.p))
    n2 = cross(r0.p, r1.p)
    n2abs = norm(n2)
    #if n2abs < 1e-10
-   #   println("... (",shapeA.name, ",", shapeB.name, "): n2abs = ", n2abs)
+   #   println("... (",shapeA, ",", shapeB, "): n2abs = ", n2abs)
    #   if n2abs > neps
    #      println("      r0.p = ", r0.p, ", r1.p = ", r1.p, ", n2 = ", n2)
    #   end
@@ -124,7 +124,7 @@ function collision(ch::Composition.ContactDetectionMPR_handler, shapeA::Composit
      distance = dot(r1.p,normalize(r0.p))
      #println("r1.a, r1.b = ", r1.a, " ", r1.b)
      #println("MVector{3,Float64}(r1.a) = ", MVector{3,Float64}(r1.a))
-     #println("... (",shapeA.name, ",", shapeB.name, "): termination 1")
+     #println("... (",shapeA, ",", shapeB, "): termination 1")
      #println("TC 1")
      return (distance, MVector{3,Float64}(r1.a), MVector{3,Float64}(r1.b), MVector{3,Float64}(r1.n), nothing, nothing, nothing, nothing, nothing, nothing)
    else
@@ -140,7 +140,7 @@ function collision(ch::Composition.ContactDetectionMPR_handler, shapeA::Composit
        # Shape is purely planar. Computing the shortest distance for a planar shape
        # requires an MPR 2D algorithm (using lines instead of triangles as portals).
        # However, this is not implemented and therefore the shortest distance cannot be computed
-       error("MPR: Shapes are planar and MPR2D is not supported. abs(dot((r2.p-r1.p),n2)). Look at shapeA = ", shapeA.name, " shapeB = ", shapeB.name)
+       error("MPR: Shapes are planar and MPR2D is not supported. abs(dot((r2.p-r1.p),n2)). Look at shapeA = ", shapeA, " shapeB = ", shapeB)
      end
      n3 = cross(r1.p-r0.p, r2.p-r0.p)   # |n3| > 0 guaranteed, due to construction
    end
@@ -156,7 +156,7 @@ function collision(ch::Composition.ContactDetectionMPR_handler, shapeA::Composit
        # Shape is purely planar. Computing the shortest distance for a planar shape
        # requires an MPR 2D algorithm (using lines instead of triangles as portals).
        # However, this is not implemented and therefore the shortest distance cannot be computed
-       error("MPR: Shapes are planar and MPR2D is not supported. r1, r2, r3 are on the same ray. Look at shapeA = ", shapeA.name, " shapeB = ", shapeB.name)
+       error("MPR: Shapes are planar and MPR2D is not supported. r1, r2, r3 are on the same ray. Look at shapeA = ", shapeA, " shapeB = ", shapeB)
      end
    end
 
@@ -184,7 +184,7 @@ function collision(ch::Composition.ContactDetectionMPR_handler, shapeA::Composit
    end
 
    if success != true
-     error("MPR: Max. number of iterations is reached. Look at shapeA = ", shapeA.name, " shapeB = ", shapeB.name)
+     error("MPR: Max. number of iterations is reached. Look at shapeA = ", shapeA, " shapeB = ", shapeB)
    end
 
    ### Phase 3
@@ -199,7 +199,7 @@ function collision(ch::Composition.ContactDetectionMPR_handler, shapeA::Composit
           # Shape is purely planar. Computing the shortest distance for a planar shape
           # requires an MPR 2D algorithm (using lines instead of triangles as portals).
           # However, this is not implemented and therefore the shortest distance cannot be computed
-          error("MPR: Shapes are planar and MPR2D is not supported. abs(dot((r3.p-r1.p),r3.n)). Look at shapeA = ", shapeA.name, " shapeB = ", shapeB.name)
+          error("MPR: Shapes are planar and MPR2D is not supported. abs(dot((r3.p-r1.p),r3.n)). Look at shapeA = ", shapeA, " shapeB = ", shapeB)
         end
         n4 = cross(r2.p-r1.p, r3.p-r1.p)   # |n4| > 0 guaranteed, due to construction
       end
@@ -292,7 +292,7 @@ function collision(ch::Composition.ContactDetectionMPR_handler, shapeA::Composit
          # error("Distance computation failed. ShapeA = ", shapeA, " shapeB = ", shapeB)
          # Compute the closest distance to the portal and return it:
          (r4.p, distance) = signedDistanceToPortal(r0.p,r1.p,r2.p,r3.p)
-         println("MPR: Numerical issues with distance computation between shapeA = ", shapeA.name, " and shapeB = ", shapeB.name,". Used distance = ",distance)
+         println("MPR: Numerical issues with distance computation between shapeA = ", shapeA, " and shapeB = ", shapeB,". Used distance = ",distance)
          barycentric(r1,r2,r3,r4)
          return (distance,MVector{3,Float64}(r4.a),MVector{3,Float64}(r4.b),MVector{3,Float64}(r4.n),MVector{3,Float64}(r1.a),MVector{3,Float64}(r1.b),MVector{3,Float64}(r2.a),MVector{3,Float64}(r2.b),MVector{3,Float64}(r3.a),MVector{3,Float64}(r3.b))
       end
@@ -300,7 +300,7 @@ function collision(ch::Composition.ContactDetectionMPR_handler, shapeA::Composit
       r0RayOnPortal = isr0RayOnPortal(r0.p,r1.p,r2.p,r3.p)
       if r0RayOnPortal[1] != true
          # println("r0RayOnPortal = ", r0RayOnPortal, ": Wrong baby-tetrahedron selected. " , i)
-         # println("... (",shapeA.name, ",", shapeB.name, "): Wrong baby-tetrahedron selected. " , i)
+         # println("... (",shapeA, ",", shapeB, "): Wrong baby-tetrahedron selected. " , i)
       end
    end
    error("MPR: Should never get here! Computation failed. Look at shapeA = ", ModiaMath.instanceName(shapeA), 
