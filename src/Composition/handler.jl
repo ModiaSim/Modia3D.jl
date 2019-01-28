@@ -6,7 +6,7 @@
 #
 
 
-function build_tree_and_allVisuElements!(scene::Scene, world::Object3D)::NOTHING
+function build_tree!(scene::Scene, world::Object3D)::NOTHING
    options             = scene.options
    visualizeFrames     = options.visualizeFrames
    renderer            = Modia3D.renderer[1]
@@ -129,6 +129,10 @@ function fillStackOrBuffer!(scene::Scene, superObj::SuperObjsRow, obj::Object3D,
     if isNotWorld(child)
       if isNotFixed(child)
         push!(scene.buffer, child)
+        if hasJoint(child)
+          println("$child has a joint")
+          println("zwischen $(child.joint.obj1) und $(child.joint.obj2)" )
+        end
         if !child.joint.canCollide    # !isFree(child) &&  !( typeof(child.joint) <: Modia3D.AbstractPrismatic )
           push!(superObj.noCPair, length(scene.buffer))
         end
@@ -322,7 +326,7 @@ end
 function initAnalysis!(world::Object3D, scene::Scene)
    # Initialize spanning tree and visualization (if visualization desired and visual elements present)
   println("initAnalysis!(world::Object3D, scene::Scene)")
-  build_tree_and_allVisuElements!(scene, world)
+  build_tree!(scene, world)
   build_superObjs!(scene, world)
 
    # Initialize contact detection if contact detection desired and objects with contactMaterial are present
@@ -360,7 +364,7 @@ function initAnalysis!(assembly::Modia3D.AbstractAssembly;
    assembly._internal.scene = scene
 
    # Initialize spanning tree and visualization (if visualization desired and visual elements present)
-   build_tree_and_allVisuElements!(scene, world)
+   build_tree!(scene, world)
    build_superObjs!(scene, world)
    if scene.visualize
       initializeVisualization(Modia3D.renderer[1], scene.allVisuElements)
