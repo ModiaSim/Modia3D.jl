@@ -63,7 +63,7 @@ end
 
 
 function changeParentToRootObj(newParent::Object3D, obj::Object3D)
-#=
+  #println("obj.parent vorher = $(obj.parent)")
   # Save elements of obj
   child_r_rel  = obj.r_rel
   child_R_rel  = obj.R_rel
@@ -78,18 +78,21 @@ function changeParentToRootObj(newParent::Object3D, obj::Object3D)
 
   r_new = parent_r_rel + parent_R_rel' * child_r_rel
   R_new = child_R_rel * parent_R_rel
+  #println("obj = $obj , r_new = $r_new")
   obj.r_rel = r_new
   obj.R_rel = R_new
 
+
   # Reverse obj, so that newParent is the new parent
   obj.parent = newParent
+  #println("obj.parent nachher = $(obj.parent)")
   push!(newParent.children, obj)
 
   #obj.r_abs = parent_r_abs + parent_R_abs'*r_new
   #obj.R_abs = R_new*parent_R_abs
-=#
 
 
+#=
   # Save elements of obj
    r_rel  = obj.r_rel
    R_rel  = obj.R_rel
@@ -114,13 +117,14 @@ function changeParentToRootObj(newParent::Object3D, obj::Object3D)
   else
     oldParent.R_rel = R_rel'
   end
-
+=#
   return nothing
 end
 
 
 # the indices of super objects, which can't collide, are stored in a list
 function fillStackOrBuffer!(scene::Scene, superObj::SuperObjsRow, obj::Object3D, rootSuperObj::Object3D)::NOTHING
+  # println("rootSuperObj = $rootSuperObj")
   for child in obj.children
     if isNotWorld(child)
       if isNotFixed(child)
@@ -134,13 +138,13 @@ function fillStackOrBuffer!(scene::Scene, superObj::SuperObjsRow, obj::Object3D,
     end
 
     if !(obj == rootSuperObj)
-      #changeParentToRootObj(rootSuperObj, child)
+      changeParentToRootObj(rootSuperObj, child)
     end
   end
 
   if !(obj == rootSuperObj)
     if !isempty(obj.children)
-      #empty!(obj.children)
+      empty!(obj.children)
     end
   end
 
@@ -200,7 +204,7 @@ function build_superObjs!(scene::Scene, world::Object3D)::NOTHING
   end
   addIndicesOfCutJointsToSuperObj(scene)
 
-
+#=
   println("scene.noCPairs ", scene.noCPairs)
   for superObjRow in scene.superObjs
     println("[")
@@ -210,6 +214,7 @@ function build_superObjs!(scene::Scene, world::Object3D)::NOTHING
     println("]")
     println(" ")
   end
+=#
 #=
   println("geht mit AABB weiter ")
   for a in scene.AABB

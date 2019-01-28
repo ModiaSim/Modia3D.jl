@@ -37,6 +37,7 @@ world_f1 = Modia3D.Object3D(world , r=[0.5*Lx, 0.0, groundWidth/2])
 
 blau1     = Modia3D.Part(Modia3D.Solid(Modia3D.SolidBox(Lx,Ly,Lz), "Aluminium", vblue;contactMaterial = cmat),    [ [0.0, 0.0, -Lz/2],[ 0.0, 0.0, Lz/2] ] )
 blau2     = Modia3D.Part(Modia3D.Solid(Modia3D.SolidBox(Lx,Ly,Lz), "Aluminium", vblue; contactMaterial = cmat),   [ [0.0, 0.0, -Lz/2], [ 0.0, 0.0, Lz/2] ] )
+
 schwarz1  = Modia3D.Part(Modia3D.Solid(Modia3D.SolidCone(Dx,Lz; relativeTipDiameter=0.0), nothing, vblack; contactMaterial = cmat),  [ [0.0, 0.0, 0.0]] )
 rosa1     = Modia3D.Part(Modia3D.Solid(Modia3D.SolidBox(Lx,Ly,Lz), "Aluminium", vpink; contactMaterial = cmat),   [ [0.0, 0.0, -Lz/2],[ 0.0, 0.0, Lz/2] ] )
 green1    = Modia3D.Part(Modia3D.Solid(Modia3D.SolidBeam(Lx,Ly,Lz), nothing, vgreen; contactMaterial = cmat),     [ [0.0, 0.0, -Lz/2],[ 0.0, 0.0, Lz/2] ] )
@@ -46,6 +47,7 @@ gelb2     = Modia3D.Part(Modia3D.Solid(Modia3D.SolidEllipsoid(Lx,Ly,Lz), "Alumin
 gelb3     = Modia3D.Part(Modia3D.Solid(Modia3D.SolidSphere(Dx), "Aluminium", vyellow; contactMaterial = cmat),    [ [0.0, 0.0, -Lz/2] ] )
 rotM1      = Modia3D.Part(Modia3D.Solid(Modia3D.SolidPipe(Dx,Lz), nothing, vred; contactMaterial = cmat),          [[0.0, 0.0, -Lz/2] , [ 0.0, 0.0,Lz/2]] )
 rotM2      = Modia3D.Part(Modia3D.Solid(Modia3D.SolidCylinder(Dx, Lz), nothing, vred; contactMaterial = cmat),     [[0.0, 0.0, -Lz/2], [ 0.0, 0.0,Lz/2]])
+
 
 Modia3D.connect(world_f1, blau1.frames[1]; R=ModiaMath.rot2(160u"°"))
 Modia3D.connect(world_f1, blau2.frames[1]; R=ModiaMath.rot2(45u"°"))
@@ -64,6 +66,7 @@ Modia3D.connect(gelb1.frames[2], gelb3.frames[1]; R=ModiaMath.rot2(90u"°"))
 
 Modia3D.connect(world, rotM1.frames[1]; fixed=false, R=ModiaMath.rot3(90u"°")) #
 Modia3D.connect(rotM1.frames[2], rotM2.frames[1]; R=ModiaMath.rot3(45u"°"))
+
 end
 
 # Bounding Boxes AABB
@@ -86,12 +89,12 @@ end
   world = Modia3D.Object3D(Modia3D.CoordinateSystem(1.0))
 
   collisionSolids = CollisionSolids(world)
-  # boundingBoxes   = BoundingBoxes(world)
+  boundingBoxes   = BoundingBoxes(world)
 end
 
 collisionTest = CollisionTest(sceneOptions=Modia3D.SceneOptions(visualizeFrames=true, defaultFrameLength=0.3,nz_max = 80))
 
-# collisionTest = CollisionTest()
+#collisionTest = CollisionTest()
 Modia3D.initAnalysis!(collisionTest)
 
 AABB = collisionTest._internal.scene.options.contactDetection.contactPairs.AABB
@@ -118,8 +121,8 @@ for time = LINSPACE(tStart, tEnd, 101)
   Modia3D.set_r!(collisionTest.collisionSolids.rotM1.frames[1], [0, 0, -s])
 
   Modia3D.updatePosition!(collisionTest)
-#  Modia3D.selectContactPairs!(collisionTest)
-#=
+  Modia3D.selectContactPairs!(collisionTest)
+
   collisionTest.boundingBoxes.blau1AABB.data.Lx = abs(AABB[1][1].x_max - AABB[1][1].x_min)
   collisionTest.boundingBoxes.blau1AABB.data.Ly = abs(AABB[1][1].y_max - AABB[1][1].y_min)
   collisionTest.boundingBoxes.blau1AABB.data.Lz = abs(AABB[1][1].z_max - AABB[1][1].z_min)
@@ -174,9 +177,9 @@ for time = LINSPACE(tStart, tEnd, 101)
   collisionTest.boundingBoxes.gelb3AABB.data.Ly = abs(AABB[6][3].y_max - AABB[6][3].y_min)
   collisionTest.boundingBoxes.gelb3AABB.data.Lz = abs(AABB[6][3].z_max - AABB[6][3].z_min)
   collisionTest.boundingBoxes.gelb3AABB.r_abs = collisionTest.collisionSolids.gelb2.frame0.r_abs
-=#
 
-#  Modia3D.setComputationFlag(collisionTest)
+
+  Modia3D.setComputationFlag(collisionTest)
   Modia3D.visualize!(collisionTest,time)
 
 #=
