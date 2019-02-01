@@ -38,38 +38,40 @@ world_f1 = Modia3D.Object3D(world , r=[0.5*Lx, 0.0, groundWidth/2])
 blau1     = Modia3D.Part(Modia3D.Solid(Modia3D.SolidBox(Lx,Ly,Lz), "Aluminium", vblue;contactMaterial = cmat),    [ [0.0, 0.0, -Lz/2],[ 0.0, 0.0, Lz/2] ] )
 blau2     = Modia3D.Part(Modia3D.Solid(Modia3D.SolidBox(Lx,Ly,Lz), "Aluminium", vblue; contactMaterial = cmat),   [ [0.0, 0.0, -Lz/2], [ 0.0, 0.0, Lz/2] ] )
 
-#schwarz1  = Modia3D.Part(Modia3D.Solid(Modia3D.SolidCone(Dx,Lz; relativeTipDiameter=0.0), nothing, vblack; contactMaterial = cmat),  [ [0.0, 0.0, 0.0]] )
-#rosa1     = Modia3D.Part(Modia3D.Solid(Modia3D.SolidBox(Lx,Ly,Lz), "Aluminium", vpink; contactMaterial = cmat),   [ [0.0, 0.0, -Lz/2],[ 0.0, 0.0, Lz/2] ] )
-#green1    = Modia3D.Part(Modia3D.Solid(Modia3D.SolidBeam(Lx,Ly,Lz), nothing, vgreen; contactMaterial = cmat),     [ [0.0, 0.0, -Lz/2],[ 0.0, 0.0, Lz/2] ] )
-#green2    = Modia3D.Part(Modia3D.Solid(Modia3D.SolidBeam(Lx,Ly,Lz), nothing, vgreen; contactMaterial = cmat),     [ [0.0, 0.0, -Lz/2]] )
+schwarz1  = Modia3D.Part(Modia3D.Solid(Modia3D.SolidCone(Dx,Lz; relativeTipDiameter=0.0), nothing, vblack; contactMaterial = cmat),  [ [0.0, 0.0, 0.0]] )
+rosa1     = Modia3D.Part(Modia3D.Solid(Modia3D.SolidBox(Lx,Ly,Lz), "Aluminium", vpink; contactMaterial = cmat),   [ [0.0, 0.0, -Lz/2],[ 0.0, 0.0, Lz/2] ] )
+green1    = Modia3D.Part(Modia3D.Solid(Modia3D.SolidBeam(Lx,Ly,Lz), nothing, vgreen; contactMaterial = cmat),     [ [0.0, 0.0, -Lz/2],[ 0.0, 0.0, Lz/2] ] )
+green2    = Modia3D.Part(Modia3D.Solid(Modia3D.SolidBeam(Lx,Ly,Lz), nothing, vgreen; contactMaterial = cmat),     [ [0.0, 0.0, -Lz/2]] )
 gelb1     = Modia3D.Part(Modia3D.Solid(Modia3D.SolidBox(Lx,Ly,Lz), "Aluminium", vyellow; contactMaterial = cmat), [ [0.0, 0.0, -Lz/2],[ 0.0, 0.0, Lz/2] ] )
 gelb2     = Modia3D.Part(Modia3D.Solid(Modia3D.SolidEllipsoid(Lx,Ly,Lz), "Aluminium", vyellow; contactMaterial = cmat), [ [0.0, 0.0, -Lz/2] ] )
 gelb3     = Modia3D.Part(Modia3D.Solid(Modia3D.SolidSphere(Dx), "Aluminium", vyellow; contactMaterial = cmat),    [ [0.0, 0.0, -Lz/2] ] )
-#rotM1      = Modia3D.Part(Modia3D.Solid(Modia3D.SolidPipe(Dx,Lz), nothing, vred; contactMaterial = cmat),          [[0.0, 0.0, -Lz/2] , [ 0.0, 0.0,Lz/2]] )
-#rotM2      = Modia3D.Part(Modia3D.Solid(Modia3D.SolidCylinder(Dx, Lz), nothing, vred; contactMaterial = cmat),     [[0.0, 0.0, -Lz/2], [ 0.0, 0.0,Lz/2]])
+rotM1      = Modia3D.Part(Modia3D.Solid(Modia3D.SolidPipe(Dx,Lz), nothing, vred; contactMaterial = cmat),          [[0.0, 0.0, -Lz/2] , [ 0.0, 0.0,Lz/2]] )
+rotM2      = Modia3D.Part(Modia3D.Solid(Modia3D.SolidCylinder(Dx, Lz), nothing, vred; contactMaterial = cmat),     [[0.0, 0.0, -Lz/2], [ 0.0, 0.0,Lz/2]])
+neuBlau1     = Modia3D.Part(Modia3D.Solid(Modia3D.SolidBox(Lx,Ly,Lz), "Aluminium", vblue;contactMaterial = cmat),    [ [0.0, 0.0, -Lz/2],[ 0.0, 0.0, Lz/2] ] )
+neuBlau2     = Modia3D.Part(Modia3D.Solid(Modia3D.SolidBox(Lx,Ly,Lz), "Aluminium", vblue; contactMaterial = cmat),   [ [0.0, 0.0, -Lz/2], [ 0.0, 0.0, Lz/2] ] )
 
 
 Modia3D.connect(world_f1, blau1.frames[1]; R=ModiaMath.rot2(160u"°"))
 Modia3D.connect(world_f1, blau2.frames[1]; R=ModiaMath.rot2(45u"°"))
 
-#Modia3D.connect(blau2.frames[2], rosa1.frames[1])
 
-#rev2 = Modia3D.Revolute(blau2.frames[2], rosa1.frames[1]; phi_start =-pi/2)
+rev2 = Modia3D.Revolute(blau2.frames[2], rosa1.frames[1]; phi_start =-pi/2)
+rev5 = Modia3D.Revolute(blau1.frames[2], schwarz1.frames[1]; phi_start =-pi/2)
+rev3 = Modia3D.Revolute(rosa1.frames[2], green1.frames[1])
 
-#rev5 = Modia3D.Revolute(blau1.frames[2], schwarz1.frames[1]; phi_start =-pi/2)
 
-#rev3 = Modia3D.Revolute(rosa1.frames[2], green1.frames[1])
+Modia3D.connect(neuBlau1.frames[2],neuBlau2.frames[1]; R=ModiaMath.rot1(130u"°"))
+rev6 = Modia3D.Revolute(rosa1.frame0, neuBlau1.frames[1])
 
-#Modia3D.connect(green1.frame0, green2.frames[1]; R=ModiaMath.rot2(45u"°"))
-#rev4 = Modia3D.Revolute(green1.frames[2], gelb1.frames[1])
 
-rev2 = Modia3D.Revolute(blau2.frames[2], gelb1.frames[1])
+Modia3D.connect(green1.frame0, green2.frames[1]; R=ModiaMath.rot2(45u"°"))
+rev4 = Modia3D.Revolute(green1.frames[2], gelb1.frames[1])
+
 Modia3D.connect(gelb1.frames[2],gelb2.frames[1]; R=ModiaMath.rot2(130u"°"))
 Modia3D.connect(gelb1.frames[2], gelb3.frames[1]; R=ModiaMath.rot2(90u"°"))
 
-#Modia3D.connect(blau1.frames[2], rotM1.frames[1]; fixed=false, R=ModiaMath.rot3(90u"°")) #
-#Modia3D.connect(rotM1.frames[2], rotM2.frames[1]; R=ModiaMath.rot3(45u"°"))
-
+Modia3D.connect(world, rotM1.frames[1]; fixed=false, R=ModiaMath.rot3(90u"°")) #
+Modia3D.connect(rotM1.frames[2], rotM2.frames[1]; R=ModiaMath.rot3(45u"°"))
 end
 
 
@@ -99,11 +101,12 @@ for time = LINSPACE(tStart, tEnd, 101)
   delta_phi = Modia3D.linearMovement(pi/3, tStart, tEnd, time)
 
   Modia3D.setAngle!(collisionTest.collisionSolids.rev2,-pi/2 + delta_phi)
-#  Modia3D.setAngle!(collisionTest.collisionSolids.rev3, delta_phi)
-#  Modia3D.setAngle!(collisionTest.collisionSolids.rev4,-delta_phi)
-#  Modia3D.setAngle!(collisionTest.collisionSolids.rev5, delta_phi)
+  Modia3D.setAngle!(collisionTest.collisionSolids.rev3, delta_phi)
+  Modia3D.setAngle!(collisionTest.collisionSolids.rev4,-delta_phi)
+  Modia3D.setAngle!(collisionTest.collisionSolids.rev5, delta_phi)
+  Modia3D.setAngle!(collisionTest.collisionSolids.rev6, -2*delta_phi)
 
-#  Modia3D.set_r!(collisionTest.collisionSolids.rotM1.frames[1], [0, 0.0, -s])
+  Modia3D.set_r!(collisionTest.collisionSolids.rotM1.frames[1], [0, 0.0, -s])
 
   Modia3D.updatePosition!(collisionTest)
 #  Modia3D.selectContactPairs!(collisionTest)

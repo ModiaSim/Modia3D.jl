@@ -63,7 +63,6 @@ end
 
 
 function changeParentToRootObj(newParent::Object3D, obj::Object3D)
-  #println("obj.parent vorher = $(obj.parent)")
   # Save elements of obj
   child_r_rel  = obj.r_rel
   child_R_rel  = obj.R_rel
@@ -78,78 +77,49 @@ function changeParentToRootObj(newParent::Object3D, obj::Object3D)
 
   r_new = parent_r_rel + parent_R_rel' * child_r_rel
   R_new = child_R_rel * parent_R_rel
-  #println("obj = $obj , r_new = $r_new")
   obj.r_rel = r_new
   obj.R_rel = R_new
 
 
   # Reverse obj, so that newParent is the new parent
   obj.parent = newParent
-  #println("obj.parent nachher = $(obj.parent)")
   push!(newParent.children, obj)
 
   #obj.r_abs = parent_r_abs + parent_R_abs'*r_new
   #obj.R_abs = R_new*parent_R_abs
 
-
-#=
-  # Save elements of obj
-   r_rel  = obj.r_rel
-   R_rel  = obj.R_rel
-   oldParent = obj.parent
-   parent_r_rel = oldParent.r_rel
-   parent_R_rel = oldParent.R_rel
-
-   # Reverse obj, so that newParent is the new parent
-   obj.parent = newParent
-   push!(newParent.children, obj)
-
-  if r_rel ≡ ModiaMath.ZeroVector3D
-    oldParent.r_rel = ModiaMath.ZeroVector3D
-    oldParent.r_abs = obj.r_abs
-  else
-    oldParent.r_rel = -R_rel*r_rel
-  end
-
-  if R_rel ≡ ModiaMath.NullRotation
-    oldParent.R_rel = ModiaMath.NullRotation
-    oldParent.R_abs = obj.R_abs
-  else
-    oldParent.R_rel = R_rel'
-  end
-=#
   return nothing
 end
 
 
 # the indices of super objects, which can't collide, are stored in a list
 function fillStackOrBuffer!(scene::Scene, superObj::SuperObjsRow, obj::Object3D, rootSuperObj::Object3D)::NOTHING
-  # println("rootSuperObj = $rootSuperObj")
-  for child in obj.children
+  n_children =  length(obj.children)
+  help = fill(false, n_children)
+  objPushed = false
+
+  for i = 1:n_children
+    child = obj.children[i]
     if isNotWorld(child)
       if isNotFixed(child)
         push!(scene.buffer, child)
-        if hasJoint(child)
-          println("$child has a joint")
-          println("zwischen $(child.joint.obj1) und $(child.joint.obj2)" )
+        if !(obj == rootSuperObj) && (objPushed == false)
+          push!(scene.treeAcceleration, obj)
+          objPushed = true
         end
+        push!(scene.treeAcceleration, child)
         if !child.joint.canCollide    # !isFree(child) &&  !( typeof(child.joint) <: Modia3D.AbstractPrismatic )
           push!(superObj.noCPair, length(scene.buffer))
         end
       else
         push!(scene.stack, child)
-      end
-    end
+        if !(obj == rootSuperObj)
+          changeParentToRootObj(rootSuperObj, child)
+          help[i] = true
+  end; end; end; end
 
-    if !(obj == rootSuperObj)
-      changeParentToRootObj(rootSuperObj, child)
-    end
-  end
-
-  if !(obj == rootSuperObj)
-    if !isempty(obj.children)
-      empty!(obj.children)
-    end
+  if !isempty(obj.children)
+    deleteat!(obj.children,help)
   end
 
   return nothing
@@ -166,11 +136,14 @@ function build_superObjs!(scene::Scene, world::Object3D)::NOTHING
   if !scene.initSuperObj
   stack = scene.stack
   buffer = scene.buffer
+  treeAcceleration = scene.treeAcceleration
   empty!(stack)
   empty!(buffer)
   empty!(scene.allVisuElements)
+  empty!(treeAcceleration)
 
   push!(buffer, world)
+  push!(treeAcceleration,world)
   actPos = 1
   nPos   = 1
 
@@ -207,13 +180,24 @@ function build_superObjs!(scene::Scene, world::Object3D)::NOTHING
     println(" ")
   end
   addIndicesOfCutJointsToSuperObj(scene)
+  println(" ")
+  println("treeAcceleration Reihenfolge")
+  for obj in treeAcceleration
+    println(ModiaMath.fullName(obj))
+  end
+  println(" ")
+  println("buffer Reihenfolge")
+  for obj in buffer
+    println(ModiaMath.fullName(obj))
+  end
+  println(" ")
 
 #=
   println("scene.noCPairs ", scene.noCPairs)
   for superObjRow in scene.superObjs
     println("[")
     for a in superObjRow.superObjCollision.superObj
-      println(a)
+      println(ModiaMath.fullName(a))
     end
     println("]")
     println(" ")
