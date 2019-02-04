@@ -210,6 +210,7 @@ mutable struct Object3D <: Modia3D.AbstractAssemblyComponent
    twoObject3Dobject::Vector{Modia3D.AbstractTwoObject3DObject}  # Optional AbstractTwoObject3DObject object associated with Object3D
    hasCutJoint::Bool
    hasForceElement::Bool
+   hasChildJoint::Bool
    visualizeFrame::Modia3D.Ternary                         # = True     : Coordinate system of Object3D is always visualized
                                                            # = False    : Coordinate system of Object3D is never visualized
                                                            # = Inherited: Coordinate system of Object3D is visualized, if SceneOptions(visualizeFrames=true)
@@ -237,6 +238,7 @@ mutable struct Object3D <: Modia3D.AbstractAssemblyComponent
       obj.twoObject3Dobject  = Modia3D.AbstractTwoObject3DObject[]
       obj.hasCutJoint        = false
       obj.hasForceElement    = false
+      obj.hasChildJoint      = false
       obj.visualizeFrame     = typeof(visualizeFrame) == Modia3D.Ternary ? visualizeFrame : (visualizeFrame ? Modia3D.True : Modia3D.False)
       obj.visualizationFrame = nothing
       obj.dynamics           = nothing
@@ -273,7 +275,7 @@ mutable struct Object3D <: Modia3D.AbstractAssemblyComponent
 
       obj = new(ModiaMath.ComponentInternal(), parent, Vector{Object3D}[], fixedJoint,
                 false, false, false, r_rel, R_rel, r_abs, R_abs, data,
-                Modia3D.AbstractTwoObject3DObject[], false, false, visualizeFrame2, nothing, nothing)
+                Modia3D.AbstractTwoObject3DObject[], false, false, false, visualizeFrame2, nothing, nothing)
 
       if !fixed
          obj.joint = FreeMotion(obj; r_start = r_rel,
@@ -297,7 +299,7 @@ mutable struct Object3D <: Modia3D.AbstractAssemblyComponent
             twoObject3Dobject::Vector{Modia3D.AbstractTwoObject3DObject},
             visualizeFrame::Modia3D.Ternary) =
       new(_internal, parent, children, joint, false, false, false, r_rel,
-          R_rel, r_abs, R_abs, data, twoObject3Dobject, false, false, visualizeFrame, nothing, nothing)
+          R_rel, r_abs, R_abs, data, twoObject3Dobject, false, false, false, visualizeFrame, nothing, nothing)
 end
 
 
@@ -368,6 +370,7 @@ isCoordinateSystem(   obj::Object3D) = typeof(obj.data) == Graphics.CoordinateSy
 isNotCoordinateSystem(obj::Object3D) = typeof(obj.data) != Graphics.CoordinateSystem
 hasCutJoint(          obj::Object3D) = obj.hasCutJoint
 hasForceElement(      obj::Object3D) = obj.hasForceElement
+hasChildJoint(        obj::Object3D) = obj.hasChildJoint
 
 
 

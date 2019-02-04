@@ -70,7 +70,8 @@ rev4 = Modia3D.Revolute(green1.frames[2], gelb1.frames[1])
 Modia3D.connect(gelb1.frames[2],gelb2.frames[1]; R=ModiaMath.rot2(130u"°"))
 Modia3D.connect(gelb1.frames[2], gelb3.frames[1]; R=ModiaMath.rot2(90u"°"))
 
-Modia3D.connect(world, rotM1.frames[1]; fixed=false, R=ModiaMath.rot3(90u"°")) #
+#Modia3D.connect(world, rotM1.frames[1]; fixed=false, R=ModiaMath.rot3(90u"°"))
+Modia3D.connect(blau2.frame0, rotM1.frames[1]; fixed=false, R=ModiaMath.rot3(90u"°"))
 Modia3D.connect(rotM1.frames[2], rotM2.frames[1]; R=ModiaMath.rot3(45u"°"))
 end
 
@@ -104,7 +105,7 @@ for time = LINSPACE(tStart, tEnd, 101)
   Modia3D.setAngle!(collisionTest.collisionSolids.rev3, delta_phi)
   Modia3D.setAngle!(collisionTest.collisionSolids.rev4,-delta_phi)
   Modia3D.setAngle!(collisionTest.collisionSolids.rev5, delta_phi)
-  Modia3D.setAngle!(collisionTest.collisionSolids.rev6, -2*delta_phi)
+#  Modia3D.setAngle!(collisionTest.collisionSolids.rev6, -2*delta_phi)
 
   Modia3D.set_r!(collisionTest.collisionSolids.rotM1.frames[1], [0, 0.0, -s])
 

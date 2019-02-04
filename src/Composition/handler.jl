@@ -103,6 +103,8 @@ function fillStackOrBuffer!(scene::Scene, superObj::SuperObjsRow, obj::Object3D,
     if isNotWorld(child)
       if isNotFixed(child)
         push!(scene.buffer, child)
+
+        # store obj and/or child in treeAcceleration
         if !(obj == rootSuperObj) && (objPushed == false)
           push!(scene.treeAcceleration, obj)
           objPushed = true
@@ -111,8 +113,15 @@ function fillStackOrBuffer!(scene::Scene, superObj::SuperObjsRow, obj::Object3D,
         if !child.joint.canCollide    # !isFree(child) &&  !( typeof(child.joint) <: Modia3D.AbstractPrismatic )
           push!(superObj.noCPair, length(scene.buffer))
         end
+#=
+        println("treeAcceleration")
+        for obj in scene.treeAcceleration
+          println(ModiaMath.fullName(obj))
+        end
+=#
       else
         push!(scene.stack, child)
+        assignSpeedObj(scene.treeSpeed, child)
         if !(obj == rootSuperObj)
           changeParentToRootObj(rootSuperObj, child)
           help[i] = true
@@ -137,10 +146,12 @@ function build_superObjs!(scene::Scene, world::Object3D)::NOTHING
   stack = scene.stack
   buffer = scene.buffer
   treeAcceleration = scene.treeAcceleration
+  treeSpeed = scene.treeSpeed
   empty!(stack)
   empty!(buffer)
   empty!(scene.allVisuElements)
   empty!(treeAcceleration)
+  empty!(treeSpeed)
 
   push!(buffer, world)
   push!(treeAcceleration,world)
@@ -181,16 +192,20 @@ function build_superObjs!(scene::Scene, world::Object3D)::NOTHING
   end
   addIndicesOfCutJointsToSuperObj(scene)
   println(" ")
-  println("treeAcceleration Reihenfolge")
-  for obj in treeAcceleration
-    println(ModiaMath.fullName(obj))
-  end
-  println(" ")
   println("buffer Reihenfolge")
   for obj in buffer
     println(ModiaMath.fullName(obj))
   end
   println(" ")
+  println("treeAcceleration Reihenfolge")
+  for obj in treeAcceleration
+    println(ModiaMath.fullName(obj))
+  end
+  println(" ")
+  println("treeSpeed Reihenfolge")
+  for obj in treeSpeed
+    println(ModiaMath.fullName(obj))
+  end
 
 #=
   println("scene.noCPairs ", scene.noCPairs)

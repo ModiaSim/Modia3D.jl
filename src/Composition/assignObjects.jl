@@ -1,14 +1,13 @@
 
 function assignObj(superObjType::SuperObjCollision, obj::Object3D)
     if canCollide(obj)
-      #println("can collidieren")
       push!(superObjType.superObj, obj)
     end
 end
 
+
 function assignObj(superObjType::SuperObjMass, obj::Object3D)
     if hasMass(obj)
-      #println("hat masse")
       push!(superObjType.superObj, obj)
     end
 end
@@ -113,3 +112,18 @@ function assign_Visu_CutJoint_Dynamics!(scene::Scene, obj::Object3D, world::Obje
   createCutJoints!(scene, obj)
   fillVisuElements!(scene, obj, world)
 end
+
+
+function assignSpeedObj(treeSpeed::Vector{Object3D}, obj::Object3D)
+    if canCollide(obj) && !hasChildJoint(obj)
+      push!(treeSpeed, obj)
+      #=
+      println("treeSpeed")
+      for obj in treeSpeed
+        println(ModiaMath.fullName(obj))
+      end
+      =#
+    end
+end
+
+assignSpeedObj(treeSpeed, obj) = nothing

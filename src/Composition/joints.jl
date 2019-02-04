@@ -135,6 +135,7 @@ function connect(obj1::Object3D, obj2::Object3D;
    if fixed
       obj.joint = fixedJoint
    else
+      obj1.hasChildJoint = true
       q_start = typeof(R) != NOTHING ? ModiaMath.from_R(R) :
                 typeof(q) != NOTHING ? q                   : ModiaMath.NullQuaternion
       q_start = obj===obj2 ? q_start : ModiaMath.inverseRotation(q_start)

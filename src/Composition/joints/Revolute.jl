@@ -219,6 +219,7 @@ function Revolute(obj1::Object3D, obj2::Object3D;
 
       joint.flange = RevoluteFlange()
 
+      obj_a.hasChildJoint = true
       obj_b.joint = joint
       obj_b.r_rel = ModiaMath.ZeroVector3D
       obj_b.r_abs = obj_a.r_abs

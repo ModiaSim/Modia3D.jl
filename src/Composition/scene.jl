@@ -97,6 +97,7 @@ struct ContactPairs
       end
 
       println("nz = $nz , nz_max = $nz_max")
+
       # Allocate storage
       z = fill(42.0, nz)
       defaultPoint   = MVector{3,Float64}(0.0,0.0,0.0)
@@ -316,6 +317,7 @@ mutable struct Scene
    analysis::ModiaMath.AnalysisType          # Type of analysis
    superObjs::Array{SuperObjsRow,1}          # super objects
    treeAcceleration::Vector{Object3D}
+   treeSpeed::Vector{Object3D}
    tree::Vector{Object3D}                    # Spanning tree of the frames in depth-first order (without world)
    cutJoints::Vector{Modia3D.AbstractJoint}  # Vector of all cut-joints
    allVisuElements::Vector{Object3D}         # Object3Ds (including Object3Ds.data) that shall be visualized
@@ -341,6 +343,7 @@ mutable struct Scene
                   false,
                   ModiaMath.KinematicAnalysis,
                   Array{SuperObjsRow,1}(),
+                  Vector{Object3D}[],
                   Vector{Object3D}[],
                   Vector{Object3D}[],
                   Vector{Modia3D.AbstractJoint}[],

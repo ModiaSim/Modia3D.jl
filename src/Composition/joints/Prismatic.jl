@@ -216,6 +216,7 @@ function Prismatic(obj1::Object3D, obj2::Object3D;
 
       P       = ModiaMath.RealScalar(:P      , joint, unit="J", info="Total power computed with interpolated x,derx, values (should be zero)", numericType=ModiaMath.WC, analysis=ModiaMath.OnlyDynamicAnalysis)
 
+      obj_a.hasChildJoint = true
       obj_b.joint = joint
       obj_b.r_rel = eAxis*rs_start
       obj_b.r_abs = obj_a.r_abs + obj_a.R_abs'*obj_b.r_rel
