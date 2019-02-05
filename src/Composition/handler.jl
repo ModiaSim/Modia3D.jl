@@ -100,6 +100,7 @@ function fillStackOrBuffer!(scene::Scene, superObj::SuperObjsRow, obj::Object3D,
 
   for i = 1:n_children
     child = obj.children[i]
+#    println(ModiaMath.fullName(child))
     if isNotWorld(child)
       if isNotFixed(child)
         push!(scene.buffer, child)
@@ -107,9 +108,13 @@ function fillStackOrBuffer!(scene::Scene, superObj::SuperObjsRow, obj::Object3D,
         # store obj and/or child in treeAcceleration
         if !(obj == rootSuperObj) && (objPushed == false)
           push!(scene.treeAcceleration, obj)
+          push!(scene.treeAccVelo, obj)
+          obj.computeAcceleration = true
           objPushed = true
         end
         push!(scene.treeAcceleration, child)
+        push!(scene.treeAccVelo, child)
+        child.computeAcceleration = true
         if !child.joint.canCollide    # !isFree(child) &&  !( typeof(child.joint) <: Modia3D.AbstractPrismatic )
           push!(superObj.noCPair, length(scene.buffer))
         end
@@ -122,6 +127,7 @@ function fillStackOrBuffer!(scene::Scene, superObj::SuperObjsRow, obj::Object3D,
       else
         push!(scene.stack, child)
         assignSpeedObj(scene.treeSpeed, child)
+        assignSpeedObj(scene.treeAccVelo, child)
         if !(obj == rootSuperObj)
           changeParentToRootObj(rootSuperObj, child)
           help[i] = true
@@ -147,12 +153,15 @@ function build_superObjs!(scene::Scene, world::Object3D)::NOTHING
   buffer = scene.buffer
   treeAcceleration = scene.treeAcceleration
   treeSpeed = scene.treeSpeed
+  treeAccVelo  = scene.treeAccVelo
   empty!(stack)
   empty!(buffer)
   empty!(scene.allVisuElements)
   empty!(treeAcceleration)
   empty!(treeSpeed)
+  empty!(treeAccVelo)
 
+  world.computeAcceleration = true
   push!(buffer, world)
   push!(treeAcceleration,world)
   actPos = 1
@@ -162,6 +171,7 @@ function build_superObjs!(scene::Scene, world::Object3D)::NOTHING
   hasMoreCollisionSuperObj = false
 
   while actPos <= nPos
+  #  println("actPos = $actPos")
     superObjsRow = SuperObjsRow()
     AABBrow      = Array{Basics.BoundingBox,1}()
     rootSuperObj = buffer[actPos]
@@ -191,33 +201,39 @@ function build_superObjs!(scene::Scene, world::Object3D)::NOTHING
     println(" ")
   end
   addIndicesOfCutJointsToSuperObj(scene)
+  #=
   println(" ")
   println("buffer Reihenfolge")
   for obj in buffer
-    println(ModiaMath.fullName(obj))
+    println(ModiaMath.fullName(obj)) # , " obj.computeAcceleration = $(obj.computeAcceleration)")
   end
   println(" ")
   println("treeAcceleration Reihenfolge")
   for obj in treeAcceleration
-    println(ModiaMath.fullName(obj))
+    println(ModiaMath.fullName(obj)) #, " obj.computeAcceleration = $(obj.computeAcceleration)")
   end
   println(" ")
   println("treeSpeed Reihenfolge")
   for obj in treeSpeed
-    println(ModiaMath.fullName(obj))
+    println(ModiaMath.fullName(obj)) #, " obj.computeAcceleration = $(obj.computeAcceleration)")
   end
+println(" ")
+println("treeAccVelo Reihenfolge")
+for obj in treeAccVelo
+  println(ModiaMath.fullName(obj)) #, " obj.computeAcceleration = $(obj.computeAcceleration)")
+end
+=#
 
-#=
-  println("scene.noCPairs ", scene.noCPairs)
+#  println("scene.noCPairs ", scene.noCPairs)
   for superObjRow in scene.superObjs
     println("[")
-    for a in superObjRow.superObjCollision.superObj
+    for a in superObjRow.superObjVisu.superObj
       println(ModiaMath.fullName(a))
     end
     println("]")
     println(" ")
   end
-=#
+
 #=
   println("geht mit AABB weiter ")
   for a in scene.AABB

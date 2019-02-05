@@ -117,12 +117,6 @@ end
 function assignSpeedObj(treeSpeed::Vector{Object3D}, obj::Object3D)
     if canCollide(obj) && !hasChildJoint(obj)
       push!(treeSpeed, obj)
-      #=
-      println("treeSpeed")
-      for obj in treeSpeed
-        println(ModiaMath.fullName(obj))
-      end
-      =#
     end
 end
 

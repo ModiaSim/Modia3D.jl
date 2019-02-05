@@ -50,6 +50,8 @@ rotM2      = Modia3D.Part(Modia3D.Solid(Modia3D.SolidCylinder(Dx, Lz), nothing, 
 neuBlau1     = Modia3D.Part(Modia3D.Solid(Modia3D.SolidBox(Lx,Ly,Lz), "Aluminium", vblue;contactMaterial = cmat),    [ [0.0, 0.0, -Lz/2],[ 0.0, 0.0, Lz/2] ] )
 neuBlau2     = Modia3D.Part(Modia3D.Solid(Modia3D.SolidBox(Lx,Ly,Lz), "Aluminium", vblue; contactMaterial = cmat),   [ [0.0, 0.0, -Lz/2], [ 0.0, 0.0, Lz/2] ] )
 
+visuElem     = Modia3D.Part(cyl,   [ [0.0, 0.0, -Lz/2], [ 0.0, 0.0, Lz/2] ] )
+
 
 Modia3D.connect(world_f1, blau1.frames[1]; R=ModiaMath.rot2(160u"°"))
 Modia3D.connect(world_f1, blau2.frames[1]; R=ModiaMath.rot2(45u"°"))
@@ -71,8 +73,10 @@ Modia3D.connect(gelb1.frames[2],gelb2.frames[1]; R=ModiaMath.rot2(130u"°"))
 Modia3D.connect(gelb1.frames[2], gelb3.frames[1]; R=ModiaMath.rot2(90u"°"))
 
 #Modia3D.connect(world, rotM1.frames[1]; fixed=false, R=ModiaMath.rot3(90u"°"))
-Modia3D.connect(blau2.frame0, rotM1.frames[1]; fixed=false, R=ModiaMath.rot3(90u"°"))
-Modia3D.connect(rotM1.frames[2], rotM2.frames[1]; R=ModiaMath.rot3(45u"°"))
+Modia3D.connect(blau2.frame0, rotM1.frames[1]; fixed=false, R=ModiaMath.rot2(90u"°"))
+Modia3D.connect(rotM1.frames[2], rotM2.frames[1]) #; R=ModiaMath.rot2(90u"°"))
+
+#Modia3D.connect(gelb1.frames[2], visuElem.frames[2])
 end
 
 
