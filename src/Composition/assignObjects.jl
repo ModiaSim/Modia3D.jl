@@ -114,10 +114,20 @@ function assign_Visu_CutJoint_Dynamics!(scene::Scene, obj::Object3D, world::Obje
 end
 
 
-function assignSpeedObj(treeSpeed::Vector{Object3D}, obj::Object3D)
+function assignVeloObj(tree::Vector{Object3D}, obj::Object3D)
     if canCollide(obj) && !hasChildJoint(obj)
-      push!(treeSpeed, obj)
+      push!(tree, obj)
     end
 end
 
-assignSpeedObj(treeSpeed, obj) = nothing
+assignVeloObj(tree, obj) = nothing
+
+
+function assignAccObj(tree::Vector{Object3D}, obj::Object3D)
+    if hasChildJoint(obj)
+      obj.computeAcceleration = true
+      push!(tree, obj)
+    end
+end
+
+assignAccObj(tree, obj) = nothing
