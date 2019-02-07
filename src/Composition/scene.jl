@@ -316,8 +316,7 @@ mutable struct Scene
    initSuperObj::Bool                        # = true, if super objects are initialized
    analysis::ModiaMath.AnalysisType          # Type of analysis
    superObjs::Array{SuperObjsRow,1}          # super objects
-   treeAcceleration::Vector{Object3D}
-   treeSpeed::Vector{Object3D}
+   treeVisu::Vector{Object3D}
    treeAccVelo::Vector{Object3D}
    tree::Vector{Object3D}                    # Spanning tree of the frames in depth-first order (without world)
    cutJoints::Vector{Modia3D.AbstractJoint}  # Vector of all cut-joints
@@ -344,7 +343,6 @@ mutable struct Scene
                   false,
                   ModiaMath.KinematicAnalysis,
                   Array{SuperObjsRow,1}(),
-                  Vector{Object3D}[],
                   Vector{Object3D}[],
                   Vector{Object3D}[],
                   Vector{Object3D}[],

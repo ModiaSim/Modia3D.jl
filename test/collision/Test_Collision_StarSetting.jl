@@ -76,7 +76,7 @@ Modia3D.connect(gelb1.frames[2], gelb3.frames[1]; R=ModiaMath.rot2(90u"°"))
 Modia3D.connect(blau2.frame0, rotM1.frames[1]; fixed=false, R=ModiaMath.rot2(90u"°"))
 Modia3D.connect(rotM1.frames[2], rotM2.frames[1]) #; R=ModiaMath.rot2(90u"°"))
 
-#Modia3D.connect(gelb1.frames[2], visuElem.frames[2])
+Modia3D.connect(gelb1.frames[2], visuElem.frames[2])
 end
 
 

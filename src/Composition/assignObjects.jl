@@ -1,19 +1,19 @@
 
-function assignObj(superObjType::SuperObjCollision, obj::Object3D)
+function assignObj(scene::Scene, superObjType::SuperObjCollision, obj::Object3D)
     if canCollide(obj)
       push!(superObjType.superObj, obj)
     end
 end
 
 
-function assignObj(superObjType::SuperObjMass, obj::Object3D)
+function assignObj(scene::Scene, superObjType::SuperObjMass, obj::Object3D)
     if hasMass(obj)
       push!(superObjType.superObj, obj)
     end
 end
 
 
-function assignObj(superObjType::SuperObjForce, obj::Object3D)
+function assignObj(scene::Scene, superObjType::SuperObjForce, obj::Object3D)
     if canCollide(obj) || hasJoint(obj) || hasForceElement(obj)
     #println("ist ein ObjForce, canCollide = ", canCollide(obj), " hasJoint = ", hasJoint(obj), " hasForceElement = ", hasForceElement(obj))
       push!(superObjType.superObj, obj)
@@ -22,22 +22,21 @@ end
 
 
 
-function assignObj(superObjType::SuperObjVisu, obj::Object3D)
+function assignObj(scene::Scene, superObjType::SuperObjVisu, obj::Object3D)
     renderer = Modia3D.renderer[1]
     if isVisible(obj, renderer) && !hasJoint(obj) && !hasMass(obj) && !canCollide(obj) && !hasForceElement(obj) && !hasCutJoint(obj)
-     # println("ist ein VisuObj")
-      push!(superObjType.superObj, obj)
+      push!(scene.treeVisu, obj)
     end
 end
 
-assignObj(superObjType, obj) = nothing
+assignObj(scene, superObjType, obj) = nothing
 
 
 function assignAll(scene::Scene, superObj::SuperObjsRow, obj::Object3D, world::Object3D, actPos::Int64)
     names = fieldnames(typeof(superObj))
     for val in names
         tmp = getfield(superObj,val)
-        assignObj(tmp,obj)
+        assignObj(scene,tmp,obj)
     end
 
     if hasCutJoint(obj)
@@ -114,20 +113,15 @@ function assign_Visu_CutJoint_Dynamics!(scene::Scene, obj::Object3D, world::Obje
 end
 
 
-function assignVeloObj(tree::Vector{Object3D}, obj::Object3D)
-    if canCollide(obj) && !hasChildJoint(obj)
-      push!(tree, obj)
-    end
+function assignAccVelo(tree::Vector{Object3D}, obj::Object3D)
+  # compute velocity of this object
+  if canCollide(obj) && !hasChildJoint(obj)
+    push!(tree, obj)
+  end
+  # compute acceleration of this object
+  if hasChildJoint(obj)
+    obj.computeAcceleration = true
+    push!(tree, obj)
+  end
 end
-
-assignVeloObj(tree, obj) = nothing
-
-
-function assignAccObj(tree::Vector{Object3D}, obj::Object3D)
-    if hasChildJoint(obj)
-      obj.computeAcceleration = true
-      push!(tree, obj)
-    end
-end
-
-assignAccObj(tree, obj) = nothing
+assignAccVelo(tree, obj) = nothing
