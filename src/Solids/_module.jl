@@ -5,7 +5,7 @@
     module Modia3D.Solids
 
 Objects that have a volume and properties associated with the volume.
-Solid parts can be associated with a [`Modia3D.Object3D`](@ref). 
+Solid parts can be associated with a [`Modia3D.Object3D`](@ref).
 They are defined with struct [`Modia3D.Solid`](@ref) consisting of an **optional** solid geometry:
 
 ![Solids](../../resources/images/SolidGeos.jpg)
@@ -27,7 +27,7 @@ is associated with an Object3D `object3D`:
 - boundingBox(geo, <other arguments>),
 - supportPoint(geo, <other arguments>),
 - isVisible(object3D, renderer),
-- hasMass(object3D),
+- dataHasMass(object3D),
 - canCollide(object3D),
 - and other functions.
 
@@ -46,7 +46,7 @@ export volume, centroid, bottomArea, topArea, longestEdge, lengthGeo, inertiaMat
 # export canCollide
 
 # Solid materials
-export MassProperties, SolidMaterial, ContactMaterialElastic
+export MassProperties, SolidMaterial, ContactMaterialElastic, dummyMassProperties
 export solidMaterial, solidMaterialPalette, defaultContactMaterial
 
 using StaticArrays

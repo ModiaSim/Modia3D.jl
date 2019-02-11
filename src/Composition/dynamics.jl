@@ -154,7 +154,7 @@ struct SimulationModel <: ModiaMath.AbstractSimulationModel
                                 storeResult!     = ModiaMath.Variables.storeVariables!,
                                 hev = hev,
                                 scaleConstraintsAtEvents = scaleConstraintsAtEvents)
-      println(".... useOptimizedStructure = ", useOptimizedStructure)                                
+      println(".... useOptimizedStructure = ", useOptimizedStructure)
       new(modelName, simulationState,assembly,var,analysis, useOptimizedStructure)
    end
 end
@@ -302,7 +302,7 @@ open("log.txt", "a") do file
 
       # Initialize forces and torques
       dynamics::Object3Ddynamics = obj.dynamics
-      if hasMass(obj) && analysis != ModiaMath.KinematicAnalysis
+      if dataHasMass(obj) && analysis != ModiaMath.KinematicAnalysis
          massProperties = obj.data.massProperties
          mass = massProperties.m
          rCM  = massProperties.rCM
@@ -408,7 +408,7 @@ open("log.txt", "a") do file
    if scene.visualize && storeResults
       # Compute positions of frames that are only used for visualization
       if m.useOptimizedStructure
-          for obj in scene.treeVisu 
+          for obj in scene.treeVisu
               parent = obj.parent
               obj.r_abs = obj.r_rel ≡ ModiaMath.ZeroVector3D ? parent.r_abs : parent.r_abs + parent.R_abs'*obj.r_rel
               obj.R_abs = obj.R_rel ≡ ModiaMath.NullRotation ? parent.R_abs : obj.R_rel*parent.R_abs

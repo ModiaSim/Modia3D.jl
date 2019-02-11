@@ -335,15 +335,13 @@ function initAnalysis!(world::Object3D, scene::Scene)
   build_superObjs!(scene, world)
 
    # Initialize contact detection if contact detection desired and objects with contactMaterial are present
-   #if scene.options.enableContactDetection
    if scene.visualize
       initializeVisualization(Modia3D.renderer[1], scene.allVisuElements)
    end
    if scene.collide
-        initializeContactDetection!(world, scene)
-    end
-   #end
-
+      initializeContactDetection!(world, scene)
+   end
+   initializeMassComputation!(scene)
    # Initialize connections between signals and frames, joints, ...
    # build_SignalObject3DConnections!(assembly)
 
@@ -374,14 +372,10 @@ function initAnalysis!(assembly::Modia3D.AbstractAssembly;
    if scene.visualize
       initializeVisualization(Modia3D.renderer[1], scene.allVisuElements)
    end
-
-   # Initialize contact detection if contact detection desired and objects with contactMaterial are present
-  # if scene.options.enableContactDetection
-
-      if scene.collide
-        initializeContactDetection!(world, scene)
-      end
-  # end
+   if scene.collide
+      initializeContactDetection!(world, scene)
+  end
+  initializeMassComputation!(scene)
 
    # Initialize connections between signals and frames, joints, ...
    #build_SignalObject3DConnections!(assembly)

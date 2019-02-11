@@ -7,7 +7,7 @@ end
 
 
 function assignObj(scene::Scene, superObjType::SuperObjMass, obj::Object3D)
-    if hasMass(obj)
+    if dataHasMass(obj)
       push!(superObjType.superObj, obj)
     end
 end
@@ -24,7 +24,7 @@ end
 
 function assignObj(scene::Scene, superObjType::SuperObjVisu, obj::Object3D)
     renderer = Modia3D.renderer[1]
-    if isVisible(obj, renderer) && !hasJoint(obj) && !canCollide(obj) && !hasForceElement(obj) && !hasCutJoint(obj) # && !hasMass(obj)
+    if isVisible(obj, renderer) && !hasJoint(obj) && !canCollide(obj) && !hasForceElement(obj) && !hasCutJoint(obj) # && !objectHasMass(obj)
       push!(scene.treeVisu, obj)
     end
 end

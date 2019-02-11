@@ -204,6 +204,7 @@ mutable struct Object3D <: Modia3D.AbstractAssemblyComponent
    # Absolute position of frame
    r_abs::SVector{3,Float64}                    # Absolute position vector from origin of world frame to origin of Object3D frame, resolved in world frame
    R_abs::SMatrix{3,3,Float64,9}                # Absolute rotation matrix from world frame to Object3D frame
+   massProperties::Union{Solids.MassProperties,NOTHING}
 
    # Additional information associated with Object3D
    data::Modia3D.AbstractObject3Ddata                      # Optional data associated with Object3D
@@ -235,6 +236,7 @@ mutable struct Object3D <: Modia3D.AbstractAssemblyComponent
       obj.R_rel              = ModiaMath.NullRotation
       obj.r_abs              = ModiaMath.ZeroVector3D
       obj.R_abs              = ModiaMath.NullRotation
+      obj.massProperties     = nothing
       obj.data               = data
       obj.twoObject3Dobject  = Modia3D.AbstractTwoObject3DObject[]
       obj.hasCutJoint        = false
@@ -276,7 +278,7 @@ mutable struct Object3D <: Modia3D.AbstractAssemblyComponent
       visualizeFrame2 = typeof(visualizeFrame) == Modia3D.Ternary ? visualizeFrame : (visualizeFrame ? Modia3D.True : Modia3D.False)
 
       obj = new(ModiaMath.ComponentInternal(), parent, Vector{Object3D}[], fixedJoint,
-                false, false, false, r_rel, R_rel, r_abs, R_abs, data,
+                false, false, false, r_rel, R_rel, r_abs, R_abs, nothing, data,
                 Modia3D.AbstractTwoObject3DObject[], false, false, false, false, visualizeFrame2, nothing, nothing)
 
       if !fixed
@@ -301,7 +303,7 @@ mutable struct Object3D <: Modia3D.AbstractAssemblyComponent
             twoObject3Dobject::Vector{Modia3D.AbstractTwoObject3DObject},
             visualizeFrame::Modia3D.Ternary) =
       new(_internal, parent, children, joint, false, false, false, r_rel,
-          R_rel, r_abs, R_abs, data, twoObject3Dobject, false, false, false, false, visualizeFrame, nothing, nothing)
+          R_rel, r_abs, R_abs, nothing, data, twoObject3Dobject, false, false, false, false, visualizeFrame, nothing, nothing)
 end
 
 
@@ -374,7 +376,7 @@ hasCutJoint(          obj::Object3D) = obj.hasCutJoint
 hasForceElement(      obj::Object3D) = obj.hasForceElement
 hasChildJoint(        obj::Object3D) = obj.hasChildJoint
 needsAcceleration(    obj::Object3D) = obj.computeAcceleration
-
+objectHasMass(        obj::Object3D) = typeof(obj.massProperties)!= NOTHING
 
 # The following functions need to be defined for every type derived from AbstractObject3Ddata,
 # provided the function should return true
@@ -382,8 +384,8 @@ needsAcceleration(    obj::Object3D) = obj.computeAcceleration
 
 isVisible( data::Modia3D.AbstractObject3Ddata, renderer::Modia3D.AbstractRenderer) = false
 canCollide(data::Modia3D.AbstractObject3Ddata) = false
-hasMass(   data::Modia3D.AbstractObject3Ddata) = false
-hasMass(   data::Solids.Solid)                 = typeof(data.massProperties)!= NOTHING
+dataHasMass(   data::Modia3D.AbstractObject3Ddata) = false
+dataHasMass(   data::Solids.Solid)                 = typeof(data.massProperties)!= NOTHING
 
 
 # Inquire properties of an Object3D that depend on the type of frame.data
@@ -401,7 +403,7 @@ function canCollide(obj::Object3D)
     return false
   end
 end
-hasMass(obj::Object3D) = hasMass(obj.data)
+dataHasMass(obj::Object3D) = dataHasMass(obj.data)
 
 
 """    rootObject3D(frame) - returns the root frame of all parents of frame"""
