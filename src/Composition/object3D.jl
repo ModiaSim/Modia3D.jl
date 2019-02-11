@@ -373,7 +373,7 @@ isNotCoordinateSystem(obj::Object3D) = typeof(obj.data) != Graphics.CoordinateSy
 hasCutJoint(          obj::Object3D) = obj.hasCutJoint
 hasForceElement(      obj::Object3D) = obj.hasForceElement
 hasChildJoint(        obj::Object3D) = obj.hasChildJoint
-
+needsAcceleration(    obj::Object3D) = obj.computeAcceleration
 
 
 # The following functions need to be defined for every type derived from AbstractObject3Ddata,

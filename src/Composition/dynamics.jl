@@ -90,6 +90,7 @@ struct SimulationModel <: ModiaMath.AbstractSimulationModel
    assembly::Modia3D.AbstractAssembly
    var::ModiaMath.ModelVariables
    analysis::ModiaMath.AnalysisType
+   useOptimizedStructure::Bool
 
    function SimulationModel(assembly::Modia3D.AbstractAssembly;
                             analysis::ModiaMath.AnalysisType=ModiaMath.DynamicAnalysis,
@@ -98,7 +99,8 @@ struct SimulationModel <: ModiaMath.AbstractSimulationModel
                             tolerance = 1e-4,
                             interval  = (stopTime-startTime)/500.0,
                             hev = 1e-8,
-                            scaleConstraintsAtEvents::Bool = true)
+                            scaleConstraintsAtEvents::Bool = true,
+                            useOptimizedStructure::Bool = true)
       modelName = Modia3D.trailingPartOfName( string( typeof(assembly) ) )
       world = get_WorldObject3D(assembly)
       assembly._internal.referenceObject3D = world
@@ -152,7 +154,8 @@ struct SimulationModel <: ModiaMath.AbstractSimulationModel
                                 storeResult!     = ModiaMath.Variables.storeVariables!,
                                 hev = hev,
                                 scaleConstraintsAtEvents = scaleConstraintsAtEvents)
-      new(modelName, simulationState,assembly,var,analysis)
+      println(".... useOptimizedStructure = ", useOptimizedStructure)                                
+      new(modelName, simulationState,assembly,var,analysis, useOptimizedStructure)
    end
 end
 
@@ -219,7 +222,11 @@ function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64
    sim              = m.simulationState
    world            = m.assembly._internal.referenceObject3D
    scene            = m.assembly._internal.scene
-   tree             = scene.tree
+   if m.useOptimizedStructure
+      tree          = scene.treeAccVelo
+   else
+      tree          = scene.tree
+   end
    cutJoints        = scene.cutJoints
    var              = m.var
    analysis         = m.analysis
@@ -297,17 +304,17 @@ open("log.txt", "a") do file
       dynamics::Object3Ddynamics = obj.dynamics
       if hasMass(obj) && analysis != ModiaMath.KinematicAnalysis
          massProperties = obj.data.massProperties
-         m   = massProperties.m
-         rCM = massProperties.rCM
-         I   = massProperties.I
-         w   = dynamics.w
+         mass = massProperties.m
+         rCM  = massProperties.rCM
+         I    = massProperties.I
+         w    = dynamics.w
          grav = gravityAcceleration(scene.options.gravityField, obj.r_abs)
          #println("grav = ", grav)
          if rCM === ModiaMath.ZeroVector3D
-            dynamics.f = -m*( obj.R_abs*(dynamics.a0 - grav) )
+            dynamics.f = -mass*( obj.R_abs*(dynamics.a0 - grav) )
             dynamics.t = -(I*dynamics.z + cross(w, I*w))
          else
-            dynamics.f = -m*( obj.R_abs*(dynamics.a0 - grav) +
+            dynamics.f = -mass*( obj.R_abs*(dynamics.a0 - grav) +
                                cross(dynamics.z, rCM) + cross(w, cross(w, rCM)))
             dynamics.t = -(I*dynamics.z + cross(w, I*w) + cross(rCM, dynamics.f))
          end
@@ -399,6 +406,14 @@ open("log.txt", "a") do file
 
    # Visualize at a communication point
    if scene.visualize && storeResults
+      # Compute positions of frames that are only used for visualization
+      if m.useOptimizedStructure
+          for obj in scene.treeVisu 
+              parent = obj.parent
+              obj.r_abs = obj.r_rel ≡ ModiaMath.ZeroVector3D ? parent.r_abs : parent.r_abs + parent.R_abs'*obj.r_rel
+              obj.R_abs = obj.R_rel ≡ ModiaMath.NullRotation ? parent.R_abs : obj.R_rel*parent.R_abs
+          end
+      end
       visualize!(Modia3D.renderer[1], time)
    end
 

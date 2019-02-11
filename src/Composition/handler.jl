@@ -153,8 +153,8 @@ function build_superObjs!(scene::Scene, world::Object3D)::NOTHING
     assign_Visu_CutJoint_Dynamics!(scene, rootSuperObj, world)
     if rootSuperObj != world
       assignAll(scene, superObjsRow, rootSuperObj, world, actPos)
+      push!(scene.treeAccVelo, rootSuperObj)
     end
-    push!(scene.treeAccVelo, rootSuperObj)
     fillStackOrBuffer!(scene, superObjsRow, rootSuperObj, rootSuperObj)
 
     while length(stack) > 0

@@ -13,6 +13,7 @@ function computeKinematics!(joint::FixedJoint, obj::Object3D, analysis::ModiaMat
    parent::Object3D    = obj.parent
    noTranslation::Bool = obj.r_rel ≡ ModiaMath.ZeroVector3D
    noRotation::Bool    = obj.R_rel ≡ ModiaMath.NullRotation
+   acc::Bool           = obj.computeAcceleration
 
    obj.r_abs = noTranslation ? parent.r_abs : parent.r_abs + parent.R_abs'*obj.r_rel
    obj.R_abs = noRotation    ? parent.R_abs : obj.R_rel*parent.R_abs
@@ -26,8 +27,12 @@ function computeKinematics!(joint::FixedJoint, obj::Object3D, analysis::ModiaMat
          dynamics.a0 = parentDynamics.a0 
       else
          dynamics.v0 = parentDynamics.v0 + parent.R_abs'*cross(parentDynamics.w, obj.r_rel)
-         dynamics.a0 = parentDynamics.a0 + parent.R_abs'*(cross(parentDynamics.z, obj.r_rel) +
-                                                          cross(parentDynamics.w, cross(parentDynamics.w, obj.r_rel)))
+         #if acc
+             dynamics.a0 = parentDynamics.a0 + parent.R_abs'*(cross(parentDynamics.z, obj.r_rel) +
+                                                              cross(parentDynamics.w, cross(parentDynamics.w, obj.r_rel)))
+         #else
+         #    dynamics.a0 = parentDynamics.a0 
+         #end
       end
 
       if noRotation
@@ -35,7 +40,11 @@ function computeKinematics!(joint::FixedJoint, obj::Object3D, analysis::ModiaMat
          dynamics.z = parentDynamics.z
       else
          dynamics.w = obj.R_rel*parentDynamics.w
-         dynamics.z = obj.R_rel*parentDynamics.z 
+         #if acc
+             dynamics.z = obj.R_rel*parentDynamics.z 
+         #else
+         #    dynamics.z = parentDynamics.z
+         #end
       end
    end
    return nothing

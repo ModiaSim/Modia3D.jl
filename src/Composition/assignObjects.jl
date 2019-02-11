@@ -24,7 +24,7 @@ end
 
 function assignObj(scene::Scene, superObjType::SuperObjVisu, obj::Object3D)
     renderer = Modia3D.renderer[1]
-    if isVisible(obj, renderer) && !hasJoint(obj) && !hasMass(obj) && !canCollide(obj) && !hasForceElement(obj) && !hasCutJoint(obj)
+    if isVisible(obj, renderer) && !hasJoint(obj) && !hasMass(obj) && !canCollide(obj) && !hasForceElement(obj) && !hasCutJoint(obj) && !isWorld(obj)
       push!(scene.treeVisu, obj)
     end
 end
