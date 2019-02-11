@@ -24,7 +24,7 @@ end
 
 function assignObj(scene::Scene, superObjType::SuperObjVisu, obj::Object3D)
     renderer = Modia3D.renderer[1]
-    if isVisible(obj, renderer) && !hasJoint(obj) && !hasMass(obj) && !canCollide(obj) && !hasForceElement(obj) && !hasCutJoint(obj) && !isWorld(obj)
+    if isVisible(obj, renderer) && !hasJoint(obj) && !canCollide(obj) && !hasForceElement(obj) && !hasCutJoint(obj) # && !hasMass(obj)
       push!(scene.treeVisu, obj)
     end
 end
@@ -85,7 +85,6 @@ function fillVisuElements!(scene::Scene, obj::Object3D, world::Object3D)
   renderer            = Modia3D.renderer[1]
   visualizeFrames     = scene.options.visualizeFrames
   enableVisualization = scene.options.enableVisualization
-
   if enableVisualization
     if visualizeFrames && isNotCoordinateSystem(obj) && obj.visualizeFrame != Modia3D.False
       if obj != world
@@ -119,7 +118,7 @@ function assignAccVelo(tree::Vector{Object3D}, obj::Object3D)
     push!(tree, obj)
   end
   # compute acceleration of this object
-  if hasChildJoint(obj)
+  if hasChildJoint(obj) || hasCutJoint(obj)
     obj.computeAcceleration = true
     push!(tree, obj)
   end

@@ -177,23 +177,35 @@ function build_superObjs!(scene::Scene, world::Object3D)::NOTHING
     #println(" ")
   end
   addIndicesOfCutJointsToSuperObj(scene)
-
 #=
-  println(" ")
-  println("buffer Reihenfolge")
-  for obj in buffer
-    println(ModiaMath.fullName(obj) , " obj.computeAcceleration = $(obj.computeAcceleration)")
-  end
-
  println(" ")
  println("treeAccVelo Reihenfolge")
  for obj in treeAccVelo
   println(ModiaMath.fullName(obj), " obj.computeAcceleration = $(obj.computeAcceleration)")
   #println("obj.computeAcceleration = $(obj.computeAcceleration)")
  end
+
+ println(" ")
+ println("treeVisu")
+ for obj in scene.treeVisu
+   println(ModiaMath.fullName(obj))
+ end
+
+ println(" ")
+ println("allVisuElements")
+ for obj in scene.allVisuElements
+   println(ModiaMath.fullName(obj))
+ end
 =#
 
 #=
+println(" ")
+println("buffer Reihenfolge")
+for obj in buffer
+  println(ModiaMath.fullName(obj) , " obj.computeAcceleration = $(obj.computeAcceleration)")
+end
+
+
 #  println("scene.noCPairs ", scene.noCPairs)
   println("superObjRow.superObjCollision.superObj")
   for superObjRow in scene.superObjs
