@@ -31,6 +31,8 @@ abstract type AbstractDLR_VisualizationRenderer <: AbstractRenderer end   # Comm
 #abstract type AbstractSignal            end   # Signals
 #abstract type AbstractBus               end   # Bus: is a collection of signals
 
+abstract type AbstractMassProperties    end
+
 import ModiaMath
 abstract type AbstractAssemblyInternal  <: ModiaMath.AbstractComponentInternal end
 abstract type AbstractAssemblyComponent <: ModiaMath.AbstractComponentWithVariables end # Objects that can be stored in an Assembly (has elements name and within)

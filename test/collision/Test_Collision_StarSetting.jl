@@ -38,7 +38,7 @@ world_f1 = Modia3D.Object3D(world , r=[0.5*Lx, 0.0, groundWidth/2])
 blau1     = Modia3D.Part(Modia3D.Solid(Modia3D.SolidBox(Lx,Ly,Lz), "Aluminium", vblue;contactMaterial = cmat),    [ [0.0, 0.0, -Lz/2],[ 0.0, 0.0, Lz/2] ] )
 blau2     = Modia3D.Part(Modia3D.Solid(Modia3D.SolidBox(Lx,Ly,Lz), "Aluminium", vblue; contactMaterial = cmat),   [ [0.0, 0.0, -Lz/2], [ 0.0, 0.0, Lz/2] ] )
 
-schwarz1  = Modia3D.Part(Modia3D.Solid(Modia3D.SolidCone(Dx,Lz; relativeTipDiameter=0.0), nothing, vblack; contactMaterial = cmat),  [ [0.0, 0.0, 0.0]] )
+schwarz1  = Modia3D.Part(Modia3D.Solid(Modia3D.SolidCone(Dx,Lz; relativeTipDiameter=0.0), "Aluminium", vblack; contactMaterial = cmat),  [ [0.0, 0.0, 0.0]] )
 rosa1     = Modia3D.Part(Modia3D.Solid(Modia3D.SolidBox(Lx,Ly,Lz), "Aluminium", vpink; contactMaterial = cmat),   [ [0.0, 0.0, -Lz/2],[ 0.0, 0.0, Lz/2] ] )
 green1    = Modia3D.Part(Modia3D.Solid(Modia3D.SolidBeam(Lx,Ly,Lz), nothing, vgreen; contactMaterial = cmat),     [ [0.0, 0.0, -Lz/2],[ 0.0, 0.0, Lz/2] ] )
 green2    = Modia3D.Part(Modia3D.Solid(Modia3D.SolidBeam(Lx,Ly,Lz), nothing, vgreen; contactMaterial = cmat),     [ [0.0, 0.0, -Lz/2]] )

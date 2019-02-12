@@ -204,7 +204,7 @@ mutable struct Object3D <: Modia3D.AbstractAssemblyComponent
    # Absolute position of frame
    r_abs::SVector{3,Float64}                    # Absolute position vector from origin of world frame to origin of Object3D frame, resolved in world frame
    R_abs::SMatrix{3,3,Float64,9}                # Absolute rotation matrix from world frame to Object3D frame
-   massProperties::Union{Solids.MassProperties,NOTHING}
+   massProperties::Union{Solids.InternalMassProperties,NOTHING}
 
    # Additional information associated with Object3D
    data::Modia3D.AbstractObject3Ddata                      # Optional data associated with Object3D

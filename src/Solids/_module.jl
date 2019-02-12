@@ -46,7 +46,7 @@ export volume, centroid, bottomArea, topArea, longestEdge, lengthGeo, inertiaMat
 # export canCollide
 
 # Solid materials
-export MassProperties, SolidMaterial, ContactMaterialElastic, dummyMassProperties
+export InternalMassProperties, MassProperties, SolidMaterial, ContactMaterialElastic, dummyMassProperties
 export solidMaterial, solidMaterialPalette, defaultContactMaterial
 
 using StaticArrays
@@ -61,6 +61,7 @@ import ModiaMath
 else
     const NOTHING = Void
 end
+
 
 include("concaveProperties.jl")
 include("geometry.jl")

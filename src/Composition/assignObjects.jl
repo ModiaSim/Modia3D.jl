@@ -24,7 +24,7 @@ end
 
 function assignObj(scene::Scene, superObjType::SuperObjVisu, obj::Object3D)
     renderer = Modia3D.renderer[1]
-    if isVisible(obj, renderer) && !hasJoint(obj) && !canCollide(obj) && !hasForceElement(obj) && !hasCutJoint(obj) # && !objectHasMass(obj)
+    if isVisible(obj, renderer) && !hasJoint(obj) && !canCollide(obj) && !hasForceElement(obj) && !hasCutJoint(obj) && !hasChildJoint(obj) #&& !dataHasMass(obj)
       push!(scene.treeVisu, obj)
     end
 end
@@ -109,6 +109,7 @@ function assign_Visu_CutJoint_Dynamics!(scene::Scene, obj::Object3D, world::Obje
   assignDynamics!(obj)
   createCutJoints!(scene, obj)
   fillVisuElements!(scene, obj, world)
+  return nothing
 end
 
 

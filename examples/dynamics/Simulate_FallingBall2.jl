@@ -1,8 +1,8 @@
 """
     module Simulate_FallingBall2
 
-Models and simulates a *solid sphere* that is falling downwards along the y-axis (constrained via 
-a prismatic joint) on a *solid box*, **with collision handling**. 
+Models and simulates a *solid sphere* that is falling downwards along the y-axis (constrained via
+a prismatic joint) on a *solid box*, **with collision handling**.
 
 Note, a **Solid** is used in collision handling, if a **contactMaterial** is defined for the
 solid. By default, collision handling between two Object3Ds is disabled, if connected by a joint.
@@ -28,7 +28,7 @@ contactMaterial = Modia3D.defaultContactMaterial()
                                              contactMaterial=contactMaterial), r = [0.5, -0.05, 0.0])
    sphere    = Object3D(Modia3D.Solid(Modia3D.SolidSphere(D), "Aluminium", ballMaterial,
                                       contactMaterial=contactMaterial))
-   prismatic = Modia3D.Prismatic(ground, sphere, axis=2, s_start=h, canCollide=true)  
+   prismatic = Modia3D.Prismatic(ground, sphere, axis=2, s_start=h, canCollide=true)
 end
 
 fallingBall = FallingBall2()

@@ -87,6 +87,7 @@ else
     const NOTHING = Void
 end
 
+
 const MaterialOrNothing                = Union{Graphics.Material,NOTHING}
 const MassPropertiesOrNothing          = Union{Solids.MassProperties,NOTHING}
 const AbstractContactMaterialOrNothing = Union{Modia3D.AbstractContactMaterial,NOTHING}

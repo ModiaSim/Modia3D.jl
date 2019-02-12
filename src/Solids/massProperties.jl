@@ -8,13 +8,14 @@
 #
 #    Mass, centerOfMass, inertiaMatrix of a solid
 
-struct MassProperties
+
+struct MassProperties <: Modia3D.AbstractMassProperties
    m::Float64                 # mass in [kg]
    rCM::ModiaMath.Vector3D    # center of mass in [m]
    I::SMatrix{3,3,Float64,9}  # inertia matrix in [kg.m^2]
 
    function MassProperties(mass::Number, centerOfMass::AbstractVector, inertiaMatrix::AbstractMatrix)
-      @assert(mass >= 0.0)
+      @assert(mass > 0.0)
       new(mass, centerOfMass, inertiaMatrix)
    end
 end
@@ -29,4 +30,11 @@ MassProperties(geo::Geo, mass::Number)                 where Geo <: Modia3D.Abst
 MassProperties(geo::Geo, material::SolidMaterial)      where Geo <: Modia3D.AbstractSolidGeometry = MassProperties(geo, material.density*volume(geo))
 MassProperties(geo::Geo, materialName::AbstractString) where Geo <: Modia3D.AbstractSolidGeometry = MassProperties(geo, solidMaterialPalette[materialName])
 
-dummyMassProperties() = MassProperties(mass = 0.0, centerOfMass = ModiaMath.ZeroVector3D, inertiaMatrix = (zeros(3,3)+I) )
+
+mutable struct InternalMassProperties <: Modia3D.AbstractMassProperties
+   m::Float64                 # mass in [kg]
+   rCM::ModiaMath.Vector3D    # center of mass in [m]
+   I::SMatrix{3,3,Float64,9}  # inertia matrix in [kg.m^2]
+   # Basics.nullMRotation()
+   InternalMassProperties() = new(0.0, ModiaMath.ZeroVector3D, SMatrix{3,3,Float64,9}(0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0))
+end

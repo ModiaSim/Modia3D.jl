@@ -134,6 +134,9 @@ struct SimulationModel <: ModiaMath.AbstractSimulationModel
             nz = scene.options.contactDetection.contactPairs.nz
          end
       end
+      if useOptimizedStructure
+         initializeMassComputation!(scene)
+      end
 
       # Initialize connections between signals and frames, joints, ...
       build_SignalObject3DConnections!(assembly)
@@ -240,6 +243,9 @@ function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64
       if scene.options.enableContactDetection && scene.collide
          initializeContactDetection!(world, scene)
       end
+      if m.useOptimizedStructure
+         initializeMassComputation!(scene)
+      end
    end
 
    if ModiaMath.isTerminal(sim)
@@ -302,25 +308,49 @@ open("log.txt", "a") do file
 
       # Initialize forces and torques
       dynamics::Object3Ddynamics = obj.dynamics
-      if dataHasMass(obj) && analysis != ModiaMath.KinematicAnalysis
-         massProperties = obj.data.massProperties
-         mass = massProperties.m
-         rCM  = massProperties.rCM
-         I    = massProperties.I
-         w    = dynamics.w
-         grav = gravityAcceleration(scene.options.gravityField, obj.r_abs)
-         #println("grav = ", grav)
-         if rCM === ModiaMath.ZeroVector3D
-            dynamics.f = -mass*( obj.R_abs*(dynamics.a0 - grav) )
-            dynamics.t = -(I*dynamics.z + cross(w, I*w))
+
+      if m.useOptimizedStructure
+         if objectHasMass(obj) && analysis != ModiaMath.KinematicAnalysis
+            massProperties = obj.massProperties
+            mass = massProperties.m
+            rCM  = massProperties.rCM
+            I    = massProperties.I
+            w    = dynamics.w
+            grav = gravityAcceleration(scene.options.gravityField, obj.r_abs)
+            #println("grav = ", grav)
+            if rCM === ModiaMath.ZeroVector3D
+               dynamics.f = -mass*( obj.R_abs*(dynamics.a0 - grav) )
+               dynamics.t = -(I*dynamics.z + cross(w, I*w))
+            else
+               dynamics.f = -mass*( obj.R_abs*(dynamics.a0 - grav) +
+                                  cross(dynamics.z, rCM) + cross(w, cross(w, rCM)))
+               dynamics.t = -(I*dynamics.z + cross(w, I*w) + cross(rCM, dynamics.f))
+            end
          else
-            dynamics.f = -mass*( obj.R_abs*(dynamics.a0 - grav) +
-                               cross(dynamics.z, rCM) + cross(w, cross(w, rCM)))
-            dynamics.t = -(I*dynamics.z + cross(w, I*w) + cross(rCM, dynamics.f))
+            dynamics.f = ModiaMath.ZeroVector3D
+            dynamics.t = ModiaMath.ZeroVector3D
          end
       else
-         dynamics.f = ModiaMath.ZeroVector3D
-         dynamics.t = ModiaMath.ZeroVector3D
+         if dataHasMass(obj) && analysis != ModiaMath.KinematicAnalysis
+            massProperties = obj.data.massProperties
+            mass = massProperties.m
+            rCM  = massProperties.rCM
+            I    = massProperties.I
+            w    = dynamics.w
+            grav = gravityAcceleration(scene.options.gravityField, obj.r_abs)
+            #println("grav = ", grav)
+            if rCM === ModiaMath.ZeroVector3D
+               dynamics.f = -mass*( obj.R_abs*(dynamics.a0 - grav) )
+               dynamics.t = -(I*dynamics.z + cross(w, I*w))
+            else
+               dynamics.f = -mass*( obj.R_abs*(dynamics.a0 - grav) +
+                                  cross(dynamics.z, rCM) + cross(w, cross(w, rCM)))
+               dynamics.t = -(I*dynamics.z + cross(w, I*w) + cross(rCM, dynamics.f))
+            end
+         else
+            dynamics.f = ModiaMath.ZeroVector3D
+            dynamics.t = ModiaMath.ZeroVector3D
+         end
       end
       #println("    ", ModiaMath.instanceName(obj), ": f = ", dynamics.f, ", t = ", dynamics.t)
    end
