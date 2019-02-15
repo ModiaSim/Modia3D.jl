@@ -10,11 +10,17 @@ groundMaterial = Modia3D.Material(color="DarkGreen", transparency=0.5)
 vmat1 = Modia3D.Material(color="LightBlue" , transparency=0.5)
 vmat2 = Modia3D.Material(color="Red")
 
+
+rCM = zeros(3)
+rCM[2] = 5.0
+I = fill(0.0,(3,3))
+massProp = Modia3D.MassProperties(1.0, rCM, I)
+
 @assembly Pendulum(;Lx = 1.0, Ly=0.2*Lx, Lz=0.2*Lx, m=1.0) begin
    world  = Modia3D.Object3D(Modia3D.CoordinateSystem(0.5*Lx))
 
    # Pendulum
-   body   = Modia3D.Object3D(Modia3D.Solid(Modia3D.SolidBeam(Lx,Ly,Lz), Modia3D.MassProperties(m=m), vmat1))
+   body   = Modia3D.Object3D(Modia3D.Solid(Modia3D.SolidBeam(Lx,Ly,Lz), massProp, vmat1))
    frame1 = Modia3D.Object3D(body; r=[-Lx/2, 0.0, 0.0])
    cyl    = Modia3D.Object3D(frame1,Modia3D.Cylinder(Ly/2,1.2*Ly; material=vmat2))
 

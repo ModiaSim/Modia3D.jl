@@ -14,7 +14,7 @@ rCM2 = zeros(3)
 rCM2[1] = 5.0
 rCM2[3] = 2.0
 I1 = fill(2.0,(3,3))
-I2 = fill(0.5,(3,3))
+I2 = fill(3.0,(3,3))
 massProp1 = Modia3D.MassProperties(15.0, rCM1, I1)
 massProp2 = Modia3D.MassProperties(5.0, rCM2, I2)
 
@@ -25,10 +25,10 @@ rCM3[2] = 4.0
 rCM4 = zeros(3)
 rCM4[1] = 3.0
 rCM4[3] = 9.0
-I3 = fill(20.0,(3,3))
-I4 = fill(40.0,(3,3))
-massProp3 = Modia3D.MassProperties(60.0, rCM3, I3)
-massProp4 = Modia3D.MassProperties(30.0, rCM4, I4)
+I3 = fill(45.0,(3,3))
+I4 = fill(100.0,(3,3))
+massProp3 = Modia3D.MassProperties(30.0, rCM3, I3)
+massProp4 = Modia3D.MassProperties(60.0, rCM4, I4)
 
 @signal Sine(;A=1.0, freqHz = 1.0) begin
    y = ModiaMath.RealScalar(causality=ModiaMath.Output, numericType=ModiaMath.WR)
@@ -59,6 +59,7 @@ end
 
    rev1 = Modia3D.Revolute(world          , part1.frames[1])
    Modia3D.connect(part1.frames[2], part2.frames[1]; R=ModiaMath.rot2(45u"°"))
+
    rev2 = Modia3D.Revolute(part2.frames[2], part3.frame0)
    Modia3D.connect(part3.frames[2], part4.frames[1] ; R=ModiaMath.rot2(-45u"°"))
 
