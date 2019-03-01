@@ -9,6 +9,16 @@
       "linearThermalExpansionCoefficient": 2.31e-5
    },
 
+   "Steel": {
+      "density": 7900.0,
+      "YoungsModulus": 2.0e11,
+      "PoissonsRatio": 0.29,
+      "meltingPoint": 1700.0,
+      "heatCapacity": 446.0,
+      "thermalConductivity": 50.2,
+      "linearThermalExpansionCoefficient": 17.2e-6
+   },
+
    "DryWood": {
       "density": 700.0,
       "YoungsModulus": 1.1e10,
