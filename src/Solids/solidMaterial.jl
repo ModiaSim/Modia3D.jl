@@ -47,6 +47,7 @@ const solidMaterialPalette = Dict{String, SolidMaterial}()
 
 # Temporary solution
 solidMaterialPalette["Aluminium"] = SolidMaterial(2700.0, 6.9e10, 0.32, 933.0,  897.0, 237.0, 2.31e-5)
+solidMaterialPalette["Steel"]     = SolidMaterial(7900.0, 2.0e11, 0.29, 1700.0, 446.0,  50.2, 17.2e-6)
 solidMaterialPalette["DryWood"]   = SolidMaterial( 700.0, 1.1e10, 0.4 , NaN  , 1700.0,   0.1, 5.0e-6)
 
 solidMaterial(name::AbstractString) = solidMaterialPalette[name]
