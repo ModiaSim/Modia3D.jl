@@ -25,6 +25,12 @@ MassProperties(;m::Number=0.0, rCM=ModiaMath.ZeroVector3D,
                                                                                     Ixy Iyy Iyz;
                                                                                     Ixz Iyz Izz])
 
-MassProperties(geo::Geo, mass::Number)                 where Geo <: Modia3D.AbstractSolidGeometry = MassProperties(mass, centroid(geo), inertiaMatrix(geo,mass))
-MassProperties(geo::Geo, material::SolidMaterial)      where Geo <: Modia3D.AbstractSolidGeometry = MassProperties(geo, material.density*volume(geo))
-MassProperties(geo::Geo, materialName::AbstractString) where Geo <: Modia3D.AbstractSolidGeometry = MassProperties(geo, solidMaterialPalette[materialName])
+MassProperties(geo::Geo, mass::Number)                     where Geo <: Modia3D.AbstractSolidGeometry = MassProperties(mass, centroid(geo), inertiaMatrix(geo,mass))
+MassProperties(geo::Geo, material::SolidMaterial)          where Geo <: Modia3D.AbstractSolidGeometry = MassProperties(geo, material.density*volume(geo))
+function MassProperties(geo::Geo, matName::AbstractString) where Geo <: Modia3D.AbstractSolidGeometry
+    if matName in keys(solidMaterialPalette)
+        MassProperties(geo, solidMaterialPalette[matName])
+    else
+        error("material $(matName) not defined in solidMaterials.json; available materials are:\n  $(keys(solidMaterialPalette))")
+    end
+end
