@@ -100,7 +100,7 @@ struct SimulationModel <: ModiaMath.AbstractSimulationModel
                             interval  = (stopTime-startTime)/500.0,
                             hev = 1e-8,
                             scaleConstraintsAtEvents::Bool = true,
-                            useOptimizedStructure::Bool = true)
+                            useOptimizedStructure::Bool = false)
       modelName = Modia3D.trailingPartOfName( string( typeof(assembly) ) )
       world = get_WorldObject3D(assembly)
       assembly._internal.referenceObject3D = world

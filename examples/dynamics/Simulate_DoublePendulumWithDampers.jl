@@ -43,7 +43,7 @@ end
    Modia3D.connect(damper2, rev2)
 end
 
-model = Modia3D.SimulationModel( DoublePendulumWithDampers() , useOptimizedStructure = true)
+model = Modia3D.SimulationModel( DoublePendulumWithDampers())
 result = ModiaMath.simulate!(model, stopTime=5.0, tolerance=1e-6,interval=0.001,log=true)
 
 ModiaMath.plot(result, [("rev1.phi", "rev2.phi"),

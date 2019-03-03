@@ -33,7 +33,7 @@ end
    Modia3D.connect(damper, rev)
 end
 pendulum = PendulumWithDamper(Lx=1.6, m=0.5, sceneOptions= Modia3D.SceneOptions(visualizeFrames=true, defaultFrameLength=0.3))
-model = Modia3D.SimulationModel( pendulum ,useOptimizedStructure = true)
+model = Modia3D.SimulationModel( pendulum )
 result = ModiaMath.simulate!(model, stopTime=5.0, interval=0.1, tolerance=1e-4, log=true)
 
 ModiaMath.plot(result, ["rev.phi", "rev.w", "rev.a", "rev.tau"])

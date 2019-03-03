@@ -33,7 +33,7 @@ end
 
 
 doublePendulum = DoublePendulum(sceneOptions=Modia3D.SceneOptions(visualizeFrames=true, defaultFrameLength=0.3))
-model = Modia3D.SimulationModel( doublePendulum, useOptimizedStructure = true )
+model = Modia3D.SimulationModel( doublePendulum )
 result = ModiaMath.simulate!(model, stopTime=0.2, tolerance=1e-6,interval=0.001)
 
 ModiaMath.plot(result, [("rev1.phi", "rev2.phi"),

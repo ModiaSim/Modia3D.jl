@@ -2,10 +2,13 @@
 # Copyright 2017-2018, DLR Institute of System Dynamics and Control
 
 module Modia3D
-println(" \nWelcome to Modia3D - Modeling and simulation of 3D systems")
-println("   Version : 0.2.2-dev (2018-12-05)")
 
-const path = dirname(dirname(@__FILE__))   # Absolute path of Modia3D Julia package directory
+const path = dirname(dirname(@__FILE__))   # Absolute path of package directory
+const Version = "0.2.2-dev"
+const Date = "2019-02-24"
+
+println(" \nImporting Modia3D, Version $Version ($Date)")
+
 
 
 # Abstract types

@@ -33,7 +33,7 @@ fallingBall = FallingBall4()
 
 # Modia3D.visualizeAssembly!( fallingBall )
 
-simulationModel = Modia3D.SimulationModel( fallingBall, stopTime=2.5, scaleConstraintsAtEvents = true ,useOptimizedStructure = false )
+simulationModel = Modia3D.SimulationModel( fallingBall, stopTime=2.5, scaleConstraintsAtEvents = true)
 #Modia3D.print_ModelVariables(simulationModel)
 result = ModiaMath.simulate!(simulationModel, log=true)
 
