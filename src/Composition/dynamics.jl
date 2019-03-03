@@ -100,7 +100,7 @@ struct SimulationModel <: ModiaMath.AbstractSimulationModel
                             interval  = (stopTime-startTime)/500.0,
                             hev = 1e-8,
                             scaleConstraintsAtEvents::Bool = true,
-                            useOptimizedStructure::Bool = false)
+                            useOptimizedStructure::Bool = true)
       modelName = Modia3D.trailingPartOfName( string( typeof(assembly) ) )
       world = get_WorldObject3D(assembly)
       assembly._internal.referenceObject3D = world
@@ -157,7 +157,40 @@ struct SimulationModel <: ModiaMath.AbstractSimulationModel
                                 storeResult!     = ModiaMath.Variables.storeVariables!,
                                 hev = hev,
                                 scaleConstraintsAtEvents = scaleConstraintsAtEvents)
-      println(".... useOptimizedStructure = ", useOptimizedStructure)
+     # println(".... useOptimizedStructure = ", useOptimizedStructure)
+
+#=
+      scene = assembly._internal.scene
+      if useOptimizedStructure
+          println("\n... SimulationModel: treeAccVelo begin")
+          tree = scene.treeAccVelo
+      else
+          println("\n... SimulationModel: tree begin")
+          tree = scene.tree    
+      end 
+
+      for obj in tree
+         if hasParent(obj)
+            println(ModiaMath.instanceName(obj), " (parent = ", ModiaMath.instanceName(obj.parent), ")")
+            println("    r_rel = ", obj.r_rel, ", R_rel = ", obj.R_rel)
+         else
+            println(ModiaMath.instanceName(obj), " (no parent)")
+         end
+         if hasJoint(obj)
+            println("    joint type = ", typeof(obj.joint))
+         end
+         if objectHasMass(obj)
+            println("    m = ", obj.massProperties.m, " rCM = ", obj.massProperties.rCM, " I = ", obj.massProperties.I)
+         end
+      end
+      println("...  end\n\n")
+
+      println("... allVisuElements:")
+      for obj in scene.allVisuElements 
+          println(ModiaMath.instanceName(obj))
+      end
+      println("... end allVisuElements")
+=#
       new(modelName, simulationState,assembly,var,analysis, useOptimizedStructure)
    end
 end
@@ -309,30 +342,22 @@ open("log.txt", "a") do file
       # Initialize forces and torques
       dynamics::Object3Ddynamics = obj.dynamics
 
-      if m.useOptimizedStructure
-         if objectHasMass(obj) && analysis != ModiaMath.KinematicAnalysis
-            massProperties = obj.massProperties
-            mass = massProperties.m
-            rCM  = massProperties.rCM
-            I    = massProperties.I
-            w    = dynamics.w
-            grav = gravityAcceleration(scene.options.gravityField, obj.r_abs)
-            #println("grav = ", grav)
-            if rCM === ModiaMath.ZeroVector3D
-               dynamics.f = -mass*( obj.R_abs*(dynamics.a0 - grav) )
-               dynamics.t = -(I*dynamics.z + cross(w, I*w))
-            else
-               dynamics.f = -mass*( obj.R_abs*(dynamics.a0 - grav) +
-                                  cross(dynamics.z, rCM) + cross(w, cross(w, rCM)))
-               dynamics.t = -(I*dynamics.z + cross(w, I*w) + cross(rCM, dynamics.f))
+      if analysis != ModiaMath.KinematicAnalysis
+         hasMassProperties = false
+         if m.useOptimizedStructure
+            if objectHasMass(obj)
+               massProperties    = obj.massProperties
+               hasMassProperties = true
             end
          else
-            dynamics.f = ModiaMath.ZeroVector3D
-            dynamics.t = ModiaMath.ZeroVector3D
+            if dataHasMass(obj)
+               massProperties    = obj.data.massProperties
+               hasMassProperties = true
+            end
          end
-      else
-         if dataHasMass(obj) && analysis != ModiaMath.KinematicAnalysis
-            massProperties = obj.data.massProperties
+
+         if hasMassProperties
+            # Compute inertia forces / torques
             mass = massProperties.m
             rCM  = massProperties.rCM
             I    = massProperties.I
@@ -345,7 +370,7 @@ open("log.txt", "a") do file
             else
                dynamics.f = -mass*( obj.R_abs*(dynamics.a0 - grav) +
                                   cross(dynamics.z, rCM) + cross(w, cross(w, rCM)))
-               dynamics.t = -(I*dynamics.z + cross(w, I*w) + cross(rCM, dynamics.f))
+               dynamics.t = -(I*dynamics.z + cross(w, I*w)) + cross(rCM, dynamics.f)
             end
          else
             dynamics.f = ModiaMath.ZeroVector3D
@@ -353,7 +378,11 @@ open("log.txt", "a") do file
          end
       end
       #println("    ", ModiaMath.instanceName(obj), ": f = ", dynamics.f, ", t = ", dynamics.t)
-   end
+
+      #if ModiaMath.isInitial(sim)
+      #   println(ModiaMath.instanceName(obj), ": f = ", dynamics.f, ", t = ", dynamics.t)
+      #end
+   end # for
 
    # Compute contact forces/torques
    if scene.collide
@@ -432,6 +461,13 @@ open("log.txt", "a") do file
          obj = tree[i]
          computeForceTorqueAndResidue!(obj.joint, obj, analysis, time)
       end
+
+      #if ModiaMath.isInitial(sim)
+      #   for i = length(tree):-1:1
+      #      obj = tree[i]
+      #      println(ModiaMath.instanceName(obj), ": f = ", obj.dynamics.f, ", t = ", obj.dynamics.t)
+      #   end
+      #end
    end
 
    # Visualize at a communication point
@@ -442,6 +478,10 @@ open("log.txt", "a") do file
               parent = obj.parent
               obj.r_abs = obj.r_rel ≡ ModiaMath.ZeroVector3D ? parent.r_abs : parent.r_abs + parent.R_abs'*obj.r_rel
               obj.R_abs = obj.R_rel ≡ ModiaMath.NullRotation ? parent.R_abs : obj.R_rel*parent.R_abs
+              if typeof(obj.visualizationFrame) != NOTHING
+                 obj.visualizationFrame.r_abs = obj.r_abs
+                 obj.visualizationFrame.R_abs = obj.R_abs
+              end
           end
       end
       visualize!(Modia3D.renderer[1], time)
