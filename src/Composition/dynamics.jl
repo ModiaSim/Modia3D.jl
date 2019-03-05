@@ -383,7 +383,7 @@ open("log.txt", "a") do file
          computeVelocityResidues!(joint, time)
       end
       if analysis != ModiaMath.KinematicAnalysis
-         computeCutForcesAndToques!(joint, time)
+         computeCutForcesAndTorques!(joint, time)
       end
    end
 

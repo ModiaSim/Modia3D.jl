@@ -304,7 +304,7 @@ function computeVelocityResidues!(joint::CutJointRevolute, time::Float64)
    return nothing
 end
 
-function computeCutForcesAndToques!(joint::CutJointRevolute, time::Float64)
+function computeCutForcesAndTorques!(joint::CutJointRevolute, time::Float64)
    dynamics1.f += SVector{3,Float64}(joint.lambda_x, joint.lambda_y, 0.0)
    dynamics2.f += joint.frame2.R_abs*(joint.frame1.R_abs'*dynamics1.f)
 end

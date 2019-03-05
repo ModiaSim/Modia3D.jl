@@ -301,7 +301,7 @@ function computeVelocityResidues!(joint::CutJointPrismatic, time::Float64)
 end
 
 
-function computeCutForcesAndToques!(joint::CutJointPrismatic, time::Float64)
+function computeCutForcesAndTorques!(joint::CutJointPrismatic, time::Float64)
    dynamics1.f += joint.e_lambda1*lambda1 + joint.e_lambda2*lambda2
    dynamics2.f += dynamics.f
 end
