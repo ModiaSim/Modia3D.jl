@@ -433,10 +433,13 @@ function Base.show(io::IO, frame::Object3D)
          print(io,", ")
       end
       typeName = string( typeof(frame.data) )
-      s = search(typeName, "Modia3D")
-      if s.start == 1
-         typeName = "Modia3D." * Basics.trailingPartOfName( typeName )
+      ss = split(typeName, ".")
+
+      # override and collapse Modia3D.x.y.z.Type into Modia3D.Type
+      if ss[1] == "Modia3D" && length(ss) > 1
+         typeName = ss[1] * ss[end]
       end
+
       print(io, typeName, "(...)")
    end
 
