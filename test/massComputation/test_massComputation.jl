@@ -37,6 +37,12 @@ function Modia3D.computeSignal(signal::Sine, sim::ModiaMath.SimulationState)
     signal.y.value  = signal.A*sin(2*pi*signal.freqHz*sim.time)
 end
 
+@signal LinearSig(;A=1.0, freqHz = 1.0) begin
+   y = ModiaMath.RealScalar(causality=ModiaMath.Output, numericType=ModiaMath.WR)
+end
+function Modia3D.computeSignal(signal::LinearSig, sim::ModiaMath.SimulationState)
+    signal.y.value  = signal.A*sim.time - signal.freqHz
+end
 
 
 
@@ -64,11 +70,12 @@ end
    Modia3D.connect(part3.frames[2], part4.frames[1] ; R=ModiaMath.rot2(-45u"°"))
 
    sig1 = Sine(A=1.5,freqHz=0.5)
-   sig2 = Sine(A=2.5,freqHz=1.0)
+   sig2 = LinearSig(A=2.5,freqHz=1.0)
    sine1     = Modia3D.SignalToFlangeAngle(sig1.y)
-   sine2     = Modia3D.SignalToFlangeAngle(sig1.y)
+   sine2     = Modia3D.SignalToFlangeAngle(sig2.y)
    Modia3D.connect(sine1,   rev1)
    Modia3D.connect(sine2,   rev2)
+
 end
 
 doublePendulum = DoublePendulum(sceneOptions = Modia3D.SceneOptions(visualizeFrames=true,
@@ -78,7 +85,7 @@ model = Modia3D.SimulationModel( doublePendulum, analysis=ModiaMath.KinematicAna
 result = ModiaMath.simulate!(model, stopTime=3.0)
 
 ModiaMath.plot(result, ("rev1.phi", "rev2.phi") )
-
+# ModiaMath.plot(result, [("rev1.phi", "rev2.phi"), ("rev1.w"  , "rev2.w"), ("rev1.a"  , "rev2.a")])
 
 println("... success of test_massComputation.jl!")
 end

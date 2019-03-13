@@ -166,8 +166,8 @@ struct SimulationModel <: ModiaMath.AbstractSimulationModel
           tree = scene.treeAccVelo
       else
           println("\n... SimulationModel: tree begin")
-          tree = scene.tree    
-      end 
+          tree = scene.tree
+      end
 
       for obj in tree
          if hasParent(obj)
@@ -186,7 +186,7 @@ struct SimulationModel <: ModiaMath.AbstractSimulationModel
       println("...  end\n\n")
 
       println("... allVisuElements:")
-      for obj in scene.allVisuElements 
+      for obj in scene.allVisuElements
           println(ModiaMath.instanceName(obj))
       end
       println("... end allVisuElements")
@@ -471,6 +471,7 @@ open("log.txt", "a") do file
    end
 
    # Visualize at a communication point
+
    if scene.visualize && storeResults
       # Compute positions of frames that are only used for visualization
       if m.useOptimizedStructure
@@ -486,6 +487,7 @@ open("log.txt", "a") do file
       end
       visualize!(Modia3D.renderer[1], time)
    end
+
 
    # Copy variables to residues
    ModiaMath.copy_variables_to_residue!(var, _x, _derx, _r)
