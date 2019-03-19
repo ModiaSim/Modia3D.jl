@@ -24,8 +24,8 @@ end
    world = Modia3D.Object3D(Modia3D.CoordinateSystem(0.5*Lx))
    bar1  = Bar(Lx=Lx, m=m)
    bar2  = Bar(Lx=Lx, m=m)
-   rev1  = Modia3D.Revolute(world, bar1.frame1)
-   rev2  = Modia3D.Revolute(bar1.frame2, bar2.frame1)
+   rev1  = Modia3D.Revolute(world, bar1.frame1; axis = 3)
+   rev2  = Modia3D.Revolute(bar1.frame2, bar2.frame1; axis = 1)
 end
 
 

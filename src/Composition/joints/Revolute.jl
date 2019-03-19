@@ -70,7 +70,7 @@ mutable struct CutJointRevolute <: Modia3D.AbstractRevolute
    visited::Bool                                   # = true, if already visited when traversing the spanning tree
 
    # Definitions special to Revolute joints
-   axis::Int          # Rotation axis (axis = 3 or -3)
+   axis::Int            # Rotation axis (axis = 3 or -3)
    # phi_ref::Float64   # Value of angle phi in reference configuration
    # phi::Float64       # Actual value of relative rotation angle (obj1 and obj2 coincide, if phi = 0)
 
@@ -122,12 +122,13 @@ ModiaMath.plot(result, ("rev.phi", "rev.w"))
 function Revolute(obj1::Object3D, obj2::Object3D;
                   phi_start::Number = 0.0,
                   w_start::Number   = 0.0,
-                  canCollide::Bool  = false)
+                  canCollide::Bool  = false,
+                  axis::Int = 3)
    rphi_start = Float64(phi_start)
    rw_start   = Float64(w_start)
    (obj_a,obj_b,cutJoint) = attach(obj1, obj2)
-   axis  = obj_b===obj2 ? 3 : -3
-
+   @assert(-3 <= axis <= 3)
+   axis  = obj_b===obj2 ? axis : -axis
    if cutJoint
       println("... Revolute joint connecting ", ModiaMath.fullName(obj1), " with ", ModiaMath.fullName(obj2), " is a cut-joint")
 
@@ -168,7 +169,7 @@ function Revolute(obj1::Object3D, obj2::Object3D;
              end
          end
       else
-         R2_abs     = ModiaMath.rot3(axis > 0 ? rphi_start : -rphi_start)*obj_a.R_abs
+         R2_abs     = rotationMatrixAxis(axis, axis > 0 ? rphi_start : -rphi_start)*obj_a.R_abs
          diff_R_abs = norm(R2_abs*obj_b.R_abs' - ModiaMath.NullRotation)
          if diff_R_abs > Basics.neps
              @static if VERSION >= v"0.7.0-DEV.2005"
@@ -223,10 +224,22 @@ function Revolute(obj1::Object3D, obj2::Object3D;
       obj_b.joint = joint
       obj_b.r_rel = ModiaMath.ZeroVector3D
       obj_b.r_abs = obj_a.r_abs
-      obj_b.R_rel = ModiaMath.rot3(axis > 0 ? rphi_start : -rphi_start)
+      obj_b.R_rel = rotationMatrixAxis(axis, axis > 0 ? rphi_start : -rphi_start)
    end
    return joint
 end
+
+
+function rotationMatrixAxis(axis::Int, phi::Number)
+   if abs(axis) == 1
+      return ModiaMath.rot1(phi)
+   elseif abs(axis) == 2
+      return ModiaMath.rot2(phi)
+   elseif abs(axis) == 3
+      return ModiaMath.rot3(phi)
+   end
+end
+
 
 function driveJoint!(joint::TreeJointRevolute)
    joint.isDriven = true
@@ -239,7 +252,7 @@ end
 function setAngle!(joint::TreeJointRevolute, phi::Float64)
    #@assert( joint.isDriven )
    joint.phi.value = phi
-   joint.obj2.R_rel = ModiaMath.rot3(joint.axis > 0 ? phi : -phi)
+   joint.obj2.R_rel = rotationMatrixAxis(joint.axis, joint.axis > 0 ? phi : -phi)
    return joint
 end
 
@@ -248,7 +261,7 @@ function computeKinematics!(joint::TreeJointRevolute, obj::Object3D, analysis::M
    parent::Object3D = obj.parent
 
    obj.r_abs = parent.r_abs
-   obj.R_rel = ModiaMath.rot3(joint.axis > 0 ? joint.phi.value : -joint.phi.value)
+   obj.R_rel = rotationMatrixAxis(joint.axis, joint.axis > 0 ? joint.phi.value : -joint.phi.value)
    obj.R_abs = obj.R_rel*parent.R_abs
 
    if analysis == ModiaMath.DynamicAnalysis
