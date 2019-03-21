@@ -22,7 +22,7 @@ vmat2 = Modia3D.Material(color="Red")
    frame1 = Modia3D.Object3D(body; r=[-Lx/2, 0.0, 0.0])
    cyl    = Modia3D.Object3D(frame1,Modia3D.Cylinder(Ly/2,1.2*Ly; material=vmat2))
 
-   rev    = Modia3D.Revolute(world, frame1)
+   rev    = Modia3D.Revolute(world, frame1, axis = 1)
 
    sig    = Signal()
    signal = Modia3D.SignalToFlangeAngle(sig.y)

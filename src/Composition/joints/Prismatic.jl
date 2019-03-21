@@ -132,6 +132,7 @@ function Prismatic(obj1::Object3D, obj2::Object3D;
    rs_start = Float64(s_start)
    rv_start = Float64(v_start)
    (obj_a,obj_b,cutJoint) = attach(obj1, obj2)
+   @assert(1 <= axis <= 3)
    if obj_b === obj2
       axis2 = axis
    else

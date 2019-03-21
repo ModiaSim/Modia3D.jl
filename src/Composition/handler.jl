@@ -129,6 +129,7 @@ end
 #   elements which are directly connected with a joint can't collide
 #     these elements are excluded from the collision list
 function build_superObjs!(scene::Scene, world::Object3D)::NOTHING
+  println("bin in build_superObjs")
   if !scene.initSuperObj
   stack = scene.stack
   buffer = scene.buffer

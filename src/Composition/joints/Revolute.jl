@@ -127,7 +127,7 @@ function Revolute(obj1::Object3D, obj2::Object3D;
    rphi_start = Float64(phi_start)
    rw_start   = Float64(w_start)
    (obj_a,obj_b,cutJoint) = attach(obj1, obj2)
-   @assert(-3 <= axis <= 3)
+   @assert(1 <= axis <= 3)
    axis  = obj_b===obj2 ? axis : -axis
    if cutJoint
       println("... Revolute joint connecting ", ModiaMath.fullName(obj1), " with ", ModiaMath.fullName(obj2), " is a cut-joint")

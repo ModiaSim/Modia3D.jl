@@ -43,9 +43,9 @@ world    = Modia3D.Object3D()
 world_f1 = Modia3D.Object3D(world , r=[0.5*Lx, 0.0, Lz/2])
 
 green = Modia3D.Part(Modia3D.Solid(Modia3D.SolidBox(Lx,Ly,Lz), "Aluminium", vgreen),[ [-Lx/2,0,0],[ Lx/2,0,0] ])
-rev1  = Modia3D.Revolute(world, green.frames[1])
+rev1  = Modia3D.Revolute(world, green.frames[1]; axis = 2)
 green2 = Modia3D.Part(Modia3D.Solid(Modia3D.SolidBox(Lx,Ly,Lz), "Aluminium", vgreen),[ [-Lx/2,0,0],[ Lx/2,0,0] ])
-rev12  = Modia3D.Revolute(green.frames[2], green2.frames[1])
+rev12  = Modia3D.Revolute(green.frames[2], green2.frames[1]; axis = 1)
 gelb = Modia3D.Part(Modia3D.Solid(Modia3D.SolidBox(Lx,Ly,Lz), "Aluminium", vyellow),[ [-Lx/2,0,0],[ Lx/2,0,0] ])
 rev2 = Modia3D.Revolute(world_f1, gelb.frames[1])
 
