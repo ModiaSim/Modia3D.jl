@@ -19,7 +19,7 @@ mutable struct TreeJointRevolute <: Modia3D.AbstractRevolute
    isDriven::Bool                          # = true, if setAngle!(..) can be called on the joint
 
    # Definitions special to Revolute joints
-   axis::Int            # Rotation axis (axis = 3 or -3)
+   axis::Int            # Rotation axis (axis = 1,2,3 or -1,-2,-3)
    # phi_ref::Float64   # Value of angle phi in reference configuration
    # phi::Float64       # Actual value of relative rotation angle (obj1 and obj2 coincide, if phi = 0)
 
@@ -70,18 +70,22 @@ mutable struct CutJointRevolute <: Modia3D.AbstractRevolute
    visited::Bool                                   # = true, if already visited when traversing the spanning tree
 
    # Definitions special to Revolute joints
-   axis::Int            # Rotation axis (axis = 3 or -3)
+   axis::Int            # Rotation axis (axis = 1,2,3 or -1,-2,-3)
    # phi_ref::Float64   # Value of angle phi in reference configuration
    # phi::Float64       # Actual value of relative rotation angle (obj1 and obj2 coincide, if phi = 0)
 
    lambda_x::ModiaMath.RealScalar
    lambda_y::ModiaMath.RealScalar
+   lambda_z::ModiaMath.RealScalar
    mue_x::ModiaMath.RealScalar
    mue_y::ModiaMath.RealScalar
-   residue_x::ModiaMath.RealScalar
-   residue_y::ModiaMath.RealScalar
-   residue_vx::ModiaMath.RealScalar
-   residue_vy::ModiaMath.RealScalar
+   mue_z::ModiaMath.RealScalar
+   residue_x::Union{ModiaMath.RealScalar, NOTHING}
+   residue_y::Union{ModiaMath.RealScalar, NOTHING}
+   residue_z::Union{ModiaMath.RealScalar, NOTHING}
+   residue_vx::Union{ModiaMath.RealScalar, NOTHING}
+   residue_vy::Union{ModiaMath.RealScalar, NOTHING}
+   residue_vz::Union{ModiaMath.RealScalar, NOTHING}
 
    CutJointRevolute(_internal, obj1, obj2, visited, axis) = new(_internal, obj1, obj2, visited, axis)
 end
@@ -129,6 +133,7 @@ function Revolute(obj1::Object3D, obj2::Object3D;
    (obj_a,obj_b,cutJoint) = attach(obj1, obj2)
    @assert(1 <= axis <= 3)
    axis  = obj_b===obj2 ? axis : -axis
+   println("axis = $axis")
    if cutJoint
       println("... Revolute joint connecting ", ModiaMath.fullName(obj1), " with ", ModiaMath.fullName(obj2), " is a cut-joint")
 
@@ -152,20 +157,42 @@ function Revolute(obj1::Object3D, obj2::Object3D;
       end
       if isnan(rphi_start)
          # Compute angle between the two z-axes
-         angle = acos( dot(obj_a.R_abs[3,:], obj_b.R_abs[3,:]) )
+         @error("brrrr!!!!!!!!!!!!!!!!!!")
+         angle = acos( dot(obj_a.R_abs[abs(axis),:], obj_b.R_abs[abs(axis),:]) )
          if abs(angle) > Basics.neps
              @static if VERSION >= v"0.7.0-DEV.2005"
                  @warn begin
                      name_obj1 = ModiaMath.fullName(obj1)
                      name_obj2 = ModiaMath.fullName(obj2)
-                     "Warning from Modia3D.Revolute($name_obj1, $name_obj2, ....):\n" *
-                     "The z-axes of the two frames do not coincide.\n" *
-                     "( angle(zaxis(obj1), zaxis(obj2)) = $zaxes_angle > $(Basics.neps) )"
+                     if abs(axis) == 3
+                        "Warning from Modia3D.Revolute($name_obj1, $name_obj2, ....):\n" *
+                        "The z-axes of the two frames do not coincide.\n" *
+                        "( angle(zaxis(obj1), zaxis(obj2)) = $zaxes_angle > $(Basics.neps) )"
+                     elseif abs(axis) == 2
+                        "Warning from Modia3D.Revolute($name_obj1, $name_obj2, ....):\n" *
+                        "The y-axes of the two frames do not coincide.\n" *
+                        "( angle(yaxis(obj1), yaxis(obj2)) = $yaxes_angle > $(Basics.neps) )"
+                     elseif abs(axis) == 1
+                        "Warning from Modia3D.Revolute($name_obj1, $name_obj2, ....):\n" *
+                        "The x-axes of the two frames do not coincide.\n" *
+                        "( angle(xaxis(obj1), xaxis(obj2)) = $xaxes_angle > $(Basics.neps) )"
+                     end
                  end
              else
-                 warn("\nWarning from Modia3D.Revolute(", ModiaMath.fullName(obj1), ", ", ModiaMath.fullName(obj2), ", ...):\n",
-                      "The z-axes of the two frames do not coincide.\n",
-                      "( angle(zaxis(obj1), zaxis(obj2)) = ", string(), " > ", Basics.neps, ")")
+
+                      if abs(axis) == 3
+                        warn("\nWarning from Modia3D.Revolute(", ModiaMath.fullName(obj1), ", ", ModiaMath.fullName(obj2), ", ...):\n",
+                             "The z-axes of the two frames do not coincide.\n",
+                             "( angle(zaxis(obj1), zaxis(obj2)) = ", string(), " > ", Basics.neps, ")")
+                     elseif abs(axis) == 2
+                        warn("\nWarning from Modia3D.Revolute(", ModiaMath.fullName(obj1), ", ", ModiaMath.fullName(obj2), ", ...):\n",
+                            "The y-axes of the two frames do not coincide.\n",
+                            "( angle(yaxis(obj1), yaxis(obj2)) = ", string(), " > ", Basics.neps, ")")
+                     elseif abs(axis) == 1
+                        warn("\nWarning from Modia3D.Revolute(", ModiaMath.fullName(obj1), ", ", ModiaMath.fullName(obj2), ", ...):\n",
+                            "The x-axes of the two frames do not coincide.\n",
+                            "( angle(xaxis(obj1), xaxis(obj2)) = ", string(), " > ", Basics.neps, ")")
+                     end
              end
          end
       else
@@ -192,13 +219,20 @@ function Revolute(obj1::Object3D, obj2::Object3D;
       joint      = CutJointRevolute(ModiaMath.ComponentInternal(), obj_a, obj_b, false, axis)
       lambda_x   = ModiaMath.RealScalar("lambda_x"  , joint, unit="N", info="Constraint force in x-direction"   , numericType=ModiaMath.LAMBDA, analysis=ModiaMath.QuasiStaticAndDynamicAnalysis)
       lambda_y   = ModiaMath.RealScalar("lambda_y"  , joint, unit="N", info="Constraint force in y-direction"   , numericType=ModiaMath.LAMBDA, analysis=ModiaMath.QuasiStaticAndDynamicAnalysis)
+      lambda_z   = ModiaMath.RealScalar("lambda_z"  , joint, unit="N", info="Constraint force in z-direction"   , numericType=ModiaMath.LAMBDA, analysis=ModiaMath.QuasiStaticAndDynamicAnalysis)
       mue_x      = ModiaMath.RealScalar("mue_x"     , joint,           info="Stabilizing mue in x-direction"    , numericType=ModiaMath.MUE   , analysis=ModiaMath.OnlyDynamicAnalysis)
       mue_y      = ModiaMath.RealScalar("mue_y"     , joint,           info="Stabilizing mue in y-direction"    , numericType=ModiaMath.MUE   , analysis=ModiaMath.OnlyDynamicAnalysis)
-      residue_x  = ModiaMath.RealScalar("residue_x" , joint,           info="Position constraint in x-direction", numericType=ModiaMath.FC)
-      residue_y  = ModiaMath.RealScalar("residue_y" , joint,           info="Position constraint in y-direction", numericType=ModiaMath.FC)
-      residue_vx = ModiaMath.RealScalar("residue_vx", joint,           info="Velocity constraint in x-direction", numericType=ModiaMath.FC    , analysis=ModiaMath.OnlyDynamicAnalysis)
-      residue_vy = ModiaMath.RealScalar("residue_vy", joint,           info="Velocity constraint in y-direction", numericType=ModiaMath.FC    , analysis=ModiaMath.OnlyDynamicAnalysis)
-
+      mue_z      = ModiaMath.RealScalar("mue_z"     , joint,           info="Stabilizing mue in z-direction"    , numericType=ModiaMath.MUE   , analysis=ModiaMath.OnlyDynamicAnalysis)
+      if abs(axis) != 1
+         residue_x  = ModiaMath.RealScalar("residue_x" , joint,           info="Position constraint in x-direction", numericType=ModiaMath.FC)
+         residue_vx = ModiaMath.RealScalar("residue_vx", joint,           info="Velocity constraint in x-direction", numericType=ModiaMath.FC    , analysis=ModiaMath.OnlyDynamicAnalysis)
+      elseif abs(axis) != 2
+         residue_y  = ModiaMath.RealScalar("residue_y" , joint,           info="Position constraint in y-direction", numericType=ModiaMath.FC)
+         residue_vy = ModiaMath.RealScalar("residue_vy", joint,           info="Velocity constraint in y-direction", numericType=ModiaMath.FC    , analysis=ModiaMath.OnlyDynamicAnalysis)
+      elseif abs(axis) != 3
+         residue_z  = ModiaMath.RealScalar("residue_z" , joint,           info="Position constraint in z-direction", numericType=ModiaMath.FC)
+         residue_vz = ModiaMath.RealScalar("residue_vz", joint,           info="Velocity constraint in z-direction", numericType=ModiaMath.FC    , analysis=ModiaMath.OnlyDynamicAnalysis)
+      end
       # Add joint to the frames
       push!(obj_a.twoObject3Dobject, joint)
       push!(obj_b.twoObject3Dobject, joint)
@@ -271,8 +305,11 @@ function computeKinematics!(joint::TreeJointRevolute, obj::Object3D, analysis::M
       dynamics.v0 = parentDynamics.v0
       dynamics.a0 = parentDynamics.a0
 
-      w_rel = SVector{3,Float64}(0.0, 0.0, joint.axis > 0 ? joint.w.value : -joint.w.value)
-      z_rel = SVector{3,Float64}(0.0, 0.0, joint.axis > 0 ? joint.a.value : -joint.a.value)
+      w_rel = MVector{3,Float64}(0.0, 0.0, 0.0)
+      z_rel = MVector{3,Float64}(0.0, 0.0, 0.0)
+
+      w_rel[abs(joint.axis)] = joint.axis > 0 ? joint.w.value : -joint.w.value
+      z_rel[abs(joint.axis)] = joint.axis > 0 ? joint.a.value : -joint.a.value
 
       dynamics.w = obj.R_rel*(parentDynamics.w + w_rel)
       dynamics.z = obj.R_rel*(parentDynamics.z + z_rel + cross(parentDynamics.w, w_rel))
@@ -290,7 +327,7 @@ function computeForceTorqueAndResidue!(joint::TreeJointRevolute, obj::Object3D, 
    dynamics.f          = -dynamics.f
    dynamics.t          = -dynamics.t
 
-   joint.residue.value = -joint.tau.value + (joint.axis > 0 ? dynamics.t[3] : -dynamics.t[3])
+   joint.residue.value = -joint.tau.value + (joint.axis > 0 ? dynamics.t[abs(joint.axis)] : -dynamics.t[abs(joint.axis)])
 
    # For checking: compute total power
    # P = dot(parentDynamics.f, joint.obj1.R_abs*parentDynamics.v0) +
@@ -307,20 +344,42 @@ end
 
 function computePositionResidues!(joint::CutJointRevolute, time::Float64)
    r_rel12 = joint.obj1.R_abs*(joint.obj2.r_abs - joint.obj1.r_abs)
-   joint.residue_x.value = r_rel12[1]
-   joint.residue_y.value = r_rel12[2]
+   if abs(joint.axis) == 3
+      joint.residue_x.value = r_rel12[1]
+      joint.residue_y.value = r_rel12[2]
+   elseif abs(joint.axis) == 2
+      joint.residue_x.value = r_rel12[1]
+      joint.residue_z.value = r_rel12[3]
+   elseif abs(joint.axis) == 1
+      joint.residue_y.value = r_rel12[2]
+      joint.residue_z.value = r_rel12[3]
+   end
    return nothing
 end
 
 function computeVelocityResidues!(joint::CutJointRevolute, time::Float64)
    v_rel12 = joint.obj1.R_abs*(joint.obj2.dynamics.v0 - joint.obj1.dynamics.v0)
-   joint.residue_vx.value = v_rel12[1]
-   joint.residue_vy.value = v_rel12[2]
+   if abs(joint.axis) == 3
+      joint.residue_vx.value = v_rel12[1]
+      joint.residue_vy.value = v_rel12[2]
+   elseif abs(joint.axis) == 2
+      joint.residue_vx.value = v_rel12[1]
+      joint.residue_vz.value = v_rel12[3]
+   elseif abs(joint.axis) == 1
+      joint.residue_vy.value = v_rel12[2]
+      joint.residue_vz.value = v_rel12[3]
+   end
    return nothing
 end
 
 function computeCutForcesAndToques!(joint::CutJointRevolute, time::Float64)
-   dynamics1.f += SVector{3,Float64}(joint.lambda_x, joint.lambda_y, 0.0)
+   if abs(joint.axis) == 3
+      dynamics1.f += SVector{3,Float64}(joint.lambda_x, joint.lambda_y, 0.0)
+   elseif abs(joint.axis) == 2
+      dynamics1.f += SVector{3,Float64}(joint.lambda_x, 0.0, joint.lambda_z)
+   elseif abs(joint.axis) == 1
+      dynamics1.f += SVector{3,Float64}(0.0, joint.lambda_y, joint.lambda_z)
+   end
    dynamics2.f += joint.obj2.R_abs*(joint.obj1.R_abs'*dynamics1.f)
 end
 

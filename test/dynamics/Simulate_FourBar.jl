@@ -44,7 +44,7 @@ fourbar = Fourbar(Lx=1.0, sceneOptions=Modia3D.SceneOptions(visualizeFrames=true
 #hier wird wieder eine scene erstellt
 model = Modia3D.SimulationModel(fourbar)
 
-# Modia3D.visualizeAssembly!( fourbar )
+#Modia3D.visualizeAssembly!( fourbar )
 
 println("... success of Simulate_FourBar.jl!")
 end

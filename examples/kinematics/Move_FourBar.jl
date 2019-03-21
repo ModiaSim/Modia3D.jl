@@ -33,7 +33,7 @@ end
    rev1   = Modia3D.Revolute(frame1     , bar1.frame1; phi_start =  pi/2)
    rev2   = Modia3D.Revolute(bar1.frame2, bar2.frame1; phi_start = -pi/2)
    rev3   = Modia3D.Revolute(frame2     , bar3.frame1; phi_start =  pi/2)
-   rev4   = Modia3D.Revolute(bar3.frame2, bar2.frame2; phi_start = NaN)          # phi_start = -pi/2
+   rev4   = Modia3D.Revolute(bar3.frame2, bar2.frame2; phi_start = -pi/2)          # phi_start = -pi/2
 end
 
 
