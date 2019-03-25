@@ -38,4 +38,17 @@ include(joinpath(wAKinematicsPath, "Move_Pendulum.jl"))
 wAVisualPath = joinpath(Modia3D.path, "test", "withoutAssembly","visual")
 include(joinpath(wAVisualPath, "Visualize_Beam.jl"))
 
+# test/revoluteJoints
+testJointsPath = joinpath(Modia3D.path, "test", "joints")
+include(joinpath(testJointsPath, "Test_KinematicRevoluteJoints.jl"))
+include(joinpath(testJointsPath, "Test_Dynamic_Pendulum_xAxis.jl"))
+include(joinpath(testJointsPath, "Test_Dynamic_Pendulum_yAxis.jl"))
+include(joinpath(testJointsPath, "Test_Dynamic_Pendulum_zAxis.jl"))
+include(joinpath(testJointsPath, "Test_Prismatic_xAxis.jl"))
+include(joinpath(testJointsPath, "Test_Prismatic_yAxis.jl"))
+include(joinpath(testJointsPath, "Test_Prismatic_zAxis.jl"))
+include(joinpath(testJointsPath, "Move_FourBar_xAxis.jl"))
+include(joinpath(testJointsPath, "Move_FourBar_yAxis.jl"))
+include(joinpath(testJointsPath, "Move_FourBar_zAxis.jl"))
+
 end
