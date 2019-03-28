@@ -314,6 +314,7 @@ mutable struct Scene
    # initialization of analysis
    initAnalysis::Bool                        # = true, if analysis is initialized
    initSuperObj::Bool                        # = true, if super objects are initialized
+   initMassComp::Bool                        # = true, if mass computation for optimized structure is initialized
    analysis::ModiaMath.AnalysisType          # Type of analysis
    superObjs::Array{SuperObjsRow,1}          # super objects
    treeVisu::Vector{Object3D}
@@ -337,6 +338,7 @@ mutable struct Scene
                   Vector{Object3D}[],
                   Vector{Object3D}[],
                   sceneOptions,
+                  false,
                   false,
                   false,
                   false,

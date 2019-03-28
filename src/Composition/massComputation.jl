@@ -45,8 +45,11 @@ function computeInertiaTensorForTwoBodies!(rootSuperObj::Object3D, actualMassSup
         a2 = rCM_root - rCM_new
         IchildNew =  I_child + m_child * ModiaMath.skew(a1)' * ModiaMath.skew(a1)
         IrootNew  =  I_root  + m_root  * ModiaMath.skew(a2)' * ModiaMath.skew(a2)
-        Inew = IchildNew + IrootNew
-        #@assert(Inew == I_new)
+        InewNew = IchildNew + IrootNew
+      #  rootSuperObj.massProperties.I = InewNew
+      #  if (InewNew - I_new) > fill(Basics.neps,(3,3))
+      #    println("InewNew = ", InewNew, " I_new = ", I_new)
+      #  end
         #if Inew == I_new
         #  println("beide Berechnungen für Inertia Tensor ergeben das selbe!!")
         #end
@@ -62,79 +65,82 @@ end
 
 
 function initializeMassComputation!(scene::Scene)
-  superObjs = scene.superObjs
-  buffer    = scene.buffer
+  if scene.initMassComp != true
+    println("bin in initializeMassComputation")
+    superObjs = scene.superObjs
+    buffer    = scene.buffer
 
-#=
-  println("superObjRow.superObjMass.superObj - vorher")
-  for superObjRow in scene.superObjs
-  println("[")
-  for a in superObjRow.superObjMass.superObj
-    println(ModiaMath.fullName(a))
-    println("m = ", a.data.massProperties.m, " rCM = ", a.data.massProperties.rCM, " I = ", a.data.massProperties.I)
-  end
-  println("]")
-  println(" ")
-  end
-=#
-
-  for i = 1:length(superObjs)
-    rootSuperObj = buffer[i]
-    if dataHasMass(rootSuperObj)
-      #@error("... initializeMassComputation: dataHasMass = true muss noch gecheckt werden!")
-      rootSuperObj.massProperties     = Solids.InternalMassProperties()
-      rootSuperObj.massProperties.m   = rootSuperObj.data.massProperties.m
-      rootSuperObj.massProperties.rCM = rootSuperObj.data.massProperties.rCM
-      rootSuperObj.massProperties.I   = rootSuperObj.data.massProperties.I
-      #println("rootSuperObj.massProperties = ", rootSuperObj.massProperties)
-      computeInertiaTensorForTwoBodies!(rootSuperObj, superObjs[i].superObjMass.superObj)
-    else
-      if length(superObjs[i].superObjMass.superObj) > 0
-        rootSuperObj.massProperties = Solids.InternalMassProperties()
-        computeInertiaTensorForTwoBodies!(rootSuperObj, superObjs[i].superObjMass.superObj)
-      end
-    end
-  end
-
-#=
-  println("rootSuperObj - nachher")
-  for i = 1:length(superObjs)
-    rootSuperObj = buffer[i]
+  #=
+    println("superObjRow.superObjMass.superObj - vorher")
+    for superObjRow in scene.superObjs
     println("[")
-    if objectHasMass(rootSuperObj)
-      println(ModiaMath.fullName(rootSuperObj))
-      println("m = ", rootSuperObj.massProperties.m, " rCM = ", rootSuperObj.massProperties.rCM, " I = ", rootSuperObj.massProperties.I)
+    for a in superObjRow.superObjMass.superObj
+      println(ModiaMath.fullName(a))
+      println("m = ", a.data.massProperties.m, " rCM = ", a.data.massProperties.rCM, " I = ", a.data.massProperties.I)
     end
     println("]")
     println(" ")
-  end
-
-  println("tree")
-  for obj in scene.tree
-    if objectHasMass(obj)
-      println(ModiaMath.fullName(obj))
-      println("m = ", obj.massProperties.m, " rCM = ", obj.massProperties.rCM, " I = ", obj.massProperties.I)
     end
-  end
-=#
+  =#
 
-#=
-  println("\n... treeAccVelo begin")
-  for obj in scene.treeAccVelo
-      if hasParent(obj)
-         println(ModiaMath.fullName(obj), " (parent = ", ModiaMath.fullName(obj.parent), ")")
+    for i = 1:length(superObjs)
+      rootSuperObj = buffer[i]
+      if dataHasMass(rootSuperObj)
+        #@error("... initializeMassComputation: dataHasMass = true muss noch gecheckt werden!")
+        rootSuperObj.massProperties     = Solids.InternalMassProperties()
+        rootSuperObj.massProperties.m   = rootSuperObj.data.massProperties.m
+        rootSuperObj.massProperties.rCM = rootSuperObj.data.massProperties.rCM
+        rootSuperObj.massProperties.I   = rootSuperObj.data.massProperties.I
+        #println("rootSuperObj.massProperties = ", rootSuperObj.massProperties)
+        computeInertiaTensorForTwoBodies!(rootSuperObj, superObjs[i].superObjMass.superObj)
       else
-         println(ModiaMath.fullName(obj), " (no parent)")
+        if length(superObjs[i].superObjMass.superObj) > 0
+          rootSuperObj.massProperties = Solids.InternalMassProperties()
+          computeInertiaTensorForTwoBodies!(rootSuperObj, superObjs[i].superObjMass.superObj)
+        end
       end
-      if hasJoint(obj)
-         println("    joint type = ", typeof(obj.joint))
-      end
-      if objectHasMass(obj)
-         println("    m = ", obj.massProperties.m, " rCM = ", obj.massProperties.rCM, " I = ", obj.massProperties.I)
-      end
-  end
-  println("... treeAccVelo end\n\n")
-=#
+    end
 
+  #=
+    println("rootSuperObj - nachher")
+    for i = 1:length(superObjs)
+      rootSuperObj = buffer[i]
+      println("[")
+      if objectHasMass(rootSuperObj)
+        println(ModiaMath.fullName(rootSuperObj))
+        println("m = ", rootSuperObj.massProperties.m, " rCM = ", rootSuperObj.massProperties.rCM, " I = ", rootSuperObj.massProperties.I)
+      end
+      println("]")
+      println(" ")
+    end
+
+    println("tree")
+    for obj in scene.tree
+      if objectHasMass(obj)
+        println(ModiaMath.fullName(obj))
+        println("m = ", obj.massProperties.m, " rCM = ", obj.massProperties.rCM, " I = ", obj.massProperties.I)
+      end
+    end
+  =#
+
+  #=
+    println("\n... treeAccVelo begin")
+    for obj in scene.treeAccVelo
+        if hasParent(obj)
+           println(ModiaMath.fullName(obj), " (parent = ", ModiaMath.fullName(obj.parent), ")")
+        else
+           println(ModiaMath.fullName(obj), " (no parent)")
+        end
+        if hasJoint(obj)
+           println("    joint type = ", typeof(obj.joint))
+        end
+        if objectHasMass(obj)
+           println("    m = ", obj.massProperties.m, " rCM = ", obj.massProperties.rCM, " I = ", obj.massProperties.I)
+        end
+    end
+    println("... treeAccVelo end\n\n")
+  =#
+    scene.initMassComp = true
+  end
   return nothing
 end

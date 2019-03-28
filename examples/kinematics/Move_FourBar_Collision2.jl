@@ -74,5 +74,5 @@ end
 model  = Modia3D.SimulationModel( Move(), analysis=ModiaMath.KinematicAnalysis )
 result = ModiaMath.simulate!(model, stopTime=3.0, log=false)
 
-println("... success of Move_FourBar.jl!")
+println("... success of Move_FourBar_Collision2.jl!")
 end

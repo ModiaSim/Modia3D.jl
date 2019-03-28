@@ -12,9 +12,12 @@ vmat2 = Modia3D.Material(color="Red")
 
 
 rCM = zeros(3)
-rCM[2] = 5.0
+#rCM[2] = 5.0
 #I2 = fill(100.0,(9))
-I = fill(20.0,(3,3))
+I = fill(0.0,(3,3))
+#I[3] = 50.0
+#I[7] = 80.0
+#println("I = ",I)
 massProp = Modia3D.MassProperties(5.0, rCM, I)
 
 @assembly Pendulum(;Lx = 1.0, Ly=0.2*Lx, Lz=0.2*Lx, m=1.0) begin
@@ -34,8 +37,8 @@ const m  = 0.5
 # Modia3D.visualizeAssembly!( Pendulum(Lx=Lx, m=m) )
 
 pendulum = Pendulum(Lx=Lx, m=m, sceneOptions=Modia3D.SceneOptions(visualizeFrames=true, defaultFrameLength=0.3))
-model    = Modia3D.SimulationModel( pendulum; useOptimizedStructure = true )
-result   = ModiaMath.simulate!(model, stopTime=10.0, tolerance=1e-6,log=true)
+model    = Modia3D.SimulationModel( pendulum; useOptimizedStructure = false )
+result   = ModiaMath.simulate!(model, stopTime=10.0, tolerance=1e-6,log=false)
 
 ModiaMath.plot(result, ["rev.phi", "rev.w", "rev.a"])
 

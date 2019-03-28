@@ -343,8 +343,6 @@ function initAnalysis!(world::Object3D, scene::Scene)
       initializeContactDetection!(world, scene)
    end
    initializeMassComputation!(scene)
-   # Initialize connections between signals and frames, joints, ...
-   # build_SignalObject3DConnections!(assembly)
 
    scene.initAnalysis = true
 end
@@ -377,9 +375,6 @@ function initAnalysis!(assembly::Modia3D.AbstractAssembly;
       initializeContactDetection!(world, scene)
   end
   initializeMassComputation!(scene)
-
-   # Initialize connections between signals and frames, joints, ...
-   #build_SignalObject3DConnections!(assembly)
 
    scene.initAnalysis = true
 end

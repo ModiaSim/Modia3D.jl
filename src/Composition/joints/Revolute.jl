@@ -153,8 +153,8 @@ function Revolute(obj1::Object3D, obj2::Object3D;
          end
       end
       if isnan(rphi_start)
-         # Compute angle between the two z-axes
-         @error("brrrr!!!!!!!!!!!!!!!!!!")
+         # Compute angle between the two axes
+         # @error("brrrr!!!!!!!!!!!!!!!!!!")
          angle = acos( dot(obj_a.R_abs[abs(axis),:], obj_b.R_abs[abs(axis),:]) )
          if abs(angle) > Basics.neps
              @static if VERSION >= v"0.7.0-DEV.2005"
@@ -316,6 +316,13 @@ function computeForceTorqueAndResidue!(joint::TreeJointRevolute, obj::Object3D, 
    parentDynamics.t    += obj.R_rel'*dynamics.t
    dynamics.f          = -dynamics.f
    dynamics.t          = -dynamics.t
+   #=
+   println("compForce parentparent.f = ", obj.parent.parent.dynamics.f)
+   println("compForce parentDynamics.f = ", parentDynamics.f)
+   println("compForce parentDynamics.t = ", parentDynamics.t)
+   println("compForce dynamics.f = ", dynamics.f)
+   println("compForce dynamics.t = ", dynamics.t)
+   =#
 
    joint.residue.value = -joint.tau.value + (joint.axis > 0 ? dynamics.t[abs(joint.axis)] : -dynamics.t[abs(joint.axis)])
 

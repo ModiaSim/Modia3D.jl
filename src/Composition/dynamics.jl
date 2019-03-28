@@ -276,9 +276,6 @@ function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64
       if scene.options.enableContactDetection && scene.collide
          initializeContactDetection!(world, scene)
       end
-      if m.useOptimizedStructure
-         initializeMassComputation!(scene)
-      end
    end
 
    if ModiaMath.isTerminal(sim)
@@ -357,20 +354,27 @@ open("log.txt", "a") do file
          end
 
          if hasMassProperties
+            #println(ModiaMath.fullName(obj.parent))
+            #println(ModiaMath.fullName(obj))
             # Compute inertia forces / torques
             mass = massProperties.m
             rCM  = massProperties.rCM
             I    = massProperties.I
             w    = dynamics.w
+            #println("w = ",w)
             grav = gravityAcceleration(scene.options.gravityField, obj.r_abs)
             #println("grav = ", grav)
             if rCM === ModiaMath.ZeroVector3D
                dynamics.f = -mass*( obj.R_abs*(dynamics.a0 - grav) )
                dynamics.t = -(I*dynamics.z + cross(w, I*w))
+               #println("rCM = 0, dynamics.f = ", dynamics.f)
+               #println("rCM = 0, dynamics.t = ", dynamics.t)
             else
                dynamics.f = -mass*( obj.R_abs*(dynamics.a0 - grav) +
                                   cross(dynamics.z, rCM) + cross(w, cross(w, rCM)))
                dynamics.t = -(I*dynamics.z + cross(w, I*w)) + cross(rCM, dynamics.f)
+               #println("dynamics.f = ", dynamics.f)
+               #println("dynamics.t = ", dynamics.t)
             end
          else
             dynamics.f = ModiaMath.ZeroVector3D
@@ -383,6 +387,7 @@ open("log.txt", "a") do file
       #   println(ModiaMath.instanceName(obj), ": f = ", dynamics.f, ", t = ", dynamics.t)
       #end
    end # for
+
 
    # Compute contact forces/torques
    if scene.collide
@@ -422,6 +427,7 @@ open("log.txt", "a") do file
          contact = ModiaMath.negative!(sim, i, s, str)
 
          if contact
+            println("hat contakt?")
             #println("... Contact ", str, " active at time = ", sim.time)
             r1 = ModiaMath.Vector3D(chpairs.contactPoint1[i])
             r2 = ModiaMath.Vector3D(chpairs.contactPoint2[i])
@@ -488,6 +494,8 @@ open("log.txt", "a") do file
       visualize!(Modia3D.renderer[1], time)
    end
 
+   println("world.f = ", world.dynamics.f )
+   println("world.t = ", world.dynamics.t )
 
    # Copy variables to residues
    ModiaMath.copy_variables_to_residue!(var, _x, _derx, _r)
