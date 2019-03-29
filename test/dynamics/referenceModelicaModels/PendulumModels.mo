@@ -319,17 +319,40 @@ ALT=\"model Examples.Elementary.Pendulum\">
       phi(fixed=true),
       w(fixed=true))
       annotation (Placement(transformation(extent={{-48,0},{-28,20}})));
-    Modelica.Mechanics.Rotational.Components.Damper damper(
-                                                d=0.1)
-      annotation (Placement(transformation(extent={{-48,40},{-28,60}})));
-    Modelica.Mechanics.MultiBody.Parts.BodyBox boxBody1(r={0.5,0,0}, width=0.06)
+    Modelica.Mechanics.Rotational.Components.Damper damper1(d=1)
+      annotation (Placement(transformation(extent={{-46,40},{-26,60}})));
+    Modelica.Mechanics.MultiBody.Parts.BodyBox boxBody1(             width=0.06, r={0.05,
+          0,0})
       annotation (Placement(transformation(extent={{-10,0},{10,20}})));
-    Modelica.Mechanics.MultiBody.Joints.Revolute rev2(phi(fixed=true), w(fixed=true))
-      annotation (Placement(transformation(extent={{32,0},{52,20}})));
+    Modelica.Mechanics.MultiBody.Joints.Revolute rev2(phi(fixed=true), w(fixed=true),
+      useAxisFlange=true)
+      annotation (Placement(transformation(extent={{138,0},{158,20}})));
     Modelica.Mechanics.MultiBody.Parts.BodyBox boxBody2(r={0.5,0,0}, width=0.06)
-      annotation (Placement(transformation(extent={{74,0},{94,20}})));
+      annotation (Placement(transformation(extent={{180,0},{200,20}})));
     Real P1;
     Real P2;
+    Modelica.Mechanics.Rotational.Components.Damper damper2(d=1)
+      annotation (Placement(transformation(extent={{134,42},{154,62}})));
+    Modelica.Mechanics.MultiBody.Parts.BodyBox boxBody3(width=0.06, r={0.05,0,0})
+      annotation (Placement(transformation(extent={{20,0},{40,20}})));
+    Modelica.Mechanics.MultiBody.Parts.BodyBox boxBody4(width=0.06, r={0.05,0,0})
+      annotation (Placement(transformation(extent={{52,0},{72,20}})));
+    Modelica.Mechanics.MultiBody.Parts.BodyBox boxBody5(width=0.06, r={0.05,0,0})
+      annotation (Placement(transformation(extent={{80,0},{100,20}})));
+    Modelica.Mechanics.MultiBody.Parts.BodyBox boxBody6(width=0.06, r={0.05,0,0})
+      annotation (Placement(transformation(extent={{108,0},{128,20}})));
+    Modelica.Mechanics.MultiBody.Parts.BodyBox boxBody7(width=0.06, r={0.05,0,0})
+      annotation (Placement(transformation(extent={{-2,-34},{18,-14}})));
+    Modelica.Mechanics.MultiBody.Parts.BodyBox boxBody8(width=0.06, r={0.05,0,0})
+      annotation (Placement(transformation(extent={{28,-34},{48,-14}})));
+    Modelica.Mechanics.MultiBody.Parts.BodyBox boxBody9(width=0.06, r={0.05,0,0})
+      annotation (Placement(transformation(extent={{60,-34},{80,-14}})));
+    Modelica.Mechanics.MultiBody.Parts.BodyBox boxBody10(width=0.06, r={0.05,0,
+          0})
+      annotation (Placement(transformation(extent={{88,-34},{108,-14}})));
+    Modelica.Mechanics.MultiBody.Parts.BodyBox boxBody11(width=0.06, r={0.05,0,
+          0})
+      annotation (Placement(transformation(extent={{116,-34},{136,-14}})));
   equation
       P1 = rev1.frame_a.f*Frames.resolve2(rev1.frame_a.R, der(rev1.frame_a.r_0)) +
            rev1.frame_b.f*Frames.resolve2(rev1.frame_b.R, der(rev1.frame_b.r_0)) +
@@ -340,24 +363,64 @@ ALT=\"model Examples.Elementary.Pendulum\">
            rev2.frame_a.t*Frames.angularVelocity2(rev2.frame_a.R) +
            rev2.frame_b.t*Frames.angularVelocity2(rev2.frame_b.R);
 
-    connect(damper.flange_b, rev1.axis)
-      annotation (Line(points={{-28,50},{-24,50},{-24,28},{-38,28},{-38,20}}));
-    connect(rev1.support, damper.flange_a)
-      annotation (Line(points={{-44,20},{-44,28},{-58,28},{-58,50},{-48,50}}));
+    connect(damper1.flange_b, rev1.axis)
+      annotation (Line(points={{-26,50},{-24,50},{-24,28},{-38,28},{-38,20}}));
+    connect(rev1.support, damper1.flange_a)
+      annotation (Line(points={{-44,20},{-44,28},{-58,28},{-58,50},{-46,50}}));
     connect(rev1.frame_b, boxBody1.frame_a) annotation (Line(
         points={{-28,10},{-10,10}},
         color={95,95,95},
         thickness=0.5));
     connect(rev2.frame_b, boxBody2.frame_a) annotation (Line(
-        points={{52,10},{74,10}},
-        color={95,95,95},
-        thickness=0.5));
-    connect(boxBody1.frame_b, rev2.frame_a) annotation (Line(
-        points={{10,10},{32,10}},
+        points={{158,10},{180,10}},
         color={95,95,95},
         thickness=0.5));
     connect(world.frame_b, rev1.frame_a) annotation (Line(
         points={{-68,10},{-48,10}},
+        color={95,95,95},
+        thickness=0.5));
+    connect(damper2.flange_b, rev2.axis) annotation (Line(points={{154,52},{150,
+            52},{150,20},{148,20}}, color={0,0,0}));
+    connect(rev2.support, damper2.flange_a) annotation (Line(points={{142,20},{
+            136,20},{136,32},{122,32},{122,52},{134,52}}, color={0,0,0}));
+    connect(boxBody1.frame_b, boxBody3.frame_a) annotation (Line(
+        points={{10,10},{20,10}},
+        color={95,95,95},
+        thickness=0.5));
+    connect(boxBody3.frame_b, boxBody4.frame_a) annotation (Line(
+        points={{40,10},{52,10}},
+        color={95,95,95},
+        thickness=0.5));
+    connect(boxBody4.frame_b, boxBody5.frame_a) annotation (Line(
+        points={{72,10},{80,10}},
+        color={95,95,95},
+        thickness=0.5));
+    connect(boxBody5.frame_b, boxBody6.frame_a) annotation (Line(
+        points={{100,10},{108,10}},
+        color={95,95,95},
+        thickness=0.5));
+    connect(boxBody6.frame_b, boxBody7.frame_a) annotation (Line(
+        points={{128,10},{132,10},{132,-12},{-16,-12},{-16,-24},{-2,-24}},
+        color={95,95,95},
+        thickness=0.5));
+    connect(boxBody11.frame_b, rev2.frame_a) annotation (Line(
+        points={{136,-24},{144,-24},{144,4},{138,4},{138,10}},
+        color={95,95,95},
+        thickness=0.5));
+    connect(boxBody7.frame_b, boxBody8.frame_a) annotation (Line(
+        points={{18,-24},{28,-24}},
+        color={95,95,95},
+        thickness=0.5));
+    connect(boxBody8.frame_b, boxBody9.frame_a) annotation (Line(
+        points={{48,-24},{60,-24}},
+        color={95,95,95},
+        thickness=0.5));
+    connect(boxBody9.frame_b, boxBody10.frame_a) annotation (Line(
+        points={{80,-24},{88,-24}},
+        color={95,95,95},
+        thickness=0.5));
+    connect(boxBody10.frame_b, boxBody11.frame_a) annotation (Line(
+        points={{108,-24},{116,-24}},
         color={95,95,95},
         thickness=0.5));
     annotation (
@@ -377,7 +440,9 @@ object to <b>false</b> to switch off animation of all components.
 ALT=\"model Examples.Elementary.DoublePendulum\">
 </td></tr></table>
 
-</html>"));
+</html>"),
+      Diagram(coordinateSystem(extent={{-100,-100},{200,100}})),
+      Icon(coordinateSystem(extent={{-100,-100},{200,100}})));
   end DoublePendulum;
 
   model DoublePendulum2
