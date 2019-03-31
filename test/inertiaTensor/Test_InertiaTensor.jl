@@ -66,7 +66,7 @@ gravField = Modia3D.UniformGravityField(n=[1,0,0])
 
 pendulum = Pendulum(sceneOptions=Modia3D.SceneOptions(gravityField=gravField,visualizeFrames=true,defaultFrameLength=0.3, enableContactDetection=false))
 model    = Modia3D.SimulationModel(pendulum; useOptimizedStructure = true)
-result   = ModiaMath.simulate!(model, stopTime=5.0, log=false)
+result   = ModiaMath.simulate!(model, stopTime=0.1, interval=0.1, log=false)
 ModiaMath.plot(result, ["sig.y1", "rev1.phi", "rev1.tau"] )
 
 println("... success of Test_SignalTorque.jl!")

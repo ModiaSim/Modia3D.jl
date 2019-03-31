@@ -21,7 +21,7 @@ function build_tree!(scene::Scene, world::Object3D)::NOTHING
    empty!(stack)
 
    world.dynamics = Object3Ddynamics()
-   push!(stack, world)
+   append!(stack, world.children)     
    while length(stack) > 0
       frame = pop!(stack)
       frame.dynamics = Object3Ddynamics()
