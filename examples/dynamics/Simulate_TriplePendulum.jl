@@ -1,4 +1,4 @@
-module Simulate_DoublePendulum
+module Simulate_TriplePendulum
 
 using  Modia3D
 import Modia3D.ModiaMath
@@ -20,25 +20,27 @@ vmat2 = Modia3D.Material(color="Red")
    cyl2   = Modia3D.Object3D(frame2, cyl; visualizeFrame=false)
 end
 
-@assembly DoublePendulum(;Lx = 1.0, m=1.0) begin
+@assembly TriplePendulum(;Lx = 1.0, m=1.0) begin
    world = Modia3D.Object3D(Modia3D.CoordinateSystem(0.5*Lx))
    bar1  = Bar(Lx=Lx, m=m)
    bar2  = Bar(Lx=Lx, m=m)
+   bar3  = Bar(Lx=Lx, m=m)
    rev1  = Modia3D.Revolute(world, bar1.frame1; axis = 3)
    rev2  = Modia3D.Revolute(bar1.frame2, bar2.frame1; axis = 3)
+   rev3  = Modia3D.Revolute(bar2.frame2, bar3.frame1; axis = 3)
 end
 
 
 # Modia3D.visualizeAssembly!( DoublePendulum(), Modia3D.SceneOptions(visualizeFrames=true, defaultFrameLength=0.3) )
 
 
-doublePendulum = DoublePendulum(sceneOptions=Modia3D.SceneOptions(visualizeFrames=true, defaultFrameLength=0.3))
-model = Modia3D.SimulationModel( doublePendulum; useOptimizedStructure = true )
+triplePendulum = TriplePendulum(sceneOptions=Modia3D.SceneOptions(visualizeFrames=true, defaultFrameLength=0.3))
+model = Modia3D.SimulationModel( triplePendulum; useOptimizedStructure = true )
 result = ModiaMath.simulate!(model; stopTime=5.0, tolerance=1e-5,interval=0.001, log=false)
 
-ModiaMath.plot(result, [("rev1.phi", "rev2.phi"),
-                        ("rev1.w"  , "rev2.w"),
-                        ("rev1.a"  , "rev2.a")])
+ModiaMath.plot(result, [("rev1.phi", "rev2.phi", "rev3.phi"),
+                        ("rev1.w"  , "rev2.w", "rev3.w"),
+                        ("rev1.a"  , "rev2.a", "rev3.a")])
 
-println("... success of Simulate_DoublePendulum.jl!")
+println("... success of Simulate_TriplePendulum.jl!")
 end

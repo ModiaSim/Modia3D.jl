@@ -61,7 +61,7 @@ Lx = 1.0
    Modia3D.connect(sig, fourbar.rev1)
 end
 
-model  = Modia3D.SimulationModel( Move(), analysis=ModiaMath.KinematicAnalysis )
+model  = Modia3D.SimulationModel( Move(), analysis=ModiaMath.KinematicAnalysis)
 result = ModiaMath.simulate!(model, stopTime=3.0, log=false)
 
 println("... success of Move_FourBar.jl!")

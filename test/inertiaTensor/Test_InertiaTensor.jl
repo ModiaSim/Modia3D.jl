@@ -8,28 +8,13 @@ Dx = 0.7
 Lx = 1.0
 Ly = 0.3
 Lz = 0.3
-m = 1.0
-#=
-@signal SignalX(;A=0.1) begin
-   y1 = ModiaMath.RealScalar("y", causality=ModiaMath.Output, numericType=ModiaMath.WR)
-end
-function Modia3D.computeSignal(signal::SignalX, sim::ModiaMath.SimulationState)
-    signal.y1.value  = signal.A*sim.time
-end
 
-@signal SignalY(;A=0.1) begin
-   y1 = ModiaMath.RealScalar("y", causality=ModiaMath.Output, numericType=ModiaMath.WR)
+@forceElement Damper(; d=1.0) begin
+    w   = ModiaMath.RealScalar("w",   causality=ModiaMath.Input,  numericType=ModiaMath.WR)
+    tau = ModiaMath.RealScalar("tau", causality=ModiaMath.Output, numericType=ModiaMath.WR)
 end
-function Modia3D.computeSignal(signal::SignalY, sim::ModiaMath.SimulationState)
-    signal.y1.value  = signal.A*cos(sim.time)
-end
-=#
-
-@signal SignalZ(;A=0.1) begin
-   y1 = ModiaMath.RealScalar("y", causality=ModiaMath.Output, numericType=ModiaMath.WR)
-end
-function Modia3D.computeSignal(signal::SignalZ, sim::ModiaMath.SimulationState)
-    signal.y1.value  = 0.0 # 3.0*sim.time # signal.A*sin(sim.time)
+function Modia3D.computeTorque(damper::Damper, sim::ModiaMath.SimulationState)
+    damper.tau.value = damper.d*sim.time
 end
 
 
@@ -37,15 +22,20 @@ end
 vmat1 = Modia3D.Material(color="LightBlue" , transparency=0.5)
 vmat2 = Modia3D.Material(color="Red")
 
+m = 15.0
 
 rCM = zeros(3)
-rCM[2] = 0.0
-#I2 = fill(100.0,(9))
-I = fill(0.0,(3,3))
-#I[3] = 50.0
-#I[7] = 80.0
+
+rCM[1] = 20.0
+rCM[2] = 5.0
+rCM[3] = 10.0
+
+
+I = fill(30.0,(3,3))
+I[7] = 100.0
+I[8] = 80.0
 #println("I = ",I)
-massProp = Modia3D.MassProperties(1.0, rCM, I)
+massProp = Modia3D.MassProperties(m, rCM, I)
 
 @assembly Pendulum() begin
    world  = Modia3D.Object3D(Modia3D.CoordinateSystem(0.5*Lx))
@@ -57,17 +47,17 @@ massProp = Modia3D.MassProperties(1.0, rCM, I)
 
    rev1    = Modia3D.Revolute(world, frame1; axis = 3)
 
-   sig    = SignalZ()
-   signal = Modia3D.SignalToFlangeTorque(sig.y1)
-   Modia3D.connect(signal, rev1)
+   d     = Damper(d=10.0)
+   damper = Modia3D.AdaptorForceElementToFlange(w=d.w, tau=d.tau)
+   Modia3D.connect(damper, rev1)
 end
 
 gravField = Modia3D.UniformGravityField(n=[1,0,0])
 
 pendulum = Pendulum(sceneOptions=Modia3D.SceneOptions(gravityField=gravField,visualizeFrames=true,defaultFrameLength=0.3, enableContactDetection=false))
 model    = Modia3D.SimulationModel(pendulum; useOptimizedStructure = true)
-result   = ModiaMath.simulate!(model, stopTime=0.1, interval=0.1, log=false)
-ModiaMath.plot(result, ["sig.y1", "rev1.phi", "rev1.tau"] )
+result   = ModiaMath.simulate!(model, stopTime=5.0, tolerance=1e-6,interval=0.001, log=false)
+ModiaMath.plot(result, ["rev1.phi", "rev1.tau"] )
 
 println("... success of Test_SignalTorque.jl!")
 end
