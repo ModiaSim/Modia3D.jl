@@ -30,7 +30,8 @@ vmat2 = Modia3D.Material(color="Red")
    Modia3D.connect(signal, rev)
 end
 
-pendulum = PendulumDrivenKinematically(Lx=1.6, m=0.5, sceneOptions = Modia3D.SceneOptions(visualizeFrames=true, defaultFrameLength=0.3))
+gravField = Modia3D.UniformGravityField(g=0.0)
+pendulum = PendulumDrivenKinematically(Lx=1.6, m=0.5, sceneOptions = Modia3D.SceneOptions(gravityField=gravField,visualizeFrames=true, defaultFrameLength=0.3))
 model    = Modia3D.SimulationModel(pendulum) # , analysis=ModiaMath.KinematicAnalysis
 # ModiaMath.print_ModelVariables(model)
 result   = ModiaMath.simulate!(model, stopTime=5.0)

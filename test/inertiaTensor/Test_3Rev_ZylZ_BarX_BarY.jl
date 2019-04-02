@@ -52,6 +52,14 @@ end
    end
 end
 
+@signal Signal(;A=2000.0) begin
+   y1 = ModiaMath.RealScalar("y", causality=ModiaMath.Output, numericType=ModiaMath.WR)
+end
+function Modia3D.computeSignal(signal::Signal, sim::ModiaMath.SimulationState)
+    signal.y1.value  = signal.A*sim.time
+end
+
+
 @assembly DoublePendulum(;Lx = 1.0) begin
    world = Modia3D.Object3D(Modia3D.CoordinateSystem(0.5*Lx))
    boxZ  = Box(Lx=Lx)
@@ -60,6 +68,11 @@ end
    rev1  = Modia3D.Revolute(world, boxZ.frame1; axis = 3)
    rev2  = Modia3D.Revolute(boxZ.frame2, cylinderX.frame1; axis = 1, phi_start = pi/2)
    rev3  = Modia3D.Revolute(cylinderX.frame2, cylinderY.frame1; axis = 2, phi_start = -pi/2)
+
+
+   sig    = Signal()
+   signal = Modia3D.SignalToFlangeTorque(sig.y1)
+   Modia3D.connect(signal, rev1)
 
 #=
    d     = Force(d=10.0)
@@ -82,7 +95,8 @@ result = ModiaMath.simulate!(model; stopTime=5.0, tolerance=1e-6,interval=0.001,
 
 ModiaMath.plot(result, [("rev1.phi", "rev2.phi"),
                         ("rev1.w"  , "rev2.w"),
-                        ("rev1.a"  , "rev2.a")])
+                        ("rev1.a"  , "rev2.a"),
+                        ("rev1.tau", "rev2.tau")])
 
 println("... success of Test_3Rev_ZylZ_BarX_BarY.jl!")
 end
