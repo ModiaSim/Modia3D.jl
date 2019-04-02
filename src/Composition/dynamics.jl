@@ -318,7 +318,7 @@ function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64
 
    # Compute positions, velocities, accelerations in a forward recursion
 
-open("log.txt", "a") do file
+   open("log.txt", "a") do file
 
    #println("\n... Forward recursion")
    for obj in tree
@@ -354,8 +354,6 @@ open("log.txt", "a") do file
          end
 
          if hasMassProperties
-            #println(ModiaMath.fullName(obj.parent))
-            #println(ModiaMath.fullName(obj))
             # Compute inertia forces / torques
             mass = massProperties.m
             rCM  = massProperties.rCM
@@ -367,14 +365,10 @@ open("log.txt", "a") do file
             if rCM === ModiaMath.ZeroVector3D
                dynamics.f = -mass*( obj.R_abs*(dynamics.a0 - grav) )
                dynamics.t = -(I*dynamics.z + cross(w, I*w))
-               #println("rCM = 0, dynamics.f = ", dynamics.f)
-               #println("rCM = 0, dynamics.t = ", dynamics.t)
             else
                dynamics.f = -mass*( obj.R_abs*(dynamics.a0 - grav) +
                                   cross(dynamics.z, rCM) + cross(w, cross(w, rCM)))
                dynamics.t = -(I*dynamics.z + cross(w, I*w)) + cross(rCM, dynamics.f)
-               #println("dynamics.f = ", dynamics.f)
-               #println("dynamics.t = ", dynamics.t)
             end
          else
             dynamics.f = ModiaMath.ZeroVector3D
@@ -427,7 +421,6 @@ open("log.txt", "a") do file
          contact = ModiaMath.negative!(sim, i, s, str)
 
          if contact
-            println("hat contakt?")
             #println("... Contact ", str, " active at time = ", sim.time)
             r1 = ModiaMath.Vector3D(chpairs.contactPoint1[i])
             r2 = ModiaMath.Vector3D(chpairs.contactPoint2[i])
