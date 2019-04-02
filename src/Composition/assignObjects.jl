@@ -1,3 +1,5 @@
+assignObj(scene, superObjType, obj) = nothing
+
 
 function assignObj(scene::Scene, superObjType::SuperObjCollision, obj::Object3D)
     if canCollide(obj)
@@ -15,11 +17,9 @@ end
 
 function assignObj(scene::Scene, superObjType::SuperObjForce, obj::Object3D)
     if canCollide(obj) || hasJoint(obj) || hasForceElement(obj)
-    #println("ist ein ObjForce, canCollide = ", canCollide(obj), " hasJoint = ", hasJoint(obj), " hasForceElement = ", hasForceElement(obj))
       push!(superObjType.superObj, obj)
     end
 end
-
 
 
 function assignObj(scene::Scene, superObjType::SuperObjVisu, obj::Object3D)
@@ -28,8 +28,6 @@ function assignObj(scene::Scene, superObjType::SuperObjVisu, obj::Object3D)
       push!(scene.treeVisu, obj)
     end
 end
-
-assignObj(scene, superObjType, obj) = nothing
 
 
 function assignAll(scene::Scene, superObj::SuperObjsRow, obj::Object3D, world::Object3D, actPos::Int64)
@@ -44,10 +42,7 @@ function assignAll(scene::Scene, superObj::SuperObjsRow, obj::Object3D, world::O
         if typeof(cutJoint) <: Modia3D.AbstractJoint
           if cutJoint.visited
             push!(scene.noCPairsHelp[cutJoint], actPos)
-          end
-        end
-      end
-    end
+    end; end; end; end
 
 #=
     if hasForceElement(obj)
@@ -71,13 +66,10 @@ function createCutJoints!(scene::Scene, obj::Object3D)
       if !cutJoint.visited
         println("\n... Cut-joint ", ModiaMath.instanceName(cutJoint), " pushed on scene.cutJoints vector")
         push!(scene.cutJoints, cutJoint)
-        #println("length scene.cutJoints = ", length(scene.cutJoints))
         push!(scene.noCPairsHelp, cutJoint => [])
-        #println("length scene.noCPairsHelp = ", length(scene.noCPairsHelp))
         cutJoint.visited = true
-      end
-    end
-  end
+  end; end; end
+  return nothing
 end
 
 
@@ -100,7 +92,6 @@ function fillVisuElements!(scene::Scene, obj::Object3D, world::Object3D)
   end
 
   scene.visualize = length(scene.allVisuElements) > 0
-  # println("length(scene.allVisuElements) = ", length(scene.allVisuElements))
   return nothing
 end
 

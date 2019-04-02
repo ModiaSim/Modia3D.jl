@@ -14,12 +14,17 @@ include(joinpath(collisionPath, "Test_Collision_StarSetting.jl"))
 include(joinpath(collisionPath, "Test_MiniBsp.jl"))
 include(joinpath(collisionPath, "Test_Solids.jl"))
 
-
 # test/SignalToFlange
 dynamicsPath = joinpath(Modia3D.path, "test", "dynamics")
 include(joinpath(dynamicsPath, "Simulate_ControllerDamper.jl"))
 include(joinpath(dynamicsPath, "Simulate_DamperMacro.jl"))
 include(joinpath(dynamicsPath, "Simulate_FourBar.jl"))
+
+# test/inertiaTensor
+inertiaPath = joinpath(Modia3D.path, "test", "inertiaTensor")
+include(joinpath(inertiaPath, "Test_2Rev_ZylZ_BarX.jl"))
+include(joinpath(inertiaPath, "Test_3Rev_ZylZ_BarX_BarY.jl"))
+include(joinpath(inertiaPath, "Test_InertiaTensor.jl"))
 
 # test/revoluteJoints
 testJointsPath = joinpath(Modia3D.path, "test", "joints")
@@ -38,13 +43,20 @@ include(joinpath(testJointsPath, "Move_FourBar_zAxis.jl"))
 kinematicsPath = joinpath(Modia3D.path, "test", "kinematics")
 include(joinpath(kinematicsPath, "Move_FourBar_noMacros.jl"))
 
+# test/massComputation
+massCompPath = joinpath(Modia3D.path, "test", "massComputation")
+include(joinpath(massCompPath, "test_massComputation.jl"))
 
 # test/signalToFlange
 signalToFlangePath = joinpath(Modia3D.path, "test", "signalToFlange")
 include(joinpath(signalToFlangePath, "Test_Signal1Assembly.jl"))
 include(joinpath(signalToFlangePath, "Test_Signal4Assemblies.jl"))
 
-# test/signalToFlange
+# test/visual
+visuPath = joinpath(Modia3D.path, "test", "visual")
+include(joinpath(visuPath, "visual_3Bars.jl"))
+
+# test/volumeComputation
 volCompPath = joinpath(Modia3D.path, "test", "volumeComputation")
 include(joinpath(volCompPath, "volume_computation3D_obj.jl"))
 
@@ -57,6 +69,5 @@ wAVisualPath = joinpath(Modia3D.path, "test", "withoutAssembly","visual")
 include(joinpath(wAVisualPath, "Visualize_Beam.jl"))
 
 
-
-println("\n test_Examples finished!")
+println("\n ...test_Examples finished!")
 end

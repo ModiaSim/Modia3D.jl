@@ -487,9 +487,6 @@ function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64
       visualize!(Modia3D.renderer[1], time)
    end
 
-   println("world.f = ", world.dynamics.f )
-   println("world.t = ", world.dynamics.t )
-
    # Copy variables to residues
    ModiaMath.copy_variables_to_residue!(var, _x, _derx, _r)
 

@@ -1,4 +1,4 @@
-module Test_SignalTorque
+module Test_InertiaTensor
 
 using  Modia3D
 import Modia3D.ModiaMath
@@ -32,9 +32,16 @@ rCM[3] = 10.0
 
 
 I = fill(30.0,(3,3))
-I[7] = 100.0
-I[8] = 80.0
-#println("I = ",I)
+I[1] = 10.0
+I[2] = 5.0
+I[3] = 80.0
+I[4] = 5.0
+I[5] = 20.0
+I[6] = 7.0
+I[7] = 80.0
+I[8] = 7.0
+I[9] = 30.0
+
 massProp = Modia3D.MassProperties(m, rCM, I)
 
 @assembly Pendulum() begin
@@ -59,5 +66,5 @@ model    = Modia3D.SimulationModel(pendulum; useOptimizedStructure = true)
 result   = ModiaMath.simulate!(model, stopTime=5.0, tolerance=1e-6,interval=0.001, log=false)
 ModiaMath.plot(result, ["rev1.phi", "rev1.tau"] )
 
-println("... success of Test_SignalTorque.jl!")
+println("... success of Test_InertiaTensor.jl!")
 end

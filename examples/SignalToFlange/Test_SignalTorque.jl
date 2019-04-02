@@ -32,7 +32,7 @@ end
 
 gravField = Modia3D.UniformGravityField(g=0.0)
 pendulum = PendulumDrivenKinematically(Lx=1.6, m=0.5, sceneOptions = Modia3D.SceneOptions(gravityField=gravField,visualizeFrames=true, defaultFrameLength=0.3))
-model    = Modia3D.SimulationModel(pendulum) # , analysis=ModiaMath.KinematicAnalysis
+model    = Modia3D.SimulationModel(pendulum) #, analysis=ModiaMath.KinematicAnalysis) 
 # ModiaMath.print_ModelVariables(model)
 result   = ModiaMath.simulate!(model, stopTime=5.0)
 ModiaMath.plot(result, ["sig.y1", "rev.phi", "rev.tau"] )
