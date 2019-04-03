@@ -47,7 +47,7 @@ end
 
 Modia3D.visualizeAssembly!( AllVisualObjects(sceneOptions=Modia3D.SceneOptions(visualizeFrames=true,
                                                                                defaultFrameLength=0.7,
-                                                                               enableContactDetection=false) ) )
+                                                                               enableContactDetection=false,useOptimizedStructure=false) ) )
 
 println("... success of Visualize_AllVisualObjects.jl!")
 

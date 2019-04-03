@@ -36,8 +36,8 @@ const Lx = 1.6
 const m  = 0.5
 # Modia3D.visualizeAssembly!( Pendulum(Lx=Lx, m=m) )
 
-pendulum = Pendulum(Lx=Lx, m=m, sceneOptions=Modia3D.SceneOptions(visualizeFrames=true, defaultFrameLength=0.3))
-model    = Modia3D.SimulationModel( pendulum; useOptimizedStructure = false )
+pendulum = Pendulum(Lx=Lx, m=m, sceneOptions=Modia3D.SceneOptions(visualizeFrames=true, defaultFrameLength=0.3, useOptimizedStructure = false))
+model    = Modia3D.SimulationModel( pendulum )
 result   = ModiaMath.simulate!(model, stopTime=10.0, tolerance=1e-6,log=false)
 
 ModiaMath.plot(result, ["rev.phi", "rev.w", "rev.a"])

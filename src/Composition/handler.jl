@@ -7,27 +7,20 @@
 
 
 function build_tree!(scene::Scene, world::Object3D)::NOTHING
-   options             = scene.options
-   visualizeFrames     = options.visualizeFrames
-   renderer            = Modia3D.renderer[1]
-   autoCoordsys        = scene.autoCoordsys
-   allVisuElements     = scene.allVisuElements
    tree                = scene.tree
-   cutJoints           = scene.cutJoints
    stack               = scene.stack
-   enableVisualization = scene.options.enableVisualization
-   analysis            = scene.analysis
    empty!(tree)
    empty!(stack)
+   empty!(scene.allVisuElements)
 
-   world.dynamics = Object3Ddynamics()
+   assign_Visu_CutJoint_Dynamics!(scene, world, world)
    append!(stack, world.children)
    while length(stack) > 0
-      frame = pop!(stack)
-      frame.dynamics = Object3Ddynamics()
-      push!(tree,frame)
+      obj = pop!(stack)
+      assign_Visu_CutJoint_Dynamics!(scene, obj, world)
+      push!(tree, obj)
       # Visit children of frame
-      append!(stack, frame.children)
+      append!(stack, obj.children)
    end
    return nothing
 end
@@ -43,6 +36,7 @@ function addIndicesOfCutJointsToSuperObj(scene::Scene)
       error("...from addIndicesOfCutJointsToSuperObj: problems with amount of cut joints")
     end
   end
+  return nothing
 end
 
 
@@ -59,6 +53,7 @@ function createAABB_noCPairs(scene::Scene, superObjsRow::SuperObjsRow)
   else
     push!(scene.AABB, [])
   end
+  return nothing
 end
 
 
@@ -80,14 +75,9 @@ function changeParentToRootObj(newParent::Object3D, obj::Object3D)
   obj.r_rel = r_new
   obj.R_rel = R_new
 
-
   # Reverse obj, so that newParent is the new parent
   obj.parent = newParent
   push!(newParent.children, obj)
-
-  #obj.r_abs = parent_r_abs + parent_R_abs'*r_new
-  #obj.R_abs = R_new*parent_R_abs
-
   return nothing
 end
 
@@ -117,7 +107,6 @@ function fillStackOrBuffer!(scene::Scene, superObj::SuperObjsRow, obj::Object3D,
   if !isempty(obj.children)
     deleteat!(obj.children,help)
   end
-
   return nothing
 end
 
@@ -177,64 +166,6 @@ function build_superObjs!(scene::Scene, world::Object3D)::NOTHING
     #println(" ")
   end
   addIndicesOfCutJointsToSuperObj(scene)
-#=
- println(" ")
- println("treeAccVelo Reihenfolge")
- for obj in treeAccVelo
-  println(ModiaMath.fullName(obj), " obj.computeAcceleration = $(obj.computeAcceleration)")
-  #println("obj.computeAcceleration = $(obj.computeAcceleration)")
- end
-
- println(" ")
- println("treeVisu")
- for obj in scene.treeVisu
-   println(ModiaMath.fullName(obj))
- end
-
- println(" ")
- println("allVisuElements")
- for obj in scene.allVisuElements
-   println(ModiaMath.fullName(obj))
- end
-=#
-
-#=
-println(" ")
-println("buffer Reihenfolge")
-for obj in buffer
-  println(ModiaMath.fullName(obj) , " obj.computeAcceleration = $(obj.computeAcceleration)")
-end
-
-
-#  println("scene.noCPairs ", scene.noCPairs)
-  println("superObjRow.superObjCollision.superObj")
-  for superObjRow in scene.superObjs
-    println("[")
-    for a in superObjRow.superObjCollision.superObj
-      println(ModiaMath.fullName(a))
-    end
-    println("]")
-    println(" ")
-  end
-=#
-
-#=
-
-println("treeVisu")
-for obj in scene.treeVisu
-  println(ModiaMath.fullName(obj))
-end
-
-  println("geht mit AABB weiter ")
-  for a in scene.AABB
-    println("[")
-    for b in a
-      println(b)
-    end
-    println("]")
-    println(" ")
-  end
-=#
 
   hasMoreCollisionSuperObj ? (scene.collide = true) : (scene.collide = false)
   scene.initSuperObj = true
@@ -248,7 +179,6 @@ getAssembly(dummy)                              = nothing
 
 function build_SignalObject3DConnections!(assembly::Modia3D.AbstractAssembly)
   scene     = assembly._internal.scene
-
   uniqueSignals       = scene.uniqueSignals
   uniqueForceTorques  = scene.uniqueForceTorques
   potentialVarInput   = scene.potentialVarInput
@@ -258,7 +188,6 @@ function build_SignalObject3DConnections!(assembly::Modia3D.AbstractAssembly)
 
   empty!(uniqueSignals)
   empty!(uniqueForceTorques)
-
   empty!(potentialVarInput)
   empty!(potentialVarOutput)
   empty!(flowVarInput)
@@ -274,29 +203,26 @@ function build_SignalObject3DConnections!(assembly::Modia3D.AbstractAssembly)
       subAssembly = getAssembly(getfield(assembly,v))
       if typeof(subAssembly) != NOTHING && typeof(subAssembly) != Modia3D.Composition.Part
         push!(assemblyStack, subAssembly)
-      end
-    end
+    end; end
 
     # for signals
     for signal in assembly._internal.uniqueSignals
       if !in(signal, uniqueSignals)
         push!(uniqueSignals, signal)
-      end
-    end
+    end; end
 
     # for forces and torques
     for forceTorque in assembly._internal.uniqueForceTorques
       if !in(forceTorque, uniqueForceTorques)
         push!(uniqueForceTorques, forceTorque)
-      end
-    end
+    end; end
 
     append!(potentialVarInput, assembly._internal.potentialVarInput)
     append!(potentialVarOutput, assembly._internal.potentialVarOutput)
     append!(flowVarInput, assembly._internal.flowVarInput)
     append!(flowVarOutput, assembly._internal.flowVarOutput)
-
   end
+  return nothing
 end
 build_SignalObject3DConnections!(dummy) = nothing
 
@@ -328,22 +254,38 @@ function visualizeWorld!(world::Object3D; sceneOptions = SceneOptions())::NOTHIN
    return nothing
 end
 
+
+function chooseAndBuildUpTree(world::Object3D, scene::Scene)
+  # Build tree for optimized structure or standard structure
+  # collision handling is only available for optimized structure
+  if scene.options.useOptimizedStructure
+     build_superObjs!(scene, world)
+     if scene.options.enableContactDetection && scene.collide
+        initializeContactDetection!(world, scene)
+        nz = scene.options.contactDetection.contactPairs.nz
+     end
+     initializeMassComputation!(scene)
+  else
+     println("useOptimizedStructure = false")
+     build_tree!(scene, world)
+     if scene.options.enableContactDetection #&& scene.collide
+        @error("Collision handling is only possible with the optimized structure. Please set useOptimizedStructure = true.")
+     end
+  end
+  if scene.visualize
+     initializeVisualization(Modia3D.renderer[1], scene.allVisuElements)
+  end
+  scene.initAnalysis = true
+  return nothing
+end
+
+
 function initAnalysis!(world::Object3D, scene::Scene)
    # Initialize spanning tree and visualization (if visualization desired and visual elements present)
   println("initAnalysis!(world::Object3D, scene::Scene)")
-  build_tree!(scene, world)
-  build_superObjs!(scene, world)
 
-   # Initialize contact detection if contact detection desired and objects with contactMaterial are present
-   if scene.visualize
-      initializeVisualization(Modia3D.renderer[1], scene.allVisuElements)
-   end
-   if scene.collide
-      initializeContactDetection!(world, scene)
-   end
-   initializeMassComputation!(scene)
-
-   scene.initAnalysis = true
+  chooseAndBuildUpTree(world, scene)
+  return nothing
 end
 
 
@@ -364,56 +306,10 @@ function initAnalysis!(assembly::Modia3D.AbstractAssembly;
    scene.analysis = analysis
    assembly._internal.scene = scene
 
-   # Initialize spanning tree and visualization (if visualization desired and visual elements present)
-   build_tree!(scene, world)
-   build_superObjs!(scene, world)
-   if scene.visualize
-      initializeVisualization(Modia3D.renderer[1], scene.allVisuElements)
-   end
-   if scene.collide
-      initializeContactDetection!(world, scene)
-  end
-  initializeMassComputation!(scene)
-
-   scene.initAnalysis = true
+   chooseAndBuildUpTree(world, scene)
+   return nothing
 end
 
-
-#=
-function initAnalysis!(assembly::Modia3D.AbstractAssembly)
-  println("bin in initAnalysis!(assembly::Modia3D.AbstractAssembly)")
-   # Add visual elements to scene.allVisuElements
-   if typeof(assembly._internal.referenceObject3D) == NOTHING
-      error("\nError message from Modia3D.initAnalysis!(..):\n",
-            typeof(assembly), " has no reference frame.")
-   end
-
-   # Construct Scene(..) object
-   world = assembly._internal.referenceObject3D
-   scene = typeof(world.data) == SceneOptions ? Scene(world.data) : Scene()
-   assembly._internal.scene = scene
-
-   # Initialize visualization, if visualization desired and visual elements present
-   if scene.options.enableVisualization
-      build_allVisuElements!(scene,world)
-      if scene.visualize
-        initializeVisualization(Modia3D.renderer[1], scene.allVisuElements)
-      end
-   end
-
-   # Initialize contact detection if contact detection desired and objects with contactMaterial are present
-   if scene.options.enableContactDetection
-      build_superObjs!(scene, world)
-      if scene.collide
-        initializeContactDetection!(world, scene)
-      end
-   end
-
-   build_revElements!(scene,world)
-
-   scene.initAnalysis = true
-end
-=#
 
 # Error Messages
 function assertInitAnalysis(assembly::Modia3D.AbstractAssembly, functionName::String)

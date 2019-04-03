@@ -53,8 +53,8 @@ vmat2 = Modia3D.Material(color="Red")
    controller = Modia3D.AdaptorForceElementToFlange(phi=c.phi, w=c.w, tau=c.tau)
    Modia3D.connect(controller, rev)
 end
-pendulum = PendulumWithController(Lx=1.6, m=0.5, sceneOptions = Modia3D.SceneOptions(visualizeFrames=true, defaultFrameLength=0.3))
-model    = Modia3D.SimulationModel( pendulum; useOptimizedStructure = true )
+pendulum = PendulumWithController(Lx=1.6, m=0.5, sceneOptions = Modia3D.SceneOptions(visualizeFrames=true, defaultFrameLength=0.3, useOptimizedStructure = true))
+model    = Modia3D.SimulationModel( pendulum )
 result   = ModiaMath.simulate!(model, stopTime=5.0, log=true, tolerance=1e-4)
 
 ModiaMath.plot(result, [("rev.phi","c.sine_y"), "rev.w", "rev.a", "rev.tau"])

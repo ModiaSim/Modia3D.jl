@@ -210,6 +210,8 @@ gravityAcceleration(grav::PointGravityField, r_abs::AbstractVector) = -(grav.mue
 #-------------------------------------- Global Scene Options -------------------------------
 
 struct SceneOptions
+   useOptimizedStructure::Bool    # = true, if the optimized structure (with super objects, and common inertia) is used
+
    # Handler used for contact detection
    contactDetection::Modia3D.AbstractContactDetection
    nz_max::Int                    # Maximum number of zero crossing functions used for
@@ -262,7 +264,8 @@ struct SceneOptions
                           defaultArrowDiameter   = nominalLength/40,
                           defaultN_to_m          = 1000,
                           defaultNm_to_m         = 1000,
-                          enableContactDetection = true)
+                          enableContactDetection = true,
+                          useOptimizedStructure  = true)
       @assert(nz_max > 0)
       @assert(nominalLength > 0.0)
       @assert(defaultFrameLength > 0.0)
@@ -275,7 +278,8 @@ struct SceneOptions
       @assert(defaultN_to_m > 0.0)
       @assert(defaultNm_to_m  > 0.0)
 
-      new(contactDetection,
+      new(useOptimizedStructure,
+          contactDetection,
           nz_max,
           gravityField,
           enableVisualization,

@@ -90,7 +90,6 @@ struct SimulationModel <: ModiaMath.AbstractSimulationModel
    assembly::Modia3D.AbstractAssembly
    var::ModiaMath.ModelVariables
    analysis::ModiaMath.AnalysisType
-   useOptimizedStructure::Bool
 
    function SimulationModel(assembly::Modia3D.AbstractAssembly;
                             analysis::ModiaMath.AnalysisType=ModiaMath.DynamicAnalysis,
@@ -99,8 +98,7 @@ struct SimulationModel <: ModiaMath.AbstractSimulationModel
                             tolerance = 1e-4,
                             interval  = (stopTime-startTime)/500.0,
                             hev = 1e-8,
-                            scaleConstraintsAtEvents::Bool = true,
-                            useOptimizedStructure::Bool = true)
+                            scaleConstraintsAtEvents::Bool = true)
       modelName = Modia3D.trailingPartOfName( string( typeof(assembly) ) )
       world = get_WorldObject3D(assembly)
       assembly._internal.referenceObject3D = world
@@ -124,6 +122,24 @@ struct SimulationModel <: ModiaMath.AbstractSimulationModel
       scene.analysis = analysis
       assembly._internal.scene = scene
 
+      # Build tree for optimized structure or standard structure
+      # collision handling is only available for optimized structure
+      nz = 0
+      if scene.options.useOptimizedStructure
+         build_superObjs!(scene, world)
+         if scene.options.enableContactDetection && scene.collide
+            initializeContactDetection!(world, scene)
+            nz = scene.options.contactDetection.contactPairs.nz
+         end
+         initializeMassComputation!(scene)
+      else
+         build_tree!(scene, world)
+         if scene.options.enableContactDetection && scene.collide
+            @error("Collision handling is only possible with the optimized structure. Please set useOptimizedStructure = true.")
+         end
+      end
+
+#=
       # Build tree (for multibody computation), allVisuElements (for visualization), super objects (for contact handling)
       build_tree!(scene, world)
       build_superObjs!(scene, world)
@@ -137,6 +153,7 @@ struct SimulationModel <: ModiaMath.AbstractSimulationModel
       if useOptimizedStructure
          initializeMassComputation!(scene)
       end
+=#
 
       # Initialize connections between signals and frames, joints, ...
       build_SignalObject3DConnections!(assembly)
@@ -191,7 +208,7 @@ struct SimulationModel <: ModiaMath.AbstractSimulationModel
       end
       println("... end allVisuElements")
 =#
-      new(modelName, simulationState,assembly,var,analysis, useOptimizedStructure)
+      new(modelName, simulationState,assembly,var,analysis)
    end
 end
 
@@ -258,7 +275,7 @@ function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64
    sim              = m.simulationState
    world            = m.assembly._internal.referenceObject3D
    scene            = m.assembly._internal.scene
-   if m.useOptimizedStructure
+   if scene.options.useOptimizedStructure
       tree          = scene.treeAccVelo
    else
       tree          = scene.tree
@@ -341,7 +358,7 @@ function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64
 
       if analysis != ModiaMath.KinematicAnalysis
          hasMassProperties = false
-         if m.useOptimizedStructure
+         if scene.options.useOptimizedStructure
             if objectHasMass(obj)
                massProperties    = obj.massProperties
                hasMassProperties = true
@@ -473,7 +490,7 @@ function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64
 
    if scene.visualize && storeResults
       # Compute positions of frames that are only used for visualization
-      if m.useOptimizedStructure
+      if scene.options.useOptimizedStructure
           for obj in scene.treeVisu
               parent = obj.parent
               obj.r_abs = obj.r_rel ≡ ModiaMath.ZeroVector3D ? parent.r_abs : parent.r_abs + parent.R_abs'*obj.r_rel

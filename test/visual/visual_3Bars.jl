@@ -80,8 +80,8 @@ end
 
 doublePendulum = DoublePendulum(sceneOptions = Modia3D.SceneOptions(visualizeFrames=false,
                                                                     defaultFrameLength=0.1,
-                                                                    enableContactDetection=false))
-model = Modia3D.SimulationModel( doublePendulum, analysis=ModiaMath.KinematicAnalysis, useOptimizedStructure = true )
+                                                                    enableContactDetection=false, useOptimizedStructure = true))
+model = Modia3D.SimulationModel( doublePendulum, analysis=ModiaMath.KinematicAnalysis )
 result = ModiaMath.simulate!(model, stopTime=3.0)
 
 ModiaMath.plot(result, ("rev1.phi", "rev2.phi") )

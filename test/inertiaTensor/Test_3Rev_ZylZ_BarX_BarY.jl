@@ -69,7 +69,7 @@ doublePendulum = DoublePendulum(sceneOptions=Modia3D.SceneOptions(gravityField=g
 
 #Modia3D.visualizeAssembly!( doublePendulum )
 
-model = Modia3D.SimulationModel( doublePendulum; useOptimizedStructure = true )
+model = Modia3D.SimulationModel( doublePendulum )
 result = ModiaMath.simulate!(model; stopTime=5.0, tolerance=1e-6,interval=0.001, log=false)
 
 ModiaMath.plot(result, [("rev1.phi", "rev2.phi"),

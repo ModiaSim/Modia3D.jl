@@ -32,8 +32,8 @@ end
 # Modia3D.visualizeAssembly!( DoublePendulum(), Modia3D.SceneOptions(visualizeFrames=true, defaultFrameLength=0.3) )
 
 
-doublePendulum = DoublePendulum(sceneOptions=Modia3D.SceneOptions(visualizeFrames=true, defaultFrameLength=0.3))
-model = Modia3D.SimulationModel( doublePendulum; useOptimizedStructure = true )
+doublePendulum = DoublePendulum(sceneOptions=Modia3D.SceneOptions(visualizeFrames=true, defaultFrameLength=0.3, useOptimizedStructure = false))
+model = Modia3D.SimulationModel( doublePendulum )
 result = ModiaMath.simulate!(model; stopTime=5.0, tolerance=1e-5,interval=0.001, log=false)
 
 ModiaMath.plot(result, [("rev1.phi", "rev2.phi"),
