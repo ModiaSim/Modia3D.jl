@@ -15,7 +15,7 @@ mutable struct SignalToFlangeAngle <: Modia3D.AbstractSignalAdaptor
             flange = Flange(;phiCausality=ModiaMath.Output)
             signal = phi._internal.within
             flange.phi = phi
-            new(ModiaMath.ComponentInternal(),signal, flange)
+            new(ModiaMath.ComponentInternal(), signal, flange)
         else
             error("from Modia3D.SignalToFlangeAngle: There is no signal to convert.")
         end
@@ -32,7 +32,7 @@ mutable struct SignalToFlangeTorque <: Modia3D.AbstractSignalAdaptor
             signal = tau._internal.within
             tau.flow   = true
             flange.tau = tau
-            new(ModiaMath.ComponentInternal(),signal, flange)
+            new(ModiaMath.ComponentInternal(), signal, flange)
         else
             error("from Modia3D.SignalToFlangeTorque: There is no signal to convert.")
         end

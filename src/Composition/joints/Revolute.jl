@@ -130,7 +130,6 @@ function Revolute(obj1::Object3D, obj2::Object3D;
    (obj_a,obj_b,cutJoint) = attach(obj1, obj2)
    @assert(1 <= axis <= 3)
    axis  = obj_b===obj2 ? axis : -axis
-   println("axis = $axis")
    if cutJoint
       println("... Revolute joint connecting ", ModiaMath.fullName(obj1), " with ", ModiaMath.fullName(obj2), " is a cut-joint")
 
@@ -316,16 +315,12 @@ function computeForceTorqueAndResidue!(joint::TreeJointRevolute, obj::Object3D, 
    parentDynamics.t    += obj.R_rel'*dynamics.t
    dynamics.f          = -dynamics.f
    dynamics.t          = -dynamics.t
-   #=
-   println("compForce parentparent.f = ", obj.parent.parent.dynamics.f)
-   println("compForce parentDynamics.f = ", parentDynamics.f)
-   println("compForce parentDynamics.t = ", parentDynamics.t)
-   println("compForce dynamics.f = ", dynamics.f)
-   println("compForce dynamics.t = ", dynamics.t)
-   =#
 
+   # println("joint.tau.value = ", joint.tau.value)
    joint.residue.value = -joint.tau.value + (joint.axis > 0 ? dynamics.t[abs(joint.axis)] : -dynamics.t[abs(joint.axis)])
+   #println("nachher joint.residue.value = ", joint.residue.value)
 
+   #println(" ")
    # For checking: compute total power
    # P = dot(parentDynamics.f, joint.obj1.R_abs*parentDynamics.v0) +
    #    dot(dynamics.f      , joint.obj2.R_abs*dynamics.v0) +
@@ -416,7 +411,7 @@ end
 
 function assignRevoluteFlange(flange::Flange, revFlange::RevoluteFlange, joint::Modia3D.AbstractRevolute, assembly::Modia3D.Composition.AssemblyInternal)
   names = fieldnames(typeof(flange))
-  for val in names
+  for val in names # loops over phi, w, a, tau
     flange_val    = getfield(flange, val)
     revFlange_val = getfield(revFlange,val)
     joint_val     = getfield(joint,val)
@@ -431,7 +426,7 @@ function assignRevoluteFlange(flange::Flange, revFlange::RevoluteFlange, joint::
   return true
 end
 
-
+#=
 function addTorqueObjToJoint(torqueObj::Modia3D.AbstractForceTorque, SymbFlangeTorque::Symbol, joint::Modia3D.AbstractRevolute, SymbFlangeJoint::Symbol, assembly::Modia3D.AbstractAssembly)
   flangeTorque  = getfield(torqueObj, SymbFlangeTorque)
   flangeJoint   = getfield(joint, SymbFlangeJoint)
@@ -445,7 +440,7 @@ function addTorqueObjToJoint(torqueObj::Modia3D.AbstractForceTorque, SymbFlangeT
     driveJoint!(joint)
   end
 end
-
+=#
 
 function connect(torqueObj::Modia3D.AbstractForceAdaptor, joint::Modia3D.AbstractRevolute)
   actualAssembly = torqueObj._internal.within._internal
@@ -462,7 +457,7 @@ function connect(torqueObj::Modia3D.AbstractForceAdaptor, joint::Modia3D.Abstrac
   if !isPhiInput(flangeJoint) && isTauInput(flangeJoint)
     joint.isDriven = false
   elseif isPhiInput(flangeJoint) && !isTauInput(flangeJoint)
-      driveJoint!(joint)
+    driveJoint!(joint)
   end
 end
 connect(joint::Modia3D.AbstractRevolute, torqueObj::Modia3D.AbstractForceAdaptor) = connect(torqueObj::Modia3D.AbstractForceAdaptor, joint::Modia3D.AbstractRevolute)
@@ -485,7 +480,7 @@ function connect(signal::Modia3D.AbstractSignalAdaptor, joint::Modia3D.AbstractR
     if !isPhiInput(flangeJoint) && isTauInput(flangeJoint)
       joint.isDriven = false
     elseif isPhiInput(flangeJoint) && !isTauInput(flangeJoint)
-        driveJoint!(joint)
+      driveJoint!(joint)
     end
 end
 connect(joint::Modia3D.AbstractRevolute, signal::Modia3D.AbstractSignalAdaptor) = connect(signal::Modia3D.AbstractSignalAdaptor, joint::Modia3D.AbstractRevolute)

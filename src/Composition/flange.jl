@@ -1,12 +1,3 @@
-# License for this file: MIT (expat)
-# Copyright 2017-2018, DLR Institute of System Dynamics and Control
-#
-# This file is part of module
-#   Modia3D.Composition (Modia3D/Composition/_module.jl)
-#
-
-
-
 function setAnalysis!(var::ModiaMath.RealScalar)
   if var.causality == ModiaMath.Local
     var.analysis = ModiaMath.NotUsedInAnalysis
@@ -54,7 +45,8 @@ end
 
 #------------------------------
 
-
+# each revolute joint holds a RevoluteFlange
+# it is an internal flange for connecting with a Flange
 mutable struct RevoluteFlange <: Modia3D.AbstractFlange
   phi::ModiaMath.RealScalar
   w::ModiaMath.RealScalar
@@ -73,7 +65,8 @@ mutable struct RevoluteFlange <: Modia3D.AbstractFlange
   end
 end
 
-
+# each adaptor holds a Flange
+# if is an internal flange for connecting with e.g. a RevoluteFlange
 mutable struct Flange <: Modia3D.AbstractFlange
   phi::ModiaMath.RealScalar
   w::ModiaMath.RealScalar
