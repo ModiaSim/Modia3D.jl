@@ -95,7 +95,7 @@ get_eAxis(axis::Int) = axis== 1 ? ModiaMath.Vector3D( 1.0,  0.0,  0.0) :
 
 Return a `joint` object that constrains the movement of `obj2::`[`Object3D`](@ref)
 with respect to `obj1::`[`Object3D`](@ref) along
-coordinate axis `axis` (`axis = 1,2,3`). The initial position/velocity of `obj2` with respect
+coordinate axis `axis` (`axis = 1,2,3,-1,-2,-3`). The initial position/velocity of `obj2` with respect
 to `obj1` along `axis` is `s_start` [m] and `v_start` [m/s], respectively.
 If `canCollide=false`, no collision detection will occur between `obj1` and `obj2`
 (and `Object3D`s that are directly or indirectly rigidly fixed to `obj1` or `obj2`).
@@ -132,7 +132,7 @@ function Prismatic(obj1::Object3D, obj2::Object3D;
    rs_start = Float64(s_start)
    rv_start = Float64(v_start)
    (obj_a,obj_b,cutJoint) = attach(obj1, obj2)
-   @assert(1 <= axis <= 3)
+   @assert(1 <= abs(axis) <= 3)
    if obj_b === obj2
       axis2 = axis
    else

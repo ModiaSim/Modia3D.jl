@@ -120,6 +120,31 @@ There are the following operations on an instance of an assembly:
 
 ### Version 0.3.0
 
+- The first version that requires Julia >= 1.0 (all Julia 0.6 and 0.7 code was removed).
+
+- Adapted to ModiaMath 0.5.0 (earlier versions of ModiaMath are no longer supported).
+
+- Prismatic and Revolute joints have a new keyword `axis` with possible values 1,2,3,-1,-2,-3,
+  to define the axis of movement / rotation.
+  
+- All joints have a new keyword `canCollide` (default = `false`).
+  If `false`, collision detection will not occur to the `Object3D`s that are rigidly fixed
+  to each other and connected by the joint.
+  
+- Before a simulation is performed, the internal structure is optimized for the computation:
+
+  * For all objects that are rigidly connected, the common mass, center-of-mass, inertia tensor
+    are computed and used during simulation. All frames with mass property objects are ignored
+	during simulation (if not needed for other purposes).
+
+  * Collision detection is switched off for `Object3D`s that are rigidly connected to each other.
+  
+  * The spanning tree of the `Object3D`s is simplified, so that during simulation only 
+    the minimum number of frames must be traversed and position, velocity, acceleration of these
+	frames are computed.
+    `Object3D`s that are only used for visualization are only evaluated at communication points
+	and only the position is computed (not velocity or acceleration).
+
 
 
 ### Version 0.2.1

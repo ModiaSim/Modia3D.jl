@@ -88,7 +88,7 @@ end
     joint = Modia3D.Revolute(obj1, obj2; axis=3, phi_start=0, w_start=0, canCollide=false)
 
 Return a Revolute `joint` that rotates `obj1::`[`Object3D`](@ref) into
-`obj2::`[`Object3D`](@ref) along the z-axis of `obj1`.
+`obj2::`[`Object3D`](@ref) along the axis `axis` of `obj1` (`axis = 1,2,3,-1,-2,-3`).
 The initial start angle is `phi_start` and the initial angular velocity
 is `w_start`. If `canCollide=false`, no collision detection will occur between `obj1` and `obj2`
 (and `Object3D`s that are directly or indirectly rigidly fixed to `obj1` or `obj2`).
@@ -124,7 +124,7 @@ function Revolute(obj1::Object3D, obj2::Object3D;
    rphi_start = Float64(phi_start)
    rw_start   = Float64(w_start)
    (obj_a,obj_b,cutJoint) = attach(obj1, obj2)
-   @assert(1 <= axis <= 3)
+   @assert(1 <= abs(axis) <= 3)
    axis  = obj_b===obj2 ? axis : -axis
    if cutJoint
       println("... Revolute joint connecting ", ModiaMath.fullName(obj1), " with ", ModiaMath.fullName(obj2), " is a cut-joint")

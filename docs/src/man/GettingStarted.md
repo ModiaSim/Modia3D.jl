@@ -3,15 +3,9 @@
 
 ## Installation
 
-**Modia3D** is registered in METADATA.jl and can be installed with Pkg.add:
+**Modia3D** is registered in METADATA.jl and can be installed in the following way (Julia >= 1.0 is required):
 
 ```julia
-# Julia 0.6:
-julia> Pkg.add("Modia3D")
-julia> Pkg.add("ModiaMath")   # in order to use simulate!(..) and plot(..)
-julia> Pkg.add("PyPlot")      # in order that plots are shown
-
-# Julia 0.7 and 1.0 (registration is pending)
 julia> ]add Modia3D
         add ModiaMath  # in order to use simulate!(..) and plot(..)
         add PyPlot     # in order that plots are shown
@@ -35,8 +29,7 @@ are supported. To install the free version for *Windows* or for *Linux* perform 
    provide your contact information and click on *Request download* for *Community Edition*.
    Afterwards, you get a link to download the library and you need to unzip the file.
 
-2. In your Julia **startup file** (Julia 0.6: `HOME/.juliarc.jl`, Julia 0.7 and 1.0:
-   `HOME/.julia/config/startup.jl`), include the environment variable
+2. In your Julia **startup file** (`HOME/.julia/config/startup.jl`), include the environment variable
    `ENV["DLR_VISUALIZATION"] = "<path-to-library>/Visualization/Extras/SimVis"`.
    Make sure that the SimVis executable under this directory has execution rights.
    For example in Linux with command:
