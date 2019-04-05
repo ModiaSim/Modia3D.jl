@@ -115,6 +115,12 @@ struct SimulationModel <: ModiaMath.AbstractSimulationModel
       ModiaMath.copy_start_to_x!(var, x, x_fixed, x_nominal)
       # println("... x0 = ", x)
 
+      # Last nfc equations are the constraint equations
+      is_constraint = fill(false, var.nx)      
+      for i = (var.nx-var.nfc+1):var.nx
+         is_constraint[i] = true
+      end
+	  
       # Construct Scene(..) object
       so = assembly._internal.sceneOptions
       sceneOptions::SceneOptions = typeof(so) == NOTHING ? SceneOptions() : so
@@ -163,7 +169,7 @@ struct SimulationModel <: ModiaMath.AbstractSimulationModel
       simulationState = ModiaMath.SimulationState(modelName, getModelResidues!, x, ModiaMath.Variables.getVariableName;
                                 x_fixed   = x_fixed,
                                 x_nominal = x_nominal,
-                                nc = var.nfc,
+                                is_constraint = is_constraint,
                                 nz = nz,
                                 defaultStartTime = startTime,
                                 defaultStopTime  = stopTime,
