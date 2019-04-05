@@ -9,19 +9,25 @@
 function build_tree!(scene::Scene, world::Object3D)::NOTHING
    tree                = scene.tree
    stack               = scene.stack
+   allCollisionElements = scene.allCollisionElements
    empty!(tree)
    empty!(stack)
    empty!(scene.allVisuElements)
+   empty!(allCollisionElements)
 
    assign_Visu_CutJoint_Dynamics!(scene, world, world)
    append!(stack, world.children)
    while length(stack) > 0
       obj = pop!(stack)
       assign_Visu_CutJoint_Dynamics!(scene, obj, world)
+      if canCollide(obj)
+        push!(allCollisionElements, obj)
+      end
       push!(tree, obj)
       # Visit children of frame
       append!(stack, obj.children)
    end
+   (length(allCollisionElements) > 1) ? (scene.collide = true) : (scene.collide = false)
    return nothing
 end
 
@@ -163,7 +169,6 @@ function build_superObjs!(scene::Scene, world::Object3D)::NOTHING
     push!(scene.superObjs, superObjsRow)
     nPos = length(buffer)
     actPos += 1
-    #println(" ")
   end
   addIndicesOfCutJointsToSuperObj(scene)
 
@@ -262,13 +267,11 @@ function chooseAndBuildUpTree(world::Object3D, scene::Scene)
      build_superObjs!(scene, world)
      if scene.options.enableContactDetection && scene.collide
         initializeContactDetection!(world, scene)
-        nz = scene.options.contactDetection.contactPairs.nz
      end
      initializeMassComputation!(scene)
   else
-     println("useOptimizedStructure = false")
      build_tree!(scene, world)
-     if scene.options.enableContactDetection #&& scene.collide
+     if scene.options.enableContactDetection
         @error("Collision handling is only possible with the optimized structure. Please set useOptimizedStructure = true.")
      end
   end
@@ -283,7 +286,6 @@ end
 function initAnalysis!(world::Object3D, scene::Scene)
    # Initialize spanning tree and visualization (if visualization desired and visual elements present)
   println("initAnalysis!(world::Object3D, scene::Scene)")
-
   chooseAndBuildUpTree(world, scene)
   return nothing
 end

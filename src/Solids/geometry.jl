@@ -324,7 +324,7 @@ inertiaMatrix(geo::SolidBox, mass::Number) = InertiaMatrix(1/12*mass*Diagonal([g
                                                                                geo.Lx^2 + geo.Lz^2,
                                                                                geo.Lx^2 + geo.Ly^2]))
 function inertiaMatrix(geo::SolidCylinder, mass::Number)
-    println("mass = ", mass)
+    #println("mass = ", mass)
     return InertiaMatrix(mass*Diagonal([1/4*(geo.Dy/2)^2 + 1/3*geo.Lz^2,
                                         1/4*(geo.Dx/2)^2 + 1/3*geo.Lz^2,
                                         1/4*((geo.Dx/2)^2 + (geo.Dy/2)^2)]))

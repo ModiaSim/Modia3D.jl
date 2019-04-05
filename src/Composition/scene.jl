@@ -326,6 +326,7 @@ mutable struct Scene
    tree::Vector{Object3D}                    # Spanning tree of the frames in depth-first order (without world)
    cutJoints::Vector{Modia3D.AbstractJoint}  # Vector of all cut-joints
    allVisuElements::Vector{Object3D}         # Object3Ds (including Object3Ds.data) that shall be visualized
+   allCollisionElements::Vector{Object3D}    # all Object3Ds, which are allowed to collide (no order, no super objects)
    noCPairs::Array{Array{Int64,1}}           # Indices of frames (with respect to collSuperObjs) that can't collide in general (e.g. objects are connected via joints)
    noCPairsHelp::Dict{Modia3D.AbstractJoint,Array{Int64,1}}
    AABB::Array{Array{Basics.BoundingBox}}    # Bounding boxes of elements that can collide
@@ -349,6 +350,7 @@ mutable struct Scene
                   false,
                   ModiaMath.KinematicAnalysis,
                   Array{SuperObjsRow,1}(),
+                  Vector{Object3D}[],
                   Vector{Object3D}[],
                   Vector{Object3D}[],
                   Vector{Object3D}[],
