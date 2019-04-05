@@ -54,7 +54,7 @@ end
 
 
 gravField = Modia3D.UniformGravityField( n=[0,0,-1])
-doublePendulum = DoublePendulum(sceneOptions=Modia3D.SceneOptions(gravityField=gravField,visualizeFrames=true, defaultFrameLength=0.3, useOptimizedStructure = true))
+doublePendulum = DoublePendulum(sceneOptions=Modia3D.SceneOptions(gravityField=gravField,visualizeFrames=true, defaultFrameLength=0.3))
 
 #Modia3D.visualizeAssembly!( doublePendulum )
 

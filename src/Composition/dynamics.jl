@@ -116,11 +116,11 @@ struct SimulationModel <: ModiaMath.AbstractSimulationModel
       # println("... x0 = ", x)
 
       # Last nfc equations are the constraint equations
-      is_constraint = fill(false, var.nx)      
+      is_constraint = fill(false, var.nx)
       for i = (var.nx-var.nfc+1):var.nx
          is_constraint[i] = true
       end
-	  
+
       # Construct Scene(..) object
       so = assembly._internal.sceneOptions
       sceneOptions::SceneOptions = typeof(so) == NOTHING ? SceneOptions() : so
@@ -140,26 +140,10 @@ struct SimulationModel <: ModiaMath.AbstractSimulationModel
          initializeMassComputation!(scene)
       else
          build_tree!(scene, world)
-         if scene.options.enableContactDetection && scene.collide
-            @error("Collision handling is only possible with the optimized structure. Please set useOptimizedStructure = true.")
+         if scene.options.enableContactDetection
+            @error("Collision handling is only possible with the optimized structure. Please set useOptimizedStructure = true in Modia3D.SceneOptions.")
          end
       end
-
-#=
-      # Build tree (for multibody computation), allVisuElements (for visualization), super objects (for contact handling)
-      build_tree!(scene, world)
-      build_superObjs!(scene, world)
-      nz = 0
-      if scene.options.enableContactDetection
-         if scene.collide
-            initializeContactDetection!(world, scene)
-            nz = scene.options.contactDetection.contactPairs.nz
-         end
-      end
-      if useOptimizedStructure
-         initializeMassComputation!(scene)
-      end
-=#
 
       # Initialize connections between signals and frames, joints, ...
       build_SignalObject3DConnections!(assembly)
@@ -180,7 +164,6 @@ struct SimulationModel <: ModiaMath.AbstractSimulationModel
                                 storeResult!     = ModiaMath.Variables.storeVariables!,
                                 hev = hev,
                                 scaleConstraintsAtEvents = scaleConstraintsAtEvents)
-     # println(".... useOptimizedStructure = ", useOptimizedStructure)
 
 #=
       scene = assembly._internal.scene

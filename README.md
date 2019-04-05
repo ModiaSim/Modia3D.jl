@@ -19,8 +19,9 @@ A more detailed overview of the available features is given in the
 Papers about Modia3D:
 
 - *[Collision Handling with Variable-Step Integrators](docs/resources/documentation/CollisionHandling_Neumayr_Otter_2017.pdf)* ([EOOLT 2017, December](http://www.eoolt.org/2017/))
-- *Component-Based 3D Modeling of Dynamic Systems*, to be presented at the
-  [American Modelica Conference 2018, October 9-10](https://www.modelica.org/events/modelica2018Americas/index_html)
+- *[Component-Based 3D Modeling of Dynamic Systems](docs/resources/documentation/ComponentBased3DModeling_Neumayr_Otter_2018.pdf)*([American Modelica Conference 2018, October](https://www.modelica.org/events/modelica2018Americas/index_html))
+- *[Algorithms for Component-Based 3D Modeling](docs/resources/documentation/AlgorithmsComponentBased3DModeling_Neumayr_Otter_2019.pdf)*([13th International Modelica Conference 2019, March](https://modelica.org/events/modelica2019))
+
 
 Before releasing version 1.0, Modia3D shall be
 easily combinable with [Modia](https://github.com/ModiaSim/Modia.jl), for example to define a controlled
@@ -156,4 +157,3 @@ Please open an [issue](https://github.com/Modia/Modia3D.jl/issues) in this case 
 [DLR - Institute of System Dynamics and Control](https://www.dlr.de/sr/en)
 
 License: [MIT (expat)](LICENSE.md)
-

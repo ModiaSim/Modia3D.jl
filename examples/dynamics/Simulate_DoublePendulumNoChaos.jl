@@ -33,7 +33,7 @@ end
 
 gravField = Modia3D.UniformGravityField(n=[-1,0,0])
 
-doublePendulum = DoublePendulum(sceneOptions=Modia3D.SceneOptions(visualizeFrames=true, defaultFrameLength=0.3, useOptimizedStructure = false))
+doublePendulum = DoublePendulum(sceneOptions=Modia3D.SceneOptions(visualizeFrames=true, defaultFrameLength=0.3))
 model = Modia3D.SimulationModel( doublePendulum)
 result = ModiaMath.simulate!(model; stopTime=5.0, tolerance=1e-5,interval=0.001, log=false)
 

@@ -80,7 +80,7 @@ end
 
 doublePendulum = DoublePendulum(sceneOptions = Modia3D.SceneOptions(visualizeFrames=true,
                                                                     defaultFrameLength=0.3,
-                                                                    enableContactDetection=false, useOptimizedStructure = true))
+                                                                    enableContactDetection=false))
 model = Modia3D.SimulationModel( doublePendulum, analysis=ModiaMath.KinematicAnalysis )
 result = ModiaMath.simulate!(model, stopTime=3.0)
 

@@ -92,7 +92,7 @@ end
   boundingBoxes   = BoundingBoxes(world)
 end
 
-collisionTest = CollisionTest(sceneOptions=Modia3D.SceneOptions(visualizeFrames=true, defaultFrameLength=0.3,nz_max = 80, useOptimizedStructure  = true))
+collisionTest = CollisionTest(sceneOptions=Modia3D.SceneOptions(visualizeFrames=true, defaultFrameLength=0.3,nz_max = 80))
 
 #collisionTest = CollisionTest()
 Modia3D.initAnalysis!(collisionTest)
