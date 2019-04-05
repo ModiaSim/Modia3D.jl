@@ -47,11 +47,7 @@ function planarRotationAngle(frame1::Object3D, frame2::Object3D)
    end
    r12n = r12/norm(r12)
 
-   @static if VERSION >= v"0.7.0-DEV.2005"
-       return atan(dot(cross(e1x,r12n), e1z), dot(e1x,r12n) )
-   else
-       return atan2(dot(cross(e1x,r12n), e1z), dot(e1x,r12n) )
-   end
+   return atan(dot(cross(e1x,r12n), e1z), dot(e1x,r12n) )
 end
 
 

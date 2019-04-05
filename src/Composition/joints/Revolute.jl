@@ -4,12 +4,8 @@
 # This file is part of module
 #   Modia3D.Composition (Modia3D/Composition/_module.jl)
 #
-@static if VERSION >= v"0.7.0-DEV.2005"
-    using LinearAlgebra
-    EYE3() = Matrix(1.0I,3,3)
-else
-    EYE3() = eye(3)
-end
+using LinearAlgebra
+EYE3() = Matrix(1.0I,3,3)
 
 mutable struct TreeJointRevolute <: Modia3D.AbstractRevolute
    _internal::ModiaMath.ComponentInternal  # Data common to assembly component classes
@@ -137,7 +133,6 @@ function Revolute(obj1::Object3D, obj2::Object3D;
       # rotating from obj_a along z-axis with angle phi gives obj_b (or compute rphi_start if phi_start = NaN)
       diff_r_abs = norm(obj_b.r_abs - obj_a.r_abs)
       if diff_r_abs > Basics.neps
-         @static if VERSION >= v"0.7.0-DEV.2005"
              @warn begin
                  name_obj1 = ModiaMath.fullName(obj1)
                  name_obj2 = ModiaMath.fullName(obj2)
@@ -145,57 +140,34 @@ function Revolute(obj1::Object3D, obj2::Object3D;
                  "The origins of the provided frames do not coincide.\n" *
                  "( norm(obj2.r_abs - obj1.r_abs) = $diff_r_abs > $(Basics.neps) )"
              end
-         else
-             warn("\nWarning from Modia3D.Revolute(", ModiaMath.fullName(obj1), ", ", ModiaMath.fullName(obj2), ", ...):\n",
-                  "The origins of the provided frames do not coincide.\n",
-                  "( norm(obj2.r_abs - obj1.r_abs) = ", string(diff_r_abs), " > ", Basics.neps, ")")
-         end
       end
       if isnan(rphi_start)
          # Compute angle between the two axes
          # @error("brrrr!!!!!!!!!!!!!!!!!!")
          angle = acos( dot(obj_a.R_abs[abs(axis),:], obj_b.R_abs[abs(axis),:]) )
          if abs(angle) > Basics.neps
-             @static if VERSION >= v"0.7.0-DEV.2005"
-                 @warn begin
-                     name_obj1 = ModiaMath.fullName(obj1)
-                     name_obj2 = ModiaMath.fullName(obj2)
-                     if abs(axis) == 3
-                        "Warning from Modia3D.Revolute($name_obj1, $name_obj2, ....):\n" *
-                        "The z-axes of the two frames do not coincide.\n" *
-                        "( angle(zaxis(obj1), zaxis(obj2)) = $zaxes_angle > $(Basics.neps) )"
-                     elseif abs(axis) == 2
-                        "Warning from Modia3D.Revolute($name_obj1, $name_obj2, ....):\n" *
-                        "The y-axes of the two frames do not coincide.\n" *
-                        "( angle(yaxis(obj1), yaxis(obj2)) = $yaxes_angle > $(Basics.neps) )"
-                     elseif abs(axis) == 1
-                        "Warning from Modia3D.Revolute($name_obj1, $name_obj2, ....):\n" *
-                        "The x-axes of the two frames do not coincide.\n" *
-                        "( angle(xaxis(obj1), xaxis(obj2)) = $xaxes_angle > $(Basics.neps) )"
-                     end
-                 end
-             else
-
-                      if abs(axis) == 3
-                        warn("\nWarning from Modia3D.Revolute(", ModiaMath.fullName(obj1), ", ", ModiaMath.fullName(obj2), ", ...):\n",
-                             "The z-axes of the two frames do not coincide.\n",
-                             "( angle(zaxis(obj1), zaxis(obj2)) = ", string(), " > ", Basics.neps, ")")
-                     elseif abs(axis) == 2
-                        warn("\nWarning from Modia3D.Revolute(", ModiaMath.fullName(obj1), ", ", ModiaMath.fullName(obj2), ", ...):\n",
-                            "The y-axes of the two frames do not coincide.\n",
-                            "( angle(yaxis(obj1), yaxis(obj2)) = ", string(), " > ", Basics.neps, ")")
-                     elseif abs(axis) == 1
-                        warn("\nWarning from Modia3D.Revolute(", ModiaMath.fullName(obj1), ", ", ModiaMath.fullName(obj2), ", ...):\n",
-                            "The x-axes of the two frames do not coincide.\n",
-                            "( angle(xaxis(obj1), xaxis(obj2)) = ", string(), " > ", Basics.neps, ")")
-                     end
-             end
+            @warn begin
+                name_obj1 = ModiaMath.fullName(obj1)
+                name_obj2 = ModiaMath.fullName(obj2)
+                if abs(axis) == 3
+                   "Warning from Modia3D.Revolute($name_obj1, $name_obj2, ....):\n" *
+                   "The z-axes of the two frames do not coincide.\n" *
+                   "( angle(zaxis(obj1), zaxis(obj2)) = $zaxes_angle > $(Basics.neps) )"
+                elseif abs(axis) == 2
+                   "Warning from Modia3D.Revolute($name_obj1, $name_obj2, ....):\n" *
+                   "The y-axes of the two frames do not coincide.\n" *
+                   "( angle(yaxis(obj1), yaxis(obj2)) = $yaxes_angle > $(Basics.neps) )"
+                elseif abs(axis) == 1
+                   "Warning from Modia3D.Revolute($name_obj1, $name_obj2, ....):\n" *
+                   "The x-axes of the two frames do not coincide.\n" *
+                   "( angle(xaxis(obj1), xaxis(obj2)) = $xaxes_angle > $(Basics.neps) )"
+                end
+            end
          end
       else
          R2_abs     = rotationMatrixAxis(axis, axis > 0 ? rphi_start : -rphi_start)*obj_a.R_abs
          diff_R_abs = norm(R2_abs*obj_b.R_abs' - ModiaMath.NullRotation)
          if diff_R_abs > Basics.neps
-             @static if VERSION >= v"0.7.0-DEV.2005"
                  @warn begin
                      name_obj1 = ModiaMath.fullName(obj1)
                      name_obj2 = ModiaMath.fullName(obj2)
@@ -203,11 +175,6 @@ function Revolute(obj1::Object3D, obj2::Object3D;
                      "The orientations of the provided frames do not coincide.\n" *
                      "( norm(R2_abs*obj2.R_abs' - EYE3()) = $diff_R_abs > $(Basics.neps) )"
                  end
-             else
-                 warn("Warning from Modia3D.Revolute(", ModiaMath.fullName(obj1), ", ", ModiaMath.fullName(obj2), ", ...):\n",
-                      "The orientations of the provided frames do not coincide.\n",
-                      "( norm(R2_abs*obj2.R_abs' - EYE3()) = ", string(diff_R_abs), " > ", Basics.neps,")")
-             end
          end
       end
 

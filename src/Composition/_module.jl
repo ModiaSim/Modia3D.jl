@@ -81,11 +81,7 @@ import Modia3D.Graphics
 import Modia3D.Signals
 import JSON
 
-@static if VERSION >= v"0.7.0-DEV.2005"
-    const NOTHING = Nothing
-else
-    const NOTHING = Void
-end
+const NOTHING = Nothing
 
 
 const MaterialOrNothing                = Union{Graphics.Material,NOTHING}

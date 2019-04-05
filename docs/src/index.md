@@ -116,6 +116,33 @@ There are the following operations on an instance of an assembly:
   In the future it is planned to support `QuasiStaticAnalysis` as well.
 
 
+## Release Notes
+
+### Version 0.3.0
+
+
+
+### Version 0.2.1
+
+- Adapted to Julia 0.7 and 1.0 (including using new package manager via Project.toml, Manifest.toml files).
+
+- Travis Continuous Integration added.
+
+- Wrong UUID of Modia3D and referenced ModiaMath corrected (did not correspond to the UUID in Julias METADATA).
+
+- PyPlot was removed from the REQUIRE and Project.toml files and code was added, so that PyPlot is automatically imported in ModiaMath if it is available in the current environment of the user. The benefit is that Modia3D and ModiaMath can be used, even if PyPlot is not installed. This is especially useful for ContinuousIntegration, because automatic installation of PyPlot often fails. Inspect the wiki page Installing PyPlot in a robust way to install PyPlot in a robust way.
+
+- All extra packages used in examples and tests are now referenced via Modia3D (for example using Modia3D.StaticArrays instead of using StaticArrays). The benefit is that all examples and tests can be directly executed with include (for example: import Modia3D; include($(Modia3D.path)/examples/dynamics/Simulate_Pendulum.jl)) provided Modia3D is in the current environment. Previously, it was assumed that these extra packages are present in the users environment and an error occured, if this was not the case.
+
+- Dependent packages updated to their newest versions.
+  Especially, warnings from Unitful do no longer occur, due to the update to version 0.12.0.
+
+
+### Version 0.2.0
+
+- First public release (for Julia 0.6.4)
+
+
 ## Main developers
 
 [Andrea Neumayr](mailto:andrea.neumayr@dlr.de) and

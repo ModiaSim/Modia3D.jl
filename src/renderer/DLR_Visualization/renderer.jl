@@ -84,27 +84,16 @@ function getSimVisInfo()
       directory = ENV["DLR_VISUALIZATION"]
    else
       directory = UndefinedDirectory
-      @static if VERSION >= v"0.7.0-DEV.2005"
           @warn "\nEnvironment variable \"DLR_VISUALIZATION\" not defined.\n" *
                 "Include ENV[\"DLR_VISUALIZATION\"] = <path-to-Visualization/Extras/SimVis> into your HOME/.julia/config/startup.jl file.\n" *
                 "\nNo Renderer is used in Modia3D (so, animation is switched off)."
-      else
-          warn("\nEnvironment variable \"DLR_VISUALIZATION\" not defined.\n",
-               "Include ENV[\"DLR_VISUALIZATION\"] = <path-to-Visualization/Extras/SimVis> into your HOME/.juliarc.jl file.\n",
-               "\nNo Renderer is used in Modia3D (so, animation is switched off).")
-      end
       return (directory,"???",false,true)
    end
 
    # Check for 64 bit
    if Base.Sys.WORD_SIZE != 64
-      @static if VERSION >= v"0.7.0-DEV.2005"
           @warn "DLR Visualization library only supported for 64-bit system but not for $(Base.Sys.WORD_SIZE) bit.\n" *
                 "\nNo Renderer is used in Modia3D (so, animation is switched off)."
-      else
-          warn("DLR Visualization library only supported for 64-bit system but not for ", Base.Sys.WORD_SIZE, "bit.\n",
-               "\nNo Renderer is used in Modia3D (so, animation is switched off).")
-      end
       return (directory,"???",false,true)
    end
 
@@ -120,19 +109,11 @@ function getSimVisInfo()
             dll_name = dll_name2
             isProfessionalEdition = false
          else
-            @static if VERSION >= v"0.7.0-DEV.2005"
                 @warn "\nModia3D: DLL of DLR-Visualization library not found. Neither of these files\n" * 
                       "   $dll_name1, \n" *
                       "   $dll_name2, \n" *
                       "exists. Check whether ENV[\"DLR_VISUALIZATION\"] is correct." *
                       "\nNo Renderer is used in Modia3D (so, animation is switched off)."
-            else
-                warn("\nModia3D: DLL of DLR-Visualization library not found. Neither of these files\n",
-                     "   ", dll_name1, "\n",
-                     "   ", dll_name2, "\n",
-                     "exist. Check whether ENV[\"DLR_VISUALIZATION\"] is correct.",
-                     "\nNo Renderer is used in Modia3D (so, animation is switched off).")
-            end
             return (directory,"???",false,true)
          end
       end
@@ -148,30 +129,17 @@ function getSimVisInfo()
             dll_name = dll_name2
             isProfessionalEdition = false
          else
-            @static if VERSION >= v"0.7.0-DEV.2005"
                 @warn "\nModia3D: *.so of DLR-Visualization library not found. Neither of these files\n" * 
                       "   $dll_name1, \n" *
                       "   $dll_name2, \n" *
                       "exists. Check whether ENV[\"DLR_VISUALIZATION\"] is correct." *
                       "\nNo Renderer is used in Modia3D (so, animation is switched off)."
-            else
-                warn("\nModia3D: *.so of DLR-Visualization library not found. Neither of these files\n",
-                     "   ", dll_name1, "\n",
-                     "   ", dll_name2, "\n",
-                     "exist. Check whether ENV[\"DLR_VISUALIZATION\"] is correct.",
-                     "\nNo Renderer is used in Modia3D (so, animation is switched off).")
-            end
             return (directory, "???", false, true)
          end
       end
    else
-      @static if VERSION >= v"0.7.0-DEV.2005"
           @warn "\nModia3D: DLR Visualization library only supported for Windows or Linux.\n" *
                 "\nNo Renderer is used in Modia3D (so, animation is switched off)."
-      else
-          warn("\nModia3D: DLR Visualization library only supported for Windows or Linux.\n",
-               "\nNo Renderer is used in Modia3D (so, animation is switched off).")
-      end
       return (directory, "???", false, true)
    end
 
@@ -180,17 +148,10 @@ function getSimVisInfo()
    if dll != C_NULL
       Libdl.dlclose(dll)
    else
-      @static if VERSION >= v"0.7.0-DEV.2005"
           @warn "\nModia3D: DLR Visualization interface library:" *
                 "\n   $dll_name" * 
                 "\nexists, but could not be opened with Libdl.dlopen_e." *
                 "\nNo Renderer is used in Modia3D (so, animation is switched off)."
-      else
-          warn("\nModia3D: DLR Visualization interface library:",
-               "\n   ", dll_name, 
-               "\nexist, but could not be opened with Libdl.dlopen_e.",
-               "\nNo Renderer is used in Modia3D (so, animation is switched off).")
-      end
       return (directory, dll_name, false, true)
    end
 

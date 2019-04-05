@@ -123,13 +123,7 @@ AABB = coll._internal.scene.options.contactDetection.contactPairs.AABB
 tStart = 0.0
 tEnd   = 2*pi
 
-@static if VERSION >= v"0.7.0-DEV.2005"
-    LINSPACE(start,stop,length) = range(0.0, stop=stop, length=length)
-else
-    LINSPACE(start,stop,length) = linspace(start,stop,length)
-end
-
-for time =  LINSPACE(tStart, tEnd, 101)
+for time =  range(tStart, stop=tEnd, length=101)
   Modia3D.update!(coll, time, tStart, tEnd)
   Modia3D.selectContactPairs!(coll)
   # Modia3D.getDistances!(coll)

@@ -1,5 +1,5 @@
 # License for this file: MIT (expat)
-# Copyright 2017-2018, DLR Institute of System Dynamics and Control
+# Copyright 2017-2019, DLR Institute of System Dynamics and Control
 
 module Modia3D
 
@@ -59,11 +59,7 @@ abstract type AbstractForceAdaptor   <: AbstractAssemblyComponent end
 
 
 # Used renderer (actual value is defined with __init__() below)
-@static if VERSION >= v"0.7.0-DEV.2005"
-    const renderer = Vector{AbstractRenderer}(undef,1)
-else
-    const renderer = Vector{AbstractRenderer}(1)
-end
+const renderer = Vector{AbstractRenderer}(undef,1)
 
 
 # Include sub-modules
@@ -118,10 +114,7 @@ export Object3D
 import StaticArrays
 import Unitful
 import ModiaMath
-
-@static if VERSION >= v"0.7.0-DEV.2005"
-    import LinearAlgebra
-    import Test
-end
+import LinearAlgebra
+import Test
 
 end # module

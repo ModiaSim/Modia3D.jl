@@ -1,11 +1,7 @@
 
 import Modia3D
 
-@static if VERSION < v"0.7.0-DEV.2005"
-    using Base.Test
-else
-    using Modia3D.Test
-end
+using Modia3D.Test
 
 @testset "Test Modia3D" begin
    include("test_Graphics.jl")

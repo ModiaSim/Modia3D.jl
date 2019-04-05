@@ -19,8 +19,8 @@ A more detailed overview of the available features is given in the
 Papers about Modia3D:
 
 - *[Collision Handling with Variable-Step Integrators](docs/resources/documentation/CollisionHandling_Neumayr_Otter_2017.pdf)* ([EOOLT 2017, December](http://www.eoolt.org/2017/))
-- *[Component-Based 3D Modeling of Dynamic Systems](docs/resources/documentation/ComponentBased3DModeling_Neumayr_Otter_2018.pdf)*([American Modelica Conference 2018, October](https://www.modelica.org/events/modelica2018Americas/index_html))
-- *[Algorithms for Component-Based 3D Modeling](docs/resources/documentation/AlgorithmsComponentBased3DModeling_Neumayr_Otter_2019.pdf)*([13th International Modelica Conference 2019, March](https://modelica.org/events/modelica2019))
+- *[Component-Based 3D Modeling of Dynamic Systems](http://www.ep.liu.se/ecp/154/019/ecp18154019.pdf)*([American Modelica Conference 2018, October](https://www.modelica.org/events/modelica2018Americas/index_html))
+- *[Algorithms for Component-Based 3D Modeling](http://www.ep.liu.se/ecp/157/039/ecp19157039.pdf)*([13th International Modelica Conference 2019, March](https://modelica.org/events/modelica2019))
 
 
 Before releasing version 1.0, Modia3D shall be
@@ -32,15 +32,9 @@ Special 3D algorithms (Modia3D) + power/flexibility of equation based modeling (
 
 ## Installation
 
-**Modia3D** is registered in METADATA.jl and can be installed with Pkg.add:
+**Modia3D** is registered in METADATA.jl and can be installed in the following way (Julia >= 1.0 is required):
 
 ```julia
-# Julia 0.6:
-julia> Pkg.add("Modia3D")
-julia> Pkg.add("ModiaMath")   # in order to use simulate!(..) and plot(..)
-julia> Pkg.add("PyPlot")      # in order that plots are shown
-
-# Julia 0.7 and 1.0
 julia> ]add Modia3D
         add ModiaMath  # in order to use simulate!(..) and plot(..)
         add PyPlot     # in order that plots are shown
@@ -64,8 +58,7 @@ are supported. To install the free version for *Windows* or for *Linux* perform 
    provide your contact information and click on *Request download* for *Community Edition*.
    Afterwards, you get a link to download the library and you need to unzip the file.
 
-2. In your Julia **startup file** (Julia 0.6: `HOME/.juliarc.jl`, Julia 0.7 and 1.0:
-   `HOME/.julia/config/startup.jl`) include the environment variable
+2. In your Julia **startup file** (`HOME/.julia/config/startup.jl`) include the environment variable
    `ENV["DLR_VISUALIZATION"] = "<path-to-library>/Visualization/Extras/SimVis"`.
    Make sure that the SimVis executable under this directory has execution rights.
    For example in Linux with command:
@@ -131,7 +124,7 @@ ModiaMath.plot(result, ["revolute.phi", "revolute.w"]);
 
 ## Status
 
-The package has been tested with Julia `0.6.4`, `0.7.0`, `1.0.0`, `1.0.1` on Windows 7,
+The package has been tested with Julia on Windows 7,
 via the TravisCL on Linux (x86_64-pc-linux-gnu) and macOS (x86_64-apple-darwin14.5.0)
 and via the Appveyor CL on Windows.
 

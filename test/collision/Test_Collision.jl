@@ -103,13 +103,7 @@ AABB = collisionTest._internal.scene.options.contactDetection.contactPairs.AABB
 tStart=0.0
 tEnd  =1.0
 
-@static if VERSION >= v"0.7.0-DEV.2005"
-    LINSPACE(start,stop,length) = range(0.0, stop=stop, length=length)
-else
-    LINSPACE(start,stop,length) = linspace(start,stop,length)
-end
-
-for time = LINSPACE(tStart, tEnd, 101)
+for time = range(tStart, stop=tEnd, length=101)
   s = Modia3D.linearMovement(2*Lx, tStart, tEnd, time)
   delta_phi = Modia3D.linearMovement(pi/3, tStart, tEnd, time)
 

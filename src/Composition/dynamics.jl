@@ -13,10 +13,9 @@
 The function traverses assembly and stores all frames without a parent frame in vector frames.
 """
 function get_Object3DsWithoutParent!(assembly::Modia3D.AbstractAssembly, frames::AbstractVector)::NOTHING
-   assemblyType = typeof(assembly)
+    assemblyType = typeof(assembly)
 
-   @static if VERSION >= v"0.7.0-DEV.2005"
-       for i = 1:fieldcount(assemblyType)
+    for i = 1:fieldcount(assemblyType)
           field     = getfield(assembly, fieldname(assemblyType,i))
           fieldType = typeof(field)
           if fieldType == Object3D
@@ -26,21 +25,8 @@ function get_Object3DsWithoutParent!(assembly::Modia3D.AbstractAssembly, frames:
           elseif fieldType <: Modia3D.AbstractAssembly
              get_Object3DsWithoutParent!(field, frames)
           end
-       end
-   else
-       for i = 1:nfields(assemblyType)
-          field     = getfield(assembly, fieldname(assemblyType,i))
-          fieldType = typeof(field)
-          if fieldType == Object3D
-             if hasNoParent(field)
-                push!(frames,field)
-             end
-          elseif fieldType <: Modia3D.AbstractAssembly
-             get_Object3DsWithoutParent!(field, frames)
-          end
-       end
-   end
-   return nothing
+    end
+    return nothing
 end
 
 

@@ -3,13 +3,8 @@ module test_solidProperties
 using Modia3D
 using Modia3D.ModiaMath
 using Modia3D.Unitful
-
-@static if VERSION < v"0.7.0-DEV.2005"
-    using Base.Test
-else
-    using Modia3D.Test
-    using Modia3D.LinearAlgebra
-end
+using Modia3D.Test
+using Modia3D.LinearAlgebra
 
 
 

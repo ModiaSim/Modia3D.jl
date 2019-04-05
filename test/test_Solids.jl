@@ -1,15 +1,9 @@
 module TestSolid
 
 import Modia3D
-
-@static if VERSION < v"0.7.0-DEV.2005"
-    using Base.Test
-    EYE3() = eye(3)
-else
-    using Modia3D.Test
-    using Modia3D.LinearAlgebra
-    EYE3() = Matrix(1.0I,3,3)
-end
+using  Modia3D.Test
+using  Modia3D.LinearAlgebra
+EYE3() = Matrix(1.0I,3,3)
 
 
 

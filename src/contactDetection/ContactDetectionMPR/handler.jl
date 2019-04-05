@@ -4,12 +4,8 @@
 # This file is part of module
 #   Modia3D.ContactDetectionMPR (Modia3D/contactDetection/ContactDetectionMPR/_module.jl)
 #
-@static if VERSION >= v"0.7.0-DEV.2005"
-    using LinearAlgebra
-    EYE3() = Matrix(1.0I,3,3)
-else
-    EYE3() = eye(3)
-end
+using LinearAlgebra
+EYE3() = Matrix(1.0I,3,3)
 
 AABB_collision(aabb1::Basics.BoundingBox, aabb2::Basics.BoundingBox) = aabb1.x_max > aabb2.x_min && aabb1.x_min < aabb2.x_max &&
                                            aabb1.y_max > aabb2.y_min && aabb1.y_min < aabb2.y_max &&
@@ -25,13 +21,8 @@ function Composition.initializeContactDetection!(world::Composition.Object3D, sc
   if ch.contactPairs.nz == 0
      Composition.closeContactDetection!(ch)
      scene.collide = false
-     @static if VERSION >= v"0.7.0-DEV.2005"
          @warn "... From Modia3D collision handler: Collision handling switched off, since no contacts can take place (nz=0).\n" *
                "... You might need to set canCollide=true at joints.\n"
-     else
-         warn("\n... From Modia3D collision handler: Collision handling switched off, since no contacts can take place (nz=0).\n",
-                "... You might need to set canCollide=true at joints.\n")
-     end
      return
   end
   @assert(ch.contactPairs.ne > 0)

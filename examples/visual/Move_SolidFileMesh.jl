@@ -28,13 +28,7 @@ fileMeshes = FileMeshes(sceneOptions=Modia3D.SceneOptions(visualizeFrames=true,d
 Modia3D.initAnalysis!(fileMeshes)
 
 
-@static if VERSION >= v"0.7.0-DEV.2005"
-    LINSPACE(start,stop,length) = range(0.0, stop=stop, length=length)
-else
-    LINSPACE(start,stop,length) = linspace(start,stop,length)
-end
-
-for time = LINSPACE(0.0, 2.0, 101)
+for time = range(0.0, stop=2.0, length=101)
   r1[3]  = 2*time
   Modia3D.set_r!(fileMeshes.fileMesh1, r1)
 

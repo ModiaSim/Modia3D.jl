@@ -56,11 +56,7 @@ import Modia3D.Basics
 import Modia3D.Graphics
 import ModiaMath
 
-@static if VERSION >= v"0.7.0-DEV.2005"
-    const NOTHING = Nothing
-else
-    const NOTHING = Void
-end
+const NOTHING = Nothing
 
 
 include("concaveProperties.jl")
