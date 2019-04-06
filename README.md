@@ -3,6 +3,7 @@
 [![Travis](https://travis-ci.org/ModiaSim/Modia3D.jl.svg?branch=master)](https://travis-ci.org/ModiaSim/Modia3D.jl)
 [![AppVoyer](https://ci.appveyor.com/api/projects/status/github/ModiaSim/Modia3D.jl?svg=true)](https://ci.appveyor.com/project/MartinOtter/modia3d-jl)
 [![codecov.io](http://codecov.io/github/ModiaSim/Modia3D.jl/coverage.svg?branch=master)](http://codecov.io/github/ModiaSim/Modia3D.jl?branch=master)
+[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://ModiaSim.github.io/Modia3D.jl/stable)
 [![Latest](https://img.shields.io/badge/docs-latest-blue.svg)](https://ModiaSim.github.io/Modia3D.jl/latest)
 [![The MIT License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](https://github.com/ModiaSim/Modia3D.jl/blob/master/LICENSE.md)
 
@@ -10,12 +11,14 @@
 Modia3D is a Julia package to model fixed and moving objects in 3D (*e.g.* visual shapes, rigid bodies).
 These objects are driven kinematically by pre-defined time functions or are moving dynamically by
 solving Differential Algebraic Equations (DAEs)
-with a variable-step DAE solver. Collision handling with elastic response calculation is
+with a variable-step DAE solver. 
+
+Collision handling with elastic response calculation is
 performed for objects that are defined with a contact material and (a) have a convex geometry,
 (b) can be approximated by a set of convex geometries, or (c) have a concave geometry
 that is (automatically) approximated by its convex hull.
 A more detailed overview of the available features is given in the
-[Modia3D documentation](https://ModiaSim.github.io/Modia3D.jl/latest).
+[Modia3D documentation](https://ModiaSim.github.io/Modia3D.jl/stable).
 Papers about Modia3D:
 
 - *[Collision Handling with Variable-Step Integrators](docs/resources/documentation/CollisionHandling_Neumayr_Otter_2017.pdf)* ([EOOLT 2017, December](http://www.eoolt.org/2017/))
@@ -73,6 +76,7 @@ that is animation is switched off.
 
 ## Documentation
 
+- [**STABLE**](https://ModiaSim.github.io/Modia3D.jl/stable) &mdash; *documentation of the last released version.*
 - [**LATEST**](https://ModiaSim.github.io/Modia3D.jl/latest) &mdash; *in-development version of the documentation.*
 
 

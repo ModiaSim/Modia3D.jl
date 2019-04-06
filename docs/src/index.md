@@ -10,11 +10,14 @@ Collision handling with elastic response calculation is
 performed for objects that are defined with a contact material and (a) have a convex geometry, or
 (b) can be approximated by a set of convex geometries, or (c) have a concave geometry
 that is (automatically) approximated by its convex hull.
+A more detailed overview of the available features is given in the
+[Modia3D documentation](https://ModiaSim.github.io/Modia3D.jl/stable).
 Papers about Modia3D:
 
 - *[Collision Handling with Variable-Step Integrators](../resources/documentation/CollisionHandling_Neumayr_Otter_2017.pdf)* ([EOOLT 2017, December](http://www.eoolt.org/2017/))
-- *Component-Based 3D Modeling of Dynamic Systems*, to be presented at the
-  [American Modelica Conference 2018, October 9-10](https://www.modelica.org/events/modelica2018Americas/index_html)
+- *[Component-Based 3D Modeling of Dynamic Systems](http://www.ep.liu.se/ecp/154/019/ecp18154019.pdf)*([American Modelica Conference 2018, October](https://www.modelica.org/events/modelica2018Americas/index_html))
+- *[Algorithms for Component-Based 3D Modeling](http://www.ep.liu.se/ecp/157/039/ecp19157039.pdf)*([13th International Modelica Conference 2019, March](https://modelica.org/events/modelica2019))
+
 
 Before releasing version 1.0, Modia3D shall be
 easily combinable with [Modia](https://github.com/ModiaSim/Modia.jl), for example to define a controlled
@@ -126,24 +129,23 @@ There are the following operations on an instance of an assembly:
 
 - Prismatic and Revolute joints have a new keyword `axis` with possible values 1,2,3,-1,-2,-3,
   to define the axis of movement / rotation.
-  
+
 - All joints have a new keyword `canCollide` (default = `false`).
   If `false`, collision detection will not occur to the `Object3D`s that are rigidly fixed
   to each other and connected by the joint.
-  
+
 - Before a simulation is performed, the internal structure is optimized for the computation:
-
-  * For all objects that are rigidly connected, the common mass, center-of-mass, inertia tensor
-    are computed and used during simulation. All frames with mass property objects are ignored
-	during simulation (if not needed for other purposes).
-
-  * Collision detection is switched off for `Object3D`s that are rigidly connected to each other.
-  
-  * The spanning tree of the `Object3D`s is simplified, so that during simulation only 
+  * For all objects that are rigidly connected, the common mass, common center-of-mass, common inertia tensor
+    are computed and used during simulation (and the source frames with mass property objects are ignored
+    if not needed for other purposes).
+  * Collision detection is switched off for `Object3D` pairs that are rigidly connected to each other.
+  * The spanning tree of the `Object3D`s is simplified, so that during simulation only
     the minimum number of frames must be traversed and position, velocity, acceleration of these
-	frames are computed.
+    frames are computed.
     `Object3D`s that are only used for visualization are only evaluated at communication points
-	and only the position is computed (not velocity or acceleration).
+    and only the position is computed (not velocity or acceleration).
+
+- More examples and tests added.
 
 
 

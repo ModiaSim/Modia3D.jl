@@ -2,9 +2,9 @@ using Documenter, Modia3D
 
 makedocs(
   modules  = [Modia3D],
-  format   = :html,
   sitename = "Modia3D",
   authors  = "Andrea Neumayr, Martin Otter (DLR-SR)",
+  format   = Documenter.HTML(prettyurls = false),
   pages    = [
      "Home"   => "index.md",
      "Manual" => [

@@ -13,7 +13,6 @@ Features planned for version 1.0:
     during integration (especially, changing some of the remaining MVector{3,Float64} to
     SVector{3,Float64}).
   - Improved documentation.
-  - Changing to Julia 0.7.
 
 - **ContactDetectionMPR**
   - The MPR algorithm for distance computation needs to be more thoroughly tested.
@@ -35,9 +34,6 @@ Features planned for version 1.0:
 
 - **Composition**
   - Visualizing (optionally) the direction of the gravity vector if a parallel gravity field is used.
-  - Improving efficiency: Structure spanning tree in two parts: One only needed for
-    kinematic/dynamic analysis and the remaining part only needed for visualization
-    (need only to be evaluated at communication points).
   - Support of more joint types (Spherical, Cylindrical, Planar, GearConstraint, ...).
   - Support of 3D force/torque objects.
   - Automatic handling of 2D and 3D kinematic loops for kinematic and dynamic analysis
