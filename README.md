@@ -118,6 +118,7 @@ ModiaMath.plot(result, ["revolute.phi", "revolute.w"]);
   include("$(Modia3D.path)/examples/dynamics/Simulate_FallingBall4.jl")
   include("$(Modia3D.path)/examples/kinematics/Move_FourBar.jl")
   include("$(Modia3D.path)/examples/visual/Move_AllVisualObjects.jl")
+
 ```
 
 ### To run tests
