@@ -1,5 +1,5 @@
 name = "Modia3D"
-uuid = "9eeeb1f0-b440-11e8-152a-c19cc3a383d5"
+uuid = "07f2c1e0-90b0-56cf-bda7-b44b56e34eed"
 authors = ["Andrea Neumayr <andrea.neumayr@dlr.de>", "Martin Otter <Martin.Otter@dlr.de>"]
 version = "0.3.0"
 
