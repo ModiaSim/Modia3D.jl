@@ -61,6 +61,7 @@ end
 # according to their distances in O(n_n log(n_z)) operations.
 # This function is called before every integrator step.
 function Composition.selectContactPairs!(ch::Composition.ContactDetectionMPR_handler) # ch::Composition.ContactDetectionMPR_handler)
+  #println("selectContactPairs")
   if !ch.distanceComputed
     computeDistances(ch,false)
   end
@@ -96,6 +97,7 @@ end
 # operations. This function is called whenever the integrator
 # requests a new zero-crossing function evaluation
 function Composition.getDistances!(ch::Composition.ContactDetectionMPR_handler)
+  #println("getDistances")
   if !ch.distanceComputed
     computeDistances(ch,true)
     #println("getDistances: ch.contactPairs.z = ", ch.contactPairs.z)
@@ -106,6 +108,7 @@ end
 
 
 function computeDistances(ch::Composition.ContactDetectionMPR_handler, phase2::Bool)
+#  println("computeDistances wird aufgerufen")
   collSuperObjs = ch.contactPairs.collSuperObjs
   noCPairs = ch.contactPairs.noCPairs
 
@@ -115,7 +118,7 @@ function computeDistances(ch::Composition.ContactDetectionMPR_handler, phase2::B
       superObj = collSuperObjs[i]
       for j = 1:length(superObj)
         obj = superObj[j]
-        AABB[i][j] = Solids.boundingBox!(obj.data.geo, AABB[i][j], obj.r_abs, obj.R_abs; tight=true, scaleFactor=0.1)
+        AABB[i][j] = Solids.boundingBox!(obj.data.geo, AABB[i][j], obj.r_abs, obj.R_abs; tight=false, scaleFactor=0.1)
       end
     end
 
@@ -162,7 +165,7 @@ function computeDistances(ch::Composition.ContactDetectionMPR_handler, phase2::B
                     if status((ch.dict2,token)) == 1          # index of contact pair is in dict2
                       tmp_val = deref_value((ch.dict2,token)) # unpacking its values
                       j = Int(tmp_val[2])
-                      ch.contactPairs.z[j] = distance        # new distance is stored in z, at it's old position
+                      ch.contactPairs.z[j] = distance         # new distance is stored in z, at it's old position
                       ch.contactPairs.contactPoint1[j] = contactPoint1
                       ch.contactPairs.contactPoint2[j] = contactPoint2
                       ch.contactPairs.contactNormal[j] = contactNormal
@@ -170,7 +173,7 @@ function computeDistances(ch::Composition.ContactDetectionMPR_handler, phase2::B
                       ch.contactPairs.contactObj2[j]   = nextObj
                     else
                       if distance < 0.0
-                        #println("distance = $distance")
+                        println("distance = $distance")
                         error("\nNumber of max. collision pairs nz (= ", ch.contactPairs.nz, ") is too low.",
                               "\nProvide a large nz_max with Modia3D.SceneOptions(nz_max=xxx).")
     end; end; end; end; end; end; end; end; end; end; end

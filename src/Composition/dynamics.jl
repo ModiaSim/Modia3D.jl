@@ -127,7 +127,7 @@ struct SimulationModel <: ModiaMath.AbstractSimulationModel
       else
          build_tree!(scene, world)
          if scene.options.enableContactDetection
-            @error("Collision handling is only possible with the optimized structure. Please set useOptimizedStructure = true in Modia3D.SceneOptions.")
+            error("Collision handling is only possible with the optimized structure. Please set useOptimizedStructure = true in Modia3D.SceneOptions.")
          end
       end
 

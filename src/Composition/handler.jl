@@ -172,6 +172,20 @@ function build_superObjs!(scene::Scene, world::Object3D)::NOTHING
   end
   addIndicesOfCutJointsToSuperObj(scene)
 
+
+
+    println("superObjRow.superObjCollision.superObj")
+    for superObjRow in scene.superObjs
+    println("[")
+    for a in superObjRow.superObjCollision.superObj
+      println(ModiaMath.fullName(a))
+    end
+    println("]")
+    println(" ")
+    end
+
+
+
   hasMoreCollisionSuperObj ? (scene.collide = true) : (scene.collide = false)
   scene.initSuperObj = true
   end
@@ -272,7 +286,7 @@ function chooseAndBuildUpTree(world::Object3D, scene::Scene)
   else
      build_tree!(scene, world)
      if scene.options.enableContactDetection
-        @error("Collision handling is only possible with the optimized structure. Please set useOptimizedStructure = true in Modia3D.SceneOptions.")
+        error("Collision handling is only possible with the optimized structure. Please set useOptimizedStructure = true in Modia3D.SceneOptions.")
      end
   end
   if scene.visualize

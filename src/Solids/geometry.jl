@@ -18,8 +18,12 @@
 #    https://en.wikipedia.org/wiki/List_of_moments_of_inertia
 #    https://en.wikipedia.org/wiki/List_of_second_moments_of_area
 
-using LinearAlgebra
-EYE3() = Matrix(1.0I,3,3)
+@static if VERSION >= v"0.7.0-DEV.2005"
+    using LinearAlgebra
+    EYE3() = Matrix(1.0I,3,3)
+else
+    EYE3() = eye(3)
+end
 
 
 const InertiaMatrix  = SMatrix{3,3,Float64,9}
@@ -183,6 +187,7 @@ struct SolidFileMesh <: Modia3D.AbstractSolidGeometry
      @assert(scaleFactor[3] >= 0.0)
      (centroid, longestEdge, objPoints, facesIndizes) = getObjInfos(filename, scaleFactor)
      (volume, centroidAlgo, inertia) = computeMassProperties(objPoints, facesIndizes; bodyCoords=false)
+     #println("volume = ", volume)
      fileMesh = new(filename, scaleFactor, useGraphicsMaterialColor, smoothNormals, centroid, longestEdge, objPoints, facesIndizes, volume, centroidAlgo, inertia)
      return fileMesh
   end
@@ -273,11 +278,13 @@ function volume(geo::SolidCone)
   end
 end
 function volume(geo::SolidFileMesh)
+    println("bin ich hier?")
     if !isempty(geo.facesIndizes)
-        return geo.volume
+    #  println("geo.volume = ", geo.volume)
+      return geo.volume
     else
-        println("SolidFileMesh: ", geo.filename, ". The surface areas must be triangular, and each triangle should be specified in right-handed/counter-clockwise order. Otherwise it is not possible to compute a volume.")
-        return nothing
+      println("SolidFileMesh: ", geo.filename, ". The surface areas must be triangular, and each triangle should be specified in right-handed/counter-clockwise order. Otherwise it is not possible to compute a volume.")
+      return nothing
     end
 end
 
@@ -326,7 +333,11 @@ function inertiaMatrix(geo::SolidCylinder, mass::Number)
                                         1/4*((geo.Dx/2)^2 + (geo.Dy/2)^2)]))
 end
 function inertiaMatrix(geo::SolidCapsule, massGeo::Number)
-    @warn "from Modia3D.inertiaMatrix(SolidCapsule): inertia matrix is not fully tested yet!"
+     @static if VERSION >= v"0.7.0-DEV.2005"
+         @warn "from Modia3D.inertiaMatrix(SolidCapsule): inertia matrix is not fully tested yet!"
+     else
+         warn("from Modia3D.inertiaMatrix(SolidCapsule): inertia matrix is not fully tested yet!")
+     end
 
     # mass = rho * volume
     #=
@@ -434,6 +445,7 @@ function inertiaMatrix(geo::SolidPipe, mass::Number)
     end
 end
 function inertiaMatrix(geo::SolidFileMesh, mass::Number)
+  #println("mass = ", mass)
     if !isempty(geo.facesIndizes)
         return geo.inertia.*mass
     else
