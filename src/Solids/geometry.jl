@@ -18,13 +18,8 @@
 #    https://en.wikipedia.org/wiki/List_of_moments_of_inertia
 #    https://en.wikipedia.org/wiki/List_of_second_moments_of_area
 
-@static if VERSION >= v"0.7.0-DEV.2005"
-    using LinearAlgebra
-    EYE3() = Matrix(1.0I,3,3)
-else
-    EYE3() = eye(3)
-end
-
+using LinearAlgebra
+EYE3() = Matrix(1.0I,3,3)
 
 const InertiaMatrix  = SMatrix{3,3,Float64,9}
 
@@ -278,7 +273,6 @@ function volume(geo::SolidCone)
   end
 end
 function volume(geo::SolidFileMesh)
-    println("bin ich hier?")
     if !isempty(geo.facesIndizes)
     #  println("geo.volume = ", geo.volume)
       return geo.volume
@@ -333,12 +327,7 @@ function inertiaMatrix(geo::SolidCylinder, mass::Number)
                                         1/4*((geo.Dx/2)^2 + (geo.Dy/2)^2)]))
 end
 function inertiaMatrix(geo::SolidCapsule, massGeo::Number)
-     @static if VERSION >= v"0.7.0-DEV.2005"
-         @warn "from Modia3D.inertiaMatrix(SolidCapsule): inertia matrix is not fully tested yet!"
-     else
-         warn("from Modia3D.inertiaMatrix(SolidCapsule): inertia matrix is not fully tested yet!")
-     end
-
+    @warn "from Modia3D.inertiaMatrix(SolidCapsule): inertia matrix is not fully tested yet!"
     # mass = rho * volume
     #=
     volGeo = volume(geo)

@@ -18,9 +18,9 @@ filenameBunny = joinpath(Modia3D.path, "objects", "bunny", "bunny.obj")
 @assembly ThreeDFiles begin
   world = Modia3D.Object3D(visualizeFrame=true)
   solidFileMeshCrank = Modia3D.SolidFileMesh(filenameCrank,1.0)
-  #fileMesh1 = Modia3D.Object3D(world, Modia3D.Solid(solidFileMeshCrank, "Aluminium", vmat1; contactMaterial = cmat); r=[0.0,0.0,0.0], fixed=false)
+  fileMesh1 = Modia3D.Object3D(world, Modia3D.Solid(solidFileMeshCrank, "Aluminium", vmat1; contactMaterial = cmat); r=[0.0,0.0,0.0], fixed=false)
 
-  boxMoving     = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidBox(1.0,1.0,1.0) , "Aluminium", vmat1; contactMaterial = cmat); r=[0.0, 0.0, 0.0], R=ModiaMath.rot2(-pi/2), fixed=false) #
+  #boxMoving     = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidBox(1.0,1.0,1.0) , "Aluminium", vmat1; contactMaterial = cmat); r=[0.0, 0.0, 0.0], R=ModiaMath.rot2(-pi/2), fixed=false) #
 
   #fileMesh2 = Modia3D.Object3D(world, Modia3D.SolidWithConvexDecomposition(solidFileMeshCrank, "Aluminium", vmat1, vmat2; contactMaterial = cmat); r=[3.0,0.0,0.0], fixed=false)
 
