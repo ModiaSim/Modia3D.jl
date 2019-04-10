@@ -85,7 +85,7 @@ function isNextTetrahedron!(r0::SupportPoint,r4::SupportPoint,r2::SupportPoint,r
 end
 =#
 
-#obj.r_abs .= MVector{3,Float64}(r_solid + T_solid'*obj.r_rel)
+#obj.r_abs .= SVector{3,Float64}(r_solid + T_solid'*obj.r_rel)
 getCentroid(obj::Composition.Object3D, centroidObj::SVector{3,Float64}) = (obj.r_abs + obj.R_abs'*centroidObj)
 
 #getCentroid(shape::Shapes.AbstractGeometry) = shape.r_abs
@@ -123,10 +123,10 @@ function collision(ch::Composition.ContactDetectionMPR_handler, shapeA::Composit
      # any collision between two spheres
      distance = dot(r1.p,normalize(r0.p))
      #println("r1.a, r1.b = ", r1.a, " ", r1.b)
-     #println("MVector{3,Float64}(r1.a) = ", MVector{3,Float64}(r1.a))
+     #println("SVector{3,Float64}(r1.a) = ", SVector{3,Float64}(r1.a))
      #println("... (",shapeA, ",", shapeB, "): termination 1")
      #println("TC 1")
-     return (distance, MVector{3,Float64}(r1.a), MVector{3,Float64}(r1.b), MVector{3,Float64}(r1.n), nothing, nothing, nothing, nothing, nothing, nothing)
+     return (distance, SVector{3,Float64}(r1.a), SVector{3,Float64}(r1.b), SVector{3,Float64}(r1.n), nothing, nothing, nothing, nothing, nothing, nothing)
    else
      n2 = n2/n2abs
    end
@@ -222,14 +222,14 @@ function collision(ch::Composition.ContactDetectionMPR_handler, shapeA::Composit
         distance = -dot(r4.n, r4.p)
         barycentric(r1,r2,r3,r4)
         # println("r4.a = ", r4.a, ", r4.b = ", r4.b, " ,r1.a = ", r1.a, " ,r1.b = ", r1.b," ,r2.a = ", r2.a, " ,r2.b = ",r2.b," ,r3.a = ",r3.a," ,r3.b = ",r3.b)
-        return (distance,MVector{3,Float64}(r4.a),MVector{3,Float64}(r4.b),MVector{3,Float64}(r4.n),MVector{3,Float64}(r1.a),MVector{3,Float64}(r1.b),MVector{3,Float64}(r2.a),MVector{3,Float64}(r2.b),MVector{3,Float64}(r3.a),MVector{3,Float64}(r3.b))
+        return (distance,SVector{3,Float64}(r4.a),SVector{3,Float64}(r4.b),SVector{3,Float64}(r4.n),SVector{3,Float64}(r1.a),SVector{3,Float64}(r1.b),SVector{3,Float64}(r2.a),SVector{3,Float64}(r2.b),SVector{3,Float64}(r3.a),SVector{3,Float64}(r3.b))
       elseif abs(dot(r4.p-r1.p, r4.n)) < tol_rel
         #println("TC 3")
         # println("... abs(dot(r4.p-r1.p, r4.n)) < tol_rel")
         (r4.p, distance) = signedDistanceToPortal(r0.p,r1.p,r2.p,r3.p)
         barycentric(r1,r2,r3,r4)
         # println("r4.a = ", r4.a, ", r4.b = ", r4.b, " ,r1.a = ", r1.a, " ,r1.b = ", r1.b," ,r2.a = ", r2.a, " ,r2.b = ",r2.b," ,r3.a = ",r3.a," ,r3.b = ",r3.b)
-        return (distance,MVector{3,Float64}(r4.a),MVector{3,Float64}(r4.b),MVector{3,Float64}(r4.n),MVector{3,Float64}(r1.a),MVector{3,Float64}(r1.b),MVector{3,Float64}(r2.a),MVector{3,Float64}(r2.b),MVector{3,Float64}(r3.a),MVector{3,Float64}(r3.b))
+        return (distance,SVector{3,Float64}(r4.a),SVector{3,Float64}(r4.b),SVector{3,Float64}(r4.n),SVector{3,Float64}(r1.a),SVector{3,Float64}(r1.b),SVector{3,Float64}(r2.a),SVector{3,Float64}(r2.b),SVector{3,Float64}(r3.a),SVector{3,Float64}(r3.b))
       end
 
 
@@ -294,7 +294,7 @@ function collision(ch::Composition.ContactDetectionMPR_handler, shapeA::Composit
          (r4.p, distance) = signedDistanceToPortal(r0.p,r1.p,r2.p,r3.p)
          println("MPR: Numerical issues with distance computation between shapeA = ", shapeA, " and shapeB = ", shapeB,". Used distance = ",distance)
          barycentric(r1,r2,r3,r4)
-         return (distance,MVector{3,Float64}(r4.a),MVector{3,Float64}(r4.b),MVector{3,Float64}(r4.n),MVector{3,Float64}(r1.a),MVector{3,Float64}(r1.b),MVector{3,Float64}(r2.a),MVector{3,Float64}(r2.b),MVector{3,Float64}(r3.a),MVector{3,Float64}(r3.b))
+         return (distance,SVector{3,Float64}(r4.a),SVector{3,Float64}(r4.b),SVector{3,Float64}(r4.n),SVector{3,Float64}(r1.a),SVector{3,Float64}(r1.b),SVector{3,Float64}(r2.a),SVector{3,Float64}(r2.b),SVector{3,Float64}(r3.a),SVector{3,Float64}(r3.b))
       end
 
       r0RayOnPortal = isr0RayOnPortal(r0.p,r1.p,r2.p,r3.p)
@@ -303,7 +303,7 @@ function collision(ch::Composition.ContactDetectionMPR_handler, shapeA::Composit
          # println("... (",shapeA, ",", shapeB, "): Wrong baby-tetrahedron selected. " , i)
       end
    end
-   error("MPR: Should never get here! Computation failed. Look at shapeA = ", ModiaMath.instanceName(shapeA), 
+   error("MPR: Should never get here! Computation failed. Look at shapeA = ", ModiaMath.instanceName(shapeA),
          " shapeB = ",  ModiaMath.instanceName(shapeB))
 
    # Barycentric coordinates to map from the Minkowski difference

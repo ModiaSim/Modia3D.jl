@@ -18,15 +18,17 @@ filenameBunny = joinpath(Modia3D.path, "objects", "bunny", "bunny.obj")
 @assembly ThreeDFiles begin
   world = Modia3D.Object3D(visualizeFrame=true)
   solidFileMeshCrank = Modia3D.SolidFileMesh(filenameCrank,1.0)
-  fileMesh1 = Modia3D.Object3D(world, Modia3D.Solid(solidFileMeshCrank, "Aluminium", vmat1; contactMaterial = cmat); r=[0.0,0.0,0.0], fixed=false)
+  #fileMesh1 = Modia3D.Object3D(world, Modia3D.Solid(solidFileMeshCrank, "Aluminium", vmat1; contactMaterial = cmat); r=[0.0,0.0,0.0], fixed=false)
 
-  #boxMoving     = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidBox(1.0,1.0,1.0) , "Aluminium", vmat1; contactMaterial = cmat); r=[0.0, 0.0, 0.0], R=ModiaMath.rot2(-pi/2), fixed=false) #
+  #boxMoving     = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidBox(1.0,1.0,1.0) , "Aluminium", vmat1; contactMaterial = cmat); r=[0.0, 0.0, 0.0], R=ModiaMath.rot2(-pi/2), fixed=false)
+
+  sphereMoving     = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidSphere(1.0) , "Aluminium", vmat1; contactMaterial = cmat); r=[0.0, 0.0, 0.0], R=ModiaMath.rot2(-pi/2), fixed=false)
 
   #fileMesh2 = Modia3D.Object3D(world, Modia3D.SolidWithConvexDecomposition(solidFileMeshCrank, "Aluminium", vmat1, vmat2; contactMaterial = cmat); r=[3.0,0.0,0.0], fixed=false)
 
   #bunny = Modia3D.Object3D(world, Modia3D.SolidWithConvexDecomposition(Modia3D.SolidFileMesh(filenameBunny,0.1), "Aluminium", vmat1, vmat2; contactMaterial = cmat); r=[-3.0, 0.0, -1.0], fixed=true)
 
-  box     = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidBox(1.0,2.0,10.0) , "Aluminium", vmat1; contactMaterial = cmat); r=[-8.0, 0.0, 2.0], fixed=true)
+  box     = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidBox(1.0,2.0,10.0) , "Aluminium", vmat1; contactMaterial = cmat); r=[-3.0, 0.0, -2.0], fixed=true)
 end
 
 
@@ -38,7 +40,7 @@ threeD = ThreeDFiles(sceneOptions=Modia3D.SceneOptions(gravityField=gravField,vi
 
 
 model = Modia3D.SimulationModel( threeD )
-result = ModiaMath.simulate!(model; stopTime=2.0, tolerance=1e-6,interval=0.001, log=false)
+result = ModiaMath.simulate!(model; stopTime=2.0, tolerance=1e-6,interval=0.001, log=true)
 
 
 println("... success of tests_SolidFileMesh.jl!")

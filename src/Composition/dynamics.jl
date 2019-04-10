@@ -414,6 +414,7 @@ function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64
 
          if contact
             #println("... Contact ", str, " active at time = ", sim.time)
+            #println("typeof(chpairs.contactPoint1[i]) = ", chpairs.contactPoint1[i])
             r1 = ModiaMath.Vector3D(chpairs.contactPoint1[i])
             r2 = ModiaMath.Vector3D(chpairs.contactPoint2[i])
             rContact = (r1 + r2)/2.0

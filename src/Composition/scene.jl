@@ -48,9 +48,10 @@ struct ContactPairs
    # All vectors below have length nz and are computed by functions selectContactPairs!(...) and getDistances!(...)
    z::Vector{Float64}                              # Vector of zero crossing functions. z[i] < 0.0 if i-th contact pair has penetration
 
-   contactPoint1::Vector{MVector{3,Float64}}       # Absolute position vector to first contact point on contactObj1
-   contactPoint2::Vector{MVector{3,Float64}}       # Absolute position vector to second contact point on contactObj2
-   contactNormal::Vector{MVector{3,Float64}}       # Unit normal to surface on contactPoint1 (in world frame)
+
+   contactPoint1::Vector{Union{SVector{3,Float64},NOTHING}}       # Absolute position vector to first contact point on contactObj1
+   contactPoint2::Vector{Union{SVector{3,Float64},NOTHING}}       # Absolute position vector to second contact point on contactObj2
+   contactNormal::Vector{Union{SVector{3,Float64},NOTHING}}       # Unit normal to surface on contactPoint1 (in world frame)
 
    contactObj1::Vector{Union{Object3D,NOTHING}}
    contactObj2::Vector{Union{Object3D,NOTHING}}

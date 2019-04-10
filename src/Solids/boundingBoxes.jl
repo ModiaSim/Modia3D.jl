@@ -115,7 +115,7 @@ end
 # boundingBox!(..) calculates the AABB (= Axis Aligned Bounding Box) for the geometries
 # it also uses support points for finding the points which are furthest away in each x,y,z - direction
 # it calles supportPoint_i
-function boundingBox!(geo::Modia3D.AbstractSolidGeometry, AABB::Basics.BoundingBox, r_abs::AbstractVector, R_abs::AbstractMatrix; tight::Bool=true, scaleFactor::Float64=0.1)
+function boundingBox!(geo::Modia3D.AbstractSolidGeometry, AABB::Basics.BoundingBox, r_abs::AbstractVector, R_abs::AbstractMatrix; tight::Bool=true, scaleFactor::Float64=0.01)
   xmin = supportPoint_i(geo, r_abs[1], R_abs[:,1], -1)
   xmax = supportPoint_i(geo, r_abs[1], R_abs[:,1], +1)
   ymin = supportPoint_i(geo, r_abs[2], R_abs[:,2], -1)
@@ -164,7 +164,7 @@ function boundingBox!(geo::Modia3D.AbstractSolidGeometry, AABB::Basics.BoundingB
 end
 
 
-function boundingBox!(geo::SolidSphere, AABB::Basics.BoundingBox, r_abs::AbstractVector, R_abs::AbstractMatrix; tight::Bool=true, scaleFactor::Float64=0.1)
+function boundingBox!(geo::SolidSphere, AABB::Basics.BoundingBox, r_abs::AbstractVector, R_abs::AbstractMatrix; tight::Bool=true, scaleFactor::Float64=0.01)
   r = geo.Dx/2
   if tight    # best fitting AABB which is possible
     AABB.x_min = r_abs[1] - r
