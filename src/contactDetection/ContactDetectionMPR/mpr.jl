@@ -126,6 +126,8 @@ function collision(ch::Composition.ContactDetectionMPR_handler, shapeA::Composit
      #println("SVector{3,Float64}(r1.a) = ", SVector{3,Float64}(r1.a))
      #println("... (",shapeA, ",", shapeB, "): termination 1")
      #println("TC 1")
+     println("Fall n2abs <= neps ", r1.a, " r1.b " , r1.b, " r1.n ", r1.n)
+
      return (distance, SVector{3,Float64}(r1.a), SVector{3,Float64}(r1.b), SVector{3,Float64}(r1.n), nothing, nothing, nothing, nothing, nothing, nothing)
    else
      n2 = n2/n2abs

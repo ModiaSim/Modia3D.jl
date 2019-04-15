@@ -122,6 +122,8 @@ struct SimulationModel <: ModiaMath.AbstractSimulationModel
          if scene.options.enableContactDetection && scene.collide
             initializeContactDetection!(world, scene)
             nz = scene.options.contactDetection.contactPairs.nz
+            append!(scene.allVisuElements, scene.options.contactDetection.contactPairs.contactVisuObj1)
+            append!(scene.allVisuElements, scene.options.contactDetection.contactPairs.contactVisuObj2)
          end
          initializeMassComputation!(scene)
       else
@@ -262,11 +264,11 @@ function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64
    # Handle initialization and termination of model
    if ModiaMath.isInitial(sim)
       # println("... isInitial = true")
-      if scene.visualize
-         initializeVisualization(Modia3D.renderer[1], scene.allVisuElements)
-      end
       if scene.options.enableContactDetection && scene.collide
          initializeContactDetection!(world, scene)
+      end
+      if scene.visualize
+         initializeVisualization(Modia3D.renderer[1], scene.allVisuElements)
       end
    end
 

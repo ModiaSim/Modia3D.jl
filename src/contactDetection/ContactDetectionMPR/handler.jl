@@ -18,7 +18,7 @@ function Composition.initializeContactDetection!(world::Composition.Object3D, sc
   # ch::Composition.ContactDetectionMPR_handler, collSuperObjs::Array{Array{Composition.Object3D}}, noCPairs::Array{Array{Int64,1}}, AABB::Array{Array{Basics.BoundingBox}})
   # scene.options.contactDetection, scene.collSuperObjs, scene.noCPairs, scene.AABB
   ch = scene.options.contactDetection
-  ch.contactPairs = Composition.ContactPairs(scene.superObjs, scene.noCPairs, scene.AABB, scene.options.nz_max)
+  ch.contactPairs = Composition.ContactPairs(world, scene.superObjs, scene.noCPairs, scene.AABB, scene.options.nz_max)
   if ch.contactPairs.nz == 0
      Composition.closeContactDetection!(ch)
      scene.collide = false
@@ -197,6 +197,15 @@ function storeDistancesForSolver!(index::Integer, ch::Composition.ContactDetecti
         ch.contactPairs.contactNormal[j_local] = contactNormal
         ch.contactPairs.contactObj1[j_local]   = actObj
         ch.contactPairs.contactObj2[j_local]   = nextObj
+
+        if contactPoint1 != nothing
+          Modia3D.set_r!(ch.contactPairs.contactVisuObj1[j_local],contactPoint1)
+          Modia3D.set_r!(ch.contactPairs.contactVisuObj2[j_local],contactPoint2)
+          #ch.contactPairs.contactVisuObj1[j_local].r_abs = contactPoint1
+          #ch.contactPairs.contactVisuObj2[j_local].r_abs = contactPoint2
+
+          # println("ch.contactPairs.contactVisuObj1[j_local].r_abs ", ch.contactPairs.contactVisuObj1[j_local] )
+        end
       else
         if distance < 0.0
           error("\nNumber of max. collision pairs nz (= ", ch.contactPairs.nz, ") is too low.",

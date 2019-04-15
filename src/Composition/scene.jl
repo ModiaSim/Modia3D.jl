@@ -56,10 +56,11 @@ struct ContactPairs
    contactObj1::Vector{Union{Object3D,NOTHING}}
    contactObj2::Vector{Union{Object3D,NOTHING}}
 
-   function ContactPairs(superObjs::Array{SuperObjsRow,1},
-                         noCPairs::Array{Array{Int64,1}},
-                         AABB::Array{Array{Basics.BoundingBox}},
-                         nz_max::Int)
+   contactVisuObj1::Vector{Object3D}
+   contactVisuObj2::Vector{Object3D}
+
+   function ContactPairs(world::Composition.Object3D, superObjs::Array{SuperObjsRow,1},
+                         noCPairs::Array{Array{Int64,1}}, AABB::Array{Array{Basics.BoundingBox}}, nz_max::Int)
       @assert(length(superObjs) > 0)
       @assert(length(noCPairs) == length(superObjs))
       @assert(nz_max > 0)
@@ -89,19 +90,10 @@ struct ContactPairs
          allPossibleContactPairsInz = false
          nz = nz_max
       end
-#=
-      for a in collSuperObjs
-         println(" ")
-         for b in a
-            println(ModiaMath.fullName(b))
-         end
-      end
 
-      println("nz = $nz , nz_max = $nz_max")
-=#
       # Allocate storage
       z = fill(42.0, nz)
-      defaultPoint   = MVector{3,Float64}(0.0,0.0,0.0)
+      defaultPoint   = SVector{3,Float64}(0.0,0.0,0.0)
       contactPoint1  = [defaultPoint for i = 1:nz]
       contactPoint2  = [defaultPoint for i = 1:nz]
       contactNormal  = [defaultPoint for i = 1:nz]
@@ -113,8 +105,13 @@ struct ContactPairs
          contactObj1[i] = nothing
          contactObj2[i] = nothing
       end
+
+      dummyContactVisuObj = Object3D(world, Modia3D.Sphere(0.3, material= Modia3D.Material(color="Black", transparency=0.0) ), fixed=false )
+      contactVisuObj1 = fill(dummyContactVisuObj, nz) # Vector{Object3D}(dummyContactVisuObj,nz)
+      contactVisuObj2 = fill(dummyContactVisuObj, nz) # Vector{Object3D}(dummyContactVisuObj,nz)
+
       new(collSuperObjs, noCPairs, AABB, dummyObject3D, length(collSuperObjs), nz, allPossibleContactPairsInz,
-          z, contactPoint1, contactPoint2, contactNormal, contactObj1, contactObj2)
+          z, contactPoint1, contactPoint2, contactNormal, contactObj1, contactObj2, contactVisuObj1, contactVisuObj2)
    end
 end
 
