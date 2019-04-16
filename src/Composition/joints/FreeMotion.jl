@@ -5,7 +5,7 @@
 #   Modia3D.Composition (Modia3D/Composition/_module.jl)
 #
 
-# mutable struct of FreeMotion is defined in Modia3D/Composition/object3d.jl, 
+# mutable struct of FreeMotion is defined in Modia3D/Composition/object3d.jl,
 # since Object3D references FreeMotion and FreeMotion references Object3D
 
 function driveJoint!(joint::FreeMotion)
@@ -73,7 +73,7 @@ end
 
 # Sets the relative position vector
 function set_r!(obj::Object3D, r::ModiaMath.Vector3D)::NOTHING
-   if isNotFree(obj) 
+   if isNotFree(obj)
       error("Not allowed to call set_r!(..) on Object3D ", ModiaMath.fullName(obj), " because not freely moving")
    end
    obj.joint.r.value = r
@@ -83,10 +83,22 @@ end
 set_r!(obj::Object3D, r::AbstractVector)::NOTHING = set_r!(obj, ModiaMath.Vector3D(r))
 
 
+# Sets the absolute position vector
+function set_r_abs!(obj::Object3D, r::ModiaMath.Vector3D)::NOTHING
+   if isNotFree(obj)
+      error("Not allowed to call set_r!(..) on Object3D ", ModiaMath.fullName(obj), " because not freely moving")
+   end
+   obj.joint.r.value = r
+   obj.r_abs         = r
+   return nothing
+end
+set_r_abs!(obj::Object3D, r::AbstractVector)::NOTHING = set_r_abs!(obj, ModiaMath.Vector3D(r))
+
+
 
 # Sets the relative quaternion
 function set_q!(obj::Object3D, q::ModiaMath.Quaternion)::NOTHING
-   if isNotFree(obj) 
+   if isNotFree(obj)
       error("Not allowed to call set_q!(..) on Object3D ", ModiaMath.fullName(obj), " because not freely moving")
    end
    obj.joint.q.value = q
@@ -94,4 +106,3 @@ function set_q!(obj::Object3D, q::ModiaMath.Quaternion)::NOTHING
    return nothing
 end
 set_q!(obj::Object3D, q::AbstractVector)::NOTHING = set_q!(obj, ModiaMath.Quaternion(q))
-

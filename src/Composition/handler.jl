@@ -173,7 +173,7 @@ function build_superObjs!(scene::Scene, world::Object3D)::NOTHING
   addIndicesOfCutJointsToSuperObj(scene)
 
 
-
+#=
     println("superObjRow.superObjCollision.superObj")
     for superObjRow in scene.superObjs
     println("[")
@@ -183,7 +183,7 @@ function build_superObjs!(scene::Scene, world::Object3D)::NOTHING
     println("]")
     println(" ")
     end
-
+=#
 
 
   hasMoreCollisionSuperObj ? (scene.collide = true) : (scene.collide = false)
@@ -359,7 +359,8 @@ function getDistances!(assembly::Modia3D.AbstractAssembly)
   assertInitAnalysis(assembly, "Modia3D.getDistances!(..)")
   if assembly._internal.scene.collide
     ch = assembly._internal.scene.options.contactDetection
-    getDistances!(ch)
+    world = assembly._internal.referenceObject3D
+    getDistances!(ch, world)
   else
     errorMessageCollision("Modia3D.getDistances!(..)")
   end
@@ -380,7 +381,8 @@ function selectContactPairs!(assembly::Modia3D.AbstractAssembly)
   assertInitAnalysis(assembly, "Modia3D.selectContactPairs!(..)")
   if assembly._internal.scene.collide
     ch = assembly._internal.scene.options.contactDetection
-    selectContactPairs!(ch)
+    world = assembly._internal.referenceObject3D
+    selectContactPairs!(ch, world)
   else
     errorMessageCollision("Modia3D.selectContactPairs!(..)")
   end

@@ -122,8 +122,8 @@ struct SimulationModel <: ModiaMath.AbstractSimulationModel
          if scene.options.enableContactDetection && scene.collide
             initializeContactDetection!(world, scene)
             nz = scene.options.contactDetection.contactPairs.nz
-            append!(scene.allVisuElements, scene.options.contactDetection.contactPairs.contactVisuObj1)
-            append!(scene.allVisuElements, scene.options.contactDetection.contactPairs.contactVisuObj2)
+            append!(scene.allVisuElements, world.contactVisuObj1)
+            append!(scene.allVisuElements, world.contactVisuObj2)
          end
          initializeMassComputation!(scene)
       else
@@ -266,6 +266,8 @@ function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64
       # println("... isInitial = true")
       if scene.options.enableContactDetection && scene.collide
          initializeContactDetection!(world, scene)
+         append!(scene.allVisuElements, world.contactVisuObj1)
+         append!(scene.allVisuElements, world.contactVisuObj2)
       end
       if scene.visualize
          initializeVisualization(Modia3D.renderer[1], scene.allVisuElements)
@@ -323,6 +325,7 @@ function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64
          obj.visualizationFrame.r_abs = obj.r_abs
          obj.visualizationFrame.R_abs = obj.R_abs
       end
+
 
       # Compute forces and torques
       initializeFlowVariables(scene)
@@ -385,9 +388,9 @@ function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64
       # Compute signed distances of all contact shapes during zero-crossing computation
       setComputationFlag(ch)
       if ModiaMath.isZeroCrossing(sim) || ModiaMath.isEvent(sim)
-         selectContactPairs!(ch)
+         selectContactPairs!(ch, world)
       else
-         getDistances!(ch)
+         getDistances!(ch, world)
       end
 
       # Handle zero crossing event

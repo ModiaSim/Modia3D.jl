@@ -15,10 +15,9 @@ AABB_touching(aabb1::Basics.BoundingBox, aabb2::Basics.BoundingBox) = aabb1.x_ma
 
 
 function Composition.initializeContactDetection!(world::Composition.Object3D, scene::Composition.Scene)
-  # ch::Composition.ContactDetectionMPR_handler, collSuperObjs::Array{Array{Composition.Object3D}}, noCPairs::Array{Array{Int64,1}}, AABB::Array{Array{Basics.BoundingBox}})
-  # scene.options.contactDetection, scene.collSuperObjs, scene.noCPairs, scene.AABB
   ch = scene.options.contactDetection
-  ch.contactPairs = Composition.ContactPairs(world, scene.superObjs, scene.noCPairs, scene.AABB, scene.options.nz_max)
+  ch.contactPairs = Composition.ContactPairs(world,  scene.superObjs, scene.noCPairs, scene.AABB, scene.options.nz_max,
+                                ch.visualizeContactPoints, ch.defaultContactSphereDiameter)
   if ch.contactPairs.nz == 0
      Composition.closeContactDetection!(ch)
      scene.collide = false
@@ -28,26 +27,6 @@ function Composition.initializeContactDetection!(world::Composition.Object3D, sc
   end
   @assert(ch.contactPairs.ne > 0)
   @assert(ch.contactPairs.nz > 0)
-
-#=
-  if ch.visualizeContactPoints
-    ch.contactPointShape1 = []
-    ch.contactPointShape2 = []
-    for i in 1:ch.n_max
-      obj = Shapes.Sphere(0.05; visible=true, collide=false, material=Shapes.Material(; color=[0,0,0]))
-      Shapes.defineZeroShapePosition!(obj)
-      obj.r_abs = SVector{3,Float64}(0.0,0.0,0.0)
-      obj.R_abs = SMatrix{3,3,Float64,9}(EYE3())
-      push!(ch.contactPointShape1, obj)
-
-      obj2 = Shapes.Sphere(0.05; visible=true, collide=false, material=Shapes.Material(; color=[0,0,0]))
-      Shapes.defineZeroShapePosition!(obj2)
-      obj2.r_abs = SVector{3,Float64}(0.0,0.0,0.0)
-      obj2.R_abs = SMatrix{3,3,Float64,9}(EYE3())
-      push!(ch.contactPointShape2, obj2)
-    end
-  end
-=#
 end
 
 
@@ -61,10 +40,9 @@ end
 # the nz shape pairs with the smallest distances and orders them
 # according to their distances in O(n_n log(n_z)) operations.
 # This function is called before every integrator step.
-function Composition.selectContactPairs!(ch::Composition.ContactDetectionMPR_handler) # ch::Composition.ContactDetectionMPR_handler)
-  #println("selectContactPairs")
+function Composition.selectContactPairs!(ch::Composition.ContactDetectionMPR_handler, world::Composition.Object3D)
   if !ch.distanceComputed
-    computeDistances(ch,false)
+    computeDistances(ch, world, false)
   end
   if !isempty(ch.dict1)
     if !isempty(ch.dict2)
@@ -86,7 +64,6 @@ function Composition.selectContactPairs!(ch::Composition.ContactDetectionMPR_han
     end
   end
   #println("ch.contactPairs.z = ", ch.contactPairs.z)
-  #println("\n")
   ch.distanceComputed = true
 end
 
@@ -97,10 +74,9 @@ end
 # call of function selectContactPairs!(C) in z in O(n log(nz))
 # operations. This function is called whenever the integrator
 # requests a new zero-crossing function evaluation
-function Composition.getDistances!(ch::Composition.ContactDetectionMPR_handler)
-  #println("getDistances")
+function Composition.getDistances!(ch::Composition.ContactDetectionMPR_handler, world::Composition.Object3D)
   if !ch.distanceComputed
-    computeDistances(ch,true)
+    computeDistances(ch, world, true)
     #println("getDistances: ch.contactPairs.z = ", ch.contactPairs.z)
     #println("\n")
     ch.distanceComputed = true
@@ -108,7 +84,7 @@ function Composition.getDistances!(ch::Composition.ContactDetectionMPR_handler)
 end
 
 
-function computeDistances(ch::Composition.ContactDetectionMPR_handler, phase2::Bool)
+function computeDistances(ch::Composition.ContactDetectionMPR_handler, world::Composition.Object3D, phase2::Bool)
   collSuperObjs = ch.contactPairs.collSuperObjs
   noCPairs = ch.contactPairs.noCPairs
 
@@ -147,20 +123,15 @@ function computeDistances(ch::Composition.ContactDetectionMPR_handler, phase2::B
               nextObj = nextSuperObj[j]
               nextAABB = nextSuperAABB[j]
               index = pack(is,i,js,j)
-              storeDistancesForSolver!(index, ch, actObj, nextObj, actAABB, nextAABB, phase2)
-    end; end; end; end; end; end
-
-    #visualizeContactPoints()
-    #visualizeSupportPoints()
- end
- # println("\n")
- return nothing
+              storeDistancesForSolver!(world, index, ch, actObj, nextObj, actAABB, nextAABB, phase2)
+  end; end; end; end; end; end; end
+  # println("\n")
+  return nothing
 end
 
-function storeDistancesForSolver!(index::Integer, ch::Composition.ContactDetectionMPR_handler,
+function storeDistancesForSolver!(world::Composition.Object3D, index::Integer, ch::Composition.ContactDetectionMPR_handler,
                                   actObj::Composition.Object3D, nextObj::Composition.Object3D,
                                   actAABB::Basics.BoundingBox, nextAABB::Basics.BoundingBox, phase2::Bool)
-
   # Broad Phase
   if AABB_touching(actAABB, nextAABB) # AABB's are overlapping
     # narrow phase
@@ -197,22 +168,16 @@ function storeDistancesForSolver!(index::Integer, ch::Composition.ContactDetecti
         ch.contactPairs.contactNormal[j_local] = contactNormal
         ch.contactPairs.contactObj1[j_local]   = actObj
         ch.contactPairs.contactObj2[j_local]   = nextObj
-
-        if contactPoint1 != nothing
-          Modia3D.set_r!(ch.contactPairs.contactVisuObj1[j_local],contactPoint1)
-          Modia3D.set_r!(ch.contactPairs.contactVisuObj2[j_local],contactPoint2)
-          #ch.contactPairs.contactVisuObj1[j_local].r_abs = contactPoint1
-          #ch.contactPairs.contactVisuObj2[j_local].r_abs = contactPoint2
-
-          # println("ch.contactPairs.contactVisuObj1[j_local].r_abs ", ch.contactPairs.contactVisuObj1[j_local] )
+        if ch.visualizeContactPoints
+          setVisualizationContactProperties!(world.contactVisuObj1[j_local], contactPoint1)
+          setVisualizationContactProperties!(world.contactVisuObj2[j_local], contactPoint2)
         end
+
       else
         if distance < 0.0
           error("\nNumber of max. collision pairs nz (= ", ch.contactPairs.nz, ") is too low.",
                 "\nProvide a large nz_max with Modia3D.SceneOptions(nz_max=xxx).")
   end; end; end; end
-
-
   return nothing
 end
 
@@ -237,49 +202,15 @@ function computeDistanceOneAxisAABB(A_min, A_max, B_min, B_max)
 end
 
 
-#=
-function Composition.visualizeContactPoints()
-  if ch.visualizeContactPoints
-    i = 0
-    for obj in ch.contactPointShape1
-      i += 1
-      obj.diameter = 0.05  #Shapes.Sphere(0.05; visible=true, collide=false, material=Shapes.Material(; color=[0,0,0]))
-      obj.r_abs = ch.contactPoint1[i] #point
-    end
-    i = 0
-    for obj in ch.contactPointShape2
-      i += 1
-      obj.diameter = 0.05  #Shapes.Sphere(0.05; visible=true, collide=false, material=Shapes.Material(; color=[0,0,0]))
-      obj.r_abs = ch.contactPoint2[i]
-    end
+function setVisualizationContactProperties!(obj::Composition.Object3D, contactPoint)
+  if contactPoint != nothing
+    Modia3D.set_r_abs!(obj, contactPoint)
+    obj.data.material.transparency = 0.0
+  else
+    obj.data.material.transparency = 1.0
   end
+  return nothing
 end
-=#
-
-
-#function Composition.visualizeSupportPoints()
-  #if ch.visualizeSupportPoints
-    #println("not supported yet!")
-    #=
-           if r1_a != nothing
-             ch.SupportPoints[c] = SimVis.Sphere(0.05; material=SimVis.Material(; color=[255,0,0]))
-             ch.SupportPoints[c].r_abs .= r1_a
-             ch.SupportPoints[c+size] = SimVis.Sphere(0.05; material=SimVis.Material(; color=[255,0,0]))
-             ch.SupportPoints[c+size].r_abs .= r1_b
-
-             ch.SupportPoints[c+2*size] = SimVis.Sphere(0.05; material=SimVis.Material(; color=[0,255,0]))
-             ch.SupportPoints[c+2*size].r_abs .= r2_a
-             ch.SupportPoints[c+3*size] = SimVis.Sphere(0.05; material=SimVis.Material(; color=[0,255,0]))
-             ch.SupportPoints[c+3*size].r_abs .= r2_b
-
-             ch.SupportPoints[c+4*size] = SimVis.Sphere(0.05; material=SimVis.Material(; color=[0,0,255]))
-             ch.SupportPoints[c+4*size].r_abs .= r3_a
-             ch.SupportPoints[c+5*size] = SimVis.Sphere(0.05; material=SimVis.Material(; color=[0,0,255]))
-             ch.SupportPoints[c+5*size].r_abs .= r3_b
-           end
-    =#
-  #end
-#end
 
 
 function Composition.closeContactDetection!(ch::Composition.ContactDetectionMPR_handler)

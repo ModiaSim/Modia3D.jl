@@ -22,7 +22,7 @@ filenameBunny = joinpath(Modia3D.path, "objects", "bunny", "bunny.obj")
 
   #boxMoving     = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidBox(1.0,1.0,1.0) , "Aluminium", vmat1; contactMaterial = cmat); r=[0.0, 0.0, 0.0], R=ModiaMath.rot2(-pi/2), fixed=false)
 
-  sphereMoving     = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidSphere(1.0) , "Aluminium", vmat1; contactMaterial = cmat); r=[0.0, 0.0, 0.0],  fixed=false) # R=ModiaMath.rot2(-pi/2),
+  sphereMoving     = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidSphere(0.5) , "Aluminium", vmat1; contactMaterial = cmat); r=[0.0, 0.0, 0.0],  fixed=false) # R=ModiaMath.rot2(-pi/2),
 
   #fileMesh2 = Modia3D.Object3D(world, Modia3D.SolidWithConvexDecomposition(solidFileMeshCrank, "Aluminium", vmat1, vmat2; contactMaterial = cmat); r=[3.0,0.0,0.0], fixed=false)
 
@@ -33,14 +33,14 @@ end
 
 
 gravField = Modia3D.UniformGravityField(g=9.81, n=[-1,0,0])
-threeD = ThreeDFiles(sceneOptions=Modia3D.SceneOptions(gravityField=gravField,visualizeFrames=true, defaultFrameLength=0.7,nz_max = 100, enableContactDetection=true))
+threeD = ThreeDFiles(sceneOptions=Modia3D.SceneOptions(gravityField=gravField,visualizeFrames=true, defaultFrameLength=0.7,nz_max = 100, enableContactDetection=true, visualizeContactPoints=true))
 
 
 # Modia3D.visualizeAssembly!( threeD )
 
 
 model = Modia3D.SimulationModel( threeD )
-result = ModiaMath.simulate!(model; stopTime=4.0, tolerance=1e-6,interval=0.001, log=true)
+result = ModiaMath.simulate!(model; stopTime=4.0, tolerance=1e-6,interval=0.001, log=false)
 
 
 println("... success of tests_SolidFileMesh.jl!")

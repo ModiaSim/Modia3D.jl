@@ -56,11 +56,9 @@ struct ContactPairs
    contactObj1::Vector{Union{Object3D,NOTHING}}
    contactObj2::Vector{Union{Object3D,NOTHING}}
 
-   contactVisuObj1::Vector{Object3D}
-   contactVisuObj2::Vector{Object3D}
 
    function ContactPairs(world::Composition.Object3D, superObjs::Array{SuperObjsRow,1},
-                         noCPairs::Array{Array{Int64,1}}, AABB::Array{Array{Basics.BoundingBox}}, nz_max::Int)
+                         noCPairs::Array{Array{Int64,1}}, AABB::Array{Array{Basics.BoundingBox}}, nz_max::Int, visualizeContactPoints::Bool, defaultContactSphereDiameter::Float64)
       @assert(length(superObjs) > 0)
       @assert(length(noCPairs) == length(superObjs))
       @assert(nz_max > 0)
@@ -68,7 +66,6 @@ struct ContactPairs
 
       # Determine the dimension of vector z (<= nzmax, but at most the number of all possible contact point combinations)
       nz = 0
-
       collSuperObjs = Array{Array{Object3D,1},1}()
 
       for i_superObj = 1:length(superObjs)
@@ -97,21 +94,25 @@ struct ContactPairs
       contactPoint1  = [defaultPoint for i = 1:nz]
       contactPoint2  = [defaultPoint for i = 1:nz]
       contactNormal  = [defaultPoint for i = 1:nz]
-
       contactObj1    = Vector{Union{Object3D,NOTHING}}(nothing,nz)
       contactObj2    = Vector{Union{Object3D,NOTHING}}(nothing,nz)
 
-      for i = 1:nz
-         contactObj1[i] = nothing
-         contactObj2[i] = nothing
+      if nz > 0
+         world.contactVisuObj1 = Vector{Object3D}[]
+         world.contactVisuObj2 = Vector{Object3D}[]
+         for i = 1:nz
+            contactObj1[i] = nothing
+            contactObj2[i] = nothing
+            if visualizeContactPoints
+               push!(world.contactVisuObj1, Object3D(world, Modia3D.Sphere(defaultContactSphereDiameter, material= Modia3D.Material(color="Black", transparency=1.0)); fixed=false) )
+               push!(world.contactVisuObj2, Object3D(world, Modia3D.Sphere(defaultContactSphereDiameter, material= Modia3D.Material(color="Black", transparency=1.0)); fixed=false) )
+            end
+         end
       end
-
-      dummyContactVisuObj = Object3D(world, Modia3D.Sphere(0.3, material= Modia3D.Material(color="Black", transparency=0.0) ), fixed=false )
-      contactVisuObj1 = fill(dummyContactVisuObj, nz) # Vector{Object3D}(dummyContactVisuObj,nz)
-      contactVisuObj2 = fill(dummyContactVisuObj, nz) # Vector{Object3D}(dummyContactVisuObj,nz)
+      # push!(scene.allVisuElements, world.contactVisuObjs)
 
       new(collSuperObjs, noCPairs, AABB, dummyObject3D, length(collSuperObjs), nz, allPossibleContactPairsInz,
-          z, contactPoint1, contactPoint2, contactNormal, contactObj1, contactObj2, contactVisuObj1, contactVisuObj2)
+          z, contactPoint1, contactPoint2, contactNormal, contactObj1, contactObj2)
    end
 end
 
@@ -237,6 +238,8 @@ struct SceneOptions
    # ContactDetection
    enableContactDetection::Bool   # = true, if contact detection is enabled
 
+   defaultContactSphereDiameter::Float64   # = true, if contact points are visualized
+
    function SceneOptions(;contactDetection       = ContactDetectionMPR_handler(),
                           nz_max                 = 100,
                           gravityField           = UniformGravityField(),
@@ -258,7 +261,8 @@ struct SceneOptions
                           defaultN_to_m          = 1000,
                           defaultNm_to_m         = 1000,
                           enableContactDetection = true,
-                          useOptimizedStructure  = true)
+                          useOptimizedStructure  = true,
+                          defaultContactSphereDiameter = 0.1)
       @assert(nz_max > 0)
       @assert(nominalLength > 0.0)
       @assert(defaultFrameLength > 0.0)
@@ -270,8 +274,9 @@ struct SceneOptions
       @assert(defaultArrowDiameter > 0.0)
       @assert(defaultN_to_m > 0.0)
       @assert(defaultNm_to_m  > 0.0)
+      @assert(defaultContactSphereDiameter > 0.0)
 
-      new(useOptimizedStructure,
+      scene = new(useOptimizedStructure,
           contactDetection,
           nz_max,
           gravityField,
@@ -292,7 +297,11 @@ struct SceneOptions
           defaultArrowDiameter,
           defaultN_to_m,
           defaultNm_to_m,
-          enableContactDetection)
+          enableContactDetection,
+          defaultContactSphereDiameter)
+      scene.contactDetection.visualizeContactPoints       = visualizeContactPoints
+      scene.contactDetection.defaultContactSphereDiameter = defaultContactSphereDiameter
+      return scene
    end
 end
 

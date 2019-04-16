@@ -10,7 +10,6 @@ using Modia3D.Test
    include("test_Composition.jl")
    include("test_DynamicExamples.jl")
    include("test_Examples.jl")
-
    include("runexamples.jl")
 
    println("\n... success of all tests!")

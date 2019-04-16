@@ -39,7 +39,7 @@ export Part
 export SimulationModel
 export BodyWithTwoFrames
 export printObject3DAndAllChildren, writeObject3DAndAllChildrenOnJsonFile
-export set_r!, set_q!
+export set_r!, set_q!, set_r_abs!
 export Revolute, setAngle!, connect, addRevoluteTorqueObject, computeTorque
 export Prismatic, setDistance!
 export FreeMotion
