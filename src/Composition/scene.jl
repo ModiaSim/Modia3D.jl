@@ -104,7 +104,7 @@ struct ContactPairs
             contactObj1[i] = nothing
             contactObj2[i] = nothing
             if visualizeContactPoints
-               push!(world.contactVisuObj1, Object3D(world, Modia3D.Sphere(defaultContactSphereDiameter, material= Modia3D.Material(color="Black", transparency=1.0)); fixed=false) )
+               push!(world.contactVisuObj1, Object3D(world, Modia3D.Sphere(defaultContactSphereDiameter, material= Modia3D.Material(color="Red", transparency=1.0)); fixed=false) )
                push!(world.contactVisuObj2, Object3D(world, Modia3D.Sphere(defaultContactSphereDiameter, material= Modia3D.Material(color="Black", transparency=1.0)); fixed=false) )
             end
          end

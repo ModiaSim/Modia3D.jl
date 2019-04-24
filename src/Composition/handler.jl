@@ -281,6 +281,8 @@ function chooseAndBuildUpTree(world::Object3D, scene::Scene)
      build_superObjs!(scene, world)
      if scene.options.enableContactDetection && scene.collide
         initializeContactDetection!(world, scene)
+        append!(scene.allVisuElements, world.contactVisuObj1)
+        append!(scene.allVisuElements, world.contactVisuObj2)
      end
      initializeMassComputation!(scene)
   else

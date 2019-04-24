@@ -125,7 +125,7 @@ function collision(ch::Composition.ContactDetectionMPR_handler, shapeA::Composit
      #println("r1.a, r1.b = ", r1.a, " ", r1.b)
      #println("SVector{3,Float64}(r1.a) = ", SVector{3,Float64}(r1.a))
      #println("... (",shapeA, ",", shapeB, "): termination 1")
-     #println("TC 1")
+     println("TC 1")
      # println("Fall n2abs <= neps ", r1.a, " r1.b " , r1.b, " r1.n ", r1.n)
 
      return (distance, SVector{3,Float64}(r1.a), SVector{3,Float64}(r1.b), SVector{3,Float64}(r1.n), nothing, nothing, nothing, nothing, nothing, nothing)
@@ -219,14 +219,14 @@ function collision(ch::Composition.ContactDetectionMPR_handler, shapeA::Composit
 =#
 
       if norm(cross(r4.p,r4.n)) < tol_rel
-        #println("TC 2")
+        println("TC 2")
         #println("... cross(r4.p,r4.n) < tol_rel")
         distance = -dot(r4.n, r4.p)
         barycentric(r1,r2,r3,r4)
         # println("r4.a = ", r4.a, ", r4.b = ", r4.b, " ,r1.a = ", r1.a, " ,r1.b = ", r1.b," ,r2.a = ", r2.a, " ,r2.b = ",r2.b," ,r3.a = ",r3.a," ,r3.b = ",r3.b)
         return (distance,SVector{3,Float64}(r4.a),SVector{3,Float64}(r4.b),SVector{3,Float64}(r4.n),SVector{3,Float64}(r1.a),SVector{3,Float64}(r1.b),SVector{3,Float64}(r2.a),SVector{3,Float64}(r2.b),SVector{3,Float64}(r3.a),SVector{3,Float64}(r3.b))
       elseif abs(dot(r4.p-r1.p, r4.n)) < tol_rel
-        #println("TC 3")
+        println("TC 3")
         # println("... abs(dot(r4.p-r1.p, r4.n)) < tol_rel")
         (r4.p, distance) = signedDistanceToPortal(r0.p,r1.p,r2.p,r3.p)
         barycentric(r1,r2,r3,r4)
