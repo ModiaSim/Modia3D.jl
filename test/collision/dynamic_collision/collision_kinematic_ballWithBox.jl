@@ -15,13 +15,13 @@ cmat = Modia3D.defaultContactMaterial()
 @assembly BallWithBox begin
   world = Modia3D.Object3D(visualizeFrame=true)
 
-  sphereMoving     = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidSphere(0.5) , "Aluminium", vmat1; contactMaterial = cmat); r=[0.0, 0.0, 0.0],  fixed=false) # R=ModiaMath.rot2(-pi/2),
+  sphereMoving     = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidSphere(0.5) , "Aluminium", vmat1; contactMaterial = cmat); r=[0.0, 0.0, 0.0],  fixed=false) #R=ModiaMath.rot2(-pi/2),
 
   box     = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidBox(1.0,4.0,10.0) , "Aluminium", vmat1; contactMaterial = cmat); r=[-3.0, 0.0, -2.0], fixed=true) # R=ModiaMath.rot2(-pi/3),
 end
 
 gravField = Modia3D.UniformGravityField(g=9.81, n=[-1,0,0])
-ballBox = BallWithBox(sceneOptions=Modia3D.SceneOptions(gravityField=gravField,visualizeFrames=true, defaultFrameLength=0.7,nz_max = 100, enableContactDetection=true, visualizeContactPoints=true))
+ballBox = BallWithBox(sceneOptions=Modia3D.SceneOptions(gravityField=gravField,visualizeFrames=true, defaultFrameLength=0.7,nz_max = 100, enableContactDetection=true, visualizeContactPoints=true, visualizeSupportPoints=true))
 
 
 
@@ -29,11 +29,11 @@ Modia3D.initAnalysis!(ballBox)
 
 
 tStart=0.0
-tEnd  =0.001
+tEnd  =0.00000001
 
-Lx = 3.0
-s = 2.82
-for time = range(tStart, stop=tEnd, length=101)
+Lx = 3.5
+s = 2.5  # 2.249 # 2.6996028006546
+for time = range(tStart, stop=tEnd, length=2)
   #s = Modia3D.linearMovement(Lx, tStart, tEnd, time)
   delta_phi = Modia3D.linearMovement(pi/3, tStart, tEnd, time)
 

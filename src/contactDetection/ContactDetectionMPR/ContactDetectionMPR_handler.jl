@@ -22,8 +22,8 @@ mutable struct ContactDetectionMPR_handler <: Modia3D.AbstractContactDetection
 
   # Visualization options
   visualizeContactPoints::Bool
+  visualizeSupportPoints::Bool
   defaultContactSphereDiameter::Float64
-  #visualizeSupportPoints::Bool
 
   function ContactDetectionMPR_handler(;tol_rel   = 1e-4,
                                         niter_max = 100 ,

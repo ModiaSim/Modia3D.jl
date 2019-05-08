@@ -283,6 +283,12 @@ function chooseAndBuildUpTree(world::Object3D, scene::Scene)
         initializeContactDetection!(world, scene)
         append!(scene.allVisuElements, world.contactVisuObj1)
         append!(scene.allVisuElements, world.contactVisuObj2)
+        append!(scene.allVisuElements, world.supportVisuObj1A)
+        append!(scene.allVisuElements, world.supportVisuObj1B)
+        append!(scene.allVisuElements, world.supportVisuObj1C)
+        append!(scene.allVisuElements, world.supportVisuObj2A)
+        append!(scene.allVisuElements, world.supportVisuObj2B)
+        append!(scene.allVisuElements, world.supportVisuObj2C)
      end
      initializeMassComputation!(scene)
   else

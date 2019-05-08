@@ -58,7 +58,7 @@ struct ContactPairs
 
 
    function ContactPairs(world::Composition.Object3D, superObjs::Array{SuperObjsRow,1},
-                         noCPairs::Array{Array{Int64,1}}, AABB::Array{Array{Basics.BoundingBox}}, nz_max::Int, visualizeContactPoints::Bool, defaultContactSphereDiameter::Float64)
+                         noCPairs::Array{Array{Int64,1}}, AABB::Array{Array{Basics.BoundingBox}}, nz_max::Int, visualizeContactPoints::Bool, visualizeSupportPoints::Bool, defaultContactSphereDiameter::Float64)
       @assert(length(superObjs) > 0)
       @assert(length(noCPairs) == length(superObjs))
       @assert(nz_max > 0)
@@ -100,12 +100,26 @@ struct ContactPairs
       if nz > 0
          world.contactVisuObj1 = Vector{Object3D}[]
          world.contactVisuObj2 = Vector{Object3D}[]
+         world.supportVisuObj1A = Vector{Object3D}[]
+         world.supportVisuObj1B = Vector{Object3D}[]
+         world.supportVisuObj1C = Vector{Object3D}[]
+         world.supportVisuObj2A = Vector{Object3D}[]
+         world.supportVisuObj2B = Vector{Object3D}[]
+         world.supportVisuObj2C = Vector{Object3D}[]
          for i = 1:nz
             contactObj1[i] = nothing
             contactObj2[i] = nothing
             if visualizeContactPoints
                push!(world.contactVisuObj1, Object3D(world, Modia3D.Sphere(defaultContactSphereDiameter, material= Modia3D.Material(color="Red", transparency=1.0)); fixed=false) )
                push!(world.contactVisuObj2, Object3D(world, Modia3D.Sphere(defaultContactSphereDiameter, material= Modia3D.Material(color="Black", transparency=1.0)); fixed=false) )
+            end
+            if visualizeSupportPoints
+               push!(world.supportVisuObj1A, Object3D(world, Modia3D.Sphere(defaultContactSphereDiameter, material= Modia3D.Material(color="Red", transparency=1.0)); fixed=false) )
+               push!(world.supportVisuObj1B, Object3D(world, Modia3D.Sphere(defaultContactSphereDiameter, material= Modia3D.Material(color="Red", transparency=1.0)); fixed=false) )
+               push!(world.supportVisuObj1C, Object3D(world, Modia3D.Sphere(defaultContactSphereDiameter, material= Modia3D.Material(color="Red", transparency=1.0)); fixed=false) )
+               push!(world.supportVisuObj2A, Object3D(world, Modia3D.Sphere(defaultContactSphereDiameter, material= Modia3D.Material(color="Black", transparency=1.0)); fixed=false) )
+               push!(world.supportVisuObj2B, Object3D(world, Modia3D.Sphere(defaultContactSphereDiameter, material= Modia3D.Material(color="Black", transparency=1.0)); fixed=false) )
+               push!(world.supportVisuObj2C, Object3D(world, Modia3D.Sphere(defaultContactSphereDiameter, material= Modia3D.Material(color="Black", transparency=1.0)); fixed=false) )
             end
          end
       end
@@ -300,6 +314,7 @@ struct SceneOptions
           enableContactDetection,
           defaultContactSphereDiameter)
       scene.contactDetection.visualizeContactPoints       = visualizeContactPoints
+      scene.contactDetection.visualizeSupportPoints       = visualizeSupportPoints
       scene.contactDetection.defaultContactSphereDiameter = defaultContactSphereDiameter
       return scene
    end

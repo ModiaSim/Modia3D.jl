@@ -17,7 +17,7 @@ AABB_touching(aabb1::Basics.BoundingBox, aabb2::Basics.BoundingBox) = aabb1.x_ma
 function Composition.initializeContactDetection!(world::Composition.Object3D, scene::Composition.Scene)
   ch = scene.options.contactDetection
   ch.contactPairs = Composition.ContactPairs(world,  scene.superObjs, scene.noCPairs, scene.AABB, scene.options.nz_max,
-                                ch.visualizeContactPoints, ch.defaultContactSphereDiameter)
+                                ch.visualizeContactPoints, ch.visualizeSupportPoints, ch.defaultContactSphereDiameter)
   if ch.contactPairs.nz == 0
      Composition.closeContactDetection!(ch)
      scene.collide = false
@@ -170,10 +170,20 @@ function storeDistancesForSolver!(world::Composition.Object3D, index::Integer, c
         ch.contactPairs.contactObj1[j_local]   = actObj
         ch.contactPairs.contactObj2[j_local]   = nextObj
         if ch.visualizeContactPoints
-          setVisualizationContactProperties!(world.contactVisuObj1[j_local], contactPoint1)
-          setVisualizationContactProperties!(world.contactVisuObj2[j_local], contactPoint2)
+          transparency = 0.0
+          setVisualizationContactProperties!(world.contactVisuObj1[j_local], transparency, contactPoint1)
+          setVisualizationContactProperties!(world.contactVisuObj2[j_local], transparency, contactPoint2)
         end
-
+        if ch.visualizeSupportPoints
+          transparency = 0.5
+          setVisualizationContactProperties!(world.supportVisuObj1A[j_local], transparency, r1_a)
+          setVisualizationContactProperties!(world.supportVisuObj1B[j_local], transparency, r2_a)
+          setVisualizationContactProperties!(world.supportVisuObj1C[j_local], transparency, r3_a)
+          setVisualizationContactProperties!(world.supportVisuObj2A[j_local], transparency, r1_b)
+          setVisualizationContactProperties!(world.supportVisuObj2B[j_local], transparency, r2_b)
+          setVisualizationContactProperties!(world.supportVisuObj2C[j_local], transparency, r3_b)
+          println("r1_a = ", r1_a, " r2_a = ", r2_a, " r3_a = ", r3_a, " r1_b = ", r1_b, " r2_b = ", r2_b, " r3_b = ", r3_b)
+        end
       else
         if distance < 0.0
           error("\nNumber of max. collision pairs nz (= ", ch.contactPairs.nz, ") is too low.",
@@ -203,10 +213,10 @@ function computeDistanceOneAxisAABB(A_min, A_max, B_min, B_max)
 end
 
 
-function setVisualizationContactProperties!(obj::Composition.Object3D, contactPoint)
+function setVisualizationContactProperties!(obj::Composition.Object3D, transparency, contactPoint)
   if contactPoint != nothing
     Modia3D.set_r_abs!(obj, contactPoint)
-    obj.data.material.transparency = 0.0
+    obj.data.material.transparency = transparency
   else
     obj.data.material.transparency = 1.0
   end

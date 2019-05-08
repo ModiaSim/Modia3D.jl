@@ -98,6 +98,7 @@ isNextPortal(r0,r1,r2,r4) = dot( cross( (r2.p-r0.p), (r4.p-r0.p) ), r0.p ) <= 0.
 function collision(ch::Composition.ContactDetectionMPR_handler, shapeA::Composition.Object3D, shapeB::Modia3D.Composition.Object3D)
   tol_rel = ch.tol_rel
   niter_max = ch.niter_max
+  #println("niter_max = ", niter_max)
   neps = ch.neps
 
    ### Phase 1, Minkowski Portal Refinement
@@ -105,10 +106,12 @@ function collision(ch::Composition.ContactDetectionMPR_handler, shapeA::Composit
    centroidB = getCentroid(shapeB, Modia3D.centroid(shapeB.data.geo))
 
    r0 = SupportPoint(centroidA-centroidB, SVector{3,Float64}(0.0,0.0,0.0), SVector{3,Float64}(0.0,0.0,0.0), SVector{3,Float64}(0.0,0.0,0.0))
+   #println("1. r0 = ", r0.p)
    if norm(r0.p) <= neps # centers of shapes are overlapping
      error("MPR: Too large penetration (prerequisite of MPR violated). Centers are overlapping. Look at shapeA = ", shapeA, " shapeB = ", shapeB)
    end
    r1   = getSupportPoint(shapeA, shapeB, Basics.normalizeVector(-r0.p))
+   # println("2. r1.p = ", r1.p)
    n2 = cross(r0.p, r1.p)
    n2abs = norm(n2)
    #if n2abs < 1e-10
@@ -133,6 +136,7 @@ function collision(ch::Composition.ContactDetectionMPR_handler, shapeA::Composit
      n2 = n2/n2abs
    end
    r2 = getSupportPoint(shapeA, shapeB, n2)
+   # println("3. r2.p = ", r2.p)
 
    n3 = cross(r1.p-r0.p, r2.p-r0.p)
    if norm(n3) <= neps
@@ -150,6 +154,7 @@ function collision(ch::Composition.ContactDetectionMPR_handler, shapeA::Composit
      n3 = -n3
    end
    r3 = getSupportPoint(shapeA, shapeB, Basics.normalizeVector(n3))
+   # println("4. r3.p = ", r3.p)
    # check if points r1, r2, r3 are on the same line
    n3b = cross(r2.p-r1.p, r3.p-r1.p)
    if norm(n3b) <= neps
@@ -168,16 +173,20 @@ function collision(ch::Composition.ContactDetectionMPR_handler, shapeA::Composit
    aux = SVector(0.0, 0.0, 0.0)
    success = false
    for i in 1:niter_max
+     #println("phase 2, iteration i = ", i)
+     #println("r1.p = ", r1.p , " r2.p = ", r2.p ," r3.p = ", r3.p)
       aux = cross(r1.p-r0.p,r3.p-r0.p)
       if dot(aux,r0.p) < -neps
          r2 = r3
          r3 = getSupportPoint(shapeA,shapeB,Basics.normalizeVector(aux))
+         #println("4. r3.p = ", r3.p)
          continue
       end
       aux = cross(r3.p-r0.p,r2.p-r0.p)
       if dot(aux,r0.p) < -neps
          r1 = r3
          r3 = getSupportPoint(shapeA,shapeB,Basics.normalizeVector(aux))
+         #println("5. r3.p = ", r3.p)
          continue
       end
       # println("counter von loop = ", i)
@@ -194,9 +203,11 @@ function collision(ch::Composition.ContactDetectionMPR_handler, shapeA::Composit
    nb = SVector(0.0, 0.0, 0.0)
    for i in 1:niter_max
       # Find support point using the tetrahedron face
+      #println("phase 3, iteration i = ", i)
       n4 = cross(r2.p-r1.p, r3.p-r1.p)
       if norm(n4) <= neps
         r3 = getSupportPoint(shapeA, shapeB, -r3.n) # change search direction
+        #println("6. r3.p = ", r3.p)
         if abs(dot((r3.p-r1.p),r3.n)) <= neps
           # Shape is purely planar. Computing the shortest distance for a planar shape
           # requires an MPR 2D algorithm (using lines instead of triangles as portals).
@@ -209,6 +220,7 @@ function collision(ch::Composition.ContactDetectionMPR_handler, shapeA::Composit
         n4 = -n4
       end
       r4 = getSupportPoint(shapeA, shapeB, Basics.normalizeVector(n4))
+      #println("7. r4.p = ", r4.p)
       # Is our new point already on the plane of our triangle,
       # we're already as close as we can get to the origin
 
@@ -221,12 +233,21 @@ function collision(ch::Composition.ContactDetectionMPR_handler, shapeA::Composit
       if norm(cross(r4.p,r4.n)) < tol_rel
         println("TC 2")
         #println("... cross(r4.p,r4.n) < tol_rel")
+        if !analyzeFinalPortal(r1.p, r2.p, r3.p, r4.p, neps)
+          error("shapeA = ", shapeA, " shapeB = ", shapeB)
+        end
         distance = -dot(r4.n, r4.p)
         barycentric(r1,r2,r3,r4)
         # println("r4.a = ", r4.a, ", r4.b = ", r4.b, " ,r1.a = ", r1.a, " ,r1.b = ", r1.b," ,r2.a = ", r2.a, " ,r2.b = ",r2.b," ,r3.a = ",r3.a," ,r3.b = ",r3.b)
         return (distance,SVector{3,Float64}(r4.a),SVector{3,Float64}(r4.b),SVector{3,Float64}(r4.n),SVector{3,Float64}(r1.a),SVector{3,Float64}(r1.b),SVector{3,Float64}(r2.a),SVector{3,Float64}(r2.b),SVector{3,Float64}(r3.a),SVector{3,Float64}(r3.b))
       elseif abs(dot(r4.p-r1.p, r4.n)) < tol_rel
         println("TC 3")
+        #println("r1.p = ", r1.p , " r2.p = ", r2.p ," r3.p = ", r3.p)
+        #println("r4.p = ", r4.p)
+        #println(" ")
+        if !analyzeFinalPortal(r1.p, r2.p, r3.p, r4.p, neps)
+          error("shapeA = ", shapeA, " shapeB = ", shapeB)
+        end
         # println("... abs(dot(r4.p-r1.p, r4.n)) < tol_rel")
         (r4.p, distance) = signedDistanceToPortal(r0.p,r1.p,r2.p,r3.p)
         barycentric(r1,r2,r3,r4)

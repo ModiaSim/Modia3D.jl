@@ -220,6 +220,13 @@ mutable struct Object3D <: Modia3D.AbstractAssemblyComponent
    contactVisuObj1::Union{Vector{Object3D},NOTHING}
    contactVisuObj2::Union{Vector{Object3D},NOTHING}
 
+   supportVisuObj1A::Union{Vector{Object3D},NOTHING}
+   supportVisuObj1B::Union{Vector{Object3D},NOTHING}
+   supportVisuObj1C::Union{Vector{Object3D},NOTHING}
+   supportVisuObj2A::Union{Vector{Object3D},NOTHING}
+   supportVisuObj2B::Union{Vector{Object3D},NOTHING}
+   supportVisuObj2C::Union{Vector{Object3D},NOTHING}
+
    # Data for dynamic simulation
    dynamics::Union{Object3Ddynamics, NOTHING}   # Data for dynamic simulation
 
@@ -249,6 +256,14 @@ mutable struct Object3D <: Modia3D.AbstractAssemblyComponent
       obj.visualizationFrame = nothing
       obj.contactVisuObj1    = nothing
       obj.contactVisuObj2    = nothing
+
+      obj.supportVisuObj1A   = nothing
+      obj.supportVisuObj1B   = nothing
+      obj.supportVisuObj1C   = nothing
+      obj.supportVisuObj2A   = nothing
+      obj.supportVisuObj2B   = nothing
+      obj.supportVisuObj2C   = nothing
+
       obj.dynamics           = nothing
       return obj
    end

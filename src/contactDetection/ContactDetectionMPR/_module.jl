@@ -27,6 +27,7 @@ using DataStructures
 
 const NOTHING = Nothing
 
+include("analyzeMPR.jl")
 include("utilities.jl")
 include("mpr.jl")
 include("handler.jl")

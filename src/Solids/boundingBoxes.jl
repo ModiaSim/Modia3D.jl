@@ -17,7 +17,7 @@ supportPoint(geo::SolidEllipsoid, r_abs::AbstractVector, R_abs::AbstractMatrix, 
             r_abs + R_abs'*supportPoint_abs(geo, R_abs*e)
 
 supportPoint(geo::SolidFileMesh, r_abs::AbstractVector, R_abs::AbstractMatrix, e::AbstractVector) =
-            r_abs + R_abs'*supportPoint_abs(geo, R_abs*e)
+            r_abs + R_abs'*supportPoint_abs(geo, R_abs*e) # + e*geo.rsmall
 
 
 #------------------------------------------------------------------------------------
