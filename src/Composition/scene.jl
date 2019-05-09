@@ -123,8 +123,7 @@ struct ContactPairs
             end
          end
       end
-      # push!(scene.allVisuElements, world.contactVisuObjs)
-
+      
       new(collSuperObjs, noCPairs, AABB, dummyObject3D, length(collSuperObjs), nz, allPossibleContactPairsInz,
           z, contactPoint1, contactPoint2, contactNormal, contactObj1, contactObj2)
    end

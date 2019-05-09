@@ -32,7 +32,7 @@ tStart=0.0
 tEnd  =0.00000001
 
 Lx = 3.5
-s = 2.5  # 2.249 # 2.6996028006546
+s = 2.2  # 2.249 # 2.6996028006546
 for time = range(tStart, stop=tEnd, length=2)
   #s = Modia3D.linearMovement(Lx, tStart, tEnd, time)
   delta_phi = Modia3D.linearMovement(pi/3, tStart, tEnd, time)

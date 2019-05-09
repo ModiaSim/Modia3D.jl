@@ -45,13 +45,28 @@ function intersect3DSegmentPlane(seg::Segment, plane::Plane, neps)
 end
 
 
-function sameSide(p1, p2, a, b)::Bool
+function sameSideTriangle(p1, p2, a, b)::Bool
    cp1 = cross(b-a, p1-a)
    cp2 = cross(b-a, p2-a)
    return (dot(cp1, cp2) >= 0.0)
 end
-pointInTriangle(p,a,b,c) = (sameSide(p,a,b,c) && sameSide(p,b,a,c) && sameSide(p,c,a,b))
+pointInTriangle(p,a,b,c) = (sameSideTriangle(p,a,b,c) && sameSideTriangle(p,b,a,c) && sameSideTriangle(p,c,a,b))
 
+
+function doesRayIntersectPortal(r1,r2,r3,point,neps)
+   plane = Plane(r1,r2,r3)
+   segment = Segment(point, SVector(0.0, 0.0, 0.0))
+
+   (value, intersectionPoint) = intersect3DSegmentPlane(segment, plane, neps)
+   if value == 1
+      if !pointInTriangle(intersectionPoint, r1, r2, r3)
+         error("Ray = ", point ," does not intersect portal (r1,r2,r3) = ", r1, r2, r3)
+         return false
+      end
+   end
+
+   return true
+end
 
 function analyzeFinalPortal(r1, r2, r3, r4, neps)
    plane = Plane(r1,r2,r3)
@@ -60,7 +75,7 @@ function analyzeFinalPortal(r1, r2, r3, r4, neps)
    if value == 1
       if !pointInTriangle(intersectionPoint, r1, r2, r3)
          println("Ray r4 = ", r4 ," is not intersecting last portal (r1,r2,r3) = ", r1, r2, r3)
-         #return false
+         return false
       end
    end
 
@@ -73,3 +88,13 @@ function analyzeFinalPortal(r1, r2, r3, r4, neps)
    #println("volumeTetraeder2 = ", volumeTetraeder2)
    return true
 end
+
+
+
+function sameSideTetrahedron(v1,v2,v3,v4,p)
+   normal = cross(v2-v1,v3-v1)
+   dotV4  = dot(normal, v4-v1)
+   dotP   = dot(normal, p-v1)
+   return ( sign(dotV4) == sign(dotP) )
+end
+pointInTetrahedron(v1,v2,v3,v4,p) = (sameSideTetrahedron(v1,v2,v3,v4,p) && sameSideTetrahedron(v2,v3,v4,v1,p) && sameSideTetrahedron(v3,v4,v1,v2,p) && sameSideTetrahedron(v4,v1,v2,v3,p) )

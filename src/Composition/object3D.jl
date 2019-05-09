@@ -298,7 +298,7 @@ mutable struct Object3D <: Modia3D.AbstractAssemblyComponent
 
       obj = new(ModiaMath.ComponentInternal(), parent, Vector{Object3D}[], fixedJoint,
                 false, false, false, r_rel, R_rel, r_abs, R_abs, nothing, data,
-                Modia3D.AbstractTwoObject3DObject[], false, false, false, false, visualizeFrame2, nothing, nothing, nothing, nothing)
+                Modia3D.AbstractTwoObject3DObject[], false, false, false, false, visualizeFrame2, nothing, nothing, nothing, nothing, nothing, nothing, nothing, nothing, nothing, nothing)
 
       if !fixed
          obj.joint = FreeMotion(obj; r_start = r_rel,
@@ -322,7 +322,7 @@ mutable struct Object3D <: Modia3D.AbstractAssemblyComponent
             twoObject3Dobject::Vector{Modia3D.AbstractTwoObject3DObject},
             visualizeFrame::Modia3D.Ternary) =
       new(_internal, parent, children, joint, false, false, false, r_rel,
-          R_rel, r_abs, R_abs, nothing, data, twoObject3Dobject, false, false, false, false, visualizeFrame, nothing, nothing, nothing, nothing)
+          R_rel, r_abs, R_abs, nothing, data, twoObject3Dobject, false, false, false, false, visualizeFrame, nothing, nothing, nothing, nothing, nothing, nothing, nothing, nothing, nothing, nothing)
 end
 
 

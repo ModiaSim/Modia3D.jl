@@ -19,7 +19,7 @@ cmat = Modia3D.defaultContactMaterial()
 end
 
 gravField = Modia3D.UniformGravityField(g=9.81, n=[-1,0,0])
-threeD = ThreeDFiles(sceneOptions=Modia3D.SceneOptions(gravityField=gravField,visualizeFrames=true, defaultFrameLength=0.7,nz_max = 100, enableContactDetection=true, visualizeContactPoints=true))
+threeD = ThreeDFiles(sceneOptions=Modia3D.SceneOptions(gravityField=gravField,visualizeFrames=true, defaultFrameLength=0.7,nz_max = 100, enableContactDetection=true, visualizeContactPoints=true, visualizeSupportPoints=true))
 
 
 model = Modia3D.SimulationModel( threeD )

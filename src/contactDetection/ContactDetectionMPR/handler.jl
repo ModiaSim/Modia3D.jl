@@ -135,7 +135,7 @@ function storeDistancesForSolver!(world::Composition.Object3D, index::Integer, c
   # Broad Phase
   if AABB_touching(actAABB, nextAABB) # AABB's are overlapping
     # narrow phase
-    (distance, contactPoint1, contactPoint2, contactNormal,r1_a, r1_b, r2_a, r2_b, r3_a, r3_b) = collision(ch, actObj, nextObj)
+    (distance, contactPoint1, contactPoint2, contactNormal,r1_a, r1_b, r2_a, r2_b, r3_a, r3_b) = mpr(ch, actObj, nextObj)
     println("distance = ", distance)
   else # AABB's are not overlapping
     (distance, contactPoint1, contactPoint2, contactNormal,r1_a, r1_b, r2_a, r2_b, r3_a, r3_b) = computeDistanceBetweenAABB(actAABB, nextAABB)
@@ -182,7 +182,7 @@ function storeDistancesForSolver!(world::Composition.Object3D, index::Integer, c
           setVisualizationContactProperties!(world.supportVisuObj2A[j_local], transparency, r1_b)
           setVisualizationContactProperties!(world.supportVisuObj2B[j_local], transparency, r2_b)
           setVisualizationContactProperties!(world.supportVisuObj2C[j_local], transparency, r3_b)
-          println("r1_a = ", r1_a, " r2_a = ", r2_a, " r3_a = ", r3_a, " r1_b = ", r1_b, " r2_b = ", r2_b, " r3_b = ", r3_b)
+          # println("r1_a = ", r1_a, " r2_a = ", r2_a, " r3_a = ", r3_a, " r1_b = ", r1_b, " r2_b = ", r2_b, " r3_b = ", r3_b)
         end
       else
         if distance < 0.0
