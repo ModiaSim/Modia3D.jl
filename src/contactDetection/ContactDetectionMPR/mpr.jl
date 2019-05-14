@@ -79,33 +79,42 @@ end
 
 function checkIfShapesArePlanar(r0::SupportPoint,r1::SupportPoint,r2::SupportPoint,n2::SVector{3,Float64}, neps::Float64,
                                 shapeA::Composition.Object3D,shapeB::Composition.Object3D)
+  # r3 is in the direction of plane normal that contains triangle r0-r1-r2
   n3 = cross(r1.p-r0.p, r2.p-r0.p)
+  # the triangle r0-r1-r2 has degenerated into a line segment
   if norm(n3) <= neps
+    # change search direction for r2
+    # because we are still interested in distances if shapes are not intersecting
     n2 = -n2
-    r2 = getSupportPoint(shapeA, shapeB, n2) # change search direction
+    r2 = getSupportPoint(shapeA, shapeB, n2)
     if abs(dot((r2.p-r1.p),n2)) <= neps
       # Shape is purely planar. Computing the shortest distance for a planar shape
       # requires an MPR 2D algorithm (using lines instead of triangles as portals).
       # However, this is not implemented and therefore the shortest distance cannot be computed
       error("MPR: Shapes are planar and MPR2D is not supported. abs(dot((r2.p-r1.p),n2)). Look at shapeA = ", shapeA, " shapeB = ", shapeB)
     end
+    # new normal to the triangle plane (r0-r1-r2_new)
     n3 = cross(r1.p-r0.p, r2.p-r0.p)   # |n3| > 0 guaranteed, due to construction
   end
+
   if dot(n3,r0.p) >= neps
     n3 = -n3
   end
-  # check if points r1, r2, r3 are on the same line
+
+  # check if portal triangle r1-r2-r3 has degenerated into a line segment <--> points r1,r2,r3 are on the same line
   r3 = getSupportPoint(shapeA, shapeB, Basics.normalizeVector(n3))
   n3b = cross(r2.p-r1.p, r3.p-r1.p)
   if norm(n3b) <= neps
-    r3 = getSupportPoint(shapeA, shapeB, -r3.n) # change search direction
+    # change search direction for r3
+    r3 = getSupportPoint(shapeA, shapeB, -r3.n)
     if abs(dot((r3.p-r1.p),r3.n)) <= neps
       # Shape is purely planar. Computing the shortest distance for a planar shape
       # requires an MPR 2D algorithm (using lines instead of triangles as portals).
       # However, this is not implemented and therefore the shortest distance cannot be computed
-      error("MPR: Shapes are planar and MPR2D is not supported. r1, r2, r3 are on the same ray. Look at shapeA = ", shapeA, " shapeB = ", shapeB)
+      error("MPR: Shapes are planar and MPR2D is not supported. r1, r2, r3 are on the same ray. abs(dot((r3.p-r1.p),r3.n)) <= neps. Look at shapeA = ", shapeA, " shapeB = ", shapeB)
     end
   end
+
   return (r2, r3, n2, n3)
 end
 
@@ -196,7 +205,9 @@ function createBabyTetrahedrons(r0::SupportPoint,r1::SupportPoint,r2::SupportPoi
 end
 
 # MPR - Minkowski Portal Refinement algorithm
+# construction of points r0 is in the interior of Minkowski Difference and points r1,r2,r3,r4 are on the boundary of Minkowski Difference
 # Phase 1
+#   Construct a tetrahedron such one point is in the interior r0 and three points r1,r2,r3 are on the boundary of the Minkowski Difference
 #   Construction of r0 and of initial portal triangle points r1, r2, r3
 #   Phase 1.1: construction of r0
 #   Phase 1.2: construction of initial r1
@@ -204,8 +215,14 @@ end
 #   Phase 1.3: construction of initial r2
 #   Phase 1.4: construction of initial r3
 # Phase 2
+#   make sure the origin ray passes through portal triangle r1-r2-r3, otherwise it is not sure that the portal's normal points in the right direction
+#   if the origin ray passes through the portal, --> the normal of all other triangles of the tetrahedron point away from the origin ray
+#   replace one of the points in the portal with a new one until the ray from r0 passes through the portal
 #   loop around to "ensure" the tetrahedron r0,r1,r2 and r3 encloses the origin
 # Phase 3
+#   search iteratively in the direction of the portal's normal
+#   construct a new portal, such the origin passes still the portal, and it is closer to the surface of the Minkowski Difference
+#   than the old portal
 #   Phase 3.1: construct r4,
 #   Phase 3.2: check if r4 is close to the origin
 #     Termination Condition 2
@@ -220,6 +237,8 @@ function mpr(ch::Composition.ContactDetectionMPR_handler, shapeA::Composition.Ob
   # Construction of r0 and initial portal triangle points r1, r2, r3
 
   ### Phase 1.1: construction of r0 ###
+  # r0 is a point inside the Minkowski Difference (centroidA-centroidB)
+  # the direction of the origin ray r0 is -r0.p
   centroidA = getCentroid(shapeA, Modia3D.centroid(shapeA.data.geo))
   centroidB = getCentroid(shapeB, Modia3D.centroid(shapeB.data.geo))
   r0 = SupportPoint(centroidA-centroidB, SVector{3,Float64}(0.0,0.0,0.0), SVector{3,Float64}(0.0,0.0,0.0), SVector{3,Float64}(0.0,0.0,0.0))
@@ -227,6 +246,9 @@ function mpr(ch::Composition.ContactDetectionMPR_handler, shapeA::Composition.Ob
   checkCentersOfShapesOverlapp(r0, neps, shapeA, shapeB)
 
   ### Phase 1.2: construction of initial r1 ###
+  # r1 is the farthest point in the direction to the origin
+  # first portal point should point in the direction of the origin ray (-r0.p)
+  # therefore choose search direction -r0.p
   r1 = getSupportPoint(shapeA, shapeB, Basics.normalizeVector(-r0.p))
 
   ### Phase 1.3: construction of initial r2 ###
@@ -234,17 +256,21 @@ function mpr(ch::Composition.ContactDetectionMPR_handler, shapeA::Composition.Ob
   n2abs = norm(n2)
   ## TERMINATION CONDITION 1 ##
   if n2abs <= neps
+    # r0 || r1, r0 ist parallel zu r1
     # centers of shapes (r0.p and r1.p) are on the same line segment
-    # e.g. any collision between two spheres
+    # the origin of Minkowski Difference is on the line from r0 with direction r1-r0
+    # e.g. any collision/or distance between two spheres
     println("TC 1")
     distance = dot(r1.p,normalize(r0.p))
     return (distance,r1.a,r1.b,r1.n, nothing, nothing, nothing, nothing, nothing, nothing)
   else
+    # normalize n2
     n2 = n2/n2abs
   end
   r2 = getSupportPoint(shapeA, shapeB, n2)
 
   ### Phase 1.4: construction of initial r3 ###
+  # r3 is in the direction of plane normal that contains triangle r0-r1-r2
   (r2, r3, n2, n3) = checkIfShapesArePlanar(r0, r1, r2, n2, neps, shapeA, shapeB)
 
 
