@@ -21,7 +21,7 @@ cmat = Modia3D.defaultContactMaterial()
 end
 
 gravField = Modia3D.UniformGravityField(g=9.81, n=[-1,0,0])
-ballBox = BallWithBox(sceneOptions=Modia3D.SceneOptions(gravityField=gravField,visualizeFrames=true, defaultFrameLength=0.7,nz_max = 100, enableContactDetection=true, visualizeContactPoints=true, visualizeSupportPoints=true))
+ballBox = BallWithBox(sceneOptions=Modia3D.SceneOptions(gravityField=gravField,visualizeFrames=true, defaultFrameLength=0.7,nz_max = 100, enableContactDetection=true, visualizeContactPoints=true, visualizeSupportPoints=false))
 
 
 
@@ -32,7 +32,7 @@ tStart=0.0
 tEnd  =0.00000001
 
 Lx = 3.5
-s = 2.2  # 2.249 # 2.6996028006546
+s =  2.3 #2.7 #2.6996028006546 #2.249
 for time = range(tStart, stop=tEnd, length=2)
   #s = Modia3D.linearMovement(Lx, tStart, tEnd, time)
   delta_phi = Modia3D.linearMovement(pi/3, tStart, tEnd, time)

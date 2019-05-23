@@ -19,7 +19,7 @@ mutable struct ContactMaterialElastic <: Modia3D.AbstractContactMaterial
    #v_min::Float64 # [m/s]       Tangential velocity at which sliding friction force starts
    #w_min::Float64 # [rad/s]     Rel. angular velocity at which sliding friction torque starts
 
-   function ContactMaterialElastic(; c = 1e5, d = 100.0, mu1=0.1)
+   function ContactMaterialElastic(; c = 1e9, d = 100.0, mu1=0.0)
       @assert(c > 0.0)
       @assert(d >= 0.0)
       #@assert(d_w >= 0.0)

@@ -135,11 +135,11 @@ function storeDistancesForSolver!(world::Composition.Object3D, index::Integer, c
   # Broad Phase
   if AABB_touching(actAABB, nextAABB) # AABB's are overlapping
     # narrow phase
-    (distance, contactPoint1, contactPoint2, contactNormal,r1_a, r1_b, r2_a, r2_b, r3_a, r3_b) = mpr(ch, actObj, nextObj)
+    (distance, contactPoint1, contactPoint2, contactNormal,r1_a, r1_b, r2_a, r2_b, r3_a, r3_b) = mpr(ch, actObj, nextObj, actObj.data.geo, nextObj.data.geo)
     println("distance = ", distance)
   else # AABB's are not overlapping
     (distance, contactPoint1, contactPoint2, contactNormal,r1_a, r1_b, r2_a, r2_b, r3_a, r3_b) = computeDistanceBetweenAABB(actAABB, nextAABB)
-    #error("distance = ", distance)
+    println("distance1 = ", distance)
   end
 
   if length(ch.dict1) < ch.contactPairs.nz

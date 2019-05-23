@@ -6,7 +6,7 @@
 #
 
 function responseCalculation(cM1::Solids.ContactMaterialElastic,
-                             cM2::Solids.ContactMaterialElastic, 
+                             cM2::Solids.ContactMaterialElastic,
                              obj1::Object3D,
                              obj2::Object3D,
                              s::Float64,
@@ -46,7 +46,7 @@ function responseCalculation(cM1::Solids.ContactMaterialElastic,
    #friction    = abs_v_rel_t > v_min
    #e_t         = v_rel_t/(friction ? abs_v_rel_t : v_min)
    w_rel_n     = dot(w2 - w1,e_n)
-            
+
    # Contact forces/torques
    f_c  = c*s
    f_d  = d*v_rel_n
@@ -61,8 +61,13 @@ function responseCalculation(cM1::Solids.ContactMaterialElastic,
    #ta   = t_n*e_n
    t1   = cross(r_rel1,f1)
    t2   = cross(r_rel2,f2)
-
+   #t2 = zeros(3)
+   #println("r_rel2 = ",r_rel2)
+   #println("f1 = ",f1)
+   #println("t1 = ",t1)
+   #println("t2 = ",t2)
    # println("... 1: ", ModiaMath.instanceName(obj1), ", 2: ", ModiaMath.instanceName(obj2), ", s = ", s, ", e_n = ", e_n, ", e_t = ", e_t, ", rContact = ", rContact, ", f_n = ", f_n, ", f_t = ", f_t)
+
 
    return (f1,f2,t1,t2)
 end

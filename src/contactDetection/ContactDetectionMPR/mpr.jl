@@ -130,13 +130,13 @@ function tetrahedronEncloseOrigin(r0::SupportPoint,r1::SupportPoint,r2::SupportP
   success = false
   for i in 1:niter_max
     aux = cross(r1.p-r0.p,r3.p-r0.p)
-    if dot(aux,r0.p) < -neps
+    if dot(aux,r0.n) < -neps
        r2 = r3
        r3 = getSupportPoint(shapeA,shapeB,Basics.normalizeVector(aux))
        continue
     end
     aux = cross(r3.p-r0.p,r2.p-r0.p)
-    if dot(aux,r0.p) < -neps
+    if dot(aux,r0.n) < -neps
        r1 = r3
        r3 = getSupportPoint(shapeA,shapeB,Basics.normalizeVector(aux))
        continue
@@ -176,8 +176,8 @@ function constructR4(r0::SupportPoint,r1::SupportPoint,r2::SupportPoint,r3::Supp
 end
 
 
-isNextPortal(r0,r1,r2,r4) = dot( cross( (r2.p-r0.p), (r4.p-r0.p) ), r0.p ) <= 0.0 &&
-                            dot( cross( (r4.p-r0.p), (r1.p-r0.p) ), r0.p ) <= 0.0
+isNextPortal(r0,r1,r2,r4) = dot( cross( (r2.p-r0.p), (r4.p-r0.p) ), r0.n ) <= 0.0 &&
+                            dot( cross( (r4.p-r0.p), (r1.p-r0.p) ), r0.n ) <= 0.0
 
 
 # Construction of three baby tetrahedrons and decide which one will replace
@@ -204,6 +204,23 @@ function createBabyTetrahedrons(r0::SupportPoint,r1::SupportPoint,r2::SupportPoi
   return (r1,r2,r3)
 end
 
+
+function scaleVector(scale, ri)
+  return ri.*scale
+end
+
+function skalarization(r0,r1,r2,r3)
+  maximum([abs.(r0.p) abs.(r1.p) abs.(r2.p) abs.(r3.p)])
+  x = maximum([abs.(A) abs.(B) abs.(C)])
+  scale = 1/x
+  r0.p = scaleVector(scale, r0.p)
+  r0.p = scaleVector(scale, r0.p)
+  r0.p = scaleVector(scale, r0.p)e
+  r0.p = scaleVector(scale, r0.p)
+  return (r0,r1,r2,r3,scale)
+end
+
+
 # MPR - Minkowski Portal Refinement algorithm
 # construction of points r0 is in the interior of Minkowski Difference and points r1,r2,r3,r4 are on the boundary of Minkowski Difference
 # Phase 1
@@ -228,8 +245,9 @@ end
 #     Termination Condition 2
 #     Termination Condition 3
 #   Phase 3.3: construct baby tetrahedrons with r1,r2,r3,r4 and create a new portal
-function mpr(ch::Composition.ContactDetectionMPR_handler, shapeA::Composition.Object3D, shapeB::Modia3D.Composition.Object3D)
+function mpr(ch::Composition.ContactDetectionMPR_handler, shapeA::Composition.Object3D, shapeB::Modia3D.Composition.Object3D, geoA::Modia3D.AbstractSolidGeometry, geoB::Modia3D.AbstractSolidGeometry)
   tol_rel = ch.tol_rel
+  tol_rel = 10e-6
   niter_max = ch.niter_max
   neps = ch.neps
 
@@ -241,7 +259,7 @@ function mpr(ch::Composition.ContactDetectionMPR_handler, shapeA::Composition.Ob
   # the direction of the origin ray r0 is -r0.p
   centroidA = getCentroid(shapeA, Modia3D.centroid(shapeA.data.geo))
   centroidB = getCentroid(shapeB, Modia3D.centroid(shapeB.data.geo))
-  r0 = SupportPoint(centroidA-centroidB, SVector{3,Float64}(0.0,0.0,0.0), SVector{3,Float64}(0.0,0.0,0.0), SVector{3,Float64}(0.0,0.0,0.0))
+  r0 = SupportPoint(centroidA-centroidB, -(centroidA-centroidB), SVector{3,Float64}(0.0,0.0,0.0), SVector{3,Float64}(0.0,0.0,0.0))
   # check if centers of shapes are overlapping
   checkCentersOfShapesOverlapp(r0, neps, shapeA, shapeB)
 
@@ -249,10 +267,10 @@ function mpr(ch::Composition.ContactDetectionMPR_handler, shapeA::Composition.Ob
   # r1 is the farthest point in the direction to the origin
   # first portal point should point in the direction of the origin ray (-r0.p)
   # therefore choose search direction -r0.p
-  r1 = getSupportPoint(shapeA, shapeB, Basics.normalizeVector(-r0.p))
+  r1 = getSupportPoint(shapeA, shapeB, Basics.normalizeVector(r0.n))
 
   ### Phase 1.3: construction of initial r2 ###
-  n2 = cross(r0.p, r1.p)
+  n2 = cross(r0.n, r1.p)
   n2abs = norm(n2)
   ## TERMINATION CONDITION 1 ##
   if n2abs <= neps
@@ -272,6 +290,8 @@ function mpr(ch::Composition.ContactDetectionMPR_handler, shapeA::Composition.Ob
   ### Phase 1.4: construction of initial r3 ###
   # r3 is in the direction of plane normal that contains triangle r0-r1-r2
   (r2, r3, n2, n3) = checkIfShapesArePlanar(r0, r1, r2, n2, neps, shapeA, shapeB)
+
+  # (r0,r1,r2,r3,scale) = skalarization(r0,r1,r2,r3)
 
 
   ###########      Phase 2, Minkowski Portal Refinement      ###################
@@ -300,7 +320,12 @@ function mpr(ch::Composition.ContactDetectionMPR_handler, shapeA::Composition.Ob
       distance = -dot(r4.n, r4.p)
       barycentric(r1,r2,r3,r4)
       # println("r4.a = ", r4.a, ", r4.b = ", r4.b, " ,r1.a = ", r1.a, " ,r1.b = ", r1.b," ,r2.a = ", r2.a, " ,r2.b = ",r2.b," ,r3.a = ",r3.a," ,r3.b = ",r3.b)
-      return (distance,r4.a,r4.b,r4.n,r1.a,r1.b,r2.a,r2.b,r3.a,r3.b)
+      (sphereWithOthers,contactPointA, contactPointB) = handleSphereWithOtherShapes(shapeA, shapeB, r4.n, distance)
+      if sphereWithOthers
+        return (distance,contactPointA,contactPointB,r4.n,r1.a,r1.b,r2.a,r2.b,r3.a,r3.b)
+      else
+        return (distance,r4.a,r4.b,r4.n,r1.a,r1.b,r2.a,r2.b,r3.a,r3.b)
+      end
 
     ## TERMINATION CONDITION 3 ##
     elseif abs(dot(r4.p-r1.p, r4.n)) < tol_rel
@@ -314,9 +339,16 @@ function mpr(ch::Composition.ContactDetectionMPR_handler, shapeA::Composition.Ob
       #end
       (r4.p, distance) = signedDistanceToPortal(r0.p,r1.p,r2.p,r3.p)
       barycentric(r1,r2,r3,r4)
-      #println("r4.n = ", r4.n)
-      # println("r4.a = ", r4.a, ", r4.b = ", r4.b, " ,r1.a = ", r1.a, " ,r1.b = ", r1.b," ,r2.a = ", r2.a, " ,r2.b = ",r2.b," ,r3.a = ",r3.a," ,r3.b = ",r3.b)
-      return (distance,r4.a,r4.b,r4.n,r1.a,r1.b,r2.a,r2.b,r3.a,r3.b)
+      # println("r4.n = ", r4.n)
+
+      (sphereWithOthers,contactPointA, contactPointB) = handleSphereWithOtherShapes(shapeA, shapeB, r4.n, distance)
+      if sphereWithOthers
+        return (distance,contactPointA,contactPointB,r4.n,r1.a,r1.b,r2.a,r2.b,r3.a,r3.b)
+      else
+        return (distance,r4.a,r4.b,r4.n,r1.a,r1.b,r2.a,r2.b,r3.a,r3.b)
+      end
+      #println("r4.a = ", r4.a, ", r4.b = ", r4.b, " ,r1.a = ", r1.a, " ,r1.b = ", r1.b," ,r2.a = ", r2.a, " ,r2.b = ",r2.b," ,r3.a = ",r3.a," ,r3.b = ",r3.b)
+
     end
 
     #### Phase 3.3: construct baby tetrahedrons with r1,r2,r3,r4 and create a new portal ###
@@ -334,4 +366,47 @@ function mpr(ch::Composition.ContactDetectionMPR_handler, shapeA::Composition.Ob
   end
   error("MPR: Should never get here! Computation failed. Look at shapeA = ", ModiaMath.instanceName(shapeA),
        " shapeB = ",  ModiaMath.instanceName(shapeB))
+end
+
+
+function mpr(ch::Composition.ContactDetectionMPR_handler, shapeA::Composition.Object3D,
+              shapeB::Modia3D.Composition.Object3D,
+              geoA::Modia3D.Solids.SolidSphere, geoB::Modia3D.Solids.SolidSphere)
+  neps = ch.neps
+  radiusA = shapeA.data.geo.Dx*0.5
+  radiusB = shapeB.data.geo.Dx*0.5
+  centroidSphereA = getCentroid(shapeA, Modia3D.centroid(shapeA.data.geo))
+  centroidSphereB = getCentroid(shapeB, Modia3D.centroid(shapeB.data.geo))
+  n = centroidSphereA - centroidSphereB
+  distanceCentroids = norm(n)
+  if distanceCentroids <= neps
+    error("Centers of two spheres are overlapping. SphereA = ", shapeA, " sphereB = ", shapeB)
+  else
+    normal = n/distanceCentroids
+  end
+  distance = distanceCentroids - radiusA - radiusB
+  contactPointShapeA = centroidSphereA - normal*radiusA
+  contactPointShapeB = centroidSphereB + normal*radiusB
+  return (distance,contactPointShapeA,contactPointShapeB,normal, nothing, nothing, nothing, nothing, nothing, nothing)
+end
+
+
+function handleSphereWithOtherShapes(shapeA::Composition.Object3D, shapeB::Composition.Object3D, normal::SVector{3,Float64}, distance::Float64)
+  # normal is pointing from shapeA to shapeB
+  if typeof(shapeA.data.geo) != Modia3D.Solids.SolidSphere && typeof(shapeB.data.geo) != Modia3D.Solids.SolidSphere
+    return (false, nothing, nothing)
+  elseif typeof(shapeA.data.geo) == Modia3D.Solids.SolidSphere
+    centroidSphere = getCentroid(shapeA, Modia3D.centroid(shapeA.data.geo))
+    radius = shapeA.data.geo.Dx*0.5
+    contactPointSphere = centroidSphere + radius*normal
+    contactPointOtherShape = contactPointSphere + distance*normal
+    return (true, contactPointSphere, contactPointOtherShape)
+  elseif typeof(shapeB.data.geo) == Modia3D.Solids.SolidSphere
+    normal = -normal
+    centroidSphere = getCentroid(shapeB, Modia3D.centroid(shapeB.data.geo))
+    radius = shapeB.data.geo.Dx*0.5
+    contactPointSphere = centroidSphere + radius*normal
+    contactPointOtherShape = contactPointSphere + distance*normal # distance is negative (otherwise direction of normal must be changed)
+    return (true, contactPointOtherShape, contactPointSphere)
+  end
 end
