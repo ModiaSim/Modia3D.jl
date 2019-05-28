@@ -11,14 +11,14 @@ vmat2 = deepcopy(vmat1)                                           # material of 
 vmat2.transparency = 0.7
 
 #c = 1e9, d = 100.0
-cmat = Modia3D.ContactMaterialElastic(c=1e14, d=1000.0)
+cmat = Modia3D.ContactMaterialElastic(c=1e9, d=10.0)
 
 @assembly BallWithBall begin
   world = Modia3D.Object3D(visualizeFrame=true)
 
-  sphereMoving     = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidSphere(0.2) , "Aluminium", vmat11; contactMaterial = cmat); r=[0.0, 0.0, 0.0],  fixed=false) #R=ModiaMath.rot2(-pi/2),
+  sphereMoving     = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidSphere(0.5) , "Aluminium", vmat11; contactMaterial = cmat); r=[0.0, 0.0, 0.0],  fixed=false) #R=ModiaMath.rot2(-pi/2),
 
-  sphere     = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidSphere(3.0) , "Aluminium", vmat1; contactMaterial = cmat); r=[-3.0, 0.0, 0.0], fixed=true) # R=ModiaMath.rot2(-pi/3),
+  sphere     = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidSphere(1.0) , "Aluminium", vmat1; contactMaterial = cmat); r=[-3.0, 0.0, 0.0], fixed=true) # R=ModiaMath.rot2(-pi/3),
 end
 
 gravField = Modia3D.UniformGravityField(g=9.81, n=[-1,0,0])
@@ -26,7 +26,7 @@ threeD = BallWithBall(sceneOptions=Modia3D.SceneOptions(gravityField=gravField,v
 
 
 model = Modia3D.SimulationModel( threeD )
-result = ModiaMath.simulate!(model; stopTime=0.5, tolerance=1e-8,interval=0.001, log=false)
+result = ModiaMath.simulate!(model; stopTime=10.0, tolerance=1e-8,interval=0.001, log=false)
 
 println("... success of collision_ballWithBall.jl!")
 end

@@ -382,11 +382,11 @@ function mpr(ch::Composition.ContactDetectionMPR_handler, shapeA::Composition.Ob
   if distanceCentroids <= neps
     error("Centers of two spheres are overlapping. SphereA = ", shapeA, " sphereB = ", shapeB)
   else
-    normal = n/distanceCentroids
+    normal = -n/distanceCentroids
   end
   distance = distanceCentroids - radiusA - radiusB
-  contactPointShapeA = centroidSphereA - normal*radiusA
-  contactPointShapeB = centroidSphereB + normal*radiusB
+  contactPointShapeA = centroidSphereA + normal*radiusA
+  contactPointShapeB = centroidSphereB - normal*radiusB
   return (distance,contactPointShapeA,contactPointShapeB,normal, nothing, nothing, nothing, nothing, nothing, nothing)
 end
 
