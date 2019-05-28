@@ -16,9 +16,9 @@ cmat = Modia3D.ContactMaterialElastic(c=1e9, d=10.0)
 @assembly BallWithBall begin
   world = Modia3D.Object3D(visualizeFrame=true)
 
-  sphereMoving     = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidSphere(0.5) , "Aluminium", vmat11; contactMaterial = cmat); r=[0.0, 0.0, 0.0],  fixed=false) #R=ModiaMath.rot2(-pi/2),
+  sphereMoving     = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidSphere(0.5) , "Aluminium", vmat11; contactMaterial = cmat); r=[0.0, 0.0, 0.0],  fixed=false ) # , R=ModiaMath.rot2(-pi/2) )
 
-  sphere     = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidSphere(1.0) , "Aluminium", vmat1; contactMaterial = cmat); r=[-3.0, 0.0, 0.0], fixed=true) # R=ModiaMath.rot2(-pi/3),
+  sphere     = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidSphere(1.0) , "Aluminium", vmat1; contactMaterial = cmat); r=[-3.0, 0.0, 0.0], fixed=true) #, R=ModiaMath.rot2(-pi/3) )
 end
 
 gravField = Modia3D.UniformGravityField(g=9.81, n=[-1,0,0])

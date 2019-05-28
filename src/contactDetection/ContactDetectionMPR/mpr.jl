@@ -377,12 +377,12 @@ function mpr(ch::Composition.ContactDetectionMPR_handler, shapeA::Composition.Ob
   radiusB = shapeB.data.geo.Dx*0.5
   centroidSphereA = getCentroid(shapeA, Modia3D.centroid(shapeA.data.geo))
   centroidSphereB = getCentroid(shapeB, Modia3D.centroid(shapeB.data.geo))
-  n = centroidSphereA - centroidSphereB
+  n = centroidSphereB - centroidSphereA
   distanceCentroids = norm(n)
   if distanceCentroids <= neps
     error("Centers of two spheres are overlapping. SphereA = ", shapeA, " sphereB = ", shapeB)
   else
-    normal = -n/distanceCentroids
+    normal = n/distanceCentroids
   end
   distance = distanceCentroids - radiusA - radiusB
   contactPointShapeA = centroidSphereA + normal*radiusA
