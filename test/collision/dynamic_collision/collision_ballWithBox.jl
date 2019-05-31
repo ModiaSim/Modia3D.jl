@@ -9,14 +9,14 @@ vmat2 = deepcopy(vmat1)                                           # material of 
 vmat2.transparency = 0.7
 
 #c = 1e9, d = 100.0
-cmat = Modia3D.ContactMaterialElastic(c=1e10)
+cmat = Modia3D.ContactMaterialElastic(c=1e10, d = 1e5)
 
 @assembly ThreeDFiles begin
   world = Modia3D.Object3D(visualizeFrame=true)
 
   sphereMoving     = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidSphere(0.5) , "Aluminium", vmat1; contactMaterial = cmat); r=[0.0, 0.0, 0.0],  fixed=false) # , R=ModiaMath.rot2(-pi/2) )
 
-  box     = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidBox(1.0,4.0,4.5) , "Aluminium", vmat1; contactMaterial = cmat); r=[-3.0, 0.0, -2.0], fixed=true) # R=ModiaMath.rot2(-pi/3),
+  box     = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidBox(1.0,4.0,5.5) , "Aluminium", vmat1; contactMaterial = cmat); r=[-3.0, 0.0, -2.0], fixed=true) # R=ModiaMath.rot2(-pi/3) )
 end
 
 gravField = Modia3D.UniformGravityField(g=9.81, n=[-1,0,0])

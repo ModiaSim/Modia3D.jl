@@ -11,7 +11,7 @@ vmat2 = deepcopy(vmat1)                                           # material of 
 vmat2.transparency = 0.7
 
 #c = 1e9, d = 100.0
-cmat = Modia3D.ContactMaterialElastic(c=1e9, d=10.0)
+cmat = Modia3D.ContactMaterialElastic(c=1e9, d=10000.0)
 
 @assembly BallWithBall begin
   world = Modia3D.Object3D(visualizeFrame=true)

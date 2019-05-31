@@ -48,22 +48,20 @@ function Composition.selectContactPairs!(ch::Composition.ContactDetectionMPR_han
     if !isempty(ch.dict2)
       empty!(ch.dict2)
     end
-    tmp = collect(ch.dict1)
-    for i=1:length(tmp)
-      ch.contactPairs.z[i] = tmp[i][1][1]        # fill z vector with smallest distances
-      ch.contactPairs.contactPoint1[i] = tmp[i][2][2]
-      ch.contactPairs.contactPoint2[i] = tmp[i][2][3]
-      ch.contactPairs.contactNormal[i] = tmp[i][2][4]
-      ch.contactPairs.contactObj1[i]   = tmp[i][2][5]
-      ch.contactPairs.contactObj2[i]   = tmp[i][2][6]
-      ch.dict2[tmp[i][2][1][]] = [tmp[i][1], i]  # interchange key and value of dictionary dict1 + position in z vector
+    for i=1:length(ch.dict1)
+      ch.contactPairs.z[i] = ch.dict1[i][1]        # fill z vector with smallest distances
+      ch.contactPairs.contactPoint1[i] = ch.dict1[i][3]
+      ch.contactPairs.contactPoint2[i] = ch.dict1[i][4]
+      ch.contactPairs.contactNormal[i] = ch.dict1[i][5]
+      ch.contactPairs.contactObj1[i]   = ch.dict1[i][6]
+      ch.contactPairs.contactObj2[i]   = ch.dict1[i][7]
+      ch.dict2[ch.dict1[i][2][1][]] = [ch.dict1[i][1], i]  # interchange key and value of dictionary dict1 + position in z vector
     end
   else # No AABBs are overlapping, take old z!
     for i=1:length(ch.contactPairs.z)
       ch.contactPairs.z[i] = 42.0
     end
   end
-  #println("ch.contactPairs.z = ", ch.contactPairs.z)
   ch.distanceComputed = true
 end
 
@@ -77,8 +75,6 @@ end
 function Composition.getDistances!(ch::Composition.ContactDetectionMPR_handler, world::Composition.Object3D)
   if !ch.distanceComputed
     computeDistances(ch, world, true)
-    #println("getDistances: ch.contactPairs.z = ", ch.contactPairs.z)
-    #println("\n")
     ch.distanceComputed = true
   end
 end
@@ -125,7 +121,8 @@ function computeDistances(ch::Composition.ContactDetectionMPR_handler, world::Co
               index = pack(is,i,js,j)
               storeDistancesForSolver!(world, index, ch, actObj, nextObj, actAABB, nextAABB, phase2)
   end; end; end; end; end; end; end
-  # println("\n")
+  #println("length(ch.dict1) = ", length(ch.dict1))
+  #println("\n")
   return nothing
 end
 
@@ -139,18 +136,19 @@ function storeDistancesForSolver!(world::Composition.Object3D, index::Integer, c
     #println("distance = ", distance)
   else # AABB's are not overlapping
     (distance, contactPoint1, contactPoint2, contactNormal,r1_a, r1_b, r2_a, r2_b, r3_a, r3_b) = computeDistanceBetweenAABB(actAABB, nextAABB)
-    #println("distance1 = ", distance)
+    #println("distance = ", distance)
   end
 
   if length(ch.dict1) < ch.contactPairs.nz
-    push!(ch.dict1, distance=>(index,contactPoint1,contactPoint2,contactNormal,actObj,nextObj))
+    push!(ch.dict1, (distance,index,contactPoint1,contactPoint2,contactNormal,actObj,nextObj))
   else
-    (k,v) = last(ch.dict1)  # returns last sorted key -k, and its value - v
+    sort!(ch.dict1, by = x -> x[1])
+    k = ch.dict1[length(ch.dict1)][1]
     if distance < k && k <= 0.0
       error("Number of max. collisions (n_max) is too low.")
     elseif distance < k && k >= 0.0
-      delete!(ch.dict1,k)
-      push!(ch.dict1, distance=>(index,contactPoint1,contactPoint2,contactNormal,actObj,nextObj))  # new distance is added, it is smaller than the biggest one in dict1
+      pop!(ch.dict1) # removes last entry of sorted dict1
+      push!(ch.dict1, (distance,index,contactPoint1,contactPoint2,contactNormal,actObj,nextObj))  # new distance is added, it is smaller than the biggest one in dict1
     end
   end
 
@@ -169,6 +167,7 @@ function storeDistancesForSolver!(world::Composition.Object3D, index::Integer, c
         ch.contactPairs.contactNormal[j_local] = contactNormal
         ch.contactPairs.contactObj1[j_local]   = actObj
         ch.contactPairs.contactObj2[j_local]   = nextObj
+
         if ch.visualizeContactPoints
           transparency = 0.0
           setVisualizationContactProperties!(world.contactVisuObj1[j_local], transparency, contactPoint1)
@@ -182,13 +181,15 @@ function storeDistancesForSolver!(world::Composition.Object3D, index::Integer, c
           setVisualizationContactProperties!(world.supportVisuObj2A[j_local], transparency, r1_b)
           setVisualizationContactProperties!(world.supportVisuObj2B[j_local], transparency, r2_b)
           setVisualizationContactProperties!(world.supportVisuObj2C[j_local], transparency, r3_b)
-          # println("r1_a = ", r1_a, " r2_a = ", r2_a, " r3_a = ", r3_a, " r1_b = ", r1_b, " r2_b = ", r2_b, " r3_b = ", r3_b)
         end
+
       else
         if distance < 0.0
           error("\nNumber of max. collision pairs nz (= ", ch.contactPairs.nz, ") is too low.",
                 "\nProvide a large nz_max with Modia3D.SceneOptions(nz_max=xxx).")
-  end; end; end; end
+        end
+      end
+end; end
   return nothing
 end
 

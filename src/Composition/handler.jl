@@ -173,17 +173,15 @@ function build_superObjs!(scene::Scene, world::Object3D)::NOTHING
   addIndicesOfCutJointsToSuperObj(scene)
 
 
-#=
-    println("superObjRow.superObjCollision.superObj")
-    for superObjRow in scene.superObjs
-    println("[")
-    for a in superObjRow.superObjCollision.superObj
-      println(ModiaMath.fullName(a))
-    end
-    println("]")
-    println(" ")
-    end
-=#
+  println("superObjRow.superObjCollision.superObj")
+  for superObjRow in scene.superObjs
+  println("[")
+  for a in superObjRow.superObjCollision.superObj
+    println(ModiaMath.fullName(a))
+  end
+  println("]")
+  println(" ")
+  end
 
 
   hasMoreCollisionSuperObj ? (scene.collide = true) : (scene.collide = false)

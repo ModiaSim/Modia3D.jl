@@ -8,12 +8,12 @@
 
 using DataStructures
 
-const Dict1ValueType = Tuple{Int64, Union{SVector{3,Float64},NOTHING}, Union{SVector{3,Float64},NOTHING}, Union{SVector{3,Float64},NOTHING}, Union{Object3D,NOTHING}, Union{Object3D,NOTHING}}
+#const Dict1ValueType = Tuple{Int64, Union{SVector{3,Float64},NOTHING}, Union{SVector{3,Float64},NOTHING}, Union{SVector{3,Float64},NOTHING}, Union{Object3D,NOTHING}, Union{Object3D,NOTHING}}
 
 mutable struct ContactDetectionMPR_handler <: Modia3D.AbstractContactDetection
   contactPairs::Composition.ContactPairs
   distanceComputed::Bool
-  dict1::SortedDict{Float64,Dict1ValueType}
+  dict1::Array{Any,1}
   dict2::SortedDict{Int,Array{Float64,1}}
 
   tol_rel::Float64
@@ -35,7 +35,7 @@ mutable struct ContactDetectionMPR_handler <: Modia3D.AbstractContactDetection
     handler = new()
 
     handler.distanceComputed = false
-    handler.dict1            = SortedDict{Float64,Dict1ValueType}()
+    handler.dict1            = Array{Any,1}()    #SortedDict{Float64,Dict1ValueType}()
     handler.dict2            = SortedDict{Int,Array{Float64,1}}()
     handler.tol_rel          = tol_rel
     handler.niter_max        = niter_max

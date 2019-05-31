@@ -77,17 +77,19 @@ struct ContactPairs
                 for i_nextObj =1:length(superObjs[i_next_superObj].superObjCollision.superObj)
                    nz += 1
                    if nz >=nz_max
-                      @goto AfterLoops
+                  #    @goto AfterLoops
       end; end; end; end; end; end
 
       @label AfterLoops
+
+      println("nz = ", nz)
       if nz <= nz_max
          allPossibleContactPairsInz = true
       else
          allPossibleContactPairsInz = false
          nz = nz_max
       end
-
+      println("nachher nz = ", nz)
       # Allocate storage
       z = fill(42.0, nz)
       defaultPoint   = SVector{3,Float64}(0.0,0.0,0.0)
@@ -123,7 +125,7 @@ struct ContactPairs
             end
          end
       end
-      
+
       new(collSuperObjs, noCPairs, AABB, dummyObject3D, length(collSuperObjs), nz, allPossibleContactPairsInz,
           z, contactPoint1, contactPoint2, contactNormal, contactObj1, contactObj2)
    end

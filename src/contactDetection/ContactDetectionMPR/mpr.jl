@@ -278,7 +278,7 @@ function mpr(ch::Composition.ContactDetectionMPR_handler, shapeA::Composition.Ob
     # centers of shapes (r0.p and r1.p) are on the same line segment
     # the origin of Minkowski Difference is on the line from r0 with direction r1-r0
     # e.g. any collision/or distance between two spheres
-    println("TC 1")
+    #println("TC 1")
     distance = dot(r1.p,normalize(r0.p))
     return (distance,r1.a,r1.b,r1.n, nothing, nothing, nothing, nothing, nothing, nothing)
   else
@@ -313,7 +313,7 @@ function mpr(ch::Composition.ContactDetectionMPR_handler, shapeA::Composition.Ob
 
     ## TERMINATION CONDITION 2 ##
     if norm(cross(r4.p,r4.n)) < tol_rel
-      println("TC 2")
+      #println("TC 2")
       #if !analyzeFinalPortal(r1.p, r2.p, r3.p, r4.p, neps)
         # error("shapeA = ", shapeA, " shapeB = ", shapeB)
       #end
@@ -329,7 +329,7 @@ function mpr(ch::Composition.ContactDetectionMPR_handler, shapeA::Composition.Ob
 
     ## TERMINATION CONDITION 3 ##
     elseif abs(dot(r4.p-r1.p, r4.n)) < tol_rel
-      println("TC 3")
+      #println("TC 3")
       #doesRayIntersectPortal(r1.p,r2.p,r3.p, r4.p,neps)
       #println("r1.p = ", r1.p , " r2.p = ", r2.p ," r3.p = ", r3.p)
       #println("r4.p = ", r4.p)

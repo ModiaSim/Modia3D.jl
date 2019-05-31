@@ -10,7 +10,7 @@ vmatSolids = Modia3D.Material(color="Red" , transparency=0.5)         # material
 
 
 #c = 1e9, d = 100.0
-cmat = Modia3D.ContactMaterialElastic(c=1e9, d=10.0)
+cmat = Modia3D.ContactMaterialElastic(c=1e9, d=0.0)
 
 Lx = 0.3
 Ly = 4.2
@@ -36,10 +36,10 @@ Lz = 0.1
   pendulum5 = Pendulum()
 
   rev1   = Modia3D.Revolute(frame1, pendulum1.frame1; axis = 1 , phi_start =  -pi/3)
-  rev2   = Modia3D.Revolute(frame2, pendulum2.frame1; axis = 1 )
-  rev3   = Modia3D.Revolute(frame3, pendulum3.frame1; axis = 1 )
-  rev4   = Modia3D.Revolute(frame4, pendulum4.frame1; axis = 1 )
-  rev5   = Modia3D.Revolute(frame5, pendulum5.frame1; axis = 1 )
+  rev2   = Modia3D.Revolute(frame2, pendulum2.frame1; axis = 1 , phi_start =  -pi/3)
+  rev3   = Modia3D.Revolute(frame3, pendulum3.frame1; axis = 1 ) #, phi_start =  -pi/3)
+  rev4   = Modia3D.Revolute(frame4, pendulum4.frame1; axis = 1 ) #, phi_start =  -pi/3 ) #
+  rev5   = Modia3D.Revolute(frame5, pendulum5.frame1; axis = 1 ) #, phi_start =  pi/3 ) #
 end
 
 diameter = 1.0
@@ -65,7 +65,7 @@ newton = NewtonsCradle(sceneOptions=Modia3D.SceneOptions(gravityField=gravField,
 
 
 model = Modia3D.SimulationModel( newton )
-result = ModiaMath.simulate!(model; stopTime=15.0, tolerance=1e-8,interval=0.001, log=false)
+result = ModiaMath.simulate!(model; stopTime=10.0, tolerance=1e-8,interval=0.001, log=false)
 
 
 println("... success of collision_newtons_cradle.jl!")

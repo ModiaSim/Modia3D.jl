@@ -432,21 +432,22 @@ function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64
 
          if contact
             #println("... Contact ", str, " active at time = ", sim.time)
-            #println("typeof(chpairs.contactPoint1[i]) = ", chpairs.contactPoint1[i])
-            r1 = ModiaMath.Vector3D(chpairs.contactPoint1[i])
-            r2 = ModiaMath.Vector3D(chpairs.contactPoint2[i])
-            rContact = (r1 + r2)/2.0
+            if chpairs.contactPoint1[i] != nothing && chpairs.contactPoint2[i] != nothing && chpairs.contactNormal[i] != nothing
+               r1 = ModiaMath.Vector3D(chpairs.contactPoint1[i])
+               r2 = ModiaMath.Vector3D(chpairs.contactPoint2[i])
+               rContact = (r1 + r2)/2.0
 
-            (f1,f2,t1,t2) = responseCalculation(obj1.data.contactMaterial,
-                                                obj2.data.contactMaterial,
-                                                obj1, obj2, s, rContact,
-                                                ModiaMath.Vector3D(chpairs.contactNormal[i]), time, file)
+               (f1,f2,t1,t2) = responseCalculation(obj1.data.contactMaterial,
+                                                   obj2.data.contactMaterial,
+                                                   obj1, obj2, s, rContact,
+                                                   ModiaMath.Vector3D(chpairs.contactNormal[i]), time, file)
 
-            # Transform forces/torques in local part frames
-            obj1.dynamics.f += obj1.R_abs*f1
-            obj1.dynamics.t += obj1.R_abs*t1
-            obj2.dynamics.f += obj2.R_abs*f2
-            obj2.dynamics.t += obj2.R_abs*t2
+               # Transform forces/torques in local part frames
+               obj1.dynamics.f += obj1.R_abs*f1
+               obj1.dynamics.t += obj1.R_abs*t1
+               obj2.dynamics.f += obj2.R_abs*f2
+               obj2.dynamics.t += obj2.R_abs*t2
+            end
          end
       end
    end
