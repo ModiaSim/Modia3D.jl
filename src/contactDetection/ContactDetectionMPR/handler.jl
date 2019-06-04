@@ -55,7 +55,7 @@ function Composition.selectContactPairs!(ch::Composition.ContactDetectionMPR_han
       ch.contactPairs.contactNormal[i] = ch.dict1[i][5]
       ch.contactPairs.contactObj1[i]   = ch.dict1[i][6]
       ch.contactPairs.contactObj2[i]   = ch.dict1[i][7]
-      ch.dict2[ch.dict1[i][2][1][]] = [ch.dict1[i][1], i]  # interchange key and value of dictionary dict1 + position in z vector
+      ch.dict2[ch.dict1[i][2][1][]] = [ch.dict1[i][1], i, ch.dict1[i][8]]  # interchange key and value of dictionary dict1 + position in z vector + flag biggerZero
     end
   else # No AABBs are overlapping, take old z!
     for i=1:length(ch.contactPairs.z)
@@ -126,17 +126,19 @@ function computeDistances(ch::Composition.ContactDetectionMPR_handler, world::Co
   return nothing
 end
 
-hysteresis(distance) = nothing
 
-function hysteresis(distance::Float64)
-  if distance > 0.0
-    distance = distance + eps()
+getInitialBoolOfDistance(distance_org) = distance_org >= 0.0 ? true : false
+manipulateDistance(distance_org::Float64, biggerZero::Bool) = biggerZero ? distance_org + 100*eps() : distance_org - 100*eps()
+
+function hysteresis(distance_org::Float64; initial::Bool=false, biggerZero::Bool=false)
+  if initial
+    biggerZero = getInitialBoolOfDistance(distance_org)
+    distance = manipulateDistance(distance_org, biggerZero)
   else
-    distance = distance - eps()
+    distance = manipulateDistance(distance_org, biggerZero)
   end
-  return distance
+  return (distance, biggerZero)
 end
-
 
 function storeDistancesForSolver!(world::Composition.Object3D, index::Integer, ch::Composition.ContactDetectionMPR_handler,
                                   actObj::Composition.Object3D, nextObj::Composition.Object3D,
@@ -144,25 +146,30 @@ function storeDistancesForSolver!(world::Composition.Object3D, index::Integer, c
   # Broad Phase
   if AABB_touching(actAABB, nextAABB) # AABB's are overlapping
     # narrow phase
-    (distance, contactPoint1, contactPoint2, contactNormal,r1_a, r1_b, r2_a, r2_b, r3_a, r3_b) = mpr(ch, actObj, nextObj, actObj.data.geo, nextObj.data.geo)
-    #println("distance = ", distance)
+    (distance_org, contactPoint1, contactPoint2, contactNormal,r1_a, r1_b, r2_a, r2_b, r3_a, r3_b) = mpr(ch, actObj, nextObj, actObj.data.geo, nextObj.data.geo)
+    #println("distance_org = ", distance_org)
   else # AABB's are not overlapping
-    (distance, contactPoint1, contactPoint2, contactNormal,r1_a, r1_b, r2_a, r2_b, r3_a, r3_b) = computeDistanceBetweenAABB(actAABB, nextAABB)
-    #println("distance = ", distance)
+    (distance_org, contactPoint1, contactPoint2, contactNormal,r1_a, r1_b, r2_a, r2_b, r3_a, r3_b) = computeDistanceBetweenAABB(actAABB, nextAABB)
+    #println("distance_org = ", distance_org)
   end
 
-  hysteresis(distance)
 
   if length(ch.dict1) < ch.contactPairs.nz
-    push!(ch.dict1, (distance,index,contactPoint1,contactPoint2,contactNormal,actObj,nextObj))
+    (distance, biggerZero) = hysteresis(distance_org, initial=true)
+    #=
+    biggerZero = getInitialBoolOfDistance(distance_org)
+    distance = manipulateDistance(distance_org, biggerZero)
+    =#
+    push!(ch.dict1, (distance,index,contactPoint1,contactPoint2,contactNormal,actObj,nextObj,biggerZero))
   else
     sort!(ch.dict1, by = x -> x[1])
     k = ch.dict1[length(ch.dict1)][1]
-    if distance < k && k <= 0.0
+    if distance_org < k && k <= 0.0
       error("Number of max. collisions (n_max) is too low.")
-    elseif distance < k && k >= 0.0
+    elseif distance_org < k && k >= 0.0
       pop!(ch.dict1) # removes last entry of sorted dict1
-      push!(ch.dict1, (distance,index,contactPoint1,contactPoint2,contactNormal,actObj,nextObj))  # new distance is added, it is smaller than the biggest one in dict1
+      (distance, biggerZero) = hysteresis(distance_org, initial=true)
+      push!(ch.dict1, (distance,index,contactPoint1,contactPoint2,contactNormal,actObj,nextObj,biggerZero)) # new distance_org is added, it is smaller than the biggest one in dict1
     end
   end
 
@@ -175,7 +182,8 @@ function storeDistancesForSolver!(world::Composition.Object3D, index::Integer, c
       if status((ch.dict2,token)) == 1          # index of contact pair is in dict2
         tmp_val = deref_value((ch.dict2,token)) # unpacking its values
         j_local = Int(tmp_val[2])
-        ch.contactPairs.z[j_local] = distance         # new distance is stored in z, at it's old position
+        (distance, biggerZero) = hysteresis(distance_org, initial=false, biggerZero=Bool(tmp_val[3]))
+        ch.contactPairs.z[j_local] = distance        # new distance is stored in z, at it's old position
         ch.contactPairs.contactPoint1[j_local] = contactPoint1
         ch.contactPairs.contactPoint2[j_local] = contactPoint2
         ch.contactPairs.contactNormal[j_local] = contactNormal
@@ -198,7 +206,7 @@ function storeDistancesForSolver!(world::Composition.Object3D, index::Integer, c
         end
 
       else
-        if distance < 0.0
+        if distance_org < 0.0
           error("\nNumber of max. collision pairs nz (= ", ch.contactPairs.nz, ") is too low.",
                 "\nProvide a large nz_max with Modia3D.SceneOptions(nz_max=xxx).")
         end
