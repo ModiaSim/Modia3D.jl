@@ -49,6 +49,9 @@ export volume, centroid, bottomArea, topArea, longestEdge, lengthGeo, inertiaMat
 export InternalMassProperties, MassProperties, SolidMaterial, ContactMaterialElastic, dummyMassProperties
 export solidMaterial, solidMaterialPalette, defaultContactMaterial
 
+export ElasticContactMaterial, ElasticContactMaterialFromMaterialData, ElasticContactMaterialFromMaterialName
+
+
 using StaticArrays
 import JSON
 import Modia3D

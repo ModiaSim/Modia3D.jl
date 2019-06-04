@@ -17,11 +17,16 @@ struct SolidMaterial
    thermalConductivity::Float64  # [W/(m.K)] , https://en.wikipedia.org/wiki/Thermal_conductivity
                                  #             https://en.wikipedia.org/wiki/List_of_thermal_conductivities
    linearThermalExpansionCoefficient::Float64  # [1/K], https://en.wikipedia.org/wiki/Thermal_expansion
+   coefficientOfRestitution::Float64  # []
+   slidingFrictionCoefficient::Float64
+   v_min::Float64
 end
 SolidMaterial(;density=NaN, YoungsModulus=NaN, PoissonsRatio=NaN, meltingPoint=NaN,
-               heatCapacity=NaN, thermalConductivity=NaN, linearThermalExpansionCoefficient=NaN) =
+               heatCapacity=NaN, thermalConductivity=NaN, linearThermalExpansionCoefficient=NaN,
+               coefficientOfRestitution=NaN, slidingFrictionCoefficient=NaN, v_min=NaN) =
               SolidMaterial(density,YoungsModulus, PoissonsRatio, meltingPoint, heatCapacity,
-                            thermalConductivity, linearThermalExpansionCoefficient)
+                            thermalConductivity, linearThermalExpansionCoefficient,
+                            coefficientOfRestitution, slidingFrictionCoefficient, v_min)
 
 
 #=
@@ -46,8 +51,8 @@ end
 const solidMaterialPalette = Dict{String, SolidMaterial}()
 
 # Temporary solution
-solidMaterialPalette["Aluminium"] = SolidMaterial(2700.0, 6.9e10, 0.32, 933.0,  897.0, 237.0, 2.31e-5)
-solidMaterialPalette["DryWood"]   = SolidMaterial( 700.0, 1.1e10, 0.4 , NaN  , 1700.0,   0.1, 5.0e-6)
+solidMaterialPalette["Aluminium"] = SolidMaterial(2700.0, 6.9e10, 0.32, 933.0,  897.0, 237.0, 2.31e-5, NaN, NaN, NaN)
+solidMaterialPalette["DryWood"]   = SolidMaterial( 700.0, 1.1e10, 0.4 , NaN  , 1700.0,   0.1, 5.0e-6, NaN, NaN, NaN)
 
 solidMaterial(name::AbstractString) = solidMaterialPalette[name]
 
