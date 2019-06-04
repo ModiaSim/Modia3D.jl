@@ -126,6 +126,18 @@ function computeDistances(ch::Composition.ContactDetectionMPR_handler, world::Co
   return nothing
 end
 
+hysteresis(distance) = nothing
+
+function hysteresis(distance::Float64)
+  if distance > 0.0
+    distance = distance + eps()
+  else
+    distance = distance - eps()
+  end
+  return distance
+end
+
+
 function storeDistancesForSolver!(world::Composition.Object3D, index::Integer, ch::Composition.ContactDetectionMPR_handler,
                                   actObj::Composition.Object3D, nextObj::Composition.Object3D,
                                   actAABB::Basics.BoundingBox, nextAABB::Basics.BoundingBox, phase2::Bool)
@@ -138,6 +150,8 @@ function storeDistancesForSolver!(world::Composition.Object3D, index::Integer, c
     (distance, contactPoint1, contactPoint2, contactNormal,r1_a, r1_b, r2_a, r2_b, r3_a, r3_b) = computeDistanceBetweenAABB(actAABB, nextAABB)
     #println("distance = ", distance)
   end
+
+  hysteresis(distance)
 
   if length(ch.dict1) < ch.contactPairs.nz
     push!(ch.dict1, (distance,index,contactPoint1,contactPoint2,contactNormal,actObj,nextObj))

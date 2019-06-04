@@ -42,7 +42,7 @@ end
 end
 
 
-@assembly Billard() begin
+@assembly BillardOK() begin
   world = Modia3D.Object3D(visualizeFrame=false)
   table = BillardTable(world)
   startBall = StartBall(world)
@@ -69,8 +69,35 @@ end
 end
 
 
+@assembly BillardFail() begin
+  world = Modia3D.Object3D(visualizeFrame=false)
+  table = BillardTable(world)
+  startBall = StartBall(world)
+
+  ball1 = BillardBall(world, 2.0, 0.0)
+
+  ball2 = BillardBall(world, 2.5, 0.25)
+  ball3 = BillardBall(world, 2.5, -0.25)
+
+  ball4 = BillardBall(world, 3.0, 0.0)
+  ball5 = BillardBall(world, 3.0, 0.5)
+  ball6 = BillardBall(world, 3.0, -0.5)
+
+  ball7 = BillardBall(world, 3.5, 0.25)
+  ball8 = BillardBall(world, 3.5, 0.75)
+  ball9 = BillardBall(world, 3.5, -0.25)
+  ball10 = BillardBall(world, 3.5, -0.75)
+
+  ball11 = BillardBall(world, 4.0, 0.0)
+  ball12 = BillardBall(world, 4.0, 0.5)
+  ball13 = BillardBall(world, 4.0, 1.0)
+  ball14= BillardBall(world, 4.0, -0.5)
+  ball15= BillardBall(world, 4.0, -1.0)
+end
+
+
 gravField = Modia3D.UniformGravityField(g=9.81, n=[0,0,-1])
-bill = Billard(sceneOptions=Modia3D.SceneOptions(gravityField=gravField,visualizeFrames=false, defaultFrameLength=0.7,nz_max = 100, enableContactDetection=true, visualizeContactPoints=true, visualizeSupportPoints=false))
+bill = BillardFail(sceneOptions=Modia3D.SceneOptions(gravityField=gravField,visualizeFrames=false, defaultFrameLength=0.7,nz_max = 100, enableContactDetection=true, visualizeContactPoints=true, visualizeSupportPoints=false))
 
 # Modia3D.visualizeAssembly!( bill )
 
