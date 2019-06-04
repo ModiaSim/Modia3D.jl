@@ -33,9 +33,9 @@ end
 
 
 """
-    material1 = ElasticContactMaterial(c=1e7, d=1.0, mu_s=0.1, v_min=0.01)
-    material2 = ElasticContactMaterialFromMaterialData(E=20e9, nu=0.3, cof=0.7, mu_s=0.1, v_min=0.01)
-    material3 = ElasticContactMaterialFromMaterialName(name="Steel1")
+    material1 = ElasticContactMaterial(c=1e7, d=1.0, mu_k=0.1, v_min=0.01)
+    material2 = ElasticContactMaterialFromMaterialData(E=2e11, nu=0.3, cof=0.7, mu_k=0.1, v_min=0.01)
+    material3 = ElasticContactMaterialFromMaterialName(name="Steel")
 
 Generate an `ElasticContactMaterial` object. This object is used to 
 compute an elastic response calculation between two 3D objects
@@ -44,8 +44,8 @@ using the following force law:
 
 ```math
 \\begin{align}
-f_n        &= \\max\\left(0, c \\cdot |\\delta| \\left(1 + d \\frac{\\dot{\\delta}}{\\dot{\\delta}^-} \\right) \\right) \\\\
-\\vec{f}_t &= \\mu_s f_n \\frac{\\vec{v}_t}{|\\vec{v}_t| > v_{min} \\; ? \\; |\\vec{v}_t| \\; : \\; (v_{min} + |\\vec{v}_t|^2 /v_{min})/2 } \\\\
+f_n        &= \\max\\left(0, c_{mean} \\cdot |\\delta| \\left(1 + d_{mean} \\frac{\\dot{\\delta}}{\\dot{\\delta}^-} \\right) \\right) \\\\
+\\vec{f}_t &= \\mu_{k,mean} f_n \\frac{\\vec{v}_t}{|\\vec{v}_t| + v_{min} e^{-k|\\vec{v}_t|}} \\quad \\# \\; k = -log(0.01)/v_{min} \\\\
 \\vec{f}_1 &= f_n \\vec{e}_n + \\vec{f}_t  \\\\
 \\vec{f}_2 &= -\\vec{f}_1
 \\end{align}
@@ -56,8 +56,8 @@ and ``1/r_i = 0`` if object is not a sphere, and ``1/r = 1/r_1 + 1/r_2``, then
 the normal force is computed in the following way:
 
 ```math
-f_n = \\max\\left(0, c \\cdot \\left(\\frac{4}{3} |\\delta| \\sqrt{r |\\delta|} \\right) \\cdot
-      \\left(1 + d \\frac{\\dot{\\delta}}{\\dot{\\delta}^-} \\right) \\right)
+f_n = \\max\\left(0, c_{mean} \\cdot \\left(\\frac{4}{3} |\\delta| \\sqrt{r |\\delta|} \\right) \\cdot
+      \\left(1 + d_{mean} \\frac{\\dot{\\delta}}{\\dot{\\delta}^-} \\right) \\right)
 ```
 
 where
@@ -71,19 +71,19 @@ where
 - ``\\dot{\\delta}``: Signed relative velocity between object 1 and 2 in normal direction. 
 - ``\\dot{\\delta}^-``: Value of ``\\dot{\\delta}`` when contact starts. 
 - ``\\vec{v}_t``: Relative velocity vector between object 1 and 2 projected onto tangential direction.
-- ``c``: Elastic material constant in normal direction. This constant is computed
+- ``c_{mean}``: Elastic material constant in normal direction. This constant is computed
          from the constants ``c_1, c_2`` of the two contacting objects 1 and 2 as
-         ``1/c = 1/c_1 + 1/c_2``. ``c_i`` can be computed from the material properties as
+         ``1/c_{mean} = 1/c_1 + 1/c_2``. ``c_i`` can be computed from the material properties as
          ``c_i = E_i/(1 - \\nu_i^2)`` where ``E_i`` is Young's modules and
          ``\\nu_i`` is Poisson's ratio of object i.
-- ``d``: Damping material constant in normal direction. This constant is computed
+- ``d_{mean}``: Damping material constant in normal direction. This constant is computed
          from the constants ``d_1, d_2`` of the two contacting objects 1 and 2 as
-         ``d = (d_1+d_2)/2``.
+         ``d_{mean} = (d_1+d_2)/2``.
          ``d_i`` can be computed from the *coefficient of restitution* ``cor_i`` as
          ``d_i=8(1-e_i)/(5e_i); e_i = max(cor_i,0.01)`` according to [^1].
-- ``\\mu_s``: Sliding friction material constant in tangential direction. This constant is computed
-         from the constants ``\\mu_{s,1}, \\mu_{s,2}`` of the two contacting objects 1 and 2 as
-         ``\\mu_s = (\\mu_{s,1}+\\mu_{s,2})/2``.
+- ``\\mu_{k,mean}``: Kinetic/sliding friction coefficient in tangential direction. This constant is computed
+         from the constants ``\\mu_{k,1}, \\mu_{k,2}`` of the two contacting objects 1 and 2 as
+         ``\\mu_{k,mean} = \\min(\\mu_{k,1},\\mu_{k,2})``.
 - ``v_{min}``: Absolute value of tangential velocity at which sliding friction force starts.
                This constant is computed from the constants ``v_{min,1}, v_{min,2}``
                of the two contacting objects 1 and 2 as
@@ -94,15 +94,15 @@ The contact force law in normal direction is based on [^1], [^3], the remaining 
 
 # Arguments
 
-- `c` in [N/m]: = ``c_i`` - Elastic material constant in normal direction of current object (``\\gt 0``).
-- `d` in [Ns/m]: = ``d_i`` - Damping material constant in normal direction of current object (``\\ge 0``).
-- `mu_s`: = ``\\mu_{s,i}`` - Sliding friction coefficient in tangential direction of current object (``\\ge 0``).
-- `v_min` in [m/s]: = ``v_{min,i}`` - Absolute value of tangential velocity of current
-                                      object at which sliding friction force starts (``\\gt 0``).
-- `E` in [N/m^2]: = ``E_i`` - Young's modulus of current object (``\\gt 0``).
-- `\\nu`: = ``\\nu_i`` - Poisson's ratio of current object (``0 \\gt \\nu \\lt 1``).
-- `cof`: = ``cof_i`` - Coefficient of restitution between two objects of the same material (``0 \\ge cof \\le 1``).
-- `name::String``: Name of the material.
+- `c` in [N/m]: Elastic material constant in normal direction (``\\gt 0``).
+- `d` in [Ns/m]: Damping material constant in normal direction (``\\ge 0``).
+- `mu_k`: Kinetic/sliding friction coefficient in tangential direction between two objects of the same material (``\\ge 0``).
+- `v_min` in [m/s]: Absolute value of tangential velocity of current
+                    object at which sliding friction force starts (``\\gt 0``).
+- `E` in [N/m^2]: Young's modulus of material (``\\gt 0``).
+- `nu`: Poisson's ratio of material (``0 \\lt nu \\lt 1``).
+- `cof`: Coefficient of restitution between two objects of the same material (``0 \\le cof \\le 1``).
+- `name::String`: Name of the material.
 
 
 # Discussion
@@ -121,9 +121,9 @@ to guarantee that ``f_n`` is always a compressive and never a pulling force beca
 this would be unphysical.
 
 The tangential force law is basically just a sliding friction force
-``|\\vec{f}_t| = \\mu_s f_n`` acting in opposite direction of the movement in the tangential plane.
+``|\\vec{f}_t| = \\mu_k f_n`` acting in opposite direction of the movement in the tangential plane.
 The stuck phase is not modelled, but is approximated by a steep characteristic
-from zero force up to the sliding friction force:
+from zero force up to the sliding friction force, see next figure:
 
 ![Sliding friction force](../../resources/images/plot_friction1.svg)
 
@@ -149,15 +149,15 @@ from zero force up to the sliding friction force:
 mutable struct ElasticContactMaterial <: Modia3D.AbstractContactMaterial
    c::Float64      # [N/m]    Spring constant of contact in normal direction
    d::Float64      # [N*s/m]  Scaled damping constant of contact in normal direction
-   mu_s::Float64   # []       Sliding friction force coefficient
+   mu_k::Float64   # []       Kinetic/sliding friction force coefficient
    v_min::Float64  # [m/s]    Absolute value of tangential velocity at which sliding friction force starts
 
-   function ElasticContactMaterial(; c=1e7, d=1.0, mu_s=0.1, v_min=0.01)
+   function ElasticContactMaterial(; c=1e7, d=1.0, mu_k=0.1, v_min=0.01)
       @assert(c > 0.0)
       @assert(d >= 0.0)
-      @assert(mu_s >= 0.0)
+      @assert(mu_k >= 0.0)
       @assert(v_min > 0.0)
-      new(c, d, mu_s, v_min)
+      new(c, d, mu_k, v_min)
    end
 end
 
@@ -169,24 +169,24 @@ function dampingFromCof(cof)
 end
 
 
-function ElasticContactMaterialFromMaterialData(E=20e9, nu=0.3, cof=0.7, mu_s=0.1, v_min=0.01)
+function ElasticContactMaterialFromMaterialData(E=20e9, nu=0.3, cof=0.7, mu_k=0.1, v_min=0.01)
     @assert(E > 0.0)
     @assert(nu > 0.0 && nu < 1.0)
     @assert(cof >= 0.0 && cof <= 1.0)
     c = E/(1 - nu^2)
     d = dampingFromCof(cof) 
-    return ElasticContactMaterial(c=E/(1 - nu^2), d=dampingFromCof(cof), mu_s=mu_s, v_min=v_min)
+    return ElasticContactMaterial(c=E/(1 - nu^2), d=dampingFromCof(cof), mu_k=mu_k, v_min=v_min)
 end
 
 
-function ElasticContactMaterialFromMaterialName(name::String="Steel1")
+function ElasticContactMaterialFromMaterialName(name::String="Steel")
    mat   = SolidMaterial(name)
    E     = mat.YoungsModulus
    nu    = mat.PoissonsRatio
    cof   = mat.coefficientOfRestitution
-   mu_s  = mat.slidingFrictionCoefficient
+   mu_k  = mat.slidingFrictionCoefficient
    v_min = mat.v_min 
-   return ElasticContactMaterialFromMaterialData(E=E, nu=nu, cof=cof, mu_s=mu_s, v_min=v_min)
+   return ElasticContactMaterialFromMaterialData(E=E, nu=nu, cof=cof, mu_k=mu_k, v_min=v_min)
 end
 
 
