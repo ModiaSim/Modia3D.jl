@@ -38,8 +38,8 @@ Lz = 0.1
   rev1   = Modia3D.Revolute(frame1, pendulum1.frame1; axis = 1 , phi_start =  -pi/3)
   rev2   = Modia3D.Revolute(frame2, pendulum2.frame1; axis = 1 , phi_start =  -pi/3)
   rev3   = Modia3D.Revolute(frame3, pendulum3.frame1; axis = 1 ) #, phi_start =  -pi/3)
-  rev4   = Modia3D.Revolute(frame4, pendulum4.frame1; axis = 1 ) #, phi_start =  -pi/3 ) #
-  rev5   = Modia3D.Revolute(frame5, pendulum5.frame1; axis = 1 ) #, phi_start =  pi/3 ) #
+  rev4   = Modia3D.Revolute(frame4, pendulum4.frame1; axis = 1 , phi_start =  pi/3 ) #
+  rev5   = Modia3D.Revolute(frame5, pendulum5.frame1; axis = 1 , phi_start =  pi/3 ) #
 end
 
 diameter = 1.0

@@ -400,7 +400,9 @@ function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64
 
       # Compute signed distances of all contact shapes during zero-crossing computation
       setComputationFlag(ch)
-      if ModiaMath.isZeroCrossing(sim) || ModiaMath.isEvent(sim)
+      if ModiaMath.isEvent(sim)    # with Event
+         selectContactPairs!(ch, world)
+      elseif ModiaMath.isZeroCrossing(sim) # no Event
          selectContactPairs!(ch, world)
       else
          getDistances!(ch, world)
@@ -408,7 +410,7 @@ function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64
 
       # Handle zero crossing event
       contact::Bool = false
-      for i in eachindex(chpairs.z)
+      for i in eachindex(chpairs.z) # only length of contact=true elements
          obj1  = chpairs.contactObj1[i]
          obj2  = chpairs.contactObj2[i]
 
@@ -430,7 +432,7 @@ function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64
          # Generate state event, if s < 0 changes
          contact = ModiaMath.negative!(sim, i, s, str)
 
-         if contact
+         if contact # kann man eventuell rausgeben
             #println("... Contact ", str, " active at time = ", sim.time)
             if chpairs.contactPoint1[i] != nothing && chpairs.contactPoint2[i] != nothing && chpairs.contactNormal[i] != nothing
                r1 = ModiaMath.Vector3D(chpairs.contactPoint1[i])

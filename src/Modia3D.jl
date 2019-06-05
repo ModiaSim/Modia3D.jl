@@ -36,6 +36,8 @@ abstract type AbstractDLR_VisualizationRenderer <: AbstractRenderer end   # Comm
 
 abstract type AbstractMassProperties    end
 
+abstract type AbstractKeys    end
+
 import ModiaMath
 abstract type AbstractAssemblyInternal  <: ModiaMath.AbstractComponentInternal end
 abstract type AbstractAssemblyComponent <: ModiaMath.AbstractComponentWithVariables end # Objects that can be stored in an Assembly (has elements name and within)
@@ -50,6 +52,8 @@ abstract type AbstractForceTorque <: AbstractAssemblyComponent end  # Object com
 abstract type AbstractSignal <: AbstractAssemblyComponent end # It is a Signal with one output variable
 abstract type AbstractSignalAdaptor  <: AbstractAssemblyComponent end
 abstract type AbstractForceAdaptor   <: AbstractAssemblyComponent end
+
+
 
 
 # Enumerations
