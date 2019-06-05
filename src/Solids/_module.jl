@@ -4,7 +4,8 @@
 """
     module Modia3D.Solids
 
-Objects that have a volume and properties associated with the volume.
+Module `Solids` provides data structures and operations for solids, so objects that have a volume and 
+properties associated with the volume.
 Solid parts can be associated with a [`Modia3D.Object3D`](@ref).
 They are defined with struct [`Modia3D.Solid`](@ref) consisting of an **optional** solid geometry:
 
@@ -19,17 +20,21 @@ and other **optional** properties:
 Since the solid geometry itself is optional, it is possible to just define a
 coordinate system with associated mass, center of mass and inertia matrix.
 
-The following functions are provided for a solid geometry `geo` that
+The following functions are provided for a solid geometry `geo::Modia3D.AbstractSolidGeometry` that
 is associated with an Object3D `object3D`:
-- volume(geo),
-- centroid(geo),
-- inertiaMatrix(geo, mass),
-- boundingBox(geo, <other arguments>),
-- supportPoint(geo, <other arguments>),
+- [`Modia3D.volume`](@ref)`(geo)` returns the volume of `geo`.
+- [`Modia3D.centroid`](@ref)`(geo)` returns the centroid of `geo` (= center of mass for uniform density).
+- [`Modia3D.inertiaMatrix`](@ref)`(geo, mass)` returns the inertia matrix of `geo`.
+- [`Modia3D.boundingBox!`](@ref)`(geo, <other arguments>)` returns the Axis Aligned Bounding Box of `geo`.
+- [`Modia3D.supportPoint`](@ref)`(geo, <other arguments>)` returns the support point of `geo` along the desired direction.
 - isVisible(object3D, renderer),
 - dataHasMass(object3D),
 - canCollide(object3D),
 - and other functions.
+
+Other functions in module `Solids`:
+- [`Modia3D.SolidMaterial`](@ref)(name) returns the solid properties of material `name`.
+- [`Modia3D.ElasticContactMaterial`](@ref)(name) returns the elastic contact properties of material `name`.
 
 # Main developers
 Andrea Neumayr and Martin Otter, [DLR - Institute of System Dynamics and Control](https://www.dlr.de/sr/en)

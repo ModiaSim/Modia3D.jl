@@ -238,6 +238,11 @@ topArea(geo::Modia3D.AbstractSolidGeometry) = bottomArea(geo)
 
 
 #------------------volume-----------------------------------------------
+"""
+    V = volume(geo)
+
+Return the volume of the solid geometry `geo::Modia3D.AbstractSolidGeometry` in [m^3].
+"""
 volume(geo::Modia3D.AbstractSolidGeometry) = bottomArea(geo)*lengthGeo(geo)
 volume(geo::SolidSphere)                   = 4/3*pi*(geo.Dx/2)^3
 function volume(geo::SolidEllipsoid)
@@ -301,6 +306,13 @@ lengthGeo(geo::SolidFileMesh)                 = error("lengthGeo(SolidFileMesh):
 
 
 #------------------------centroid of geometries----------------------------------------
+"""
+    r = centroid(geo)
+
+Return position vector from solid reference frame to [centroid](https://en.wikipedia.org/wiki/Centroid) 
+of solid `geo::Modia3D.AbstractSolidGeometry` in [m]. If the solid has a uniform density,
+the centroid is identical to the *center of mass*.
+"""
 centroid(geo::Modia3D.AbstractSolidGeometry) = ModiaMath.ZeroVector3D
 centroid(geo::SolidCone)                     = SVector{3,Float64}([0.0,0.0,geo.Lz/4])
 function centroid(geo::SolidFileMesh)
@@ -313,6 +325,14 @@ end
 
 
 #------------------------inertia matrix of geometries-----------------------------------
+"""
+   I = inertiaMatrix(geo, mass)
+
+Return [inertia matrix](https://en.wikipedia.org/wiki/Moment_of_inertia) `I` of solid 
+`geo::Modia3D.AbstractSolidGeometry` with respect to the
+solid reference frame in [kg*m^2] as `SMatrix{3,3,Float64,9}`. Hereby it is assumed that
+`geo` has uniform density and `mass` is the mass of `geo` in [kg].
+"""
 inertiaMatrix(geo::SolidSphere, mass::Number) = InertiaMatrix(mass/10*geo.Dx^2*EYE3())
 inertiaMatrix(geo::SolidEllipsoid, mass::Number) = InertiaMatrix(mass/20*Diagonal([geo.Dy^2 + geo.Dz^2,
                                                                                    geo.Dx^2 + geo.Dz^2,

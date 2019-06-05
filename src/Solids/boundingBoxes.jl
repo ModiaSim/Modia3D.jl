@@ -8,6 +8,20 @@
 #------------------------------------------------------------------------------------
 # supportPoint(geo,r_abs,R_abs,e) - Return support point of geometry geo at position r_abs/R_abs in direction of unit vector e
 # function is called from mpr algorithm
+
+"""
+    r = supportPoint(geo, r_abs, R_abs, e)
+
+Return the absolute position vector `r` from world frame to *support point* of 
+solid `geo`, resolved in world frame in [m]. The support point is the point of solid `geo` 
+that is the most extreme in direction of unit vector `e`.
+
+# Arguments
+- `geo::Modia3D.AbstractSolidGeometry`: Solid geometry object.
+- `r_abs::AbstractVector`: Absolute position vector of `geo` reference frame.
+- `R_abs::AbstractMatrix`: Rotation matrix to rotate world frame in `geo` reference frame.
+- `e::AbstractVector`: Unit vector pointing into the desired direction.
+"""
 supportPoint(geo::Modia3D.AbstractSolidGeometry, r_abs::AbstractVector, R_abs::AbstractMatrix, e::AbstractVector) =
             r_abs + R_abs'*centroid(geo) + R_abs'*supportPoint_abs(geo, R_abs*e) + e*geo.rsmall
 
@@ -115,6 +129,23 @@ end
 # boundingBox!(..) calculates the AABB (= Axis Aligned Bounding Box) for the geometries
 # it also uses support points for finding the points which are furthest away in each x,y,z - direction
 # it calles supportPoint_i
+"""
+    boundingBox!(geo, AABB, r_abs, R_abs; tight=true, scaleFactor=0.01)
+
+Returns the *Axis Aligned Bounding Box* of solid `geo` in argument `AABB`.
+
+# Arguments
+- `geo::Modia3D.AbstractSolidGeometry`: Solid geometry object.
+- `AABB::Modia3D.BoundingBox`: On return, update AABB with the actual *Axis Aligned Bounding Box* of solid `geo`.
+- `r_abs::AbstractVector`: Absolute position vector of `geo` reference frame.
+- `R_abs::AbstractMatrix`: Rotation matrix to rotate world frame in `geo` reference frame.
+- `tight::Bool`: If true, return the tightest AABB. If false return an AABB that is
+                scaleFactor bigger than the best fitting AABB
+                (for example, scaleFactor=0.1 means that the returned AABB is 10 percent bigger
+                than the best fitting AABB).
+- `scaleFactor::Float64`: If `tight=false`, the returned AABB is `scaleFactor` bigger than the
+                          best fitting AABB.
+"""
 function boundingBox!(geo::Modia3D.AbstractSolidGeometry, AABB::Basics.BoundingBox, r_abs::AbstractVector, R_abs::AbstractMatrix; tight::Bool=true, scaleFactor::Float64=0.01)
   xmin = supportPoint_i(geo, r_abs[1], R_abs[:,1], -1)
   xmax = supportPoint_i(geo, r_abs[1], R_abs[:,1], +1)

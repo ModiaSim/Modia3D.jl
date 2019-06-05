@@ -33,9 +33,9 @@ end
 
 
 """
-    material1 = ElasticContactMaterial(c=1e7, d=1.0, mu_k=0.1, v_min=0.01)
-    material2 = ElasticContactMaterialFromMaterialData(E=2e11, nu=0.3, cof=0.7, mu_k=0.1, v_min=0.01)
-    material3 = ElasticContactMaterialFromMaterialName(name="Steel")
+    material1 = ElasticContactMaterial(;c=1e7, d=1.0, mu_k=0.1, v_min=0.01)
+    material2 = ElasticContactMaterial(name; v_min=0.01)
+    material3 = ElasticContactMaterialFromMaterialData(;E=2e11, nu=0.3, cof=0.7, mu_k=0.1, v_min=0.01)
 
 Generate an `ElasticContactMaterial` object. This object is used to 
 compute an elastic response calculation between two 3D objects
@@ -102,7 +102,7 @@ The contact force law in normal direction is based on [^1], [^3], the remaining 
 - `E` in [N/m^2]: Young's modulus of material (``\\gt 0``).
 - `nu`: Poisson's ratio of material (``0 \\lt nu \\lt 1``).
 - `cof`: Coefficient of restitution between two objects of the same material (``0 \\le cof \\le 1``).
-- `name::String`: Name of the material.
+- `name::AbstractString`: Name of the material.
 
 
 # Discussion
@@ -169,7 +169,7 @@ function dampingFromCof(cof)
 end
 
 
-function ElasticContactMaterialFromMaterialData(E=20e9, nu=0.3, cof=0.7, mu_k=0.1, v_min=0.01)
+function ElasticContactMaterialFromMaterialData(; E=20e9, nu=0.3, cof=0.7, mu_k=0.1, v_min=0.01)
     @assert(E > 0.0)
     @assert(nu > 0.0 && nu < 1.0)
     @assert(cof >= 0.0 && cof <= 1.0)
@@ -179,13 +179,12 @@ function ElasticContactMaterialFromMaterialData(E=20e9, nu=0.3, cof=0.7, mu_k=0.
 end
 
 
-function ElasticContactMaterialFromMaterialName(name::String="Steel")
+function ElasticContactMaterial(name::AbstractString; v_min=0.01)
    mat   = SolidMaterial(name)
    E     = mat.YoungsModulus
    nu    = mat.PoissonsRatio
    cof   = mat.coefficientOfRestitution
    mu_k  = mat.slidingFrictionCoefficient
-   v_min = mat.v_min 
    return ElasticContactMaterialFromMaterialData(E=E, nu=nu, cof=cof, mu_k=mu_k, v_min=v_min)
 end
 
