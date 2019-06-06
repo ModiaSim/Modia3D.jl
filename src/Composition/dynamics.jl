@@ -401,16 +401,17 @@ function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64
       # Compute signed distances of all contact shapes during zero-crossing computation
       setComputationFlag(ch)
       if ModiaMath.isEvent(sim)    # with Event
-         selectContactPairs!(ch, world)
+         selectContactPairsWithEvent!(ch, world)
       elseif ModiaMath.isZeroCrossing(sim) # no Event
-         selectContactPairs!(ch, world)
+         selectContactPairsNoEvent!(ch, world)
       else
          getDistances!(ch, world)
       end
 
       # Handle zero crossing event
       contact::Bool = false
-      for i in eachindex(chpairs.z) # only length of contact=true elements
+       #for i=1:chpairs.nzContact[1] # only length of contact=true elements
+       for i in eachindex(chpairs.z)
          obj1  = chpairs.contactObj1[i]
          obj2  = chpairs.contactObj2[i]
 
@@ -441,7 +442,7 @@ function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64
 
                (f1,f2,t1,t2) = responseCalculation(obj1.data.contactMaterial,
                                                    obj2.data.contactMaterial,
-                                                   obj1, obj2, s, rContact,
+                                                   obj1, obj2, chpairs.zOrg[i], rContact,
                                                    ModiaMath.Vector3D(chpairs.contactNormal[i]), time, file)
 
                # Transform forces/torques in local part frames

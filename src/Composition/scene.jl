@@ -43,10 +43,12 @@ struct ContactPairs
    # Dimensions
    ne::Int                                         # length(collSuperObjs)
    nz::Int                                         # length(z)
+   nzContact::Array{Int,1}                         # length(z | z has contact) length of z where zi has contact
    allPossibleContactPairsInz::Bool                # = true, if nz == number of all possible contact pairs
 
-   # All vectors below have length nz and are computed by functions selectContactPairs!(...) and getDistances!(...)
-   z::Vector{Float64}                              # Vector of zero crossing functions. z[i] < 0.0 if i-th contact pair has penetration
+   # All vectors below have length nz and are computed by functions selectContactPairsWithEvent!(...), selectContactPairsNoEvent!(...)  and getDistances!(...)
+   z::Vector{Float64}                              # Vector of zero crossing functions with hysteresis. z[i] < 0.0 if i-th contact pair has penetration
+   zOrg::Vector{Float64}                           # Vector of original distances computed with mpr or others
 
 
    contactPoint1::Vector{Union{SVector{3,Float64},NOTHING}}       # Absolute position vector to first contact point on contactObj1
@@ -55,6 +57,7 @@ struct ContactPairs
 
    contactObj1::Vector{Union{Object3D,NOTHING}}
    contactObj2::Vector{Union{Object3D,NOTHING}}
+
 
 
    function ContactPairs(world::Composition.Object3D, superObjs::Array{SuperObjsRow,1},
@@ -66,6 +69,7 @@ struct ContactPairs
 
       # Determine the dimension of vector z (<= nzmax, but at most the number of all possible contact point combinations)
       nz = 0
+      nzContact = [1]
       collSuperObjs = Array{Array{Object3D,1},1}()
 
       for i_superObj = 1:length(superObjs)
@@ -76,22 +80,21 @@ struct ContactPairs
              for i_obj = 1:length(superObj)
                 for i_nextObj =1:length(superObjs[i_next_superObj].superObjCollision.superObj)
                    nz += 1
-                   if nz >=nz_max
-                     # @goto AfterLoops
+                   if nz > nz_max
+                     break
       end; end; end; end; end; end
 
-      @label AfterLoops
-
-      # println("nz = ", nz)
+      #println("nz = ", nz)
       if nz <= nz_max
          allPossibleContactPairsInz = true
       else
          allPossibleContactPairsInz = false
          nz = nz_max
       end
-      # println("nachher nz = ", nz)
+      #println("nachher nz = ", nz)
       # Allocate storage
       z = fill(42.0, nz)
+      zOrg = fill(42.0, nz)
       defaultPoint   = SVector{3,Float64}(0.0,0.0,0.0)
       contactPoint1  = [defaultPoint for i = 1:nz]
       contactPoint2  = [defaultPoint for i = 1:nz]
@@ -126,13 +129,14 @@ struct ContactPairs
          end
       end
 
-      new(collSuperObjs, noCPairs, AABB, dummyObject3D, length(collSuperObjs), nz, allPossibleContactPairsInz,
-          z, contactPoint1, contactPoint2, contactNormal, contactObj1, contactObj2)
+      new(collSuperObjs, noCPairs, AABB, dummyObject3D, length(collSuperObjs), nz, nzContact, allPossibleContactPairsInz,
+          z, zOrg, contactPoint1, contactPoint2, contactNormal, contactObj1, contactObj2)
    end
 end
 
 initializeContactDetection!(ch::Modia3D.AbstractContactDetection, collSuperObjs::Array{Array{Modia3D.AbstractObject3Ddata}}, noCPairs::Array{Array{Int64,1}}) = error("No contact detection handler defined.")
-selectContactPairs!(ch::Modia3D.AbstractContactDetection)            = error("No contact detection handler defined.")
+selectContactPairsWithEvent!(ch::Modia3D.AbstractContactDetection)   = error("No contact detection handler defined.")
+selectContactPairsNoEvent!(ch::Modia3D.AbstractContactDetection)     = error("No contact detection handler defined.")
 getDistances!(ch::Modia3D.AbstractContactDetection)                  = error("No contact detection handler defined.")
 setComputationFlag(ch::Modia3D.AbstractContactDetection)             = error("No contact detection handler defined.")
 closeContactDetection!(ch::Modia3D.AbstractContactDetection)         = error("No contact detection handler defined.")

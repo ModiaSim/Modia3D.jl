@@ -36,7 +36,7 @@ for time = range(tStart, stop=tEnd, length=2)
   Modia3D.updatePosition!(ballBox)
 
   Modia3D.setComputationFlag(ballBox)
-  Modia3D.selectContactPairs!(ballBox)
+  Modia3D.selectContactPairsWithEvent!(ballBox)
   Modia3D.setComputationFlag(ballBox)
   Modia3D.getDistances!(ballBox)
 

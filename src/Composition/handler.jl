@@ -383,14 +383,25 @@ function setComputationFlag(assembly::Modia3D.AbstractAssembly)
   end
 end
 
-function selectContactPairs!(assembly::Modia3D.AbstractAssembly)
-  assertInitAnalysis(assembly, "Modia3D.selectContactPairs!(..)")
+function selectContactPairsWithEvent!(assembly::Modia3D.AbstractAssembly)
+  assertInitAnalysis(assembly, "Modia3D.selectContactPairsWithEvent!(..)")
   if assembly._internal.scene.collide
     ch = assembly._internal.scene.options.contactDetection
     world = assembly._internal.referenceObject3D
-    selectContactPairs!(ch, world)
+    selectContactPairsWithEvent!(ch, world)
   else
-    errorMessageCollision("Modia3D.selectContactPairs!(..)")
+    errorMessageCollision("Modia3D.selectContactPairsWithEvent!(..)")
+  end
+end
+
+function selectContactPairsNoEvent!(assembly::Modia3D.AbstractAssembly)
+  assertInitAnalysis(assembly, "Modia3D.selectContactPairsNoEvent!(..)")
+  if assembly._internal.scene.collide
+    ch = assembly._internal.scene.options.contactDetection
+    world = assembly._internal.referenceObject3D
+    selectContactPairsNoEvent!(ch, world)
+  else
+    errorMessageCollision("Modia3D.selectContactPairsNoEvent!(..)")
   end
 end
 

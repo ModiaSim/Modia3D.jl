@@ -63,7 +63,7 @@ export G, EarthMass, EarthRadius
 export DLR_Visualization_renderer
 
 export ContactDetectionMPR_handler
-export initializeContactDetection!, selectContactPairsNoEvent!, selectContactPairs!, getDistances!, setComputationFlag, closeContactDetection!
+export initializeContactDetection!, selectContactPairsNoEvent!, selectContactPairsWithEvent!, getDistances!, setComputationFlag, closeContactDetection!
 
 export responseCalculation, print_ModelVariables
 

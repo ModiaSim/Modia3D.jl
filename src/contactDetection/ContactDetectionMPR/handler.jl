@@ -40,70 +40,53 @@ end
 # the nz shape pairs with the smallest distances and orders them
 # according to their distances in O(n_n log(n_z)) operations.
 # This function is called before every integrator step.
-function Composition.selectContactPairs!(ch::Composition.ContactDetectionMPR_handler, world::Composition.Object3D)
-  if !ch.distanceComputed
-    computeDistances(ch, world, false)
-  end
-  if !isempty(ch.dict1)
-    if !isempty(ch.dict2)
-      empty!(ch.dict2)
-    end
-    tmp = collect(ch.dict1)
-    for i=1:length(tmp)
-      ch.contactPairs.z[i] = tmp[i][1].distance        # fill z vector with smallest distances
-      ch.contactPairs.contactPoint1[i] = tmp[i][2][1]
-      ch.contactPairs.contactPoint2[i] = tmp[i][2][2]
-      ch.contactPairs.contactNormal[i] = tmp[i][2][3]
-      ch.contactPairs.contactObj1[i]   = tmp[i][2][4]
-      ch.contactPairs.contactObj2[i]   = tmp[i][2][5]
-      ch.dict2[tmp[i][1].index] = [tmp[i][1].distance, i, tmp[i][1].contact]  # interchange key and value of dictionary dict1 + position in z vector + flag contact
-    end
-  else # No AABBs are overlapping, take old z!
-    for i=1:length(ch.contactPairs.z)
-      ch.contactPairs.z[i] = 42.0
-    end
-  end
-  ch.distanceComputed = true
+function Composition.selectContactPairsWithEvent!(ch::Composition.ContactDetectionMPR_handler, world::Composition.Object3D)
+  selectContactPairs!(ch,world,true)
 end
 
 
-function selectContactPairsNoEvent!(ch::Composition.ContactDetectionMPR_handler, world::Composition.Object3D)
-  println("bin in neuer funktion ")
+function Composition.selectContactPairsNoEvent!(ch::Composition.ContactDetectionMPR_handler, world::Composition.Object3D)
   if !isempty(ch.dict1)
     tmp = collect(ch.dict1)
     for i=1:length(tmp)
-      if tmp[i][1].contact
-        dictHelp[tmp[i][1].index] = i
-      else
-        @goto AfterLoopsSelectContactPairsNoEvent
-      end
-    end
-    @label AfterLoopsSelectContactPairsNoEvent
-  end
+      tmp[i][1].contact ? (ch.dictHelp[tmp[i][1].index] = i) : break
+  end; end
+  selectContactPairs!(ch,world,false)
+end
 
 
+function selectContactPairs!(ch::Composition.ContactDetectionMPR_handler, world::Composition.Object3D, hasEvent::Bool)
   if !ch.distanceComputed
-    computeDistances(ch, world, false)
+    computeDistances(ch, world, false, hasEvent)
   end
   if !isempty(ch.dict1)
     if !isempty(ch.dict2)
       empty!(ch.dict2)
     end
+    if !isempty(ch.dictHelp)
+      empty!(ch.dictHelp)
+    end
     tmp = collect(ch.dict1)
+    ch.contactPairs.nzContact[1] = 0
     for i=1:length(tmp)
+      if tmp[i][1].contact
+        ch.contactPairs.nzContact[1] = i
+        ch.dictHelp[tmp[i][1].index] = i
+      end
       ch.contactPairs.z[i] = tmp[i][1].distance        # fill z vector with smallest distances
       ch.contactPairs.contactPoint1[i] = tmp[i][2][1]
       ch.contactPairs.contactPoint2[i] = tmp[i][2][2]
       ch.contactPairs.contactNormal[i] = tmp[i][2][3]
       ch.contactPairs.contactObj1[i]   = tmp[i][2][4]
       ch.contactPairs.contactObj2[i]   = tmp[i][2][5]
+      ch.contactPairs.zOrg[i]          = tmp[i][2][6]
       ch.dict2[tmp[i][1].index] = [tmp[i][1].distance, i, tmp[i][1].contact]  # interchange key and value of dictionary dict1 + position in z vector + flag contact
     end
   else # No AABBs are overlapping, take old z!
     for i=1:length(ch.contactPairs.z)
-      ch.contactPairs.z[i] = 42.0
-    end
-  end
+      ch.contactPairs.z[i]    = 42.0
+      ch.contactPairs.zOrg[i] = 42.0
+  end; end
   ch.distanceComputed = true
 end
 
@@ -112,18 +95,18 @@ end
 # shapes are potentially in contact to each other, (b) computes
 # the distances of these shapes in a narrow phase and (c)
 # stores the distances of the contact pairs selected by the last
-# call of function selectContactPairs!(C) in z in O(n log(nz))
+# call of function selectContactPairsWithEvent!(C) in z in O(n log(nz))
 # operations. This function is called whenever the integrator
 # requests a new zero-crossing function evaluation
 function Composition.getDistances!(ch::Composition.ContactDetectionMPR_handler, world::Composition.Object3D)
   if !ch.distanceComputed
-    computeDistances(ch, world, true)
+    computeDistances(ch, world, true, false)
     ch.distanceComputed = true
   end
 end
 
 
-function computeDistances(ch::Composition.ContactDetectionMPR_handler, world::Composition.Object3D, phase2::Bool)
+function computeDistances(ch::Composition.ContactDetectionMPR_handler, world::Composition.Object3D, phase2::Bool, hasEvent::Bool=true)
   collSuperObjs = ch.contactPairs.collSuperObjs
   noCPairs = ch.contactPairs.noCPairs
 
@@ -134,8 +117,7 @@ function computeDistances(ch::Composition.ContactDetectionMPR_handler, world::Co
       for j = 1:length(superObj)
         obj = superObj[j]
         AABB[i][j] = Solids.boundingBox!(obj.data.geo, AABB[i][j], obj.r_abs, obj.R_abs; tight=false, scaleFactor=0.01)
-      end
-    end
+    end; end
 
     # new computation of dictionary 1
     if !isempty(ch.dict1)
@@ -152,85 +134,94 @@ function computeDistances(ch::Composition.ContactDetectionMPR_handler, world::Co
       if !isempty(actSuperObj)
         actSuperAABB = AABB[is]
       for i = 1:length(actSuperObj)
-        actObj = actSuperObj[i]      # determine contact from this Object3D with all Object3Ds that have larger indices
+        actObj = actSuperObj[i]       # determine contact from this Object3D with all Object3Ds that have larger indices
         actAABB = actSuperAABB[i]
         for js = is+1:length(collSuperObjs)
-          if !(js in noCPairs[is]) # index is not in objects which cant collide
+          if !(js in noCPairs[is])    # index is not in objects which cant collide
             nextSuperObj = collSuperObjs[js]
             nextSuperAABB = AABB[js]
             for j = 1:length(nextSuperObj)
               nextObj = nextSuperObj[j]
               nextAABB = nextSuperAABB[j]
               index = pack(is,i,js,j)
-              storeDistancesForSolver!(world, index, ch, actObj, nextObj, actAABB, nextAABB, phase2)
+              storeDistancesForSolver!(world, index, ch, actObj, nextObj, actAABB, nextAABB, phase2, hasEvent)
   end; end; end; end; end; end; end
-  #println("length(ch.dict1) = ", length(ch.dict1))
-  #println("\n")
+
   return nothing
 end
 
 
-getInitialBoolOfDistance(distance_org) = distance_org < 0.0 ? true : false
-manipulateDistance(distance_org::Float64, contact::Bool) = contact ? distance_org - 100*eps() : distance_org + 100*eps()
+getInitialBoolOfDistance(distanceOrg) = distanceOrg < 0.0 ? true : false
+manipulateDistance(distanceOrg::Float64, contact::Bool) = contact ? distanceOrg - 100*eps() : distanceOrg + 100*eps()
 
-function hysteresis(distance_org::Float64; initial::Bool=false, contact::Bool=false)
+function hysteresis(distanceOrg::Float64; initial::Bool=false, contact::Bool=false)
   if initial
-    contact = getInitialBoolOfDistance(distance_org)
-    distance = manipulateDistance(distance_org, contact)
+    contact = getInitialBoolOfDistance(distanceOrg)
+    distance = manipulateDistance(distanceOrg, contact)
   else
-    distance = manipulateDistance(distance_org, contact)
+    distance = manipulateDistance(distanceOrg, contact)
   end
   return (distance, contact)
 end
 
 function storeDistancesForSolver!(world::Composition.Object3D, index::Integer, ch::Composition.ContactDetectionMPR_handler,
                                   actObj::Composition.Object3D, nextObj::Composition.Object3D,
-                                  actAABB::Basics.BoundingBox, nextAABB::Basics.BoundingBox, phase2::Bool)
+                                  actAABB::Basics.BoundingBox, nextAABB::Basics.BoundingBox, phase2::Bool, hasEvent::Bool)
   # Broad Phase
   if AABB_touching(actAABB, nextAABB) # AABB's are overlapping
     # narrow phase
-    (distance_org, contactPoint1, contactPoint2, contactNormal,r1_a, r1_b, r2_a, r2_b, r3_a, r3_b) = mpr(ch, actObj, nextObj, actObj.data.geo, nextObj.data.geo)
-    #println("distance_org = ", distance_org)
+    (distanceOrg, contactPoint1, contactPoint2, contactNormal,r1_a, r1_b, r2_a, r2_b, r3_a, r3_b) = mpr(ch, actObj, nextObj, actObj.data.geo, nextObj.data.geo)
   else # AABB's are not overlapping
-    (distance_org, contactPoint1, contactPoint2, contactNormal,r1_a, r1_b, r2_a, r2_b, r3_a, r3_b) = computeDistanceBetweenAABB(actAABB, nextAABB)
-    #println("distance_org = ", distance_org)
+    (distanceOrg, contactPoint1, contactPoint2, contactNormal,r1_a, r1_b, r2_a, r2_b, r3_a, r3_b) = computeDistanceBetweenAABB(actAABB, nextAABB)
   end
 
 
+  if hasEvent # has event
+    (distanceHyst, contact) = hysteresis(distanceOrg, initial=true)
+    key1 = Composition.KeyDict1(contact, distanceHyst, index)
+  elseif !isempty(ch.dictHelp) && status((ch.dictHelp,findkey(ch.dictHelp,index) )) == 1  # no event, but index pair has contact
+    (distanceHyst, contact) = hysteresis(distanceOrg, initial=false, contact=true)
+    key1 = Composition.KeyDict1(contact, distanceHyst, index)
+  else # no event and no contact
+    (distanceHyst, contact) = hysteresis(distanceOrg, initial=false, contact=false)
+    key1 = Composition.KeyDict1(contact, distanceHyst, index)
+  end
+
+  # phase 1
   if length(ch.dict1) < ch.contactPairs.nz
-    (distance, contact) = hysteresis(distance_org, initial=true)
-    key1 = Composition.KeyDict1(contact, distance, index)
-    push!(ch.dict1, key1=>(contactPoint1,contactPoint2,contactNormal,actObj,nextObj))
+    push!(ch.dict1, key1=>(contactPoint1,contactPoint2,contactNormal,actObj,nextObj,distanceOrg))
   else
     (k,v) = last(ch.dict1) # returns last sorted key -k, and its value -v
-    if distance_org < k.distance && k.distance <= 0.0
+    if distanceOrg < k.distance && k.distance <= 0.0
       error("Number of max. collisions (n_max) is too low.")
-    elseif distance_org < k.distance && k.distance >= 0.0
+    elseif distanceOrg < k.distance && k.distance >= 0.0
       delete!(ch.dict1,k) # removes last entry of sorted dict1
-      (distance, contact) = hysteresis(distance_org, initial=true)
-      key1 = Composition.KeyDict1(contact, distance, index)
-      push!(ch.dict1, key1=>(contactPoint1,contactPoint2,contactNormal,actObj,nextObj)) # new distance_org is added, it is smaller than the biggest one in dict1
+      push!(ch.dict1, key1=>(contactPoint1,contactPoint2,contactNormal,actObj,nextObj,distanceOrg)) # new distanceOrg is added, it is smaller than the biggest one in dict1
     end
-
   end
 
+  # Phase 2 is only for getDistances!()
   if phase2
     # it's for integrators update, if index of contact pair is already in dict2,
     # its distance is stored in z vector at the same position as before
     if !isempty(ch.dict2)
-      # token = find(ch.dict2,index)   # is deprecated
       token = findkey(ch.dict2,index)
       if status((ch.dict2,token)) == 1          # index of contact pair is in dict2
         tmp_val = deref_value((ch.dict2,token)) # unpacking its values
         j_local = Int(tmp_val[2])
-        (distance, contact) = hysteresis(distance_org, initial=false, contact=Bool(tmp_val[3]))
-        ch.contactPairs.z[j_local] = distance        # new distance is stored in z, at it's old position
+        # (distanceHyst, contact) = hysteresis(distanceOrg, initial=false, contact=Bool(tmp_val[3]))
+        if !isempty(ch.dictHelp) && status((ch.dictHelp,findkey(ch.dictHelp,index) )) == 1  # index pair has contact
+          (distanceHyst, contact) = hysteresis(distanceOrg, initial=false, contact=true)
+        else # no event and no contact
+          (distanceHyst, contact) = hysteresis(distanceOrg, initial=false, contact=false)
+        end
+        ch.contactPairs.z[j_local] = distanceHyst        # new distance is stored in z, at it's old position
         ch.contactPairs.contactPoint1[j_local] = contactPoint1
         ch.contactPairs.contactPoint2[j_local] = contactPoint2
         ch.contactPairs.contactNormal[j_local] = contactNormal
         ch.contactPairs.contactObj1[j_local]   = actObj
         ch.contactPairs.contactObj2[j_local]   = nextObj
-
+        ch.contactPairs.zOrg[j_local] = distanceOrg
         if ch.visualizeContactPoints
           transparency = 0.0
           setVisualizationContactProperties!(world.contactVisuObj1[j_local], transparency, contactPoint1)
@@ -245,14 +236,11 @@ function storeDistancesForSolver!(world::Composition.Object3D, index::Integer, c
           setVisualizationContactProperties!(world.supportVisuObj2B[j_local], transparency, r2_b)
           setVisualizationContactProperties!(world.supportVisuObj2C[j_local], transparency, r3_b)
         end
-
       else
-        if distance_org < 0.0
-          error("\nNumber of max. collision pairs nz (= ", ch.contactPairs.nz, ") is too low.",
-                "\nProvide a large nz_max with Modia3D.SceneOptions(nz_max=xxx).")
-        end
-      end
-end; end
+        if distanceOrg < 0.0
+        error("\nNumber of max. collision pairs nz (= ", ch.contactPairs.nz, ") is too low.",
+              "\nProvide a large nz_max with Modia3D.SceneOptions(nz_max=xxx).")
+  end; end; end; end
   return nothing
 end
 
@@ -291,9 +279,11 @@ end
 function Composition.closeContactDetection!(ch::Composition.ContactDetectionMPR_handler)
   Basics.emptyArray!(ch.dict1)
   Basics.emptyArray!(ch.dict2)
+  Basics.emptyArray!(ch.dictHelp)
   Basics.emptyArray!(ch.contactPairs.collSuperObjs)
   Basics.emptyArray!(ch.contactPairs.noCPairs)
   Basics.emptyArray!(ch.contactPairs.z)
+  Basics.emptyArray!(ch.contactPairs.zOrg)
   Basics.emptyArray!(ch.contactPairs.contactPoint1)
   Basics.emptyArray!(ch.contactPairs.contactPoint2)
   Basics.emptyArray!(ch.contactPairs.contactNormal)

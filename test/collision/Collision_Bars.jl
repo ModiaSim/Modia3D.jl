@@ -125,7 +125,7 @@ tEnd   = 2*pi
 
 for time =  range(tStart, stop=tEnd, length=101)
   Modia3D.update!(coll, time, tStart, tEnd)
-  Modia3D.selectContactPairs!(coll)
+  Modia3D.selectContactPairsWithEvent!(coll)
   # Modia3D.getDistances!(coll)
 
 

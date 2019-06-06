@@ -115,7 +115,7 @@ for time = range(tStart, stop=tEnd, length=101)
   Modia3D.set_r!(collisionTest.collisionSolids.rotM1.frames[1], [0, 0, -s])
 
   Modia3D.updatePosition!(collisionTest)
-  Modia3D.selectContactPairs!(collisionTest)
+  Modia3D.selectContactPairsWithEvent!(collisionTest)
 
   collisionTest.boundingBoxes.blau1AABB.data.Lx = abs(AABB[1][1].x_max - AABB[1][1].x_min)
   collisionTest.boundingBoxes.blau1AABB.data.Ly = abs(AABB[1][1].y_max - AABB[1][1].y_min)
@@ -181,7 +181,7 @@ for time = range(tStart, stop=tEnd, length=101)
   s = Modia3D.linearMovement(2*Lx, tStart, tEnd, time)
   Modia3D.set_r!(rotM1, [0, 0, s])
   Modia3D.updatePosition!(world)
-  Modia3D.selectContactPairs!(world)
+  Modia3D.selectContactPairsWithEvent!(world)
   Modia3D.setComputationFlag(world)
   Modia3D.visualize!(world,time)
 =#
