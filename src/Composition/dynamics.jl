@@ -401,20 +401,19 @@ function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64
       # Compute signed distances of all contact shapes during zero-crossing computation
       setComputationFlag(ch)
       if ModiaMath.isEvent(sim)    # with Event
-         selectContactPairsWithEvent!(ch, world)
+         selectContactPairsWithEvent!(sim, ch, world) #sim
       elseif ModiaMath.isZeroCrossing(sim) # no Event
-         selectContactPairsNoEvent!(ch, world)
+         selectContactPairsNoEvent!(sim, ch, world) #sim
       else
          getDistances!(ch, world)
       end
-
+      # sim.eventHandler.z = chpairs.z[i]
       # Handle zero crossing event
-      contact::Bool = false
-       #for i=1:chpairs.nzContact[1] # only length of contact=true elements
-       for i in eachindex(chpairs.z)
-         obj1  = chpairs.contactObj1[i]
-         obj2  = chpairs.contactObj2[i]
+      # contact::Bool = false
+      #for i=1:chpairs.nzContact[1] # only length of contact=true elements
+      for i in eachindex(chpairs.z)
 
+         #=
          if ModiaMath.isLogEvents(sim)
             #if ModiaMath.isInitial(sim)
             #   str = ""   # when logging, do not print z
@@ -432,10 +431,13 @@ function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64
 
          # Generate state event, if s < 0 changes
          contact = ModiaMath.negative!(sim, i, s, str)
+         =#
 
-         if contact # kann man eventuell rausgeben
+         if chpairs.contact[i] # kann man eventuell rausgeben
             #println("... Contact ", str, " active at time = ", sim.time)
-            if chpairs.contactPoint1[i] != nothing && chpairs.contactPoint2[i] != nothing && chpairs.contactNormal[i] != nothing
+            obj1  = chpairs.contactObj1[i]
+            obj2  = chpairs.contactObj2[i]
+            #if chpairs.contactPoint1[i] != nothing && chpairs.contactPoint2[i] != nothing && chpairs.contactNormal[i] != nothing
                r1 = ModiaMath.Vector3D(chpairs.contactPoint1[i])
                r2 = ModiaMath.Vector3D(chpairs.contactPoint2[i])
                rContact = (r1 + r2)/2.0
@@ -450,7 +452,7 @@ function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64
                obj1.dynamics.t += obj1.R_abs*t1
                obj2.dynamics.f += obj2.R_abs*f2
                obj2.dynamics.t += obj2.R_abs*t2
-            end
+            #end
          end
       end
    end

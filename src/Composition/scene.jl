@@ -49,6 +49,7 @@ struct ContactPairs
    # All vectors below have length nz and are computed by functions selectContactPairsWithEvent!(...), selectContactPairsNoEvent!(...)  and getDistances!(...)
    z::Vector{Float64}                              # Vector of zero crossing functions with hysteresis. z[i] < 0.0 if i-th contact pair has penetration
    zOrg::Vector{Float64}                           # Vector of original distances computed with mpr or others
+   contact::Vector{Bool}
 
 
    contactPoint1::Vector{Union{SVector{3,Float64},NOTHING}}       # Absolute position vector to first contact point on contactObj1
@@ -95,6 +96,7 @@ struct ContactPairs
       # Allocate storage
       z = fill(42.0, nz)
       zOrg = fill(42.0, nz)
+      contact = fill(false, nz)
       defaultPoint   = SVector{3,Float64}(0.0,0.0,0.0)
       contactPoint1  = [defaultPoint for i = 1:nz]
       contactPoint2  = [defaultPoint for i = 1:nz]
@@ -130,7 +132,7 @@ struct ContactPairs
       end
 
       new(collSuperObjs, noCPairs, AABB, dummyObject3D, length(collSuperObjs), nz, nzContact, allPossibleContactPairsInz,
-          z, zOrg, contactPoint1, contactPoint2, contactNormal, contactObj1, contactObj2)
+          z, zOrg, contact, contactPoint1, contactPoint2, contactNormal, contactObj1, contactObj2)
    end
 end
 

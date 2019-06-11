@@ -388,7 +388,7 @@ function selectContactPairsWithEvent!(assembly::Modia3D.AbstractAssembly)
   if assembly._internal.scene.collide
     ch = assembly._internal.scene.options.contactDetection
     world = assembly._internal.referenceObject3D
-    selectContactPairsWithEvent!(ch, world)
+    selectContactPairsWithEvent!(nothing, ch, world)
   else
     errorMessageCollision("Modia3D.selectContactPairsWithEvent!(..)")
   end
@@ -399,7 +399,7 @@ function selectContactPairsNoEvent!(assembly::Modia3D.AbstractAssembly)
   if assembly._internal.scene.collide
     ch = assembly._internal.scene.options.contactDetection
     world = assembly._internal.referenceObject3D
-    selectContactPairsNoEvent!(ch, world)
+    selectContactPairsNoEvent!(nothing, ch, world)
   else
     errorMessageCollision("Modia3D.selectContactPairsNoEvent!(..)")
   end

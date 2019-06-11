@@ -40,22 +40,22 @@ end
 # the nz shape pairs with the smallest distances and orders them
 # according to their distances in O(n_n log(n_z)) operations.
 # This function is called before every integrator step.
-function Composition.selectContactPairsWithEvent!(ch::Composition.ContactDetectionMPR_handler, world::Composition.Object3D)
-  selectContactPairs!(ch,world,true)
+function Composition.selectContactPairsWithEvent!(sim::Union{ModiaMath.SimulationState,NOTHING}, ch::Composition.ContactDetectionMPR_handler, world::Composition.Object3D)
+  selectContactPairs!(sim,ch,world,true)
 end
 
 
-function Composition.selectContactPairsNoEvent!(ch::Composition.ContactDetectionMPR_handler, world::Composition.Object3D)
+function Composition.selectContactPairsNoEvent!(sim::Union{ModiaMath.SimulationState,NOTHING}, ch::Composition.ContactDetectionMPR_handler, world::Composition.Object3D)
   if !isempty(ch.dict1)
     tmp = collect(ch.dict1)
     for i=1:length(tmp)
       tmp[i][1].contact ? (ch.dictHelp[tmp[i][1].index] = i) : break
   end; end
-  selectContactPairs!(ch,world,false)
+  selectContactPairs!(sim,ch,world,false)
 end
 
 
-function selectContactPairs!(ch::Composition.ContactDetectionMPR_handler, world::Composition.Object3D, hasEvent::Bool)
+function selectContactPairs!(sim::Union{ModiaMath.SimulationState,NOTHING}, ch::Composition.ContactDetectionMPR_handler, world::Composition.Object3D, hasEvent::Bool)
   if !ch.distanceComputed
     computeDistances(ch, world, false, hasEvent)
   end
@@ -81,6 +81,9 @@ function selectContactPairs!(ch::Composition.ContactDetectionMPR_handler, world:
       ch.contactPairs.contactObj2[i]   = tmp[i][2][5]
       ch.contactPairs.zOrg[i]          = tmp[i][2][6]
       ch.dict2[tmp[i][1].index] = [tmp[i][1].distance, i, tmp[i][1].contact]  # interchange key and value of dictionary dict1 + position in z vector + flag contact
+      if typeof(sim) != NOTHING
+        ch.contactPairs.contact[i] = negative!(sim, i, ch.contactPairs.zOrg[i], createCrossingAsString(sim, ch.contactPairs.contactObj1[i], ch.contactPairs.contactObj2[i]) )
+      end
     end
   else # No AABBs are overlapping, take old z!
     for i=1:length(ch.contactPairs.z)
@@ -146,7 +149,6 @@ function computeDistances(ch::Composition.ContactDetectionMPR_handler, world::Co
               index = pack(is,i,js,j)
               storeDistancesForSolver!(world, index, ch, actObj, nextObj, actAABB, nextAABB, phase2, hasEvent)
   end; end; end; end; end; end; end
-
   return nothing
 end
 
@@ -175,6 +177,8 @@ function storeDistancesForSolver!(world::Composition.Object3D, index::Integer, c
     (distanceOrg, contactPoint1, contactPoint2, contactNormal,r1_a, r1_b, r2_a, r2_b, r3_a, r3_b) = computeDistanceBetweenAABB(actAABB, nextAABB)
   end
 
+    #contact = negative!(.,. distanceOrg, ..)
+    #key1 = Composition.KeyDict1(contact, distanceOrg, index)
 
   if hasEvent # has event
     (distanceHyst, contact) = hysteresis(distanceOrg, initial=true)
@@ -289,4 +293,78 @@ function Composition.closeContactDetection!(ch::Composition.ContactDetectionMPR_
   Basics.emptyArray!(ch.contactPairs.contactNormal)
   Basics.emptyArray!(ch.contactPairs.contactObj1)
   Basics.emptyArray!(ch.contactPairs.contactObj2)
+end
+
+function createCrossingAsString(sim::ModiaMath.SimulationState, obj1::Composition.Object3D, obj2::Composition.Object3D)::String
+  if ModiaMath.isLogEvents(sim)
+    name1 = typeof(obj1) == NOTHING ? "nothing" : ModiaMath.instanceName(obj1)
+    name2 = typeof(obj2) == NOTHING ? "nothing" : ModiaMath.instanceName(obj2)
+    crossingAsString   = "distance(" * string(name1) * "," * string(name2) * ")"
+  else
+    crossingAsString = "dummyDistance(nothing,nothing)"
+  end
+  return crossingAsString
+end
+
+
+#=
+
+function change!(h::EventHandler, nr::Int, crossing::Float64, crossingAsString::String;
+                 restart::EventRestart=Restart, eventIteration::Bool=true)::Bool
+    h.z[nr] = crossing
+    if h.initial
+        h.zPositive[nr] = crossing > 0.0
+        if ModiaMath.isLogEvents(h.logger)
+            println("        ", crossingAsString, " = ", crossing, positiveCrossingAsString(h.zPositive[nr]))
+        end
+        return false
+
+    elseif h.event
+        new_zPositive = crossing > 0.0
+        change = (h.zPositive[nr] && !new_zPositive) || (!h.zPositive[nr] && new_zPositive)
+        h.zPositive[nr] = new_zPositive
+
+        if change
+            h.restart = max(h.restart, restart)
+            if ModiaMath.isLogEvents(h.logger)
+                println("        ", crossingAsString, " = ", crossing, positiveCrossingAsString(h.zPositive[nr]))
+            end
+            h.newEventIteration = eventIteration
+            return true
+        end
+    end
+
+    return false
+end
+=#
+
+negativeCrossingAsString(negative::Bool) = negative ? " (became < 0)" : " (became >= 0)"
+
+function negative!(sim::ModiaMath.SimulationState, nr::Int, crossing::Float64, crossingAsString::String;
+                   restart::ModiaMath.EventRestart=ModiaMath.Restart)::Bool
+    zEps = 1.e-8
+    simh = sim.eventHandler
+    if simh.initial     # ModiaMath.isInitial(sim)
+        simh.zPositive[nr] = crossing >= 0.0
+        if ModiaMath.isLogEvents(simh.logger)
+            println("        ", crossingAsString, " = ", crossing, negativeCrossingAsString(!simh.zPositive[nr]))
+        end
+
+    elseif simh.event   # ModiaMath.isEvent(sim)
+        new_zPositive = crossing >= 0.0
+        change = (simh.zPositive[nr] && !new_zPositive) || (!simh.zPositive[nr] && new_zPositive)
+        simh.zPositive[nr] = new_zPositive
+
+
+        if change
+            simh.restart = max(simh.restart, restart)
+            if ModiaMath.isLogEvents(simh.logger)
+                println("        ", crossingAsString, " = ", crossing, negativeCrossingAsString(!simh.zPositive[nr]))
+            end
+            simh.newEventIteration = false
+        end
+    end
+    simh.z[nr] = crossing + (simh.zPositive[nr] ? zEps : -zEps)
+
+    return !simh.zPositive[nr]
 end

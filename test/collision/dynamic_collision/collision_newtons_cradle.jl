@@ -65,7 +65,7 @@ newton = NewtonsCradle(sceneOptions=Modia3D.SceneOptions(gravityField=gravField,
 
 
 model = Modia3D.SimulationModel( newton )
-result = ModiaMath.simulate!(model; stopTime=10.0, tolerance=1e-8,interval=0.001, log=false)
+result = ModiaMath.simulate!(model; stopTime=10.0, tolerance=1e-8,interval=0.001, log=true)
 
 
 println("... success of collision_newtons_cradle.jl!")
