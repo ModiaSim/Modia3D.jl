@@ -407,32 +407,10 @@ function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64
       else
          getDistances!(ch, world)
       end
-      # sim.eventHandler.z = chpairs.z[i]
+
       # Handle zero crossing event
-      # contact::Bool = false
-      #for i=1:chpairs.nzContact[1] # only length of contact=true elements
-      for i in eachindex(chpairs.z)
-
-         #=
-         if ModiaMath.isLogEvents(sim)
-            #if ModiaMath.isInitial(sim)
-            #   str = ""   # when logging, do not print z
-            #else
-               name1 = typeof(obj1) == NOTHING ? "nothing" : ModiaMath.instanceName(obj1)
-               name2 = typeof(obj2) == NOTHING ? "nothing" : ModiaMath.instanceName(obj2)
-               str   = "distance(" * string(name1) * "," * string(name2) * ")"
-            #end
-         else
-            str = str_DUMMY
-         end
-
-         # Penetration depth
-         s = chpairs.z[i]
-
-         # Generate state event, if s < 0 changes
-         contact = ModiaMath.negative!(sim, i, s, str)
-         =#
-
+      for i=1:chpairs.nzContact[1]
+      # for i in eachindex(chpairs.z)
          if chpairs.contact[i] # kann man eventuell rausgeben
             #println("... Contact ", str, " active at time = ", sim.time)
             obj1  = chpairs.contactObj1[i]

@@ -42,26 +42,6 @@ function Base.:isequal(key1::KeyDict1, key2::KeyDict1)
 end
 
 
-#=
-struct KeyDict2 <: Modia3D.AbstractKeys
-    contact::Bool
-    index::Int
-    KeyDict2(contact::Bool,index::Int) = new(contact,index)
-end
-
-function Base.:isless(key1::KeyDict2, key2::KeyDict2)
-    if key1.contact > key2.contact
-        return true
-    elseif key1.contact < key2.contact
-        return false
-    end
-    if key1.index < key2.index
-        return true
-    end
-    return false
-end
-=#
-
 mutable struct ContactDetectionMPR_handler <: Modia3D.AbstractContactDetection
   contactPairs::Composition.ContactPairs
   distanceComputed::Bool
