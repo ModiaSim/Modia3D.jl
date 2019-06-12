@@ -1,14 +1,14 @@
 # License for this file: MIT (expat)
 # Copyright 2017-2018, DLR Institute of System Dynamics and Control
 #
-# This file is part of module 
+# This file is part of module
 #   Modia3D.Solids (Modia3D/Solids/_module.jl)
 #
 # Content:
 #
 #    Material properties of solids
 
-""" 
+"""
     material1 = SolidMaterial(;kwargs...)
     material2 = SolidMaterial(name)
 
@@ -16,7 +16,7 @@
 keyword arguments. Arguments that are not provided have value = NaN.
 
 `SolidMaterial(name)` returns a SolidMaterial object from dictionary Modia3D.solidMaterialPalette using
-the name as dictionary key. Initially, this dictionary has the following keys: 
+the name as dictionary key. Initially, this dictionary has the following keys:
 `"Steel"`, `"Aluminium"`, `"DryWood"`.
 
 # Arguments
@@ -30,16 +30,16 @@ the name as dictionary key. Initially, this dictionary has the following keys:
                                   If the material is destroyed before its melting point (e.g. wood that is burning)
                                   then `meltingPoint` is the temperature when destruction of the solid starts.
 - `specificHeatCapacity::Float64` in [J/(kg.K)]: Specific heat capacity, see [Wikipedia](https://en.wikipedia.org/wiki/Heat_capacity).
-- `thermalConductivity::Float64` in [W/(m.K)]: Thermal conductivity, see [Wikipedia](https://en.wikipedia.org/wiki/Thermal_conductivity) and 
+- `thermalConductivity::Float64` in [W/(m.K)]: Thermal conductivity, see [Wikipedia](https://en.wikipedia.org/wiki/Thermal_conductivity) and
                                 [List of thermal conductivities](https://en.wikipedia.org/wiki/List_of_thermal_conductivities)
 - `linearThermalExpansionCoefficient::Float64` in [1/K]: Linear thermal expansion coefficient, see [Wikipedia](https://en.wikipedia.org/wiki/Thermal_expansion).
 - `coefficientOfRestitution::Float64`: Coefficient of restitution, see [Wikipedia](https://en.wikipedia.org/wiki/Coefficient_of_restitution).
-- `kineticFrictionCoefficient::Float64`: Kinetic/sliding friction coefficient, see [Wikipedia](https://en.wikipedia.org/wiki/Friction)
+- `slidingFrictionCoefficient::Float64`: Kinetic/sliding friction coefficient, see [Wikipedia](https://en.wikipedia.org/wiki/Friction)
 
 # Example
 ```julia
 import Modia3D
-mat1 = Modia3D.SolidMaterial(density=3000.0, YoungsModulus=2e11) 
+mat1 = Modia3D.SolidMaterial(density=3000.0, YoungsModulus=2e11)
 mat2 = Modia3D.SolidMaterial("Steel")    # mat2.density = 8000.0
 ```
 """
@@ -55,14 +55,16 @@ struct SolidMaterial
                                  #             https://en.wikipedia.org/wiki/List_of_thermal_conductivities
    linearThermalExpansionCoefficient::Float64  # [1/K], https://en.wikipedia.org/wiki/Thermal_expansion
    coefficientOfRestitution::Float64     # [] https://en.wikipedia.org/wiki/Coefficient_of_restitution
-   kineticFrictionCoefficient::Float64   # [] https://en.wikipedia.org/wiki/Friction
+   slidingFrictionCoefficient::Float64   # [] https://en.wikipedia.org/wiki/Friction
+   SolidMaterial(density, YoungsModulus, PoissonsRatio, meltingPoint, heatCapacity,
+                 thermalConductivity, linearThermalExpansionCoefficient, coefficientOfRestitution, slidingFrictionCoefficient) = new(density, YoungsModulus, PoissonsRatio, meltingPoint, heatCapacity,thermalConductivity, linearThermalExpansionCoefficient, coefficientOfRestitution, slidingFrictionCoefficient)
 end
 SolidMaterial(;density=NaN, YoungsModulus=NaN, PoissonsRatio=NaN, meltingPoint=NaN,
                heatCapacity=NaN, thermalConductivity=NaN, linearThermalExpansionCoefficient=NaN,
-               coefficientOfRestitution=NaN, kineticFrictionCoefficient=NaN) =
+               coefficientOfRestitution=NaN, slidingFrictionCoefficient=NaN) =
               SolidMaterial(density,YoungsModulus, PoissonsRatio, meltingPoint, heatCapacity,
                             thermalConductivity, linearThermalExpansionCoefficient,
-                            coefficientOfRestitution, kineticFrictionCoefficient)
+                            coefficientOfRestitution, slidingFrictionCoefficient)
 
 
 #=
@@ -93,4 +95,3 @@ solidMaterialPalette["DryWood"]   = SolidMaterial( 700.0, 1.1e10, 0.4 , 570.0, 1
 
 solidMaterial(name::AbstractString) = solidMaterialPalette[name]   # Should be removed
 SolidMaterial(name::AbstractString) = solidMaterialPalette[name]
-

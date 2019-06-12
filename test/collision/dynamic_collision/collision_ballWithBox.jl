@@ -8,7 +8,6 @@ vmat1 = Modia3D.Material(color="LightBlue" , transparency=0.5)    # material of 
 vmat2 = deepcopy(vmat1)                                           # material of convex decomposition of SolidFileMesh
 vmat2.transparency = 0.7
 
-#c = 1e9, d = 100.0
 cmat = Modia3D.ContactMaterialElastic(c=1e10, d = 1e5)
 
 @assembly ThreeDFiles begin
