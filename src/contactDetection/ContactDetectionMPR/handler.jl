@@ -90,7 +90,10 @@ function selectContactPairs!(sim::Union{ModiaMath.SimulationState,NOTHING}, ch::
       ch.contactPairs.zOrg[i]          = tmp[i][2][6]
       ch.dict2[tmp[i][1].index] = [tmp[i][1].distance, i, tmp[i][1].contact]  # interchange key and value of dictionary dict1 + position in z vector + flag contact
       if typeof(sim) != NOTHING
-        ch.contactPairs.contact[i] = negative!(sim, i, ch.contactPairs.zOrg[i], createCrossingAsString(sim, ch.contactPairs.contactObj1[i], ch.contactPairs.contactObj2[i]) )
+        (contact, changeToNegative) = negative!(sim, i, ch.contactPairs.zOrg[i], createCrossingAsString(sim, ch.contactPairs.contactObj1[i], ch.contactPairs.contactObj2[i]) )
+        ch.contactPairs.contact[i] = contact
+        ch.contactPairs.changeToNegative[i] = changeToNegative
+
       end
     end
   else # No AABBs are overlapping, take old z!
@@ -307,13 +310,15 @@ function createCrossingAsString(sim::ModiaMath.SimulationState, obj1::Compositio
   return crossingAsString
 end
 
+checkChangeFromNoContactToContact(oldContact::Bool, newContact::Bool) = (oldContact != newContact && oldContact == true) ? true : false
 
 negativeCrossingAsString(negative::Bool) = negative ? " (became < 0)" : " (became >= 0)"
 
 function negative!(sim::ModiaMath.SimulationState, nr::Int, crossing::Float64, crossingAsString::String;
-                   restart::ModiaMath.EventRestart=ModiaMath.Restart)::Bool
+                   restart::ModiaMath.EventRestart=ModiaMath.Restart)
   zEps = 1.e-8
   simh = sim.eventHandler
+  changeToNegative = false
   if simh.initial     # ModiaMath.isInitial(sim)
     simh.zPositive[nr] = crossing >= 0.0
     if ModiaMath.isLogEvents(simh.logger)
@@ -321,6 +326,7 @@ function negative!(sim::ModiaMath.SimulationState, nr::Int, crossing::Float64, c
     end
   elseif simh.event   # ModiaMath.isEvent(sim)
     new_zPositive = crossing >= 0.0
+    changeToNegative = checkChangeFromNoContactToContact(simh.zPositive[nr], new_zPositive)
     change = (simh.zPositive[nr] && !new_zPositive) || (!simh.zPositive[nr] && new_zPositive)
     simh.zPositive[nr] = new_zPositive
 
@@ -334,5 +340,5 @@ function negative!(sim::ModiaMath.SimulationState, nr::Int, crossing::Float64, c
   end
   simh.z[nr] = crossing + (simh.zPositive[nr] ? zEps : -zEps)
 
-  return !simh.zPositive[nr]
+  return (!simh.zPositive[nr], changeToNegative)
 end

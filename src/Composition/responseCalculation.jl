@@ -6,16 +6,17 @@
 #
 
 
-function responseCalculation(cM1::Solids.ContactMaterialElastic,
+function responseCalculation(chpairs::ContactPairs,
+                             cM1::Solids.ContactMaterialElastic,
                              cM2::Solids.ContactMaterialElastic,
                              obj1::Object3D,
                              obj2::Object3D,
                              s::Float64,
                              rContact::ModiaMath.Vector3D,
                              e_n::ModiaMath.Vector3D,
+                             delta_dot_initial::Union{Float64, NOTHING},
                              time,
                              file)::Tuple{ModiaMath.Vector3D,ModiaMath.Vector3D,ModiaMath.Vector3D,ModiaMath.Vector3D}
-
    # Resultant spring constant (series connection of two springs)
    c = cM1.c*cM2.c/(cM1.c + cM2.c)
 
@@ -76,28 +77,27 @@ end
 
 
 # response calculation with new contact force law
-function responseCalculation(cM1::Solids.ElasticContactMaterial,
+function responseCalculation(chpairs::ContactPairs,
+                             cM1::Solids.ElasticContactMaterial,
                              cM2::Solids.ElasticContactMaterial,
                              obj1::Object3D,
                              obj2::Object3D,
                              s::Float64,
                              rContact::ModiaMath.Vector3D,
                              e_n::ModiaMath.Vector3D,
+                             delta_dot_initial::Union{Float64, NOTHING},
                              time,
                              file)::Tuple{ModiaMath.Vector3D,ModiaMath.Vector3D,ModiaMath.Vector3D,ModiaMath.Vector3D}
+
 ### computing constans out of material definition ###
   # c_mean ... elastic material constant in normal direction
-  c_mean = cM1.c*cM2.c/(cM1.c + cM2.c)
-
   # d_mean ... damping material constant in normal direction
-  d_mean = (cM1.d + cM1.d)/2
-
   # mu_mean ... sliding friction coefficient in tangential direction
-  mu_mean = min(cM1.mu_k, cM2.mu_k)
-
   # v_min ... absolute value of tangential velocity at which sliding friction force starts
-  v_min = (cM1.v_min + cM1.v_min)/2
-
+  c_mean = cM1.c*cM2.c/(cM1.c + cM2.c)
+  d_mean = (cM1.d + cM2.d)/2 
+  mu_mean = min(cM1.mu_k, cM2.mu_k)
+  v_min = (cM1.v_min + cM2.v_min)/2
 
 ### signed velocity and relative velocity ####
   # Contact points and distances to local part frame (in world frame)
@@ -113,29 +113,30 @@ function responseCalculation(cM1::Solids.ElasticContactMaterial,
   v2 = dynamics2.v0 + cross(w2,r_rel2)
 
   # Velocities and angular velocities in normal and tangential direction
-  v_rel       = v2 - v1
+  v_rel = v2 - v1
   # delta_dot ... signed relative velocity in normal direction
-  delta_dot     = dot(v_rel,e_n)
+  delta_dot = dot(v_rel,e_n)
 
   # v_t ... relative velocity vector in tangential direction
-  v_t     = v_rel - delta_dot*e_n
+  v_t = v_rel - delta_dot*e_n
 
   # delta ... signed distance
   delta = abs(s)
   fn = normalForce(obj1, obj2, c_mean, d_mean, delta, delta_dot, delta_dot_initial)
   ft = tangentialForce(fn, mu_mean, v_t, v_min)
+  #ft = 0.0
 
-  f1   = fn*e_n + ft
-  f2   = -f1
-  t1   = cross(r_rel1,f1)
-  t2   = cross(r_rel2,f2)
-  println("bis hier gehts")
-  error("das klappt nicht")
+  f1 = fn*e_n + ft
+  f2 = -f1
+  t1 = cross(r_rel1,f1)
+  t2 = cross(r_rel2,f2)
   return (f1,f2,t1,t2)
 end
 
 
-function normalForce(obj1, obj2, c_mean, d_mean, delta, delta_dot, delta_dot_initial)
+normalForce(obj1, obj2, c_mean, d_mean, delta, delta_dot::Float64, delta_dot_initial::NOTHING) = error("delta_dot_initial is not defined!!!")
+
+function normalForce(obj1, obj2, c_mean, d_mean, delta, delta_dot::Float64, delta_dot_initial::Float64)
   if typeof(obj1.data.geo) != Modia3D.Solids.SolidSphere && typeof(obj2.data.geo) != Modia3D.Solids.SolidSphere
     fn = max(0.0, c_mean*delta*(1+d_mean*delta_dot/delta_dot_initial) )
   else
@@ -152,13 +153,29 @@ function normalForce(obj1, obj2, c_mean, d_mean, delta, delta_dot, delta_dot_ini
     end
     fn =  max(0.0, c_mean*(4/3*delta*sqrt(r*delta))*(1+d_mean*delta_dot/delta_dot_initial) )
   end
-  return fn
+  return -fn
 end
 
 
 function tangentialForce(fn, mu_mean, v_t, v_min)
   norm_v_t = norm(v_t)
-  k = -log(0.01)/v_min   # is natural logramithm ln(..)
+  k = log(0.01)/v_min   # is natural logramithm ln(..)
   ft = mu_mean*fn*v_t/(norm_v_t + v_min*MathConstants.e^(-norm_v_t*k) )
   return ft
+end
+
+
+function computeDeltaDotInitial(obj1::Object3D, obj2::Object3D,
+                             rContact::ModiaMath.Vector3D, e_n::ModiaMath.Vector3D)
+  r_rel1 = rContact - obj1.r_abs
+  r_rel2 = rContact - obj2.r_abs
+  dynamics1 = obj1.dynamics
+  dynamics2 = obj2.dynamics
+  w1 = obj1.R_abs'*dynamics1.w
+  w2 = obj2.R_abs'*dynamics2.w
+  v1 = dynamics1.v0 + cross(w1,r_rel1)
+  v2 = dynamics2.v0 + cross(w2,r_rel2)
+  v_rel = v2 - v1
+  delta_dot_initial = dot(v_rel,e_n)
+  return delta_dot_initial
 end

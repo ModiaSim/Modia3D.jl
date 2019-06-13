@@ -1,4 +1,4 @@
-module collision_Billard
+module contactForceLaw_Billard
 
 using Modia3D
 using Modia3D.StaticArrays
@@ -8,8 +8,8 @@ import Modia3D.ModiaMath
 vmatGraphics = Modia3D.Material(color="LightBlue" , transparency=0.5)    # material of Graphics
 vmatSolids = Modia3D.Material(color="Red" , transparency=0.5)         # material of solids
 #c = 1e9, d = 100.0
-cmat = Modia3D.ContactMaterialElastic(c=1e9, d=0.0)
 
+cmat = Modia3D.ElasticContactMaterial("Steel")
 
 LxGround = 25.4
 LyGround = 12.7
@@ -18,8 +18,8 @@ LyBox = 1.0
 LzBox = 2.0
 @assembly BillardTable(world) begin
   #ground = Modia3D.Object3D(world, Modia3D.Box(LxGround, LyGround, LzGround; material=vmatGraphics) )
-  withBox = Modia3D.Solid(Modia3D.SolidBox(LxGround, LyBox, LzBox) , "Aluminium", vmatSolids; contactMaterial = cmat)
-  lengthBox = Modia3D.Solid(Modia3D.SolidBox(LyBox, LyGround, LzBox) , "Aluminium", vmatSolids; contactMaterial = cmat)
+  withBox = Modia3D.Solid(Modia3D.SolidBox(LxGround, LyBox, LzBox) , "Steel", vmatSolids; contactMaterial = cmat)
+  lengthBox = Modia3D.Solid(Modia3D.SolidBox(LyBox, LyGround, LzBox) , "Steel", vmatSolids; contactMaterial = cmat)
   box1 = Modia3D.Object3D(world, withBox, r=[0.0, LyGround/2, LzGround], fixed=true)
   box2 = Modia3D.Object3D(world, withBox, r=[0.0, -LyGround/2, LzGround], fixed=true)
   box3 = Modia3D.Object3D(world, lengthBox, r=[LxGround/2, 0.0, LzGround], fixed=true)
@@ -28,14 +28,14 @@ end
 
 diameter = 0.5
 @assembly StartBall(world) begin
-  sphere = Modia3D.Object3D( Modia3D.Solid(Modia3D.SolidSphere(diameter) , "Aluminium" , vmatSolids ; contactMaterial = cmat))
+  sphere = Modia3D.Object3D( Modia3D.Solid(Modia3D.SolidSphere(diameter) , "Steel" , vmatSolids ; contactMaterial = cmat))
   helpFrame = Modia3D.Object3D(visualizeFrame=false)
   prisX = Modia3D.Prismatic(world, helpFrame; axis=1, v_start=6.0, s_start=-6.0, canCollide=true)
   prisY = Modia3D.Prismatic(helpFrame, sphere, axis=2, v_start=0.3, s_start=0.1, canCollide=true)
 end
 
 @assembly BillardBall(world, xPos, yPos) begin
-  sphere = Modia3D.Object3D( Modia3D.Solid(Modia3D.SolidSphere(diameter) , "Aluminium" , vmatSolids ; contactMaterial = cmat))
+  sphere = Modia3D.Object3D( Modia3D.Solid(Modia3D.SolidSphere(diameter) , "Steel" , vmatSolids ; contactMaterial = cmat))
   helpFrame = Modia3D.Object3D(visualizeFrame=false)
   prisX2 = Modia3D.Prismatic(world, helpFrame; axis=1, canCollide=true , s_start=xPos)
   prisY2 = Modia3D.Prismatic(helpFrame, sphere, axis=2, canCollide=true, s_start=yPos)
@@ -97,7 +97,7 @@ end
 
 
 gravField = Modia3D.UniformGravityField(g=9.81, n=[0,0,-1])
-bill = Billard2(sceneOptions=Modia3D.SceneOptions(gravityField=gravField,visualizeFrames=true, defaultFrameLength=0.7,nz_max = 100, enableContactDetection=true, visualizeContactPoints=true, visualizeSupportPoints=false))
+bill = Billard2(sceneOptions=Modia3D.SceneOptions(gravityField=gravField,visualizeFrames=false, defaultFrameLength=0.7,nz_max = 100, enableContactDetection=true, visualizeContactPoints=true, visualizeSupportPoints=false))
 
 # Modia3D.visualizeAssembly!( bill )
 
@@ -106,5 +106,5 @@ model = Modia3D.SimulationModel( bill )
 result = ModiaMath.simulate!(model; stopTime=10.0, tolerance=1e-8,interval=0.001, log=false)
 
 
-println("... success of collision_Billard.jl!")
+println("... success of contactForceLaw_Billard.jl!")
 end
