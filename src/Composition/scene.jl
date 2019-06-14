@@ -100,7 +100,7 @@ struct ContactPairs
       zOrg = fill(42.0, nz)
       contact = fill(false, nz)
       changeToNegative = fill(false, nz)
-      delta_dot_initial = fill(nothing, nz)
+      delta_dot_initial = fill(-0.001, nz)
       defaultPoint   = SVector{3,Float64}(0.0,0.0,0.0)
       contactPoint1  = [defaultPoint for i = 1:nz]
       contactPoint2  = [defaultPoint for i = 1:nz]

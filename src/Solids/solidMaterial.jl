@@ -89,7 +89,8 @@ end
 const solidMaterialPalette = Dict{String, SolidMaterial}()
 
 # Temporary solution
-solidMaterialPalette["Steel"]     = SolidMaterial(8000.0, 2.0e11, 0.30, 1640.0, 500.0, 50.0 , 1.2e-5 , 0.7, 0.5)
+solidMaterialPalette["Steel"]     = SolidMaterial(8000.0, 2.0e6, 0.30, 1640.0, 500.0, 50.0 , 1.2e-5 , 0.7, 0.5)
+solidMaterialPalette["SteelOrg"]     = SolidMaterial(8000.0, 2.0e11, 0.30, 1640.0, 500.0, 50.0 , 1.2e-5 , 0.7, 0.5)
 solidMaterialPalette["Aluminium"] = SolidMaterial(2700.0, 6.9e10, 0.32, 933.0,  897.0, 237.0, 2.31e-5, 0.1, 1.4)
 solidMaterialPalette["DryWood"]   = SolidMaterial( 700.0, 1.1e10, 0.4 , 570.0, 1700.0,   0.1,  5.0e-6, 0.1, 0.3)
 

@@ -185,6 +185,7 @@ function storeDistancesForSolver!(world::Composition.Object3D, index::Integer, c
   if AABB_touching(actAABB, nextAABB) # AABB's are overlapping
     # narrow phase
     (distanceOrg, contactPoint1, contactPoint2, contactNormal,r1_a, r1_b, r2_a, r2_b, r3_a, r3_b) = mpr(ch, actObj, nextObj, actObj.data.geo, nextObj.data.geo)
+    println("distanceOrg = $distanceOrg, contactPoint1 = $contactPoint1, contactPoint2 = $contactPoint2, contactNormal = $contactNormal")
   else # AABB's are not overlapping
     (distanceOrg, contactPoint1, contactPoint2, contactNormal,r1_a, r1_b, r2_a, r2_b, r3_a, r3_b) = computeDistanceBetweenAABB(actAABB, nextAABB)
   end
@@ -316,15 +317,18 @@ negativeCrossingAsString(negative::Bool) = negative ? " (became < 0)" : " (becam
 
 function negative!(sim::ModiaMath.SimulationState, nr::Int, crossing::Float64, crossingAsString::String;
                    restart::ModiaMath.EventRestart=ModiaMath.Restart)
+                   #println("bin hier drinnen")
   zEps = 1.e-8
   simh = sim.eventHandler
   changeToNegative = false
   if simh.initial     # ModiaMath.isInitial(sim)
+    # println("auch im initial")
     simh.zPositive[nr] = crossing >= 0.0
     if ModiaMath.isLogEvents(simh.logger)
       println("        ", crossingAsString, " = ", crossing, negativeCrossingAsString(!simh.zPositive[nr]))
     end
   elseif simh.event   # ModiaMath.isEvent(sim)
+    # println("auch im event")
     new_zPositive = crossing >= 0.0
     changeToNegative = checkChangeFromNoContactToContact(simh.zPositive[nr], new_zPositive)
     change = (simh.zPositive[nr] && !new_zPositive) || (!simh.zPositive[nr] && new_zPositive)

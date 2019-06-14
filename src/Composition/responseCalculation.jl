@@ -95,7 +95,7 @@ function responseCalculation(chpairs::ContactPairs,
   # mu_mean ... sliding friction coefficient in tangential direction
   # v_min ... absolute value of tangential velocity at which sliding friction force starts
   c_mean = cM1.c*cM2.c/(cM1.c + cM2.c)
-  d_mean = (cM1.d + cM2.d)/2 
+  d_mean = (cM1.d + cM2.d)/2
   mu_mean = min(cM1.mu_k, cM2.mu_k)
   v_min = (cM1.v_min + cM2.v_min)/2
 
@@ -120,21 +120,25 @@ function responseCalculation(chpairs::ContactPairs,
   # v_t ... relative velocity vector in tangential direction
   v_t = v_rel - delta_dot*e_n
 
+
   # delta ... signed distance
   delta = abs(s)
   fn = normalForce(obj1, obj2, c_mean, d_mean, delta, delta_dot, delta_dot_initial)
   ft = tangentialForce(fn, mu_mean, v_t, v_min)
-  #ft = 0.0
+#  println("e_n = ", e_n)
+#  println("v_t = ", v_t)
+  #ft = tangentialForce(fn, mu_mean, v_t)
 
   f1 = fn*e_n + ft
   f2 = -f1
+  println("f1 = $f1")
   t1 = cross(r_rel1,f1)
   t2 = cross(r_rel2,f2)
   return (f1,f2,t1,t2)
 end
 
 
-normalForce(obj1, obj2, c_mean, d_mean, delta, delta_dot::Float64, delta_dot_initial::NOTHING) = error("delta_dot_initial is not defined!!!")
+normalForce(obj1, obj2, c_mean, d_mean, delta, delta_dot::Float64, delta_dot_initial::NOTHING) =  error("delta_dot_initial is not defined!!!")
 
 function normalForce(obj1, obj2, c_mean, d_mean, delta, delta_dot::Float64, delta_dot_initial::Float64)
   if typeof(obj1.data.geo) != Modia3D.Solids.SolidSphere && typeof(obj2.data.geo) != Modia3D.Solids.SolidSphere
@@ -159,8 +163,15 @@ end
 
 function tangentialForce(fn, mu_mean, v_t, v_min)
   norm_v_t = norm(v_t)
-  k = log(0.01)/v_min   # is natural logramithm ln(..)
+  k = -log(0.01)/v_min   # is natural logramithm ln(..)
   ft = mu_mean*fn*v_t/(norm_v_t + v_min*MathConstants.e^(-norm_v_t*k) )
+
+  # println("ft = ", ft)
+  return -ft
+end
+
+function tangentialForce(fn, mu_mean, v_t)
+  ft = mu_mean*fn*v_t/norm(v_t)
   return ft
 end
 
@@ -176,6 +187,7 @@ function computeDeltaDotInitial(obj1::Object3D, obj2::Object3D,
   v1 = dynamics1.v0 + cross(w1,r_rel1)
   v2 = dynamics2.v0 + cross(w2,r_rel2)
   v_rel = v2 - v1
-  delta_dot_initial = dot(v_rel,e_n)
+  delta_dot_initial = min(-0.001, dot(v_rel,e_n))
+  println("delta_dot_initial = ", delta_dot_initial)
   return delta_dot_initial
 end
