@@ -56,15 +56,20 @@ struct SolidMaterial
    linearThermalExpansionCoefficient::Float64  # [1/K], https://en.wikipedia.org/wiki/Thermal_expansion
    coefficientOfRestitution::Float64     # [] https://en.wikipedia.org/wiki/Coefficient_of_restitution
    slidingFrictionCoefficient::Float64   # [] https://en.wikipedia.org/wiki/Friction
+   rotationalFrictionCoefficient::Float64   
    SolidMaterial(density, YoungsModulus, PoissonsRatio, meltingPoint, heatCapacity,
-                 thermalConductivity, linearThermalExpansionCoefficient, coefficientOfRestitution, slidingFrictionCoefficient) = new(density, YoungsModulus, PoissonsRatio, meltingPoint, heatCapacity,thermalConductivity, linearThermalExpansionCoefficient, coefficientOfRestitution, slidingFrictionCoefficient)
+                 thermalConductivity, linearThermalExpansionCoefficient, coefficientOfRestitution, slidingFrictionCoefficient,
+                 rotationalFrictionCoefficient) = new(density, YoungsModulus, PoissonsRatio, meltingPoint, heatCapacity,thermalConductivity, linearThermalExpansionCoefficient, coefficientOfRestitution, slidingFrictionCoefficient,
+                 rotationalFrictionCoefficient)
 end
 SolidMaterial(;density=NaN, YoungsModulus=NaN, PoissonsRatio=NaN, meltingPoint=NaN,
                heatCapacity=NaN, thermalConductivity=NaN, linearThermalExpansionCoefficient=NaN,
-               coefficientOfRestitution=NaN, slidingFrictionCoefficient=NaN) =
+               coefficientOfRestitution=NaN, slidingFrictionCoefficient=NaN,
+               rotationalFrictionCoefficient=NaN) =
               SolidMaterial(density,YoungsModulus, PoissonsRatio, meltingPoint, heatCapacity,
                             thermalConductivity, linearThermalExpansionCoefficient,
-                            coefficientOfRestitution, slidingFrictionCoefficient)
+                            coefficientOfRestitution, slidingFrictionCoefficient,
+                            rotationalFrictionCoefficient)
 
 
 #=
@@ -89,10 +94,9 @@ end
 const solidMaterialPalette = Dict{String, SolidMaterial}()
 
 # Temporary solution
-solidMaterialPalette["Steel"]     = SolidMaterial(8000.0, 2.0e6, 0.30, 1640.0, 500.0, 50.0 , 1.2e-5 , 0.7, 0.5)
-solidMaterialPalette["SteelOrg"]     = SolidMaterial(8000.0, 2.0e11, 0.30, 1640.0, 500.0, 50.0 , 1.2e-5 , 0.7, 0.5)
-solidMaterialPalette["Aluminium"] = SolidMaterial(2700.0, 6.9e10, 0.32, 933.0,  897.0, 237.0, 2.31e-5, 0.1, 1.4)
-solidMaterialPalette["DryWood"]   = SolidMaterial( 700.0, 1.1e10, 0.4 , 570.0, 1700.0,   0.1,  5.0e-6, 0.1, 0.3)
+solidMaterialPalette["Steel"]     = SolidMaterial(8000.0, 2.0e11, 0.30, 1640.0, 500.0, 50.0 , 1.2e-5 , 0.7, 0.5, 0.001)
+solidMaterialPalette["Aluminium"] = SolidMaterial(2700.0, 6.9e10, 0.32, 933.0,  897.0, 237.0, 2.31e-5, 0.1, 1.4, 0.001)
+solidMaterialPalette["DryWood"]   = SolidMaterial( 700.0, 1.1e10, 0.4 , 570.0, 1700.0,   0.1,  5.0e-6, 0.1, 0.3, 0.002)
 
 solidMaterial(name::AbstractString) = solidMaterialPalette[name]   # Should be removed
 SolidMaterial(name::AbstractString) = solidMaterialPalette[name]

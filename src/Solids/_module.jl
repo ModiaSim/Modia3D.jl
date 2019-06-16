@@ -53,6 +53,7 @@ export volume, centroid, bottomArea, topArea, longestEdge, lengthGeo, inertiaMat
 # Solid materials
 export InternalMassProperties, MassProperties, SolidMaterial, ContactMaterialElastic, dummyMassProperties
 export solidMaterial, solidMaterialPalette, defaultContactMaterial
+export regularize, resultantCoefficientOfRestitution, resultantDampingCoefficient
 
 export ElasticContactMaterial, ElasticContactMaterialFromMaterialData, ElasticContactMaterialFromMaterialName
 

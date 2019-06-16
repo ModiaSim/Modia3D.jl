@@ -12,6 +12,7 @@ returns: v_small     , if absv=0
 
 # regularize(absv,v_small) = v_small*exp(log(0.01)*(absv/v_small))
 
+#=
 regularize(absv,v_small) = absv >= v_small ? absv : absv*(absv/v_small)*(1.0 - (absv/v_small)/3.0) + v_small/3.0
 
 
@@ -37,9 +38,13 @@ function resultantDampingCoefficient(cor1, cor2, abs_v_rel_n,v_small)
     d_res = 8.0*(1.0 - cof)/(5*cof*regularize(abs_v_rel_n,v_small))
     return d_res
 end
+=#
+
 
 using PyCall
 using PyPlot
+using Modia3D
+
 pyplot_rc = PyCall.PyDict(PyPlot.matplotlib."rcParams")
 pyplot_rc["font.size"] = 10.0
 
@@ -76,32 +81,32 @@ cor_res4 = zeros( length(vrelc) )
 reg = zeros( length(vreld) )
 
 for i in 1:length(vrela)
-   d_res0a[i] = resultantDampingCoefficient(cof0,cof0,vrela[i],vsmall)
-   d_res1a[i] = resultantDampingCoefficient(cor1,cor1,vrela[i],vsmall)
-   d_res2a[i] = resultantDampingCoefficient(cor2,cor2,vrela[i],vsmall)
-   d_res3a[i] = resultantDampingCoefficient(cof3,cof3,vrela[i],vsmall)
-   d_res4a[i] = resultantDampingCoefficient(cof4,cof4,vrela[i],vsmall)
+   d_res0a[i] = Modia3D.resultantDampingCoefficient(cof0,cof0,vrela[i],vsmall)
+   d_res1a[i] = Modia3D.resultantDampingCoefficient(cor1,cor1,vrela[i],vsmall)
+   d_res2a[i] = Modia3D.resultantDampingCoefficient(cor2,cor2,vrela[i],vsmall)
+   d_res3a[i] = Modia3D.resultantDampingCoefficient(cof3,cof3,vrela[i],vsmall)
+   d_res4a[i] = Modia3D.resultantDampingCoefficient(cof4,cof4,vrela[i],vsmall)
 end
 
 for i in 1:length(vrelb)
-   d_res0b[i] = resultantDampingCoefficient(cof0,cof0,vrelb[i],vsmall)
-   d_res1b[i] = resultantDampingCoefficient(cor1,cor1,vrelb[i],vsmall)
-   d_res2b[i] = resultantDampingCoefficient(cor2,cor2,vrelb[i],vsmall)
-   d_res3b[i] = resultantDampingCoefficient(cof3,cof3,vrelb[i],vsmall)
-   d_res4b[i] = resultantDampingCoefficient(cof4,cof4,vrelb[i],vsmall)
+   d_res0b[i] = Modia3D.resultantDampingCoefficient(cof0,cof0,vrelb[i],vsmall)
+   d_res1b[i] = Modia3D.resultantDampingCoefficient(cor1,cor1,vrelb[i],vsmall)
+   d_res2b[i] = Modia3D.resultantDampingCoefficient(cor2,cor2,vrelb[i],vsmall)
+   d_res3b[i] = Modia3D.resultantDampingCoefficient(cof3,cof3,vrelb[i],vsmall)
+   d_res4b[i] = Modia3D.resultantDampingCoefficient(cof4,cof4,vrelb[i],vsmall)
 end
 
 for i in 1:length(vrelc)
-   cor_res0[i] = resultantCor(cof0,cof0,vrelc[i],vsmall)
-   cor_res1[i] = resultantCor(cor1,cor1,vrelc[i],vsmall)
-   cor_res2[i] = resultantCor(cor2,cor2,vrelc[i],vsmall)
-   cor_res3[i] = resultantCor(cof3,cof3,vrelc[i],vsmall)
-   cor_res4[i] = resultantCor(cof4,cof4,vrelc[i],vsmall)
+   cor_res0[i] = Modia3D.resultantCoefficientOfRestitution(cof0,cof0,vrelc[i],vsmall)
+   cor_res1[i] = Modia3D.resultantCoefficientOfRestitution(cor1,cor1,vrelc[i],vsmall)
+   cor_res2[i] = Modia3D.resultantCoefficientOfRestitution(cor2,cor2,vrelc[i],vsmall)
+   cor_res3[i] = Modia3D.resultantCoefficientOfRestitution(cof3,cof3,vrelc[i],vsmall)
+   cor_res4[i] = Modia3D.resultantCoefficientOfRestitution(cof4,cof4,vrelc[i],vsmall)
 
 end
 
 for i in 1:length(vreld)
-   reg[i] = regularize(vreld[i],vsmall)
+   reg[i] = Modia3D.regularize(vreld[i],vsmall)
 end
 
 figure(1)
@@ -146,4 +151,7 @@ plot(vreld, reg)
 grid(true)
 xlabel("\$v_{abs}\$")
 legend(["\$reg(v_{abs},0.1)\$"])
+
+
+
 end

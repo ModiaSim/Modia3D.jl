@@ -45,11 +45,11 @@ end
 
 
 """
-    material = ElasticContactMaterial(;name="", E=NaN, nu=NaN, cof=NaN, mu_k=NaN, 
+    material = ElasticContactMaterial(;name="", E=NaN, nu=NaN, cor=NaN, mu_k=NaN, 
                                        mu_r=NaN, v_small=0.01, w_small=v_small,)
 
 Generate an `ElasticContactMaterial` object. If `name` is an empty string, the material
-data (`E, nu, cof, mu_k, mu_r`) must be provided as input argument.
+data (`E, nu, cor, mu_k, mu_r`) must be provided as input argument.
 If `name` is not an empty string, the default material data is extracted from the
 `Modia3D.solidMaterialPalette` dictionary using `name` as key
 (available keys are for example `"Steel", "Aluminium", "DryWood"`).
@@ -61,7 +61,7 @@ Material data arguments that are additionally provided, overwrite the data from 
 - `name::AbstractString`: Optional name of the material.
 - `E` in [N/m^2]: Young's modulus of material (``\\gt 0``).
 - `nu`: Poisson's ratio of material (``0 \\lt nu \\lt 1``).
-- `cof`: Coefficient of restitution between two objects of the same material (``0 \\le cof \\le 1``).
+- `cor`: Coefficient of restitution between two objects of the same material (``0 \\le cor \\le 1``).
 - `mu_k`: Kinetic/sliding friction force coefficient between two objects of the same material (``\\ge 0``).
           The contact force in tangential contact surface direction is proportional to `mu_k` and to
           the normal force and acts in opposite direction to the relative tangential velocity.
@@ -96,6 +96,9 @@ f_{n,2}        &= \\max\\left(0, c_{res} \\cdot |\\delta| \\cdot (1 - d_{res} \\
 \\vec{f}_1     &= -\\vec{f}_2 \\\\[5mm]
 \\vec{\\tau}_2 &= -\\mu_{r,res} f_{n,2} \\frac{\\vec{\\omega}_{rel}}{reg(|\\vec{\\omega}_{rel}|,\\omega_{small})} \\\\
 \\vec{\\tau}_1 &= -\\vec{\\tau}_2 \\\\[5mm]
+reg(v_{abs}, v_{small}) &= \\text{if}~ v_{abs} \\ge v_{small} ~\\text{then}~ v_{abs} ~\\text{else}~
+                           \\frac{v_{abs}^2}{v_{small}}
+                           \\left( 1 - \\frac{v_{abs}}{3v_{small}} \\right) + \\frac{v_{small}}{3}      
 \\end{align}
 ```
 
@@ -193,7 +196,7 @@ Various equations need a regularization to avoid a division by zero. This is acc
 function ``reg(v_{abs}, v_{small})`` that has the following characteristics
 (the function returns ``v_{abs}`` if ``v_{abs} \\ge v_{small}`` and otherwise returns
 a third order polynomial with a minimum of ``v_{small}/3`` at ``v_{abs}=0`` and 
-smooth first and second derivative at ``v_{abs} = v_{small}``):
+smooth first and second derivatives at ``v_{abs} = v_{small}``):
 
 
 ![Regularization function](../../resources/images/plot_reg.svg)
@@ -210,8 +213,8 @@ The overall characteristics is shown in the next two figures:
 
 The tangential force law is basically a sliding friction force
 ``\\vec{f}_t = -\\mu_k f_n \\vec{e}_t`` acting in opposite direction of the movement in the tangential plane.
-The unit vector in direction of movement is ``\\vec{e}_t = \\vec{v}_t/|\\vec{v}_t|``.
-The denominator is again regularized to avoid a division by zero when ``|\\vec{v}_t| = 0``.
+The unit vector in direction of movement is ``\\vec{e}_t = \\vec{v}_{rel,t}/|\\vec{v}_{rel,t}|``.
+The denominator is again regularized to avoid a division by zero when ``|\\vec{v}_{rel,t}| = 0``.
 The result is that the absolute value of the unit vector in direction of the movement
 is approximated by the following smooth characteristics:
 
@@ -247,60 +250,100 @@ relative angular velocity between the two contacting objects.
 # Example
 
 ```julia
-# E=2.0e11, nu=0.3, cof=0.7, mu_k=0.5, mu_r=0.01 
-material1 = ElasticContactMaterial(name="Steel") 
+import Modia3D
 
-# E=2.0e11, nu=0.3, cof=0.8, mu_k=0.5, mu_r=0.01  
-material2 = ElasticContactMaterial(name="Steel", cof=0.8) 
+# E=2.0e11, nu=0.3, cor=0.7, mu_k=0.5, mu_r=0.01 
+material1 = Modia3D.ElasticContactMaterial(name="Steel") 
+
+# E=2.0e11, nu=0.3, cor=0.8, mu_k=0.5, mu_r=0.01  
+material2 = Modia3D.ElasticContactMaterial(name="Steel", cor=0.8) 
 ```
 """
 mutable struct ElasticContactMaterial <: Modia3D.AbstractContactMaterial
-   c::Float64      # [N/m]    Spring constant of contact in normal direction
-   d::Float64      # [N*s/m]  Scaled damping constant of contact in normal direction
-   mu_k::Float64   # []       Kinetic/sliding friction force coefficient
-   mu_r::Float64   # []       Rotational friction torque coefficient
-   v_small::Float64  # [m/s]    Absolute value of relative tangential velocity at which sliding friction force starts
-   w_small::Float64  # [m/s]    Absolute value of relative angular velocity at which sliding friction torque starts
+    c::Float64        # [N/m]   Spring constant of contact in normal direction
+    cor::Float64      # []      Coefficient of restitution between two objects of the same material
+    mu_k::Float64     # []      Kinetic/sliding friction force coefficient
+    mu_r::Float64     # []      Rotational friction torque coefficient
+    v_small::Float64  # [m/s]   Used for regularization when computing the unit vector in direction of 
+                      #         the relative tangential velocity to avoid a division by zero.
+    w_small::Float64  # [rad/s] Used for regularization when computing the unit vector in direction of 
+                      #         the relative angular velocity to avoid a division by zero.
 
-   function ElasticContactMaterial(; c=1e7, d=1.0, mu_k=0.1, mu_r=0.01, v_small=0.01, w_small=v_small)
-      @assert(c > 0.0)
-      @assert(d >= 0.0)
-      @assert(mu_k >= 0.0)
-      @assert(mu_r >= 0.0)
-      @assert(v_small > 0.0)
-      @assert(w_small > 0.0)
-      new(c, d, mu_k, mu_r, v_small, w_small)
-   end
+    function ElasticContactMaterial(;name="", E=NaN, nu=NaN, cor=NaN, mu_k=NaN, mu_r=NaN, v_small=0.01, w_small=v_small)
+        @assert(v_small > 0.0)
+        @assert(w_small > 0.0)
+        if name == ""
+            @assert(!isnan(E)    && E > 0.0)
+            @assert(!isnan(nu)   && (nu > 0.0 && nu < 1.0))
+            @assert(!isnan(cor)  && (cor >= 0.0 && cor <= 1.0))
+            @assert(!isnan(mu_k) && mu_k >= 0.0)
+            @assert(!isnan(mu_r) && mu_r >= 0.0)
+            E2     = E
+            nu2    = nu
+            cor2   = cor
+            mu_k2  = mu_k
+            mu_r2  = mu_r
+        else
+            mat    = solidMaterialPalette[name]
+            E2     = mat.YoungsModulus
+            nu2    = mat.PoissonsRatio
+            cor2   = mat.coefficientOfRestitution
+            mu_k2  = mat.slidingFrictionCoefficient
+            mu_r2  = mat.rotationalFrictionCoefficient 
+            if !isnan(E)
+                @assert(E > 0.0)
+                E2 = E
+            end
+            if !isnan(nu)
+                @assert(nu > 0.0 && nu < 1.0)
+                nu2 = nu
+            end
+            if !isnan(cor)
+                @assert(cor >=0.0 && cor <= 1.0)
+                cor2 = cor
+            end           
+            if !isnan(mu_k)
+                @assert(mu_k >= 0.0)
+                mu_k2 = mu_k
+            end 
+            if !isnan(mu_r)
+                @assert(mu_r >= 0.0)
+                mu_r2 = mu_r
+            end 
+        end
+
+        c = E2/(1 - nu2^2)
+        new(c, cor2, mu_k2, mu_r2, v_small, w_small)
+    end
 end
 
 
-function dampingFromCof(cof)
-    @assert(cof >= 0.0 && cof <= 1.0)
-    cof2 = max(cof, 0.01)
-    return 8*(1-cof2)/(5*cof2)
+regularize(absv,v_small) = absv >= v_small ? absv : absv*(absv/v_small)*(1.0 - (absv/v_small)/3.0) + v_small/3.0
+
+
+function resultantCoefficientOfRestitution(cor1,cor2,abs_vreln,vsmall)
+    @assert(cor1 >= 0.0 && cor1 <= 1.0)
+    @assert(cor2 >= 0.0 && cor2 <= 1.0)
+    @assert(abs_vreln >= 0.0)
+    @assert(vsmall > 0)
+ 
+    cor_min  = 0.001
+    cor_mean = max(cor_min, (cor1 + cor2)/2.0)
+    cor_res  = cor_mean + (cor_min - cor_mean)*exp(log(0.01)*(abs_vreln/vsmall))
+    return cor_res
 end
 
 
-function ElasticContactMaterialFromMaterialData(; E=20e9, nu=0.3, cof=0.7, mu_k=0.1, mu_r=0.01, v_small=0.01, w_small=v_small)
-    @assert(E > 0.0)
-    @assert(nu > 0.0 && nu < 1.0)
-    @assert(cof >= 0.0 && cof <= 1.0)
-    c = E/(1 - nu^2)
-    d = dampingFromCof(cof) 
-    return ElasticContactMaterial(c=E/(1 - nu^2), d=dampingFromCof(cof), mu_k=mu_k, mu_r=mu_r, v_small=v_small, w_small=w_small)
+function resultantDampingCoefficient(cor1, cor2, abs_vreln, vsmall)
+    @assert(cor1 >= 0.0 && cor1 <= 1.0)
+    @assert(cor2 >= 0.0 && cor2 <= 1.0)
+    @assert(abs_vreln >= 0.0)
+    @assert(vsmall > 0)
+
+    cof_res = resultantCoefficientOfRestitution(cor1,cor2,abs_vreln,vsmall)
+    d_res   = 8.0*(1.0 - cof_res)/(5*cof_res*regularize(abs_vreln,vsmall))
+    return d_res
 end
-
-
-function ElasticContactMaterial(name::AbstractString; v_small=0.01, w_small=0.01)
-   mat   = SolidMaterial(name)
-   E     = mat.YoungsModulus
-   nu    = mat.PoissonsRatio
-   cof   = mat.coefficientOfRestitution
-   mu_k  = mat.slidingFrictionCoefficient
-   mu_t  = mat.rotationalFrictionCoefficient
-   return ElasticContactMaterialFromMaterialData(E=E, nu=nu, cof=cof, mu_k=mu_k, mu_t=mu_t, v_small=v_small, w_small=w_small)
-end
-
 
 
 defaultContactMaterial() = ContactMaterialElastic()
