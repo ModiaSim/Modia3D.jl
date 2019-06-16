@@ -96,9 +96,6 @@ f_{n,2}        &= \\max\\left(0, c_{res} \\cdot |\\delta| \\cdot (1 - d_{res} \\
 \\vec{f}_1     &= -\\vec{f}_2 \\\\[5mm]
 \\vec{\\tau}_2 &= -\\mu_{r,res} f_{n,2} \\frac{\\vec{\\omega}_{rel}}{reg(|\\vec{\\omega}_{rel}|,\\omega_{small})} \\\\
 \\vec{\\tau}_1 &= -\\vec{\\tau}_2 \\\\[5mm]
-reg(v_{abs}, v_{small}) &= \\text{\\textbf{if}}~ v_{abs} \\ge v_{small} ~\\text{\\textbf{then}}~ 
-                                v_{abs} ~\\text{\\textbf{else}}~  v_{abs}\\frac{v_{abs}}{v_{small}}
-                                 \left( 1.0 - \\frac{1}{3}\\frac{v_{abs}}{v_{small}}\right) + \frac{v_{small}{3}
 \\end{align}
 ```
 
