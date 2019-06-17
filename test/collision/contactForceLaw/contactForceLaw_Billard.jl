@@ -9,7 +9,7 @@ vmatGraphics = Modia3D.Material(color="LightBlue" , transparency=0.5)    # mater
 vmatSolids = Modia3D.Material(color="Red" , transparency=0.5)         # material of solids
 #c = 1e9, d = 100.0
 
-cmat = Modia3D.ElasticContactMaterial("Steel")
+cmat = Modia3D.ElasticContactMaterial(name="Steel")
 
 LxGround = 25.4
 LyGround = 12.7
@@ -103,7 +103,7 @@ bill = Billard2(sceneOptions=Modia3D.SceneOptions(gravityField=gravField,visuali
 
 
 model = Modia3D.SimulationModel( bill )
-result = ModiaMath.simulate!(model; stopTime=10.0, tolerance=1e-8,interval=0.001, log=false)
+result = ModiaMath.simulate!(model; stopTime=17.0, tolerance=1e-8,interval=0.001, log=false)
 
 
 println("... success of contactForceLaw_Billard.jl!")

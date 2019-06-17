@@ -11,7 +11,7 @@ vmat2.transparency = 0.7
 #c = 1e9, d = 100.0
 
 
-cmat = Modia3D.ElasticContactMaterial("Steel")
+cmat = Modia3D.ElasticContactMaterial(name="Steel")
 
 @assembly ThreeDFiles begin
   world = Modia3D.Object3D(visualizeFrame=true)
@@ -26,7 +26,7 @@ threeD = ThreeDFiles(sceneOptions=Modia3D.SceneOptions(gravityField=gravField,vi
 
 
 model = Modia3D.SimulationModel( threeD )
-result = ModiaMath.simulate!(model; stopTime=6.0, tolerance=1e-8,interval=0.001, log=false)
+result = ModiaMath.simulate!(model; stopTime=6.0, tolerance=1e-8,interval=0.001, log=true)
 
 
 println("... success of contactForceLaw_Ball.jl!")

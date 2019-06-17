@@ -9,7 +9,7 @@ vmatGraphics = Modia3D.Material(color="LightBlue" , transparency=0.5)    # mater
 vmatSolids = Modia3D.Material(color="Red" , transparency=0.5)         # material of solids
 #c = 1e9, d = 100.0
 
-cmat = Modia3D.ElasticContactMaterial("Steel")
+cmat = Modia3D.ElasticContactMaterial(name="Steel", mu_r = 0.1)
 
 LxGround = 20.0
 LyGround = 30.0
@@ -49,7 +49,7 @@ bill = RollingBall(sceneOptions=Modia3D.SceneOptions(gravityField=gravField,visu
 
 model = Modia3D.SimulationModel( bill )
 ModiaMath.print_ModelVariables(model)
-result = ModiaMath.simulate!(model; stopTime=2.1, tolerance=1e-8,interval=0.001, log=false)
+result = ModiaMath.simulate!(model; stopTime=10.1, tolerance=1e-8,interval=0.001, log=false)
 
 ModiaMath.plot(result, ["startBall.sphere.v","startBall.sphere.w"])
 

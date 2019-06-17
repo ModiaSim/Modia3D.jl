@@ -45,7 +45,7 @@ end
 
 
 """
-    material = ElasticContactMaterial(;name="", E=NaN, nu=NaN, cor=NaN, mu_k=NaN, 
+    material = ElasticContactMaterial(;name="", E=NaN, nu=NaN, cor=NaN, mu_k=NaN,
                                        mu_r=NaN, v_small=0.01, w_small=v_small,)
 
 Generate an `ElasticContactMaterial` object. If `name` is an empty string, the material
@@ -66,12 +66,12 @@ Material data arguments that are additionally provided, overwrite the data from 
           The contact force in tangential contact surface direction is proportional to `mu_k` and to
           the normal force and acts in opposite direction to the relative tangential velocity.
 - `mu_r`: Rotational friction torque coefficient between two objects of the same material (``\\ge 0``).
-          The contact torque is proportional to `mu_r` and to the normal force and acts in 
+          The contact torque is proportional to `mu_r` and to the normal force and acts in
           opposite direction to the relative angular velocity.
-- `v_small` in [m/s]: Used for regularization when computing the unit vector in direction of 
+- `v_small` in [m/s]: Used for regularization when computing the unit vector in direction of
           the relative tangential velocity ``\\vec{e}_t := \\vec{v}_{rel,t}/|\\vec{v}_{rel,t}|`` to avoid
           a division by zero if ``|\\vec{v}_{rel,t}| = 0`` (``\\gt 0``).
-- `w_small` in [rad/s]: Used for regularization when computing the unit vector in direction of 
+- `w_small` in [rad/s]: Used for regularization when computing the unit vector in direction of
           the relative angular velocity ``\\vec{e}_{\\omega} := \\vec{\\omega}_{rel}/|\\vec{\\omega}_{rel}|`` to avoid
           a division by zero if ``|\\vec{\\omega}_{rel}| = 0`` (``\\gt 0``).
 
@@ -81,7 +81,7 @@ Material data arguments that are additionally provided, overwrite the data from 
 When two 3D objects penetrate each other with a penetration depth ``\\delta < 0``,
 then a *contact force* and a *contact torque* is computed from the elastic contact materials
 of the two objects in the following way
-(the contact force law in normal direction is based on [^1], [^3], 
+(the contact force law in normal direction is based on [^1], [^3],
 the remaining force law on [^2] with some extensions and corrections):
 
 
@@ -98,12 +98,12 @@ f_{n,2}        &= \\max\\left(0, c_{res} \\cdot |\\delta| \\cdot (1 - d_{res} \\
 \\vec{\\tau}_1 &= -\\vec{\\tau}_2 \\\\[5mm]
 reg(v_{abs}, v_{small}) &= \\text{if}~ v_{abs} \\ge v_{small} ~\\text{then}~ v_{abs} ~\\text{else}~
                            \\frac{v_{abs}^2}{v_{small}}
-                           \\left( 1 - \\frac{v_{abs}}{3v_{small}} \\right) + \\frac{v_{small}}{3}      
+                           \\left( 1 - \\frac{v_{abs}}{3v_{small}} \\right) + \\frac{v_{small}}{3}
 \\end{align}
 ```
 
 If at least one of the two 3D objects is a sphere, with ``r_i`` the sphere radius
-and ``1/r_i = 0`` if object is not a sphere, and ``1/r = 1/r_1 + 1/r_2``, then 
+and ``1/r_i = 0`` if object is not a sphere, and ``1/r = 1/r_1 + 1/r_2``, then
 the normal force ``f_{n,2}`` and the contact torque vector ``\\vec{\\tau}_2`` are
 computed in the following way:
 
@@ -124,10 +124,10 @@ where
 - ``\\vec{f}_2``: Contact force vector acting on object 2.
 - ``\\vec{\\tau}_1``: Contact torque vector acting on object 1.
 - ``\\vec{\\tau}_2``: Contact torque vector acting on object 2.
-- ``\\delta``: Signed distance between object 1 and 2 in normal direction ``\\vec{e}_n``. 
+- ``\\delta``: Signed distance between object 1 and 2 in normal direction ``\\vec{e}_n``.
                ``\\delta < 0`` if objects are penetrating each other.
-- ``\\dot{\\delta}``: Signed relative velocity between object 1 and 2 in normal direction ``\\vec{e}_n``. 
-- ``\\dot{\\delta}^-``: Value of ``\\dot{\\delta}`` when contact starts (``\\dot{\\delta}^- \\le 0``). 
+- ``\\dot{\\delta}``: Signed relative velocity between object 1 and 2 in normal direction ``\\vec{e}_n``.
+- ``\\dot{\\delta}^-``: Value of ``\\dot{\\delta}`` when contact starts (``\\dot{\\delta}^- \\le 0``).
 - ``\\vec{v}_{rel,t}``: Relative velocity vector between object 1 and 2 projected in tangential direction
                         (``= \\vec{v}_2 - \\vec{v}_1`` and ``\\vec{v}_1, \\vec{v}_2`` are the absolute
                         velocities of the points on objects 1 and 2 that are in contact to each other).
@@ -142,7 +142,7 @@ where
 - ``d_{res}``: Resultant damping material constant in normal direction. This constant is computed
          from the resultant coefficient of restitution ``cor_{res}`` in equation (4) according to [^1].
 - ``cor_{res}``: Resultant coefficient of restitution. This constant is computed from the
-                 coeffients of restitutions of the two objects ``cor_1, cor_2`` according to 
+                 coeffients of restitutions of the two objects ``cor_1, cor_2`` according to
                  equation (3).
 - ``\\mu_{k,res}``: Resultant kinetic/sliding friction force coefficient in tangential direction. This constant is computed
          from the constants ``\\mu_{k,1}, \\mu_{k,2}`` of the two contacting objects 1 and 2 as
@@ -159,7 +159,7 @@ contact force law and an approximation of the damping so that a similar response
 an impulsive based contact law with a coefficient of restitution would be used, see [^1], [^3].
 In all other cases, ``f_n`` is a very crude approximation of the normal contact force,
 because it depends only on the penetration depth. A more realistic normal contact force
-computation would require to estimate the penetration volume. 
+computation would require to estimate the penetration volume.
 Note, in the special case of equation (12), the rotational coefficient of friction ``\\mu_{r,res}``
 can be interpreted as *rolling resistance coefficient*.
 
@@ -168,7 +168,7 @@ to guarantee that ``f_n`` is always a compressive and never a pulling force beca
 this would be unphysical.
 
 The equations above need constants for object pairs. However, only material data
-for the respective surfaces are provided and not for object pairs. 
+for the respective surfaces are provided and not for object pairs.
 The correct solution would be to apply, say, (1) a force on object 1 computed with the
 material constants of object 1, (2) a force element on object 2 using the material
 constants of object 2 and (3) connect the force elements of object 1 and 2 in series.
@@ -192,16 +192,16 @@ to compute the resultant coefficient of restitution is shown in the next figure:
 ![Resultant coefficient of restitution](../../resources/images/plot_cor.svg)
 
 
-Various equations need a regularization to avoid a division by zero. This is accomplished with 
+Various equations need a regularization to avoid a division by zero. This is accomplished with
 function ``reg(v_{abs}, v_{small})`` that has the following characteristics
 (the function returns ``v_{abs}`` if ``v_{abs} \\ge v_{small}`` and otherwise returns
-a third order polynomial with a minimum of ``v_{small}/3`` at ``v_{abs}=0`` and 
+a third order polynomial with a minimum of ``v_{small}/3`` at ``v_{abs}=0`` and
 smooth first and second derivatives at ``v_{abs} = v_{small}``):
 
 
 ![Regularization function](../../resources/images/plot_reg.svg)
 
-The resultant damping coefficient ``d_{res}`` is basically computed from the 
+The resultant damping coefficient ``d_{res}`` is basically computed from the
 resultant coefficient of restitution with equation (4) from [^1],
 but with regularization of ``|\\dot{\\delta}^-|`` to avoid a division by zero.
 The overall characteristics is shown in the next two figures:
@@ -231,20 +231,20 @@ relative angular velocity between the two contacting objects.
 
 # Literature
 [^1]: Paulo Flores, Margarida Machado, Miguel Silva, Jorge Martins (2011):
-      [On the continuous contact force models for soft materials in 
+      [On the continuous contact force models for soft materials in
       multibody dynamics](https://hal.archives-ouvertes.fr/hal-01333699).
       Multibody System Dynamics, Springer Verlag,
       Vol. 25, pp. 357-375. 10.1007/s11044-010-9237-4.
 
-[^2]: Martin Otter, Hilding Elmqvist, José Díaz López (2005): 
-      [Collision Handling for the Modelica MultiBody Library](https://modelica.org/events/Conference2005/online_proceedings/Session1/Session1a4.pdf). 
-      Proceedings of the 4th International Modelica Conference 2005, 
-      Gerhard Schmitz (Ed.), pages 45-53. 
+[^2]: Martin Otter, Hilding Elmqvist, José Díaz López (2005):
+      [Collision Handling for the Modelica MultiBody Library](https://modelica.org/events/Conference2005/online_proceedings/Session1/Session1a4.pdf).
+      Proceedings of the 4th International Modelica Conference 2005,
+      Gerhard Schmitz (Ed.), pages 45-53.
 
-[^3]: Luka Skrinjar, Janko Slavic, Miha Boltezar (2018): 
-      [A review of continuous contact-force models in multibody dynamics](https://doi.org/10.1016/j.ijmecsci.2018.07.010). 
+[^3]: Luka Skrinjar, Janko Slavic, Miha Boltezar (2018):
+      [A review of continuous contact-force models in multibody dynamics](https://doi.org/10.1016/j.ijmecsci.2018.07.010).
       International Journal of Mechanical Sciences, Volume 145,
-      Sept., pages 171-187. 
+      Sept., pages 171-187.
 
 
 # Example
@@ -252,11 +252,11 @@ relative angular velocity between the two contacting objects.
 ```julia
 import Modia3D
 
-# E=2.0e11, nu=0.3, cor=0.7, mu_k=0.5, mu_r=0.01 
-material1 = Modia3D.ElasticContactMaterial(name="Steel") 
+# E=2.0e11, nu=0.3, cor=0.7, mu_k=0.5, mu_r=0.01
+material1 = Modia3D.ElasticContactMaterial(name="Steel")
 
-# E=2.0e11, nu=0.3, cor=0.8, mu_k=0.5, mu_r=0.01  
-material2 = Modia3D.ElasticContactMaterial(name="Steel", cor=0.8) 
+# E=2.0e11, nu=0.3, cor=0.8, mu_k=0.5, mu_r=0.01
+material2 = Modia3D.ElasticContactMaterial(name="Steel", cor=0.8)
 ```
 """
 mutable struct ElasticContactMaterial <: Modia3D.AbstractContactMaterial
@@ -264,9 +264,9 @@ mutable struct ElasticContactMaterial <: Modia3D.AbstractContactMaterial
     cor::Float64      # []      Coefficient of restitution between two objects of the same material
     mu_k::Float64     # []      Kinetic/sliding friction force coefficient
     mu_r::Float64     # []      Rotational friction torque coefficient
-    v_small::Float64  # [m/s]   Used for regularization when computing the unit vector in direction of 
+    v_small::Float64  # [m/s]   Used for regularization when computing the unit vector in direction of
                       #         the relative tangential velocity to avoid a division by zero.
-    w_small::Float64  # [rad/s] Used for regularization when computing the unit vector in direction of 
+    w_small::Float64  # [rad/s] Used for regularization when computing the unit vector in direction of
                       #         the relative angular velocity to avoid a division by zero.
 
     function ElasticContactMaterial(;name="", E=NaN, nu=NaN, cor=NaN, mu_k=NaN, mu_r=NaN, v_small=0.01, w_small=v_small)
@@ -289,7 +289,7 @@ mutable struct ElasticContactMaterial <: Modia3D.AbstractContactMaterial
             nu2    = mat.PoissonsRatio
             cor2   = mat.coefficientOfRestitution
             mu_k2  = mat.slidingFrictionCoefficient
-            mu_r2  = mat.rotationalFrictionCoefficient 
+            mu_r2  = mat.rotationalFrictionCoefficient
             if !isnan(E)
                 @assert(E > 0.0)
                 E2 = E
@@ -301,15 +301,15 @@ mutable struct ElasticContactMaterial <: Modia3D.AbstractContactMaterial
             if !isnan(cor)
                 @assert(cor >=0.0 && cor <= 1.0)
                 cor2 = cor
-            end           
+            end
             if !isnan(mu_k)
                 @assert(mu_k >= 0.0)
                 mu_k2 = mu_k
-            end 
+            end
             if !isnan(mu_r)
                 @assert(mu_r >= 0.0)
                 mu_r2 = mu_r
-            end 
+            end
         end
 
         c = E2/(1 - nu2^2)
@@ -326,7 +326,7 @@ function resultantCoefficientOfRestitution(cor1,cor2,abs_vreln,vsmall)
     @assert(cor2 >= 0.0 && cor2 <= 1.0)
     @assert(abs_vreln >= 0.0)
     @assert(vsmall > 0)
- 
+
     cor_min  = 0.001
     cor_mean = max(cor_min, (cor1 + cor2)/2.0)
     cor_res  = cor_mean + (cor_min - cor_mean)*exp(log(0.01)*(abs_vreln/vsmall))

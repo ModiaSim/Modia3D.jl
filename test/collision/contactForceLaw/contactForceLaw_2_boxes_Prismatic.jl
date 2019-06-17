@@ -8,7 +8,7 @@ vmat1 = Modia3D.Material(color="LightBlue" , transparency=0.5)    # material of 
 vmat2 = deepcopy(vmat1)                                           # material of convex decomposition of SolidFileMesh
 vmat2.transparency = 0.7
 
-cmat = Modia3D.ElasticContactMaterial("SteelOrg")
+cmat = Modia3D.ElasticContactMaterial(name="Steel")
 
 @assembly TwoBoxes begin
   world = Modia3D.Object3D(visualizeFrame=true)
@@ -18,7 +18,7 @@ cmat = Modia3D.ElasticContactMaterial("SteelOrg")
   helpFrame2 = Modia3D.Object3D(visualizeFrame=false)
   prisX = Modia3D.Prismatic(world, helpFrame1; axis=1, v_start=-6.0, s_start=0.0, canCollide=true)
   prisY = Modia3D.Prismatic(helpFrame1, helpFrame2, axis=2, v_start=2.0, s_start=0.0, canCollide=true)
-  prisZ = Modia3D.Prismatic(helpFrame2, boxMoving, axis=3, v_start=1.0, s_start=0.0, canCollide=true)
+  prisZ = Modia3D.Prismatic(helpFrame2, boxMoving, axis=3, v_start=4.0, s_start=0.0, canCollide=true)
 
 
   box     = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidBox(3.0,2.0,5.0) , "Steel", vmat1; contactMaterial = cmat); r=[-3.0, 0.0, 1.5], fixed=true) # R=ModiaMath.rot2(-pi/3),

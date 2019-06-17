@@ -371,15 +371,19 @@ function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64
             w    = dynamics.w
             #println("w = ",w)
             grav = gravityAcceleration(scene.options.gravityField, obj.r_abs)
-            #println("grav = ", grav)
+            # println("grav = ", grav)
             if rCM === ModiaMath.ZeroVector3D
-               dynamics.f = -mass*( obj.R_abs*(dynamics.a0 - grav) )
+               dynamics.f = -mass*( obj.R_abs*(dynamics.a0  - grav) )
                dynamics.t = -(I*dynamics.z + cross(w, I*w))
+               # println("(dynamics.a0  - grav) = ", (dynamics.a0  - grav) )
+               #println("dynamics.t = ", dynamics.t)
+               #println(" ")
             else
                dynamics.f = -mass*( obj.R_abs*(dynamics.a0 - grav) +
                                   cross(dynamics.z, rCM) + cross(w, cross(w, rCM)))
                dynamics.t = -(I*dynamics.z + cross(w, I*w)) + cross(rCM, dynamics.f)
             end
+
          else
             dynamics.f = ModiaMath.ZeroVector3D
             dynamics.t = ModiaMath.ZeroVector3D
@@ -423,7 +427,6 @@ function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64
                if chpairs.changeToNegative[i]
                   chpairs.delta_dot_initial[i] = computeDeltaDotInitial(obj1, obj2, rContact, ModiaMath.Vector3D(chpairs.contactNormal[i]))
                end
-               #println("chpairs.delta_dot_initial[i] = ", chpairs.delta_dot_initial[i])
 
                (f1,f2,t1,t2) = responseCalculation(chpairs, obj1.data.contactMaterial,
                                                    obj2.data.contactMaterial,
@@ -435,6 +438,7 @@ function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64
                obj1.dynamics.t += obj1.R_abs*t1
                obj2.dynamics.f += obj2.R_abs*f2
                obj2.dynamics.t += obj2.R_abs*t2
+               println("obj1.dynamics.f = ", obj1.dynamics.f, " time = ", time)
             end
          end
       end
