@@ -9,7 +9,7 @@ vmatGraphics = Modia3D.Material(color="LightBlue" , transparency=0.5)    # mater
 vmatSolids = Modia3D.Material(color="Red" , transparency=0.5)         # material of solids
 #c = 1e9, d = 100.0
 
-cmat = Modia3D.ElasticContactMaterial(name="Steel")
+cmat = Modia3D.ElasticContactMaterial(name="Steel", mu_r = 0.0)
 
 LxGround = 25.4
 LyGround = 12.7

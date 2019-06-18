@@ -438,7 +438,7 @@ function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64
                obj1.dynamics.t += obj1.R_abs*t1
                obj2.dynamics.f += obj2.R_abs*f2
                obj2.dynamics.t += obj2.R_abs*t2
-               println("obj1.dynamics.f = ", obj1.dynamics.f, " time = ", time)
+               # println("obj1.dynamics.f = ", obj1.dynamics.f, " time = ", time)
             end
          end
       end

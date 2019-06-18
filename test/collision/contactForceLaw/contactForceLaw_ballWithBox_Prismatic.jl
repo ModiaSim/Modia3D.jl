@@ -14,7 +14,7 @@ cmat = Modia3D.ElasticContactMaterial(name="Steel", mu_r =0.1) #
 @assembly TwoBoxes begin
   world = Modia3D.Object3D(visualizeFrame=true)
 
-  boxMoving     = Modia3D.Object3D(Modia3D.Solid(Modia3D.SolidSphere(0.1) , "Steel", vmat1; contactMaterial = cmat) )
+  boxMoving     = Modia3D.Object3D(Modia3D.Solid(Modia3D.SolidSphere(0.5) , "Steel", vmat1; contactMaterial = cmat) )
   helpFrame1 = Modia3D.Object3D(visualizeFrame=false)
   helpFrame2 = Modia3D.Object3D(visualizeFrame=false)
   prisX = Modia3D.Prismatic(world, helpFrame1; axis=1, v_start=2.0, s_start=0.0, canCollide=true)

@@ -49,9 +49,9 @@ bill = RollingBall(sceneOptions=Modia3D.SceneOptions(gravityField=gravField,visu
 
 model = Modia3D.SimulationModel( bill )
 ModiaMath.print_ModelVariables(model)
-result = ModiaMath.simulate!(model; stopTime=10.1, tolerance=1e-8,interval=0.001, log=false)
+result = ModiaMath.simulate!(model; stopTime=10.1, tolerance=1e-6,interval=0.001, log=false)
 
-ModiaMath.plot(result, ["startBall.sphere.v","startBall.sphere.w"])
+ModiaMath.plot(result, ["startBall.sphere.r[1]","startBall.sphere.r[2]","startBall.sphere.r[3]", "startBall.sphere.v[1]","startBall.sphere.v[2]","startBall.sphere.v[3]"])
 
 
 println("... success of contactForceLaw_rollingBall.jl!")

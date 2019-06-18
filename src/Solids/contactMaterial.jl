@@ -328,7 +328,7 @@ function resultantCoefficientOfRestitution(cor1,cor2,abs_vreln,vsmall)
     @assert(vsmall > 0)
 
     cor_min  = 0.001
-    cor_mean = max(cor_min, (cor1 + cor2)/2.0)
+    cor_mean = max(cor_min, min(cor1,cor2))   # (cor1 + cor2)/2.0)
     cor_res  = cor_mean + (cor_min - cor_mean)*exp(log(0.01)*(abs_vreln/vsmall))
     return cor_res
 end
@@ -342,7 +342,7 @@ function resultantDampingCoefficient(cor1, cor2, abs_vreln, vsmall)
 
     cof_res = resultantCoefficientOfRestitution(cor1,cor2,abs_vreln,vsmall)
     d_res   = 8.0*(1.0 - cof_res)/(5*cof_res*regularize(abs_vreln,vsmall))
-    return d_res
+    return min(d_res,1e3)
 end
 
 

@@ -339,7 +339,7 @@ function negative!(sim::ModiaMath.SimulationState, nr::Int, crossing::Float64, c
       if ModiaMath.isLogEvents(simh.logger)
         println("        ", crossingAsString, " = ", crossing, negativeCrossingAsString(!simh.zPositive[nr]))
       end
-      simh.newEventIteration = true
+      simh.newEventIteration = false
     end
   end
   simh.z[nr] = crossing + (simh.zPositive[nr] ? zEps : -zEps)

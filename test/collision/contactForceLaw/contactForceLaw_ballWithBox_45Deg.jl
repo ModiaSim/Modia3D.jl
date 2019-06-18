@@ -26,7 +26,7 @@ threeD = ThreeDFiles(sceneOptions=Modia3D.SceneOptions(gravityField=gravField,vi
 
 model = Modia3D.SimulationModel( threeD )
 ModiaMath.print_ModelVariables(model)
-result = ModiaMath.simulate!(model; stopTime=0.7, tolerance=1e-8,interval=0.001, log=false)
+result = ModiaMath.simulate!(model; stopTime=4.0, tolerance=1e-8,interval=0.001, log=false)
 ModiaMath.plot(result, ["sphereMoving.r","sphereMoving.v"])
 
 
