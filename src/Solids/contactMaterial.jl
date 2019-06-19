@@ -342,7 +342,8 @@ function resultantDampingCoefficient(cor1, cor2, abs_vreln, vsmall)
 
     cof_res = resultantCoefficientOfRestitution(cor1,cor2,abs_vreln,vsmall)
     d_res   = 8.0*(1.0 - cof_res)/(5*cof_res*regularize(abs_vreln,vsmall))
-    return min(d_res,1e3)
+    #println("d_res = ", d_res)
+    return min(d_res,100)
 end
 
 

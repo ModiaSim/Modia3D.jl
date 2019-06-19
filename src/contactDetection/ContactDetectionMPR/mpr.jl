@@ -19,10 +19,10 @@ mutable struct SupportPoint
 end
 
 
-function getSupportPoint(shapeA::Modia3D.Composition.Object3D, shapeB::Composition.Object3D, n::SVector{3,Float64})
+function getSupportPoint(shapeA::Modia3D.Composition.Object3D, shapeB::Composition.Object3D, n::SVector{3,Float64}; scale::Float64=1.0)
   a = Modia3D.supportPoint(shapeA.data.geo, shapeA.r_abs, shapeA.R_abs, n)
   b = Modia3D.supportPoint(shapeB.data.geo, shapeB.r_abs, shapeB.R_abs, -n)
-  return SupportPoint(a-b,n,a,b)
+  return SupportPoint((a-b).*scale,n,a,b)
 end
 
 
@@ -125,20 +125,20 @@ end
 # Der Ursprung muss nicht enthalten sein!!!
 function tetrahedronEncloseOrigin(r0::SupportPoint,r1::SupportPoint,r2::SupportPoint,r3::SupportPoint,
                                   neps::Float64, niter_max::Int64,
-                                  shapeA::Composition.Object3D,shapeB::Composition.Object3D)
+                                  shapeA::Composition.Object3D,shapeB::Composition.Object3D, scale::Float64)
   aux = SVector(0.0, 0.0, 0.0)
   success = false
   for i in 1:niter_max
     aux = cross(r1.p-r0.p,r3.p-r0.p)
     if dot(aux,r0.n) < -neps
        r2 = r3
-       r3 = getSupportPoint(shapeA,shapeB,Basics.normalizeVector(aux))
+       r3 = getSupportPoint(shapeA,shapeB,Basics.normalizeVector(aux), scale=scale)
        continue
     end
     aux = cross(r3.p-r0.p,r2.p-r0.p)
     if dot(aux,r0.n) < -neps
        r1 = r3
-       r3 = getSupportPoint(shapeA,shapeB,Basics.normalizeVector(aux))
+       r3 = getSupportPoint(shapeA,shapeB,Basics.normalizeVector(aux), scale=scale)
        continue
     end
     success = true
@@ -155,10 +155,10 @@ end
 ###########      Phase 3, Minkowski Portal Refinement      ###################
 # construction of r4
 function constructR4(r0::SupportPoint,r1::SupportPoint,r2::SupportPoint,r3::SupportPoint,
-                     neps::Float64, shapeA::Composition.Object3D,shapeB::Composition.Object3D)
+                     neps::Float64, shapeA::Composition.Object3D,shapeB::Composition.Object3D, scale::Float64)
   n4 = cross(r2.p-r1.p, r3.p-r1.p)
   if norm(n4) <= neps
-    r3 = getSupportPoint(shapeA, shapeB, -r3.n) # change search direction
+    r3 = getSupportPoint(shapeA, shapeB, -r3.n, scale=scale) # change search direction
     if abs(dot((r3.p-r1.p),r3.n)) <= neps
       # Shape is purely planar. Computing the shortest distance for a planar shape
       # requires an MPR 2D algorithm (using lines instead of triangles as portals).
@@ -170,7 +170,7 @@ function constructR4(r0::SupportPoint,r1::SupportPoint,r2::SupportPoint,r3::Supp
   if dot(n4,r0.p) >= neps
     n4 = -n4
   end
-  r4 = getSupportPoint(shapeA, shapeB, Basics.normalizeVector(n4))
+  r4 = getSupportPoint(shapeA, shapeB, Basics.normalizeVector(n4), scale=scale)
 
   return (r3, r4, n4)
 end
@@ -210,13 +210,25 @@ function scaleVector(scale, ri)
 end
 
 function skalarization(r0,r1,r2,r3)
-  maximum([abs.(r0.p) abs.(r1.p) abs.(r2.p) abs.(r3.p)])
-  x = maximum([abs.(A) abs.(B) abs.(C)])
+  x = maximum([abs.(r0.p) abs.(r1.p) abs.(r2.p) abs.(r3.p)])
   scale = 1/x
+  #=
+  println("x = ", x)
+  println("before = ", r0.p)
+  println("before = ", r1.p)
+  println("before = " , r2.p)
+  println("before = ", r3.p)
+  =#
   r0.p = scaleVector(scale, r0.p)
-  r0.p = scaleVector(scale, r0.p)
-  r0.p = scaleVector(scale, r0.p)e
-  r0.p = scaleVector(scale, r0.p)
+  r1.p = scaleVector(scale, r1.p)
+  r2.p = scaleVector(scale, r2.p)
+  r3.p = scaleVector(scale, r3.p)
+  #=
+  println("after = " , r0.p)
+  println("after = ", r1.p)
+  println("after = ", r2.p)
+  println("after = ", r3.p)
+  =#
   return (r0,r1,r2,r3,scale)
 end
 
@@ -291,12 +303,12 @@ function mpr(ch::Composition.ContactDetectionMPR_handler, shapeA::Composition.Ob
   # r3 is in the direction of plane normal that contains triangle r0-r1-r2
   (r2, r3, n2, n3) = checkIfShapesArePlanar(r0, r1, r2, n2, neps, shapeA, shapeB)
 
-  # (r0,r1,r2,r3,scale) = skalarization(r0,r1,r2,r3)
+  (r0,r1,r2,r3,scale) = skalarization(r0,r1,r2,r3)
 
 
   ###########      Phase 2, Minkowski Portal Refinement      ###################
   # loop around to "ensure" the tetrahedron r0,r1,r2 and r3 encloses the origin
-  (r1,r2,r3) = tetrahedronEncloseOrigin(r0,r1,r2,r3,neps,niter_max,shapeA,shapeB)
+  (r1,r2,r3) = tetrahedronEncloseOrigin(r0,r1,r2,r3,neps,niter_max,shapeA,shapeB, scale)
   # doesRayIntersectPortal(r1.p,r2.p,r3.p, r0.p,neps) # Portal.A, Portal.B, Portal.C, point, neps
 
 
@@ -304,7 +316,7 @@ function mpr(ch::Composition.ContactDetectionMPR_handler, shapeA::Composition.Ob
   for i in 1:niter_max
     ### Phase 3.1: construct r4 ###
     # Find support point using the tetrahedron face
-    (r3,r4,n4) = constructR4(r0,r1,r2,r3,neps,shapeA,shapeB)
+    (r3,r4,n4) = constructR4(r0,r1,r2,r3,neps,shapeA,shapeB, scale)
 
 
     ### Phase 3.2: check if r4 is close to the origin ###

@@ -31,7 +31,7 @@ threeD = ThreeDFiles(sceneOptions=Modia3D.SceneOptions(gravityField=gravField,vi
 
 model = Modia3D.SimulationModel( threeD )
 ModiaMath.print_ModelVariables(model)
-result = ModiaMath.simulate!(model; stopTime=2.0, tolerance=1e-6,interval=0.001, log=false)
+result = ModiaMath.simulate!(model; stopTime=2.0, tolerance=1e-8,interval=0.001, log=false)
 
 ModiaMath.plot(result, ["boxMoving.r","boxMoving.v"])
 

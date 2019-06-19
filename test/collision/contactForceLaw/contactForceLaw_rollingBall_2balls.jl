@@ -20,17 +20,17 @@ vmatSolids = Modia3D.Material(color="Red" , transparency=0.5)         # material
 # funkt nicht cor=0.9, mu_k = 0.3, mu_r = 0.01
 #
 # cor=0.8, mu_k = 0.1, mu_r = 0.025
-cmatTable = Modia3D.ElasticContactMaterial(name="Steel", E=2.0e8,  cor=0.1, mu_r = 0.1 ) #E=2.0e7, 
-cmatBall = Modia3D.ElasticContactMaterial(name="BillardBall", cor=0.9, mu_k = 0.2, mu_r = 0.1)
+cmatTable = Modia3D.ElasticContactMaterial(name="DryWood", cor=0.2, mu_r = 0.01) #, E=2.0e8,  cor=0.1, mu_r = 0.1 ) #E=2.0e7,
+cmatBall = Modia3D.ElasticContactMaterial(name="BillardBall", cor=0.99, mu_k = 0.2, mu_r = 0.01)
 
 LxGround = 10.0
 LyBox = 2.0
 LzBox = 0.3
 diameter = 0.06
-massBall = (diameter/2)^3 *pi*4/3 * 1768.0 # kg
-println("massBall = ", massBall)
+#massBall = (diameter/2)^3 *pi*4/3 * 1768.0 # kg
+#println("massBall = ", massBall)
 @assembly Table(world) begin
-  withBox = Modia3D.Solid(Modia3D.SolidBox(LxGround, LyBox, LzBox) , "Steel", vmatSolids; contactMaterial = cmatTable)
+  withBox = Modia3D.Solid(Modia3D.SolidBox(LxGround, LyBox, LzBox) , "DryWood", vmatSolids; contactMaterial = cmatTable)
   box1 = Modia3D.Object3D(world, withBox, r=[0.0, 0.0, -LzBox/2], fixed=true)
 end
 
@@ -60,9 +60,9 @@ bill = RollingBall(sceneOptions=Modia3D.SceneOptions(gravityField=gravField,visu
 
 model = Modia3D.SimulationModel( bill )
 ModiaMath.print_ModelVariables(model)
-result = ModiaMath.simulate!(model; stopTime=2.0, tolerance=1e-8,interval=0.001, log=false)
+result = ModiaMath.simulate!(model; stopTime=0.75, tolerance=1e-8,interval=0.001, log=false)
 
-ModiaMath.plot(result, ["startBall.sphere.r[3]", "startBall.sphere.v[3]","startBall.sphere.w", "ball.sphere.v","ball.sphere.w"])
+ModiaMath.plot(result, [("startBall.sphere.r[3]","ball.sphere.r[3]"), "startBall.sphere.v[3]","startBall.sphere.r", "ball.sphere.v","ball.sphere.w"])
 
 
 println("... success of contactForceLaw_rollingBall_2balls.jl!")

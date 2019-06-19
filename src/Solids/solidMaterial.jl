@@ -105,7 +105,5 @@ solidMaterialPalette["DryWood"]   = SolidMaterial( 700.0, 1.1e10, 0.4 , 570.0, 1
 # attention: meltingPoint, heatCapacity,thermalConductivity, linearThermalExpansionCoefficient are not true!!!
 solidMaterialPalette["BillardBall"]   = SolidMaterial(1768.0, 5.4e9, 0.34,      570.0, 1700.0, 0.1, 5.0e-6,      0.8, 0.1, 0.025)
 
-solidMaterialPalette["Felt"]     = SolidMaterial(8000.0, 2.0e5, 0.30, 1640.0, 500.0, 50.0 , 1.2e-5 , 0.05, 0.5, 0.001)
-
 solidMaterial(name::AbstractString) = solidMaterialPalette[name]   # Should be removed
 SolidMaterial(name::AbstractString) = solidMaterialPalette[name]

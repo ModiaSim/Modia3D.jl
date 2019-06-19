@@ -129,7 +129,7 @@ function responseCalculation(chpairs::ContactPairs,
   # delta     ... signed distance
   delta_dot = dot(v_rel,e_n)
   v_t       = v_rel - delta_dot*e_n
-  delta     = abs(s)
+  delta     = -s #abs(s)
 
   # compute normal force and tangential force
   r  = getCommonRadius(obj1, obj2)
@@ -161,8 +161,8 @@ function getCommonRadius(obj1::Object3D, obj2::Object3D)
 end
 
 
-normalForce(c_res, d_res, delta, delta_dot::Float64, r::NOTHING) = -max(0.0, c_res*delta*(1-d_res*delta_dot) )
-normalForce(c_res, d_res, delta, delta_dot::Float64, r::Float64) = -max(0.0, c_res*(4/3*delta*sqrt(r*delta))*(1-d_res*delta_dot) )
+normalForce(c_res, d_res, delta, delta_dot::Float64, r::NOTHING) = -c_res*delta*(1-d_res*delta_dot)
+normalForce(c_res, d_res, delta, delta_dot::Float64, r::Float64) = -c_res*(4/3*delta*sqrt(r*abs(delta)))*(1-d_res*delta_dot)
 tangentialForce(fn, mu_k_res, v_t, v_small) = -mu_k_res*fn*v_t/Modia3D.regularize(norm(v_t),v_small)
 compTau(fn, mu_r_res, w_rel, w_small, r::NOTHING) = -mu_r_res*fn*w_rel/Modia3D.regularize(norm(w_rel),w_small)
 compTau(fn, mu_r_res, w_rel, w_small, r::Float64) = -r*mu_r_res*fn*w_rel/Modia3D.regularize(norm(w_rel),w_small)
