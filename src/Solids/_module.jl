@@ -56,6 +56,7 @@ export solidMaterial, solidMaterialPalette, defaultContactMaterial
 export regularize, resultantCoefficientOfRestitution, resultantDampingCoefficient
 
 export ElasticContactMaterial, ElasticContactMaterialFromMaterialData, ElasticContactMaterialFromMaterialName
+export ElasticContactMaterial2   # just temporarily
 
 
 using StaticArrays

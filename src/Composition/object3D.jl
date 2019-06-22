@@ -49,13 +49,13 @@ mutable struct FreeMotion <: Modia3D.AbstractJoint
                        q_start::AbstractVector = ModiaMath.NullQuaternion,
                        w_start::AbstractVector = ModiaMath.ZeroVector3D)
 
-      r    = ModiaMath.RealSVector3(  :r   , numericType=ModiaMath.XD_EXP                ,             unit="m"    , start=r_start, fixed=true , analysis=ModiaMath.OnlyDynamicAnalysis, info="Relative position vector from origin of obj 1 to origin of obj 2, resolved in obj1")
-      v    = ModiaMath.RealSVector3(  :v   , numericType=ModiaMath.XD_IMP                , integral=r, unit="m/s"  , start=v_start, fixed=true , analysis=ModiaMath.OnlyDynamicAnalysis, info="der(r): relative velocity of origin of obj 2 with respect to origin of obj 1, resolved in obj 1")
+      r    = ModiaMath.RealSVector3(  :r   , numericType=ModiaMath.XD_EXP                ,             unit="m"    , start=r_start, fixed=true, nominal=1.0, analysis=ModiaMath.OnlyDynamicAnalysis, info="Relative position vector from origin of obj 1 to origin of obj 2, resolved in obj1")
+      v    = ModiaMath.RealSVector3(  :v   , numericType=ModiaMath.XD_IMP                , integral=r, unit="m/s"  , start=v_start, fixed=true, nominal=1.0, analysis=ModiaMath.OnlyDynamicAnalysis, info="der(r): relative velocity of origin of obj 2 with respect to origin of obj 1, resolved in obj 1")
       a    = ModiaMath.RealSVector3(  :a   , numericType=ModiaMath.DER_XD_IMP            , integral=v, unit="m/s^2",                                                                     info="der(v): relative acceleration of origin of obj 2 with respect to origin of obj 1, resolved in obj 1")
 
-      q    = ModiaMath.RealSVector{4}(:q   , numericType=ModiaMath.XD_IMP                ,               start=q_start, fixed=false,                                         info="Relative quaternion to rotate obj 1 into obj 2")
+      q    = ModiaMath.RealSVector{4}(:q   , numericType=ModiaMath.XD_IMP                ,               start=q_start, fixed=false, nominal=1.0,                            info="Relative quaternion to rotate obj 1 into obj 2")
       derq = ModiaMath.RealSVector{4}(:derq, numericType=ModiaMath.DER_XD_IMP, integral=q, unit="1/s",                               analysis=ModiaMath.OnlyDynamicAnalysis, info="der(q)")
-      w    = ModiaMath.RealSVector3(  :w   , numericType=ModiaMath.XD_IMP                , unit="rad/s", start=w_start, fixed=true , analysis=ModiaMath.OnlyDynamicAnalysis, info="Relative angular velocity of obj 2 with respect to obj 1, resolved in obj 2")
+      w    = ModiaMath.RealSVector3(  :w   , numericType=ModiaMath.XD_IMP                , unit="rad/s", start=w_start, fixed=true , nominal=1.0, analysis=ModiaMath.OnlyDynamicAnalysis, info="Relative angular velocity of obj 2 with respect to obj 1, resolved in obj 2")
       z    = ModiaMath.RealSVector3(  :z   , numericType=ModiaMath.DER_XD_IMP, integral=w, unit="rad/s^2",                           analysis=ModiaMath.OnlyDynamicAnalysis, info="der(w): Relative angular acceleration of obj 2 with respect to obj 1, resolved in obj 2")
 
       residue_w = ModiaMath.RealSVector3(:residue_w, numericType=ModiaMath.FD_IMP, analysis=ModiaMath.OnlyDynamicAnalysis, info="Angular velocity residue")

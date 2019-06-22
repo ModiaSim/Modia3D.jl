@@ -16,9 +16,9 @@ boxDim = 0.3
 @assembly ThreeDFiles begin
   world = Modia3D.Object3D(visualizeFrame=false)
 
-  boxMoving     = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidBox(boxDim,boxDim,boxDim) , "DryWood", vmat1; contactMaterial = cmat); r=[1.0, 0.0, boxDim/2], fixed=false ) # ,R=ModiaMath.rot2(-pi/3) ) #
+  boxMoving     = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidBox(boxDim,boxDim,boxDim,rsmall=0.0) , "DryWood", vmat1; contactMaterial = cmat); r=[1.0, 0.0, boxDim/2], fixed=false ) # ,R=ModiaMath.rot2(-pi/3) ) #
 
-  box     = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidBox(5.0,2.0,zDim) , "DryWood", vmat1; contactMaterial = cmat); r=[0.0, 0.0, -zDim/2], fixed=true )
+  box     = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidBox(5.0,2.0,zDim,rsmall=0.0) , "DryWood", vmat1; contactMaterial = cmat); r=[0.0, 0.0, -zDim/2], fixed=true )
 end
 
 
@@ -31,7 +31,7 @@ threeD = ThreeDFiles(sceneOptions=Modia3D.SceneOptions(gravityField=gravField,vi
 
 model = Modia3D.SimulationModel( threeD )
 ModiaMath.print_ModelVariables(model)
-result = ModiaMath.simulate!(model; stopTime=2.0, tolerance=1e-8,interval=0.001, log=false)
+result = ModiaMath.simulate!(model; stopTime=2.0, tolerance=1e-8,interval=0.001, log=true)
 
 ModiaMath.plot(result, ["boxMoving.r","boxMoving.v"])
 
