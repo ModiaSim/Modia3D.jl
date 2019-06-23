@@ -14,3 +14,32 @@ end
    frame_a = Modia3D.Object3D(data, visualizeFrame = visualizeFrames)
    frame_b = Modia3D.Object3D(frame_a; r = r_ab, visualizeFrame = visualizeFrames)
 end
+
+@assembly ContactBox(parent::Object3D;
+                     scale::AbstractVector = [1.0, 1.0, 1.0],
+                     rsmall::Float64=0.001,
+                     fixed::Bool = true,
+                     r::AbstractVector = ModiaMath.ZeroVector3D,
+                     R::Union{ModiaMath.RotationMatrix,NOTHING} = nothing,
+                     q::Union{ModiaMath.Quaternion,NOTHING} = nothing,
+                     v_start::AbstractVector = ModiaMath.ZeroVector3D,
+                     w_start::AbstractVector = ModiaMath.ZeroVector3D,
+                     visualizeFrame::Union{Modia3D.Ternary,Bool} = Modia3D.Inherited,
+                     massProperties::Union{Solids.MassProperties,Number,AbstractString,Solids.SolidMaterial,NOTHING} = nothing,
+                     material::Union{Graphics.Material,NOTHING} = Graphics.Material(),
+                     contactMaterial::Union{Modia3D.AbstractContactMaterial,NOTHING} = Modia3D.ElasticContactMaterial(name="DryWood")
+                     ) begin
+    #box    = Modia3D.Object3D(parent, Modia3D.Solid(Modia3D.SolidBox(scale[1]-2*rsmall, scale[2]-2*rsmall, scale[3]-2*rsmall; rsmall=rsmall),
+    box    = Modia3D.Object3D(parent, Modia3D.Solid(Modia3D.SolidBox(scale[1], scale[2], scale[3]; rsmall=rsmall),
+                              massProperties,material; contactMaterial=contactMaterial),
+                              fixed=fixed, r=r, R=R, q=q, v_start=v_start, w_start=w_start, visualizeFrame=visualizeFrame)
+    sphere = Modia3D.Solid(Modia3D.SolidSphere(2*rsmall), nothing, Modia3D.Material(color="Yellow"); contactMaterial=contactMaterial)
+    ball1  = Modia3D.Object3D(box, sphere, fixed=true, r=[ scale[1]/2,  scale[2]/2,  scale[3]/2], visualizeFrame=false)
+    ball2  = Modia3D.Object3D(box, sphere, fixed=true, r=[-scale[1]/2,  scale[2]/2,  scale[3]/2], visualizeFrame=false)
+    ball3  = Modia3D.Object3D(box, sphere, fixed=true, r=[ scale[1]/2, -scale[2]/2,  scale[3]/2], visualizeFrame=false)
+    ball4  = Modia3D.Object3D(box, sphere, fixed=true, r=[-scale[1]/2, -scale[2]/2,  scale[3]/2], visualizeFrame=false)
+    ball5  = Modia3D.Object3D(box, sphere, fixed=true, r=[ scale[1]/2,  scale[2]/2, -scale[3]/2], visualizeFrame=false)
+    ball6  = Modia3D.Object3D(box, sphere, fixed=true, r=[-scale[1]/2,  scale[2]/2, -scale[3]/2], visualizeFrame=false)
+    ball7  = Modia3D.Object3D(box, sphere, fixed=true, r=[ scale[1]/2, -scale[2]/2, -scale[3]/2], visualizeFrame=false)
+    ball8  = Modia3D.Object3D(box, sphere, fixed=true, r=[-scale[1]/2, -scale[2]/2, -scale[3]/2], visualizeFrame=false)
+end

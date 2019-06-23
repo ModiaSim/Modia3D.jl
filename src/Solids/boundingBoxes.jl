@@ -12,8 +12,8 @@
 """
     r = supportPoint(geo, r_abs, R_abs, e)
 
-Return the absolute position vector `r` from world frame to *support point* of 
-solid `geo`, resolved in world frame in [m]. The support point is the point of solid `geo` 
+Return the absolute position vector `r` from world frame to *support point* of
+solid `geo`, resolved in world frame in [m]. The support point is the point of solid `geo`
 that is the most extreme in direction of unit vector `e`.
 
 # Arguments
@@ -49,7 +49,7 @@ function supportPoint_abs(geo::SolidEllipsoid, e_abs::AbstractVector)
 end
 
 # [Gino v.d. Bergen, p. 135]
-supportPoint_abs(geo::SolidBox, e_abs::AbstractVector) = [Basics.sign_eps(e_abs[1])*geo.Lx/2, Basics.sign_eps(e_abs[2])*geo.Ly/2, Basics.sign_eps(e_abs[3])*geo.Lz/2]
+supportPoint_abs(geo::SolidBox, e_abs::AbstractVector) = [Basics.sign_eps(e_abs[1])*(geo.Lx/2-geo.rsmall), Basics.sign_eps(e_abs[2])*(geo.Ly/2-geo.rsmall), Basics.sign_eps(e_abs[3])*(geo.Lz/2-geo.rsmall)]
 
 # [Gino v.d. Bergen, p. 136, XenoCollide, p. 168, 169]
 supportPoint_abs(geo::SolidCylinder, e_abs::AbstractVector) = norm([e_abs[1],e_abs[2]]) <= Modia3D.neps ?

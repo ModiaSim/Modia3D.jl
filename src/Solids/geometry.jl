@@ -59,7 +59,12 @@ struct SolidBox <: Modia3D.AbstractSolidGeometry
     @assert(Ly >= 0.0)
     @assert(Lz >= 0.0)
     @assert(rsmall >= 0.0)
+
     rsmall2 = min(rsmall, 0.1*min(Lx, Ly, Lz)) # at most 10% of the smallest edge length
+    @assert(Lx >= 2*rsmall2)
+    @assert(Ly >= 2*rsmall2)
+    @assert(Lz >= 2*rsmall2)
+
     new(Lx,Ly,Lz,rsmall2)
   end
 end
@@ -309,7 +314,7 @@ lengthGeo(geo::SolidFileMesh)                 = error("lengthGeo(SolidFileMesh):
 """
     r = centroid(geo)
 
-Return position vector from solid reference frame to [centroid](https://en.wikipedia.org/wiki/Centroid) 
+Return position vector from solid reference frame to [centroid](https://en.wikipedia.org/wiki/Centroid)
 of solid `geo::Modia3D.AbstractSolidGeometry` in [m]. If the solid has a uniform density,
 the centroid is identical to the *center of mass*.
 """
@@ -328,7 +333,7 @@ end
 """
    I = inertiaMatrix(geo, mass)
 
-Return [inertia matrix](https://en.wikipedia.org/wiki/Moment_of_inertia) `I` of solid 
+Return [inertia matrix](https://en.wikipedia.org/wiki/Moment_of_inertia) `I` of solid
 `geo::Modia3D.AbstractSolidGeometry` with respect to the
 solid reference frame in [kg*m^2] as `SMatrix{3,3,Float64,9}`. Hereby it is assumed that
 `geo` has uniform density and `mass` is the mass of `geo` in [kg].

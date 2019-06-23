@@ -37,7 +37,7 @@ export updatePosition!, update!, driveJoint!
 export Object3D, AssemblyInternal, initAssemblyInternal!, initAssemblyComponent!, Scene
 export Part
 export SimulationModel
-export BodyWithTwoFrames
+export BodyWithTwoFrames, ContactBox
 export printObject3DAndAllChildren, writeObject3DAndAllChildrenOnJsonFile
 export set_r!, set_q!, set_r_abs!
 export Revolute, setAngle!, connect, addRevoluteTorqueObject, computeTorque
