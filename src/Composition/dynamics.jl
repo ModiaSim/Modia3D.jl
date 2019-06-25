@@ -405,12 +405,16 @@ function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64
       # Compute signed distances of all contact shapes during zero-crossing computation
       setComputationFlag(ch)
       if ModiaMath.isEvent(sim)    # with Event
-         selectContactPairsWithEvent!(sim, ch, world) #sim
+         selectContactPairsWithEvent!(sim, ch, world) #sim#
+         #nz = length(ch.dict1)
+         #chpairs.delta_dot_initial = fill(-0.001, nz)
+         #chpairs.colPairsMatProp = fill(nothing, nz)
       elseif ModiaMath.isZeroCrossing(sim) # no Event
          selectContactPairsNoEvent!(sim, ch, world) #sim
       else
          getDistances!(ch, world)
       end
+
 
       # Handle zero crossing event
       for i=1:chpairs.nzContact[1]
@@ -419,30 +423,49 @@ function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64
             #println("... Contact ", str, " active at time = ", sim.time)
             obj1  = chpairs.contactObj1[i]
             obj2  = chpairs.contactObj2[i]
+            index = chpairs.index[i]
             if chpairs.contactPoint1[i] != nothing && chpairs.contactPoint2[i] != nothing && chpairs.contactNormal[i] != nothing
                r1 = ModiaMath.Vector3D(chpairs.contactPoint1[i])
                r2 = ModiaMath.Vector3D(chpairs.contactPoint2[i])
                rContact = (r1 + r2)/2.0
 
                if chpairs.changeToNegative[i]
-                  chpairs.delta_dot_initial[i] = computeDeltaDotInitial(obj1, obj2, rContact, ModiaMath.Vector3D(chpairs.contactNormal[i]))
+                  #println("toNegative: obj1 = ", ModiaMath.instanceName(obj1), " obj2 = ", ModiaMath.instanceName(obj2))
+                  delta_dot_init = computeDeltaDotInitial(obj1, obj2, rContact, ModiaMath.Vector3D(chpairs.contactNormal[i]))
+                  chpairs.delta_dot_initial[i] = delta_dot_init
+                  if !isempty(ch.dictCommunicate)
+                    token = findkey(ch.dictCommunicate, index)
+                    if status((ch.dictCommunicate,token)) == 1          # index of contact pair is in dictCommunicate
+                      val = deref_value((ch.dictCommunicate,token)) # unpacking its values
+                      val.delta_dot_initial = delta_dot_init
+                      if val.i != i
+                        error("val.i != i")
+                     end
+                   else
+                      error("index ist nicht in dictCommunicate??")
+                   end
+                  else
+                     error("dictCommunicate ist leer....")
+                  end
+
                end
 
                (f1,f2,t1,t2) = responseCalculation(chpairs, obj1.data.contactMaterial,
                                                    obj2.data.contactMaterial,
                                                    obj1, obj2, chpairs.zOrg[i], rContact,
-                                                   ModiaMath.Vector3D(chpairs.contactNormal[i]), chpairs.delta_dot_initial[i], time, file)
+                                                   ModiaMath.Vector3D(chpairs.contactNormal[i]), chpairs.delta_dot_initial[i], chpairs.colPairsMatProp[i], time, file)
 
                # Transform forces/torques in local part frames
                obj1.dynamics.f += obj1.R_abs*f1
                obj1.dynamics.t += obj1.R_abs*t1
                obj2.dynamics.f += obj2.R_abs*f2
                obj2.dynamics.t += obj2.R_abs*t2
-               #=
-               if time > 0.7 && time < 0.74  && String(ModiaMath.instanceName(obj1)) != "table.box1"
+
+#=
+               if time > 0.785 && time < 0.787  && String(ModiaMath.instanceName(obj1)) != "table.box1"
                   println("obj1= \"", ModiaMath.instanceName(obj1), "\" obj2 = ", ModiaMath.instanceName(obj2), " f = ", obj1.dynamics.f, " t = ", obj1.dynamics.t, " rContact = ", rContact, " ctNormal[i] ", ModiaMath.Vector3D(chpairs.contactNormal[i]) ," time = ", time)
                end
-               =#
+=#
             end
          end
       end

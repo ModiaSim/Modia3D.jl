@@ -8,7 +8,7 @@
 
 using DataStructures
 
-const Dict1ValueType = Tuple{Union{SVector{3,Float64},NOTHING}, Union{SVector{3,Float64},NOTHING}, Union{SVector{3,Float64},NOTHING}, Union{Object3D,NOTHING}, Union{Object3D,NOTHING}, Union{Float64,NOTHING}}
+const Dict1ValueType = Tuple{Union{SVector{3,Float64},NOTHING}, Union{SVector{3,Float64},NOTHING}, Union{SVector{3,Float64},NOTHING}, Union{Object3D,NOTHING}, Union{Object3D,NOTHING}, Union{Float64,NOTHING}, Union{Modia3D.AbstractContactMaterial,NOTHING} }
 
 
 struct KeyDict1 <: Modia3D.AbstractKeys
@@ -42,13 +42,19 @@ function Base.:isequal(key1::KeyDict1, key2::KeyDict1)
 end
 
 
+mutable struct ValuesDict <: Modia3D.AbstractValues
+    i::Int
+    delta_dot_initial::Float64
+    ValuesDict(index::Int) = new(index, -0.001)
+end
+
 mutable struct ContactDetectionMPR_handler <: Modia3D.AbstractContactDetection
   contactPairs::Composition.ContactPairs
   distanceComputed::Bool
   dict1::SortedDict{KeyDict1,Dict1ValueType}
   dict2::SortedDict{Int,Array{Float64,1}}
-
-  dictHelp::SortedDict{Int,Int}
+  dict_NoEvent::SortedDict{Int,Array{Float64,1}}
+  dictCommunicate::SortedDict{Int,ValuesDict}
 
 
   tol_rel::Float64
@@ -72,7 +78,8 @@ mutable struct ContactDetectionMPR_handler <: Modia3D.AbstractContactDetection
     handler.distanceComputed = false
     handler.dict1            = SortedDict{KeyDict1,Dict1ValueType}()
     handler.dict2            = SortedDict{Int,Array{Float64,1}}()
-    handler.dictHelp         = SortedDict{Int,Int}()
+    handler.dict_NoEvent     = SortedDict{Int,Array{Float64,1}}()
+    handler.dictCommunicate  = SortedDict{Int,ValuesDict}()
     handler.tol_rel          = tol_rel
     handler.niter_max        = niter_max
     handler.neps             = neps

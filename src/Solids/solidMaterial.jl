@@ -103,7 +103,9 @@ solidMaterialPalette["DryWood"]   = SolidMaterial( 700.0, 1.1e10, 0.4 , 570.0, 1
 # E = 5,4 GPA
 # cor=0.8, mu_k = 0.1, mu_r = 0.025 # book [Physics for game developers, Bourg, Bywalce,  2013, p. 382]
 # attention: meltingPoint, heatCapacity,thermalConductivity, linearThermalExpansionCoefficient are not true!!!
-solidMaterialPalette["BillardBall"]   = SolidMaterial(1768.0, 5.4e9, 0.34,      570.0, 1700.0, 0.1, 5.0e-6,      0.8, 0.1, 0.025)
+solidMaterialPalette["BilliardBall"]   = SolidMaterial(1768.0, 5.4e9, 0.34,      570.0, 1700.0, 0.1, 5.0e-6,      0.8, 0.1, 0.025)
+solidMaterialPalette["BilliardCushion"]   = SolidMaterial( 700.0, 1.1e10, 0.4 , 570.0, 1700.0,   0.1,  5.0e-6, 0.1, 0.3, 0.002)
+solidMaterialPalette["BilliardTable"]   = SolidMaterial( 700.0, 1.1e10, 0.4 , 570.0, 1700.0,   0.1,  5.0e-6, 0.1, 0.3, 0.002)
 
 solidMaterial(name::AbstractString) = solidMaterialPalette[name]   # Should be removed
 SolidMaterial(name::AbstractString) = solidMaterialPalette[name]

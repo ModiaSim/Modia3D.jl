@@ -113,7 +113,7 @@ used as key in dictionaries
 - `Modia3D.solidMaterialPalette` to inquire constants `E, nu` and
 - `Modia3D.solidMaterialPairsPalette` to inquire constants `cor, mu_k, mu_r`.
 
-Available keys are for example `"Steel", "Aluminium", "DryWood", "BillardBall"`.
+Available keys are for example `"Steel", "Aluminium", "DryWood", "BilliardBall"`.
 
 
 # Arguments
@@ -315,14 +315,14 @@ material2 = Modia3D.ElasticContactMaterial(name="DryWood", vsmall=0.1)
 mutable struct ElasticContactMaterial2 <: Modia3D.AbstractContactMaterial
     name::AbstractString  #         Name of contact material
     c::Float64            # [N/m]   Spring constant of contact in normal direction
-    vsmall::Float64       # [m/s]   Used for regularization when computing the unit vector in direction of
+    v_small::Float64       # [m/s]   Used for regularization when computing the unit vector in direction of
                           #         the relative tangential velocity to avoid a division by zero.
-    wsmall::Float64       # [rad/s] Used for regularization when computing the unit vector in direction of
+    w_small::Float64       # [rad/s] Used for regularization when computing the unit vector in direction of
                           #         the relative angular velocity to avoid a division by zero.
 
-    function ElasticContactMaterial2(name; vsmall=0.01, wsmall=0.01)
-        @assert(vsmall > 0.0)
-        @assert(wsmall > 0.0)
+    function ElasticContactMaterial2(name; v_small=0.01, w_small=0.01)
+        @assert(v_small > 0.0)
+        @assert(w_small > 0.0)
         mat = solidMaterialPalette[name]
         E   = mat.YoungsModulus
         nu  = mat.PoissonsRatio
@@ -330,7 +330,7 @@ mutable struct ElasticContactMaterial2 <: Modia3D.AbstractContactMaterial
         @assert(nu > 0.0 && nu < 1.0)
 
         c = E/(1 - nu^2)
-        new(name, c, vsmall, wsmall)
+        new(name, c, v_small, w_small)
     end
 end
 
@@ -360,14 +360,13 @@ function resultantDampingCoefficient(cor1, cor2, abs_vreln, vsmall)
 
     cof_res = resultantCoefficientOfRestitution(cor1,cor2,abs_vreln,vsmall)
     d_res   = 8.0*(1.0 - cof_res)/(5*cof_res*regularize(abs_vreln,vsmall))
-    return min(d_res,1000)
+    return min(d_res,1000.0)
 end
 
 
-
+# both functions are for new contact law
 resultantCoefficientOfRestitution(cor,abs_vreln,vsmall;cor_min=0.01) =
     cor + (cor_min - cor)*exp(log(0.01)*(abs_vreln/vsmall))
-
 
 function resultantDampingCoefficient(cor, abs_vreln, vsmall; cor_min=0.01, d_max=1000.0)
     @assert(cor >= 0.0 && cor <= 1.0)
@@ -377,9 +376,7 @@ function resultantDampingCoefficient(cor, abs_vreln, vsmall; cor_min=0.01, d_max
     @assert(d_max   > 0.0)
 
     cor_res = resultantCoefficientOfRestitution(cor,abs_vreln,vsmall;cor_min=cor_min)
-    d_res   = min(d_max, 8.0*(1.0 - cor_res)/(5*cor_res*regularize(abs_vreln,vsmall)))
-
-    return d_res
+    return min(d_max, 8.0*(1.0 - cor_res)/(5*cor_res*regularize(abs_vreln,vsmall)))
 end
 
 

@@ -32,7 +32,7 @@ Generate a new ContactPairs structure used for communication between the Object3
 - DummyObject3D::Modia3D.AbstractObject3Ddata: A dummy Object3D that can be used in the struct as element of a vector of Object3Ds
   to fill the array with a dummy value of the correct type.
 """
-struct ContactPairs
+mutable struct ContactPairs
    # Solid shapes used in contact detection (provided by Object3D handler)
    collSuperObjs::Array{Array{Object3D}}
    noCPairs::Array{Array{Int64,1}}
@@ -51,7 +51,8 @@ struct ContactPairs
    zOrg::Vector{Float64}                           # Vector of original distances computed with mpr or others
    contact::Vector{Bool}
    changeToNegative::Vector{Bool}
-   delta_dot_initial::Vector{Union{Float64,NOTHING}}
+   delta_dot_initial::Vector{Float64}
+   colPairsMatProp::Vector{Union{Modia3D.AbstractContactMaterial,NOTHING}}
 
 
    contactPoint1::Vector{Union{SVector{3,Float64},NOTHING}}       # Absolute position vector to first contact point on contactObj1
@@ -60,7 +61,7 @@ struct ContactPairs
 
    contactObj1::Vector{Union{Object3D,NOTHING}}
    contactObj2::Vector{Union{Object3D,NOTHING}}
-
+   index::Vector{Union{Int64,NOTHING}}
 
 
    function ContactPairs(world::Composition.Object3D, superObjs::Array{SuperObjsRow,1},
@@ -101,6 +102,8 @@ struct ContactPairs
       contact = fill(false, nz)
       changeToNegative = fill(false, nz)
       delta_dot_initial = fill(-0.001, nz)
+      colPairsMatProp = fill(nothing, nz)
+      index = fill(nothing, nz)
       defaultPoint   = SVector{3,Float64}(0.0,0.0,0.0)
       contactPoint1  = [defaultPoint for i = 1:nz]
       contactPoint2  = [defaultPoint for i = 1:nz]
@@ -136,7 +139,7 @@ struct ContactPairs
       end
 
       new(collSuperObjs, noCPairs, AABB, dummyObject3D, length(collSuperObjs), nz, nzContact, allPossibleContactPairsInz,
-          z, zOrg, contact, changeToNegative, delta_dot_initial, contactPoint1, contactPoint2, contactNormal, contactObj1, contactObj2)
+          z, zOrg, contact, changeToNegative, delta_dot_initial, colPairsMatProp, contactPoint1, contactPoint2, contactNormal, contactObj1, contactObj2, index)
    end
 end
 

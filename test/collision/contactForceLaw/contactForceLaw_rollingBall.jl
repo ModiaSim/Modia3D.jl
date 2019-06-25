@@ -11,8 +11,8 @@ vmatSolids = Modia3D.Material(color="Red" , transparency=0.5)         # material
 
 #cmatTable = Modia3D.ElasticContactMaterial(name="DryWood",  mu_r = 0.1)
 #cmatBall = Modia3D.ElasticContactMaterial(name="BillardBall", cor=0.9, mu_k = 0.2, mu_r = 0.1)
-cmatTable = Modia3D.ElasticContactMaterial(name="DryWood"   , cor=0.0, mu_k = 0.0, mu_r = 0.0)
-cmatBall = Modia3D.ElasticContactMaterial(name="BillardBall", cor=0.0, mu_k = 0.0, mu_r = 0.0)
+cmatTable = Modia3D.ElasticContactMaterial(name="DryWood"   , cor=0.0, mu_r = 0.01)
+cmatBall = Modia3D.ElasticContactMaterial(name="BilliardBall", cor=0.0, mu_k = 0.2, mu_r = 0.01)
 
 
 LxGround = 10.0
@@ -28,24 +28,24 @@ diameter = 0.06
 end
 
 @assembly StartBall(world) begin
-  sphere = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidSphere(diameter) , "BillardBall" , vmatSolids ; contactMaterial = cmatBall), fixed = false, r=[-2.8, 0.0, diameter/2], v_start=[0.0, 0.0, 0.0] )
+  sphere = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidSphere(diameter) , "BilliardBall" , vmatSolids ; contactMaterial = cmatBall), fixed = false, r=[-2.8, 0.0, diameter/2], v_start=[3.0, 0.0, 0.0] )
 end
 
 @assembly RollingBall() begin
-  world = Modia3D.Object3D(visualizeFrame=true)
+  world = Modia3D.Object3D(visualizeFrame=false)
   table = Table(world)
   ball = StartBall(world)
 end
 
 
 gravField = Modia3D.UniformGravityField(g=9.81, n=[0,0,-1])
-bill = RollingBall(sceneOptions=Modia3D.SceneOptions(gravityField=gravField,visualizeFrames=true, defaultFrameLength=0.7,nz_max = 100, enableContactDetection=true, visualizeContactPoints=true, visualizeSupportPoints=false))
+bill = RollingBall(sceneOptions=Modia3D.SceneOptions(gravityField=gravField,visualizeFrames=true, defaultFrameLength=0.3,nz_max = 100, enableContactDetection=true, visualizeContactPoints=false, visualizeSupportPoints=false))
 
 # Modia3D.visualizeAssembly!( bill )
 
 model = Modia3D.SimulationModel( bill )
 #ModiaMath.print_ModelVariables(model)
-result = ModiaMath.simulate!(model; stopTime=0.12, tolerance=1e-8,interval=0.001, log=true)
+result = ModiaMath.simulate!(model; stopTime=3.0, tolerance=1e-8,interval=0.001, log=true)
 
 ModiaMath.plot(result, ["ball.sphere.r[3]", "ball.sphere.v[3]"])
 #ModiaMath.plot(result, ["ball.sphere.r[1]","ball.sphere.r[2]","ball.sphere.r[3]", #"ball.sphere.v[1]","ball.sphere.v[2]","ball.#sphere.v[3]", "ball.sphere.w[1]","ball.sphere.w[2]","ball.sphere.w[3]"])

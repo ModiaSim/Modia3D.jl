@@ -4,7 +4,7 @@
 """
     module Modia3D.Solids
 
-Module `Solids` provides data structures and operations for solids, so objects that have a volume and 
+Module `Solids` provides data structures and operations for solids, so objects that have a volume and
 properties associated with the volume.
 Solid parts can be associated with a [`Modia3D.Object3D`](@ref).
 They are defined with struct [`Modia3D.Solid`](@ref) consisting of an **optional** solid geometry:
@@ -54,6 +54,7 @@ export volume, centroid, bottomArea, topArea, longestEdge, lengthGeo, inertiaMat
 export InternalMassProperties, MassProperties, SolidMaterial, ContactMaterialElastic, dummyMassProperties
 export solidMaterial, solidMaterialPalette, defaultContactMaterial
 export regularize, resultantCoefficientOfRestitution, resultantDampingCoefficient
+export solidMaterialPairsPalette, CommonCollisionProperties, getCommonCollisionProperties
 
 export ElasticContactMaterial, ElasticContactMaterialFromMaterialData, ElasticContactMaterialFromMaterialName
 export ElasticContactMaterial2   # just temporarily
@@ -74,6 +75,7 @@ include("geometry.jl")
 include("solidMaterial.jl")
 include("massProperties.jl")
 include("contactMaterial.jl")
+include("contactMaterialPairs.jl")
 include("solid.jl")
 
 end

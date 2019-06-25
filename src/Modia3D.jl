@@ -37,6 +37,7 @@ abstract type AbstractDLR_VisualizationRenderer <: AbstractRenderer end   # Comm
 abstract type AbstractMassProperties    end
 
 abstract type AbstractKeys    end
+abstract type AbstractValues    end
 
 import ModiaMath
 abstract type AbstractAssemblyInternal  <: ModiaMath.AbstractComponentInternal end
