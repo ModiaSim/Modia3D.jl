@@ -45,7 +45,7 @@ end
 mutable struct ValuesDict <: Modia3D.AbstractValues
     i::Int
     delta_dot_initial::Float64
-    ValuesDict(index::Int) = new(index, -0.001)
+    ValuesDict(index::Int; delta_dot_initial::Float64=-0.001) = new(index, delta_dot_initial)
 end
 
 mutable struct ContactDetectionMPR_handler <: Modia3D.AbstractContactDetection

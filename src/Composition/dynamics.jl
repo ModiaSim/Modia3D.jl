@@ -433,6 +433,7 @@ function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64
                   #println("toNegative: obj1 = ", ModiaMath.instanceName(obj1), " obj2 = ", ModiaMath.instanceName(obj2))
                   delta_dot_init = computeDeltaDotInitial(obj1, obj2, rContact, ModiaMath.Vector3D(chpairs.contactNormal[i]))
                   chpairs.delta_dot_initial[i] = delta_dot_init
+                  # println("delta_dot_initial = ", delta_dot_init)
                   if !isempty(ch.dictCommunicate)
                     token = findkey(ch.dictCommunicate, index)
                     if status((ch.dictCommunicate,token)) == 1          # index of contact pair is in dictCommunicate

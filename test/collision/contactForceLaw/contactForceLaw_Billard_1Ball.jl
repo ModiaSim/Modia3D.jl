@@ -28,8 +28,8 @@ end
 
 @assembly Cushion(world) begin
   # breite = TableY
-  withBox = Modia3D.Solid(Modia3D.SolidBox(LyBox, TableY, LzBox) , "BilliardCushion", vmatTable; contactMaterial = cmatCushion)
-  lengthBox = Modia3D.Solid(Modia3D.SolidBox(TableX, LyBox, LzBox) , "BilliardCushion", vmatTable; contactMaterial = cmatCushion)
+  withBox = Modia3D.Solid(Modia3D.SolidBox(LyBox, TableY, LzBox) , "BilliardCushion", vmatBalls; contactMaterial = cmatCushion)
+  lengthBox = Modia3D.Solid(Modia3D.SolidBox(TableX, LyBox, LzBox) , "BilliardCushion", vmatBalls; contactMaterial = cmatCushion)
   cushion1 = Modia3D.Object3D(world, withBox, r=[TableX/2, 0.0, TableZ/2], fixed=true)
   cushion2 = Modia3D.Object3D(world, withBox, r=[-TableX/2, 0.0, TableZ/2], fixed=true)
   cushion3 = Modia3D.Object3D(world, lengthBox, r=[0.0, TableY/2, TableZ/2], fixed=true)

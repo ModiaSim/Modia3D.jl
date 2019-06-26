@@ -57,7 +57,7 @@ function Composition.selectContactPairsNoEvent!(sim::Union{ModiaMath.SimulationS
   if !isempty(ch.dict1)
     tmp = collect(ch.dict1)
     for i=1:length(tmp)
-      tmp[i][1].contact ? (ch.dictCommunicate[tmp[i][1].index] = Composition.ValuesDict(i) ) : break # i is a dummy value
+      tmp[i][1].contact ? (ch.dictCommunicate[tmp[i][1].index] = Composition.ValuesDict(i, delta_dot_initial=ch.contactPairs.delta_dot_initial[i]) ) : break # i is a dummy value
   end; end
 
   selectContactPairs!(sim,ch,world,false)

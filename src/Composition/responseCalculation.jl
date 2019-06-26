@@ -92,8 +92,11 @@ function responseCalculation(chpairs::ContactPairs,
 
 ### computing constans out of material definition ###
   if typeof(delta_dot_initial) == NOTHING
-    error("delta_dot_initial not defined")
+  #  error("delta_dot_initial not defined")
   end
+  #println("delta_dot_initial ", delta_dot_initial)
+
+  # println("delta_dot_initial = ", delta_dot_initial)
   # v_small  ... small velocity used for regularization
   # w_small  ... small angular velocity used for regularization
   # cor_res  ... resulting coefficient of restitution

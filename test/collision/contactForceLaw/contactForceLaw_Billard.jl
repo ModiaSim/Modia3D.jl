@@ -97,7 +97,7 @@ end
 
 
 gravField = Modia3D.UniformGravityField(g=9.81, n=[0,0,-1])
-bill = Billard2(sceneOptions=Modia3D.SceneOptions(gravityField=gravField,visualizeFrames=false, defaultFrameLength=0.7,nz_max = 100, enableContactDetection=true, visualizeContactPoints=true, visualizeSupportPoints=false))
+bill = Billard1(sceneOptions=Modia3D.SceneOptions(gravityField=gravField,visualizeFrames=false, defaultFrameLength=0.7,nz_max = 100, enableContactDetection=true, visualizeContactPoints=true, visualizeSupportPoints=false))
 
 # Modia3D.visualizeAssembly!( bill )
 
