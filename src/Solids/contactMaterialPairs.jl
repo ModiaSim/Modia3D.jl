@@ -21,7 +21,7 @@ function Base.:isequal(keyA::KeyCollisionMaterialPairs, keyB::KeyCollisionMateri
 end
 
 
-struct CommonCollisionProperties <: Modia3D.AbstractContactMaterial
+mutable struct CommonCollisionProperties <: Modia3D.AbstractContactMaterial
     cor::Float64      # []      Coefficient of restitution between two objects
     mu_k::Float64     # []      Kinetic/sliding friction force coefficient between two objects
     mu_r::Float64     # []      Rotational friction torque coefficient between two objects
@@ -52,3 +52,6 @@ function getCommonCollisionProperties(mat1::ElasticContactMaterial2, mat2::Elast
     end
     return nothing
 end
+
+getCommonCollisionProperties(name1::AbstractString, name2::AbstractString) = 
+                     solidMaterialPairsPalette[KeyCollisionMaterialPairs(name1,name2)]

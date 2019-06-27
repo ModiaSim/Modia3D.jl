@@ -285,6 +285,14 @@ Examples of this characteristics are shown in the next two figures:
 ![Damping coefficient 2](../../resources/images/plot_damping2.svg)
 
 
+In the next figure the simulation of a bouncing ball is shown where the response
+calculation is performed (a) with an impulse and (b) with the compliant force law above.
+In both cases the coefficient of restitution `cof` is going to zero when ``|\\dot{\\delta}^-|``
+becomes small. As can be seen in both cases a similar response appears:
+
+![Bouncing ball](../../resources/images/plot_bouncingBall.svg)
+
+
 # Literature
 [^1]: Paulo Flores, Margarida Machado, Miguel Silva, Jorge Martins (2011):
       [On the continuous contact force models for soft materials in
