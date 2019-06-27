@@ -21,11 +21,15 @@ export zeroMVector, onesMVector, nullMRotation
 export ZeroMVector
 export normalizeVector, BoundingBox
 
+export readDictOfStructsFromJSON
+export listKeys
+
 export linearMovement
 export PositionMVector, RotationMMatrix, assertRotationMatrix
 
 using StaticArrays
 using LinearAlgebra
+using JSON
 
 include("environment.jl")
 include("constantsAndFunctions.jl")

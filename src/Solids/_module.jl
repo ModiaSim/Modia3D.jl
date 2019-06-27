@@ -56,6 +56,8 @@ export solidMaterial, solidMaterialPalette, defaultContactMaterial
 export regularize, resultantCoefficientOfRestitution, resultantDampingCoefficient
 export solidMaterialPairsPalette, CommonCollisionProperties, getCommonCollisionProperties
 
+export SolidMaterial2, solidMaterialPalette2
+
 export ElasticContactMaterial, ElasticContactMaterialFromMaterialData, ElasticContactMaterialFromMaterialName
 export ElasticContactMaterial2   # just temporarily
 

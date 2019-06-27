@@ -11,7 +11,15 @@ import JSON
 
 const defaultColorFile = joinpath(Modia3D.path, "src", "Graphics", "colors.json")
 const RGBColor         = MVector{3,Cint}
-const colorPalette     = JSON.parsefile(defaultColorFile; dicttype=Dict{String, RGBColor})
+
+
+"""
+    const colorPalette
+
+Dictionary with default colors.
+"""
+const colorPalette = JSON.parsefile(defaultColorFile; dicttype=Dict{String, RGBColor})
+
 
 """
     color = rgb([name::String | vec::AbstractVector | r::Number,g::Number,b::Number])
@@ -34,4 +42,3 @@ rgb(vec::AbstractVector)             = RGBColor(vec)
 rgb(r::Number, g::Number, b::Number) = RGBColor(r,g,b)
 
 defaultColor() = "Blue"
-

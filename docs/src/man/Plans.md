@@ -1,4 +1,6 @@
-# Plans for version 1.0
+# Plans
+
+## Plans for version 1.0
 
 Modia3D is not yet ready and should not be used for production work.
 The features below are planned to be implemented before Modia3D version 1.0.

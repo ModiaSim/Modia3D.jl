@@ -34,6 +34,11 @@ mutable struct CommonCollisionProperties <: Modia3D.AbstractContactMaterial
 end
 
 
+"""
+    const solidMaterialPairsPalette
+
+Material for contact pairs
+"""
 const solidMaterialPairsPalette = Dict{KeyCollisionMaterialPairs, CommonCollisionProperties}()
 
 solidMaterialPairsPalette[KeyCollisionMaterialPairs("Steel", "Steel")]         = CommonCollisionProperties(0.7, 0.5, 0.001)

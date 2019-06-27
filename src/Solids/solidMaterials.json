@@ -1,22 +1,44 @@
 {
+   "Steel": {
+      "density": 8000.0,
+      "YoungsModulus": 2.0e11,
+      "PoissonsRatio": 0.3,
+      "meltingPoint": 1640.0,
+      "specificHeatCapacity": 500.0,
+      "thermalConductivity": 50.0,
+      "linearThermalExpansionCoefficient": 1.2e-5
+   },
    "Aluminium": {
       "density": 2700.0,
       "YoungsModulus": 6.9e10,
       "PoissonsRatio": 0.32,
       "meltingPoint": 933.0,
-      "heatCapacity": 897.0,
+      "specificHeatCapacity": 897.0,
       "thermalConductivity": 237.0,
       "linearThermalExpansionCoefficient": 2.31e-5
    },
-
    "DryWood": {
       "density": 700.0,
       "YoungsModulus": 1.1e10,
       "PoissonsRatio": 0.4,
-      "meltingPoint": 0.0,
-      "heatCapacity": 1700.0,
+      "meltingPoint": 570.0,
+      "specificHeatCapacity": 1700.0,
       "thermalConductivity": 0.1,
       "linearThermalExpansionCoefficient": 5.0e-6
+   },
+   "BilliardCushion": {
+      "density": 700.0,
+      "YoungsModulus": 1.1e10,
+      "PoissonsRatio": 0.4
+   },
+   "BilliardTable": {
+      "density": 700.0,
+      "YoungsModulus": 1.1e10,
+      "PoissonsRatio": 0.4
+   },
+   "BilliardBall": {
+      "density": 1768.0,
+      "YoungsModulus": 5.4e9,
+      "PoissonsRatio": 0.34
    }
-
 }

@@ -1,7 +1,7 @@
 # License for this file: MIT (expat)
 # Copyright 2017-2018, DLR Institute of System Dynamics and Control
 #
-# This file is part of module 
+# This file is part of module
 #   Modia3D.Basics (Modia3D/Basics/_module.jl)
 #
 
@@ -10,7 +10,7 @@
 const neps = sqrt( eps() )
 sign_eps(value::Float64; seps::Float64 = 100*neps)::Float64 = value > seps ? 1.0 : (value < -seps ? -1.0 : 0.0)
 
-function normalizeVector(n::SVector{3,Float64})  
+function normalizeVector(n::SVector{3,Float64})
   nabs = norm(n)
   if nabs <= neps
     @assert(nabs > neps) # && norm(vec) > eps()
@@ -67,6 +67,42 @@ function trailingPartOfName(name::AbstractString)::String
    # Determine trailing part of name (after last ".")
    i = first(something(findlast(".", name), 0:-1))
    return i > 0 && i < length(name) ? name[i+1:end] : name
+end
+
+
+"""
+    readDictOfStructsFromJSON(fileName, StructType)
+
+Read a JSON file from `fileName` and return a `Dict{String, StructType}` dictionary.
+`StructType` must be a mutable struct type with a constructor `StructType()`.
+"""
+function readDictOfStructsFromJSON(fileName, StructType)
+    dict1 = JSON.parsefile(fileName)
+    palette = Dict{String, StructType}()
+    for (key1,value1) in dict1
+        obj = StructType()
+        for (key2,value2) in value1
+            setfield!(obj, Symbol(key2), value2)
+        end
+        palette[key1] = obj
+    end
+    return palette
+end
+
+
+"""
+    listKeys(dict)
+
+List the keys of dictionary `dict` in sorted order.
+"""
+function listKeys(dict)
+    for key in sort(collect(keys(dict)))
+        if typeof(key) == String
+            println("    \"$key\"")
+        else
+            println("   $key")
+        end
+    end
 end
 
 

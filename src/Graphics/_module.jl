@@ -3,7 +3,7 @@
 
 
 """
-    module Modia3D.Graphics 
+    module Modia3D.Graphics
 
 Visual elements used for animation. The visual elements are passed to an
 external renderer. Currently, the (free) community edition and the
@@ -27,7 +27,7 @@ Andrea Neumayr and Martin Otter, [DLR - Institute of System Dynamics and Control
 module Graphics
 
 # Colors and material
-export rgb, defaultColor, Material
+export rgb, defaultColor, Material, colorPalette
 
 # Visual elements
 # (note: Pipe cannot be exported, due to a conflict with Base.Pipe)

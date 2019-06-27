@@ -10,6 +10,8 @@ makedocs(
      "Manual" => [
         "man/GettingStarted.md"
         "man/Examples.md"
+        "man/Materials.md"
+        "man/CollisionHandling.md"
         "man/Plans.md"
         ],
      "Library" => [
@@ -21,4 +23,3 @@ makedocs(
      ]
   ]
 )
-
