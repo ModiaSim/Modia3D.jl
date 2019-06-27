@@ -1,4 +1,4 @@
-module contactForceLaw_Billard_1Ball
+module contactForceLaw_Billard_moreBalls
 
 using Modia3D
 using Modia3D.StaticArrays
@@ -37,65 +37,41 @@ end
 end
 
 
+@assembly BillardBall(world, xPos, yPos) begin
+  ball = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidSphere(diameter), "BilliardBall", vmatBalls ; contactMaterial = cmatBall), fixed = false, r=[xPos, yPos, diameter/2])
+
+end
+
+distance_balls = sqrt(3)/2*diameter
 @assembly Billard1() begin
   world = Modia3D.Object3D(visualizeFrame=false)
   table = Table(world)
   cushion = Cushion(world)
-ball1 = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidSphere(diameter), "BilliardBall", vmatBalls ; contactMaterial = cmatBall), fixed = false, r=[-0.8, 0.0, diameter/2], v_start=[3.0, 2.0, 0.0] , visualizeFrame = true)
+  ballStart = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidSphere(diameter), "BilliardBall", vmatBalls ; contactMaterial = cmatBall), fixed = false, r=[-0.8, 0.0, diameter/2], v_start=[3.0, 0.0, 0.0])
 
-#  ball1 = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidSphere(diameter), "BilliardBall", vmatBalls ; contactMaterial = cmatBall), fixed = false, r=[-0.8, 0.0, 1+diameter/2], v_start=[0.0, 0.0, 0.0] )
+  ball1 = BillardBall(world, TableX/6, 0.0)
 
-#  startBall = StartBall(world)
+  ball2  = BillardBall(world, TableX/6 + 1*distance_balls,  diameter/2)
+  ball3  = BillardBall(world, TableX/6 + 1*distance_balls, -diameter/2)
+  
 #=
-  ball1 = BillardBall(world, 2.0, 0.0)
+  ball4  = BillardBall(world, TableX/6 + 2*distance_balls,  diameter)
+  ball5  = BillardBall(world, TableX/6 + 2*distance_balls,  0.0)
+  ball6  = BillardBall(world, TableX/6 + 2*distance_balls, -diameter)
 
-  ball2 = BillardBall(world, 2.5, 0.251)
-  ball3 = BillardBall(world, 2.5, -0.251)
+  ball7  = BillardBall(world, TableX/6 + 3*distance_balls,  3*diameter/2)
+  ball8  = BillardBall(world, TableX/6 + 3*distance_balls,  diameter/2)
+  ball9  = BillardBall(world, TableX/6 + 3*distance_balls, -diameter/2)
+  ball10 = BillardBall(world, TableX/6 + 3*distance_balls, -3*diameter/2)
 
-  ball4 = BillardBall(world, 3.0, 0.0)
-  ball5 = BillardBall(world, 3.0, 0.501)
-  ball6 = BillardBall(world, 3.0, -0.501)
-
-  ball7 = BillardBall(world, 3.5, 0.251)
-  ball8 = BillardBall(world, 3.5, 0.752)
-  ball9 = BillardBall(world, 3.5, -0.251)
-  ball10 = BillardBall(world, 3.5, -0.752)
-
-  ball11 = BillardBall(world, 4.0, 0.0)
-  ball12 = BillardBall(world, 4.0, 0.501)
-  ball13 = BillardBall(world, 4.0, 1.002)
-  ball14= BillardBall(world, 4.0, -0.501)
-  ball15= BillardBall(world, 4.0, -1.002)
+  ball11 = BillardBall(world, TableX/6 + 4*distance_balls,  2*diameter)
+  ball12 = BillardBall(world, TableX/6 + 4*distance_balls,  diameter)
+  ball13 = BillardBall(world, TableX/6 + 4*distance_balls,  0.0)
+  ball14 = BillardBall(world, TableX/6 + 4*distance_balls, -diameter)
+  ball15 = BillardBall(world, TableX/6 + 4*distance_balls, -2*diameter)
   =#
 end
 
-#=
-@assembly Billard2() begin
-  world = Modia3D.Object3D(visualizeFrame=false)
-  table = BillardTable(world)
-  startBall = StartBall(world)
-
-  ball1 = BillardBall(world, 2.0, 0.0)
-
-  ball2 = BillardBall(world, 2.5, 0.25)
-  ball3 = BillardBall(world, 2.5, -0.25)
-
-  ball4 = BillardBall(world, 3.0, 0.0)
-  ball5 = BillardBall(world, 3.0, 0.5)
-  ball6 = BillardBall(world, 3.0, -0.5)
-
-  ball7 = BillardBall(world, 3.5, 0.25)
-  ball8 = BillardBall(world, 3.5, 0.75)
-  ball9 = BillardBall(world, 3.5, -0.25)
-  ball10 = BillardBall(world, 3.5, -0.75)
-
-  ball11 = BillardBall(world, 4.0, 0.0)
-  ball12 = BillardBall(world, 4.0, 0.5)
-  ball13 = BillardBall(world, 4.0, 1.0)
-  ball14= BillardBall(world, 4.0, -0.5)
-  ball15= BillardBall(world, 4.0, -1.0)
-end
-=#
 
 gravField = Modia3D.UniformGravityField(g=9.81, n=[0,0,-1])
 bill = Billard1(sceneOptions=Modia3D.SceneOptions(gravityField=gravField,visualizeFrames=false, defaultFrameLength=0.2,nz_max = 100, enableContactDetection=true, visualizeContactPoints=false, visualizeSupportPoints=false))
@@ -116,5 +92,5 @@ ModiaMath.plot(result, [("ball1.r[1]"),
                         ("ball1.w[1]")])
 
 
-println("... success of contactForceLaw_Billard_1Ball.jl!")
+println("... success of contactForceLaw_Billard_moreBalls.jl!")
 end

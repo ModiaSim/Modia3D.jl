@@ -54,12 +54,19 @@ end
 # It also checks if the contact pairs (contact == true), from a previous call of selectContactPairsWithEvent!(...)
 # are still true.
 function Composition.selectContactPairsNoEvent!(sim::Union{ModiaMath.SimulationState,NOTHING}, ch::Composition.ContactDetectionMPR_handler, world::Composition.Object3D)
+
   if !isempty(ch.dict1)
+    Basics.emptyArray!(ch.indexHasContact)
     tmp = collect(ch.dict1)
     for i=1:length(tmp)
-      tmp[i][1].contact ? (ch.dictCommunicate[tmp[i][1].index] = Composition.ValuesDict(i, delta_dot_initial=ch.contactPairs.delta_dot_initial[i]) ) : break # i is a dummy value
-  end; end
-
+      if tmp[i][1].contact
+        push!(ch.indexHasContact, tmp[i][1].index)
+        #val = get(ch.dictCommunicate, tmp[i][1].index, false) # index is not in dictionary dictCommunicate
+        #if val != false
+        #  val.i = i
+          # val.delta_dot_initial = ch.contactPairs.delta_dot_initial[i]
+        #end
+  end; end; end
   selectContactPairs!(sim,ch,world,false)
 end
 
@@ -82,30 +89,38 @@ function storeValuesWithEvent!(ch::Composition.ContactDetectionMPR_handler,
     if !isempty(ch.dict2)
       empty!(ch.dict2)
     end
-    if !isempty(ch.dictCommunicate)
-      empty!(ch.dictCommunicate)
+    if !isempty(ch.indexHasContact)
+      empty!(ch.indexHasContact)
     end
-    tmp = collect(ch.dict1)
     ch.contactPairs.nzContact[1] = 0
+    tmp = collect(ch.dict1)
+
     for i=1:length(tmp)
       if tmp[i][1].contact
         ch.contactPairs.nzContact[1] = i
-        val = Composition.ValuesDict(i)
-        ch.dictCommunicate[tmp[i][1].index] = val # actual position in z
-        ch.contactPairs.delta_dot_initial[i]  = val.delta_dot_initial
+        push!(ch.indexHasContact, tmp[i][1].index)
+
+        val = get(ch.dictCommunicate, tmp[i][1].index, false)
+        if val != false
+          val.i = i
+          ch.contactPairs.delta_dot_initial[i]  = val.delta_dot_initial
+          ch.contactPairs.colPairsMatProp[i]    = val.commonCollisionProp
+        end
       end
-  #    ch.contactPairs.z[i] = tmp[i][1].distance        # fill z vector with smallest distances
+
       ch.contactPairs.contactPoint1[i] = tmp[i][2][1]
       ch.contactPairs.contactPoint2[i] = tmp[i][2][2]
       ch.contactPairs.contactNormal[i] = tmp[i][2][3]
       ch.contactPairs.contactObj1[i]   = tmp[i][2][4]
       ch.contactPairs.contactObj2[i]   = tmp[i][2][5]
       ch.contactPairs.zOrg[i]          = tmp[i][2][6]
-      ch.contactPairs.colPairsMatProp[i] = tmp[i][2][7]
       ch.contactPairs.index[i]         = tmp[i][1].index
+
+
       ch.dict2[tmp[i][1].index] = [tmp[i][1].distance, i, tmp[i][1].contact]  # interchange key and value of dictionary dict1 + position in z vector + flag contact
       if typeof(sim) != NOTHING
-        (contact, changeToNegative) = negative!(sim, i, ch.contactPairs.zOrg[i], createCrossingAsString(sim, ch.contactPairs.contactObj1[i], ch.contactPairs.contactObj2[i]) )
+        (contact, changeToNegative) = negative!(sim, i, ch.contactPairs.zOrg[i], createCrossingAsString(sim,
+        ch.contactPairs.contactObj1[i], ch.contactPairs.contactObj2[i]) )
         ch.contactPairs.contact[i] = contact
         ch.contactPairs.changeToNegative[i] = changeToNegative
       end
@@ -123,39 +138,39 @@ function storeValuesNoEvent!(ch::Composition.ContactDetectionMPR_handler,
                               sim::Union{ModiaMath.SimulationState,NOTHING})
 # hier bin ich richtig!!!
   if !isempty(ch.dict1)
-
-    if length(ch.dictCommunicate) != ch.contactPairs.nzContact[1]
-      println("irgendwas klappt hier nicht")
-    end
-
     tmp = collect(ch.dict1)
-    for i=1:ch.contactPairs.nzContact[1]
+    # new distances are stored in z, at it's old position (but only for pairs with contact)
+    for i = 1:length(ch.indexHasContact)
+      index = ch.indexHasContact[i]
       if !isempty(ch.dictCommunicate)
-        token = findkey(ch.dictCommunicate,tmp[i][1].index)
-        if status((ch.dictCommunicate,token)) == 1          # index of contact pair is in dict2
-          val = deref_value((ch.dictCommunicate,token)) # unpacking its values
-          j_local = val.i                               # new distance is stored in z, at it's old position
+        val = get(ch.dictCommunicate, index, false)
+        if val != false
+          j_local = val.i    # new distance is stored in z, at it's old position
+          if j_local > ch.contactPairs.nzContact[1]
+            error("j_local > ch.contactPairs.nzContact[1]")
+          end
           ch.contactPairs.contactPoint1[j_local] = tmp[i][2][1]
           ch.contactPairs.contactPoint2[j_local] = tmp[i][2][2]
           ch.contactPairs.contactNormal[j_local] = tmp[i][2][3]
           ch.contactPairs.contactObj1[j_local]   = tmp[i][2][4]
           ch.contactPairs.contactObj2[j_local]   = tmp[i][2][5]
           ch.contactPairs.zOrg[j_local]          = tmp[i][2][6]
-          ch.contactPairs.colPairsMatProp[j_local] = tmp[i][2][7]
           ch.contactPairs.index[j_local]         = tmp[i][1].index
           ch.contactPairs.delta_dot_initial[j_local]  = val.delta_dot_initial
+          ch.contactPairs.colPairsMatProp[j_local]    = val.commonCollisionProp
           ch.dict2[tmp[i][1].index] = [tmp[i][1].distance, j_local, tmp[i][1].contact]  # interchange key and value of dictionary dict1 + position in z vector + flag contact
           if typeof(sim) != NOTHING
             (contact, changeToNegative) = negative!(sim, j_local, ch.contactPairs.zOrg[j_local], createCrossingAsString(sim, ch.contactPairs.contactObj1[j_local], ch.contactPairs.contactObj2[j_local]) )
             ch.contactPairs.contact[j_local] = contact
             ch.contactPairs.changeToNegative[j_local] = changeToNegative
           end
+        else
+          println("value is not in dictCommunicate???")
         end
       end
     end
 
-    for i=ch.contactPairs.nzContact[1]+1:length(tmp)
-    #  println("i = ", i)
+    for i=length(ch.indexHasContact)+1:length(tmp)
       if tmp[i][1].contact
         error("das ist was schief gelaufen!!!")
       end
@@ -165,7 +180,6 @@ function storeValuesNoEvent!(ch::Composition.ContactDetectionMPR_handler,
       ch.contactPairs.contactObj1[i]   = tmp[i][2][4]
       ch.contactPairs.contactObj2[i]   = tmp[i][2][5]
       ch.contactPairs.zOrg[i]          = tmp[i][2][6]
-      ch.contactPairs.colPairsMatProp[i] = tmp[i][2][7]
       ch.contactPairs.index[i]         = tmp[i][1].index
       ch.dict2[tmp[i][1].index] = [tmp[i][1].distance, i, tmp[i][1].contact]  # interchange key and value of dictionary dict1 + position in z vector + flag contact
       if typeof(sim) != NOTHING
@@ -220,6 +234,7 @@ function computeDistances(ch::Composition.ContactDetectionMPR_handler, world::Co
     # js: subsequent super - object
     # i: Object3D of is_th super - object
     # j: Object3D of js_th super - object
+    n = 0
     for is = 1:length(collSuperObjs)
       actSuperObj = collSuperObjs[is]
       if !isempty(actSuperObj)
@@ -232,11 +247,33 @@ function computeDistances(ch::Composition.ContactDetectionMPR_handler, world::Co
             nextSuperObj = collSuperObjs[js]
             nextSuperAABB = AABB[js]
             for j = 1:length(nextSuperObj)
+              n += 1
               nextObj = nextSuperObj[j]
               nextAABB = nextSuperAABB[j]
               index = pack(is,i,js,j)
+              if !ch.dictCommunicateInitial
+                initializeDictCommunicate(ch, actObj, nextObj, index)
+                if n == ch.contactPairs.nmax
+                  ch.dictCommunicateInitial = true
+                  #println("der Vorgang ist abgeschlossen ", ch.contactPairs.nmax)
+                  #println("length(ch.dictCommunicate) = ", length(ch.dictCommunicate))
+                end
+              end
               storeDistancesForSolver!(world, index, ch, actObj, nextObj, actAABB, nextAABB, phase2, hasEvent)
   end; end; end; end; end; end; end
+end
+
+function initializeDictCommunicate(ch::Composition.ContactDetectionMPR_handler, actObj::Composition.Object3D,
+                                  nextObj::Composition.Object3D, index::Integer)
+
+  # phase 0
+  # store all indizes of collision pairs in ch.dictCommunicate (and initialize its common material)
+  val = get(ch.dictCommunicate, index, false)
+  if val == false
+    commonProp = Modia3D.getCommonCollisionProperties(actObj.data.contactMaterial,
+                                                      nextObj.data.contactMaterial)
+    ch.dictCommunicate[index] = Composition.ValuesDict(-1, commProp = commonProp)
+  end
 end
 
 
@@ -266,12 +303,11 @@ function storeDistancesForSolver!(world::Composition.Object3D, index::Integer, c
   else # AABB's are not overlapping
     (distanceOrg, contactPoint1, contactPoint2, contactNormal,r1_a, r1_b, r2_a, r2_b, r3_a, r3_b) = computeDistanceBetweenAABB(actAABB, nextAABB)
   end
-  collProperties = Modia3D.getCommonCollisionProperties(actObj.data.contactMaterial, nextObj.data.contactMaterial)
 
   if hasEvent # has event
     contact = getInitialBoolOfDistance(distanceOrg)
     key1 = Composition.KeyDict1(contact, distanceOrg, index)
-  elseif !isempty(ch.dictCommunicate) && status((ch.dictCommunicate,findkey(ch.dictCommunicate,index) )) == 1  # no event, but index pair has contact
+  elseif !isempty(ch.indexHasContact) && (index in ch.indexHasContact)  # no event, but index pair has contact
     contact = true
     key1 = Composition.KeyDict1(contact, distanceOrg, index)
   else # no event and no contact
@@ -281,14 +317,14 @@ function storeDistancesForSolver!(world::Composition.Object3D, index::Integer, c
 
   # phase 1
   if length(ch.dict1) < ch.contactPairs.nz
-    push!(ch.dict1, key1=>(contactPoint1,contactPoint2,contactNormal,actObj,nextObj,distanceOrg,collProperties))
+    push!(ch.dict1, key1=>(contactPoint1,contactPoint2,contactNormal,actObj,nextObj,distanceOrg))
   else
     (k,v) = last(ch.dict1) # returns last sorted key -k, and its value -v
     if distanceOrg < k.distance && k.distance <= 0.0
       error("Number of max. collisions (n_max) is too low.")
     elseif distanceOrg < k.distance && k.distance >= 0.0
       delete!(ch.dict1,k) # removes last entry of sorted dict1
-      push!(ch.dict1, key1=>(contactPoint1,contactPoint2,contactNormal,actObj,nextObj,distanceOrg,collProperties)) # new distanceOrg is added, it is smaller than the biggest one in dict1
+      push!(ch.dict1, key1=>(contactPoint1,contactPoint2,contactNormal,actObj,nextObj,distanceOrg)) # new distanceOrg is added, it is smaller than the biggest one in dict1
     end
   end
 
@@ -308,17 +344,13 @@ function storeDistancesForSolver!(world::Composition.Object3D, index::Integer, c
         ch.contactPairs.contactObj2[j_local]   = nextObj
         ch.contactPairs.zOrg[j_local]          = distanceOrg
         ch.contactPairs.index[j_local]         = index
-        ch.contactPairs.colPairsMatProp[j_local] = collProperties
 
         if !isempty(ch.dictCommunicate)
-          token = findkey(ch.dictCommunicate, index)
-          if status((ch.dictCommunicate,token)) == 1          # index of contact pair is in dict2
-            val = deref_value((ch.dictCommunicate,token)) # unpacking its values
-            j_local2 = val.i                               # new distance is stored in z, at it's old position
-            if j_local != j_local2
-              error("j_local != j_local2")
-            end
-            ch.contactPairs.delta_dot_initial[j_local2]  = val.delta_dot_initial
+          val = get(ch.dictCommunicate, index, false)
+          if val != false
+            val.i = j_local
+            ch.contactPairs.delta_dot_initial[j_local] = val.delta_dot_initial
+            ch.contactPairs.colPairsMatProp[j_local]   = val.commonCollisionProp
           end
         end
 
@@ -380,6 +412,7 @@ function Composition.closeContactDetection!(ch::Composition.ContactDetectionMPR_
   Basics.emptyArray!(ch.dict1)
   Basics.emptyArray!(ch.dict2)
   Basics.emptyArray!(ch.dictCommunicate)
+  Basics.emptyArray!(ch.indexHasContact)
   Basics.emptyArray!(ch.contactPairs.collSuperObjs)
   Basics.emptyArray!(ch.contactPairs.noCPairs)
   Basics.emptyArray!(ch.contactPairs.z)
@@ -389,6 +422,7 @@ function Composition.closeContactDetection!(ch::Composition.ContactDetectionMPR_
   Basics.emptyArray!(ch.contactPairs.contactNormal)
   Basics.emptyArray!(ch.contactPairs.contactObj1)
   Basics.emptyArray!(ch.contactPairs.contactObj2)
+  ch.dictCommunicateInitial = false
 end
 
 
@@ -419,6 +453,8 @@ function negative!(sim::ModiaMath.SimulationState, nr::Int, crossing::Float64, c
     if ModiaMath.isLogEvents(simh.logger)
       println("        ", crossingAsString, " = ", crossing, negativeCrossingAsString(!simh.zPositive[nr]))
     end
+    changeToNegative = !simh.zPositive[nr]
+
   elseif simh.event   # ModiaMath.isEvent(sim)
     # println("auch im event")
     new_zPositive = crossing >= 0.0

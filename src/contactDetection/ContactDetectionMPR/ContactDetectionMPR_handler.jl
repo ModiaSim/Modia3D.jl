@@ -8,7 +8,7 @@
 
 using DataStructures
 
-const Dict1ValueType = Tuple{Union{SVector{3,Float64},NOTHING}, Union{SVector{3,Float64},NOTHING}, Union{SVector{3,Float64},NOTHING}, Union{Object3D,NOTHING}, Union{Object3D,NOTHING}, Union{Float64,NOTHING}, Union{Modia3D.AbstractContactMaterial,NOTHING} }
+const Dict1ValueType = Tuple{Union{SVector{3,Float64},NOTHING}, Union{SVector{3,Float64},NOTHING}, Union{SVector{3,Float64},NOTHING}, Union{Object3D,NOTHING}, Union{Object3D,NOTHING}, Union{Float64,NOTHING} }
 
 
 struct KeyDict1 <: Modia3D.AbstractKeys
@@ -45,7 +45,8 @@ end
 mutable struct ValuesDict <: Modia3D.AbstractValues
     i::Int
     delta_dot_initial::Float64
-    ValuesDict(index::Int; delta_dot_initial::Float64=-0.001) = new(index, delta_dot_initial)
+    commonCollisionProp::Union{Modia3D.AbstractContactMaterial,NOTHING}
+    ValuesDict(index::Int; delta_dot_initial::Float64=-0.001, commProp::Union{Modia3D.AbstractContactMaterial,NOTHING}=nothing) = new(index, delta_dot_initial,commProp)
 end
 
 mutable struct ContactDetectionMPR_handler <: Modia3D.AbstractContactDetection
@@ -53,8 +54,9 @@ mutable struct ContactDetectionMPR_handler <: Modia3D.AbstractContactDetection
   distanceComputed::Bool
   dict1::SortedDict{KeyDict1,Dict1ValueType}
   dict2::SortedDict{Int,Array{Float64,1}}
-  dict_NoEvent::SortedDict{Int,Array{Float64,1}}
-  dictCommunicate::SortedDict{Int,ValuesDict}
+  dictCommunicate::Dict{Int,ValuesDict}
+  indexHasContact::Array{Int,1}
+  dictCommunicateInitial::Bool
 
 
   tol_rel::Float64
@@ -78,11 +80,12 @@ mutable struct ContactDetectionMPR_handler <: Modia3D.AbstractContactDetection
     handler.distanceComputed = false
     handler.dict1            = SortedDict{KeyDict1,Dict1ValueType}()
     handler.dict2            = SortedDict{Int,Array{Float64,1}}()
-    handler.dict_NoEvent     = SortedDict{Int,Array{Float64,1}}()
-    handler.dictCommunicate  = SortedDict{Int,ValuesDict}()
+    handler.dictCommunicate  = Dict{Int,ValuesDict}()
+    handler.indexHasContact  = Array{Int,1}()
     handler.tol_rel          = tol_rel
     handler.niter_max        = niter_max
     handler.neps             = neps
+    handler.dictCommunicateInitial = false
     return handler
   end
 end

@@ -25,7 +25,7 @@ end
   world = Modia3D.Object3D(visualizeFrame=true)
   table = Table(world)
   ball1 = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidSphere(diameter), "BilliardBall", vmatBalls ; contactMaterial = cmatBall), fixed = false, r=[-4.8, 0.0, diameter/2], v_start=[3.0, 0.0, 0.0] )
-  ball2 = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidSphere(diameter), "BilliardBall", vmatBalls ; contactMaterial = cmatBall), fixed = false, r=[-3.0, 0.00, diameter/2])
+  ball2 = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidSphere(diameter), "BilliardBall", vmatBalls ; contactMaterial = cmatBall), fixed = false, r=[-3.0, 0.0, diameter/2])
 end
 
 
@@ -35,7 +35,7 @@ bill = RollingBall(sceneOptions=Modia3D.SceneOptions(gravityField=gravField,visu
 #Modia3D.visualizeAssembly!( bill )
 
 model = Modia3D.SimulationModel( bill )
-result = ModiaMath.simulate!(model; stopTime=2.0, tolerance=1e-8,interval=0.0001, log=false)
+result = ModiaMath.simulate!(model; stopTime=5.0, tolerance=1e-8,interval=0.0001, log=false)
 
 ModiaMath.plot(result, [("ball1.r[1]", "ball2.r[1]"),
                         ("ball1.r[2]", "ball2.r[2]"),

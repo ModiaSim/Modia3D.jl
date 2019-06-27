@@ -406,15 +406,11 @@ function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64
       setComputationFlag(ch)
       if ModiaMath.isEvent(sim)    # with Event
          selectContactPairsWithEvent!(sim, ch, world) #sim#
-         #nz = length(ch.dict1)
-         #chpairs.delta_dot_initial = fill(-0.001, nz)
-         #chpairs.colPairsMatProp = fill(nothing, nz)
       elseif ModiaMath.isZeroCrossing(sim) # no Event
          selectContactPairsNoEvent!(sim, ch, world) #sim
       else
          getDistances!(ch, world)
       end
-
 
       # Handle zero crossing event
       for i=1:chpairs.nzContact[1]
@@ -430,21 +426,22 @@ function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64
                rContact = (r1 + r2)/2.0
 
                if chpairs.changeToNegative[i]
-                  #println("toNegative: obj1 = ", ModiaMath.instanceName(obj1), " obj2 = ", ModiaMath.instanceName(obj2))
-                  delta_dot_init = computeDeltaDotInitial(obj1, obj2, rContact, ModiaMath.Vector3D(chpairs.contactNormal[i]))
+                  delta_dot_init = computeDeltaDotInitial(obj1, obj2, rContact,
+                                                      ModiaMath.Vector3D(chpairs.contactNormal[i]))
                   chpairs.delta_dot_initial[i] = delta_dot_init
-                  # println("delta_dot_initial = ", delta_dot_init)
+
                   if !isempty(ch.dictCommunicate)
-                    token = findkey(ch.dictCommunicate, index)
-                    if status((ch.dictCommunicate,token)) == 1          # index of contact pair is in dictCommunicate
-                      val = deref_value((ch.dictCommunicate,token)) # unpacking its values
-                      val.delta_dot_initial = delta_dot_init
+                    val = get(ch.dictCommunicate, index, false)
+                    if val != false
+                      val.delta_dot_initial      = delta_dot_init
+                      chpairs.colPairsMatProp[i] = val.commonCollisionProp
+                      # val.commonCollisionProp = collProperties
                       if val.i != i
                         error("val.i != i")
+                      end
+                     else
+                        error("index ist nicht in dictCommunicate??")
                      end
-                   else
-                      error("index ist nicht in dictCommunicate??")
-                   end
                   else
                      error("dictCommunicate ist leer....")
                   end
