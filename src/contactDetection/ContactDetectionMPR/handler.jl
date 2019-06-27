@@ -105,6 +105,13 @@ function storeValuesWithEvent!(ch::Composition.ContactDetectionMPR_handler,
           val.i = i
           ch.contactPairs.delta_dot_initial[i]  = val.delta_dot_initial
           ch.contactPairs.colPairsMatProp[i]    = val.commonCollisionProp
+        else
+          ch.dictCommunicate[tmp[i][1].index] = Composition.ValuesDict(i)
+        end
+      else
+        val = get(ch.dictCommunicate, tmp[i][1].index, false)
+        if val != false
+          delete!(ch.dictCommunicate, tmp[i][1].index)
         end
       end
 
@@ -121,6 +128,8 @@ function storeValuesWithEvent!(ch::Composition.ContactDetectionMPR_handler,
       if typeof(sim) != NOTHING
         (contact, changeToNegative) = negative!(sim, i, ch.contactPairs.zOrg[i], createCrossingAsString(sim,
         ch.contactPairs.contactObj1[i], ch.contactPairs.contactObj2[i]) )
+      #  println("changeToNegative = ", changeToNegative, " string ", createCrossingAsString(sim,
+    #    ch.contactPairs.contactObj1[i], ch.contactPairs.contactObj2[i]))
         ch.contactPairs.contact[i] = contact
         ch.contactPairs.changeToNegative[i] = changeToNegative
       end
@@ -251,29 +260,8 @@ function computeDistances(ch::Composition.ContactDetectionMPR_handler, world::Co
               nextObj = nextSuperObj[j]
               nextAABB = nextSuperAABB[j]
               index = pack(is,i,js,j)
-              if !ch.dictCommunicateInitial
-                initializeDictCommunicate(ch, actObj, nextObj, index)
-                if n == ch.contactPairs.nmax
-                  ch.dictCommunicateInitial = true
-                  #println("der Vorgang ist abgeschlossen ", ch.contactPairs.nmax)
-                  #println("length(ch.dictCommunicate) = ", length(ch.dictCommunicate))
-                end
-              end
               storeDistancesForSolver!(world, index, ch, actObj, nextObj, actAABB, nextAABB, phase2, hasEvent)
   end; end; end; end; end; end; end
-end
-
-function initializeDictCommunicate(ch::Composition.ContactDetectionMPR_handler, actObj::Composition.Object3D,
-                                  nextObj::Composition.Object3D, index::Integer)
-
-  # phase 0
-  # store all indizes of collision pairs in ch.dictCommunicate (and initialize its common material)
-  val = get(ch.dictCommunicate, index, false)
-  if val == false
-    commonProp = Modia3D.getCommonCollisionProperties(actObj.data.contactMaterial,
-                                                      nextObj.data.contactMaterial)
-    ch.dictCommunicate[index] = Composition.ValuesDict(-1, commProp = commonProp)
-  end
 end
 
 
@@ -449,9 +437,9 @@ function negative!(sim::ModiaMath.SimulationState, nr::Int, crossing::Float64, c
   changeToNegative = false
   if simh.initial     # ModiaMath.isInitial(sim)
     # println("auch im initial")
-    simh.zPositive[nr] = crossing >= 0.0
+    simh.zPositive[nr] = crossing + zEps >= 0.0
     if ModiaMath.isLogEvents(simh.logger)
-      println("        ", crossingAsString, " = ", crossing, negativeCrossingAsString(!simh.zPositive[nr]))
+      println("        ", crossingAsString, " = ", crossing + zEps, negativeCrossingAsString(!simh.zPositive[nr]))
     end
     changeToNegative = !simh.zPositive[nr]
 

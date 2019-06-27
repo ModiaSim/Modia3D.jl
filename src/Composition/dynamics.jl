@@ -416,9 +416,10 @@ function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64
       for i=1:chpairs.nzContact[1]
       # for i in eachindex(chpairs.z)
          if chpairs.contact[i] # kann man eventuell rausgeben
-            #println("... Contact ", str, " active at time = ", sim.time)
             obj1  = chpairs.contactObj1[i]
             obj2  = chpairs.contactObj2[i]
+            #println( ModiaMath.instanceName(obj1), " ",  ModiaMath.instanceName(obj2), " time = ", sim.time, " change ", chpairs.changeToNegative[i] )
+
             index = chpairs.index[i]
             if chpairs.contactPoint1[i] != nothing && chpairs.contactPoint2[i] != nothing && chpairs.contactNormal[i] != nothing
                r1 = ModiaMath.Vector3D(chpairs.contactPoint1[i])
@@ -428,26 +429,14 @@ function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64
                if chpairs.changeToNegative[i]
                   delta_dot_init = computeDeltaDotInitial(obj1, obj2, rContact,
                                                       ModiaMath.Vector3D(chpairs.contactNormal[i]))
+                  commonProp = Modia3D.getCommonCollisionProperties(obj1.data.contactMaterial,
+                                                                    obj2.data.contactMaterial)
                   chpairs.delta_dot_initial[i] = delta_dot_init
-
-                  if !isempty(ch.dictCommunicate)
-                    val = get(ch.dictCommunicate, index, false)
-                    if val != false
-                      val.delta_dot_initial      = delta_dot_init
-                      chpairs.colPairsMatProp[i] = val.commonCollisionProp
-                      # val.commonCollisionProp = collProperties
-                      if val.i != i
-                        error("val.i != i")
-                      end
-                     else
-                        error("index ist nicht in dictCommunicate??")
-                     end
-                  else
-                     error("dictCommunicate ist leer....")
-                  end
-
+                  chpairs.colPairsMatProp[i] = commonProp
+                  ch.dictCommunicate[index] = Composition.ValuesDict(i, delta_dot_initial = delta_dot_init,
+                                                                     commProp = commonProp)
                end
-
+               # println("length(ch.dictCommunicate) ", length(ch.dictCommunicate) )
                (f1,f2,t1,t2) = responseCalculation(chpairs, obj1.data.contactMaterial,
                                                    obj2.data.contactMaterial,
                                                    obj1, obj2, chpairs.zOrg[i], rContact,

@@ -53,7 +53,7 @@ distance_balls = sqrt(3)/2*diameter
 
   ball2  = BillardBall(world, TableX/6 + 1*distance_balls,  diameter/2)
   ball3  = BillardBall(world, TableX/6 + 1*distance_balls, -diameter/2)
-  
+
 #=
   ball4  = BillardBall(world, TableX/6 + 2*distance_balls,  diameter)
   ball5  = BillardBall(world, TableX/6 + 2*distance_balls,  0.0)
