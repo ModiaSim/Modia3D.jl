@@ -41,6 +41,7 @@ mutable struct ContactPairs
 
 
    # Dimensions
+   nmax::Int                                       # all possible collision pairs
    ne::Int                                         # length(collSuperObjs)
    nz::Int                                         # length(z)
    nzContact::Array{Int,1}                         # length(z | z has contact) length of z where zi has contact
@@ -72,7 +73,7 @@ mutable struct ContactPairs
       dummyObject3D = Composition.emptyObject3DData
 
       # Determine the dimension of vector z (<= nzmax, but at most the number of all possible contact point combinations)
-      nz = 0
+      ncounter = 0
       nzContact = [1]
       collSuperObjs = Array{Array{Object3D,1},1}()
 
@@ -83,18 +84,23 @@ mutable struct ContactPairs
            if !(i_next_superObj in noCPairs[i_superObj])
              for i_obj = 1:length(superObj)
                 for i_nextObj =1:length(superObjs[i_next_superObj].superObjCollision.superObj)
-                   nz += 1
+                   ncounter += 1
+                   #=
                    if nz > nz_max
                      break
-      end; end; end; end; end; end
-
+      end;
+      =#
+     end; end; end; end; end
+      nmax = ncounter
       #println("nz = ", nz)
-      if nz <= nz_max
+      if ncounter <= nz_max
          allPossibleContactPairsInz = true
+         nz = ncounter
       else
          allPossibleContactPairsInz = false
          nz = nz_max
       end
+
       #println("nachher nz = ", nz)
       # Allocate storage
       z = fill(42.0, nz)
@@ -138,7 +144,7 @@ mutable struct ContactPairs
          end
       end
 
-      new(collSuperObjs, noCPairs, AABB, dummyObject3D, length(collSuperObjs), nz, nzContact, allPossibleContactPairsInz,
+      new(collSuperObjs, noCPairs, AABB, dummyObject3D, nmax, length(collSuperObjs), nz, nzContact, allPossibleContactPairsInz,
           z, zOrg, contact, changeToNegative, delta_dot_initial, colPairsMatProp, contactPoint1, contactPoint2, contactNormal, contactObj1, contactObj2, index)
    end
 end

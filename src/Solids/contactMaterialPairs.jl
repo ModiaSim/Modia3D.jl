@@ -44,9 +44,9 @@ const solidMaterialPairsPalette = Dict{KeyCollisionMaterialPairs, CommonCollisio
 solidMaterialPairsPalette[KeyCollisionMaterialPairs("Steel", "Steel")]         = CommonCollisionProperties(0.7, 0.5, 0.001)
 
 solidMaterialPairsPalette[KeyCollisionMaterialPairs("BilliardBall", "BilliardBall")]         = CommonCollisionProperties(1.0, 0.0, 0.0)
-solidMaterialPairsPalette[KeyCollisionMaterialPairs("BilliardBall", "BilliardTable")]   = CommonCollisionProperties(0.0, 0.5, 0.01)
+solidMaterialPairsPalette[KeyCollisionMaterialPairs("BilliardBall", "BilliardTable")]   = CommonCollisionProperties(0.0, 0.6, 0.02)
 
-solidMaterialPairsPalette[KeyCollisionMaterialPairs("BilliardBall", "BilliardCushion")] = CommonCollisionProperties(1.0, 0.0, 0.0)
+solidMaterialPairsPalette[KeyCollisionMaterialPairs("BilliardBall", "BilliardCushion")] = CommonCollisionProperties(0.8, 0.0, 0.0)
 
 getCommonCollisionProperties(obj1, obj2) = nothing
 
