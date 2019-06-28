@@ -418,7 +418,9 @@ function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64
          if chpairs.contact[i] # kann man eventuell rausgeben
             obj1  = chpairs.contactObj1[i]
             obj2  = chpairs.contactObj2[i]
-            #println( ModiaMath.instanceName(obj1), " ",  ModiaMath.instanceName(obj2), " time = ", sim.time, " change ", chpairs.changeToNegative[i] )
+            #simh = sim.eventHandler
+            #println( "time = ", sim.time, ": ", ModiaMath.instanceName(obj1), " ", ModiaMath.instanceName(obj2),
+            #         " i = ", i, ", initial = ", simh.initial, ", event = ", simh.event, " change = ", chpairs.changeToNegative[i] )
 
             index = chpairs.index[i]
             if chpairs.contactPoint1[i] != nothing && chpairs.contactPoint2[i] != nothing && chpairs.contactNormal[i] != nothing

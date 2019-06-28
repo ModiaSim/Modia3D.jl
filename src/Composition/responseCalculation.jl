@@ -209,7 +209,7 @@ function responseCalculation(chpairs::ContactPairs,
     error("delta_dot_initial not defined")
   end
   if typeof(collMaterial) == NOTHING
-    error("obj1 = ", ModiaMath.instanceName(obj1), " obj2 = ", ModiaMath.instanceName(obj2), "  common collision material for ", cM1.name ," and ", cM2.name, " is not defined!")
+    error(ModiaMath.instanceName(obj1), " ", ModiaMath.instanceName(obj2), ":  common collision material for ", cM1.name ," and ", cM2.name, " is not defined!")
   end
   # v_small  ... small velocity used for regularization
   # w_small  ... small angular velocity used for regularization

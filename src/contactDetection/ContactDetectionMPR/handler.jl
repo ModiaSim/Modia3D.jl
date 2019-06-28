@@ -425,40 +425,44 @@ function createCrossingAsString(sim::ModiaMath.SimulationState, obj1::Compositio
   return crossingAsString
 end
 
-checkChangeFromNoContactToContact(oldContact::Bool, newContact::Bool) = (oldContact != newContact && oldContact == true) ? true : false
 
 negativeCrossingAsString(negative::Bool) = negative ? " (became < 0)" : " (became >= 0)"
+
+const zEps  = 1.e-8
+const zEps2 = 2*zEps
 
 function negative!(sim::ModiaMath.SimulationState, nr::Int, crossing::Float64, crossingAsString::String;
                    restart::ModiaMath.EventRestart=ModiaMath.Restart)
                    #println("bin hier drinnen")
-  zEps = 1.e-8
-  simh = sim.eventHandler
-  changeToNegative = false
-  if simh.initial     # ModiaMath.isInitial(sim)
-    # println("auch im initial")
-    simh.zPositive[nr] = crossing + zEps >= 0.0
-    if ModiaMath.isLogEvents(simh.logger)
-      println("        ", crossingAsString, " = ", crossing + zEps, negativeCrossingAsString(!simh.zPositive[nr]))
+    simh = sim.eventHandler
+
+    changeToNegative = false
+    # crossing = crossing + zEps   # In order that touching objects will not be treated as contacting.
+
+    if simh.initial     # ModiaMath.isInitial(sim)
+        # println("auch im initial")
+        simh.zPositive[nr] = crossing >= 0.0
+        if ModiaMath.isLogEvents(simh.logger)
+            println("        ", crossingAsString, " = ", crossing, negativeCrossingAsString(!simh.zPositive[nr]))
+        end
+        changeToNegative = !simh.zPositive[nr]
+
+    elseif simh.event   # ModiaMath.isEvent(sim)
+        # println("auch im event")
+        new_zPositive = crossing >= 0.0
+        changeToNegative = simh.zPositive[nr] && (simh.zPositive[nr] != new_zPositive)
+        change = (simh.zPositive[nr] && !new_zPositive) || (!simh.zPositive[nr] && new_zPositive)
+        simh.zPositive[nr] = new_zPositive
+
+        if change
+            simh.restart = max(simh.restart, restart)
+            if ModiaMath.isLogEvents(simh.logger)
+                println("        ", crossingAsString, " = ", crossing, negativeCrossingAsString(!simh.zPositive[nr]))
+            end
+            simh.newEventIteration = false
+        end
     end
-    changeToNegative = !simh.zPositive[nr]
+    simh.z[nr] = crossing + (simh.zPositive[nr] ? zEps : -zEps)
 
-  elseif simh.event   # ModiaMath.isEvent(sim)
-    # println("auch im event")
-    new_zPositive = crossing >= 0.0
-    changeToNegative = checkChangeFromNoContactToContact(simh.zPositive[nr], new_zPositive)
-    change = (simh.zPositive[nr] && !new_zPositive) || (!simh.zPositive[nr] && new_zPositive)
-    simh.zPositive[nr] = new_zPositive
-
-    if change
-      simh.restart = max(simh.restart, restart)
-      if ModiaMath.isLogEvents(simh.logger)
-        println("        ", crossingAsString, " = ", crossing, negativeCrossingAsString(!simh.zPositive[nr]))
-      end
-      simh.newEventIteration = false
-    end
-  end
-  simh.z[nr] = crossing + (simh.zPositive[nr] ? zEps : -zEps)
-
-  return (!simh.zPositive[nr], changeToNegative)
+    return (!simh.zPositive[nr], changeToNegative)
 end
