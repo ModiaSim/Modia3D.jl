@@ -44,9 +44,9 @@ Visualization properties of a geometrical object
 
 ## Solid material
 
-The dictionary [`Modia3D.solidMaterialPalette2`](@ref) provides material constants of **one** solid.
+The dictionary [`Modia3D.solidMaterialPalette3`](@ref) provides material constants of **one** solid.
 The key is the *material name* as a string, and the data is an instance of the mutable struct
-[`Modia3D.SolidMaterial2`](@ref). This data is used, for example, to compute mass and inertia of an object
+[`Modia3D.SolidMaterial3`](@ref). This data is used, for example, to compute mass and inertia of an object
 (with *density* and the object geometry), or to compute the spring constant
 for a compliant contact (with *Youngs's modulus* and *Poisson's ratio*).
 
@@ -55,7 +55,7 @@ for a compliant contact (with *Youngs's modulus* and *Poisson's ratio*).
 ```@repl
 import Modia3D
 Modia3D.listKeys(Modia3D.solidMaterialPalette2)      # print keys (sorted)
-d_steel = Modia3D.solidMaterialPalette2["Steel"].density   # get density
+d_steel = Modia3D.solidMaterialPalette3["Steel"].density   # get density
 ```
 
 ## Contact material

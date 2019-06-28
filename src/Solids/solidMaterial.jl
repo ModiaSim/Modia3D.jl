@@ -123,13 +123,13 @@ SolidMaterial(name::AbstractString) = solidMaterialPalette[name]
 
 
 """
-    material1 = SolidMaterial2(;kwargs...)
-    material2 = SolidMaterial2(name)
+    material1 = SolidMaterial3(;kwargs...)
+    material2 = SolidMaterial3(name)
 
-`SolidMaterial2(;kwargs...)` generates a SolidMaterial2 object by providing the material properties of a solid with
+`SolidMaterial3(;kwargs...)` generates a SolidMaterial3 object by providing the material properties of a solid with
 keyword arguments. Arguments that are not provided have value = NaN.
 
-`SolidMaterial2(name)` returns a SolidMaterial2 object from dictionary `Modia3D.solidMaterialPalette2` using
+`SolidMaterial3(name)` returns a SolidMaterial3 object from dictionary `Modia3D.solidMaterialPalette2` using
 the name as dictionary key.
 
 # Arguments
@@ -150,11 +150,11 @@ the name as dictionary key.
 # Example
 ```julia
 import Modia3D
-mat1 = Modia3D.SolidMaterial2(density=3000.0, YoungsModulus=2e11)
-mat2 = Modia3D.SolidMaterial2("Steel")    # mat2.density = 8000.0
+mat1 = Modia3D.SolidMaterial3(density=3000.0, YoungsModulus=2e11)
+mat2 = Modia3D.SolidMaterial3("Steel")    # mat2.density = 8000.0
 ```
 """
-mutable struct SolidMaterial2
+mutable struct SolidMaterial3
    density::Float64                            # [kg/m^3]  , https://en.wikipedia.org/wiki/Density
    YoungsModulus::Float64                      # [Pa]      , https://en.wikipedia.org/wiki/Young%27s_modulus
    PoissonsRatio::Float64                      # []        , https://en.wikipedia.org/wiki/Poisson%27s_ratio
@@ -166,25 +166,25 @@ mutable struct SolidMaterial2
                                                #             https://en.wikipedia.org/wiki/List_of_thermal_conductivities
    linearThermalExpansionCoefficient::Float64  # [1/K], https://en.wikipedia.org/wiki/Thermal_expansion
 end
-SolidMaterial2(; density=NaN,
+SolidMaterial3(; density=NaN,
                  YoungsModulus=NaN,
                  PoissonsRatio=NaN,
                  meltingPoint=NaN,
                  specificHeatCapacity=NaN,
                  thermalConductivity=NaN,
                  linearThermalExpansionCoefficient=NaN) =
-              SolidMaterial2(density, YoungsModulus, PoissonsRatio, meltingPoint, specificHeatCapacity,
+              SolidMaterial3(density, YoungsModulus, PoissonsRatio, meltingPoint, specificHeatCapacity,
                              thermalConductivity, linearThermalExpansionCoefficient)
 
 
 readSolidMaterialsDict() = Modia3D.readDictOfStructsFromJSON( joinpath(Modia3D.path, "src", "Solids", "solidMaterials.json"),
-                                                              SolidMaterial2 )
+                                                              SolidMaterial3 )
 
 
 """
     const solidMaterialPalette2
 
-Dictionary of solid material data, see [`Modia3D.SolidMaterial2`](@ref)
+Dictionary of solid material data, see [`Modia3D.SolidMaterial3`](@ref)
 """
-const solidMaterialPalette2 = Basics.readDictOfStructsFromJSON( joinpath(Modia3D.path, "src", "Solids", "solidMaterials.json"),
-                                                                SolidMaterial2 )
+const solidMaterialPalette3 = Basics.readDictOfStructsFromJSON( joinpath(Modia3D.path, "src", "Solids", "solidMaterials.json"),
+                                                                SolidMaterial3 )
