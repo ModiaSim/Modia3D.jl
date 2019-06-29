@@ -84,17 +84,52 @@ function selectContactPairs!(sim::Union{ModiaMath.SimulationState,NOTHING}, ch::
 end
 
 function storeValuesWithEvent!(ch::Composition.ContactDetectionMPR_handler,
-                                sim::Union{ModiaMath.SimulationState,NOTHING})
+                               sim::Union{ModiaMath.SimulationState,NOTHING})
   if !isempty(ch.dict1)
-    if !isempty(ch.dict2)
-      empty!(ch.dict2)
-    end
-    if !isempty(ch.indexHasContact)
-      empty!(ch.indexHasContact)
-    end
-    ch.contactPairs.nzContact[1] = 0
-    tmp = collect(ch.dict1)
+    empty!(ch.dict2)
+    empty!(ch.indexHasContact)
 
+    i = 0  # Index of z-vector
+    for (key,data) in ch.dict1
+        # key(contact,distance,index) =>(contactPoint1,contactPoint2,contactNormal,actObj,nextObj,distanceOrg)
+        i = i + 1
+        if key.contact
+            push!(ch.indexHasContact, key.index)
+
+            val = get(ch.dictCommunicate, key.index, false)
+            if val != false
+                val.i = i
+                ch.contactPairs.delta_dot_initial[i] = val.delta_dot_initial
+                ch.contactPairs.colPairsMatProp[i]   = val.commonCollisionProp
+            else
+                ch.dictCommunicate[key.index] = Composition.ValuesDict(i)
+            end
+        else
+            val = get(ch.dictCommunicate, key.index, false)
+            if val != false
+                delete!(ch.dictCommunicate, key.index)
+            end
+        end
+
+        ch.contactPairs.contactPoint1[i] = data[1]
+        ch.contactPairs.contactPoint2[i] = data[2]
+        ch.contactPairs.contactNormal[i] = data[3]
+        ch.contactPairs.contactObj1[i]   = data[4]
+        ch.contactPairs.contactObj2[i]   = data[5]
+        ch.contactPairs.zOrg[i]          = data[6]
+        ch.contactPairs.index[i]         = key.index
+
+        ch.dict2[key.index] = [key.distance, i, key.contact]  # interchange key and value of dictionary dict1 + position in z vector + flag contact
+        if typeof(sim) != NOTHING
+            (contact, changeDirection) = negative!(sim, i, ch.contactPairs.zOrg[i], ch.contactPairs.contactObj1[i], ch.contactPairs.contactObj2[i] )
+            ch.contactPairs.contact[i]         = contact
+            ch.contactPairs.changeDirection[i] = changeDirection
+        end
+    end
+    ch.contactPairs.nzContact[1] = length(ch.indexHasContact)
+
+  #=
+    tmp = collect(dict1)
     for i=1:length(tmp)
       if tmp[i][1].contact
         ch.contactPairs.nzContact[1] = i
@@ -134,6 +169,7 @@ function storeValuesWithEvent!(ch::Composition.ContactDetectionMPR_handler,
         ch.contactPairs.changeToNegative[i] = changeToNegative
       end
     end
+  =#
   else # No AABBs are overlapping, take old z!
     for i=1:length(ch.contactPairs.z)
       ch.contactPairs.zOrg[i] = 42.0
@@ -169,9 +205,9 @@ function storeValuesNoEvent!(ch::Composition.ContactDetectionMPR_handler,
           ch.contactPairs.colPairsMatProp[j_local]    = val.commonCollisionProp
           ch.dict2[tmp[i][1].index] = [tmp[i][1].distance, j_local, tmp[i][1].contact]  # interchange key and value of dictionary dict1 + position in z vector + flag contact
           if typeof(sim) != NOTHING
-            (contact, changeToNegative) = negative!(sim, j_local, ch.contactPairs.zOrg[j_local], createCrossingAsString(sim, ch.contactPairs.contactObj1[j_local], ch.contactPairs.contactObj2[j_local]) )
-            ch.contactPairs.contact[j_local] = contact
-            ch.contactPairs.changeToNegative[j_local] = changeToNegative
+            (contact, changeDirection) = negative!(sim, j_local, ch.contactPairs.zOrg[j_local], ch.contactPairs.contactObj1[j_local], ch.contactPairs.contactObj2[j_local])
+            ch.contactPairs.contact[j_local]         = contact
+            ch.contactPairs.changeDirection[j_local] = changeDirection
           end
         else
           println("value is not in dictCommunicate???")
@@ -192,9 +228,9 @@ function storeValuesNoEvent!(ch::Composition.ContactDetectionMPR_handler,
       ch.contactPairs.index[i]         = tmp[i][1].index
       ch.dict2[tmp[i][1].index] = [tmp[i][1].distance, i, tmp[i][1].contact]  # interchange key and value of dictionary dict1 + position in z vector + flag contact
       if typeof(sim) != NOTHING
-        (contact, changeToNegative) = negative!(sim, i, ch.contactPairs.zOrg[i], createCrossingAsString(sim, ch.contactPairs.contactObj1[i], ch.contactPairs.contactObj2[i]) )
-        ch.contactPairs.contact[i] = contact
-        ch.contactPairs.changeToNegative[i] = changeToNegative
+        (contact, changeDirection) = negative!(sim, i, ch.contactPairs.zOrg[i], ch.contactPairs.contactObj1[i], ch.contactPairs.contactObj2[i])
+        ch.contactPairs.contact[i]         = contact
+        ch.contactPairs.changeDirection[i] = changeDirection
       end
     end
 
@@ -234,9 +270,7 @@ function computeDistances(ch::Composition.ContactDetectionMPR_handler, world::Co
     end; end
 
     # new computation of dictionary 1
-    if !isempty(ch.dict1)
-      empty!(ch.dict1)
-    end
+    empty!(ch.dict1)
 
     # counter
     # is: actual super - object
@@ -265,7 +299,7 @@ function computeDistances(ch::Composition.ContactDetectionMPR_handler, world::Co
 end
 
 
-getInitialBoolOfDistance(distanceOrg) = distanceOrg < 0.0 ? true : false
+# getInitialBoolOfDistance(distanceOrg) = distanceOrg < 0.0 ? true : false
 
 #=
 #manipulateDistance(distanceOrg::Float64, contact::Bool) = contact ? distanceOrg - 100*eps() : distanceOrg + 100*eps()
@@ -280,6 +314,9 @@ function hysteresis(distanceOrg::Float64; initial::Bool=false, contact::Bool=fal
 end
 =#
 
+const zEps  = 1.e-8
+const zEps2 = 2*zEps
+
 function storeDistancesForSolver!(world::Composition.Object3D, index::Integer, ch::Composition.ContactDetectionMPR_handler,
                                   actObj::Composition.Object3D, nextObj::Composition.Object3D,
                                   actAABB::Basics.BoundingBox, nextAABB::Basics.BoundingBox, phase2::Bool, hasEvent::Bool)
@@ -292,27 +329,40 @@ function storeDistancesForSolver!(world::Composition.Object3D, index::Integer, c
     (distanceOrg, contactPoint1, contactPoint2, contactNormal,r1_a, r1_b, r2_a, r2_b, r3_a, r3_b) = computeDistanceBetweenAABB(actAABB, nextAABB)
   end
 
+#=
   if hasEvent # has event
     contact = getInitialBoolOfDistance(distanceOrg)
     key1 = Composition.KeyDict1(contact, distanceOrg, index)
-  elseif !isempty(ch.indexHasContact) && (index in ch.indexHasContact)  # no event, but index pair has contact
+  elseif index in ch.indexHasContact  # no event, but index pair has contact
     contact = true
     key1 = Composition.KeyDict1(contact, distanceOrg, index)
   else # no event and no contact
     contact = false
     key1 = Composition.KeyDict1(contact, distanceOrg, index)
   end
+=#
+  changeDirection = 0
+  contact         = false
+  if hasEvent
+    contact         = distanceOrg < -zEps   # In order that touching objects will not be treated as contacting.
+    previousContact = index in ch.indexHasContact
+    changeDirection = !previousContact and contact ? -1 : (previousContact and !contact ? +1 : 0)
+  elseif index in ch.indexHasContact   # no event, but index pair had contact since the last event
+    contact = true
+  end
+  distanceWithHysteresis = contact ? distanceOrg : distanceOrg + zEps2
+  key1 = Composition.KeyDict1(contact, distanceWithHysteresis, index)
 
   # phase 1
   if length(ch.dict1) < ch.contactPairs.nz
-    push!(ch.dict1, key1=>(contactPoint1,contactPoint2,contactNormal,actObj,nextObj,distanceOrg))
+    push!(ch.dict1, key1=>ValueDict1(contactPoint1,contactPoint2,contactNormal,actObj,nextObj,distanceOrg,distanceWithHysteresis,changeDirection))
   else
     (k,v) = last(ch.dict1) # returns last sorted key -k, and its value -v
-    if distanceOrg < k.distance && k.distance <= 0.0
-      error("Number of max. collisions (n_max) is too low.")
-    elseif distanceOrg < k.distance && k.distance >= 0.0
+    if k.contact || distanceWithHysteresis < k.distanceWithHysteresis && k.distanceWithHysteresis <= 0.0
+      error("Number of max. collision pairs is too low (nz_max = ", ch.contactPairs.nz, "). Enlarge nz_max in sceneOptions(nz_max=xxx).")
+    elseif distanceWithHysteresis < k.distanceWithHysteresis
       delete!(ch.dict1,k) # removes last entry of sorted dict1
-      push!(ch.dict1, key1=>(contactPoint1,contactPoint2,contactNormal,actObj,nextObj,distanceOrg)) # new distanceOrg is added, it is smaller than the biggest one in dict1
+      push!(ch.dict1, key1=>ValueDict1(contactPoint1,contactPoint2,contactNormal,actObj,nextObj,distanceOrg,distanceWithHysteresis,changeDirection)) # new distanceOrg is added, it is smaller than the biggest one in dict1
     end
   end
 
@@ -325,13 +375,15 @@ function storeDistancesForSolver!(world::Composition.Object3D, index::Integer, c
       if status((ch.dict2,token)) == 1          # index of contact pair is in dict2
         tmp_val = deref_value((ch.dict2,token)) # unpacking its values
         j_local = Int(tmp_val[2])               # new distance is stored in z, at it's old position
-        ch.contactPairs.contactPoint1[j_local] = contactPoint1
-        ch.contactPairs.contactPoint2[j_local] = contactPoint2
-        ch.contactPairs.contactNormal[j_local] = contactNormal
-        ch.contactPairs.contactObj1[j_local]   = actObj
-        ch.contactPairs.contactObj2[j_local]   = nextObj
-        ch.contactPairs.zOrg[j_local]          = distanceOrg
-        ch.contactPairs.index[j_local]         = index
+        ch.contactPairs.contactPoint1[j_local]   = contactPoint1
+        ch.contactPairs.contactPoint2[j_local]   = contactPoint2
+        ch.contactPairs.contactNormal[j_local]   = contactNormal
+        ch.contactPairs.contactObj1[j_local]     = actObj
+        ch.contactPairs.contactObj2[j_local]     = nextObj
+        ch.contactPairs.z[j_local]               = distanceWithHysteresis
+        ch.contactPairs.zOrg[j_local]            = distanceOrg
+        ch.contactPairs.index[j_local]           = index
+        ch.contactPairs.changeDirection[j_local] = changeDirection
 
         if !isempty(ch.dictCommunicate)
           val = get(ch.dictCommunicate, index, false)
@@ -357,9 +409,9 @@ function storeDistancesForSolver!(world::Composition.Object3D, index::Integer, c
           setVisualizationContactProperties!(world.supportVisuObj2C[j_local], transparency, r3_b)
         end
       else
-        if distanceOrg < 0.0
-        error("\nNumber of max. collision pairs nz (= ", ch.contactPairs.nz, ") is too low.",
-              "\nProvide a large nz_max with Modia3D.SceneOptions(nz_max=xxx).")
+        if distanceWithHysteresis < 0.0  #???? Otter: Should never occur ????
+        error("\nNumber of max. collision pairs nz_max (= ", ch.contactPairs.nz, ") is too low.",
+              "\nProvide a larger nz_max with Modia3D.SceneOptions(nz_max=xxx).")
   end; end; end; end
   return nothing
 end
@@ -425,38 +477,41 @@ function createCrossingAsString(sim::ModiaMath.SimulationState, obj1::Compositio
   return crossingAsString
 end
 
-
+#=
 negativeCrossingAsString(negative::Bool) = negative ? " (became < 0)" : " (became >= 0)"
 
 const zEps  = 1.e-8
 const zEps2 = 2*zEps
 
-function negative!(sim::ModiaMath.SimulationState, nr::Int, crossing::Float64, crossingAsString::String;
+function negative!(sim::ModiaMath.SimulationState, nr::Int, crossing::Float64,
+                   contactObj1::Composition.Object3D, contactObj2::Composition.Object3D;
                    restart::ModiaMath.EventRestart=ModiaMath.Restart)
                    #println("bin hier drinnen")
     simh = sim.eventHandler
 
-    changeToNegative = false
-    # crossing = crossing + zEps   # In order that touching objects will not be treated as contacting.
+    changeDirection::Int64 = 0     # +1: changing from negative to positive
+                                   #  0: no change
+                                   # -1: changing from positive to neagative
+    crossing = crossing + zEps     # In order that touching objects will not be treated as contacting.
 
     if simh.initial     # ModiaMath.isInitial(sim)
         # println("auch im initial")
         simh.zPositive[nr] = crossing >= 0.0
         if ModiaMath.isLogEvents(simh.logger)
+            crossingAsString = createCrossingAsString(sim, contactObj1, contactObj2)
             println("        ", crossingAsString, " = ", crossing, negativeCrossingAsString(!simh.zPositive[nr]))
         end
-        changeToNegative = !simh.zPositive[nr]
+        changeDirection = simh.zPositive[nr] ? +1 : -1
 
     elseif simh.event   # ModiaMath.isEvent(sim)
         # println("auch im event")
-        new_zPositive = crossing >= 0.0
-        changeToNegative = simh.zPositive[nr] && (simh.zPositive[nr] != new_zPositive)
-        change = (simh.zPositive[nr] && !new_zPositive) || (!simh.zPositive[nr] && new_zPositive)
+        new_zPositive   = crossing >= 0.0
+        changeDirection = simh.zPositive[nr] && !new_zPositive ? -1 : ( !simh.zPositive[nr] && new_zPositive ? +1 : 0)
         simh.zPositive[nr] = new_zPositive
-
-        if change
+        if changeDirection != 0
             simh.restart = max(simh.restart, restart)
             if ModiaMath.isLogEvents(simh.logger)
+                crossingAsString = createCrossingAsString(sim, contactObj1, contactObj2)
                 println("        ", crossingAsString, " = ", crossing, negativeCrossingAsString(!simh.zPositive[nr]))
             end
             simh.newEventIteration = false
@@ -464,5 +519,6 @@ function negative!(sim::ModiaMath.SimulationState, nr::Int, crossing::Float64, c
     end
     simh.z[nr] = crossing + (simh.zPositive[nr] ? zEps : -zEps)
 
-    return (!simh.zPositive[nr], changeToNegative)
+    return (!simh.zPositive[nr], changeDirection)
 end
+=#

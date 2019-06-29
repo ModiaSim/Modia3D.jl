@@ -21,15 +21,15 @@ closeVisualization(renderer::Modia3D.AbstractRenderer)        = error("No render
 
 Generate a new ContactPairs structure used for communication between the Object3D handler and a ContactDetection handler.
 
-  nzmax::Int: Maximum number of zero-crossing functions that shall be used
-- collSuperObjs::Vector{Vector{Modia3D.AbstractObject3Ddata}}: Objects3D that can collide with each other.
+- `nzmax::Int: Maximum number of zero-crossing functions that shall be used
+- `collSuperObjs::Vector{Vector{Modia3D.AbstractObject3Ddata}}`: Objects3D that can collide with each other.
   collSuperObjs[i] is a vector of Objects3D that are rigidly fixed to each other.
   Note, for ever Object3D in this vector, the following holds:
   c1i = celement[i] -> canCollide(c1i[j]) = true; c1i[j].geo <: AbstractSolidGeometry
-- noCPairs::Vector{Vector{Int}}: Objects3D where contact detection shall be switched off.
+- `noCPairs::Vector{Vector{Int}}`: Objects3D where contact detection shall be switched off.
   If c2i = noCPairs[i] then c2i[j] > i, and collision detections between collSuperObjs[i][:] and
   collSuperObjs[c2i[j]][:] shall not take place.
-- DummyObject3D::Modia3D.AbstractObject3Ddata: A dummy Object3D that can be used in the struct as element of a vector of Object3Ds
+- `DummyObject3D::Modia3D.AbstractObject3Ddata`: A dummy Object3D that can be used in the struct as element of a vector of Object3Ds
   to fill the array with a dummy value of the correct type.
 """
 mutable struct ContactPairs
@@ -44,14 +44,16 @@ mutable struct ContactPairs
    nmax::Int                                       # all possible collision pairs
    ne::Int                                         # length(collSuperObjs)
    nz::Int                                         # length(z)
-   nzContact::Array{Int,1}                         # length(z | z has contact) length of z where zi has contact
+   nzContact::Int                                  # length(z | z has contact) length of z where zi has contact
    allPossibleContactPairsInz::Bool                # = true, if nz == number of all possible contact pairs
 
    # All vectors below have length nz and are computed by functions selectContactPairsWithEvent!(...), selectContactPairsNoEvent!(...)  and getDistances!(...)
    z::Vector{Float64}                              # Vector of zero crossing functions with hysteresis. z[i] < 0.0 if i-th contact pair has penetration
    zOrg::Vector{Float64}                           # Vector of original distances computed with mpr or others
    contact::Vector{Bool}
-   changeToNegative::Vector{Bool}
+   changeDirection::Vector{Int}     # +1: changing at an event from negative to positive
+                                    #  0: no change
+                                    # -1: changing at an event from positive to negative
    delta_dot_initial::Vector{Float64}
    colPairsMatProp::Vector{Union{Modia3D.AbstractContactMaterial,NOTHING}}
 
@@ -74,7 +76,7 @@ mutable struct ContactPairs
 
       # Determine the dimension of vector z (<= nzmax, but at most the number of all possible contact point combinations)
       ncounter = 0
-      nzContact = [1]
+      nzContact = 0
       collSuperObjs = Array{Array{Object3D,1},1}()
 
       for i_superObj = 1:length(superObjs)
@@ -106,7 +108,7 @@ mutable struct ContactPairs
       z = fill(42.0, nz)
       zOrg = fill(42.0, nz)
       contact = fill(false, nz)
-      changeToNegative = fill(false, nz)
+      changeDirection = fill(0, nz)
       delta_dot_initial = fill(-0.001, nz)
       colPairsMatProp = fill(nothing, nz)
       index = fill(nothing, nz)
@@ -145,7 +147,7 @@ mutable struct ContactPairs
       end
 
       new(collSuperObjs, noCPairs, AABB, dummyObject3D, nmax, length(collSuperObjs), nz, nzContact, allPossibleContactPairsInz,
-          z, zOrg, contact, changeToNegative, delta_dot_initial, colPairsMatProp, contactPoint1, contactPoint2, contactNormal, contactObj1, contactObj2, index)
+          z, zOrg, contact, changeDirection, delta_dot_initial, colPairsMatProp, contactPoint1, contactPoint2, contactNormal, contactObj1, contactObj2, index)
    end
 end
 

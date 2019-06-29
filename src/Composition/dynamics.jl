@@ -413,22 +413,20 @@ function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64
       end
 
       # Handle zero crossing event
-      for i=1:chpairs.nzContact[1]
+      for i=1:chpairs.nzContact
       # for i in eachindex(chpairs.z)
-         if chpairs.contact[i] # kann man eventuell rausgeben
+         #if chpairs.contact[i] # kann man eventuell rausgeben
             obj1  = chpairs.contactObj1[i]
             obj2  = chpairs.contactObj2[i]
             #simh = sim.eventHandler
             #println( "time = ", sim.time, ": ", ModiaMath.instanceName(obj1), " ", ModiaMath.instanceName(obj2),
-            #         " i = ", i, ", initial = ", simh.initial, ", event = ", simh.event, " change = ", chpairs.changeToNegative[i] )
+            #         " i = ", i, ", initial = ", simh.initial, ", event = ", simh.event, " change = ", chpairs.changeDirection[i] )
 
-            index = chpairs.index[i]
-            if chpairs.contactPoint1[i] != nothing && chpairs.contactPoint2[i] != nothing && chpairs.contactNormal[i] != nothing
+            #if chpairs.contactPoint1[i] != nothing && chpairs.contactPoint2[i] != nothing && chpairs.contactNormal[i] != nothing
                r1 = ModiaMath.Vector3D(chpairs.contactPoint1[i])
                r2 = ModiaMath.Vector3D(chpairs.contactPoint2[i])
                rContact = (r1 + r2)/2.0
-
-               if chpairs.changeToNegative[i]
+               if chpairs.changeDirection[i] == -1
                   delta_dot_init = computeDeltaDotInitial(obj1, obj2, rContact,
                                                       ModiaMath.Vector3D(chpairs.contactNormal[i]))
                   commonProp = Modia3D.getCommonCollisionProperties(obj1.data.contactMaterial,
@@ -455,8 +453,8 @@ function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64
                   println("obj1= \"", ModiaMath.instanceName(obj1), "\" obj2 = ", ModiaMath.instanceName(obj2), " f = ", obj1.dynamics.f, " t = ", obj1.dynamics.t, " rContact = ", rContact, " ctNormal[i] ", ModiaMath.Vector3D(chpairs.contactNormal[i]) ," time = ", time)
                end
 =#
-            end
-         end
+            #end
+         #end
       end
    end
 

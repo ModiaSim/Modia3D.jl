@@ -21,5 +21,8 @@ makedocs(
         "lib/ForceElements.md",
         "lib/Basics.md"
      ]
+     "Internal" => [
+        "internal/Crossing.md"
+     ]
   ]
 )
