@@ -22,7 +22,7 @@ makedocs(
         "lib/Basics.md"
      ],
      "Internal" => [
-        "internal/Crossing.md"
+        "internal/ContactDetection.md"
      ]
   ]
 )
