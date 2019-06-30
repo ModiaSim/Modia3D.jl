@@ -346,7 +346,7 @@ function storeDistancesForSolver!(world::Composition.Object3D, index::Integer, c
   if hasEvent
     contact         = distanceOrg < -zEps   # In order that touching objects will not be treated as contacting.
     previousContact = index in ch.indexHasContact
-    changeDirection = !previousContact and contact ? -1 : (previousContact and !contact ? +1 : 0)
+    changeDirection = !previousContact && contact ? -1 : (previousContact && !contact ? +1 : 0)
   elseif index in ch.indexHasContact   # no event, but index pair had contact since the last event
     contact = true
   end

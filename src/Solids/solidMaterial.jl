@@ -182,7 +182,7 @@ readSolidMaterialsDict() = Modia3D.readDictOfStructsFromJSON( joinpath(Modia3D.p
 
 
 """
-    const solidMaterialPalette2
+    const solidMaterialPalette3
 
 Dictionary of solid material data, see [`Modia3D.SolidMaterial3`](@ref)
 """

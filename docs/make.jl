@@ -20,7 +20,7 @@ makedocs(
         "lib/Solids.md",
         "lib/ForceElements.md",
         "lib/Basics.md"
-     ]
+     ],
      "Internal" => [
         "internal/Crossing.md"
      ]

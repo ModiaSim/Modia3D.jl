@@ -47,12 +47,7 @@ function Base.:isless(key1::KeyDict1, key2::KeyDict1)
     return false
 end
 
-function Base.:isequal(key1::KeyDict1, key2::KeyDict1)
-    if key1.index == key2.index
-        return true
-    end
-    return false
-end
+Base.:isequal(key1::KeyDict1, key2::KeyDict1) = key1.index == key2.index
 
 
 mutable struct ValuesDict <: Modia3D.AbstractValues
