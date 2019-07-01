@@ -1,7 +1,7 @@
 # Contact Detection
 
 
-## Distance
+## Distances
 
 In `scene.options.contactDetection`
 (file `Modia3D/src/contactDetection/ContactDectionMPR_handler.jl`)
@@ -14,7 +14,7 @@ The *distance* between two objects is defined by two variables:
 
 **distanceOrg**
 
-The original distance which is the distance between   
+The original distance which is the distance between
 two convex objects computed either by the improved MPR algorithm for
 the narrow phase, or the distance between Axis Aligned Bounding Boxes
 of two objects in the broad phase.
@@ -72,7 +72,7 @@ distanceWithHysteresis = distanceOrg     # if contact = true
 ```
 
 
-## ID and key of object pair
+## IDs and keys
 
 An *object pair* is identified by a *unique* `pairID::Int64`. A pairID
 is constructed by packing the object indices of the two objects into an `Int64` number.
@@ -115,7 +115,7 @@ and the derivative of the distance
 (= relative velocity projected on contact normal)
 when the last event occured.
 
-At every *event instant*, after dictionary `contactDict`
+At every *event instant*, after dictionary [contactDict}(@ref)
 was constructed, dictionary `lastContactDict` is
 emptied and then filled with the derivative of the distance
 and the material constants of the elements stored in
@@ -169,9 +169,9 @@ of the elements of this dictionary.
 
 
 
-### noContactDict
+### distanceDict
 
-This dictionary is defined as `noContactDict::SortedDict{PairKey,Float64}`.
+This dictionary is defined as `distanceDict::SortedDict{PairKey,Float64}`.
 
 A *key* of this dictionary is a `PairKey` of an object pair
 that has **`contact=false`**. The dictionary is sorted so that
@@ -181,49 +181,56 @@ A *value* is the `distanceWithHysteresis` of the object pair.
 
 At every *event instant* and
 whenever the *integrator requires zero crossing functions*,
-dictionary `noContactDict` is emptied and
+dictionary `distanceDict` is emptied and
 then filled with `pairKey` object pairs that have `contact=false`.
 This is performed in the following way:
 
 - Given a `pairID`, it is inquired whether the object pair is
   part of dictionary `contactDict`; if this is not the case,
   the `pairKey` is constructed and `pairKey => distanceWithHysteresis`
-  is inserted in `noContactDict`.
+  is inserted in `distanceDict`.
 
 - If `length(ContactDict) + length(NoContactDict) = nz_max`,
-  it is inquired whether the last element of `noContactDict` has a
+  it is inquired whether the last element of `distanceDict` has a
   `distanceWithHysteresis` that is larger as the
   `distanceWithHysteresis` of the object pair P that shall be
   inserted. If this is the case, the last element is deleted
-  and P is inserted in `noContactDict`.
+  and P is inserted in `distanceDict`.
   If this is not the case, P is ignored.
 
-At *any other model evaluation*, this dictionary is not changed.
-(because it is not used).
+At *any other model evaluation*, this dictionary is not changed,
+because it is not used.
 
 The zero crossing functions reported to the integrator are stored in
 vector `z::Vector{Float64}`. Hereby, the `nzContact+1..end` entries
-in `z` are the `noContactDict[pairKey] values.
+in `z` are the `distanceDict[pairKey] values.
 
 
-### visualizeDict
+### noContactDict
 
-This dictionary is defined as `visualizeDict::Dict{Int64,PairVisualization}`.
-It is only constructed if the collision situation
-for the object pairs shall be visualized
-(`visualizeContactPoints=true` and/or
-`visualizeSupportPoints=true` in `sceneOptions`).
+This dictionary is defined as `noContactDict::Dict{Int64,NoContactPair}`.
 
 A *key* of this dictionary is a `PairID` of an object pair.
 
 A *value* is an instance of the mutable struct
-[`Modia3D.Composition.PairVisualization`](@ref) which contains
-all information needed to visualize the collision situation of
-the object pairs.
+[`Modia3D.Composition.NoContactPair`](@ref) which contains
+the information about the closest distance points and the closes
+distance.
 
 At every *event instant* and whenever the
 *integrator requires zero crossing functions*,
 this dictionary is emptied and then newly filled, in synchronization
-to the dictionaries `contactDict`and `noContactDict`.
+to the dictionary `distanceDict`.
 At any other *model evaluation*, the keys of this dictionary
 are not changed and only the values are updated.
+
+Strictly speaking this dictionary is not absolutely necessary,
+because the values are not needed for a standard simulation.
+However, if additional functionality will be added later,
+such as storing the closest distances in the result data structure,
+or when printing a warning when there is the danger that two objects
+are too close together, then this data is needed at every model evaluation.
+
+Furthermore, when visualizing the contact situation, this data is also needed
+(but then this dictionary could be constructed, when the corresponding
+options are set, and not otherwise).

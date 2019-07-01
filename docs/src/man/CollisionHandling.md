@@ -208,7 +208,7 @@ Examples of this characteristics are shown in the next two figures:
 
 In the next figure the simulation of a bouncing ball is shown where the response
 calculation is performed (a) with an impulse and (b) with the compliant force law above.
-In both cases the regularized coefficient of restitution ``cof_{reg}`` is going to zero
+In both cases the regularized coefficient of restitution ``cor_{reg}`` is going to zero
 when ``|\dot{\delta}^-|`` becomes small. As can be seen, both formulations lead to
 similar responses:
 
