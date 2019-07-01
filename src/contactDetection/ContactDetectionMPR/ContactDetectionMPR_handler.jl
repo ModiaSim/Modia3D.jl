@@ -10,13 +10,70 @@ using DataStructures
 
 #const Dict1ValueType = Tuple{Union{SVector{3,Float64},NOTHING}, Union{SVector{3,Float64},NOTHING}, Union{SVector{3,Float64},NOTHING}, Union{Object3D,NOTHING}, Union{Object3D,NOTHING}, Union{Float64,NOTHING} }
 
-struct KeyDict1 <: Modia3D.AbstractKeys
-    contact::Bool
+const PairID = Int64
+
+struct PairKey <: Modia3D.AbstractKeys
     distanceWithHysteresis::Float64
-    index::Int64      # Coding of the two objects that are in contact to each other
+    pairID::PairID
 end
 
-struct ValueDict1
+
+"""
+    m = MaterialContactPair(m1::ElasticContactMaterial2,
+                            m2::ElasticContactMaterial2,
+                            delta_dot_initial::Float64)
+
+Generate a MaterialContactPair object (only temporary now)
+"""
+mutable struct MaterialContactPair
+    c_res::Float64
+    d_res::Float64
+    mu_k::Float64
+    mu_r::Float64
+    vsmall::Float64
+    wsmall::Float64
+
+    function MaterialContactPair(m1::ElasticContactMaterial2, m2::ElasticContactMaterial2, delta_dot_initial::Float64)
+        collMaterial = getCommonCollisionProperties(m1.name, m2.name)
+        c_res  = m1.c*m2.c/(m1.c + m2.c)
+        vsmall = (m1.v_small + m2.v_small)/2
+        wsmall = (m1.w_small + m2.w_small)/2
+        mu_k   = collMaterial.mu_k
+        mu_r   = collMaterial.mu_r
+        d_res  = Modia3D.resultantDampingCoefficient(collMaterial.cor, abs(delta_dot_initial), vsmall)
+
+        new(c_res, d_res, mu_k, mu_r, vsmall, wsmall)
+    end
+end
+
+
+"""
+    contactPair = ContactPair(...)
+
+Generate an new `ContactPair` object of two objects that are penetrating each other.
+"""
+mutable struct ContactPair
+    contactPoint1::SVector{3,Float64}
+    contactPoint2::SVector{3,Float64}
+    contactNormal::SVector{3,Float64}
+    actObj::Object3D
+    nextObj::Object3D
+    distanceOrg::Float64
+    distanceWithHysteresis::Float64
+    changeDirection::Int    # +1: changing at an event from negative to positive
+                            #  0: no change
+                            # -1: changing at an event from positive to negative
+    contactMaterial::MaterialContactPair
+end
+
+
+"""
+    noContactPair = NoContactPair(...)
+
+Generate an new `NoContactPair` object of two objects that are not penetrating each other
+(= `ContactPair` but without `contactMaterial`).
+"""
+mutable struct NoContactPair
     contactPoint1::SVector{3,Float64}
     contactPoint2::SVector{3,Float64}
     contactNormal::SVector{3,Float64}
@@ -30,32 +87,14 @@ struct ValueDict1
 end
 
 
-function Base.:isless(key1::KeyDict1, key2::KeyDict1)
-    if key1.contact > key2.contact
-        return true
-    elseif key1.contact < key2.contact
-        return false
-    end
-    if key1.distanceWithHysteresis < key2.distanceWithHysteresis
-        return true
 
-    elseif key1.distanceWithHysteresis == key2.distanceWithHysteresis
-        if key1.index < key2.index
-            return true
-        end
-    end
-    return false
-end
+Base.:isless(key1::KeyDict1, key2::KeyDict1) = key1.distanceWithHysteresis != key2.distanceWithHysteresis ?
+                                                  key1.distanceWithHysteresis < key2.distanceWithHysteresis :
+                                                  key1.pairID                 < key2.pairID
 
 Base.:isequal(key1::KeyDict1, key2::KeyDict1) = key1.index == key2.index
 
 
-mutable struct ValuesDict <: Modia3D.AbstractValues
-    i::Int
-    delta_dot_initial::Float64
-    commonCollisionProp::Union{Modia3D.AbstractContactMaterial,NOTHING}
-    ValuesDict(index::Int; delta_dot_initial::Float64=-0.001, commProp::Union{Modia3D.AbstractContactMaterial,NOTHING}=nothing) = new(index, delta_dot_initial,commProp)
-end
 
 """
     handler = ContactDetectionMPR_handler(;tol_rel = 1e-4, niter_max=100, neps=sqrt(eps()))
@@ -75,11 +114,11 @@ about the contact situation.
 mutable struct ContactDetectionMPR_handler <: Modia3D.AbstractContactDetection
   contactPairs::Composition.ContactPairs
   distanceComputed::Bool
-  dict1::SortedDict{KeyDict1,ValueDict1}
-  dict2::SortedDict{Int64,KeyDict1}
-  dictCommunicate::Dict{Int64,ValuesDict}
-  indexHasContact::Set{Int64}      # Set to have fast query whether index is in Set
-  dictCommunicateInitial::Bool
+
+  lastContactDict::Dict{PairID,MaterialContactPair}
+  contactDict::Dict{PairID,ContactPair}
+  distanceDict::SortedDict{PairKey,Float64}
+  noContactDict::Dict{PairKey,NoContactPair}
 
   tol_rel::Float64
   niter_max::Int
@@ -99,16 +138,14 @@ mutable struct ContactDetectionMPR_handler <: Modia3D.AbstractContactDetection
 
     handler = new()
 
-    handler.distanceComputed    = false
-    handler.dict1               = SortedDict{KeyDict1,ValueDict1}()
-    handler.dict2               = SortedDict{Int,KeyDict1}()
-    handler.dictCommunicate     = Dict{Int,ValuesDict}()
-    handler.indexHasContact     = Set{Int}()
-    handler.indexHasContactTemp = Set{Int}()
-    handler.tol_rel             = tol_rel
-    handler.niter_max           = niter_max
-    handler.neps                = neps
-    handler.dictCommunicateInitial = false
+    handler.distanceComputed = false
+    handler.lastContactDict  = Dict{PairID,MaterialContactPair}()
+    handler.contactDict      = Dict{PairID,ContactPair}()
+    handler.distanceDict     = SortedDict{PairKey,Float64}()
+    handler.noContactDict    = Dict{PairKey,NoContactPair}()
+    handler.tol_rel          = tol_rel
+    handler.niter_max        = niter_max
+    handler.neps             = neps
     return handler
   end
 end

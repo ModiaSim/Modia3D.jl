@@ -74,8 +74,8 @@ distanceWithHysteresis = distanceOrg     # if contact = true
 
 ## IDs and keys
 
-An *object pair* is identified by a *unique* `pairID::Int64`. A pairID
-is constructed by packing the object indices of the two objects into an `Int64` number.
+An *object pair* is identified by a *unique* `pairID::PairID`, where `const PairID = Int64`.
+A pairID is constructed by packing the object indices of the two objects into an `Int64` number.
 
 The object pairs with the *smallest distances* are stored in the sorted
 dictionary [noContactDict](@ref).
@@ -103,16 +103,15 @@ The following dictionaries are utilized in Modia3D.
 
 ### lastContactDict
 
-This dictionary is defined as `lastContactDict::Dict{Int64,MaterialContactPair}`
+This dictionary is defined as `lastContactDict::Dict{PairID,MaterialContactPair}`
 
 A *key* of this dictionary is a `PairID` of an object pair
 that had **`contact=true`** at the *last* event instant.
 
 A *value* is an instance of the mutable struct
 [`Modia3D.Composition.MaterialContactPair`](@ref) which contains
-the material constants of the two objects in contact
-and the derivative of the distance
-(= relative velocity projected on contact normal)
+the material constants needed for response calculation
+(e.g. computed from the derivative of the distance)
 when the last event occured.
 
 At every *event instant*, after dictionary [contactDict}(@ref)
@@ -123,15 +122,19 @@ dictionary `contactDict`.
 
 Before the next event, dictionary `lastContactDict` is not changed.
 
-This dictionary is used to copy the distance derivative and the
-material constants from object pairs that had been in contact at the last
-event, to dictionary `contactDict` at the current event,
-in case these object pairs are still in contact at the current event.
+This dictionary is used for the following purposes:
+
+- To detect at an event instant whether a contact occured newly,
+  or whether a previous contact continuous to remain in contact.
+
+- To copy the material constants from object pairs that had been
+  in contact at the last event, to dictionary `contactDict` at the current event,
+  in case these object pairs are still in contact at the current event.
 
 
 ### contactDict
 
-This dictionary is defined as `contactDict::Dict{Int64,ContactPair}`.
+This dictionary is defined as `contactDict::Dict{PairID,ContactPair}`.
 
 A *key* of this dictionary is a `PairID` of an object pair
 that has **`contact=true`**.
@@ -208,7 +211,7 @@ in `z` are the `distanceDict[pairKey] values.
 
 ### noContactDict
 
-This dictionary is defined as `noContactDict::Dict{Int64,NoContactPair}`.
+This dictionary is defined as `noContactDict::Dict{PairID,NoContactPair}`.
 
 A *key* of this dictionary is a `PairID` of an object pair.
 

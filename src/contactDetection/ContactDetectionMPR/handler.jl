@@ -286,15 +286,15 @@ function computeDistances(ch::Composition.ContactDetectionMPR_handler, world::Co
         actObj = actSuperObj[i]       # determine contact from this Object3D with all Object3Ds that have larger indices
         actAABB = actSuperAABB[i]
         for js = is+1:length(collSuperObjs)
-          if !(js in noCPairs[is])    # index is not in objects which cant collide
+          if !(js in noCPairs[is])    # pairID is not in objects which cant collide
             nextSuperObj = collSuperObjs[js]
             nextSuperAABB = AABB[js]
             for j = 1:length(nextSuperObj)
               n += 1
               nextObj = nextSuperObj[j]
               nextAABB = nextSuperAABB[j]
-              index = pack(is,i,js,j)
-              storeDistancesForSolver!(world, index, ch, actObj, nextObj, actAABB, nextAABB, phase2, hasEvent)
+              pairID = pack(is,i,js,j)
+              storeDistancesForSolver!(world, pairID, ch, actObj, nextObj, actAABB, nextAABB, phase2, hasEvent)
   end; end; end; end; end; end; end
 end
 
@@ -317,7 +317,7 @@ end
 const zEps  = 1.e-8
 const zEps2 = 2*zEps
 
-function storeDistancesForSolver!(world::Composition.Object3D, index::Integer, ch::Composition.ContactDetectionMPR_handler,
+function storeDistancesForSolver!(world::Composition.Object3D, pairID::PairID, ch::Composition.ContactDetectionMPR_handler,
                                   actObj::Composition.Object3D, nextObj::Composition.Object3D,
                                   actAABB::Basics.BoundingBox, nextAABB::Basics.BoundingBox, phase2::Bool, hasEvent::Bool)
   # Broad Phase
@@ -344,16 +344,20 @@ function storeDistancesForSolver!(world::Composition.Object3D, index::Integer, c
   changeDirection = 0
   contact         = false
   if hasEvent
+    # At an event
     contact         = distanceOrg < -zEps   # In order that touching objects will not be treated as contacting.
-    previousContact = index in ch.indexHasContact
+    previousContact = haskey(ch.lastContactDict)
     changeDirection = !previousContact && contact ? -1 : (previousContact && !contact ? +1 : 0)
-  elseif index in ch.indexHasContact   # no event, but index pair had contact since the last event
+  elseif haskey(contactDict)   # no event, but index pair had contact since the last event
     contact = true
   end
   distanceWithHysteresis = contact ? distanceOrg : distanceOrg + zEps2
-  key1 = Composition.KeyDict1(contact, distanceWithHysteresis, index)
+
+  # E
+  pairKey = Composition.PairKey(distanceWithHysteresis, pairID)
 
   # phase 1
+
   if length(ch.dict1) < ch.contactPairs.nz
     push!(ch.dict1, key1=>ValueDict1(contactPoint1,contactPoint2,contactNormal,actObj,nextObj,distanceOrg,distanceWithHysteresis,changeDirection))
   else
@@ -476,49 +480,3 @@ function createCrossingAsString(sim::ModiaMath.SimulationState, obj1::Compositio
   end
   return crossingAsString
 end
-
-#=
-negativeCrossingAsString(negative::Bool) = negative ? " (became < 0)" : " (became >= 0)"
-
-const zEps  = 1.e-8
-const zEps2 = 2*zEps
-
-function negative!(sim::ModiaMath.SimulationState, nr::Int, crossing::Float64,
-                   contactObj1::Composition.Object3D, contactObj2::Composition.Object3D;
-                   restart::ModiaMath.EventRestart=ModiaMath.Restart)
-                   #println("bin hier drinnen")
-    simh = sim.eventHandler
-
-    changeDirection::Int64 = 0     # +1: changing from negative to positive
-                                   #  0: no change
-                                   # -1: changing from positive to neagative
-    crossing = crossing + zEps     # In order that touching objects will not be treated as contacting.
-
-    if simh.initial     # ModiaMath.isInitial(sim)
-        # println("auch im initial")
-        simh.zPositive[nr] = crossing >= 0.0
-        if ModiaMath.isLogEvents(simh.logger)
-            crossingAsString = createCrossingAsString(sim, contactObj1, contactObj2)
-            println("        ", crossingAsString, " = ", crossing, negativeCrossingAsString(!simh.zPositive[nr]))
-        end
-        changeDirection = simh.zPositive[nr] ? +1 : -1
-
-    elseif simh.event   # ModiaMath.isEvent(sim)
-        # println("auch im event")
-        new_zPositive   = crossing >= 0.0
-        changeDirection = simh.zPositive[nr] && !new_zPositive ? -1 : ( !simh.zPositive[nr] && new_zPositive ? +1 : 0)
-        simh.zPositive[nr] = new_zPositive
-        if changeDirection != 0
-            simh.restart = max(simh.restart, restart)
-            if ModiaMath.isLogEvents(simh.logger)
-                crossingAsString = createCrossingAsString(sim, contactObj1, contactObj2)
-                println("        ", crossingAsString, " = ", crossing, negativeCrossingAsString(!simh.zPositive[nr]))
-            end
-            simh.newEventIteration = false
-        end
-    end
-    simh.z[nr] = crossing + (simh.zPositive[nr] ? zEps : -zEps)
-
-    return (!simh.zPositive[nr], changeDirection)
-end
-=#
