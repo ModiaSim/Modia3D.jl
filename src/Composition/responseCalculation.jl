@@ -176,7 +176,7 @@ compTau(fn, mu_r_res, w_rel, w_small, r::Float64) = -r*mu_r_res*fn*w_rel/Modia3D
 
 
 function computeDeltaDotInitial(obj1::Object3D, obj2::Object3D,
-                             rContact::ModiaMath.Vector3D, e_n::ModiaMath.Vector3D)
+                                rContact::ModiaMath.Vector3D, e_n::ModiaMath.Vector3D)
   r_rel1 = rContact - obj1.r_abs
   r_rel2 = rContact - obj2.r_abs
   dynamics1 = obj1.dynamics
@@ -193,38 +193,29 @@ end
 
 
 # response calculation with new contact force law
-function responseCalculation(chpairs::ContactPairs,
-                             cM1::Solids.ElasticContactMaterial2,
-                             cM2::Solids.ElasticContactMaterial2,
-                             obj1::Object3D,
-                             obj2::Object3D,
-                             s::Float64,
+function responseCalculation(pair::CollisionPair,
                              rContact::ModiaMath.Vector3D,
-                             e_n::ModiaMath.Vector3D,
-                             delta_dot_initial::Union{Float64, NOTHING},
-                             collMaterial::Union{Modia3D.AbstractContactMaterial, NOTHING},
                              time,
                              file)::Tuple{ModiaMath.Vector3D,ModiaMath.Vector3D,ModiaMath.Vector3D,ModiaMath.Vector3D}
-  if typeof(delta_dot_initial) == NOTHING
-    error("delta_dot_initial not defined")
-  end
-  if typeof(collMaterial) == NOTHING
-    error(ModiaMath.instanceName(obj1), " ", ModiaMath.instanceName(obj2), ":  common collision material for ", cM1.name ," and ", cM2.name, " is not defined!")
-  end
+
   # v_small  ... small velocity used for regularization
   # w_small  ... small angular velocity used for regularization
   # d_res    ... resulting damping material constant in normal direction d_res = (cM1.d + cM2.d)/2
   # c_res    ... elastic material constant in normal direction
   # mu_k_res ... sliding friction coefficient in tangential direction
   # mu_r_res ... rotational friction torque coefficient
-  v_small = (cM1.v_small + cM2.v_small)/2
-  w_small = (cM1.w_small + cM2.w_small)/2
-  d_res = Modia3D.resultantDampingCoefficient(collMaterial.cor, abs(delta_dot_initial), v_small)
-  c_res    = cM1.c*cM2.c/(cM1.c + cM2.c)
-  mu_k = collMaterial.mu_k
-  mu_r = collMaterial.mu_r
+  material = pair.contactPairMaterial
+  v_small  = material.v_small
+  w_small  = material.w_small
+  d_res    = material.d_res
+  c_res    = material.c_res
+  mu_k     = material.mu_k
+  mu_r     = material.mu_r
 
-
+  obj1 = pair.obj1
+  obj2 = pair.obj2
+  s    = pair.distanceWithHysteresis
+  e_n  = pair.contactNormal
 
   ### signed velocity and relative velocity ####
   # Contact points and distances to local part frame (in world frame)

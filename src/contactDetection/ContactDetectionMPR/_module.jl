@@ -32,4 +32,6 @@ include("utilities.jl")
 include("mpr.jl")
 include("handler.jl")
 
+export ElasticContactPairMaterial2
+
 end

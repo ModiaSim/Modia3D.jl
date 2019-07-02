@@ -13,7 +13,7 @@ Andrea Neumayr and Martin Otter, [DLR - Institute of System Dynamics and Control
 """
 module Basics
 
-export emptyArray, trailingPartOfName
+export trailingPartOfName
 
 export neps, sign_eps, radToDeg, degToRad
 export getAndCheckFullLibraryPath, getEnvironmentVariable

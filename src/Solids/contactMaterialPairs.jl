@@ -58,5 +58,35 @@ function getCommonCollisionProperties(mat1::ElasticContactMaterial2, mat2::Elast
     return nothing
 end
 
-getCommonCollisionProperties(name1::AbstractString, name2::AbstractString) = 
+getCommonCollisionProperties(name1::AbstractString, name2::AbstractString) =
                      solidMaterialPairsPalette[KeyCollisionMaterialPairs(name1,name2)]
+
+
+
+"""
+    m = ElasticContactPairMaterial2(m1::ElasticContactMaterial2,
+                                    m2::ElasticContactMaterial2,
+                                    delta_dot_initial::Float64)
+
+Generate an `ElasticContactPairMaterial2 < AbstractContactPairMaterial` object.
+"""
+mutable struct ElasticContactPairMaterial2 <: Modia3D.AbstractContactPairMaterial
+    c_res::Float64
+    d_res::Float64
+    mu_k::Float64
+    mu_r::Float64
+    vsmall::Float64
+    wsmall::Float64
+
+    function ElasticContactPairMaterial2(m1::ElasticContactMaterial2, m2::ElasticContactMaterial2, delta_dot_initial::Float64)
+        collMaterial = getCommonCollisionProperties(m1.name, m2.name)
+        c_res  = m1.c*m2.c/(m1.c + m2.c)
+        vsmall = (m1.v_small + m2.v_small)/2
+        wsmall = (m1.w_small + m2.w_small)/2
+        mu_k   = collMaterial.mu_k
+        mu_r   = collMaterial.mu_r
+        d_res  = Modia3D.resultantDampingCoefficient(collMaterial.cor, abs(delta_dot_initial), vsmall)
+
+        new(c_res, d_res, mu_k, mu_r, vsmall, wsmall)
+    end
+end

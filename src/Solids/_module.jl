@@ -61,7 +61,7 @@ export SolidMaterial3, solidMaterialPalette3
 
 export ElasticContactMaterial, ElasticContactMaterialFromMaterialData, ElasticContactMaterialFromMaterialName
 export ElasticContactMaterial2   # just temporarily
-
+export ElasticContactPairMaterial2
 
 using StaticArrays
 import JSON

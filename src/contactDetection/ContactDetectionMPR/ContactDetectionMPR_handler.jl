@@ -5,94 +5,67 @@
 # It is included in file Modia3D/Composition/sceneProperties.jl
 # in order to be used as default for contact detection in SceneProperties(..)
 #
+export CollisionPair
 
 using DataStructures
 
 #const Dict1ValueType = Tuple{Union{SVector{3,Float64},NOTHING}, Union{SVector{3,Float64},NOTHING}, Union{SVector{3,Float64},NOTHING}, Union{Object3D,NOTHING}, Union{Object3D,NOTHING}, Union{Float64,NOTHING} }
 
-const PairID = Int64
+const PairKey = Int64
 
-struct PairKey <: Modia3D.AbstractKeys
+
+"""
+    key = DistanceKey(contact, distanceWithHysteresis, pairKey)
+
+Generate a new distance key.
+"""
+struct DistanceKey
+    contact::Bool
     distanceWithHysteresis::Float64
-    pairID::PairID
+    pairKey::PairKey
 end
 
 
 """
-    m = MaterialContactPair(m1::ElasticContactMaterial2,
-                            m2::ElasticContactMaterial2,
-                            delta_dot_initial::Float64)
+    pair = CollisionPair(contactPoint1,contactPoint2,contactNormal,obj1,obj2,
+                         distanceWithHysteresis)
 
-Generate a MaterialContactPair object (only temporary now)
+Generate a new `CollisionPair` object of two objects providing information about the
+collision situation.
 """
-mutable struct MaterialContactPair
-    c_res::Float64
-    d_res::Float64
-    mu_k::Float64
-    mu_r::Float64
-    vsmall::Float64
-    wsmall::Float64
-
-    function MaterialContactPair(m1::ElasticContactMaterial2, m2::ElasticContactMaterial2, delta_dot_initial::Float64)
-        collMaterial = getCommonCollisionProperties(m1.name, m2.name)
-        c_res  = m1.c*m2.c/(m1.c + m2.c)
-        vsmall = (m1.v_small + m2.v_small)/2
-        wsmall = (m1.w_small + m2.w_small)/2
-        mu_k   = collMaterial.mu_k
-        mu_r   = collMaterial.mu_r
-        d_res  = Modia3D.resultantDampingCoefficient(collMaterial.cor, abs(delta_dot_initial), vsmall)
-
-        new(c_res, d_res, mu_k, mu_r, vsmall, wsmall)
-    end
-end
-
-
-"""
-    contactPair = ContactPair(...)
-
-Generate an new `ContactPair` object of two objects that are penetrating each other.
-"""
-mutable struct ContactPair
+mutable struct CollisionPair
     contactPoint1::SVector{3,Float64}
     contactPoint2::SVector{3,Float64}
     contactNormal::SVector{3,Float64}
-    actObj::Object3D
-    nextObj::Object3D
-    distanceOrg::Float64
+    obj1::Object3D
+    obj2::Object3D
     distanceWithHysteresis::Float64
-    changeDirection::Int    # +1: changing at an event from negative to positive
-                            #  0: no change
-                            # -1: changing at an event from positive to negative
-    contactMaterial::MaterialContactPair
+
+    contactPairMaterial::Modia3D.AbstractContactPairMaterial  # only if contact = true, otherwise not defined
+
+    CollisionPair(contactPoint1, contactPoint2, contactNormal, obj1, obj2, distanceWithHysteresis) =
+        new(contactPoint1, contactPoint2, contactNormal, obj1, obj2, distanceWithHysteresi)
+end
+
+function updateCollisionPair!(pair::CollisionPair, contactPoint1, contactPoint2, contactNormal, obj1, obj2, distanceWithHysteresis)::Nothing
+    pair.contactPoint1 = contactPoint1
+    pair.contactPoint2 = contactPoint2
+    pair.contactNormal = contactNormal
+    pair.obj1          = obj1
+    pair.obj2          = obj2
+    pair.distanceWithHysteresis = distanceWithHysteresis
+    return nothing
 end
 
 
-"""
-    noContactPair = NoContactPair(...)
+Base.:isless(key1::DistanceKey, key2::DistanceKey) =   key1.contact &&  key2.contact ? key1.pairKey < key2.pairKey :
+                                                     ( key1.contact && !key2.contact ? true                        :
+                                                     (!key1.contact &&  key2.contact ? false                       :
+                                                     ( key1.distanceWithHysteresis != key2.distanceWithHysteresis   ?
+                                                       key1.distanceWithHysteresis < key2.distanceWithHysteresis    :
+                                                       key1.pairKey                < key2.pairKey)))
 
-Generate an new `NoContactPair` object of two objects that are not penetrating each other
-(= `ContactPair` but without `contactMaterial`).
-"""
-mutable struct NoContactPair
-    contactPoint1::SVector{3,Float64}
-    contactPoint2::SVector{3,Float64}
-    contactNormal::SVector{3,Float64}
-    actObj::Object3D
-    nextObj::Object3D
-    distanceOrg::Float64
-    distanceWithHysteresis::Float64
-    changeDirection::Int    # +1: changing at an event from negative to positive
-                            #  0: no change
-                            # -1: changing at an event from positive to negative
-end
-
-
-
-Base.:isless(key1::KeyDict1, key2::KeyDict1) = key1.distanceWithHysteresis != key2.distanceWithHysteresis ?
-                                                  key1.distanceWithHysteresis < key2.distanceWithHysteresis :
-                                                  key1.pairID                 < key2.pairID
-
-Base.:isequal(key1::KeyDict1, key2::KeyDict1) = key1.index == key2.index
+Base.:isequal(key1::DistanceKey, key2::DistanceKey) = key1.pairKey == key2.pairKey
 
 
 
@@ -100,7 +73,7 @@ Base.:isequal(key1::KeyDict1, key2::KeyDict1) = key1.index == key2.index
     handler = ContactDetectionMPR_handler(;tol_rel = 1e-4, niter_max=100, neps=sqrt(eps()))
 
 Generate a new contact handler for usage of the MPR algorithm in module
-[`Modia3D.ContactDectionMPR`](@ref). The handler instance contains all information
+[`Modia3D.ContactDetectionMPR`](@ref). The handler instance contains all information
 about the contact situation.
 
 # Arguments
@@ -115,10 +88,10 @@ mutable struct ContactDetectionMPR_handler <: Modia3D.AbstractContactDetection
   contactPairs::Composition.ContactPairs
   distanceComputed::Bool
 
-  lastContactDict::Dict{PairID,MaterialContactPair}
-  contactDict::Dict{PairID,ContactPair}
-  distanceDict::SortedDict{PairKey,Float64}
-  noContactDict::Dict{PairKey,NoContactPair}
+  lastContactDict::Dict{PairKey,CollisionPair}
+  contactDict::Dict{PairKey,CollisionPair}
+  noContactDict::Dict{PairKey,CollisionPair}
+  distanceDict::SortedDict{DistanceKey,Float64}
 
   tol_rel::Float64
   niter_max::Int
@@ -139,10 +112,11 @@ mutable struct ContactDetectionMPR_handler <: Modia3D.AbstractContactDetection
     handler = new()
 
     handler.distanceComputed = false
-    handler.lastContactDict  = Dict{PairID,MaterialContactPair}()
-    handler.contactDict      = Dict{PairID,ContactPair}()
-    handler.distanceDict     = SortedDict{PairKey,Float64}()
-    handler.noContactDict    = Dict{PairKey,NoContactPair}()
+    handler.lastContactDict  = Dict{PairKey,CollisionPair}()
+    handler.contactDict      = Dict{PairKey,CollisionPair}()
+    handler.noContactDict    = Dict{PairKey,CollisionPair}()
+    handler.distanceDict     = SortedDict{DistanceKey,Float64}()
+
     handler.tol_rel          = tol_rel
     handler.niter_max        = niter_max
     handler.neps             = neps

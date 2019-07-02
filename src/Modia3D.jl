@@ -37,7 +37,7 @@ abstract type AbstractDLR_VisualizationRenderer <: AbstractRenderer end   # Comm
 abstract type AbstractMassProperties    end
 
 abstract type AbstractKeys    end
-abstract type AbstractValues    end
+abstract type AbstractContactPairMaterial end # Constants needed to compute the contact response between two objects
 
 import ModiaMath
 abstract type AbstractAssemblyInternal  <: ModiaMath.AbstractComponentInternal end

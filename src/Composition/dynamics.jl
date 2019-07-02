@@ -413,48 +413,49 @@ function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64
       end
 
       # Handle zero crossing event
-      for i=1:chpairs.nzContact
-      # for i in eachindex(chpairs.z)
-         #if chpairs.contact[i] # kann man eventuell rausgeben
-            obj1  = chpairs.contactObj1[i]
-            obj2  = chpairs.contactObj2[i]
-            #simh = sim.eventHandler
-            #println( "time = ", sim.time, ": ", ModiaMath.instanceName(obj1), " ", ModiaMath.instanceName(obj2),
-            #         " i = ", i, ", initial = ", simh.initial, ", event = ", simh.event, " change = ", chpairs.changeDirection[i] )
+      for (pairKey, pair) in ch.contactDict
+        #simh = sim.eventHandler
+        #println( "time = ", sim.time, ": ", ModiaMath.instanceName(obj1), " ", ModiaMath.instanceName(obj2),
+        #         " i = ", i, ", initial = ", simh.initial, ", event = ", simh.event, " change = ", chpairs.changeDirection[i] )
 
-            #if chpairs.contactPoint1[i] != nothing && chpairs.contactPoint2[i] != nothing && chpairs.contactNormal[i] != nothing
-               r1 = ModiaMath.Vector3D(chpairs.contactPoint1[i])
-               r2 = ModiaMath.Vector3D(chpairs.contactPoint2[i])
-               rContact = (r1 + r2)/2.0
-               if chpairs.changeDirection[i] == -1
-                  delta_dot_init = computeDeltaDotInitial(obj1, obj2, rContact,
-                                                      ModiaMath.Vector3D(chpairs.contactNormal[i]))
-                  commonProp = Modia3D.getCommonCollisionProperties(obj1.data.contactMaterial,
-                                                                    obj2.data.contactMaterial)
-                  chpairs.delta_dot_initial[i] = delta_dot_init
-                  chpairs.colPairsMatProp[i] = commonProp
-                  ch.dictCommunicate[index] = Composition.ValuesDict(i, delta_dot_initial = delta_dot_init,
-                                                                     commProp = commonProp)
-               end
-               # println("length(ch.dictCommunicate) ", length(ch.dictCommunicate) )
-               (f1,f2,t1,t2) = responseCalculation(chpairs, obj1.data.contactMaterial,
-                                                   obj2.data.contactMaterial,
-                                                   obj1, obj2, chpairs.zOrg[i], rContact,
-                                                   ModiaMath.Vector3D(chpairs.contactNormal[i]), chpairs.delta_dot_initial[i], chpairs.colPairsMatProp[i], time, file)
+        rContact = (pair.contactPoint1 + pair.contactPoint2)/2.0
+        if ModiaMath.isEvent(sim)
+            # Include contact pair material into collision pair
+            if haskey(lastContactDict, pairKey)
+                # use material (reference) from previous event
+                pair.contactPairMaterial = lastContactDict[pairKey].contactPairMaterial    # improve later (should avoid to inquire pairKey twice)
+            else
+                # determine contact pair material
+                obj1 = pair.obj1
+                obj2 = pair.obj2
+                delta_dot_init = computeDeltaDotInitial(obj1, obj2, rContact, pair.contactNormal)
+                println("... type ... ", typeof(obj1.data.contactMaterial))
+                pair.contactPairMaterial = Modia3D.ElasticContactPairMaterial2(obj1.data.contactMaterial, obj2.data.contactMaterial, delta_dot_init)
+            end
+        end
 
-               # Transform forces/torques in local part frames
-               obj1.dynamics.f += obj1.R_abs*f1
-               obj1.dynamics.t += obj1.R_abs*t1
-               obj2.dynamics.f += obj2.R_abs*f2
-               obj2.dynamics.t += obj2.R_abs*t2
+        # println("length(ch.dictCommunicate) ", length(ch.dictCommunicate) )
+        (f1,f2,t1,t2) = responseCalculation(pair, rContact, time, file)
+
+        # Transform forces/torques in local part frames
+        obj1.dynamics.f += obj1.R_abs*f1
+        obj1.dynamics.t += obj1.R_abs*t1
+        obj2.dynamics.f += obj2.R_abs*f2
+        obj2.dynamics.t += obj2.R_abs*t2
 
 #=
                if time > 0.785 && time < 0.787  && String(ModiaMath.instanceName(obj1)) != "table.box1"
                   println("obj1= \"", ModiaMath.instanceName(obj1), "\" obj2 = ", ModiaMath.instanceName(obj2), " f = ", obj1.dynamics.f, " t = ", obj1.dynamics.t, " rContact = ", rContact, " ctNormal[i] ", ModiaMath.Vector3D(chpairs.contactNormal[i]) ," time = ", time)
                end
 =#
-            #end
-         #end
+      end
+
+      if ModiaMath.isEvent(sim)
+            # Save contactDict in lastContactDict
+            empty!(lastContactDict)
+            for (pairKey, pair) in ch.contactDict
+                push!(lastContactDict, pairKey => pair)
+            end
       end
    end
 

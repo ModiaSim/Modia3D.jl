@@ -47,25 +47,6 @@ mutable struct ContactPairs
    nzContact::Int                                  # length(z | z has contact) length of z where zi has contact
    allPossibleContactPairsInz::Bool                # = true, if nz == number of all possible contact pairs
 
-   # All vectors below have length nz and are computed by functions selectContactPairsWithEvent!(...), selectContactPairsNoEvent!(...)  and getDistances!(...)
-   z::Vector{Float64}                              # Vector of zero crossing functions with hysteresis. z[i] < 0.0 if i-th contact pair has penetration
-   zOrg::Vector{Float64}                           # Vector of original distances computed with mpr or others
-   contact::Vector{Bool}
-   changeDirection::Vector{Int}     # +1: changing at an event from negative to positive
-                                    #  0: no change
-                                    # -1: changing at an event from positive to negative
-   delta_dot_initial::Vector{Float64}
-   colPairsMatProp::Vector{Union{Modia3D.AbstractContactMaterial,NOTHING}}
-
-
-   contactPoint1::Vector{Union{SVector{3,Float64},NOTHING}}       # Absolute position vector to first contact point on contactObj1
-   contactPoint2::Vector{Union{SVector{3,Float64},NOTHING}}       # Absolute position vector to second contact point on contactObj2
-   contactNormal::Vector{Union{SVector{3,Float64},NOTHING}}       # Unit normal to surface on contactPoint1 (in world frame)
-
-   contactObj1::Vector{Union{Object3D,NOTHING}}
-   contactObj2::Vector{Union{Object3D,NOTHING}}
-   index::Vector{Union{Int64,NOTHING}}
-
 
    function ContactPairs(world::Composition.Object3D, superObjs::Array{SuperObjsRow,1},
                          noCPairs::Array{Array{Int64,1}}, AABB::Array{Array{Basics.BoundingBox}}, nz_max::Int, visualizeContactPoints::Bool, visualizeSupportPoints::Bool, defaultContactSphereDiameter::Float64)
@@ -87,12 +68,7 @@ mutable struct ContactPairs
              for i_obj = 1:length(superObj)
                 for i_nextObj =1:length(superObjs[i_next_superObj].superObjCollision.superObj)
                    ncounter += 1
-                   #=
-                   if nz > nz_max
-                     break
-      end;
-      =#
-     end; end; end; end; end
+      end; end; end; end; end
       nmax = ncounter
       #println("nz = ", nz)
       if ncounter <= nz_max
@@ -105,20 +81,6 @@ mutable struct ContactPairs
 
       #println("nachher nz = ", nz)
       # Allocate storage
-      z = fill(42.0, nz)
-      zOrg = fill(42.0, nz)
-      contact = fill(false, nz)
-      changeDirection = fill(0, nz)
-      delta_dot_initial = fill(-0.001, nz)
-      colPairsMatProp = fill(nothing, nz)
-      index = fill(nothing, nz)
-      defaultPoint   = SVector{3,Float64}(0.0,0.0,0.0)
-      contactPoint1  = [defaultPoint for i = 1:nz]
-      contactPoint2  = [defaultPoint for i = 1:nz]
-      contactNormal  = [defaultPoint for i = 1:nz]
-      contactObj1    = Vector{Union{Object3D,NOTHING}}(nothing,nz)
-      contactObj2    = Vector{Union{Object3D,NOTHING}}(nothing,nz)
-
       if nz > 0
          world.contactVisuObj1 = Vector{Object3D}[]
          world.contactVisuObj2 = Vector{Object3D}[]
@@ -146,8 +108,7 @@ mutable struct ContactPairs
          end
       end
 
-      new(collSuperObjs, noCPairs, AABB, dummyObject3D, nmax, length(collSuperObjs), nz, nzContact, allPossibleContactPairsInz,
-          z, zOrg, contact, changeDirection, delta_dot_initial, colPairsMatProp, contactPoint1, contactPoint2, contactNormal, contactObj1, contactObj2, index)
+      new(collSuperObjs, noCPairs, AABB, dummyObject3D, nmax, length(collSuperObjs), nz, nzContact, allPossibleContactPairsInz)
    end
 end
 

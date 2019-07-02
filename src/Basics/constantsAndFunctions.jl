@@ -104,11 +104,3 @@ function listKeys(dict)
         end
     end
 end
-
-
-# should be removed: always use empty!(array)
-function emptyArray!(array)
-  if !isempty(array)
-    empty!(array)
-  end
-end
