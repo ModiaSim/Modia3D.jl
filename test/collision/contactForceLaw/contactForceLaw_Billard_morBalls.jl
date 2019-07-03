@@ -43,33 +43,37 @@ end
 end
 
 distance_balls = sqrt(3)/2*diameter
+
+dist = 0.0001
+
 @assembly Billard1() begin
   world = Modia3D.Object3D(visualizeFrame=false)
   table = Table(world)
   cushion = Cushion(world)
-  ballStart = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidSphere(diameter), "BilliardBall", vmatBalls ; contactMaterial = cmatBall), fixed = false, r=[-0.8, 0.0, diameter/2], v_start=[3.0, 0.0, 0.0])
+  ballStart = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidSphere(diameter), "BilliardBall", vmatBalls ; contactMaterial = cmatBall), fixed = false, r=[-0.8, 0.01, diameter/2], v_start=[6.0, 0.1, 0.0])
 
   ball1 = BillardBall(world, TableX/6, 0.0)
 
-  ball2  = BillardBall(world, TableX/6 + 1*distance_balls,  diameter/2)
-  ball3  = BillardBall(world, TableX/6 + 1*distance_balls, -diameter/2)
+  ball2  = BillardBall(world, TableX/6 + 1*distance_balls + dist,  1/2*(diameter+dist))
+  ball3  = BillardBall(world, TableX/6 + 1*distance_balls + dist, -1/2*(diameter+dist))
 
-#=
-  ball4  = BillardBall(world, TableX/6 + 2*distance_balls,  diameter)
-  ball5  = BillardBall(world, TableX/6 + 2*distance_balls,  0.0)
-  ball6  = BillardBall(world, TableX/6 + 2*distance_balls, -diameter)
 
-  ball7  = BillardBall(world, TableX/6 + 3*distance_balls,  3*diameter/2)
-  ball8  = BillardBall(world, TableX/6 + 3*distance_balls,  diameter/2)
-  ball9  = BillardBall(world, TableX/6 + 3*distance_balls, -diameter/2)
-  ball10 = BillardBall(world, TableX/6 + 3*distance_balls, -3*diameter/2)
+  ball4  = BillardBall(world, TableX/6 + 2*(distance_balls+dist),  (diameter+dist))
+  ball5  = BillardBall(world, TableX/6 + 2*(distance_balls+dist),  0.0)
+  ball6  = BillardBall(world, TableX/6 + 2*(distance_balls+dist), -(diameter+dist))
 
-  ball11 = BillardBall(world, TableX/6 + 4*distance_balls,  2*diameter)
-  ball12 = BillardBall(world, TableX/6 + 4*distance_balls,  diameter)
-  ball13 = BillardBall(world, TableX/6 + 4*distance_balls,  0.0)
-  ball14 = BillardBall(world, TableX/6 + 4*distance_balls, -diameter)
-  ball15 = BillardBall(world, TableX/6 + 4*distance_balls, -2*diameter)
-  =#
+
+  ball7  = BillardBall(world, TableX/6 + 3*(distance_balls+dist),  3/2*(diameter+dist))
+  ball8  = BillardBall(world, TableX/6 + 3*(distance_balls+dist),  1/2*(diameter+dist))
+  ball9  = BillardBall(world, TableX/6 + 3*(distance_balls+dist), -1/2*(diameter+dist))
+  ball10 = BillardBall(world, TableX/6 + 3*(distance_balls+dist), -3/2*(diameter+dist))
+
+  ball11 = BillardBall(world, TableX/6 + 4*(distance_balls+dist),  2*(diameter+dist))
+  ball12 = BillardBall(world, TableX/6 + 4*(distance_balls+dist),  (diameter+dist))
+  ball13 = BillardBall(world, TableX/6 + 4*(distance_balls+dist),  0.0)
+  ball14 = BillardBall(world, TableX/6 + 4*(distance_balls+dist), -(diameter+dist))
+  ball15 = BillardBall(world, TableX/6 + 4*(distance_balls+dist), -2*(diameter+dist))
+
 end
 
 
@@ -81,7 +85,7 @@ bill = Billard1(sceneOptions=Modia3D.SceneOptions(gravityField=gravField,visuali
 
 model = Modia3D.SimulationModel( bill )
 # ModiaMath.print_ModelVariables(model)
-result = ModiaMath.simulate!(model; stopTime=4.0, tolerance=1e-8,interval=0.001, log=false)
+result = ModiaMath.simulate!(model; stopTime=5.0, tolerance=1e-8,interval=0.001, log=false)
 
 ModiaMath.plot(result, [("ball1.r[1]"),
                         ("ball1.r[2]"),

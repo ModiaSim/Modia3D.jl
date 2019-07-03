@@ -40,8 +40,8 @@ distance_balls = sqrt(3)/2*diameter
   cushion   = Cushion(world)
   ballStart = Modia3D.Object3D(world, billiardBall, fixed=false, r=[-0.8, 0.0, diameter/2], v_start=[3.0, 0.0, 0.0])
   ball1     = Modia3D.Object3D(world, billiardBall, fixed=false, r=[TableX/6, 0.0, diameter/2])
-  ball2     = Modia3D.Object3D(world, billiardBall, fixed=false, r=[TableX/6 + 1*distance_balls,  diameter/2+0.001, diameter/2])
-  ball3     = Modia3D.Object3D(world, billiardBall, fixed=false, r=[TableX/6 + 1*distance_balls, -diameter/2-0.001, diameter/2])
+  ball2     = Modia3D.Object3D(world, billiardBall, fixed=false, r=[TableX/6 + 1*distance_balls,  diameter/2+0.0, diameter/2])
+  ball3     = Modia3D.Object3D(world, billiardBall, fixed=false, r=[TableX/6 + 1*distance_balls, -diameter/2-0.0, diameter/2])
 
 
 #=
