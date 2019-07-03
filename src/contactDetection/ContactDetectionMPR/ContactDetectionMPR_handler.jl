@@ -5,35 +5,36 @@
 # It is included in file Modia3D/Composition/sceneProperties.jl
 # in order to be used as default for contact detection in SceneProperties(..)
 #
-export CollisionPair
+export ContactPair
+export NoContactPair
+export updateContactPair!
+export updateNoContactPair!
 
 using DataStructures
 
 #const Dict1ValueType = Tuple{Union{SVector{3,Float64},NOTHING}, Union{SVector{3,Float64},NOTHING}, Union{SVector{3,Float64},NOTHING}, Union{Object3D,NOTHING}, Union{Object3D,NOTHING}, Union{Float64,NOTHING} }
 
-const PairKey = Int64
-
+const PairID = Int64
 
 """
-    key = DistanceKey(contact, distanceWithHysteresis, pairKey)
+    key = DistanceKey(contact, distanceWithHysteresis, pairID)
 
 Generate a new distance key.
 """
 struct DistanceKey
     contact::Bool
     distanceWithHysteresis::Float64
-    pairKey::PairKey
+    pairID::PairID
 end
 
 
 """
-    pair = CollisionPair(contactPoint1,contactPoint2,contactNormal,obj1,obj2,
-                         distanceWithHysteresis)
+    pair = ContactPair(contactPoint1,contactPoint2,contactNormal,obj1,obj2,
+                       distanceWithHysteresis)
 
-Generate a new `CollisionPair` object of two objects providing information about the
-collision situation.
+Generate a new `ContactPair` object of two objects that have contact=true.
 """
-mutable struct CollisionPair
+mutable struct ContactPair
     contactPoint1::SVector{3,Float64}
     contactPoint2::SVector{3,Float64}
     contactNormal::SVector{3,Float64}
@@ -43,11 +44,36 @@ mutable struct CollisionPair
 
     contactPairMaterial::Modia3D.AbstractContactPairMaterial  # only if contact = true, otherwise not defined
 
-    CollisionPair(contactPoint1, contactPoint2, contactNormal, obj1, obj2, distanceWithHysteresis) =
-        new(contactPoint1, contactPoint2, contactNormal, obj1, obj2, distanceWithHysteresi)
+    ContactPair(contactPoint1::SVector{3,Float64}, contactPoint2::SVector{3,Float64}, contactNormal::SVector{3,Float64},
+                obj1::Object3D, obj2::Object3D, distanceWithHysteresis::Float64) =
+        new(contactPoint1, contactPoint2, contactNormal, obj1, obj2, distanceWithHysteresis)
 end
 
-function updateCollisionPair!(pair::CollisionPair, contactPoint1, contactPoint2, contactNormal, obj1, obj2, distanceWithHysteresis)::Nothing
+
+"""
+    pair = NoContactPair(contactPoint1,contactPoint2,contactNormal,obj1,obj2,
+                         distanceWithHysteresis)
+
+Generate a new `NoContactPair` object of two objects that have contact=false.
+"""
+mutable struct NoContactPair
+    contactPoint1::Union{SVector{3,Float64},Nothing}
+    contactPoint2::Union{SVector{3,Float64},Nothing}
+    contactNormal::Union{SVector{3,Float64},Nothing}
+    obj1::Object3D
+    obj2::Object3D
+    distanceWithHysteresis::Float64
+
+    contactPairMaterial::Modia3D.AbstractContactPairMaterial  # only if contact = true, otherwise not defined
+
+    NoContactPair(contactPoint1, contactPoint2, contactNormal,
+                  obj1::Object3D, obj2::Object3D, distanceWithHysteresis::Float64) =
+        new(contactPoint1, contactPoint2, contactNormal, obj1, obj2, distanceWithHysteresis)
+end
+
+
+function updateContactPair!(pair::ContactPair, contactPoint1::SVector{3,Float64}, contactPoint2::SVector{3,Float64}, contactNormal::SVector{3,Float64},
+                            obj1::Object3D, obj2::Object3D, distanceWithHysteresis::Float64)::Nothing
     pair.contactPoint1 = contactPoint1
     pair.contactPoint2 = contactPoint2
     pair.contactNormal = contactNormal
@@ -58,14 +84,27 @@ function updateCollisionPair!(pair::CollisionPair, contactPoint1, contactPoint2,
 end
 
 
-Base.:isless(key1::DistanceKey, key2::DistanceKey) =   key1.contact &&  key2.contact ? key1.pairKey < key2.pairKey :
+function updateNoContactPair!(pair::NoContactPair, contactPoint1, contactPoint2, contactNormal,
+                              obj1::Object3D, obj2::Object3D, distanceWithHysteresis::Float64)::Nothing
+    pair.contactPoint1 = contactPoint1
+    pair.contactPoint2 = contactPoint2
+    pair.contactNormal = contactNormal
+    pair.obj1          = obj1
+    pair.obj2          = obj2
+    pair.distanceWithHysteresis = distanceWithHysteresis
+    return nothing
+end
+
+
+
+Base.:isless(key1::DistanceKey, key2::DistanceKey) =   key1.contact &&  key2.contact ? key1.pairID < key2.pairID :
                                                      ( key1.contact && !key2.contact ? true                        :
                                                      (!key1.contact &&  key2.contact ? false                       :
                                                      ( key1.distanceWithHysteresis != key2.distanceWithHysteresis   ?
                                                        key1.distanceWithHysteresis < key2.distanceWithHysteresis    :
-                                                       key1.pairKey                < key2.pairKey)))
+                                                       key1.pairID                < key2.pairID)))
 
-Base.:isequal(key1::DistanceKey, key2::DistanceKey) = key1.pairKey == key2.pairKey
+Base.:isequal(key1::DistanceKey, key2::DistanceKey) = key1.pairID == key2.pairID
 
 
 
@@ -88,10 +127,10 @@ mutable struct ContactDetectionMPR_handler <: Modia3D.AbstractContactDetection
   contactPairs::Composition.ContactPairs
   distanceComputed::Bool
 
-  lastContactDict::Dict{PairKey,CollisionPair}
-  contactDict::Dict{PairKey,CollisionPair}
-  noContactDict::Dict{PairKey,CollisionPair}
-  distanceDict::SortedDict{DistanceKey,Float64}
+  lastContactDict::Dict{PairID,ContactPair}
+  contactDict::Dict{    PairID,ContactPair}
+  noContactDict::Dict{  PairID,NoContactPair}
+  distanceSet::SortedSet{DistanceKey}
 
   tol_rel::Float64
   niter_max::Int
@@ -112,10 +151,10 @@ mutable struct ContactDetectionMPR_handler <: Modia3D.AbstractContactDetection
     handler = new()
 
     handler.distanceComputed = false
-    handler.lastContactDict  = Dict{PairKey,CollisionPair}()
-    handler.contactDict      = Dict{PairKey,CollisionPair}()
-    handler.noContactDict    = Dict{PairKey,CollisionPair}()
-    handler.distanceDict     = SortedDict{DistanceKey,Float64}()
+    handler.lastContactDict  = Dict{PairID,ContactPair}()
+    handler.contactDict      = Dict{PairID,ContactPair}()
+    handler.noContactDict    = Dict{PairID,NoContactPair}()
+    handler.distanceSet      = SortedSet{DistanceKey}()
 
     handler.tol_rel          = tol_rel
     handler.niter_max        = niter_max

@@ -43,7 +43,7 @@ end
 function Composition.selectContactPairsWithEvent!(sim::Union{ModiaMath.SimulationState,NOTHING}, ch::Composition.ContactDetectionMPR_handler, world::Composition.Object3D)
     empty!(ch.contactDict)
     empty!(ch.noContactDict)
-    empty!(ch.distanceDict)
+    empty!(ch.distanceSet)
     selectContactPairs!(sim,ch,world,true)
     ch.contactPairs.nzContact = length(ch.contactDict)
 end
@@ -59,7 +59,7 @@ end
 # are still true.
 function Composition.selectContactPairsNoEvent!(sim::Union{ModiaMath.SimulationState,NOTHING}, ch::Composition.ContactDetectionMPR_handler, world::Composition.Object3D)
     empty!(ch.noContactDict)
-    empty!(ch.distanceDict)
+    empty!(ch.distanceSet)
     selectContactPairs!(sim,ch,world,false)
 end
 
@@ -138,15 +138,15 @@ function computeDistances(ch::Composition.ContactDetectionMPR_handler, world::Co
         actObj = actSuperObj[i]       # determine contact from this Object3D with all Object3Ds that have larger indices
         actAABB = actSuperAABB[i]
         for js = is+1:length(collSuperObjs)
-          if !(js in noCPairs[is])    # PairKey is not in objects which cant collide
+          if !(js in noCPairs[is])    # PairID is not in objects which cant collide
             nextSuperObj = collSuperObjs[js]
             nextSuperAABB = AABB[js]
             for j = 1:length(nextSuperObj)
               n += 1
               nextObj  = nextSuperObj[j]
               nextAABB = nextSuperAABB[j]
-              pairKey  = pack(is,i,js,j)
-              storeDistancesForSolver!(world, pairKey, ch, actObj, nextObj, actAABB, nextAABB, phase2, hasEvent)
+              pairID  = pack(is,i,js,j)
+              storeDistancesForSolver!(world, pairID, ch, actObj, nextObj, actAABB, nextAABB, phase2, hasEvent)
   end; end; end; end; end; end; end
 end
 
@@ -155,27 +155,28 @@ const zEps  = 1.e-8
 const zEps2 = 2*zEps
 
 
-function pushCollisionPair!(ch, contact, distanceWithHysteresis, pairKey, contactPoint1,contactPoint2,contactNormal,actObj,nextObj)::Nothing
-    distanceKey = Composition.DistanceKey(contact, distanceWithHysteresis, pairKey)
-    if length(ch.distanceDict) < ch.contactPairs.nz
-        push!(ch.distanceDict, distanceKey => distanceWithHysteresis)
+function pushCollisionPair!(ch, contact, distanceWithHysteresis, pairID, contactPoint1,contactPoint2,contactNormal,actObj,nextObj,hasevent)::Nothing
+    distanceKey = Composition.DistanceKey(contact, distanceWithHysteresis, pairID)
+    if  hasevent && (length(ch.distanceSet) < ch.contactPairs.nz) ||
+       !hasevent && (length(ch.distanceSet) + length(ch.contactDict) < ch.contactPairs.nz)
+        push!(ch.distanceSet, distanceKey)
         if contact
-            push!(ch.contactDict  , pairKey => CollisionPair(contactPoint1,contactPoint2,contactNormal,actObj,nextObj,distanceWithHysteresis))
+            push!(ch.contactDict  , pairID => Modia3D.ContactPair(  contactPoint1,contactPoint2,contactNormal,actObj,nextObj,distanceWithHysteresis))
         else
-            push!(ch.noContactDict, pairKey => CollisionPair(contactPoint1,contactPoint2,contactNormal,actObj,nextObj,distanceWithHysteresis))
+            push!(ch.noContactDict, pairID => Modia3D.NoContactPair(contactPoint1,contactPoint2,contactNormal,actObj,nextObj,distanceWithHysteresis))
         end
     else
-        (lastKey,lastValue) = last(ch.distanceDict)
+        lastKey = last(ch.distanceSet)
         if contact && lastKey.contact
             error("Number of max. collision pairs is too low (nz_max = ", ch.contactPairs.nz, "). Enlarge nz_max in sceneOptions(nz_max=xxx).")
         elseif distanceWithHysteresis < lastKey.distanceWithHysteresis
-            delete!(ch.distanceDict , lastKey)  # removes last entry of distanceDict
-            delete!(ch.noContactDict, lastKey.pairKey)
-            push!(ch.distanceDict, distanceKey => distanceWithHysteresis)
+            delete!(ch.distanceSet  , lastKey)  # removes last entry of distanceSet
+            delete!(ch.noContactDict, lastKey.pairID)
+            push!(  ch.distanceSet  , distanceKey)
             if contact
-                push!(ch.contactDict  , pairKey => CollisionPair(contactPoint1,contactPoint2,contactNormal,actObj,nextObj,distanceWithHysteresis))
+                push!(ch.contactDict  , pairID => Modia3D.ContactPair(contactPoint1,contactPoint2,contactNormal,actObj,nextObj,distanceWithHysteresis))
             else
-                push!(ch.noContactDict, pairKey => CollisionPair(contactPoint1,contactPoint2,contactNormal,actObj,nextObj,distanceWithHysteresis))
+                push!(ch.noContactDict, pairID => Modia3D.NoContactPair(contactPoint1,contactPoint2,contactNormal,actObj,nextObj,distanceWithHysteresis))
             end
         end
     end
@@ -183,7 +184,7 @@ function pushCollisionPair!(ch, contact, distanceWithHysteresis, pairKey, contac
 end
 
 
-function storeDistancesForSolver!(world::Composition.Object3D, pairKey::Composition.PairKey, ch::Composition.ContactDetectionMPR_handler,
+function storeDistancesForSolver!(world::Composition.Object3D, pairID::Composition.PairID, ch::Composition.ContactDetectionMPR_handler,
                                   actObj::Composition.Object3D, nextObj::Composition.Object3D,
                                   actAABB::Basics.BoundingBox, nextAABB::Basics.BoundingBox, phase2::Bool, hasEvent::Bool)
     # Broad Phase
@@ -194,32 +195,34 @@ function storeDistancesForSolver!(world::Composition.Object3D, pairKey::Composit
     else # AABB's are not overlapping
         (distanceOrg, contactPoint1, contactPoint2, contactNormal,r1_a, r1_b, r2_a, r2_b, r3_a, r3_b) = computeDistanceBetweenAABB(actAABB, nextAABB)
     end
+    # println("... 1: ", ModiaMath.instanceName(actObj), " ", ModiaMath.instanceName(nextObj), "  ", distanceOrg, " ", contactPoint1, " ", contactPoint2, " ", contactNormal)
 
-    contact                = hasEvent ? distanceOrg < -zEps : haskey(ch.contactDict, pairKey)
+
+    contact                = hasEvent ? distanceOrg < -zEps : haskey(ch.contactDict, pairID)
     distanceWithHysteresis = contact  ? distanceOrg : distanceOrg + zEps2
 
     if hasEvent
         # At event instant
-        pushCollisionPair!(ch, contact, distanceWithHysteresis, pairKey, contactPoint1,contactPoint2,contactNormal,actObj,nextObj)
+        pushCollisionPair!(ch, contact, distanceWithHysteresis, pairID, contactPoint1,contactPoint2,contactNormal,actObj,nextObj,hasEvent)
 
     elseif !phase2
         # Integrator requires zero crossing function
         if contact
             # Collision pair had contact since the last event
-            updateCollisionPair!(ch.contactDict, contactPoint1,contactPoint2,contactNormal,actObj,nextObj,distanceWithHysteresis)
+            Modia3D.updateContactPair!(ch.contactDict[pairID], contactPoint1,contactPoint2,contactNormal,actObj,nextObj,distanceWithHysteresis)
         else
-            # Collision par did not have contact since the last event
-            pushCollisionPair!(ch, contact, distanceWithHysteresis, pairKey, contactPoint1,contactPoint2,contactNormal,actObj,nextObj)
+            # Collision pair did not have contact since the last event
+            pushCollisionPair!(ch, contact, distanceWithHysteresis, pairID, contactPoint1,contactPoint2,contactNormal,actObj,nextObj,hasEvent)
         end
 
     else
         # Other model evaluation (only getDistances!())
         if contact
             # Collision pair had contact since the last event
-            updateCollisionPair!(ch.contactDict, contactPoint1,contactPoint2,contactNormal,actObj,nextObj,distanceWithHysteresis)
-        elseif haskey(ch.noContactDict, pairKey)
+            Modia3D.updateContactPair!(ch.contactDict[pairID], contactPoint1,contactPoint2,contactNormal,actObj,nextObj,distanceWithHysteresis)
+        elseif haskey(ch.noContactDict, pairID)
             # Collision par did not have contact since the last event
-            updateCollisionPair!(ch.noContactDict, contactPoint1,contactPoint2,contactNormal,actObj,nextObj,distanceWithHysteresis)
+            Modia3D.updateNoContactPair!(ch.noContactDict[pairID], contactPoint1,contactPoint2,contactNormal,actObj,nextObj,distanceWithHysteresis)
         end
     end
 
@@ -279,10 +282,9 @@ function Composition.closeContactDetection!(ch::Composition.ContactDetectionMPR_
   empty!(ch.lastContactDict)
   empty!(ch.contactDict)
   empty!(ch.noContactDict)
-  empty!(ch.distanceDict)
+  empty!(ch.distanceSet)
   empty!(ch.contactPairs.collSuperObjs)
   empty!(ch.contactPairs.noCPairs)
-  ch.dictCommunicateInitial = false
 end
 
 

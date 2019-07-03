@@ -63,28 +63,28 @@ event.
 
 ## Keys
 
-An *object pair* is identified by a *unique* `pairKey::PairKey`, where `const PairKey = Int64`.
-A pairKey is constructed by packing the object indices of the two objects into an `Int64` number.
+An *object pair* is identified by a *unique* `pairID::PairID`, where `const PairID = Int64`.
+A pairID is constructed by packing the object indices of the two objects into an `Int64` number.
 
 The information about the *smallest distances* are stored in the sorted
-dictionary `distanceDict` (see below).
+dictionary `distanceSet` (see below).
 The entries in this dictionary are ordered according to their `key::DistanceKey`.
 This key consists of three elements that are evaluated in the following order:
 
 1. `contact`
 2. `distanceWithHysteresis`
-3. `pairKey`
+3. `pairID`
 
-If `contact=true`, order does not matter and is therefore only based on the unique `pairKey`. If `contact=false`, order matters and is basically on `distanceWithHysteresis`. This leads to the following definition of the `DistanceKey` ordering:
+If `contact=true`, order does not matter and is therefore only based on the unique `pairID`. If `contact=false`, order matters and is basically on `distanceWithHysteresis`. This leads to the following definition of the `DistanceKey` ordering:
 
 ```
 Base.:isless(key1::DistanceKey, key2::DistanceKey) =
-     key1.contact &&  key2.contact ? key1.pairKey < key2.pairKey :
+     key1.contact &&  key2.contact ? key1.pairID < key2.pairID :
    ( key1.contact && !key2.contact ? true                        :
    (!key1.contact &&  key2.contact ? false                       :
    (key1.distanceWithHysteresis != key2.distanceWithHysteresis   ?
     key1.distanceWithHysteresis < key2.distanceWithHysteresis    :
-    key1.pairKey                < key2.pairKey)))
+    key1.pairID                < key2.pairID)))
 ```
 
 
@@ -92,47 +92,61 @@ Base.:isless(key1::DistanceKey, key2::DistanceKey) =
 
 The following dictionaries are utilized for contact detection:
 
-| Dictionary       | key type    | value type    | contact | step     | else   |
-|:---------------- |:------------|:--------------|:-------:|:--------:|:------:|
-|`lastContactDict` | PairKey     | CollisionPair | true    |   -      |   -    |
-|`contactDict`     | PairKey     | CollisionPair | true    | update   | update |
-|`noContactDict`   | PairKey     | CollisionPair | false   | new keys | update |
-|`distanceDict`    | DistanceKey | Float64       | false   | new keys |   -    |
+| Dictionary/Set   | key type    | value type    | contact    | step     | else   |
+|:---------------- |:------------|:--------------|:----------:|:--------:|:------:|
+|`lastContactDict` | PairID      | ContactPair   | true       |   -      |   -    |
+|`contactDict`     | PairID      | ContactPair   | true       | update   | update |
+|`noContactDict`   | PairID      | NoContactPair | false      | new keys | update |
+|`distanceSet`     | DistanceKey | ---           | true/false | new keys |   -    |
 
-The first three dictionaries are standard `Dict`s and have [`Modia3D.Composition.CollisionPair`](@ref) as value type.
-The last dictionary is a `SortedDict` and has *distanceWithHysteresis* floats as values
-(and the keys are basically sorted according to `distanceWithHysteresis`).
+- `lastContactDict` and `contactDict` are standard `Dict`s that have
+   [`Modia3D.Composition.ContactPair`](@ref) as value type.
+
+- `noContactDict` is a standard `Dict` that has
+   [`Modia3D.Composition.NoContactPair`](@ref) as value type.
+   The difference to `ContactPair` is that the contact points and the contact normal
+   might be `Nothing` (whereas concrete vectors are required by `ContactPair`),
+   because in the broad phase this information is not determined.
+
+- `distanceSet` is a `SortedSet` where the keys are basically sorted according to
+  `distanceWithHysteresis` (see section [Keys](@ref)).
 
 - Column *contact* defines the value of the corresponding variable
   (`contact = true` if object pairs have been in contact at the last event instant).
+
 - At an *event* instant, all dictionaries have action *new keys* (see below).
+
 - Column *step* contains the actions after a *completed integrator step*.
   (Currently, this situation is not flagged by ModiaMath. Therefore the actions of column
   *step* are executed when the *integrator requires zero crossing functions*.
   This gives a slight degradation of simulation efficiency).
+
 - Column *else* contains the actions at other model evaluations (no event and no completed step).
+
 - *new keys* means that the dictionary is emptied and is filled with *new (key,value)* pairs.
+
 - *update* means that the keys are not changed and the *values are updated*.
+
 
 
 **Actions at an event instant**
 
-1. `contactDict, noContactDict, distanceDict` are emptied.
+1. `contactDict, noContactDict, distanceSet` are emptied.
 
 2. For every object pair P:
 
-   - (distanceKey(P) => distanceWithHysteresis(P)) is inserted in `distanceDict`.
-     If `length(distanceDict) = nz_max`, it is inquired whether the last item of `distanceDict` has a
+   - distanceKey(P) is inserted in `distanceSet`.
+     If `length(distanceSet) = nz_max`, it is inquired whether the last item of `distanceSet` has a
      `distanceWithHysteresis` that is larger as the
      `distanceWithHysteresis` of P. If this is the case, the last item
-     is deleted and `distanceWithHysteresis` is inserted in `distanceDict`
+     is deleted and `distanceWithHysteresis` is inserted in `distanceSet`
      (it is an error, if there are more than nz\_max object pairs with `contact=true`).
      If this is not the case, P is ignored.
 
-   - If an item was inserted in `distanceDict`, the corresponding
-     `CollisionPair` is eiter inserted in `ContactDict` (if `contact=true`) or
+   - If an item was inserted in `distanceSet`, the corresponding collision information
+     is either inserted in `ContactDict` (if `contact=true`) or
      `noContactDict` (if `contact=false`).
-     If an item was deleted in `distanceDict`, the corresponding item is deleted
+     If an item was deleted in `distanceSet`, the corresponding item is deleted
      in `noContactDict` as well (deletion cannot occur for items in `contactDict`).
 
 3. After all object pairs have been visited:
@@ -150,25 +164,25 @@ The last dictionary is a `SortedDict` and has *distanceWithHysteresis* floats as
 
 **Actions after a completed integrator step**
 
-1. `noContactDict, distanceDict` are emptied.
+1. `noContactDict, distanceSet` are emptied.
 
 2. For every object pair P:
 
-   - If pairKey(P) is a key of `contactDict`, then the corresponding value
+   - If pairID(P) is a key of `contactDict`, then the corresponding value
      is updated with the actual contact situation, especially with
      `distanceWithHysteresis`.
 
-   - If pairKey(P) is not a key of `contactDict`, then
-     (distanceKey(P) => distanceWithHysteresis(P)) is inserted in `distanceDict`.
-     If `length(contactDict)+length(distanceDict) = nz_max`, it is inquired whether the last item of `distanceDict` has a
+   - If pairID(P) is not a key of `contactDict`, then
+     distanceKey(P) is inserted in `distanceSet`.
+     If `length(contactDict)+length(distanceSet) = nz_max`, it is inquired whether the last item of `distanceSet` has a
      `distanceWithHysteresis` that is larger as the
      `distanceWithHysteresis` of P. If this is the case, the last item
-     is deleted and `distanceWithHysteresis` is inserted in `distanceDict`.
+     is deleted and `distanceWithHysteresis` is inserted in `distanceSet`.
      If this is not the case, P is ignored.
 
-   - If an item was inserted in `distanceDict`, the corresponding
-     `CollisionPair` is inserted in `noContactDict`.
-     If an item was deleted in `distanceDict`, the corresponding item is deleted
+   - If an item was inserted in `distanceSet`, the corresponding
+     `NoContactPair` is inserted in `noContactDict`.
+     If an item was deleted in `distanceSet`, the corresponding item is deleted
      in `noContactDict` as well.
 
 
@@ -176,19 +190,19 @@ The last dictionary is a `SortedDict` and has *distanceWithHysteresis* floats as
 
 For every object Pair P:
 
-- If pairKey(P) is a key of `contactDict`, then the corresponding value
+- If pairID(P) is a key of `contactDict`, then the corresponding value
   is updated with the actual contact situation, especially with
   `distanceWithHysteresis`.
 
-- If pairKey(P) is a key of `noContactDict`, then the corresponding value
+- If pairID(P) is a key of `noContactDict`, then the corresponding value
   is updated with the actual contact situation, especially with
   `distanceWithHysteresis`.
 
 
 The zero crossing functions are reported to the integrator with vector `z::Vector{Float64}`
 of length `nz_max`. Hereby, the first entries
-in `z` are the `contactDict[pairKey].distanceWithHysteresis` values
-and the remaining ones are the `noContactDict[pairKey].distanceWithHysteresis` values.
+in `z` are the `contactDict[pairID].distanceWithHysteresis` values
+and the remaining ones are the `noContactDict[pairID].distanceWithHysteresis` values.
 Vector `z` is updated, whenever the integrator requires zero-crossing functions.
 
 Strictly speaking, dictionary `noContactDict` is not absolutely necessary,

@@ -198,7 +198,7 @@ end
 include(joinpath("collision","Plot_cor.jl"))
 material1 = Modia3D.ElasticContactMaterial(name="Steel") 
 material2 = Modia3D.ElasticContactMaterial(name="Steel", cor=0.8) 
-material3 = Modia3D.ElasticContactMaterial(E=2e11, nu=0.3, cor=0.5, mu_k=0.1, mu_r=0.001, v_small=0.02, w_small=0.03) 
+material3 = Modia3D.ElasticContactMaterial(E=2e11, nu=0.3, cor=0.5, mu_k=0.1, mu_r=0.001, vsmall=0.02, wsmall=0.03) 
 
 @testset "Solids: contact material" begin
     @test isapprox(material1.c, 2e11/(1 - 0.3^2))
@@ -206,8 +206,8 @@ material3 = Modia3D.ElasticContactMaterial(E=2e11, nu=0.3, cor=0.5, mu_k=0.1, mu
     @test isapprox(material3.c, 2e11/(1 - 0.3^2))
     @test isapprox(material3.mu_k, 0.1)
     @test isapprox(material3.mu_r, 0.001)
-    @test isapprox(material3.v_small, 0.02)
-    @test isapprox(material3.w_small, 0.03)
+    @test isapprox(material3.vsmall, 0.02)
+    @test isapprox(material3.wsmall, 0.03)
 end
 
 println("... success of test_solidProperties.jl!")

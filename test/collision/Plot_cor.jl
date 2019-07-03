@@ -5,37 +5,37 @@ module Plot_SlidingFriction
 
 
 
-returns: v_small     , if absv=0
-         0.01*v_small, if absv=v_small
+returns: vsmall     , if absv=0
+         0.01*vsmall, if absv=vsmall
          0           , if absv=infinity
 =#
 
-# regularize(absv,v_small) = v_small*exp(log(0.01)*(absv/v_small))
+# regularize(absv,vsmall) = vsmall*exp(log(0.01)*(absv/vsmall))
 
 #=
-regularize(absv,v_small) = absv >= v_small ? absv : absv*(absv/v_small)*(1.0 - (absv/v_small)/3.0) + v_small/3.0
+regularize(absv,vsmall) = absv >= vsmall ? absv : absv*(absv/vsmall)*(1.0 - (absv/vsmall)/3.0) + vsmall/3.0
 
 
-function resultantCor(cor1,cor2,abs_v_rel_n,v_small)
+function resultantCor(cor1,cor2,abs_v_rel_n,vsmall)
     @assert(cor1 >= 0.0 && cor1 <= 1.0)
     @assert(cor2 >= 0.0 && cor2 <= 1.0)
     @assert(abs_v_rel_n >= 0.0)
-    @assert(v_small > 0)
+    @assert(vsmall > 0)
 
     cor_min  = 0.001
     cor_mean = max(cor_min, (cor1 + cor2)/2.0)
-    cor_res  = cor_mean + (cor_min - cor_mean)*exp(log(0.01)*(abs_v_rel_n/v_small))
+    cor_res  = cor_mean + (cor_min - cor_mean)*exp(log(0.01)*(abs_v_rel_n/vsmall))
     return cor_res
 end
 
-function resultantDampingCoefficient(cor1, cor2, abs_v_rel_n,v_small)
+function resultantDampingCoefficient(cor1, cor2, abs_v_rel_n,vsmall)
     @assert(cor1 >= 0.0 && cor1 <= 1.0)
     @assert(cor2 >= 0.0 && cor2 <= 1.0)
     @assert(abs_v_rel_n >= 0.0)
-    @assert(v_small > 0)
+    @assert(vsmall > 0)
 
-    cor   = resultantCor(cor1,cor2,abs_v_rel_n,v_small)
-    d_res = 8.0*(1.0 - cor)/(5*cor*regularize(abs_v_rel_n,v_small))
+    cor   = resultantCor(cor1,cor2,abs_v_rel_n,vsmall)
+    d_res = 8.0*(1.0 - cor)/(5*cor*regularize(abs_v_rel_n,vsmall))
     return d_res
 end
 =#

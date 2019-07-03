@@ -5,7 +5,7 @@ using PyPlot
 pyplot_rc = PyCall.PyDict(PyPlot.matplotlib."rcParams")
 pyplot_rc["font.size"] = 10.0
 
-regularize(absv,v_small) = absv >= v_small ? absv : absv*(absv/v_small)*(1.0 - (absv/v_small)/3.0) + v_small/3.0
+regularize(absv,vsmall) = absv >= vsmall ? absv : absv*(absv/vsmall)*(1.0 - (absv/vsmall)/3.0) + vsmall/3.0
 vsmall = 0.01
 vrel = collect(range(0,2*vsmall,length=100))
 fr1 = zeros( length(vrel) )

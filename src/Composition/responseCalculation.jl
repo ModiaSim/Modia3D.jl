@@ -25,7 +25,7 @@ function responseCalculation(chpairs::ContactPairs,
    #d_w   = (cM1.d_w   + cM2.d_w)/2
    #mu0   = (cM1.mu0   + cM2.mu0)/2
    mu1   = (cM1.mu1   + cM2.mu1)/2
-   #v_small = (cM1.v_small + cM2.v_small)/2
+   #vsmall = (cM1.vsmall + cM2.vsmall)/2
    #w_min = (cM1.w_min + cM2.w_min)/2
 
    # Contact points and distances to local part frame (in world frame)
@@ -45,8 +45,8 @@ function responseCalculation(chpairs::ContactPairs,
    v_rel_n     = dot(v_rel,e_n)
    v_rel_t     = v_rel - v_rel_n*e_n
    #abs_v_rel_t = norm(v_rel_t)
-   #friction    = abs_v_rel_t > v_small
-   #e_t         = v_rel_t/(friction ? abs_v_rel_t : v_small)
+   #friction    = abs_v_rel_t > vsmall
+   #e_t         = v_rel_t/(friction ? abs_v_rel_t : vsmall)
    w_rel_n     = dot(w2 - w1,e_n)
 
    # Contact forces/torques
@@ -97,17 +97,17 @@ function responseCalculation(chpairs::ContactPairs,
   #println("delta_dot_initial ", delta_dot_initial)
 
   # println("delta_dot_initial = ", delta_dot_initial)
-  # v_small  ... small velocity used for regularization
-  # w_small  ... small angular velocity used for regularization
+  # vsmall  ... small velocity used for regularization
+  # wsmall  ... small angular velocity used for regularization
   # cor_res  ... resulting coefficient of restitution
   # d_res    ... resulting damping material constant in normal direction d_res = (cM1.d + cM2.d)/2
   # c_res    ... elastic material constant in normal direction
   # mu_k_res ... sliding friction coefficient in tangential direction
   # mu_r_res ... rotational friction torque coefficient
-  v_small = (cM1.v_small + cM2.v_small)/2
-  w_small = (cM1.w_small + cM2.w_small)/2
-  # cor_res  = Modia3D.resultantCoefficientOfRestitution(cM1.cor, cM2.cor, abs(delta_dot_initial), v_small) # glg (2), (3)
-  d_res    = Modia3D.resultantDampingCoefficient(cM1.cor, cM2.cor, abs(delta_dot_initial), v_small) # glg (4)
+  vsmall = (cM1.vsmall + cM2.vsmall)/2
+  wsmall = (cM1.wsmall + cM2.wsmall)/2
+  # cor_res  = Modia3D.resultantCoefficientOfRestitution(cM1.cor, cM2.cor, abs(delta_dot_initial), vsmall) # glg (2), (3)
+  d_res    = Modia3D.resultantDampingCoefficient(cM1.cor, cM2.cor, abs(delta_dot_initial), vsmall) # glg (4)
   c_res    = cM1.c*cM2.c/(cM1.c + cM2.c)
   mu_k_res = min(cM1.mu_k, cM2.mu_k)
   mu_r_res = min(cM1.mu_r, cM2.mu_r)
@@ -140,11 +140,11 @@ function responseCalculation(chpairs::ContactPairs,
   # compute normal force and tangential force
   r  = getCommonRadius(obj1, obj2)
   fn = normalForce(c_res, d_res, delta, delta_dot, r)
-  ft = tangentialForce(fn, mu_k_res, v_t, v_small)
+  ft = tangentialForce(fn, mu_k_res, v_t, vsmall)
   #println("... fn = ", fn, ", delta = ", delta, ", delta_dot = ", delta_dot, ", c_res= ", c_res)
   f1 = fn*e_n + ft
   f2 = -f1
-  tau = compTau(fn, mu_r_res, w_rel, w_small, r)
+  tau = compTau(fn, mu_r_res, w_rel, wsmall, r)
   #println("tau = ", tau)
   t1 = cross(r_rel1,f1) + tau
   t2 = cross(r_rel2,f2) - tau
@@ -170,9 +170,9 @@ end
 
 normalForce(c_res, d_res, delta, delta_dot::Float64, r::NOTHING) = -c_res*delta*(1-d_res*delta_dot)
 normalForce(c_res, d_res, delta, delta_dot::Float64, r::Float64) = -c_res*(4/3*delta*sqrt(r*abs(delta)))*(1-d_res*delta_dot)
-tangentialForce(fn, mu_k_res, v_t, v_small) = -mu_k_res*fn*v_t/Modia3D.regularize(norm(v_t),v_small)
-compTau(fn, mu_r_res, w_rel, w_small, r::NOTHING) = -mu_r_res*fn*w_rel/Modia3D.regularize(norm(w_rel),w_small)
-compTau(fn, mu_r_res, w_rel, w_small, r::Float64) = -r*mu_r_res*fn*w_rel/Modia3D.regularize(norm(w_rel),w_small)
+tangentialForce(fn, mu_k_res, v_t, vsmall) = -mu_k_res*fn*v_t/Modia3D.regularize(norm(v_t),vsmall)
+compTau(fn, mu_r_res, w_rel, wsmall, r::NOTHING) = -mu_r_res*fn*w_rel/Modia3D.regularize(norm(w_rel),wsmall)
+compTau(fn, mu_r_res, w_rel, wsmall, r::Float64) = -r*mu_r_res*fn*w_rel/Modia3D.regularize(norm(w_rel),wsmall)
 
 
 function computeDeltaDotInitial(obj1::Object3D, obj2::Object3D,
@@ -193,20 +193,20 @@ end
 
 
 # response calculation with new contact force law
-function responseCalculation(pair::CollisionPair,
+function responseCalculation(pair::ContactPair,
                              rContact::ModiaMath.Vector3D,
                              time,
                              file)::Tuple{ModiaMath.Vector3D,ModiaMath.Vector3D,ModiaMath.Vector3D,ModiaMath.Vector3D}
 
-  # v_small  ... small velocity used for regularization
-  # w_small  ... small angular velocity used for regularization
+  # vsmall  ... small velocity used for regularization
+  # wsmall  ... small angular velocity used for regularization
   # d_res    ... resulting damping material constant in normal direction d_res = (cM1.d + cM2.d)/2
   # c_res    ... elastic material constant in normal direction
   # mu_k_res ... sliding friction coefficient in tangential direction
   # mu_r_res ... rotational friction torque coefficient
   material = pair.contactPairMaterial
-  v_small  = material.v_small
-  w_small  = material.w_small
+  vsmall  = material.vsmall
+  wsmall  = material.wsmall
   d_res    = material.d_res
   c_res    = material.c_res
   mu_k     = material.mu_k
@@ -231,7 +231,7 @@ function responseCalculation(pair::CollisionPair,
   v2 = dynamics2.v0 + cross(w2,r_rel2)
   # Velocities and angular velocities in normal and tangential direction
   w_rel = w2 - w1
-  e_w_reg = w_rel/Modia3D.regularize(norm(w_rel),w_small)
+  e_w_reg = w_rel/Modia3D.regularize(norm(w_rel),wsmall)
 
   v_rel = v2 - v1
 
@@ -240,7 +240,7 @@ function responseCalculation(pair::CollisionPair,
   # delta     ... signed distance
   delta_dot = dot(v_rel,e_n)
   v_t       = v_rel - delta_dot*e_n
-  e_t_reg   = v_t/Modia3D.regularize(norm(v_t),v_small)
+  e_t_reg   = v_t/Modia3D.regularize(norm(v_t),vsmall)
 
   delta     = -s
 

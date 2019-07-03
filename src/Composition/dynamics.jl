@@ -413,24 +413,31 @@ function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64
       end
 
       # Handle zero crossing event
-      for (pairKey, pair) in ch.contactDict
+      simh = sim.eventHandler
+      for (pairID, pair) in ch.contactDict
+        obj1 = pair.obj1
+        obj2 = pair.obj2
+        rContact = (pair.contactPoint1 + pair.contactPoint2)/2.0
+
         #simh = sim.eventHandler
         #println( "time = ", sim.time, ": ", ModiaMath.instanceName(obj1), " ", ModiaMath.instanceName(obj2),
         #         " i = ", i, ", initial = ", simh.initial, ", event = ", simh.event, " change = ", chpairs.changeDirection[i] )
-
-        rContact = (pair.contactPoint1 + pair.contactPoint2)/2.0
         if ModiaMath.isEvent(sim)
             # Include contact pair material into collision pair
-            if haskey(lastContactDict, pairKey)
+            if haskey(ch.lastContactDict, pairID)
                 # use material (reference) from previous event
-                pair.contactPairMaterial = lastContactDict[pairKey].contactPairMaterial    # improve later (should avoid to inquire pairKey twice)
+                pair.contactPairMaterial = ch.lastContactDict[pairID].contactPairMaterial    # improve later (should avoid to inquire pairID twice)
             else
                 # determine contact pair material
-                obj1 = pair.obj1
-                obj2 = pair.obj2
                 delta_dot_init = computeDeltaDotInitial(obj1, obj2, rContact, pair.contactNormal)
-                println("... type ... ", typeof(obj1.data.contactMaterial))
                 pair.contactPairMaterial = Modia3D.ElasticContactPairMaterial2(obj1.data.contactMaterial, obj2.data.contactMaterial, delta_dot_init)
+                simh.restart = max(simh.restart, ModiaMath.Restart)
+                simh.newEventIteration = false
+                if ModiaMath.isLogEvents(simh.logger)
+                    name1 = ModiaMath.instanceName(obj1)
+                    name2 = ModiaMath.instanceName(obj2)
+                    println("        distance(", name1, ",", name2, ") = ", pair.distanceWithHysteresis, " (became < 0)")
+                end
             end
         end
 
@@ -451,10 +458,24 @@ function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64
       end
 
       if ModiaMath.isEvent(sim)
+            # Should be possible to make this more efficient
+            for (pairID, pair) in ch.lastContactDict
+                if !haskey(ch.contactDict, pairID)
+                    simh.restart = max(simh.restart, ModiaMath.Restart)
+                    simh.newEventIteration = false
+                    if !ModiaMath.isLogEvents(simh.logger)
+                        break
+                    end
+                    name1 = ModiaMath.instanceName(pair.obj1)
+                    name2 = ModiaMath.instanceName(pair.obj2)
+                    println("        distance(", name1, ",", name2, ")  became > 0")
+                end
+            end
+
             # Save contactDict in lastContactDict
-            empty!(lastContactDict)
-            for (pairKey, pair) in ch.contactDict
-                push!(lastContactDict, pairKey => pair)
+            empty!(ch.lastContactDict)
+            for (pairID, pair) in ch.contactDict
+                push!(ch.lastContactDict, pairID => pair)
             end
       end
    end

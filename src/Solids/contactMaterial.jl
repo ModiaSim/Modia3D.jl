@@ -50,14 +50,14 @@ mutable struct ElasticContactMaterial <: Modia3D.AbstractContactMaterial
     cor::Float64      # []      Coefficient of restitution between two objects of the same material
     mu_k::Float64     # []      Kinetic/sliding friction force coefficient
     mu_r::Float64     # []      Rotational friction torque coefficient
-    v_small::Float64  # [m/s]   Used for regularization when computing the unit vector in direction of
+    vsmall::Float64  # [m/s]   Used for regularization when computing the unit vector in direction of
                       #         the relative tangential velocity to avoid a division by zero.
-    w_small::Float64  # [rad/s] Used for regularization when computing the unit vector in direction of
+    wsmall::Float64  # [rad/s] Used for regularization when computing the unit vector in direction of
                       #         the relative angular velocity to avoid a division by zero.
 
-    function ElasticContactMaterial(;name="", E=NaN, nu=NaN, cor=NaN, mu_k=NaN, mu_r=NaN, v_small=0.01, w_small=v_small)
-        @assert(v_small > 0.0)
-        @assert(w_small > 0.0)
+    function ElasticContactMaterial(;name="", E=NaN, nu=NaN, cor=NaN, mu_k=NaN, mu_r=NaN, vsmall=0.01, wsmall=vsmall)
+        @assert(vsmall > 0.0)
+        @assert(wsmall > 0.0)
         if name == ""
             @assert(!isnan(E)    && E > 0.0)
             @assert(!isnan(nu)   && (nu > 0.0 && nu < 1.0))
@@ -99,7 +99,7 @@ mutable struct ElasticContactMaterial <: Modia3D.AbstractContactMaterial
         end
 
         c = E2/(1 - nu2^2)
-        new(c, cor2, mu_k2, mu_r2, v_small, w_small)
+        new(c, cor2, mu_k2, mu_r2, vsmall, wsmall)
     end
 end
 
@@ -324,14 +324,14 @@ material2 = Modia3D.ElasticContactMaterial(name="DryWood", vsmall=0.1)
 mutable struct ElasticContactMaterial2 <: Modia3D.AbstractContactMaterial
     name::AbstractString  #         Name of contact material
     c::Float64            # [N/m]   Spring constant of contact in normal direction
-    v_small::Float64       # [m/s]   Used for regularization when computing the unit vector in direction of
+    vsmall::Float64       # [m/s]   Used for regularization when computing the unit vector in direction of
                           #         the relative tangential velocity to avoid a division by zero.
-    w_small::Float64       # [rad/s] Used for regularization when computing the unit vector in direction of
+    wsmall::Float64       # [rad/s] Used for regularization when computing the unit vector in direction of
                           #         the relative angular velocity to avoid a division by zero.
 
-    function ElasticContactMaterial2(name; v_small=0.01, w_small=0.01)
-        @assert(v_small > 0.0)
-        @assert(w_small > 0.0)
+    function ElasticContactMaterial2(name; vsmall=0.01, wsmall=0.01)
+        @assert(vsmall > 0.0)
+        @assert(wsmall > 0.0)
         mat = solidMaterialPalette[name]
         E   = mat.YoungsModulus
         nu  = mat.PoissonsRatio
@@ -339,7 +339,7 @@ mutable struct ElasticContactMaterial2 <: Modia3D.AbstractContactMaterial
         @assert(nu > 0.0 && nu < 1.0)
 
         c = E/(1 - nu^2)
-        new(name, c, v_small, w_small)
+        new(name, c, vsmall, wsmall)
     end
 end
 

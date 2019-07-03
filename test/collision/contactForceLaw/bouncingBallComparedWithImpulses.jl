@@ -84,7 +84,7 @@ end
 vsmall = 0.1
 material = "Steel"
 cmat = Modia3D.ElasticContactMaterial2(material)
-cmat.v_small = vsmall
+cmat.vsmall = vsmall
 
 cor = 0.7
 cpairs = Modia3D.getCommonCollisionProperties(material,material)
@@ -101,17 +101,24 @@ ModiaMath.plot(result1, ["h", ("v", "flying"), "cor_res"], heading="Bouncing bal
 
 vmat = Modia3D.Material(color="LightBlue" , transparency=0.5)
 
-
 @assembly BouncingBall2 begin
   world = Modia3D.Object3D(visualizeFrame=true)
   ball  = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidSphere(0.1)      , "Steel", vmat; contactMaterial = cmat); r=[0.0, 0.0, 1.0], fixed=false)
   box   = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidBox(1.0,1.0,0.1) , "Steel", vmat; contactMaterial = cmat); r=[0.0, 0.0,-0.1], fixed=true)
 end
 
+#=
+@assembly BouncingBall2 begin
+  world = Modia3D.Object3D(visualizeFrame=true)
+  ball  = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidSphere(0.1)      , "Steel", vmat); r=[0.0, 0.0, 1.0], fixed=false)
+  box   = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidBox(1.0,1.0,0.1) , "Steel", vmat); r=[0.0, 0.0,-0.1], fixed=true)
+end
+=#
+
 gravField = Modia3D.UniformGravityField(g=9.81, n=[0,0,-1.0])
 bouncingBall2 = BouncingBall2(sceneOptions=Modia3D.SceneOptions(gravityField=gravField,visualizeFrames=false, defaultFrameLength=0.7,nz_max = 100, enableContactDetection=true))
 model2        = Modia3D.SimulationModel( bouncingBall2 )
-result2       = ModiaMath.simulate!(model2; stopTime=stopTime, tolerance=1e-8,interval=0.001, log=false)
+result2       = ModiaMath.simulate!(model2; stopTime=stopTime, tolerance=1e-8,interval=0.001, log=true)
 ModiaMath.plot(result2, ["ball.r[3]", "ball.v[3]"], heading="Bouncing ball with compliant response calculation", figure=2)
 
 

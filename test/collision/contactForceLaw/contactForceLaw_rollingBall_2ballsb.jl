@@ -21,8 +21,11 @@ vmatTable = Modia3D.Material(color="Green")         # material of table
 # funkt nicht cor=0.9, mu_k = 0.3, mu_r = 0.01
 #
 # cor=0.8, mu_k = 0.1, mu_r = 0.025
-cmatTable = Modia3D.ElasticContactMaterial(name="DryWood", cor=0.0, mu_r = 0.01) #, E=2.0e8,  cor=0.1, mu_r = 0.1 ) #E=2.0e7,
-cmatBall = Modia3D.ElasticContactMaterial(name="BilliardBall", cor=0.9, mu_k = 0.1, mu_r = 0.01)
+#cmatTable = Modia3D.ElasticContactMaterial(name="DryWood", cor=0.0, mu_r = 0.01) #, E=2.0e8,  cor=0.1, mu_r = 0.1 ) #E=2.0e7,
+#cmatBall = Modia3D.ElasticContactMaterial(name="BilliardBall", cor=0.9, mu_k = 0.1, mu_r = 0.01)
+
+cmatTable = Modia3D.ElasticContactMaterial2("BilliardTable") #, E=2.0e8,  cor=0.1, mu_r = 0.1 ) #E=2.0e7,
+cmatBall = Modia3D.ElasticContactMaterial2("BilliardBall")
 
 LxGround = 10.0
 LyBox = 2.0
@@ -50,7 +53,7 @@ bill = RollingBall(sceneOptions=Modia3D.SceneOptions(gravityField=gravField,visu
 
 model = Modia3D.SimulationModel( bill )
 # ModiaMath.print_ModelVariables(model)
-result = ModiaMath.simulate!(model; stopTime=1.0, tolerance=1e-8,interval=0.001, log=true)
+result = ModiaMath.simulate!(model; stopTime=2.0, tolerance=1e-8,interval=0.001, log=true)
 
 ModiaMath.plot(result, [("ball1.r[3]", "ball2.r[3]"),
                         ("ball1.v[1]", "ball2.v[1]"),
