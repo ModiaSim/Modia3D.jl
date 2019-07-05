@@ -100,7 +100,6 @@ ModiaMath.plot(result1, ["h", ("v", "flying"), "cor_res"], heading="Bouncing bal
 
 
 vmat = Modia3D.Material(color="LightBlue" , transparency=0.5)
-
 @assembly BouncingBall2 begin
   world = Modia3D.Object3D(visualizeFrame=true)
   ball  = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidSphere(0.1)      , "Steel", vmat; contactMaterial = cmat); r=[0.0, 0.0, 1.0], fixed=false)
@@ -131,6 +130,20 @@ end
 
 
 using PyPlot
+using PyCall
+
+fig, ax = PyPlot.subplots(figsize=(3,9))
+
+pyplot_rc = PyCall.PyDict(PyPlot.matplotlib["rcParams"])
+pyplot_rc["font.family"]      = "sans-serif"
+pyplot_rc["font.sans-serif"]  = ["Calibri", "Arial", "Verdana", "Lucida Grande"]
+pyplot_rc["font.size"]        = 12.0
+pyplot_rc["lines.linewidth"]  = 2.0
+pyplot_rc["grid.linewidth"]   = 0.5
+pyplot_rc["axes.grid"]        = true
+pyplot_rc["axes.titlesize"]   = "large"
+pyplot_rc["figure.titlesize"] = "large"
+
 
 t1      = result1["time"]
 h1      = result1["h"]
@@ -143,13 +156,14 @@ v2 = result2."ball.v[3]"
 
 figure(3)
 clf()
-plot(t1,h1, t2,h2, t1,cor_res)
+plot(t1,h1, t2,h2)
 grid(true)
 xlabel("time [s]")
-ylabel("height [m] and cor []")
+ylabel("height [m]")
 legend(["impulsive response",
-        "compliant response",
-        "\$cor_{res}\$ (vsmall = 0.1 m/s)"])
+        "compliant response"])
+
+
 
 println("... success of bouncingBallComparedWithImpulsesjl!")
 

@@ -12,20 +12,20 @@ vmatTable = Modia3D.Material(color="Green", transparency=0.5)         # material
 cmatTable = Modia3D.ElasticContactMaterial2("BilliardTable")
 cmatBall = Modia3D.ElasticContactMaterial2("BilliardBall")
 
-LxGround = 2.0
+LxGround = 5.0
 LyBox = 0.5
 LzBox = 0.1
 diameter = 0.06
 @assembly Table(world) begin
   withBox = Modia3D.Solid(Modia3D.SolidBox(LxGround, LyBox, LzBox) , "DryWood", vmatTable; contactMaterial = cmatTable)
-  box1 = Modia3D.Object3D(world, withBox, r=[1.0, 0.0, -LzBox/2], fixed=true)
+  box1 = Modia3D.Object3D(world, withBox, r=[2.5, 0.0, -LzBox/2], fixed=true, visualizeFrame=false)
 end
 
 @assembly TwoRollingBalls() begin
   world = Modia3D.Object3D(visualizeFrame=false)
   table = Table(world)
   ball1 = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidSphere(diameter), "BilliardBall", vmatSolids ; contactMaterial = cmatBall), fixed = false, r=[0.2, 0.0, diameter/2], v_start=[3.0, 0.0, 0.0] )
-#  ball2 = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidSphere(diameter), "BilliardBall", vmatSolids ; contactMaterial = cmatBall), fixed = false, r=[1.5, 0.0, diameter/2])
+#  ball2 = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidSphere(diameter), "BilliardBall", vmatSolids ; contactMaterial = cmatBall), fixed = false, r=[2.0, 0.0, diameter/2])
 end
 
 
@@ -36,19 +36,36 @@ bill = TwoRollingBalls(sceneOptions=Modia3D.SceneOptions(gravityField=gravField,
 
 model = Modia3D.SimulationModel( bill )
 #ModiaMath.print_ModelVariables(model)
-result = ModiaMath.simulate!(model; stopTime=1.75, tolerance=1e-8,interval=0.001, log=false)
+result = ModiaMath.simulate!(model; stopTime=0.4, tolerance=1e-8,interval=0.001, log=false)
 
-#=
+using PyPlot
+using PyCall
+
+pyplot_rc = PyCall.PyDict(PyPlot.matplotlib["rcParams"])
+pyplot_rc["font.family"]      = "sans-serif"
+pyplot_rc["font.sans-serif"]  = ["Calibri", "Arial", "Verdana", "Lucida Grande"]
+pyplot_rc["font.size"]        = 12.0
+pyplot_rc["lines.linewidth"]  = 2.0
+pyplot_rc["grid.linewidth"]   = 0.5
+pyplot_rc["axes.grid"]        = true
+pyplot_rc["axes.titlesize"]   = "large"
+pyplot_rc["figure.titlesize"] = "large"
+fig, ax = PyPlot.subplots(figsize=(3,9))
+
+
+
 ModiaMath.plot(result, [("ball1.r[1]"),
                         ("ball1.r[3]"),
                         ("ball1.v[1]"),
-                        ("ball1.w[2]")])
-=#
+                        ("ball1.w[2]")],
+                        figure=1, reuse=true)
 
+#=
 ModiaMath.plot(result, [("ball1.r[1]", "ball2.r[1]"),
                         ("ball1.v[1]", "ball2.v[1]"),
-                        ("ball1.w[2]", "ball2.w[2]")])
-
+                        ("ball1.w[2]", "ball2.w[2]")],
+                        figure=1, reuse=true)
+=#
 #                        ("ball1.r[3]", "ball2.r[3]"),
 
 #=
