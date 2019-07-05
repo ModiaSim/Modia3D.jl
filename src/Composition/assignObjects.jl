@@ -78,7 +78,8 @@ function fillVisuElements!(scene::Scene, obj::Object3D, world::Object3D)
   visualizeFrames     = scene.options.visualizeFrames
   enableVisualization = scene.options.enableVisualization
   if enableVisualization
-    if visualizeFrames && isNotCoordinateSystem(obj) && obj.visualizeFrame != Modia3D.False
+    if isNotCoordinateSystem(obj) && obj.visualizeFrame != Modia3D.False &&
+       ((visualizeFrames && obj.visualizeFrame == Modia3D.Inherited) || obj.visualizeFrame == Modia3D.True)
       if obj != world
         obj.visualizationFrame = copyObject3D(obj, scene.autoCoordsys)
       else
