@@ -71,7 +71,7 @@ bill = Billard1(sceneOptions=Modia3D.SceneOptions(gravityField=gravField,visuali
 
 model = Modia3D.SimulationModel( bill )
 # ModiaMath.print_ModelVariables(model)
-result = ModiaMath.simulate!(model; stopTime=4.0, tolerance=1e-8,interval=0.001, log=true)
+result = ModiaMath.simulate!(model; stopTime=8.0, tolerance=1e-8,interval=0.001, log=true)
 
 ModiaMath.plot(result, [("ball1.r[1]"),
                         ("ball1.r[2]"),

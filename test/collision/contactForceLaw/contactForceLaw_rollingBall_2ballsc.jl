@@ -26,7 +26,8 @@ end
   table = Table(world)
   ball1 = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidSphere(diameter), "BilliardBall", vmatSolids ;
                            contactMaterial = cmatBall), fixed = false, r=[0.2, 0.0, diameter/2], v_start=[3.0, 0.0, 0.0], visualizeFrame=true )
-#  ball2 = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidSphere(diameter), "BilliardBall", vmatSolids ; contactMaterial = cmatBall), fixed = false, r=[1.5, 0.0, diameter/2])
+  ball2 = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidSphere(diameter), "BilliardBall", vmatSolids ;
+                           contactMaterial = cmatBall), fixed = false, r=[1.5, 0.0, diameter/2], visualizeFrame=true)
 end
 
 
@@ -52,7 +53,7 @@ pyplot_rc["axes.grid"]        = true
 pyplot_rc["axes.titlesize"]   = "medium"
 pyplot_rc["figure.titlesize"] = "medium"
 
-result = ModiaMath.simulate!(model; stopTime=0.7, tolerance=1e-8, log=false)
+result = ModiaMath.simulate!(model; stopTime=1.7, tolerance=1e-8, log=false)
 
 #=
 ModiaMath.plot(result, [("ball1.r[1]"),
@@ -61,8 +62,9 @@ ModiaMath.plot(result, [("ball1.r[1]"),
                         ("ball1.w[2]")])
 =#
 
-ModiaMath.plot(result, [ "ball1.r[1]"  "ball1.v[1]"
-                         "ball1.r[3]"  "ball1.w[2]"])
+ModiaMath.plot(result, [ ("ball1.r[1]", "ball2.r[1]"),
+                         ("ball1.v[1]", "ball2.v[1]"),
+                         ("ball1.w[2]", "ball2.w[2]")])
 
 #                        ("ball1.r[3]", "ball2.r[3]"),
 

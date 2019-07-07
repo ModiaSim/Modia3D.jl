@@ -5,26 +5,28 @@ using Modia3D.StaticArrays
 import Modia3D.ModiaMath
 
 vmat1 = Modia3D.Material(color="LightBlue" , transparency=0.5)    # material of SolidFileMesh
-vmat2 = deepcopy(vmat1)                                           # material of convex decomposition of SolidFileMesh
-vmat2.transparency = 0.7
+vmat2 = Modia3D.Material(color="Green" , transparency=0.5)
 
-cmat = Modia3D.ElasticContactMaterial(name="DryWood", mu_r = 0.0, mu_k = 0.0, cor=0.5)
 
-zDim = 1.0
-boxDim = 0.3
-rsmall = 0.005
+#cmat = Modia3D.ElasticContactMaterial(name="DryWood", mu_r = 0.0, mu_k = 0.0, cor=0.5)
+cmat = Modia3D.ElasticContactMaterial2("DryWood")
+#cmat = Modia3D.ElasticContactMaterial2("BilliardBall")
+
+zDim = 0.02
+boxDim = 0.2
+rsmall = 0.03    # 0.03
 @assembly ThreeDFiles begin
   world = Modia3D.Object3D(visualizeFrame=true)
 
   boxMoving = Modia3D.ContactBox(world, scale=[boxDim,boxDim,boxDim], rsmall=rsmall,
                                  massProperties="DryWood", material=vmat1,
-                                 contactMaterial = cmat, r=[1.0, 0.0, 2*boxDim], fixed=false)
-  box     = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidBox(5.0,2.0,zDim) , "DryWood", vmat1; contactMaterial = cmat); r=[0.0, 0.0, -zDim/2], fixed=true )
+                                 contactMaterial = cmat, r=[0.3, 0.3, 2*boxDim], fixed=false)
+  box     = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidBox(0.6,0.6,zDim) , "DryWood", vmat2; contactMaterial = cmat); r=[0.3, 0.3, -zDim/2], fixed=true )
 end
 
 
 gravField = Modia3D.UniformGravityField(g=9.81, n=[0,0,-1])
-threeD = ThreeDFiles(sceneOptions=Modia3D.SceneOptions(gravityField=gravField,visualizeFrames=false, defaultFrameLength=0.7,nz_max = 100, enableContactDetection=true, visualizeContactPoints=false, visualizeSupportPoints=false))
+threeD = ThreeDFiles(sceneOptions=Modia3D.SceneOptions(gravityField=gravField,visualizeFrames=false, defaultFrameLength=0.2,nz_max = 100, enableContactDetection=true, visualizeContactPoints=false, visualizeSupportPoints=false))
 
 # Modia3D.visualizeAssembly!( threeD )
 
