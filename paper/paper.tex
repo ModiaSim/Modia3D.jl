@@ -1,0 +1,48 @@
+
+% JuliaCon proceedings template
+\documentclass{juliacon}
+\setcounter{page}{1}
+
+
+%
+% Math
+%%%%%%%%%%%%%%%%%%%%
+
+\makeatletter
+\let\proof\@undefined
+\let\endproof\@undefined
+\makeatother
+
+\usepackage{amsmath,amsthm,amsfonts, bm}
+
+\usepackage{booktabs}
+\usepackage{enumitem}
+
+\begin{document}
+
+\input{header}
+
+\maketitle
+
+\begin{abstract}
+Modia3D is an experimental Julia package to model and simulate 3D mechanical systems.
+Ideas from modern game engines are used to achieve a highly flexible setup
+and features of multi-body programs are used to get a rigid mathematical formulation and
+support, for example, of closed kinematic loops. Collision handling is performed on convex
+geometries with elastic response calculation. A Modia3D model is solved with
+a variable-step integrator. This is important to combine Modia3D with the equation-based modeling system Modia in the future.
+\end{abstract}
+
+\input{sections/1_introduction.tex}
+\input{sections/2_flexibleDefinition.tex}
+\input{sections/3_collisionHandling.tex}
+\input{sections/4_example.tex}
+\input{sections/5_conclusion.tex}
+
+
+
+\input{bib.tex}
+
+\end{document}
+
+% Inspired by the International Journal of Computer Applications template

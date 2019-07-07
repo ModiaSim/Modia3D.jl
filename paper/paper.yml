@@ -1,0 +1,21 @@
+title: "Modia3D: Modeling and Simulation of 3D-Systems in Julia"
+keywords:
+  - Julia
+  - Modia
+  - Modia3D
+  - Modelica
+  - collision handling
+  - Minkowski Portal Refinement algorithm
+  - component-based modeling
+  - elastic force law
+  - response calculation
+authors:
+  - name: Andrea Neumayr
+    affiliation: 1
+  - name: Martin Otter
+    affiliation: 1
+affiliations:
+  - name: DLR, Institute of System Dynamics and Control, Germany
+    index: 1
+date: 7 July 2019
+bibliography: ref
