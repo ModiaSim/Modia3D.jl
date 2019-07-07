@@ -43,10 +43,19 @@ const solidMaterialPairsPalette = Dict{KeyCollisionMaterialPairs, CommonCollisio
 
 solidMaterialPairsPalette[KeyCollisionMaterialPairs("Steel", "Steel")]         = CommonCollisionProperties(0.7, 0.5, 0.001)
 
+#=
 solidMaterialPairsPalette[KeyCollisionMaterialPairs("BilliardBall", "BilliardBall")]         = CommonCollisionProperties(1.0, 0.0, 0.0)
 solidMaterialPairsPalette[KeyCollisionMaterialPairs("BilliardBall", "BilliardTable")]   = CommonCollisionProperties(0.0, 0.6, 0.02)
 
 solidMaterialPairsPalette[KeyCollisionMaterialPairs("BilliardBall", "BilliardCushion")] = CommonCollisionProperties(0.8, 0.0, 0.0)
+=#
+
+solidMaterialPairsPalette[KeyCollisionMaterialPairs("BilliardBall", "BilliardBall")]         = CommonCollisionProperties(1.0, 0.0, 0.0)
+solidMaterialPairsPalette[KeyCollisionMaterialPairs("BilliardBall", "BilliardTable")]   = CommonCollisionProperties(0.0, 0.8, 0.01)
+
+solidMaterialPairsPalette[KeyCollisionMaterialPairs("BilliardBall", "BilliardCushion")] = CommonCollisionProperties(0.8, 0.0, 0.3)
+
+solidMaterialPairsPalette[KeyCollisionMaterialPairs("DryWood", "DryWood")] = CommonCollisionProperties(0.5, 0.0, 0.0)
 
 getCommonCollisionProperties(obj1, obj2) = nothing
 
@@ -89,4 +98,46 @@ mutable struct ElasticContactPairMaterial2 <: Modia3D.AbstractContactPairMateria
 
         new(c_res, d_res, mu_k, mu_r, vsmall, wsmall)
     end
+end
+
+"""
+    material = ContactPairMaterial(;coefficientOfRestitution=0.0, slidingFrictionCoefficient=0.0,
+                                    rotationalResistanceCoefficient=0.0, vsmall=0.01, wsmall=0.01)
+
+Generates a `ContactPairMaterial` object by providing the material properties of
+two objects that are in contact to each other.
+
+# Keyword Arguments
+- coefficientOfRestitution: Coefficient of restitution between two objects (=0: inelastic ... =1: fully elastic).
+- slidingFrictionCoefficient: Kinetic/sliding friction force coefficent between two objects (`>= 0.0`).
+- rotationalResistanceCoefficient: Rotational resistance torque coefficient between two objects (`>= 0.0`).
+- `vsmall` in [m/s]: Used for regularization when computing the unit vector in direction of
+                     the relative tangential velocity to avoid a division by zero.
+- `wsmall` in [rad/s]: Used for regularization when computing the unit vector in direction
+                       of the relative angular velocity to avoid a division by zero.
+
+# Example
+```julia
+import Modia3D
+mat = Modia3D.ContactPairMaterial(coefficientOfRestitution=0.5)
+```
+"""
+mutable struct ContactPairMaterial
+    coefficientOfRestitution::Float64
+    slidingFrictionCoefficient::Float64
+    rotationalResistanceCoefficient::Float64
+    vsmall::Float64
+    wsmall::Float64
+
+    function ContactPairMaterial(; coefficientOfRestitution=0.0,
+                                   slidingFrictionCoefficient=0.0,
+                                   rotationalResistanceCoefficient=0.0,
+                                   vsmall=0.01,
+                                   wsmall=0.01)
+        @assert(coefficientOfRestitution >= 0.0)
+        @assert(coefficientOfRestitution <= 1.0)
+        @assert(slidingFrictionCoefficient >= 0.0)
+        #@assert()
+    end
+
 end

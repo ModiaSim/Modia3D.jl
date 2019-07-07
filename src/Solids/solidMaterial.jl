@@ -123,17 +123,10 @@ SolidMaterial(name::AbstractString) = solidMaterialPalette[name]
 
 
 """
-    material1 = SolidMaterial3(;kwargs...)
-    material2 = SolidMaterial3(name)
+    material = SolidMaterial3(;kwargs...)
 
-`SolidMaterial3(;kwargs...)` generates a SolidMaterial3 object by providing the material properties of a solid with
+Generates a SolidMaterial3 object by providing the material properties of a solid with
 keyword arguments. Arguments that are not provided have value = NaN.
-
-`SolidMaterial3(name)` returns a SolidMaterial3 object from dictionary `Modia3D.solidMaterialPalette2` using
-the name as dictionary key.
-
-# Arguments
-- `name::AbstractString`: Name of the material (used as key in dictionary `Modia3D.solidMaterialPalette`)
 
 # Keyword Arguments
 - `density` in [kg/m^3]: Density, see [Wikipedia](https://en.wikipedia.org/wiki/Density).
@@ -151,7 +144,6 @@ the name as dictionary key.
 ```julia
 import Modia3D
 mat1 = Modia3D.SolidMaterial3(density=3000.0, YoungsModulus=2e11)
-mat2 = Modia3D.SolidMaterial3("Steel")    # mat2.density = 8000.0
 ```
 """
 mutable struct SolidMaterial3
@@ -177,8 +169,16 @@ SolidMaterial3(; density=NaN,
                              thermalConductivity, linearThermalExpansionCoefficient)
 
 
-readSolidMaterialsDict() = Modia3D.readDictOfStructsFromJSON( joinpath(Modia3D.path, "src", "Solids", "solidMaterials.json"),
-                                                              SolidMaterial3 )
+#readSolidMaterialsDict() = Modia3D.readDictOfStructsFromJSON( joinpath(Modia3D.path, "src", "Solids", "solidMaterials.json"),
+#                                                              SolidMaterial3 )
+
+"""
+    readSolidMaterial3FromJSON(fileName)
+
+Read a JSON file consisting of a dictionary of SolidMaterial3 instances from `fileName` and
+return a `Dict{String, SolidMaterial3}` dictionary.
+"""
+readSolidMaterial3FromJSON(fileName::AbstractString) = Basics.readDictOfStructsFromJSON(fileName, SolidMaterial3)
 
 
 """
@@ -186,5 +186,4 @@ readSolidMaterialsDict() = Modia3D.readDictOfStructsFromJSON( joinpath(Modia3D.p
 
 Dictionary of solid material data, see [`Modia3D.SolidMaterial3`](@ref)
 """
-const solidMaterialPalette3 = Basics.readDictOfStructsFromJSON( joinpath(Modia3D.path, "src", "Solids", "solidMaterials.json"),
-                                                                SolidMaterial3 )
+const solidMaterialPalette3 = readSolidMaterial3FromJSON( joinpath(Modia3D.path, "src", "Solids", "solidMaterials.json") )

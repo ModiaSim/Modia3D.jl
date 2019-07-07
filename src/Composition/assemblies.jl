@@ -33,7 +33,7 @@ end
     box    = Modia3D.Object3D(parent, Modia3D.Solid(Modia3D.SolidBox(scale[1], scale[2], scale[3]; rsmall=rsmall),
                               massProperties,material; contactMaterial=contactMaterial),
                               fixed=fixed, r=r, R=R, q=q, v_start=v_start, w_start=w_start, visualizeFrame=visualizeFrame)
-    sphere = Modia3D.Solid(Modia3D.SolidSphere(2*rsmall), nothing, Modia3D.Material(color="Yellow"); contactMaterial=contactMaterial)
+    sphere = Modia3D.Solid(Modia3D.SolidSphere(2*rsmall), nothing, Modia3D.Material(color="Red"); contactMaterial=contactMaterial)
     ball1  = Modia3D.Object3D(box, sphere, fixed=true, r=[ scale[1]/2,  scale[2]/2,  scale[3]/2], visualizeFrame=false)
     ball2  = Modia3D.Object3D(box, sphere, fixed=true, r=[-scale[1]/2,  scale[2]/2,  scale[3]/2], visualizeFrame=false)
     ball3  = Modia3D.Object3D(box, sphere, fixed=true, r=[ scale[1]/2, -scale[2]/2,  scale[3]/2], visualizeFrame=false)
@@ -43,3 +43,4 @@ end
     ball7  = Modia3D.Object3D(box, sphere, fixed=true, r=[ scale[1]/2, -scale[2]/2, -scale[3]/2], visualizeFrame=false)
     ball8  = Modia3D.Object3D(box, sphere, fixed=true, r=[-scale[1]/2, -scale[2]/2, -scale[3]/2], visualizeFrame=false)
 end
+2
