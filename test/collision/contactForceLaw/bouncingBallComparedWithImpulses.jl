@@ -98,7 +98,6 @@ model1 = Model(cor=cor, vsmall=vsmall )
 result1 = ModiaMath.simulate!(model1, stopTime=stopTime, log=false)
 ModiaMath.plot(result1, ["h", ("v", "flying"), "cor_res"], heading="Bouncing ball with impulsive response calculation", figure=1)
 
-
 ballMaterial  = Modia3D.Material(color="Red"       , transparency=0.5)
 tableMaterial = Modia3D.Material(color="LightBlue" , transparency=0.5)
 
@@ -134,6 +133,9 @@ end
 using PyPlot
 using PyCall
 
+
+fig, ax = PyPlot.subplots(figsize=(3,9))
+
 pyplot_rc = PyCall.PyDict(PyPlot.matplotlib["rcParams"])
 pyplot_rc["font.family"]      = "sans-serif"
 pyplot_rc["font.sans-serif"]  = ["Calibri", "Arial", "Verdana", "Lucida Grande"]
@@ -143,6 +145,7 @@ pyplot_rc["grid.linewidth"]   = 0.5
 pyplot_rc["axes.grid"]        = true
 pyplot_rc["axes.titlesize"]   = "medium"
 pyplot_rc["figure.titlesize"] = "medium"
+
 
 
 t1      = result1["time"]
@@ -156,10 +159,11 @@ v2 = result2."ball.v[3]"
 
 figure(3)
 clf()
+
 plot(t1,h1,"b", t2,h2,"r", t1,cor_res,"g")
 grid(true)
 xlabel("time [s]")
-ylabel("height [m] and cor []")
+ylabel("height [m]")
 legend(["impulsive response",
         "compliant response",
         "\$cor_{res}\$"])

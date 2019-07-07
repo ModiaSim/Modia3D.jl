@@ -13,12 +13,15 @@ cmatTable = Modia3D.ElasticContactMaterial2("BilliardTable")
 cmatBall = Modia3D.ElasticContactMaterial2("BilliardBall")
 
 LxGround = 6.0
+
+
+
 LyBox = 0.5
 LzBox = 0.02
 diameter = 0.06
 @assembly Table(world) begin
   withBox = Modia3D.Solid(Modia3D.SolidBox(LxGround, LyBox, LzBox) , "DryWood", vmatTable; contactMaterial = cmatTable)
-  box1 = Modia3D.Object3D(world, withBox, r=[3.0, 0.0, -LzBox/2], fixed=true)
+  box1 = Modia3D.Object3D(world, withBox, r=[2.5, 0.0, -LzBox/2], fixed=true, visualizeFrame=false)
 end
 
 @assembly TwoRollingBalls() begin
@@ -54,26 +57,17 @@ pyplot_rc["figure.titlesize"] = "medium"
 
 result = ModiaMath.simulate!(model; stopTime=0.7, tolerance=1e-8, log=false)
 
-#=
+fig, ax = PyPlot.subplots(figsize=(3,9))
+
 ModiaMath.plot(result, [("ball1.r[1]"),
                         ("ball1.r[3]"),
                         ("ball1.v[1]"),
-                        ("ball1.w[2]")])
-=#
+                        ("ball1.w[2]")],
+                        figure=1, reuse=true)
 
 ModiaMath.plot(result, [ "ball1.r[1]"  "ball1.v[1]"
                          "ball1.r[3]"  "ball1.w[2]"])
 
-#                        ("ball1.r[3]", "ball2.r[3]"),
-
-#=
-
-ModiaMath.plot(result, [("ball1.r[3]", "ball2.r[3]"),
-                        ("ball1.v[1]", "ball2.v[1]"),
-                        ("ball1.v[3]", "ball2.v[3]"),
-                        ("ball1.w[2]", "ball2.w[2]"),
-                        ("ball1.w[1]", "ball2.w[1]")])
-=#
 
 
 ball_r = result.series["ball1.r"][:,1]
