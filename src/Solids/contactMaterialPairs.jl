@@ -57,6 +57,8 @@ solidMaterialPairsPalette[KeyCollisionMaterialPairs("BilliardBall", "BilliardCus
 
 solidMaterialPairsPalette[KeyCollisionMaterialPairs("DryWood", "DryWood")] = CommonCollisionProperties(0.5, 0.0, 0.0)
 
+solidMaterialPairsPalette[KeyCollisionMaterialPairs("Steel", "Steel")] = CommonCollisionProperties(0.99, 0.0, 0.0)
+
 getCommonCollisionProperties(obj1, obj2) = nothing
 
 function getCommonCollisionProperties(mat1::ElasticContactMaterial2, mat2::ElasticContactMaterial2)

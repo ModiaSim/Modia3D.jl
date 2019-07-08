@@ -12,13 +12,13 @@ vmatTable = Modia3D.Material(color="Green", transparency=0.5)         # material
 cmatTable = Modia3D.ElasticContactMaterial2("BilliardTable")
 cmatBall = Modia3D.ElasticContactMaterial2("BilliardBall")
 
-LxGround = 6.0
+LxGround = 3.0
 LyBox = 0.5
 LzBox = 0.02
 diameter = 0.06
 @assembly Table(world) begin
   withBox = Modia3D.Solid(Modia3D.SolidBox(LxGround, LyBox, LzBox) , "DryWood", vmatTable; contactMaterial = cmatTable)
-  box1 = Modia3D.Object3D(world, withBox, r=[3.0, 0.0, -LzBox/2], fixed=true)
+  box1 = Modia3D.Object3D(world, withBox, r=[1.5, 0.0, -LzBox/2], fixed=true)
 end
 
 @assembly TwoRollingBalls() begin
@@ -27,7 +27,7 @@ end
   ball1 = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidSphere(diameter), "BilliardBall", vmatSolids ;
                            contactMaterial = cmatBall), fixed = false, r=[0.2, 0.0, diameter/2], v_start=[3.0, 0.0, 0.0], visualizeFrame=true )
   ball2 = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidSphere(diameter), "BilliardBall", vmatSolids ;
-                           contactMaterial = cmatBall), fixed = false, r=[1.5, 0.0, diameter/2], visualizeFrame=true)
+                           contactMaterial = cmatBall), fixed = false, r=[1.2, 0.0, diameter/2], visualizeFrame=true)
 end
 
 
@@ -53,7 +53,7 @@ pyplot_rc["axes.grid"]        = true
 pyplot_rc["axes.titlesize"]   = "medium"
 pyplot_rc["figure.titlesize"] = "medium"
 
-result = ModiaMath.simulate!(model; stopTime=1.7, tolerance=1e-8, log=false)
+result = ModiaMath.simulate!(model; stopTime=1.0, tolerance=1e-8, log=false)
 
 #=
 ModiaMath.plot(result, [("ball1.r[1]"),
