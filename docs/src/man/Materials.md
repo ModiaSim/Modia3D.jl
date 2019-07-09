@@ -13,7 +13,7 @@ information. The following materia data is supported
 - [Solid material](@ref): Material constants of *one solid*, such as
   *density* or *Young's modulus*.
 
-- [Contact material](@ref): Material constants that are related to *two*
+- [Contact pair material](@ref): Material constants that are related to *two*
   solids that are in contact to each other, such as the *coefficient of restitution*
   between a Steel and an Aluminium object.
 
@@ -50,7 +50,7 @@ The *key* is the *material name* as a string, and the *value* is an instance of 
 (with *density* and the object geometry), or to compute the spring constant
 for a compliant contact (with *Youngs's modulus* and *Poisson's ratio*).
 
-### Example:
+### Keys of the dictionary
 
 ```@repl
 import Modia3D
@@ -58,18 +58,18 @@ Modia3D.listKeys(Modia3D.solidMaterialPalette3)
 d_steel = Modia3D.solidMaterialPalette3["Steel"].density
 ```
 
-## Contact material
-
-- [Contact material](@ref): The dictionary [`Modia3D.contactMaterialPalette`](@ref) provides
-  material constants that are related to **two** solids that are in contact to each other,
-  such as the *coefficient of restitution*  between a `"Steel"` and an `"Aluminium"` object.
-
-The dictionary [`Modia3D.contactMaterialPalette`](@ref) provides
-  material constants that are related to **two** solids that are in contact to each other,
-  such as the *coefficient of restitution*  between a `"Steel"` and an `"Aluminium"` object.
 
 
-The dictionary [`Modia3D.contactMaterialPalette`](@ref) provides material constants
-that are related to *two* solids that are in contact to each other.
-The *key* is a struct consisting of two *material names* as strings and the *value*
-is an instance of the mutable struct [`Modia3D.ContactMaterial`](@ref).
+## Contact pair material
+
+The dictionary [`Modia3D.contactPairMaterialPalette`](@ref) provides
+omaterial constants that are related to *two* solids that are in contact to each other,
+for example the *coefficient of restitution*  between a `"Steel"` and an `"Aluminium"` object.
+It is filled during the first usage of Modia3D from file `Modia3D/src/Solids/contactPairMaterials.json`.
+
+### Keys of the dictionary
+
+```@repl
+import Modia3D
+Modia3D.listKeys(Modia3D.contactPairMaterialPalette)
+```
