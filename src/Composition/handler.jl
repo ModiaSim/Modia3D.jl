@@ -172,7 +172,7 @@ function build_superObjs!(scene::Scene, world::Object3D)::NOTHING
   end
   addIndicesOfCutJointsToSuperObj(scene)
 
-
+#=
   println("superObjRow.superObjCollision.superObj")
   for superObjRow in scene.superObjs
   println("[")
@@ -182,7 +182,7 @@ function build_superObjs!(scene::Scene, world::Object3D)::NOTHING
   println("]")
   println(" ")
   end
-
+=#
 
   hasMoreCollisionSuperObj ? (scene.collide = true) : (scene.collide = false)
   scene.initSuperObj = true
