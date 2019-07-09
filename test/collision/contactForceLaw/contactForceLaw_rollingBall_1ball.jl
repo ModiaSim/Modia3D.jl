@@ -1,4 +1,4 @@
-module contactForceLaw_rollingBall_2balls
+module contactForceLaw_rollingBall_1ball
 
 using Modia3D
 using Modia3D.StaticArrays
@@ -12,7 +12,7 @@ vmatTable = Modia3D.Material(color="Green", transparency=0.5)         # material
 cmatTable = Modia3D.ElasticContactMaterial2("BilliardTable")
 cmatBall = Modia3D.ElasticContactMaterial2("BilliardBall")
 
-LxGround = 5.0
+LxGround = 3.0
 
 
 
@@ -21,20 +21,19 @@ LzBox = 0.02
 diameter = 0.06
 @assembly Table(world) begin
   withBox = Modia3D.Solid(Modia3D.SolidBox(LxGround, LyBox, LzBox) , "DryWood", vmatTable; contactMaterial = cmatTable)
-  box1 = Modia3D.Object3D(world, withBox, r=[2.5, 0.0, -LzBox/2], fixed=true, visualizeFrame=false)
+  box1 = Modia3D.Object3D(world, withBox, r=[1.5, 0.0, -LzBox/2], fixed=true, visualizeFrame=false)
 end
 
-@assembly TwoRollingBalls() begin
+@assembly OneRollingBall() begin
   world = Modia3D.Object3D(visualizeFrame=false)
   table = Table(world)
   ball1 = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidSphere(diameter), "BilliardBall", vmatSolids ;
                            contactMaterial = cmatBall), fixed = false, r=[0.2, 0.0, diameter/2], v_start=[3.0, 0.0, 0.0], visualizeFrame=true )
-  ball2 = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidSphere(diameter), "BilliardBall", vmatSolids ; contactMaterial = cmatBall), fixed = false, r=[1.5, 0.0, diameter/2], visualizeFrame=true)
 end
 
 
 gravField = Modia3D.UniformGravityField(g=9.81, n=[0,0,-1])
-bill = TwoRollingBalls(sceneOptions=Modia3D.SceneOptions(gravityField=gravField,visualizeFrames=false,
+bill = OneRollingBall(sceneOptions=Modia3D.SceneOptions(gravityField=gravField,visualizeFrames=false,
                        defaultFrameLength=0.1,nz_max = 100, enableContactDetection=true, visualizeContactPoints=false, visualizeSupportPoints=false))
 
 #Modia3D.visualizeAssembly!( bill )
@@ -55,7 +54,7 @@ pyplot_rc["axes.grid"]        = true
 pyplot_rc["axes.titlesize"]   = "medium"
 pyplot_rc["figure.titlesize"] = "medium"
 
-result = ModiaMath.simulate!(model; stopTime=1.5, tolerance=1e-8, log=false)
+result = ModiaMath.simulate!(model; stopTime=1.0, tolerance=1e-8, log=false)
 
 fig, ax = PyPlot.subplots(figsize=(3,9))
 
@@ -80,5 +79,5 @@ distEnd = ( ball_r[l_t] - ball_r[l_t - 1] ) / (t[l_t] - t[l_t-1] )
 println("dist = ", dist)
 println("distEnd = ", distEnd)
 
-println("... success of contactForceLaw_rollingBall_2balls.jl!")
+println("... success of contactForceLaw_rollingBall_1ball.jl!")
 end
