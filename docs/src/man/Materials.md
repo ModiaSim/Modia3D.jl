@@ -26,7 +26,7 @@ information. The following materia data is supported
  dictionary, where the color name is used as key and which is filled during the first
  usage of Modia3D from file `Modia3D/src/Graphics/colors.json`.
 
-### Example:
+### Content of colors palette
 
 ```@repl
 import Modia3D
@@ -50,7 +50,7 @@ The *key* is the *material name* as a string, and the *value* is an instance of 
 (with *density* and the object geometry), or to compute the spring constant
 for a compliant contact (with *Youngs's modulus* and *Poisson's ratio*).
 
-### Keys of the dictionary
+### Content of solid material palette
 
 ```@repl
 import Modia3D
@@ -67,7 +67,7 @@ omaterial constants that are related to *two* solids that are in contact to each
 for example the *coefficient of restitution*  between a `"Steel"` and an `"Aluminium"` object.
 It is filled during the first usage of Modia3D from file `Modia3D/src/Solids/contactPairMaterials.json`.
 
-### Keys of the dictionary
+### Content of contact pairs palette
 
 ```@repl
 import Modia3D

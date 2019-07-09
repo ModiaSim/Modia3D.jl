@@ -319,7 +319,7 @@ function initAnalysis!(assembly::Modia3D.AbstractAssembly;
       error("\nError message from Modia3D.initAnalysis!(..):\n",
             typeof(assembly), " has no reference frame.")
    end
-   println("initAnalysis!(assembly::Modia3D.AbstractAssembly;                        analysis::ModiaMath.AnalysisType=ModiaMath.KinematicAnalysis)")
+   #println("initAnalysis!(assembly::Modia3D.AbstractAssembly;                        analysis::ModiaMath.AnalysisType=ModiaMath.KinematicAnalysis)")
    # Construct Scene(..) object
    world = assembly._internal.referenceObject3D
    so    = assembly._internal.sceneOptions
@@ -440,30 +440,30 @@ end
 function closeAnalysis!(scene::Scene)
      # Close Visualisation
      closeVisualization(Modia3D.renderer[1])
-     Basics.emptyArray!(scene.allVisuElements)
+     empty!(scene.allVisuElements)
      scene.visualize = false
      # Close Collision detection
      if scene.collide
         closeContactDetection!(scene.options.contactDetection)
      end
-     Basics.emptyArray!(scene.stack)
-     Basics.emptyArray!(scene.buffer)
-     Basics.emptyArray!(scene.superObjs)
-     Basics.emptyArray!(scene.noCPairs)
+     empty!(scene.stack)
+     empty!(scene.buffer)
+     empty!(scene.superObjs)
+     empty!(scene.noCPairs)
      scene.collide = false
 
      scene.initSuperObj = false
 
      # Close signals and Forces and Torques
-     Basics.emptyArray!(scene.uniqueSignals)
-     Basics.emptyArray!(scene.uniqueForceTorques)
-     Basics.emptyArray!(scene.potentialVarInput)
-     Basics.emptyArray!(scene.potentialVarOutput)
-     Basics.emptyArray!(scene.flowVarInput)
-     Basics.emptyArray!(scene.flowVarOutput)
+     empty!(scene.uniqueSignals)
+     empty!(scene.uniqueForceTorques)
+     empty!(scene.potentialVarInput)
+     empty!(scene.potentialVarOutput)
+     empty!(scene.flowVarInput)
+     empty!(scene.flowVarOutput)
 
      # Close Spanning tree
-     Basics.emptyArray!(scene.tree)
+     empty!(scene.tree)
 
      # Close Analysis
      scene.initAnalysis = false

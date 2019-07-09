@@ -60,7 +60,7 @@ function getObjInfos(filename::AbstractString, scaleFactor::MVector{3,Float64})
       centroid = ModiaMath.ZeroVector3D
     end
     if !areTriangles
-      Basics.emptyArray!(facesIndizes)
+      empty!(facesIndizes)
     end
     longestEdge = max((x_max-x_min), (y_max-y_min), (z_max-z_min))
     end
