@@ -20,11 +20,11 @@ vmat2 = Modia3D.Material(color="Red")
 end
 
 @assembly Fourbar(;Lx = 0.1, Ly=Lx/5, Lz=Ly, groundWidth=Lx, groundHeight=0.1*Lx) begin
-   world  = Modia3D.Object3D(Modia3D.CoordinateSystem(0.6))
+   world  = Modia3D.Object3D(visualizeFrame=false)
    frame1 = Modia3D.Object3D(world ; r=[0.5*Lx, 0.0, groundWidth/2])
    frame2 = Modia3D.Object3D(frame1; r=[Lx    , 0.0, 0.0])
-   ground = Modia3D.Object3D(world , Modia3D.Box(3*Lx, groundWidth, groundHeight; material=groundMaterial);
-                                              r = [1.5*Lx, -groundHeight/2, groundWidth/2],
+   ground = Modia3D.Object3D(world , Modia3D.Box(2.0*Lx, groundWidth, groundHeight; material=groundMaterial);
+                                              r = [Lx, -groundHeight/2, groundWidth/2],
                                               R = ModiaMath.rot_nxy([-1,0,0], [0,0,1]))
    bar1   = Bar(Lx=Lx, Ly=Ly, Lz=Lz)
    bar2   = Bar(Lx=Lx, Ly=Ly, Lz=Lz)
@@ -61,7 +61,7 @@ Lx = 1.0
    Modia3D.connect(sig, fourbar.rev1)
 end
 
-model  = Modia3D.SimulationModel( Move(), analysis=ModiaMath.KinematicAnalysis)
+model  = Modia3D.SimulationModel( Move(sceneOptions=Modia3D.SceneOptions(visualizeFrames=false)), analysis=ModiaMath.KinematicAnalysis)
 result = ModiaMath.simulate!(model, stopTime=3.0, log=false)
 
 println("... success of Move_FourBar.jl!")

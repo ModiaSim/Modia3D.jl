@@ -6,8 +6,8 @@ import Modia3D.ModiaMath
 
 
 vmatGraphics = Modia3D.Material(color="LightBlue" , transparency=0.5)    # material of Graphics
-vmatSolids = Modia3D.Material(color="Red" , transparency=0.1)         # material of solids
-vmatTable = Modia3D.Material(color="Green", transparency=0.5)         # material of table
+vmatSolids = Modia3D.Material(color="Red" , transparency=0.0)         # material of solids
+vmatTable = Modia3D.Material(color="Green", transparency=0.1)         # material of table
 
 cmatTable = Modia3D.ElasticContactMaterial2("BilliardTable")
 cmatBall = Modia3D.ElasticContactMaterial2("BilliardBall")
@@ -54,7 +54,7 @@ pyplot_rc["axes.grid"]        = true
 pyplot_rc["axes.titlesize"]   = "medium"
 pyplot_rc["figure.titlesize"] = "medium"
 
-result = ModiaMath.simulate!(model; stopTime=1.0, tolerance=1e-8, log=false)
+result = ModiaMath.simulate!(model; stopTime=0.2, tolerance=1e-8, log=false)
 
 fig, ax = PyPlot.subplots(figsize=(3,9))
 

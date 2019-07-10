@@ -6,8 +6,8 @@ import Modia3D.ModiaMath
 
 
 vmatGraphics = Modia3D.Material(color="LightBlue" , transparency=0.5)    # material of Graphics
-vmatSolids = Modia3D.Material(color="Red" , transparency=0.5)         # material of solids
-vmatTable = Modia3D.Material(color="Green", transparency=0.5)         # material of table
+vmatSolids = Modia3D.Material(color="Red" , transparency=0.0)         # material of solids
+vmatTable = Modia3D.Material(color="Green", transparency=0.1)         # material of table
 
 cmatTable = Modia3D.ElasticContactMaterial2("BilliardTable")
 cmatBall = Modia3D.ElasticContactMaterial2("BilliardBall")
@@ -27,7 +27,7 @@ end
   ball1 = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidSphere(diameter), "BilliardBall", vmatSolids ;
                            contactMaterial = cmatBall), fixed = false, r=[0.2, 0.0, diameter/2], v_start=[3.0, 0.0, 0.0], visualizeFrame=true )
   ball2 = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidSphere(diameter), "BilliardBall", vmatSolids ;
-                           contactMaterial = cmatBall), fixed = false, r=[1.2, 0.0, diameter/2], visualizeFrame=true)
+                           contactMaterial = cmatBall), fixed = false, r=[1.5, 0.0, diameter/2], visualizeFrame=true)
 end
 
 
