@@ -436,7 +436,10 @@ function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64
                 if ModiaMath.isLogEvents(simh.logger)
                     name1 = ModiaMath.instanceName(obj1)
                     name2 = ModiaMath.instanceName(obj2)
-                    println("        distance(", name1, ",", name2, ") = ", pair.distanceWithHysteresis, " (became < 0)")
+                    n     = pair.contactNormal
+                    println("        distance(", name1, ",", name2, ") = ", pair.distanceWithHysteresis, " became < 0")
+                    Printf.@printf("            contact normal = [%.3g,%.3g,%.3g], contact position = [%.3g,%.3g,%.3g]\n",
+                                   n[1],n[2],n[3],rContact[1],rContact[2],rContact[3])
                 end
             end
         end

@@ -53,7 +53,7 @@ solidMaterialPairsPalette[KeyCollisionMaterialPairs("BilliardBall", "BilliardCus
 solidMaterialPairsPalette[KeyCollisionMaterialPairs("BilliardBall", "BilliardBall")]         = CommonCollisionProperties(1.0, 0.0, 0.0)
 solidMaterialPairsPalette[KeyCollisionMaterialPairs("BilliardBall", "BilliardTable")]   = CommonCollisionProperties(0.0, 0.8, 0.01)
 
-solidMaterialPairsPalette[KeyCollisionMaterialPairs("BilliardBall", "BilliardCushion")] = CommonCollisionProperties(0.8, 0.0, 0.3)
+solidMaterialPairsPalette[KeyCollisionMaterialPairs("BilliardBall", "BilliardCushion")] = CommonCollisionProperties(0.98, 0.0, 0.0)
 
 solidMaterialPairsPalette[KeyCollisionMaterialPairs("DryWood", "DryWood")] = CommonCollisionProperties(0.5, 0.0, 0.0)
 

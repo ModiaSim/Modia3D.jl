@@ -80,6 +80,7 @@ import Modia3D.Solids
 import Modia3D.Graphics
 import Modia3D.Signals
 import JSON
+import Printf
 
 const NOTHING = Nothing
 

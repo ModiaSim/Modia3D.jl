@@ -61,6 +61,9 @@ struct SolidBox <: Modia3D.AbstractSolidGeometry
     @assert(rsmall >= 0.0)
 
     rsmall2 = min(rsmall, 0.1*min(Lx, Ly, Lz)) # at most 10% of the smallest edge length
+    if rsmall2 < rsmall
+        println("rsmall in SolidBox changed from $rsmall to $rsmall2")
+    end
     @assert(Lx >= 2*rsmall2)
     @assert(Ly >= 2*rsmall2)
     @assert(Lz >= 2*rsmall2)
