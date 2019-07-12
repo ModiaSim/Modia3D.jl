@@ -9,7 +9,7 @@ vmatGraphics = Modia3D.Material(color="LightBlue" , transparency=0.1)    # mater
 vmatSolids = Modia3D.Material(color="Red" , transparency=0.0)         # material of solids
 
 
-cmat = Modia3D.ElasticContactMaterial2("Steel")
+cmat = Modia3D.ElasticContactMaterial2("BilliardBall")
 
 Lx = 0.3
 Ly = 4.1
@@ -49,10 +49,10 @@ end
   pendulum5 = Pendulum()
 
   rev1   = Modia3D.Revolute(frame1, pendulum1.frame1; axis = 1 , phi_start =  -pi/3)
-  rev2   = Modia3D.Revolute(frame2, pendulum2.frame1; axis = 1 , phi_start =  -pi/3)
+  rev2   = Modia3D.Revolute(frame2, pendulum2.frame1; axis = 1 )#, phi_start =  -pi/3)
   rev3   = Modia3D.Revolute(frame3, pendulum3.frame1; axis = 1 ) #, phi_start =  -pi/3)
   rev4   = Modia3D.Revolute(frame4, pendulum4.frame1; axis = 1 )#, phi_start =  pi/3 ) #
-  rev5   = Modia3D.Revolute(frame5, pendulum5.frame1; axis = 1  , phi_start =  pi/3 ) #
+  rev5   = Modia3D.Revolute(frame5, pendulum5.frame1; axis = 1 )# , phi_start =  pi/3 ) #
 end
 
 @assembly Pendulum() begin
