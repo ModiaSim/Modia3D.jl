@@ -39,7 +39,7 @@ bill = TwoRollingBalls(sceneOptions=Modia3D.SceneOptions(gravityField=gravField,
 
 #Modia3D.visualizeAssembly!( bill )
 
-model = Modia3D.SimulationModel( bill, maxNumberOfSteps=1000 )
+model = Modia3D.SimulationModel( bill )
 #ModiaMath.print_ModelVariables(model)
 
 using PyPlot
@@ -55,15 +55,7 @@ pyplot_rc["axes.grid"]        = true
 pyplot_rc["axes.titlesize"]   = "medium"
 pyplot_rc["figure.titlesize"] = "medium"
 
-result = ModiaMath.simulate!(model; stopTime=0.028, tolerance=1e-8, log=true, maxNumberOfSteps=1000)
-
-fig, ax = PyPlot.subplots(figsize=(3,9))
-
-ModiaMath.plot(result, [("ball1.r[1]"),
-                        ("ball1.r[3]"),
-                        ("ball1.v[1]"),
-                        ("ball1.w[2]")],
-                        figure=1, reuse=true)
+result = ModiaMath.simulate!(model; stopTime=1.5, tolerance=1e-8, log=true, maxNumberOfSteps=1000)
 
 ModiaMath.plot(result, [ "ball1.r[1]"  "ball1.v[1]"
                          "ball1.r[3]"  "ball1.w[2]"])

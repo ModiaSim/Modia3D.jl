@@ -25,14 +25,11 @@ diameter = 0.06
 end
 
 sphere = Modia3D.Solid(Modia3D.SolidSphere(diameter), "BilliardBall", vmatSolids ;   contactMaterial = cmatBall)
-println("... sphere = ", sphere)
 
 @assembly OneRollingBall() begin
   world = Modia3D.Object3D(visualizeFrame=false)
   table = Table(world)
-  ball1 = Modia3D.Object3D(world, sphere, fixed = false, r=[0.2, 0.0, diameter/2], v_start=[0.1, 0.0, 0.0], visualizeFrame=true )
-# ball1 = Modia3D.Object3D(world, sphere, fixed = false, r=[0.2, 0.0, diameter/2], v_start=[3.0, 0.0, 0.0], visualizeFrame=true )
-
+  ball1 = Modia3D.Object3D(world, sphere, fixed = false, r=[0.2, 0.0, diameter/2], v_start=[3.0, 0.0, 0.0], visualizeFrame=true )
 end
 
 
@@ -62,8 +59,7 @@ pyplot_rc["axes.titlesize"]   = "medium"
 pyplot_rc["figure.titlesize"] = "medium"
 =#
 
-#result = ModiaMath.simulate!(model; stopTime=0.019, tolerance=1e-8, log=true)
-result = ModiaMath.simulate!(model; stopTime=0.01, tolerance=1e-8, log=true, interval = 0.001)
+result = ModiaMath.simulate!(model; stopTime=0.5, tolerance=1e-8, log=true, interval = 0.001)
 
 #=
 clf()

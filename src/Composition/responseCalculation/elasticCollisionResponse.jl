@@ -110,8 +110,8 @@ function contactStart(matPair::Solids.ElasticContactPairMaterial,
                             matPair.rotationalResistanceCoefficient, mu_r_geo,
                             matPair.vsmall, matPair.wsmall)
 
-    println("... response material (", ModiaMath.instanceName(obj1), ",", ModiaMath.instanceName(obj2),
-            ") = ", responseMaterial)
+    # println("... response material (", ModiaMath.instanceName(obj1), ",", ModiaMath.instanceName(obj2),
+    #        ") = ", responseMaterial)
     return responseMaterial
 end
 
@@ -182,20 +182,21 @@ function responseCalculation(material::ElasticContactPairResponseMaterial, obj1:
     t1  = cross(r_rel1,f1) + tau
     t2  = cross(r_rel2,f2) - tau
 
+#=
   println(file,"... time = ", time,
-          " fn = ", fn, 
-          " ft = ", ft, 
-          " tau = ", tau, 
-          " e_n = ", e_n, 
-          " delta_dot ", delta_dot, 
-          " mu_k = ", mu_k, 
+          " fn = ", fn,
+          " ft = ", ft,
+          " tau = ", tau,
+          " e_n = ", e_n,
+          " delta_dot ", delta_dot,
+          " mu_k = ", mu_k,
           " mu_r = ", mu_r,
           " c_geo = ", c_geo,
           " n_geo = ", n_geo,
           " mu_r_geo = ", mu_r_geo,
           " f1 = ", f1,
           " t1 = ", t1)
-
+=#
     #if time > 0.022
     #    #println("obj1= \"", ModiaMath.instanceName(obj1), "\" obj2 = ", ModiaMath.instanceName(obj2), " fn = ", fn, " en = ", e_n, " delta_dot ", delta_dot, " time = ", time, " mu_k = ", mu_k, " mu_r = ", mu_r)
     #    println(" fn = ", fn, " ft = ", ft, " tau = ", tau, " e_n = ", e_n, " delta_dot ", delta_dot, " time = ", time, " mu_k = ", mu_k, " mu_r = ", mu_r)

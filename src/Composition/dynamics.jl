@@ -424,7 +424,7 @@ function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64
       for (pairID, pair) in ch.contactDict
         obj1 = pair.obj1
         obj2 = pair.obj2
-        rContact      = pair.rContact
+        rContact      = (pair.contactPoint1 + pair.contactPoint2)/2.0
         contactNormal = pair.contactNormal
 
         #simh = sim.eventHandler
