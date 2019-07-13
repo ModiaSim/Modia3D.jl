@@ -1,0 +1,22 @@
+{
+    "Steel,Steel": {
+       "coefficientOfRestitution": 0.7,
+       "slidingFrictionCoefficient": 0.5,
+       "rotationalResistanceCoefficient": 0.001
+    },
+   "BilliardBall,BilliardBall": {
+       "coefficientOfRestitution": 1.0,
+       "slidingFrictionCoefficient": 0.0,
+       "rotationalResistanceCoefficient": 0.0
+   },
+   "BilliardBall,BilliardTable": {
+       "coefficientOfRestitution": 0.0,
+       "slidingFrictionCoefficient": 0.8,
+       "rotationalResistanceCoefficient": 0.01
+   },
+   "BilliardBall,BilliardCushion": {
+       "coefficientOfRestitution": 0.98,
+       "slidingFrictionCoefficient": 0.0,
+       "rotationalResistanceCoefficient": 0.0
+   }
+}
