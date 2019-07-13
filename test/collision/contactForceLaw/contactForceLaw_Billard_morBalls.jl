@@ -13,12 +13,17 @@ cmatBall    = Modia3D.ElasticContactMaterial2("BilliardBall")
 cmatCushion = Modia3D.ElasticContactMaterial2("BilliardCushion")
 
 diameter = 0.06
+radius = diameter/2
+distance_balls = sqrt(3)/2*diameter
+dist = 0.0001
 
 TableX = 2.24
 TableY = 1.12
 TableZ = 0.05
 LyBox = 0.05
 LzBox = 0.05
+hz  = 7*radius/5
+hzz = hz/3
 
 
 @assembly Table(world) begin
@@ -27,13 +32,19 @@ LzBox = 0.05
 end
 
 @assembly Cushion(world) begin
-  # breite = TableY
-  withBox = Modia3D.Solid(Modia3D.SolidBox(LyBox, TableY, LzBox) , "BilliardCushion", vmatTable; contactMaterial = cmatCushion)
-  lengthBox = Modia3D.Solid(Modia3D.SolidBox(TableX, LyBox, LzBox) , "BilliardCushion", vmatTable; contactMaterial = cmatCushion)
-  cushion1 = Modia3D.Object3D(world, withBox, r=[TableX/2, 0.0, TableZ/2], fixed=true)
-  cushion2 = Modia3D.Object3D(world, withBox, r=[-TableX/2, 0.0, TableZ/2], fixed=true)
-  cushion3 = Modia3D.Object3D(world, lengthBox, r=[0.0, TableY/2, TableZ/2], fixed=true)
-  cushion4 = Modia3D.Object3D(world, lengthBox, r=[0.0, -TableY/2, TableZ/2], fixed=true)
+  cushionPart11 = Modia3D.Solid(Modia3D.SolidBox(LyBox, TableY, hz) , "BilliardCushion", vmatTable)
+  cushionPart12 = Modia3D.Solid(Modia3D.SolidBox(1.5*LyBox, TableY, hzz,rsmall=0.0) , "BilliardCushion", vmatTable; contactMaterial = cmatCushion)
+  cushionPart21 = Modia3D.Solid(Modia3D.SolidBox(TableX, LyBox , hz) , "BilliardCushion", vmatTable)
+  cushionPart22 = Modia3D.Solid(Modia3D.SolidBox(TableX, 1.5*LyBox, hzz,rsmall=0.0) , "BilliardCushion", vmatTable; contactMaterial = cmatCushion)
+
+  cushion11 = Modia3D.Object3D(world    , cushionPart11, r=[TableX/2 - LyBox/2, 0.0, hz/2], fixed=true)
+  cushion12 = Modia3D.Object3D(cushion11, cushionPart12, r=[-LyBox/4     , 0.0, hz/2+hzz/2], fixed=true)
+  cushion31 = Modia3D.Object3D(world    , cushionPart11, r=[-TableX/2 + LyBox/2, 0.0, hz/2], fixed=true)
+  cushion32 = Modia3D.Object3D(cushion31, cushionPart12, r=[LyBox/4     , 0.0, hz/2+hzz/2], fixed=true)
+  cushion21 = Modia3D.Object3D(world    , cushionPart21, r=[0.0, TableY/2 - LyBox/2 , hz/2], fixed=true)
+  cushion22 = Modia3D.Object3D(cushion21, cushionPart22, r=[0.0, -LyBox/4 , hz/2+hzz/2], fixed=true)
+  cushion41 = Modia3D.Object3D(world    , cushionPart21, r=[0.0, -TableY/2 + LyBox/2 , hz/2], fixed=true)
+  cushion42 = Modia3D.Object3D(cushion41, cushionPart22, r=[0.0, LyBox/4 , hz/2+hzz/2], fixed=true)
 end
 
 
@@ -42,15 +53,13 @@ end
 
 end
 
-distance_balls = sqrt(3)/2*diameter
 
-dist = 0.0001
 
 @assembly Billard1() begin
   world = Modia3D.Object3D(visualizeFrame=false)
   table = Table(world)
   cushion = Cushion(world)
-  ballStart = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidSphere(diameter), "BilliardBall", vmatBalls ; contactMaterial = cmatBall), fixed = false, r=[-0.8, 0.01, diameter/2], v_start=[6.0, 0.1, 0.0])
+  ballStart = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidSphere(diameter), "BilliardBall", vmatBalls ; contactMaterial = cmatBall), fixed = false, r=[-0.8, -0.1, diameter/2], v_start=[3.0, 0.1, 0.0])
 
   ball1 = BillardBall(world, TableX/6, 0.0)
 
@@ -73,9 +82,7 @@ dist = 0.0001
   ball13 = BillardBall(world, TableX/6 + 4*(distance_balls+dist),  0.0)
   ball14 = BillardBall(world, TableX/6 + 4*(distance_balls+dist), -(diameter+dist))
   ball15 = BillardBall(world, TableX/6 + 4*(distance_balls+dist), -2*(diameter+dist))
-
 end
-
 
 gravField = Modia3D.UniformGravityField(g=9.81, n=[0,0,-1])
 bill = Billard1(sceneOptions=Modia3D.SceneOptions(gravityField=gravField,visualizeFrames=false, defaultFrameLength=0.2,nz_max = 100, enableContactDetection=true, visualizeContactPoints=false, visualizeSupportPoints=false))
@@ -85,8 +92,9 @@ bill = Billard1(sceneOptions=Modia3D.SceneOptions(gravityField=gravField,visuali
 
 model = Modia3D.SimulationModel( bill )
 # ModiaMath.print_ModelVariables(model)
-result = ModiaMath.simulate!(model; stopTime=5.0, tolerance=1e-8,interval=0.001, log=false)
+result = ModiaMath.simulate!(model; stopTime=5.0, tolerance=1e-8,interval=0.0001, log=false)
 
+#=
 ModiaMath.plot(result, [("ball1.r[1]"),
                         ("ball1.r[2]"),
                         ("ball1.r[3]"),
@@ -94,7 +102,7 @@ ModiaMath.plot(result, [("ball1.r[1]"),
                         ("ball1.v[3]"),
                         ("ball1.w[2]"),
                         ("ball1.w[1]")])
-
+=#
 
 println("... success of contactForceLaw_Billard_moreBalls.jl!")
 end
