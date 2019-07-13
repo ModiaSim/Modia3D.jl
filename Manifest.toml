@@ -138,10 +138,10 @@ version = "0.4.1"
 uuid = "a63ad114-7e13-5084-954f-fe012c677804"
 
 [[ModiaMath]]
-deps = ["DataFrames", "DataStructures", "LinearAlgebra", "Pkg", "Printf", "Requires", "StaticArrays", "Sundials", "Test", "Unitful"]
-git-tree-sha1 = "4d3107cbb4dfdbe6fb66dfda63d1dd65d6001825"
+deps = ["DataFrames", "DataStructures", "LinearAlgebra", "Printf", "Requires", "StaticArrays", "Sundials", "Test", "Unitful"]
+path = "D:\\otter\\home\\.julia\\dev\\ModiaMath"
 uuid = "67ccffd1-116d-535b-ad39-76a8fd0cbf71"
-version = "0.5.1"
+version = "0.5.2"
 
 [[MuladdMacro]]
 deps = ["MacroTools", "Test"]

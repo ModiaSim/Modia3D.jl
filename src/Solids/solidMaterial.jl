@@ -16,8 +16,7 @@
 keyword arguments. Arguments that are not provided have value = NaN.
 
 `SolidMaterial(name)` returns a SolidMaterial object from dictionary Modia3D.solidMaterialPalette using
-the name as dictionary key. Initially, this dictionary has the following keys:
-`"Steel"`, `"Aluminium"`, `"DryWood"`.
+the name as dictionary key.
 
 # Arguments
 - `name::AbstractString`: Name of the material (used as key in dictionary Modia3D.solidMaterialPalette)

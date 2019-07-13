@@ -39,13 +39,13 @@ bill = TwoRollingBalls(sceneOptions=Modia3D.SceneOptions(gravityField=gravField,
 
 #Modia3D.visualizeAssembly!( bill )
 
-model = Modia3D.SimulationModel( bill )
+model = Modia3D.SimulationModel( bill, maxNumberOfSteps=1000 )
 #ModiaMath.print_ModelVariables(model)
 
 using PyPlot
 using PyCall
 
-pyplot_rc = PyCall.PyDict(PyPlot.matplotlib["rcParams"])
+pyplot_rc = PyCall.PyDict(PyPlot.matplotlib."rcParams")
 pyplot_rc["font.family"]      = "sans-serif"
 pyplot_rc["font.sans-serif"]  = ["Calibri", "Arial", "Verdana", "Lucida Grande"]
 pyplot_rc["font.size"]        = 12.0
@@ -55,7 +55,7 @@ pyplot_rc["axes.grid"]        = true
 pyplot_rc["axes.titlesize"]   = "medium"
 pyplot_rc["figure.titlesize"] = "medium"
 
-result = ModiaMath.simulate!(model; stopTime=1.5, tolerance=1e-8, log=false)
+result = ModiaMath.simulate!(model; stopTime=0.028, tolerance=1e-8, log=true, maxNumberOfSteps=1000)
 
 fig, ax = PyPlot.subplots(figsize=(3,9))
 

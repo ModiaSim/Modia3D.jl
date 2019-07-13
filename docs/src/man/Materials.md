@@ -49,13 +49,13 @@ The *key* is the *material name* as a string, and the *value* is an instance of 
 [`Modia3D.SolidMaterial3`](@ref). This data is used, for example, to compute mass and inertia of an object
 (with *density* and the object geometry), or to compute the spring constant
 for a compliant contact (with *Youngs's modulus* and *Poisson's ratio*).
+It is filled during the first usage of Modia3D from file `Modia3D/src/Solids/solidMaterials.json`.
 
 ### Content of solid material palette
 
 ```@repl
 import Modia3D
 Modia3D.listKeys(Modia3D.solidMaterialPalette3)
-d_steel = Modia3D.solidMaterialPalette3["Steel"].density
 ```
 
 

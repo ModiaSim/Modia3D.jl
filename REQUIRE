@@ -1,5 +1,5 @@
-julia 1.0
-ModiaMath 0.5.0
+julia 1.1
+ModiaMath 0.5.2
 StaticArrays
 DataFrames
 DataStructures

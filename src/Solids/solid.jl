@@ -62,7 +62,7 @@ struct Solid <: Modia3D.AbstractObject3Ddata
    function Solid(geo::Union{Modia3D.AbstractSolidGeometry,NOTHING},
                   massProperties::Union{Solids.MassProperties,Number,AbstractString,Solids.SolidMaterial,NOTHING} = nothing,
                   material::Union{Graphics.Material,NOTHING} = Graphics.Material();
-                  contactMaterial::Union{Modia3D.AbstractContactMaterial,NOTHING} = nothing)::Solid
+                  contactMaterial::Union{Modia3D.AbstractContactMaterial,AbstractString,NOTHING} = nothing)::Solid
       if typeof(massProperties) == NOTHING
          solid = new(geo, nothing, material, contactMaterial)
       else
@@ -76,7 +76,7 @@ struct Solid <: Modia3D.AbstractObject3Ddata
    function Solid(geo::Vector{Modia3D.Solids.SolidFileMesh},
                   massProperties::Union{Solids.MassProperties,Number,AbstractString,Solids.SolidMaterial,NOTHING},
                   material::Union{Graphics.Material,NOTHING} = Graphics.Material();
-                  contactMaterial::Union{Modia3D.AbstractContactMaterial,NOTHING} = nothing)::Solid
+                  contactMaterial::Union{Modia3D.AbstractContactMaterial,AbstractString,NOTHING} = nothing)::Solid
      solids = Vector{Solid}()
      for geoParts in geo
        push!(solids, Solid(geoParts, massProperties, material; contactMaterial=contactMaterial))

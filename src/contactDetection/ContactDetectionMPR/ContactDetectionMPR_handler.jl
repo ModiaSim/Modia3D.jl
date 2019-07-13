@@ -37,6 +37,7 @@ Generate a new `ContactPair` object of two objects that have contact=true.
 mutable struct ContactPair
     contactPoint1::SVector{3,Float64}
     contactPoint2::SVector{3,Float64}
+    rContact::SVector{3,Float64}
     contactNormal::SVector{3,Float64}
     obj1::Object3D
     obj2::Object3D
@@ -46,7 +47,8 @@ mutable struct ContactPair
 
     ContactPair(contactPoint1::SVector{3,Float64}, contactPoint2::SVector{3,Float64}, contactNormal::SVector{3,Float64},
                 obj1::Object3D, obj2::Object3D, distanceWithHysteresis::Float64) =
-        new(contactPoint1, contactPoint2, contactNormal, obj1, obj2, distanceWithHysteresis)
+        new(contactPoint1, contactPoint2, (contactPoint1 + contactPoint2)/2,
+            contactNormal, obj1, obj2, distanceWithHysteresis)
 end
 
 

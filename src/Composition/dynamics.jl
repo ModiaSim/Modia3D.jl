@@ -62,11 +62,13 @@ end
     simModel = SimulationModel(assembly::Modia3D.AbstractAssembly;
                                analysis::ModiaMath.AnalysisType=ModiaMath.DynamicAnalysis,
                                startTime = 0.0, stopTime  = 1.0, tolerance = 1e-4,
-                               interval  = (stopTime-startTime)/500.0)
+                               interval  = (stopTime-startTime)/500.0,
+                               maxStepSize = NaN, maxNumberOfSteps=missing)
 
 Generate a `simulationModel` from an `assembly` generated with macro [`Modia3D.@assembly`](@ref)
 and the type of `analysis` to be carried out on the `assembly`.
-Additionally, default `startTime`, `stopTime`, `tolerance`, `interval` for the simulation
+Additionally, default `startTime`, `stopTime`, `tolerance`, `interval`,
+`maxStepSize`, `maxNumberOfSteps`, for the simulation
 engine are defined. These values should be adapted so that assembly-specific, meaningful
 defaults are provided.
 """
@@ -83,6 +85,8 @@ struct SimulationModel <: ModiaMath.AbstractSimulationModel
                             stopTime  = 1.0,
                             tolerance = 1e-4,
                             interval  = (stopTime-startTime)/500.0,
+                            maxStepSize=NaN,
+                            maxNumberOfSteps=missing,
                             hev = 1e-8,
                             scaleConstraintsAtEvents::Bool = true)
       modelName = Modia3D.trailingPartOfName( string( typeof(assembly) ) )
@@ -153,6 +157,8 @@ struct SimulationModel <: ModiaMath.AbstractSimulationModel
                                 defaultStopTime  = stopTime,
                                 defaultTolerance = tolerance,
                                 defaultInterval  = interval,
+                                defaultMaxStepSize = maxStepSize,
+                                defaultMaxNumberOfSteps = maxNumberOfSteps,
                                 getResultNames   = Composition.getResultNames,
                                 getResult        = ModiaMath.Variables.getResult,
                                 storeResult!     = ModiaMath.Variables.storeVariables!,
@@ -252,6 +258,7 @@ end
 
 
 const str_DUMMY = "dummyDistance(nothing,nothing)"
+
 
 function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64}, _derx::Vector{Float64}, _r::Vector{Float64}, _w::Vector{Float64})
    # println("... time = ", time, ", x = ", _x, ", derx = ", _derx)
@@ -417,7 +424,8 @@ function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64
       for (pairID, pair) in ch.contactDict
         obj1 = pair.obj1
         obj2 = pair.obj2
-        rContact = (pair.contactPoint1 + pair.contactPoint2)/2.0
+        rContact      = pair.rContact
+        contactNormal = pair.contactNormal
 
         #simh = sim.eventHandler
         #println( "time = ", sim.time, ": ", ModiaMath.instanceName(obj1), " ", ModiaMath.instanceName(obj2),
@@ -429,14 +437,13 @@ function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64
                 pair.contactPairMaterial = ch.lastContactDict[pairID].contactPairMaterial    # improve later (should avoid to inquire pairID twice)
             else
                 # determine contact pair material
-                delta_dot_init = computeDeltaDotInitial(obj1, obj2, rContact, pair.contactNormal)
-                pair.contactPairMaterial = Modia3D.ElasticContactPairMaterial2(obj1.data.contactMaterial, obj2.data.contactMaterial, delta_dot_init)
+                pair.contactPairMaterial = contactStart(obj1, obj2, rContact, contactNormal)
                 simh.restart = max(simh.restart, ModiaMath.Restart)
                 simh.newEventIteration = false
                 if ModiaMath.isLogEvents(simh.logger)
                     name1 = ModiaMath.instanceName(obj1)
                     name2 = ModiaMath.instanceName(obj2)
-                    n     = pair.contactNormal
+                    n     = contactNormal
                     println("        distance(", name1, ",", name2, ") = ", pair.distanceWithHysteresis, " became < 0")
                     Printf.@printf("            contact normal = [%.3g,%.3g,%.3g], contact position = [%.3g,%.3g,%.3g]\n",
                                    n[1],n[2],n[3],rContact[1],rContact[2],rContact[3])
@@ -445,14 +452,13 @@ function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64
         end
 
         # println("length(ch.dictCommunicate) ", length(ch.dictCommunicate) )
-        (f1,f2,t1,t2) = responseCalculation(pair, rContact, time, file)
+        (f1,f2,t1,t2) = responseCalculation(pair.contactPairMaterial, obj1, obj2, rContact, contactNormal, pair.distanceWithHysteresis, time)
 
         # Transform forces/torques in local part frames
         obj1.dynamics.f += obj1.R_abs*f1
         obj1.dynamics.t += obj1.R_abs*t1
         obj2.dynamics.f += obj2.R_abs*f2
         obj2.dynamics.t += obj2.R_abs*t2
-
 #=
                if time > 0.785 && time < 0.787  && String(ModiaMath.instanceName(obj1)) != "table.box1"
                   println("obj1= \"", ModiaMath.instanceName(obj1), "\" obj2 = ", ModiaMath.instanceName(obj2), " f = ", obj1.dynamics.f, " t = ", obj1.dynamics.t, " rContact = ", rContact, " ctNormal[i] ", ModiaMath.Vector3D(chpairs.contactNormal[i]) ," time = ", time)
@@ -464,6 +470,7 @@ function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64
             # Should be possible to make this more efficient
             for (pairID, pair) in ch.lastContactDict
                 if !haskey(ch.contactDict, pairID)
+                    contactEnd(pair.contactPairMaterial, pair.obj1, pair.obj2)
                     simh.restart = max(simh.restart, ModiaMath.Restart)
                     simh.newEventIteration = false
                     if !ModiaMath.isLogEvents(simh.logger)

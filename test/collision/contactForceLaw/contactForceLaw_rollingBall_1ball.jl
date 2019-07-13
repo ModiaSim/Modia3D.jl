@@ -44,7 +44,7 @@ model = Modia3D.SimulationModel( bill )
 using PyPlot
 using PyCall
 
-pyplot_rc = PyCall.PyDict(PyPlot.matplotlib["rcParams"])
+pyplot_rc = PyCall.PyDict(PyPlot.matplotlib."rcParams")
 pyplot_rc["font.family"]      = "sans-serif"
 pyplot_rc["font.sans-serif"]  = ["Calibri", "Arial", "Verdana", "Lucida Grande"]
 pyplot_rc["font.size"]        = 12.0
@@ -54,7 +54,7 @@ pyplot_rc["axes.grid"]        = true
 pyplot_rc["axes.titlesize"]   = "medium"
 pyplot_rc["figure.titlesize"] = "medium"
 
-result = ModiaMath.simulate!(model; stopTime=0.2, tolerance=1e-8, log=false)
+result = ModiaMath.simulate!(model; stopTime=0.2, tolerance=1e-8, log=true)
 
 fig, ax = PyPlot.subplots(figsize=(3,9))
 

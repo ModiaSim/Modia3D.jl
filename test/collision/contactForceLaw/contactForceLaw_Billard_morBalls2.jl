@@ -69,7 +69,7 @@ bill = Billard1(sceneOptions=Modia3D.SceneOptions(gravityField=gravField,visuali
 # Modia3D.visualizeAssembly!( bill )
 
 
-model = Modia3D.SimulationModel( bill )
+model = Modia3D.SimulationModel( bill, maxNumberOfSteps=5000 )
 # ModiaMath.print_ModelVariables(model)
 result = ModiaMath.simulate!(model; stopTime=8.0, tolerance=1e-8,interval=0.001, log=true)
 

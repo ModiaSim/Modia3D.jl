@@ -66,7 +66,8 @@ export ContactDetectionMPR_handler
 export initializeContactDetection!, selectContactPairsNoEvent!, selectContactPairsWithEvent!, getDistances!, setComputationFlag, closeContactDetection!
 
 export responseCalculation, print_ModelVariables
-
+export contactStart, contactEnd, regularize, resultantCoefficientOfRestitution, resultantDampingCoefficient
+export ElasticContactPairResponseMaterial, elasticContactPairCoefficients, normalRelativeVelocityAtContact
 
 using StaticArrays
 using DataStructures
@@ -91,6 +92,7 @@ const AbstractContactMaterialOrNothing = Union{Modia3D.AbstractContactMaterial,N
 
 include("flange.jl")
 include("object3D.jl")
+include(joinpath("responseCalculation", "elasticCollisionResponse.jl"))
 include(joinpath("joints", "FixedJoint.jl"))
 include(joinpath("joints", "FreeMotion.jl"))
 include(joinpath("superObjects.jl"))

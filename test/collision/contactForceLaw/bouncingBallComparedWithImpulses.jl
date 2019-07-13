@@ -60,8 +60,8 @@ function getModelResidues!(m::Model, t::Float64, _x::Vector{Float64}, _derx::Vec
         cor_res = Modia3D.resultantCoefficientOfRestitution(m.cor, abs(v), m.vsmall, cor_min=0.0)
         _w[1] = cor_res
         v = -cor_res * v
-        #if v < m.vsmall/10
-        if cor_res <= 0.01
+        if v < m.vsmall
+        #if cor_res <= 0.01
             m.flying = false
             v = 0.0
             if ModiaMath.isLogInfos(sim)
@@ -81,18 +81,21 @@ function getModelResidues!(m::Model, t::Float64, _x::Vector{Float64}, _derx::Vec
     return nothing
 end
 
-vsmall = 0.1
+#vsmall = 0.1
 material = "Steel"
 cmat = Modia3D.ElasticContactMaterial2(material)
-cmat.vsmall = vsmall
+#cmat.vsmall = vsmall
 
 cor = 0.7
-cpairs = Modia3D.getCommonCollisionProperties(material,material)
-cpairs.cor = cor
+vsmall = 0.01
+#cpairs = Modia3D.getCommonCollisionProperties(material,material)
+#cpairs.cor = cor
 
-cpairs2 = Modia3D.getCommonCollisionProperties(material,material)
-println("cpairs2 = ", cpairs2)
+#cpairs2 = Modia3D.getCommonCollisionProperties(material,material)
+#println("cpairs2 = ", cpairs2)
+
 stopTime = 3.0
+
 
 model1 = Model(cor=cor, vsmall=vsmall )
 result1 = ModiaMath.simulate!(model1, stopTime=stopTime, log=false)
@@ -136,7 +139,7 @@ using PyCall
 
 fig, ax = PyPlot.subplots(figsize=(3,9))
 
-pyplot_rc = PyCall.PyDict(PyPlot.matplotlib["rcParams"])
+pyplot_rc = PyCall.PyDict(PyPlot.matplotlib."rcParams")
 pyplot_rc["font.family"]      = "sans-serif"
 pyplot_rc["font.sans-serif"]  = ["Calibri", "Arial", "Verdana", "Lucida Grande"]
 pyplot_rc["font.size"]        = 12.0

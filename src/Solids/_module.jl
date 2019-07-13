@@ -62,6 +62,7 @@ export SolidMaterial3, solidMaterialPalette3
 export ElasticContactMaterial, ElasticContactMaterialFromMaterialData, ElasticContactMaterialFromMaterialName
 export ElasticContactMaterial2   # just temporarily
 export ElasticContactPairMaterial2
+export contactPairMaterialPalette, ContactPairMaterial, TwoNamesKey
 
 using StaticArrays
 import JSON
@@ -78,7 +79,8 @@ include("geometry.jl")
 include("solidMaterial.jl")
 include("massProperties.jl")
 include("contactMaterial.jl")
-include("contactMaterialPairs.jl")
+#include("contactMaterialPairs.jl")
+include("contactPairMaterials.jl")
 include("solid.jl")
 
 end
