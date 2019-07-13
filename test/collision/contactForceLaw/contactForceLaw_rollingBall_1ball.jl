@@ -24,23 +24,30 @@ diameter = 0.06
   box1 = Modia3D.Object3D(world, withBox, r=[1.5, 0.0, -LzBox/2], fixed=true, visualizeFrame=false)
 end
 
+sphere = Modia3D.Solid(Modia3D.SolidSphere(diameter), "BilliardBall", vmatSolids ;   contactMaterial = cmatBall)
+println("... sphere = ", sphere)
+
 @assembly OneRollingBall() begin
   world = Modia3D.Object3D(visualizeFrame=false)
   table = Table(world)
-  ball1 = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidSphere(diameter), "BilliardBall", vmatSolids ;
-                           contactMaterial = cmatBall), fixed = false, r=[0.2, 0.0, diameter/2], v_start=[3.0, 0.0, 0.0], visualizeFrame=true )
+  ball1 = Modia3D.Object3D(world, sphere, fixed = false, r=[0.2, 0.0, diameter/2], v_start=[0.1, 0.0, 0.0], visualizeFrame=true )
+# ball1 = Modia3D.Object3D(world, sphere, fixed = false, r=[0.2, 0.0, diameter/2], v_start=[3.0, 0.0, 0.0], visualizeFrame=true )
+
 end
 
 
 gravField = Modia3D.UniformGravityField(g=9.81, n=[0,0,-1])
 bill = OneRollingBall(sceneOptions=Modia3D.SceneOptions(gravityField=gravField,visualizeFrames=false,
-                       defaultFrameLength=0.1,nz_max = 100, enableContactDetection=true, visualizeContactPoints=false, visualizeSupportPoints=false))
+                      defaultFrameLength=0.1,nz_max = 100, enableContactDetection=true, visualizeContactPoints=false, visualizeSupportPoints=false))
+
+
 
 #Modia3D.visualizeAssembly!( bill )
 
 model = Modia3D.SimulationModel( bill )
 #ModiaMath.print_ModelVariables(model)
 
+#=
 using PyPlot
 using PyCall
 
@@ -53,9 +60,13 @@ pyplot_rc["grid.linewidth"]   = 0.5
 pyplot_rc["axes.grid"]        = true
 pyplot_rc["axes.titlesize"]   = "medium"
 pyplot_rc["figure.titlesize"] = "medium"
+=#
 
-result = ModiaMath.simulate!(model; stopTime=0.2, tolerance=1e-8, log=true)
+#result = ModiaMath.simulate!(model; stopTime=0.019, tolerance=1e-8, log=true)
+result = ModiaMath.simulate!(model; stopTime=0.01, tolerance=1e-8, log=true, interval = 0.001)
 
+#=
+clf()
 fig, ax = PyPlot.subplots(figsize=(3,9))
 
 ModiaMath.plot(result, [("ball1.r[1]"),
@@ -63,6 +74,7 @@ ModiaMath.plot(result, [("ball1.r[1]"),
                         ("ball1.v[1]"),
                         ("ball1.w[2]")],
                         figure=1, reuse=true)
+=#
 
 ModiaMath.plot(result, [ "ball1.r[1]"  "ball1.v[1]"
                          "ball1.r[3]"  "ball1.w[2]"])
@@ -79,5 +91,5 @@ distEnd = ( ball_r[l_t] - ball_r[l_t - 1] ) / (t[l_t] - t[l_t-1] )
 println("dist = ", dist)
 println("distEnd = ", distEnd)
 
-println("... success of contactForceLaw_rollingBall_1ball.jl!")
+println("... success of old contactForceLaw_rollingBall_1ball.jl!")
 end

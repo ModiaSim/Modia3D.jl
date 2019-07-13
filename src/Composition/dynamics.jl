@@ -452,7 +452,7 @@ function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64
         end
 
         # println("length(ch.dictCommunicate) ", length(ch.dictCommunicate) )
-        (f1,f2,t1,t2) = responseCalculation(pair.contactPairMaterial, obj1, obj2, rContact, contactNormal, pair.distanceWithHysteresis, time)
+        (f1,f2,t1,t2) = responseCalculation(pair.contactPairMaterial, obj1, obj2, rContact, contactNormal, pair.distanceWithHysteresis, time, file)
 
         # Transform forces/torques in local part frames
         obj1.dynamics.f += obj1.R_abs*f1
