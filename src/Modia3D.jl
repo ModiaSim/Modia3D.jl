@@ -114,6 +114,18 @@ export @bus
 export @forceElement
 export Object3D
 
+export Sphere, Ellipsoid, Box, Cylinder, Capsule, Beam, Cone, Pipe
+export Spring, GearWheel, CoordinateSystem, Grid, FileMesh
+
+export Solid, SolidFileMesh, SolidWithConvexDecomposition
+export SolidSphere, SolidEllipsoid, SolidBox, SolidCylinder, SolidCapsule, SolidBeam, SolidCone, SolidPipe
+
+export Revolute, Prismatic
+
+export UniformGravityField, PointGravityField, NoGravityField
+export Material
+export SceneOptions, SimulationModel
+export visualizeAssembly!, print_ModelVariables
 
 # Add import clauses used in examples and test
 import StaticArrays
