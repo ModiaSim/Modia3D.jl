@@ -60,9 +60,9 @@ uuid = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 
 [[DiffEqBase]]
 deps = ["Compat", "Distributed", "DocStringExtensions", "FunctionWrappers", "IterativeSolvers", "IteratorInterfaceExtensions", "LinearAlgebra", "MuladdMacro", "Parameters", "RecipesBase", "RecursiveArrayTools", "RecursiveFactorization", "Requires", "Roots", "SparseArrays", "StaticArrays", "Statistics", "SuiteSparse", "TableTraits", "TreeViews"]
-git-tree-sha1 = "76b059cad5d43fd1fcfd7ffcd8ab5696d2027595"
+git-tree-sha1 = "6902d019588b3b8c3c6807d972037b19915f410f"
 uuid = "2b5f629d-d688-5b77-993f-72d75c75574e"
-version = "5.16.0"
+version = "5.16.1"
 
 [[Distributed]]
 deps = ["Random", "Serialization", "Sockets"]
@@ -119,10 +119,10 @@ uuid = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 uuid = "56ddb016-857b-54e1-b83d-db4d58db5568"
 
 [[MacroTools]]
-deps = ["CSTParser", "Compat", "DataStructures", "Test"]
-git-tree-sha1 = "daecd9e452f38297c686eba90dba2a6d5da52162"
+deps = ["CSTParser", "Compat", "DataStructures", "Test", "Tokenize"]
+git-tree-sha1 = "d6e9dedb8c92c3465575442da456aec15a89ff76"
 uuid = "1914dd2f-81c6-5fcd-8719-6d5c9610ff09"
-version = "0.5.0"
+version = "0.5.1"
 
 [[Markdown]]
 deps = ["Base64"]
@@ -139,7 +139,7 @@ uuid = "a63ad114-7e13-5084-954f-fe012c677804"
 
 [[ModiaMath]]
 deps = ["DataFrames", "DataStructures", "LinearAlgebra", "Printf", "Requires", "StaticArrays", "Sundials", "Test", "Unitful"]
-path = "D:\\otter\\home\\.julia\\dev\\ModiaMath"
+git-tree-sha1 = "902971a4f44a19f06b7d190266ab746e6f93728d"
 uuid = "67ccffd1-116d-535b-ad39-76a8fd0cbf71"
 version = "0.5.2"
 
