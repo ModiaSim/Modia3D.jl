@@ -415,9 +415,17 @@ returns true, if `obj` is visualized with renderer `renderer`.
 """
 isVisible( obj::Object3D, renderer::Modia3D.AbstractRenderer) = isVisible(obj.data, renderer)
 
-function canCollide(obj::Object3D)
+function canCollide(obj::Object3D)::Bool
   if typeof(obj.data) == Modia3D.Solids.Solid
-    return typeof(obj.data.contactMaterial) != NOTHING && typeof(obj.data.geo) != NOTHING
+    if typeof(obj.data.geo) != Nothing && typeof(obj.data.contactMaterial) != Nothing
+        if typeof(obj.data.contactMaterial) == String
+            return obj.data.contactMaterial != ""
+        else
+            return true
+        end
+    else
+        return false
+    end
   else
     return false
   end

@@ -18,12 +18,12 @@ function getObjInfos(filename::AbstractString, scaleFactor::MVector{3,Float64})
   if filename[end-3:end] == ".obj"
     open(filename,"r") do file
     i = 0
-    x_max = Float64
-    x_min = Float64
-    y_max = Float64
-    y_min = Float64
-    z_max = Float64
-    z_min = Float64
+    x_max::Float64 = 0.0
+    x_min::Float64 = 0.0
+    y_max::Float64 = 0.0
+    y_min::Float64 = 0.0
+    z_max::Float64 = 0.0
+    z_min::Float64 = 0.0
     sum = ModiaMath.ZeroVector3D
 
     for line in eachline(file; keep=true)
