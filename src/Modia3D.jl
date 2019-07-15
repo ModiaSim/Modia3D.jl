@@ -5,7 +5,7 @@ module Modia3D
 
 const path = dirname(dirname(@__FILE__))   # Absolute path of package directory
 const Version = "0.4.0"
-const Date = "2019-07-15"
+const Date = "2019-07-16"
 
 println("\nImporting Modia3D Version $Version ($Date)")
 
@@ -119,7 +119,7 @@ export Spring, GearWheel, CoordinateSystem, Grid, FileMesh
 
 export Solid, SolidFileMesh, SolidWithConvexDecomposition
 export SolidSphere, SolidEllipsoid, SolidBox, SolidCylinder, SolidCapsule, SolidBeam, SolidCone, SolidPipe
-
+export MassProperties
 export Revolute, Prismatic
 
 export UniformGravityField, PointGravityField, NoGravityField

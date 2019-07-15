@@ -184,7 +184,10 @@ struct SolidFileMesh <: Modia3D.AbstractSolidGeometry
   centroidAlgo::SVector{3,Float64}
   inertia::SMatrix{3,3,Float64,9}
   function SolidFileMesh(filename::AbstractString; scaleFactor=Basics.onesMVector()  , useGraphicsMaterialColor::Bool=false, smoothNormals::Bool=false)
-     @assert(isfile(filename))
+     if !isfile(filename)
+        error("SolidFileMesh(\"$filename\",...): file not found.")
+     end
+     # @assert(isfile(filename))
      @assert(scaleFactor[1] >= 0.0)
      @assert(scaleFactor[2] >= 0.0)
      @assert(scaleFactor[3] >= 0.0)
