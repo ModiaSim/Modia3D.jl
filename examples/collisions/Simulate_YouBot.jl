@@ -4,7 +4,7 @@ using  Modia3D
 import Modia3D.ModiaMath
 using  Modia3D.ModiaMath.Unitful
 
-vmat1 = Modia3D.Material(color="LightBlue" , transparency=0.4)    # material of SolidFileMesh
+vmat1 = Modia3D.Material(color="LightBlue" , transparency=0.0)    # material of SolidFileMesh
 
 base_frame_obj           = joinpath(Modia3D.path, "objects/robot_KUKA_YouBot/base_frame.obj")
 plate_obj                = joinpath(Modia3D.path, "objects/robot_KUKA_YouBot/plate.obj")
@@ -60,13 +60,11 @@ function Modia3D.computeSignal(signal::Sine, sim::ModiaMath.SimulationState)
 end
 
 
-@assembly Link(frame_a; axis=3, R_a_rev=ModiaMath.NullRotation, r_rev_b=[0.0, 0.0, 0.0],
-                r_rev_CM=[0.0, 0.0, 0.0], m=0.0, Ixx=0.0, Iyy=0.0, Izz=0.0, fileMesh="",
+@assembly Link(frame_a; axis=3, R_a_rev=ModiaMath.NullRotation, r_rev_b=[0.0, 0.0, 0.0], m=0.0, fileMesh="",
                 d=0.0, k1=10.0, k2=10.0, T2=0.01, freqHz=0.1, A=1.0) begin
     rev_a   = Object3D(frame_a, R=R_a_rev)
-    rev_b   = Object3D(Solid(nothing,MassProperties(m=m, rCM=r_rev_CM, Ixx=Ixx, Iyy=Iyy, Izz=Izz),vmat1), visualizeFrame=true)
+    rev_b   = Object3D(Solid(SolidFileMesh(fileMesh),m,vmat1), visualizeFrame=false)
     rev     = Revolute(rev_a, rev_b)
-    frame_vis = Object3D(rev_b, FileMesh(fileMesh), R=ModiaMath.rot1(90u"°"))
     frame_b = Object3D(rev_b, r=r_rev_b)
 
     # Kinematic movement of joint
@@ -89,61 +87,38 @@ end
 
 @assembly Gripper(frame_a) begin
     frame1                   = Object3D(frame_a, R=ModiaMath.rot3(-180u"°"))
-    gripper_base_frame       = Object3D(frame1,Solid(nothing,MassProperties(m=0.199, Ixx=0.0002324, Iyy=0.0003629, Izz=0.0002067),nothing), visualizeFrame=true)
-    gripper_base_frame_vis   = Object3D(frame1, FileMesh(gripper_base_frame_obj), R=ModiaMath.rot1(90u"°"))
-
-    gripper_left_finger      = Object3D(gripper_base_frame, Solid(nothing,MassProperties(m=0.010),nothing), r=[0, 0.0082,0])
-    gripper_left_finger_vis  = Object3D(gripper_left_finger, FileMesh(gripper_left_finger_obj), R=ModiaMath.rot1(90u"°"))
-
-    gripper_right_finger     = Object3D(gripper_base_frame, Solid(nothing,MassProperties(m=0.010),nothing), r=[0,-0.0082,0])
-    gripper_right_finger_vis = Object3D(gripper_right_finger, FileMesh(gripper_right_finger_obj), R=ModiaMath.rot1(90u"°"))
+    gripper_base_frame       = Object3D(frame1,Solid(SolidFileMesh(gripper_base_frame_obj),0.199,vmat1), visualizeFrame=true)
+    gripper_left_finger      = Object3D(gripper_base_frame, Solid(SolidFileMesh(gripper_left_finger_obj),0.010,vmat1), r=[0, 0.0082,0])
+    gripper_right_finger     = Object3D(gripper_base_frame, Solid(SolidFileMesh(gripper_right_finger_obj),0.010,vmat1), r=[0,-0.0082,0])
 end
 
 @assembly Base(world) begin
-    base_frame            = Object3D(world, Solid(nothing,MassProperties(m=19.803),nothing), r=[0,0,0.084])
-    base_frame_vis        = Object3D(base_frame, FileMesh(base_frame_obj), R=ModiaMath.rot1(90u"°"))
-
-    plate                 = Object3D(base_frame, Solid(nothing,MassProperties(m=2.397),nothing), r=[-0.159,0,0.046])
-    plate_vis             = Object3D(plate, FileMesh(plate_obj), R=ModiaMath.rot1(90u"°"))
-
-    front_right_wheel     = Object3D(base_frame, Solid(nothing,MassProperties(m=1.4),nothing), r=[0.228, -0.158, -0.034])
-    front_right_wheel_vis = Object3D(front_right_wheel, FileMesh(front_right_wheel_obj), R=ModiaMath.rot1(90u"°"))
-
-    front_left_wheel     = Object3D(base_frame, Solid(nothing,MassProperties(m=1.4),nothing), r=[0.228, 0.158, -0.034])
-    front_left_wheel_vis = Object3D(front_left_wheel, FileMesh(front_left_wheel_obj), R=ModiaMath.rot1(90u"°"))
-
-    back_right_wheel     = Object3D(base_frame, Solid(nothing,MassProperties(m=1.4),nothing), r=[-0.228, -0.158, -0.034])
-    back_right_wheel_vis = Object3D(back_right_wheel, FileMesh(back_right_wheel_obj), R=ModiaMath.rot1(90u"°"))
-
-    back_left_wheel      = Object3D(base_frame, Solid(nothing,MassProperties(m=1.4),nothing), r=[-0.228, 0.158, -0.034])
-    back_left_wheel_vis  = Object3D(back_left_wheel, FileMesh(back_left_wheel_obj), R=ModiaMath.rot1(90u"°"))
+    base_frame        = Object3D(world, Solid(SolidFileMesh(base_frame_obj),19.803,vmat1), r=[0,0,0.084])
+    plate             = Object3D(base_frame, Solid(SolidFileMesh(plate_obj),MassProperties(m=2.397),vmat1), r=[-0.159,0,0.046])
+    front_right_wheel = Object3D(base_frame, Solid(SolidFileMesh(front_right_wheel_obj),1.4,vmat1), r=[0.228, -0.158, -0.034])
+    front_left_wheel  = Object3D(base_frame, Solid(SolidFileMesh(front_left_wheel_obj),1.4,vmat1) , r=[0.228, 0.158, -0.034])
+    back_right_wheel  = Object3D(base_frame, Solid(SolidFileMesh(back_right_wheel_obj),1.4,vmat1) , r=[-0.228, -0.158, -0.034])
+    back_left_wheel   = Object3D(base_frame, Solid(SolidFileMesh(back_left_wheel_obj),1.4,vmat1)  , r=[-0.228, 0.158, -0.034])
 end
 
-
 @assembly YouBot begin
-    world              = Object3D(visualizeFrame=true)
-    base               = Base(world)
-    arm_base_frame     = Object3D(base.base_frame, Solid(nothing, MassProperties(m=0.961), vmat1), r=[0.143, 0.0, 0.046], visualizeFrame=true)
-    arm_base_frame_vis = Object3D(arm_base_frame, FileMesh(arm_base_frame_obj), R=ModiaMath.rot1(90u"°"))
-    armBase_b          = Object3D(arm_base_frame, r=[0.024, 0, 0.115])
-    link1   = Link(armBase_b, R_a_rev = ModiaMath.rot1(180u"°"), r_rev_b=[0.033,0,0],
-                   r_rev_CM=[0.0, 0.0, 0.0], m=1.390, Ixx=0.0029525, Iyy=0.0060091, Izz=0.0058821, fileMesh=arm_joint_1_obj)
-    link2   = Link(link1.frame_b, R_a_rev = ModiaMath.rot123(90u"°", 0.0,-90u"°"), r_rev_b=[0.155,0,0],
-                   r_rev_CM=[0.0, 0.0, 0.0], m=1.318, Ixx=0.0031145, Iyy=0.0005843, Izz=0.0031631, fileMesh=arm_joint_2_obj)
-    link3   = Link(link2.frame_b, R_a_rev = ModiaMath.rot3(-90u"°"), r_rev_b=[0,0.135,0],
-                   r_rev_CM=[0.0, 0.0, 0.0], m=0.821, Ixx=0.00172767, Iyy=0.0005843, Izz=0.0018468, fileMesh=arm_joint_3_obj)
-    link4   = Link(link3.frame_b, r_rev_b=[0,0.11316,0],
-                   r_rev_CM=[0.0, 0.0, 0.0], m=0.769, Ixx=0.0006764, Iyy=0.0010573, Izz=0.000661, fileMesh=arm_joint_4_obj)
-    link5   = Link(link4.frame_b, R_a_rev = ModiaMath.rot1(-90u"°"), r_rev_b=[0,0,0.05716],
-                   r_rev_CM=[0.0, 0.0, 0.0], m=0.687, Ixx=0.0001934, Iyy=0.0001602, Izz=0.0000689, fileMesh=arm_joint_5_obj)
+    world           = Object3D(visualizeFrame=false)
+    base            = Base(world)
+    arm_base_frame  = Object3D(base.base_frame, Solid(SolidFileMesh(arm_base_frame_obj), 0.961, vmat1), r=[0.143, 0.0, 0.046], visualizeFrame=false)
+    armBase_b       = Object3D(arm_base_frame, r=[0.024, 0, 0.115])
+    link1   = Link(armBase_b, R_a_rev = ModiaMath.rot1(180u"°"), r_rev_b=[0.033,0,0], m=1.390, fileMesh=arm_joint_1_obj)
+    link2   = Link(link1.frame_b, R_a_rev = ModiaMath.rot123(90u"°", 0.0,-90u"°"), r_rev_b=[0.155,0,0], m=1.318, fileMesh=arm_joint_2_obj)
+    link3   = Link(link2.frame_b, R_a_rev = ModiaMath.rot3(-90u"°"), r_rev_b=[0,0.135,0], m=0.821, fileMesh=arm_joint_3_obj)
+    link4   = Link(link3.frame_b, r_rev_b=[0,0.11316,0], m=0.769, fileMesh=arm_joint_4_obj)
+    link5   = Link(link4.frame_b, R_a_rev = ModiaMath.rot1(-90u"°"), r_rev_b=[0,0,0.05716], m=0.687, fileMesh=arm_joint_5_obj)
     gripper = Gripper(link5.frame_b)
 end
 
 gravField = UniformGravityField(g=9.81, n=[0,0,-1])
 youBot    = YouBot(sceneOptions=SceneOptions(gravityField=gravField, visualizeFrames=false,
-                                             defaultFrameLength=0.1, enableContactDetection=false))
+                                             defaultFrameLength=0.2, enableContactDetection=false))
 
-# Modia3D.visualizeAssembly!(youBot)
+#Modia3D.visualizeAssembly!(youBot)
 model  = Modia3D.SimulationModel( youBot, analysis=ModiaMath.KinematicAnalysis )
 result = ModiaMath.simulate!(model, stopTime=5.0, log=true, tolerance=1e-4)
 end
