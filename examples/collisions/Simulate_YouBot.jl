@@ -47,6 +47,12 @@ const gearboxRatio5 = 71.0
 const J5            = effectiveInertia(motorInertia5, gearboxRatio5)
 
 
+println("\nJ1 = $J1")
+println("J2 = $J2")
+println("J3 = $J3")
+println("J4 = $J4")
+println("J5 = $J5\n")
+
 
 # Damper
 @forceElement Damper(; d=1.0) begin
@@ -77,27 +83,10 @@ function Modia3D.computeTorque(c::P_PI_Controller, sim::ModiaMath.SimulationStat
 end
 
 
-@signal Sine(;A=1.5, freqHz = 0.5, offset=0.0) begin
-   y = ModiaMath.RealScalar(causality=ModiaMath.Output, numericType=ModiaMath.WR)
-end
-function Modia3D.computeSignal(signal::Sine, sim::ModiaMath.SimulationState)
-    signal.y.value  = signal.offset + signal.A*sin(2*pi*signal.freqHz*sim.time)
-end
+@assembly ControlledRevolute(frame_a, frame_b; phi_start=0.0, w_start=0.0, axis=3, J=1.0,
+                             d=1.0, k1=1.0, k2=10.0, T2=0.01, freqHz=0.1, A=0.1, gearRatio=1.0) begin
 
-
-@assembly Link(frame_a; axis=3, fileMesh="", m=0.0, r_rev_b=[0.0, 0.0, 0.0], R_a_rev=ModiaMath.NullRotation,
-               d=1.0, k1=1.0, k2=10.0, T2=0.01, freqHz=0.1, A=0.1, offset=0.0, J=1.0, gearRatio=1.0) begin
-    rev_a   = Object3D(frame_a, R=R_a_rev, visualizeFrame=false)
-    rev_b   = Object3D(Solid(SolidFileMesh(fileMesh),m,vmat1))
-    rev     = Revolute(rev_a, rev_b, phi_start=offset, J=J)
-    frame_b = Object3D(rev_b, r=r_rev_b, visualizeFrame=false)
-
-#=
-    # Kinematic movement of joint
-    sig         = Sine(A=A,freqHz=freqHz,offset=offset)
-    sig_adaptor = Modia3D.SignalToFlangeAngle(sig.y)
-    Modia3D.connect(sig_adaptor, rev)
-=#
+    rev = Revolute(frame_a, frame_b, phi_start=phi_start, w_start=w_start, J=J, axis=axis)
 
     # Damping in the joint
     damper         = Damper(d=d)
@@ -108,6 +97,17 @@ end
     controller         = P_PI_Controller(k1=k1, k2=k2, T2=T2, freqHz=freqHz, A=A, gearRatio=gearRatio)
     controller_adaptor = Modia3D.AdaptorForceElementToFlange(phi=controller.phi, w=controller.w, tau=controller.tau)
     Modia3D.connect(controller_adaptor, rev)
+end
+
+
+@assembly Link(frame_a; axis=3, phi_start=0.0, w_start=0.0, J=1.0,
+               fileMesh="", m=0.0, r_rev_b=[0.0, 0.0, 0.0], R_a_rev=ModiaMath.NullRotation,
+               d=1.0, k1=1.0, k2=10.0, T2=0.01, freqHz=0.1, A=0.1, gearRatio=1.0) begin
+    rev_a   = Object3D(frame_a, R=R_a_rev, visualizeFrame=false)
+    rev_b   = Object3D(Solid(SolidFileMesh(fileMesh),m,vmat1))
+    rev     = ControlledRevolute(rev_a, rev_b, axis=axis, phi_start=phi_start, w_start=w_start, J=J,
+                                 d=d, k1=k1, k2=k2, T2=T2, freqHz=freqHz, A=A, gearRatio=gearRatio)
+    frame_b = Object3D(rev_b, r=r_rev_b, visualizeFrame=false)
 end
 
 @assembly Gripper(frame_a) begin
@@ -153,7 +153,7 @@ end
     armBase_b       = Object3D(arm_base_frame, r=[0.024, 0, 0.115])
     link1   = Link(armBase_b    , fileMesh=arm_joint_1_obj, m=1.390, J=J1, r_rev_b=[0.033,0,0], R_a_rev = ModiaMath.rot1(180u"°"), A=1.0)
     link2   = Link(link1.frame_b, fileMesh=arm_joint_2_obj, m=1.318, J=J2, r_rev_b=[0.155,0,0], R_a_rev = ModiaMath.rot123(90u"°", 0.0,-90u"°"))
-    link3   = Link(link2.frame_b, fileMesh=arm_joint_3_obj, m=0.821, J=J3, r_rev_b=[0,0.135,0], R_a_rev = ModiaMath.rot3(-90u"°"), offset=pi/2, A=1.0)
+    link3   = Link(link2.frame_b, fileMesh=arm_joint_3_obj, m=0.821, J=J3, r_rev_b=[0,0.135,0], R_a_rev = ModiaMath.rot3(-90u"°"), phi_start=pi/2, A=1.0)
     link4   = Link(link3.frame_b, fileMesh=arm_joint_4_obj, m=0.769, J=J4, r_rev_b=[0,0.11316,0])
     link5   = Link(link4.frame_b, fileMesh=arm_joint_5_obj, m=0.687, J=J5, r_rev_b=[0,0,0.05716], R_a_rev = ModiaMath.rot1(-90u"°"))
     gripper = Gripper(link5.frame_b)

@@ -27,13 +27,17 @@ export listKeys
 export linearMovement
 export PositionMVector, RotationMMatrix, assertRotationMatrix
 
-using StaticArrays
-using LinearAlgebra
-using JSON
-using DataFrames
+export PTP_path, getPosition!, plotPath
+
+using  StaticArrays
+using  LinearAlgebra
+using  JSON
+import ModiaMath
+using  Unitful
 
 include("environment.jl")
 include("constantsAndFunctions.jl")
+include("pathPlanning.jl")
 
 
 

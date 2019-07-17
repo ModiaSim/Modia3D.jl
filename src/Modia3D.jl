@@ -127,6 +127,9 @@ export Material
 export SceneOptions, SimulationModel
 export visualizeAssembly!, print_ModelVariables
 
+export PTP_path, getPosition!, plotPath
+
+
 # Add import clauses used in examples and test
 import StaticArrays
 import Unitful
