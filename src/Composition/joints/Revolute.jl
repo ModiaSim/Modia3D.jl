@@ -19,6 +19,8 @@ mutable struct TreeJointRevolute <: Modia3D.AbstractRevolute
    # phi_ref::Float64   # Value of angle phi in reference configuration
    # phi::Float64       # Actual value of relative rotation angle (obj1 and obj2 coincide, if phi = 0)
 
+   J::Float64   # Inertia in the joint
+
    phi::ModiaMath.RealScalar
    w::ModiaMath.RealScalar
    a::ModiaMath.RealScalar
@@ -32,7 +34,7 @@ mutable struct TreeJointRevolute <: Modia3D.AbstractRevolute
 
    flange::RevoluteFlange
 
-   TreeJointRevolute(_internal, obj1, obj2, canCollide, isDriven, axis) = new(_internal, obj1, obj2, canCollide, isDriven, axis)
+   TreeJointRevolute(_internal, obj1, obj2, canCollide, isDriven, axis, J) = new(_internal, obj1, obj2, canCollide, isDriven, axis, J)
 end
 
 
@@ -85,7 +87,7 @@ end
 
 
 """
-    joint = Modia3D.Revolute(obj1, obj2; axis=3, phi_start=0, w_start=0, canCollide=false)
+    joint = Modia3D.Revolute(obj1, obj2; axis=3, phi_start=0, w_start=0, canCollide=false, J=NaN)
 
 Return a Revolute `joint` that rotates `obj1::`[`Object3D`](@ref) into
 `obj2::`[`Object3D`](@ref) along the axis `axis` of `obj1` (`axis = 1,2,3,-1,-2,-3`).
@@ -93,9 +95,21 @@ The initial start angle is `phi_start` and the initial angular velocity
 is `w_start`. If `canCollide=false`, no collision detection will occur between `obj1` and `obj2`
 (and `Object3D`s that are directly or indirectly rigidly fixed to `obj1` or `obj2`).
 
+Optionally, an inertia can be placed on the axis of rotation (`J`).
+If such an inertia is provided, the generalized coordinate is still the angle of the revolute joint and
+the driving torque is still the torque acting in the revolute joint. If, for example, an electric
+motor with a gearbox shall be modelled then
+
+```julia
+J = JMotor*gearRatio^2
+jointTorque = motorTorque*gearRatio
+motor
+```
+```J = JMotor*gearRatio^2; jointTorque = `.
+
 If a `Revolute` joint *closes a kinematic loop*, then the already present objects must be consistent
-to the `Revolute` joint that is the frames of `obj1` and `obj2` must be *parallel* to each other and
-rotation of `obj1` along its axis `axis` with `phi_start` results in `obj2`. If `phi_start=NaN`,
+to the `Revolute` joint. That is, the frames of `obj1` and `obj2` must be *parallel* to each other and
+rotating `obj1` along its axis `axis` with `phi_start` results in `obj2`. If `phi_start=NaN`,
 its value is computed in this case.
 
 # Examples
@@ -120,7 +134,8 @@ function Revolute(obj1::Object3D, obj2::Object3D;
                   phi_start::Number = 0.0,
                   w_start::Number   = 0.0,
                   canCollide::Bool  = false,
-                  axis::Int = 3)
+                  axis::Int = 3,
+                  J=0.0)
    rphi_start = Float64(phi_start)
    rw_start   = Float64(w_start)
    (obj_a,obj_b,cutJoint) = attach(obj1, obj2)
@@ -200,7 +215,7 @@ function Revolute(obj1::Object3D, obj2::Object3D;
          error("\nerror from Modia3D.Revolute(", ModiaMath.fullName(obj1), ", ", ModiaMath.fullName(obj2), ", phi_start=NaN):\n",
               "Argument phi_start = NaN (Not-a-Number). However, joint is not allowed if the joint is in the spanning tree")
       end
-      joint   = TreeJointRevolute(ModiaMath.ComponentInternal(), obj_a, obj_b, canCollide, false, axis)
+      joint   = TreeJointRevolute(ModiaMath.ComponentInternal(), obj_a, obj_b, canCollide, false, axis, J)
       phi     = ModiaMath.RealScalar("phi"    , joint, unit="rad"    , start=rphi_start, fixed=true, info="Relative rotation angle"      , numericType=ModiaMath.XD_EXP)
       w       = ModiaMath.RealScalar("w"      , joint, unit="rad/s"  , start=rw_start  , fixed=true, info="Relative angular velocity"    , numericType=ModiaMath.XD_IMP    , integral=phi, analysis=ModiaMath.OnlyDynamicAnalysis)
       a       = ModiaMath.RealScalar("a"      , joint, unit="rad/s^2", start=0.0       ,             info="Relative angular acceleration", numericType=ModiaMath.DER_XD_IMP, integral=w  , analysis=ModiaMath.OnlyDynamicAnalysis)
@@ -284,7 +299,7 @@ function computeForceTorqueAndResidue!(joint::TreeJointRevolute, obj::Object3D, 
    dynamics.t          = -dynamics.t
 
    # println("joint.tau.value = ", joint.tau.value)
-   joint.residue.value = -joint.tau.value + (joint.axis > 0 ? dynamics.t[abs(joint.axis)] : -dynamics.t[abs(joint.axis)])
+   joint.residue.value = -joint.tau.value + joint.J*joint.a.value + (joint.axis > 0 ? dynamics.t[abs(joint.axis)] : -dynamics.t[abs(joint.axis)])
    #println("nachher joint.residue.value = ", joint.residue.value)
 
    #println(" ")
