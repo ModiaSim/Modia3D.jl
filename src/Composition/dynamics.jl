@@ -126,20 +126,23 @@ struct SimulationModel <: ModiaMath.AbstractSimulationModel
       nz = 0
       if scene.options.useOptimizedStructure
          build_superObjs!(scene, world)
-      if !scene.options.enableContactDetection
-          scene.collide = false
-      end
+         if !scene.options.enableContactDetection
+             scene.collide = false
+         end
+
          if scene.collide
             initializeContactDetection!(world, scene)
-            nz = scene.options.contactDetection.contactPairs.nz
-            append!(scene.allVisuElements, world.contactVisuObj1)
-            append!(scene.allVisuElements, world.contactVisuObj2)
-            append!(scene.allVisuElements, world.supportVisuObj1A)
-            append!(scene.allVisuElements, world.supportVisuObj1B)
-            append!(scene.allVisuElements, world.supportVisuObj1C)
-            append!(scene.allVisuElements, world.supportVisuObj2A)
-            append!(scene.allVisuElements, world.supportVisuObj2B)
-            append!(scene.allVisuElements, world.supportVisuObj2C)
+            if scene.collide
+                nz = scene.options.contactDetection.contactPairs.nz
+                append!(scene.allVisuElements, world.contactVisuObj1)
+                append!(scene.allVisuElements, world.contactVisuObj2)
+                append!(scene.allVisuElements, world.supportVisuObj1A)
+                append!(scene.allVisuElements, world.supportVisuObj1B)
+                append!(scene.allVisuElements, world.supportVisuObj1C)
+                append!(scene.allVisuElements, world.supportVisuObj2A)
+                append!(scene.allVisuElements, world.supportVisuObj2B)
+                append!(scene.allVisuElements, world.supportVisuObj2C)
+            end
          end
          initializeMassComputation!(scene)
       else
