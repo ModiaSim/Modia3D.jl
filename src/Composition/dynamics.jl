@@ -117,13 +117,19 @@ struct SimulationModel <: ModiaMath.AbstractSimulationModel
       scene = Scene(sceneOptions)
       scene.analysis = analysis
       assembly._internal.scene = scene
+      if !scene.options.enableContactDetection
+          scene.collide = false
+      end
 
       # Build tree for optimized structure or standard structure
       # collision handling is only available for optimized structure
       nz = 0
       if scene.options.useOptimizedStructure
          build_superObjs!(scene, world)
-         if scene.options.enableContactDetection && scene.collide
+      if !scene.options.enableContactDetection
+          scene.collide = false
+      end
+         if scene.collide
             initializeContactDetection!(world, scene)
             nz = scene.options.contactDetection.contactPairs.nz
             append!(scene.allVisuElements, world.contactVisuObj1)
@@ -277,7 +283,7 @@ function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64
    # Handle initialization and termination of model
    if ModiaMath.isInitial(sim)
       # println("... isInitial = true")
-      if scene.options.enableContactDetection && scene.collide
+      if scene.collide
          initializeContactDetection!(world, scene)
          append!(scene.allVisuElements, world.contactVisuObj1)
          append!(scene.allVisuElements, world.contactVisuObj2)

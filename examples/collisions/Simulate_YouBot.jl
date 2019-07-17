@@ -26,25 +26,25 @@ gripper_right_finger_obj = joinpath(Modia3D.path, "objects/robot_KUKA_YouBot/gri
 # Drive train data
 effectiveInertia(J, gearRatio) = J*gearRatio^2
 
-const motorInertia1   = 0.0000135 + 0.000000409
-const gearboxRatio1   = 156.0
-const J1              = effectiveInertia(motorInertia1, gearboxRatio1)
+const motorInertia1 = 0.0000135 + 0.000000409
+const gearboxRatio1 = 156.0
+const J1            = effectiveInertia(motorInertia1, gearboxRatio1)
 
-const motorInertia2   = 0.0000135 + 0.000000409
-const gearboxRatio2   = 156.0
-const J2              = effectiveInertia(motorInertia2, gearboxRatio2)
+const motorInertia2 = 0.0000135 + 0.000000409
+const gearboxRatio2 = 156.0
+const J2            = effectiveInertia(motorInertia2, gearboxRatio2)
 
-const motorInertia3   = 0.0000135 + 0.000000071
-const gearboxRatio3   = 100.0
-const J3              = effectiveInertia(motorInertia3, gearboxRatio3)
+const motorInertia3 = 0.0000135 + 0.000000071
+const gearboxRatio3 = 100.0
+const J3            = effectiveInertia(motorInertia3, gearboxRatio3)
 
-const motorInertia4   = 0.00000925 + 0.000000071
-const gearboxRatio4   = 71.0
-const J4              = effectiveInertia(motorInertia4, gearboxRatio4)
+const motorInertia4 = 0.00000925 + 0.000000071
+const gearboxRatio4 = 71.0
+const J4            = effectiveInertia(motorInertia4, gearboxRatio4)
 
-const motorInertia5   = 0.0000035 + 0.000000071
-const gearboxRatio5   = 71.0
-const J5              = effectiveInertia(motorInertia5, gearboxRatio5)
+const motorInertia5 = 0.0000035 + 0.000000071
+const gearboxRatio5 = 71.0
+const J5            = effectiveInertia(motorInertia5, gearboxRatio5)
 
 
 

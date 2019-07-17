@@ -30,6 +30,7 @@ export PositionMVector, RotationMMatrix, assertRotationMatrix
 using StaticArrays
 using LinearAlgebra
 using JSON
+using DataFrames
 
 include("environment.jl")
 include("constantsAndFunctions.jl")
