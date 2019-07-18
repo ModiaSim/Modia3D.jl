@@ -66,16 +66,19 @@ end
 
 
 # Controller
-const ptp_path = PTP_path(["angle1", "angle2", "angle3", "angle4", "angle5"],
-                          positions = [0.0 0.0 1.5 0.0 0.0;
-                                       3.0 1.5 0.0 1.3 1.4;
-                                       1.5 0.0 0.5 0.5 0.5;
-                                       0.0 0.0 1.5 0.0 0.0],
+const ptp_path = PTP_path(["angle1", "angle2", "angle3", "angle4", "angle5", "gripper"],
+                          positions = [0.0 0.0 1.5 0.0 0.0 0.0;
+                                       3.0 1.5 0.0 1.3 1.4 0.0;
+                                       1.5 0.0 0.5 0.5 0.5 0.0;
+                                       0.0 0.0 1.5 0.0 0.0 0.0;
+                                       0.0 0.0 1.5 0.0 0.0 0.04;
+                                       0.0 0.0 1.5 0.0 0.0 0.0;],
                           startTime = 0.0,
-                          v_max = [2.68512, 2.68512, 4.8879, 5.8997, 5.8997],
-                          a_max = 1.5*ones(5))
+                          v_max = [2.68512, 2.68512, 4.8879, 5.8997, 5.8997, 1.0],
+                          a_max = [1.5, 1.5, 1.5, 1.5, 1.5, 0.5])
 
-plotPath(ptp_path)
+plotPath(ptp_path, figure=1, ntime=501)
+plotPath(ptp_path, names=["gripper"], figure=2, ntime=501)
 
 @forceElement P_PI_Controller(; k1=1.0, k2=10.0, T2=0.01, gearRatio=1.0, phi_ref_name="UnknownName") begin
     phi_ref_index = getIndex(ptp_path, phi_ref_name)
@@ -113,6 +116,23 @@ end
 end
 
 
+@assembly ControlledPrismatic(frame_a, frame_b; axis=3,
+                              d=0.0, k1=1.0, k2=10.0, T2=0.01, gearRatio=1.0, s_ref_name="UnknownName") begin
+
+    prism = Prismatic(frame_a, frame_b, s_start=getPosition(ptp_path,getIndex(ptp_path, s_ref_name), 0.0), axis=axis)
+
+    # Damping in the joint
+    damper         = Damper(d=d)
+    damper_adaptor = Modia3D.AdaptorForceElementToPFlange(v=damper.w, f=damper.tau)
+    Modia3D.connect(damper_adaptor, prism)
+
+    # P-PI controller in the joint
+    controller         = P_PI_Controller(k1=k1, k2=k2, T2=T2, gearRatio=gearRatio, phi_ref_name=s_ref_name)
+    controller_adaptor = Modia3D.AdaptorForceElementToPFlange(s=controller.phi, v=controller.w, f=controller.tau)
+    Modia3D.connect(controller_adaptor, prism)
+end
+
+
 @assembly Link(frame_a; axis=3, J=1.0,
                d=1.0, k1=50.0, k2=50.0, T2=0.002, gearRatio=1.0, phi_ref_name="UnknownName",
                fileMesh="", m=0.0, r_rev_b=[0.0, 0.0, 0.0], R_a_rev=ModiaMath.NullRotation) begin
@@ -123,11 +143,16 @@ end
     frame_b = Object3D(rev_b, r=r_rev_b, visualizeFrame=false)
 end
 
-@assembly Gripper(frame_a, right_finger_offset=0.02) begin
+@assembly Gripper(frame_a, right_finger_offset=0.02,
+                  d=0.0, k1=50.0, k2=50.0, T2=0.002, gearRatio=1.0) begin
     frame1                   = Object3D(frame_a, R=ModiaMath.rot3(-180u"°"))
     gripper_base_frame       = Object3D(frame1,Solid(SolidFileMesh(gripper_base_frame_obj),0.199,vmat1), visualizeFrame=true)
-    gripper_left_finger      = Object3D(gripper_base_frame, Solid(SolidFileMesh(gripper_left_finger_obj),0.010,vmat1), r=[0, 0.0082,0])
-    gripper_right_finger     = Object3D(gripper_base_frame, Solid(SolidFileMesh(gripper_right_finger_obj),0.010,vmat1), r=[0,-0.0082-right_finger_offset,0])
+    gripper_left_finger_a    = Object3D(visualizeFrame=true)
+    gripper_left_finger      = Object3D(gripper_left_finger_a, Solid(SolidFileMesh(gripper_left_finger_obj),0.010,vmat1), r=[0, 0.0082,0])
+    gripper_right_finger_a   = Object3D(gripper_base_frame, r=[0,-right_finger_offset,0])
+    gripper_right_finger     = Object3D(gripper_right_finger_a, Solid(SolidFileMesh(gripper_right_finger_obj),0.010,vmat1), r=[0,-0.0082,0])
+    prism = ControlledPrismatic(gripper_right_finger_a, gripper_left_finger_a, axis=2,
+                                 d=d, k1=k1, k2=k2, T2=T2, gearRatio=gearRatio, s_ref_name="gripper")
 end
 
 @assembly Base(world) begin
@@ -183,9 +208,9 @@ youBot    = YouBot(sceneOptions=SceneOptions(gravityField=gravField, visualizeFr
 
 #Modia3D.visualizeAssembly!(youBot)
 model  = Modia3D.SimulationModel( youBot )
-result = ModiaMath.simulate!(model, stopTime=7.0, log=true, tolerance=1e-4)
+result = ModiaMath.simulate!(model, stopTime=8.0, log=true, tolerance=1e-4)
 
-ModiaMath.plot(result,[("link1.rev.controller.phi_ref", "link1.rev.rev.phi"),
-                       ("link2.rev.controller.phi_ref", "link2.rev.rev.phi"),
-                       ("link3.rev.controller.phi_ref", "link3.rev.rev.phi")], figure=2 )
+ModiaMath.plot(result,[("link1.rev.controller.phi_ref", "link1.rev.rev.phi") ("link4.rev.controller.phi_ref", "link4.rev.rev.phi");
+                       ("link2.rev.controller.phi_ref", "link2.rev.rev.phi") ("link5.rev.controller.phi_ref", "link5.rev.rev.phi");
+                       ("link3.rev.controller.phi_ref", "link3.rev.rev.phi") ("gripper.prism.controller.phi_ref", "gripper.prism.prism.s")], figure=3 )
 end
