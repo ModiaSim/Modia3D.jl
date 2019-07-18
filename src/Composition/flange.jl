@@ -87,6 +87,50 @@ mutable struct Flange <: Modia3D.AbstractFlange
 end
 
 
+# each prismatic joint holds a PrismaticFlange
+# it is an internal flange for connecting with a Flange
+mutable struct PrismaticFlange <: Modia3D.AbstractFlange
+  s::ModiaMath.RealScalar
+  v::ModiaMath.RealScalar
+  a::ModiaMath.RealScalar
+  f::ModiaMath.RealScalar
+
+  function PrismaticFlange()
+    s = ModiaMath.RealScalar("s_flange", causality = ModiaMath.Local, flow=false)
+    v = ModiaMath.RealScalar("v_flange", causality = ModiaMath.Local, flow=false)
+    a = ModiaMath.RealScalar("a_flange", causality = ModiaMath.Local, flow=false)
+    f = ModiaMath.RealScalar("f_flange", causality = ModiaMath.Local, flow=false)
+    setAnalysis!(s)
+    setAnalysis!(v)
+    setAnalysis!(a)
+    setAnalysis!(f)
+    new(s,v,a,f)
+  end
+end
+
+# each adaptor holds a PFlange
+# if is an internal flange for connecting with e.g. a PrismaticFlange
+mutable struct PFlange <: Modia3D.AbstractFlange
+  s::ModiaMath.RealScalar
+  v::ModiaMath.RealScalar
+  a::ModiaMath.RealScalar
+  f::ModiaMath.RealScalar
+  function PFlange(; sCausality=ModiaMath.Local, vCausality=ModiaMath.Local,
+                     aCausality=ModiaMath.Local, sFlow=false, fCausality=ModiaMath.Local, fFlow=false)
+    s = ModiaMath.RealScalar("s_flange", causality = sCausality, flow=sFlow)
+    v = ModiaMath.RealScalar("v_flange", causality = vCausality, flow=sFlow)
+    a = ModiaMath.RealScalar("a_flange", causality = aCausality, flow=sFlow)
+    f = ModiaMath.RealScalar("f_flange", causality = fCausality, flow=fFlow)
+    setAnalysis!(s)
+    setAnalysis!(v)
+    setAnalysis!(a)
+    setAnalysis!(f)
+    new(s,v,a,f)
+  end
+end
+
+
+
 
 # this function checks causality of a revolute flange
 function checkCausalityOfOneFlange(flange::RevoluteFlange)
@@ -116,6 +160,40 @@ function isPhiInput(flange::RevoluteFlange)
 end
 
 function isTauInput(flange::RevoluteFlange)
+  (potentialCausality, flowCausality) = checkCausalityOfOneFlange(flange)
+  ((flowCausality == ModiaMath.Input) ? (return true) : (return false) )
+end
+
+
+
+# this function checks causality of a prismatic flange
+function checkCausalityOfOneFlange(flange::PrismaticFlange)
+  potentialCausality = ModiaMath.Local
+  flowCausality = flange.f.causality
+  names = fieldnames(typeof(flange))
+
+  for val in names
+      if val != :f && val != :isInitialized
+        tmp = getfield(flange, val)
+        if !(potentialCausality == tmp.causality || tmp.causality == ModiaMath.Local || potentialCausality != ModiaMath.Local)
+            potentialCausality = tmp.causality
+        elseif (potentialCausality != ModiaMath.Local && potentialCausality != tmp.causality && tmp.causality != ModiaMath.Local)
+            println("All potential variables of a flange must be of the same causality.")
+        end
+      end
+  end
+  if potentialCausality == flowCausality && flowCausality != ModiaMath.Local
+      error("Causality of flow and potential variables must be different.")
+  end
+  return (potentialCausality, flowCausality)
+end
+
+function isSInput(flange::PrismaticFlange)
+  (potentialCausality, flowCausality) = checkCausalityOfOneFlange(flange)
+  ((potentialCausality == ModiaMath.Input) ? (return true) : (return false) )
+end
+
+function isFInput(flange::PrismaticFlange)
   (potentialCausality, flowCausality) = checkCausalityOfOneFlange(flange)
   ((flowCausality == ModiaMath.Input) ? (return true) : (return false) )
 end

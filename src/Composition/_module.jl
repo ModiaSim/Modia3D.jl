@@ -51,7 +51,7 @@ export Flange, RevoluteFlange
 export SignalToFlangeAngle, SignalToFlangeTorque
 export computeSignal
 
-export AdaptorForceElementToFlange
+export AdaptorForceElementToFlange, AdaptorForceElementToPFlange
 
 export setVariable_phi!, setVariable_r_rel!, setVariable_R_rel!
 

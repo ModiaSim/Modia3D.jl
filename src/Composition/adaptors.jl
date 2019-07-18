@@ -84,6 +84,50 @@ mutable struct AdaptorForceElementToFlange <: Modia3D.AbstractForceAdaptor
 end
 
 
+mutable struct AdaptorForceElementToPFlange <: Modia3D.AbstractForceAdaptor
+    _internal::ModiaMath.ComponentInternal
+    forceElement::Modia3D.AbstractForceTorque
+    flange::PFlange
+    function AdaptorForceElementToPFlange(;s::Union{ModiaMath.RealScalar,NOTHING}=nothing,
+                                           v::Union{ModiaMath.RealScalar,NOTHING}=nothing,
+                                           a::Union{ModiaMath.RealScalar,NOTHING}=nothing,
+                                           f::Union{ModiaMath.RealScalar,NOTHING}=nothing)
+        flange = PFlange()
+        forceElement  = nothing
+        forceElement1 = nothing
+        forceElement2 = nothing
+        forceElement3 = nothing
+        forceElement4 = nothing
+        if typeof(s) != NOTHING
+            flange.s = s
+            forceElement1 = s._internal.within
+            forceElement  = forceElement1
+        end
+        if typeof(v) != NOTHING
+            flange.v = v
+            forceElement2 = v._internal.within
+            ((typeof(forceElement)==NOTHING) ? (forceElement=forceElement2) : ( (typeof(forceElement)!=typeof(forceElement2)) ? (error("from Modia3D.AdaptorForceElementToFlange: all arguments should be of the same @forceElement.")) : () ) )
+        end
+        if typeof(a) != NOTHING
+            flange.a = a
+            forceElement3 = a._internal.within
+            ((typeof(forceElement)==NOTHING) ? (forceElement=forceElement3) : ( (typeof(forceElement)!=typeof(forceElement3)) ? (error("from Modia3D.AdaptorForceElementToFlange: all arguments should be of the same @forceElement.")) : () ) )
+        end
+        if typeof(f) != NOTHING
+            f.flow   = true
+            flange.f = f
+            forceElement4 = f._internal.within
+            ((typeof(forceElement)==NOTHING) ? (forceElement=forceElement4) : ( (typeof(forceElement)!=typeof(forceElement4)) ? (error("from Modia3D.AdaptorForceElementToFlange: all arguments should be of the same @forceElement.")) : () ) )
+        end
+        if typeof(forceElement) != NOTHING
+            new(ModiaMath.ComponentInternal(),forceElement,flange)
+        else
+            error("from Modia3D.SignalToFlangeTorque: There is no forceElement to convert.")
+        end
+    end
+end
+
+
 #=
 mutable struct TransDyn
   filter_T::Float64

@@ -25,7 +25,7 @@ mutable struct TreeJointPrismatic <: Modia3D.AbstractPrismatic
 
    P::ModiaMath.RealScalar       # Total power flowing in obj1, obj2, axis computed at communication points (must be zero; = computed with interpolated values of x,derx)
 
-   # flange::PrismaticFlange
+   flange::PrismaticFlange
 
    TreeJointPrismatic(_internal, obj1, obj2, canCollide, isDriven, axis, eAxis) = new(_internal, obj1, obj2, canCollide, isDriven, axis, eAxis)
 end
@@ -216,6 +216,7 @@ function Prismatic(obj1::Object3D, obj2::Object3D;
       residue = ModiaMath.RealScalar(:residue, joint,               start=0.0     ,             info="Prismatic residue"                        , numericType=ModiaMath.FD_IMP                , analysis=ModiaMath.OnlyDynamicAnalysis)
 
       P       = ModiaMath.RealScalar(:P      , joint, unit="J", info="Total power computed with interpolated x,derx, values (should be zero)", numericType=ModiaMath.WC, analysis=ModiaMath.OnlyDynamicAnalysis)
+      joint.flange = PrismaticFlange()
 
       obj_a.hasChildJoint = true
       obj_b.joint = joint
@@ -308,3 +309,112 @@ function computeCutForcesAndToques!(joint::CutJointPrismatic, time::Float64)
    dynamics1.f += joint.e_lambda1*lambda1 + joint.e_lambda2*lambda2
    dynamics2.f += dynamics.f
 end
+
+
+#-----------------------------------------------------------
+
+
+function assignPrismaticFlange(flange::PFlange, prismFlange::PrismaticFlange, joint::Modia3D.AbstractPrismatic, assembly::Modia3D.Composition.AssemblyInternal)
+  names = fieldnames(typeof(flange))
+  for val in names # loops over s,v,a,f
+    flange_val    = getfield(flange, val)
+    prismFlange_val = getfield(prismFlange,val)
+    joint_val     = getfield(joint,val)
+    if causalitiesAreOk(flange_val, joint_val)
+        setFlangeVariable!(flange_val, prismFlange_val)
+        setJointVariable!(joint_val, prismFlange_val)
+        addVariableToArray(flange_val, joint_val, assembly)
+    else
+      return false
+    end
+  end
+  return true
+end
+
+
+function connect(torqueObj::Modia3D.AbstractForceAdaptor, joint::Modia3D.AbstractPrismatic)
+  actualAssembly = torqueObj._internal.within._internal
+
+  flangeTorque  = torqueObj.flange
+  flangeJoint   = joint.flange
+
+  if !assignPrismaticFlange(flangeTorque, flangeJoint, joint, actualAssembly) # !assignRevoluteFlangeAndSignal(signal, flangeSig, joint, flangeJoint, assembly)
+    error("The causalities are different. Please, check all flanges which are connected with joint = ", joint ,".")
+  end
+  if !in(torqueObj.forceElement, actualAssembly.uniqueForceTorques)
+    push!(actualAssembly.uniqueForceTorques, torqueObj.forceElement)
+  end
+  if !isSInput(flangeJoint) && isFInput(flangeJoint)
+    joint.isDriven = false
+  elseif isSInput(flangeJoint) && !isFInput(flangeJoint)
+    driveJoint!(joint)
+  end
+end
+connect(joint::Modia3D.AbstractPrismatic, torqueObj::Modia3D.AbstractForceAdaptor) = connect(torqueObj::Modia3D.AbstractForceAdaptor, joint::Modia3D.AbstractPrismatic)
+
+
+
+function connect(signal::Modia3D.AbstractSignalAdaptor, joint::Modia3D.AbstractPrismatic)
+    actualAssembly = signal._internal.within._internal
+
+    flangeSig   = signal.flange
+    flangeJoint = joint.flange
+
+    if !assignPrismaticFlange(flangeSig, flangeJoint, joint, actualAssembly) # !assignRevoluteFlangeAndSignal(signal, flangeSig, joint, flangeJoint, assembly)
+      error("The causalities are different. Please, check all flanges which are connected with joint = ", joint ,".")
+    end
+    if !in(signal.signal, actualAssembly.uniqueSignals)
+      push!(actualAssembly.uniqueSignals, signal.signal)
+    end
+    if !isSInput(flangeJoint) && isFInput(flangeJoint)
+      joint.isDriven = false
+    elseif isSInput(flangeJoint) && !isFInput(flangeJoint)
+      driveJoint!(joint)
+    end
+end
+connect(joint::Modia3D.AbstractPrismatic, signal::Modia3D.AbstractSignalAdaptor) = connect(signal::Modia3D.AbstractSignalAdaptor, joint::Modia3D.AbstractPrismatic)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

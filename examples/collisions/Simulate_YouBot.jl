@@ -123,11 +123,11 @@ end
     frame_b = Object3D(rev_b, r=r_rev_b, visualizeFrame=false)
 end
 
-@assembly Gripper(frame_a) begin
+@assembly Gripper(frame_a, right_finger_offset=0.02) begin
     frame1                   = Object3D(frame_a, R=ModiaMath.rot3(-180u"°"))
     gripper_base_frame       = Object3D(frame1,Solid(SolidFileMesh(gripper_base_frame_obj),0.199,vmat1), visualizeFrame=true)
     gripper_left_finger      = Object3D(gripper_base_frame, Solid(SolidFileMesh(gripper_left_finger_obj),0.010,vmat1), r=[0, 0.0082,0])
-    gripper_right_finger     = Object3D(gripper_base_frame, Solid(SolidFileMesh(gripper_right_finger_obj),0.010,vmat1), r=[0,-0.0082,0])
+    gripper_right_finger     = Object3D(gripper_base_frame, Solid(SolidFileMesh(gripper_right_finger_obj),0.010,vmat1), r=[0,-0.0082-right_finger_offset,0])
 end
 
 @assembly Base(world) begin
