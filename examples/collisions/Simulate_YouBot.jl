@@ -83,8 +83,8 @@ const ptp_path2 = PTP_path(["angle1", "angle2", "angle3", "angle4", "angle5", "g
                            positions = [0.0  0.0 0.0  0.0 0.0 0.0;
                                         0.0  0.0 0.0  0.0 0.0 0.04;
                                         0.0  0.0 pi/2 0.0 0.0 0.04;
-                                        0.0  0.0 pi/2 0.0 0.0 0.03807;    # no contact 0.381; 0.38068 with contactReductionFactor=1e-4 fails; 0.3807: sliding contact (box remains on the table)
-                                        0.0 -pi/4 2.5*pi/4 0.0 0.0 0.03807;
+                                        0.0  0.0 pi/2 0.0 0.0 0.0380703;    # no contact 0.3808; 0.3807 fails; 0.380703: a lot of events, but box stays on table
+                                        0.0 -pi/4 2.5*pi/4 0.0 0.0 0.0380703;
                                         0.0  0.0 0.0  0.0 0.0 0.03807],
                            startTime = 0.0,
                            v_max = [2.68512, 2.68512, 4.8879, 5.8997, 5.8997, 1.0],
