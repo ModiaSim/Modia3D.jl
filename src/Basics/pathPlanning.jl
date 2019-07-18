@@ -40,6 +40,7 @@ mutable struct PTP_path
    s2::Vector{Float64}
    s3::Vector{Float64}
    Tend::Float64
+   posTemp::Vector{Float64}   # Temporary storage that can be used by the functions operation on PTP_path
 
    function PTP_path(names::AbstractVector;
                      positions::Matrix{Float64} = [zeros(size(names,1))'; ones(size(names,1))'],
@@ -120,7 +121,7 @@ mutable struct PTP_path
         Tend = Tes[end]
 
         new(names, startTime, v_max, a_max, positions, delta,
-            hasPath, sd_max, sdd_max, Ta1, Ta2, noWphase, Tv, Te, Ta1s, Ta2s, Tvs, Tes, sd_max2, s1, s2, s3, Tend)
+            hasPath, sd_max, sdd_max, Ta1, Ta2, noWphase, Tv, Te, Ta1s, Ta2s, Tvs, Tes, sd_max2, s1, s2, s3, Tend, zeros(np))
     end
 end
 
@@ -181,6 +182,19 @@ function getPosition!(path::PTP_path, time::Number, position::Vector{Float64})
         position[j]= path.positions[i,j] + path.delta[i,j]*s
     end
 end
+
+
+"""
+    pos = getPosition(path, index, time)
+
+Given a `path::PTP_path`, the `index` of a signal, and a time instant `time`, return the actual
+position at time `time`.
+"""
+function getPosition(path::PTP_path, index, time::Number)
+    getPosition!(path, time, path.posTemp)
+    return path.posTemp[index]
+end
+
 
 
 """

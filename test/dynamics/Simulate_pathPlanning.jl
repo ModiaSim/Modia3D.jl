@@ -17,4 +17,8 @@ plotPath(ptp_path)
 plotPath(ptp_path, names=("angle2", "angle3"), heading="Test of PTP plots",
          tend = 0.9*ptp_path.Tend, figure=2, ntime=99)
 
+# Test getPosition
+pos = getPosition(ptp_path, 2, 0.5)
+println("... pos_angle2(time=0.5) = ", pos)
+
 end

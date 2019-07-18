@@ -127,7 +127,7 @@ export Material
 export SceneOptions, SimulationModel
 export visualizeAssembly!, print_ModelVariables
 
-export PTP_path, getPosition!, plotPath
+export PTP_path, getPosition!, getPosition, getIndex, plotPath
 
 
 # Add import clauses used in examples and test

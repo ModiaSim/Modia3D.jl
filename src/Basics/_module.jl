@@ -27,7 +27,7 @@ export listKeys
 export linearMovement
 export PositionMVector, RotationMMatrix, assertRotationMatrix
 
-export PTP_path, getPosition!, plotPath
+export PTP_path, getPosition!, getPosition, getIndex, plotPath
 
 using  StaticArrays
 using  LinearAlgebra
