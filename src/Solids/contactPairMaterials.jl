@@ -112,11 +112,11 @@ end
 
 
 """
-    const contactPairMaterialPalette
+    contactPairMaterialPalette
 
 Dictionary of contact pair material data, see [`Modia3D.ContactPairMaterial`](@ref)
 """
-const contactPairMaterialPalette = readContactPairMaterialFromJSON( joinpath(Modia3D.path, "src", "Solids", "contactPairMaterials.json") )
+contactPairMaterialPalette = readContactPairMaterialFromJSON( joinpath(Modia3D.path, "src", "Solids", "contactPairMaterials.json") )
 
 
 

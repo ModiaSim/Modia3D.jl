@@ -6,7 +6,7 @@
 #
 # Functions that have to be provided from an object used for contact pair response
 
-contactStart(material::Modia3D.AbstractContactMaterial, obj1, obj2, rContact, contactNormal) =
+contactStart(material::Modia3D.AbstractContactMaterial, obj1, obj2, rContact, contactNormal, elasticContactReductionFactor) =
              error("Function contactStart not defined for material ", String(typeof(material)))
 
 contactEnd(material::Modia3D.AbstractContactMaterial, obj1, obj2) =
@@ -24,7 +24,7 @@ responseCalculation(material::Modia3D.AbstractContactMaterial, obj1, obj2, rCont
 Return a response material object at contact start.
 """
 function contactStart(obj1::Object3D, obj2::Object3D, rContact::SVector{3,Float64},
-                      contactNormal::SVector{3,Float64})
+                      contactNormal::SVector{3,Float64}, elasticContactReductionFactor::Float64)
     if typeof(obj1.data.contactMaterial) == Solids.ElasticContactMaterial2
         name1 = obj1.data.contactMaterial.name
         name2 = obj2.data.contactMaterial.name
@@ -34,7 +34,7 @@ function contactStart(obj1::Object3D, obj2::Object3D, rContact::SVector{3,Float6
     end
     material = Solids.getContactPairMaterial(name1, name2)
     return contactStart(material,
-                        obj1, obj2, rContact, contactNormal)
+                        obj1, obj2, rContact, contactNormal, elasticContactReductionFactor)
 end
 
 

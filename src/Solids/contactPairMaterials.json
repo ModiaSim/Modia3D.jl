@@ -4,6 +4,11 @@
        "slidingFrictionCoefficient": 0.5,
        "rotationalResistanceCoefficient": 0.001
     },
+    "DryWood,DryWood": {
+       "coefficientOfRestitution": 0.6,
+       "slidingFrictionCoefficient": 0.3,
+       "rotationalResistanceCoefficient": 0.001
+    },
    "BilliardBall,BilliardBall": {
        "coefficientOfRestitution": 1.0,
        "slidingFrictionCoefficient": 0.0,

@@ -232,6 +232,7 @@ struct SceneOptions
 
    # ContactDetection
    enableContactDetection::Bool   # = true, if contact detection is enabled
+   elasticContactReductionFactor::Float64   # c_res_used = c_res * elasticContactReductionFactor (> 0)
 
    defaultContactSphereDiameter::Float64   # = true, if contact points are visualized
 
@@ -256,6 +257,7 @@ struct SceneOptions
                           defaultN_to_m          = 1000,
                           defaultNm_to_m         = 1000,
                           enableContactDetection = true,
+                          elasticContactReductionFactor = 1.0,
                           useOptimizedStructure  = true,
                           defaultContactSphereDiameter = 0.1)
       @assert(nz_max > 0)
@@ -293,6 +295,7 @@ struct SceneOptions
           defaultN_to_m,
           defaultNm_to_m,
           enableContactDetection,
+          elasticContactReductionFactor,
           defaultContactSphereDiameter)
       scene.contactDetection.visualizeContactPoints       = visualizeContactPoints
       scene.contactDetection.visualizeSupportPoints       = visualizeSupportPoints

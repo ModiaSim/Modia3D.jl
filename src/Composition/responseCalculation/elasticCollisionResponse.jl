@@ -76,7 +76,8 @@ function contactStart(matPair::Solids.ElasticContactPairMaterial,
                       obj1::Object3D,
                       obj2::Object3D,
                       rContact::ModiaMath.Vector3D,
-                      contactNormal::ModiaMath.Vector3D)::ElasticContactPairResponseMaterial
+                      contactNormal::ModiaMath.Vector3D,
+                      elasticContactReductionFactor::Float64)::ElasticContactPairResponseMaterial
     # Compute spring constant
     if typeof(obj1.data.contactMaterial) == Solids.ElasticContactMaterial2
         name1 = obj1.data.contactMaterial.name
@@ -95,9 +96,10 @@ function contactStart(matPair::Solids.ElasticContactPairMaterial,
     @assert(E2 > 0.0)
     @assert(nu1 > 0.0 && nu1 < 1.0)
     @assert(nu2 > 0.0 && nu2 < 1.0)
+    @assert(elasticContactReductionFactor > 0.0)
     c1 = E1/(1 - nu1^2)
     c2 = E2/(1 - nu2^2)
-    c_res = c1*c2/(c1 + c2)
+    c_res = elasticContactReductionFactor*c1*c2/(c1 + c2)
 
     # Compute damping constant
     delta_dot_start = normalRelativeVelocityAtContact(obj1, obj2, rContact, contactNormal)

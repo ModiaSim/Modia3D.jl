@@ -446,7 +446,7 @@ function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64
                 pair.contactPairMaterial = ch.lastContactDict[pairID].contactPairMaterial    # improve later (should avoid to inquire pairID twice)
             else
                 # determine contact pair material
-                pair.contactPairMaterial = contactStart(obj1, obj2, rContact, contactNormal)
+                pair.contactPairMaterial = contactStart(obj1, obj2, rContact, contactNormal, scene.options.elasticContactReductionFactor)
                 simh.restart = max(simh.restart, ModiaMath.Restart)
                 simh.newEventIteration = false
                 if ModiaMath.isLogEvents(simh.logger)
@@ -454,8 +454,8 @@ function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64
                     name2 = ModiaMath.instanceName(obj2)
                     n     = contactNormal
                     println("        distance(", name1, ",", name2, ") = ", pair.distanceWithHysteresis, " became < 0")
-                    Printf.@printf("            contact normal = [%.3g,%.3g,%.3g], contact position = [%.3g,%.3g,%.3g]\n",
-                                   n[1],n[2],n[3],rContact[1],rContact[2],rContact[3])
+                    Printf.@printf("            contact normal = [%.3g,%.3g,%.3g], contact position = [%.3g,%.3g,%.3g], c_res=%.3g, d_res=%.3g\n",
+                                   n[1],n[2],n[3],rContact[1],rContact[2],rContact[3], pair.contactPairMaterial.c_res, pair.contactPairMaterial.d_res)
                 end
             end
         end
