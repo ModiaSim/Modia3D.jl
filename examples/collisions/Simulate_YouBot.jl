@@ -7,6 +7,7 @@ using  Modia3D.ModiaMath.Unitful
 vmat1 = Modia3D.Material(color="LightBlue" , transparency=0.0)    # material of SolidFileMesh
 vmat2 = Modia3D.Material(color="Grey"      , transparency=0.3)    # material of work piece
 vmat3 = Modia3D.Material(color="LightBlue" , transparency=0.3)    # material of table
+vmat4 = Modia3D.Material(color="Green"     , transparency=0.0)    # material of ground
 
 base_frame_obj           = joinpath(Modia3D.path, "objects/robot_KUKA_YouBot/base_frame.obj")
 plate_obj                = joinpath(Modia3D.path, "objects/robot_KUKA_YouBot/plate.obj")
@@ -90,7 +91,14 @@ const ptp_path2 = PTP_path(["angle1", "angle2", "angle3", "angle4", "angle5", "g
                            v_max = [2.68512, 2.68512, 4.8879, 5.8997, 5.8997, 1.0],
                            a_max = [1.5, 1.5, 1.5, 1.5, 1.5, 0.5])
 
-const ptp_path = ptp_path2
+const ptp_path3 = PTP_path(["angle1", "angle2", "angle3", "angle4", "angle5", "gripper"],
+                           positions = [0.0  0.0 pi/2     0.0 0.0 0.0;
+                                        0.0  0.3 pi/2-0.3 0.0 0.0 0.0;
+                                        0.0  0.0 0.0      0.0 0.0 0.0],
+                           startTime = 0.0,
+                           v_max = [2.68512, 2.68512, 4.8879, 5.8997, 5.8997, 1.0],
+                           a_max = [1.5, 1.5, 1.5, 1.5, 1.5, 0.5])
+const ptp_path = ptp_path3
 
 
 plotPath(ptp_path, figure=1, ntime=501)
@@ -159,14 +167,14 @@ end
     frame_b = Object3D(rev_b, r=r_rev_b, visualizeFrame=false)
 end
 
-@assembly Gripper(frame_a, right_finger_offset=0.019,
+@assembly Gripper(frame_a, right_finger_offset=0.0,   #  right_finger_offset=0.019
                   d=0.0, k1=50.0, k2=50.0, T2=0.002, gearRatio=1.0) begin
     frame1                   = Object3D(frame_a, R=ModiaMath.rot3(-180u"°"))
     gripper_base_frame       = Object3D(frame1,Solid(SolidFileMesh(gripper_base_frame_obj),0.199,vmat1), visualizeFrame=false)
     gripper_left_finger_a    = Object3D(visualizeFrame=true)
-    gripper_left_finger      = Object3D(gripper_left_finger_a, Solid(SolidFileMesh(gripper_left_finger_obj),0.010,vmat1,contactMaterial="DryWood"), r=[0, 0.0082,0])
+    gripper_left_finger      = Object3D(gripper_left_finger_a, Solid(SolidFileMesh(gripper_left_finger_obj),0.010,vmat1,contactMaterial="DryWood"), r=[0, 0.0082,0])    # 0.0082
     gripper_right_finger_a   = Object3D(gripper_base_frame, r=[0,-right_finger_offset,0])
-    gripper_right_finger     = Object3D(gripper_right_finger_a, Solid(SolidFileMesh(gripper_right_finger_obj),0.010,vmat1,contactMaterial="DryWood"), r=[0,-0.0082,0])
+    gripper_right_finger     = Object3D(gripper_right_finger_a, Solid(SolidFileMesh(gripper_right_finger_obj),0.010,vmat1,contactMaterial="DryWood"), r=[0,-0.0082,0])     # -0.0082
     prism = ControlledPrismatic(gripper_right_finger_a, gripper_left_finger_a, axis=2,
                                  d=d, k1=k1, k2=k2, T2=T2, gearRatio=gearRatio, s_ref_name="gripper")
 end
@@ -183,15 +191,16 @@ end
 workpiece_Lx = 0.04
 workpiece_Ly = 0.04
 workpiece_Lz = 0.08
+diameter = 0.05
 
 xPosTable = 0.71
-tableX    = 0.4
+tableX    = 0.3
 tableY    = 0.3
 tableZ    = 0.01
-heigthLeg = 0.35
+heigthLeg = 0.37
 widthLeg  = 0.02
 @assembly Table(world) begin
-    solidPlate = Solid(SolidBox(tableX, tableY, tableZ, rsmall=0.0) , "DryWood", vmat1, contactMaterial="DryWood")
+    solidPlate = Solid(SolidBox(tableX, tableY, tableZ) , "DryWood", vmat1, contactMaterial="DryWood")
     plate = Object3D(world, solidPlate, fixed=true, r=[xPosTable , 0.0, heigthLeg], visualizeFrame=false)
     leg   = Solid(SolidBox(widthLeg, widthLeg, heigthLeg) , "DryWood", vmat3)
     leg1  = Object3D(plate, leg, fixed=true, r=[tableX/2 - widthLeg/2 , tableY/2 - widthLeg/2, -heigthLeg/2])
@@ -215,9 +224,14 @@ end
 
     # Table + workpiece
     table     = Table(world)
-    workpiece = Modia3D.ContactBox2(table.plate, scale=[workpiece_Lx, workpiece_Ly, workpiece_Lz], massProperties="DryWood",
-                                   material=vmat2, contactMaterial="DryWood",
-                                   r=[-tableX/2+1.2*workpiece_Lx/2, 0.0, workpiece_Lz/2+tableZ/2], visualizeFrame=false, fixed=false)
+
+    #workpiece = Modia3D.ContactBox2(table.plate, scale=[workpiece_Lx, workpiece_Ly, workpiece_Lz], massProperties="DryWood",
+    #                               material=vmat2, contactMaterial="DryWood",
+    #                               r=[-tableX/2+1.2*workpiece_Lx/2, 0.0, workpiece_Lz/2+tableZ/2], visualizeFrame=false, fixed=false)
+
+    sphere = Object3D(table.plate, Solid(SolidSphere(diameter),"Steel",vmat2, contactMaterial="Steel"),
+                                    r=[-tableX/2+diameter/2, 0.0, diameter/2+tableZ/2], visualizeFrame=false, fixed=false)
+    ground = Object3D(world, Solid(SolidBox(2.5, 2.0, 0.01), "DryWood", vmat4, contactMaterial="DryWood"), r=[0.5, 0.0, -0.005])
 end
 
 gravField = UniformGravityField(g=9.81, n=[0,0,-1])
@@ -225,13 +239,15 @@ youBot    = YouBot(sceneOptions=SceneOptions(gravityField=gravField, visualizeFr
                                              defaultFrameLength=0.1, enableContactDetection=true, elasticContactReductionFactor=1e-4))
 
 #Modia3D.visualizeAssembly!(youBot)
+
 model  = Modia3D.SimulationModel( youBot, maxNumberOfSteps=500 )
 #result = ModiaMath.simulate!(model, stopTime=2.764, log=true, interval=0.001, tolerance=1e-5)
-result = ModiaMath.simulate!(model, stopTime=6.0, log=true, interval=0.001, tolerance=1e-5)
+result = ModiaMath.simulate!(model, stopTime=5.0, log=true, interval=0.001, tolerance=1e-5)
 
 ModiaMath.plot(result,[("link1.rev.controller.phi_ref", "link1.rev.rev.phi") ("link4.rev.controller.phi_ref", "link4.rev.rev.phi");
                        ("link2.rev.controller.phi_ref", "link2.rev.rev.phi") ("link5.rev.controller.phi_ref", "link5.rev.rev.phi");
                        ("link3.rev.controller.phi_ref", "link3.rev.rev.phi") ("gripper.prism.controller.phi_ref", "gripper.prism.prism.s")], figure=3 )
 
-ModiaMath.plot(result, "workpiece.box.r[3]", figure=4)
+# ModiaMath.plot(result, "sphere.r[3]", figure=4)
+
 end

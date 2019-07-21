@@ -187,8 +187,11 @@ end
 function storeDistancesForSolver!(world::Composition.Object3D, pairID::Composition.PairID, ch::Composition.ContactDetectionMPR_handler,
                                   actObj::Composition.Object3D, nextObj::Composition.Object3D,
                                   actAABB::Basics.BoundingBox, nextAABB::Basics.BoundingBox, phase2::Bool, hasEvent::Bool)
-    # Broad Phase
-    if AABB_touching(actAABB, nextAABB) # AABB's are overlapping
+    # If object pairs are already in contact, always perform narrow phase!!
+    hasContact = haskey(ch.contactDict, pairID)
+
+    # Broad phase
+    if hasContact || AABB_touching(actAABB, nextAABB) # AABB's are overlapping
         # narrow phase
         (distanceOrg, contactPoint1, contactPoint2, contactNormal,r1_a, r1_b, r2_a, r2_b, r3_a, r3_b) = mpr(ch, actObj, nextObj, actObj.data.geo, nextObj.data.geo)
         #println("distanceOrg = $distanceOrg") #, contactPoint1 = $contactPoint1, contactPoint2 = $contactPoint2, contactNormal = $contactNormal")
@@ -198,7 +201,7 @@ function storeDistancesForSolver!(world::Composition.Object3D, pairID::Compositi
     # println("... 1: ", ModiaMath.instanceName(actObj), " ", ModiaMath.instanceName(nextObj), "  ", distanceOrg, " ", contactPoint1, " ", contactPoint2, " ", contactNormal)
 
 
-    contact                = hasEvent ? distanceOrg < -zEps : haskey(ch.contactDict, pairID)
+    contact                = hasEvent ? distanceOrg < -zEps : hasContact
     distanceWithHysteresis = contact  ? distanceOrg : distanceOrg + zEps2
 
     if hasEvent
