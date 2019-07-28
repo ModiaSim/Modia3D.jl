@@ -5,8 +5,8 @@
 #   Modia3D.Composition (Modia3D/Composition/_module.jl)
 #
 
-# mutable struct of FreeMotion is defined in Modia3D/Composition/object3d.jl, 
-# since Object3D references FreeMotion and FreeMotion references Object3D
+# mutable struct of FixedJoint is defined in Modia3D/src/Composition/object3d.jl, 
+# since Object3D references FixedJoint and FixedJoint references Object3D
 
 
 function computeKinematics!(joint::FixedJoint, obj::Object3D, analysis::ModiaMath.AnalysisType, time::Float64)::NOTHING

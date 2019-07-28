@@ -40,6 +40,7 @@ export SimulationModel
 export BodyWithTwoFrames, ContactBox, ContactBox2
 export printObject3DAndAllChildren, writeObject3DAndAllChildrenOnJsonFile
 export set_r!, set_q!, set_r_abs!
+export Fixed
 export Revolute, setAngle!, connect, addRevoluteTorqueObject, computeTorque
 export Prismatic, setDistance!
 export FreeMotion
@@ -100,6 +101,7 @@ include("scene.jl")
 include("assembly.jl")
 include("sensors.jl")
 include("joints.jl")
+include(joinpath("joints", "Fixed.jl"))
 include(joinpath("joints", "Revolute.jl"))
 include(joinpath("joints", "Prismatic.jl"))
 include("adaptors.jl")

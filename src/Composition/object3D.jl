@@ -382,8 +382,8 @@ hasChildren(          obj::Object3D) = length(obj.children) > 0
 hasNoChildren(        obj::Object3D) = length(obj.children) == 0
 isWorld(              obj::Object3D) = hasNoParent(obj) && ModiaMath.isInComponent(obj) && typeof(obj._internal.within._internal.scene) == Scene && obj._internal.within._internal.scene.initAnalysis
 isNotWorld(           obj::Object3D) = !(isWorld(obj))
-isFixed(              obj::Object3D) = typeof(obj.joint) == FixedJoint
-isNotFixed(           obj::Object3D) = typeof(obj.joint) != FixedJoint
+isFixed(              obj::Object3D) = typeof(obj.joint) == FixedJoint || typeof(obj.joint) == TreeJointFixed
+isNotFixed(           obj::Object3D) = typeof(obj.joint) != FixedJoint && typeof(obj.joint) != TreeJointFixed
 isFree(               obj::Object3D) = typeof(obj.joint) == FreeMotion
 isNotFree(            obj::Object3D) = typeof(obj.joint) != FreeMotion
 hasJoint(             obj::Object3D) = isNotFixed(obj) && isNotFree(obj)
