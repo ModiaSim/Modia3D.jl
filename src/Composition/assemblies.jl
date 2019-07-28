@@ -72,3 +72,36 @@ end
     ball7  = Modia3D.Object3D(box, sphere, fixed=true, r=[ scale[1]/2-rsmall, -scale[2]/2+rsmall, -scale[3]/2+rsmall], visualizeFrame=false)
     ball8  = Modia3D.Object3D(box, sphere, fixed=true, r=[-scale[1]/2+rsmall, -scale[2]/2+rsmall, -scale[3]/2+rsmall], visualizeFrame=false)
 end
+
+
+@assembly ContactBox3(parent::Object3D;
+                     scale::AbstractVector = [1.0, 1.0, 1.0],
+                     rsmall::Float64=0.001,
+                     fixed::Bool = true,
+                     r::AbstractVector = ModiaMath.ZeroVector3D,
+                     R::Union{ModiaMath.RotationMatrix,NOTHING} = nothing,
+                     q::Union{ModiaMath.Quaternion,NOTHING} = nothing,
+                     v_start::AbstractVector = ModiaMath.ZeroVector3D,
+                     w_start::AbstractVector = ModiaMath.ZeroVector3D,
+                     visualizeFrame::Union{Modia3D.Ternary,Bool} = Modia3D.Inherited,
+                     massProperties::Union{Solids.MassProperties,Number,AbstractString,Solids.SolidMaterial,NOTHING} = nothing,
+                     material::Union{Graphics.Material,NOTHING} = Graphics.Material(),
+                     contactMaterial::String = "",
+                     ) begin
+    #box    = Modia3D.Object3D(parent, Modia3D.Solid(Modia3D.SolidBox(scale[1]-2*rsmall, scale[2]-2*rsmall, scale[3]-2*rsmall; rsmall=rsmall),
+    box = Modia3D.Object3D(parent, Modia3D.Solid(Modia3D.SolidBox(scale[1], scale[2], scale[3]),massProperties,material),
+                           fixed=fixed, r=r, R=R, q=q, v_start=v_start, w_start=w_start, visualizeFrame=visualizeFrame)
+
+    solidBox1 = Modia3D.Solid(Modia3D.SolidBox(scale[1]/2, scale[2]/2, scale[3]/2; rsmall=0.0),
+                              nothing,Graphics.Material(color="Red", transparency=0.7), contactMaterial=contactMaterial)
+    solidBox2 = Modia3D.Solid(Modia3D.SolidBox(scale[1]/2, scale[2]/2, scale[3]/2; rsmall=0.0),
+                              nothing,Graphics.Material(color="Yellow", transparency=0.7), contactMaterial=contactMaterial)
+    box1 = Modia3D.Object3D(box, solidBox1, r=[ scale[1]/4, scale[2]/4, scale[3]/4])
+    box2 = Modia3D.Object3D(box, solidBox2, r=[-scale[1]/4, scale[2]/4, scale[3]/4])
+    box3 = Modia3D.Object3D(box, solidBox1, r=[ scale[1]/4,-scale[2]/4, scale[3]/4])
+    box4 = Modia3D.Object3D(box, solidBox2, r=[-scale[1]/4,-scale[2]/4, scale[3]/4])
+    box5 = Modia3D.Object3D(box, solidBox1, r=[ scale[1]/4, scale[2]/4,-scale[3]/4])
+    box6 = Modia3D.Object3D(box, solidBox2, r=[-scale[1]/4, scale[2]/4,-scale[3]/4])
+    box7 = Modia3D.Object3D(box, solidBox1, r=[ scale[1]/4,-scale[2]/4,-scale[3]/4])
+    box8 = Modia3D.Object3D(box, solidBox2, r=[-scale[1]/4,-scale[2]/4,-scale[3]/4])
+ end

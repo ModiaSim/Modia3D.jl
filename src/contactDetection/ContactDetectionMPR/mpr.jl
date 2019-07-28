@@ -342,6 +342,7 @@ function mpr(ch::Composition.ContactDetectionMPR_handler, shapeA::Composition.Ob
     ## TERMINATION CONDITION 3 ##
     elseif abs(dot(r4.p-r1.p, r4.n)) < tol_rel
       #println("TC 3")
+
       #doesRayIntersectPortal(r1.p,r2.p,r3.p, r4.p,neps)
       #println("r1.p = ", r1.p , " r2.p = ", r2.p ," r3.p = ", r3.p)
       #println("r4.p = ", r4.p)
@@ -355,6 +356,10 @@ function mpr(ch::Composition.ContactDetectionMPR_handler, shapeA::Composition.Ob
 
       (sphereWithOthers,contactPointA, contactPointB) = handleSphereWithOtherShapes(shapeA, shapeB, r4.n, distance)
       if sphereWithOthers
+        #rContact = (contactPointA + contactPointB)/2
+        #Printf.@printf("TC3: contact normal = [%.3g,%.3g,%.3g], contact position = [%.3g,%.3g,%.3g]\n",
+        #             r4.n[1],r4.n[2],r4.n[3],rContact[1],rContact[2],rContact[3])
+
         return (distance,contactPointA,contactPointB,r4.n,r1.a,r1.b,r2.a,r2.b,r3.a,r3.b)
       else
         return (distance,r4.a,r4.b,r4.n,r1.a,r1.b,r2.a,r2.b,r3.a,r3.b)
