@@ -23,14 +23,14 @@ end
     joint = Modia3D.Fixed(obj1, obj2; r=zeros(3), R=nothing, q=nothing)
 
 Return a Fixed `joint` that fixes `obj2::`[`Object3D`](@ref) relatively to
-`obj1::`[`Object3D`](@ref) via the relative position vector vom `obj1` to `obj2`
+`obj1::`[`Object3D`](@ref) via the relative position vector from `obj1` to `obj2`
 (resolved in `obj1`) and the relative transformation matrix `R` from `obj1` to `obj2`
 or alternatively the relative quaternion `q`.
 
 # Arguments
 - `obj1::Object3D`: Parent object.
 
-- `obj1::Object3D`: Object fixed relative to `obj1`.
+- `obj2::Object3D`: Object fixed relative to `obj1`.
 
 - `r::AbstractVector`: Relative position vector from `obj1` to `obj2`
    resolved in `obj1`.
