@@ -8,7 +8,7 @@ import Modia3D.ModiaMath
 vgreen  = Modia3D.Material(color="Green", transparency=0.5)
 vyellow = Modia3D.Material(color="Yellow", transparency=0.5)
 vred    = Modia3D.Material(color="Red", transparency=0.5)
-cmat    = Modia3D.defaultContactMaterial()
+cmat    = "Steel"
 
 Dx = 0.2
 Lx = 1.0

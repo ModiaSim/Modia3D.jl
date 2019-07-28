@@ -10,7 +10,7 @@ vmat1 = Modia3D.Material(color="LightBlue" , transparency=0.5)    # material of 
 vmat2 = deepcopy(vmat1)                                           # material of convex decomposition of SolidFileMesh
 vmat2.transparency = 0.7
 
-cmat = Modia3D.defaultContactMaterial()
+cmat = "Steel"
 
 @assembly BallWithBox begin
   world = Modia3D.Object3D(visualizeFrame=true)

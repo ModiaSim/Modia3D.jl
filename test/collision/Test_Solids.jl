@@ -17,7 +17,7 @@ vyellow = Modia3D.Material(color="Yellow", transparency=0.5)
 vpink   = Modia3D.Material(color="Pink", transparency=0.5)
 vMatAABB = Modia3D.Material(color="Grey", transparency=0.95)
 
-cmat = Modia3D.defaultContactMaterial()
+cmat = "Steel"
 
 # Base dimensions
 length1  = 2.0

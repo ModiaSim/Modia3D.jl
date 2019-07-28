@@ -15,7 +15,7 @@ vgreen  = Modia3D.Material(color="Green", transparency=0.5)
 vblack  = Modia3D.Material(color="Black", transparency=0.5)
 vyellow = Modia3D.Material(color="Yellow", transparency=0.5)
 vpink   = Modia3D.Material(color="Pink", transparency=0.5)
-cmat    = Modia3D.defaultContactMaterial()
+cmat    = "Steel"
 vMatAABB = Modia3D.Material(color="Grey", transparency=0.95)
 
 # dimensions

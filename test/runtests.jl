@@ -1,3 +1,4 @@
+module Modia3D_Runtests
 
 import Modia3D
 
@@ -13,4 +14,6 @@ using Modia3D.Test
    include("runexamples.jl")
 
    println("\n... success of all tests!")
+end
+
 end

@@ -15,7 +15,7 @@ vgreen  = Modia3D.Material(color="Green", transparency=0.5)
 vblack  = Modia3D.Material(color="Black", transparency=0.5)
 vyellow = Modia3D.Material(color="Yellow", transparency=0.5)
 vpink   = Modia3D.Material(color="Pink", transparency=0.5)
-cmat    = Modia3D.defaultContactMaterial()
+cmat    = "Steel"
 vMatAABB = Modia3D.Material(color="Grey", transparency=0.95)
 
 # dimensions
@@ -109,5 +109,5 @@ for time = range(tStart, stop=tEnd, length=101)
 end
 
 Modia3D.closeAnalysis!(collisionSolids)
-println("... success of Test_Collision.jl!")
+println("... success of Test_MiniBsp.jl!")
 end

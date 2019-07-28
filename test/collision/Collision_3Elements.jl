@@ -6,7 +6,7 @@ import Modia3D.ModiaMath
 vmat1 = Modia3D.Material(color="Red", transparency=0.5)
 vmat2 = Modia3D.Material(color="Blue", transparency=0.5)
 vmat3 = Modia3D.Material(color="Green", transparency=0.5)
-cmat    = Modia3D.defaultContactMaterial()
+cmat  = "Steel"
 
 
 @signal Sine(;A=1.0, freqHz = 1.0) begin

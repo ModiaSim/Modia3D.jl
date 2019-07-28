@@ -11,7 +11,7 @@ using  Modia3D.Unitful
 vgreen  = Modia3D.Material(color="Green", transparency=0.5)
 vyellow = Modia3D.Material(color="Yellow", transparency=0.5)
 vred    = Modia3D.Material(color="Red", transparency=0.5)
-cmat    = Modia3D.defaultContactMaterial()
+cmat    = "Steel"
 
 
 @signal negMove() begin
@@ -39,7 +39,7 @@ vblack  = Modia3D.Material(color="Black", transparency=0.5)
 vyellow = Modia3D.Material(color="Yellow", transparency=0.5)
 vpink   = Modia3D.Material(color="Pink", transparency=0.5)
 vgrey = Modia3D.Material(color="Grey", transparency=0.5)
-cmat    = Modia3D.defaultContactMaterial()
+cmat    = "Steel"
 vMatAABB = Modia3D.Material(color="Grey", transparency=0.95)
 vrevolute    = Modia3D.Material(color="Red", transparency=0.0)
 

@@ -114,7 +114,7 @@ struct SolidWithConvexDecomposition
                   massProperties::Union{Solids.MassProperties,Number,AbstractString,Solids.SolidMaterial,NOTHING},
                   material::Union{Graphics.Material,NOTHING} = Graphics.Material(),
                   convexDecompositionMaterial::Union{Graphics.Material,NOTHING} = Graphics.Material();
-                  contactMaterial::Union{Modia3D.AbstractContactMaterial,NOTHING} = nothing)::SolidWithConvexDecomposition
+                  contactMaterial::Union{String,Modia3D.AbstractContactMaterial,NOTHING} = "")::SolidWithConvexDecomposition
 
       # Construct solid of SolidFileMesh
       if typeof(massProperties) == NOTHING

@@ -27,7 +27,7 @@ end
 
    font  = Modia3D.Font(fontFamily="Arial", bold=true, charSize=0.2, color="LightBlue", transparency=0.5)
    text1 = Modia3D.TextShape("This is a box")
-   text2 = Modia3D.TextShape("This is the xy plane"; font=font, 
+   text2 = Modia3D.TextShape("This is the xy plane"; font=font,
                               axisAlignment=Modia3D.XY_Plane, alignment=Modia3D.Left)
 
    textShape1 = Modia3D.Object3D(world, text1)
@@ -41,10 +41,10 @@ end
    vmat   = Modia3D.Material(color="Blue", transparency=0.5)
    box    = Modia3D.Box(1.0,2.0,3.0; material=vmat)
 
-   shape1 = Modia3D.Object3D(world , box)     
+   shape1 = Modia3D.Object3D(world , box)
    shape2 = Modia3D.Object3D(world , Modia3D.Sphere(0.1))
    shape3 = Modia3D.Object3D(shape1, box; r=[1.0,2.0,3.0])
-   shape4 = Modia3D.Object3D(shape3, box; R=ModiaMath.rot2(45u"°")) 
+   shape4 = Modia3D.Object3D(shape3, box; R=ModiaMath.rot2(45u"°"))
 end
 
 
@@ -52,14 +52,14 @@ end
    world = Modia3D.Object3D()
 
    sbox  = Modia3D.SolidBox(1.0,2.0,3.0)
-   smat  = Modia3D.SolidMaterial(density = 2700) 
+   smat  = Modia3D.SolidMaterial(density = 2700)
    vmat  = Modia3D.Material(color="Blue", transparency=0.5)
-   cmat  = Modia3D.ContactMaterialElastic(c=1e5, d=100)
+   cmat  = "Steel"   # Modia3D.ContactMaterialElastic(c=1e5, d=100)
    mass  = Modia3D.MassProperties(m=0.1, Ixx=1.0, Iyy=2.0, Izz=3.0)
 
    solid1 = Modia3D.Object3D(world, Modia3D.Solid(sbox, "Aluminium", vmat))
    solid2 = Modia3D.Object3D(world, Modia3D.Solid(sbox, 2700       , vmat))
-   solid3 = Modia3D.Object3D(world, Modia3D.Solid(sbox, smat       , vmat)) 
+   solid3 = Modia3D.Object3D(world, Modia3D.Solid(sbox, smat       , vmat))
    solid4 = Modia3D.Object3D(solid1, Modia3D.Solid(sbox, nothing, contactMaterial=cmat); r=[10.0,10.0,20.0])
    solid5 = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidSphere(0.1), mass, vmat, contactMaterial=cmat); r=[1.0,2.0,3.0])
    solid6 = Modia3D.Object3D(world, Modia3D.Solid(nothing                 , mass); r=[1.0,2.0,3.0])
@@ -78,7 +78,7 @@ g3    = norm( Modia3D.gravityAcceleration(grav3,r) )
 
 prop = Modia3D.SceneOptions()
 
-@testset "Modia3D.Composition: test global properties" begin 
+@testset "Modia3D.Composition: test global properties" begin
    @test g1 == 0.0
    @test isapprox(g2,9.81)
    @test isapprox(g3,9.8;atol=0.01)
@@ -97,7 +97,7 @@ end
 Modia3D.closeAnalysis!(testObject3D)
 
 TestGraphics()
-TestVisualElements()  
+TestVisualElements()
 TestSolids()
 
 end
