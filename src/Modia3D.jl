@@ -120,7 +120,7 @@ export Spring, GearWheel, CoordinateSystem, Grid, FileMesh
 export Solid, SolidFileMesh, SolidWithConvexDecomposition
 export SolidSphere, SolidEllipsoid, SolidBox, SolidCylinder, SolidCapsule, SolidBeam, SolidCone, SolidPipe
 export MassProperties
-export Revolute, Prismatic
+export Fixed, Revolute, Prismatic
 
 export UniformGravityField, PointGravityField, NoGravityField
 export Material
