@@ -185,4 +185,4 @@ readSolidMaterial3FromJSON(fileName::AbstractString) = Basics.readDictOfStructsF
 
 Dictionary of solid material data, see [`Modia3D.SolidMaterial3`](@ref)
 """
-const solidMaterialPalette3 = readSolidMaterial3FromJSON( joinpath(Modia3D.path, "src", "Solids", "solidMaterials.json") )
+const solidMaterialPalette3 = readSolidMaterial3FromJSON( joinpath(Modia3D.path, "palettes", "solidMaterials.json") )

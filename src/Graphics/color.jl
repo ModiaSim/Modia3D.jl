@@ -9,7 +9,7 @@
 
 import JSON
 
-const defaultColorFile = joinpath(Modia3D.path, "src", "Graphics", "colors.json")
+const defaultColorFile = joinpath(Modia3D.path, "palettes", "colors.json")
 const RGBColor         = MVector{3,Cint}
 
 
