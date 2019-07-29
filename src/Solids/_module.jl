@@ -79,7 +79,6 @@ include("geometry.jl")
 include("solidMaterial.jl")
 include("massProperties.jl")
 include("contactMaterial.jl")
-#include("contactMaterialPairs.jl")
 include("contactPairMaterials.jl")
 include("solid.jl")
 
