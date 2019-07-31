@@ -10,20 +10,21 @@ collisions of \emph{many} objects are supported in \emph{real-time} and that a s
 reasonably realistic. Game engines typically make compromises regarding physics (see for
 example \cite{Erez2015}, where it is pointed out that NVIDIA PhysX and Havok neglect
 Coriolis forces).
-When designing a product, it is important that a simulation of the collision between objects
+When designing an industrial product, it is important that a model of the collision between objects
 is \emph{validated by measurements}. Therefore, the simulation results must
 be much closer to reality as in a game.
 
-In Modia3D an algorithm computes the closest distance and/or the penetration depth
+In Modia3D, a currently used algorithm computes the closest distance and/or the penetration depth
 between two \emph{convex} objects.
-If two objects are penetrating each other, two contact forces and 
-a contact torque are computed from the penetration depth and the relative movement
+If two objects are penetrating each other, two contact forces $\vec{f}_n, \vec{f}_t$ and 
+a contact torque $\vec{\tau}_{\omega}$ are computed from the penetration depth and the relative movement
 and are applied at one point of the contact area (see Fig.~\ref{fig:forces}).
 The advantages of this approach compared to a response calculation with impulses
 is that (a) simulation results are closer
 to reality and (b) it is easier to treat complex contact situations correctly. For example, if several objects have contact at the same time instant, as in the billiard table benchmark of section~\ref{sec:Examples}, 
 it is difficult to solve a model with an impulsive response calculation. The drawback of an elastic
 response calculation is that simulation is often much slower.
+
 
 
 \subsection{User's View}
@@ -33,16 +34,16 @@ associated with them. Modia3D uses two sets of material data:
 
 \begin{enumerate}
 \item \emph{Solid material constants}\\
-      In a dictionary, the name of \emph{one} material is used as a key, for example \texttt{"Steel"}. 
+      In a dictionary, the name of \emph{one} material is used as a key, for example \texttt{Steel}. 
       The values are typical material constants of a solid. For elastic response calculation,
       Young's modules $E$ and Poisson's ratio $\nu$ are used. From this data of two contacting
       objects, a spring constant is computed to describe the elastic deformation in the contact area.
 
 \item \emph{Contact pair material constants}\\
-      In another dictionary, the names of \emph{two} materials are used as a key, for example \texttt{"Steel"} 
-      and \texttt{"DryWood"}. The values are the \emph{coefficient of restitution} $cor$, 
-      the \emph{kinetic/sliding friction force coefficient} $\mu_k$ and the 
-      \emph{rotational resistance torque coefficient} $\mu_r$ between these two contacting
+      In another dictionary, the names of \emph{two} materials are used as a key, for example \texttt{Steel} 
+      and \texttt{DryWood}. The values are the coefficient of restitution $cor$, 
+      the kinetic/sliding friction force coefficient $\mu_k$ and the 
+      rotational resistance torque coefficient $\mu_r$ between these two contacting
       objects of the respective materials, see section~\ref{sec:responseCalculation}.
 \end{enumerate}  
 
@@ -70,6 +71,16 @@ model  = SimulationModel(bounce)
 result = simulate!(model; stopTime=3.0)
 \end{lstlisting}
 
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.25\textwidth]{figures/forces.pdf}
+	\caption{Contact normal force $\vec{f}_n$, contact tangential force $\vec{f}_t$ 
+		(= sliding friction force) and contact torque $\vec{\tau}_{\omega}$
+		between two penetrating objects. $\vec{e}_n, \vec{e}_t, \vec{e}_{\omega}$ are unit vectors
+		in direction of the respective relative movement.}
+	\label{fig:forces}
+\end{figure}
+
 %
 \begin{figure}[htb]
 	\centering
@@ -83,9 +94,9 @@ During simulation, the \texttt{contactMaterials} defined for
 dictionaries sketched above. 
 When the two objects penetrate each other,
 an elastic response is computed with the help of the dictionary values 
-(provided, collision handling was explicitly enabled in the scene options).
+(provided collision handling was explicitly enabled in the scene options).
 
-\subsection{Numerical Solution}
+\subsection{Numerical Solution}\label{sec:numericSolution}
 
 \newcommand{\bvec}[1]{\bm{#1}}
 
@@ -127,7 +138,7 @@ Distances between convex shapes, as well as penetration depths are computed with
 Minkowski Portal Refinement algorithm (MPR-algorithm) \cite{snethen2008}.
 The MPR-algorithm is much simpler to implement and has less numerical problems than the often used GJK/EPA-standard algorithms \cite{bergen2003, GJK1988}, because it only works with triangles and not with tetrahedrons.
 In the original version of the MPR-algorithm \cite{snethen2008} only penetration depths are determined. In Modia3D improvements of the MPR-algorithm are utilized that have been proposed in \cite{kenwright2015,Neumayr2017}, in particular to compute the distances of shapes that are not in contact
-and treating special collision situations properly.
+and treat special collision situations properly.
 
 Collisions of $n$ potentially colliding shapes are handled in the following (mostly standard) way:
 \begin{enumerate}
@@ -135,7 +146,7 @@ Collisions of $n$ potentially colliding shapes are handled in the following (mos
 	The shapes are approximated by \emph{Axis Aligned Bounding Boxes}, see e.g.\ \cite{bergen2003},
     where potential collisions and approximate distances can be very cheaply determined
 	resulting in $O(n^2)$ cheap tests. When using special data structures (such as octrees or kd-trees),
-	it is possible to reduce the number of cheap tests to $O(n \log(n))$.
+	it is even possible to reduce the number of cheap tests to $O(n \log(n))$.
 	
 	\item[2. ] \emph{Narrow Phase}\\
 	For the potentially colliding shape pairs as identified in the broad phase,
@@ -146,22 +157,14 @@ Collisions of $n$ potentially colliding shapes are handled in the following (mos
 	contact point. For details, see section \ref{sec:responseCalculation} and 
     Fig.~\ref{fig:forces}.
 \end{enumerate}
-\begin{figure}[h]
-	\centering
-	\includegraphics[width=0.25\textwidth]{figures/forces.pdf}
-	\caption{Contact normal force $\vec{f}_n$, contact tangential force $\vec{f}_t$ 
-             (= sliding friction force) and contact torque $\vec{\tau}_{\omega}$
-             between two penetrating objects. $\vec{e}_n, \vec{e}_t, \vec{e}_{\omega}$ are unit vectors
-             in direction of the respective relative movement.}
-	\label{fig:forces}
-\end{figure}
+
 
 \subsection{Elastic Response Calculation}\label{sec:responseCalculation}
 
 A contact normal force $\vec{f}_n$, a contact tangential force $\vec{f}_t$ (= sliding friction force), 
-and a contact torque $\vec{\tau}_{\omega}$ are calculated, when two 3D objects penetrate each other with a 
+and a contact torque $\vec{\tau}_{\omega}$ are calculated when two 3D objects penetrate each other with a 
 penetration depth $\delta \ge 0$, as shown in Fig.~\ref{fig:forces}. The intuition is that
-there is a contact \emph{area} with a certain pressure distribution in normal and a stress
+there is a contact area with a certain pressure distribution in normal and a stress
 distribution in tangential direction and that the response characteristics provides an
 approximation of the resultant force and torque of these distributions.
 %
@@ -170,10 +173,10 @@ approximation of the resultant force and torque of these distributions.
 The MPR-algorithm computes the contact point, $\delta$, and a unit vector $\vec{e}_n$ that is orthogonal
 to the contacting surfaces. The novel response characteristic of (\ref{eq:response})
 utilizes ideas from \cite{Flores2011, otter2005, Skinjar2018} with some extensions
-and corrections. Variables with index ${}_{geo}$ are computed from the contacting geometries and 
-vectors with index ${}_{reg}$ are regularized with smooth characteristics  to avoid divisions by zero
-(for example, $|\vec{e}_{t,reg}| = 1$ with exception of a small region around,
-$|\vec{v}_{rel,t}| < v_{small}$ where $|\vec{e}_{t,reg}| = 0$ at
+and corrections. Variables with index ${geo}$ are computed from the contacting geometries and 
+vectors with index ${reg}$ are regularized with smooth characteristics  to avoid divisions by zero
+(for example, $|\vec{e}_{t,reg}| = 1$ with exception of a small region around
+$|\vec{v}_{rel,t}| < v_{small}$, where $|\vec{e}_{t,reg}| = 0$ at
 $|\vec{v}_{rel,t}| = 0$ and it smoothly approaches $1$ at $|\vec{v}_{rel,t}| = v_{small}$):
 %
 \begin{subequations}
@@ -199,7 +202,7 @@ The symbols of (\ref{eq:response}) have the following meaning:
                    coefficient of restitution $cor_{reg}$ and $\dot{\delta}$
                    when contact starts ($\dot{\delta}^{-} \ge 0$).
                    Variable $cor_{reg}$ is computed according to \cite{Flores2011} and regularized
-                   so that $cor_{reg} = 0.001$ if the normal relative velocity $v_{rel,n}=0$
+                   so that $cor_{reg} = 0.001$ if the normal relative velocity $v_{rel,n}=\SI{0}{\meter \per \second}$
                    and approaches $cor$ when $v_{rel,n} = v_{small}$.
                    One reason for this is
                    that otherwise \cite{Flores2011} would result in a division by zero if 
@@ -210,7 +213,7 @@ The symbols of (\ref{eq:response}) have the following meaning:
 \item[$\mu_k$]     Kinetic/sliding friction force coefficient ($\ge 0$).
 \item[$\mu_r$]     Rotational resistance torque coefficient ($\ge 0$). 
                    Its effect is that torque $\vec{\tau}_{\omega}$ is computed to reduce the relative
-                   angular velocity $\vec{\omega}_{rel}$ between the two objects until $\vec{\omega}_{rel}=0$.
+                   angular velocity $\vec{\omega}_{rel}$ between the two objects until $\vec{\omega}_{rel}= \SI{0}{\radian\per\second}$.
                    For a ball, $\mu_r$ is the (standard) rolling resistance coefficient and
                    $\mu_{geo}$ is the ball radius.
 \end{description}
@@ -257,10 +260,9 @@ on a billiard table.
 	\label{fig:rollingBall}
 \end{figure}
 %
-In Fig.~\ref{fig:rollingBall_plot}, time plots of some of the variables
-are shown. The billiard ball is a free flying object with 6 degrees-of-freedom where the rotation is
+The billiard ball is a free flying object with 6 degrees-of-freedom where the rotation is
 described with quaternions (in total, the state of this object is defined with 13 variables). 
-It starts at its initial position $r_s = 0.2~m$ with an initial velocity $v_s = 3~m/s$. At initialization, the billiard ball is placed in touching position with the table (penetration depth $\delta = 0$). The ball subsides immediately, because of gravity in z-direction. Therefore, the ball and the table are colliding, a collision event is triggered, and the two objects are penetrating each other. The material data is shown in table \ref{table:billiardTableMaterials}.
+It starts at its initial position $r_s = \SI{0.2}{\meter}$ with an initial velocity $v_s = \SI{3}{\meter \per \second}$ . At initialization, the billiard ball is placed in touching position with the table (penetration depth $\delta = 0$). The ball subsides immediately, because of gravity in z-direction. Therefore, the ball and the table are colliding, a collision event is triggered, and the two objects are penetrating each other. The material data is shown in table \ref{table:billiardTableMaterials}.
 
 %
 \begin{figure}[tb]
@@ -272,19 +274,19 @@ It starts at its initial position $r_s = 0.2~m$ with an initial velocity $v_s = 
 %
 The upper left plot in Fig,~\ref{fig:rollingBall_plot} shows the position of the billiard ball in x-direction. 
 The lower left plot of Fig.~\ref{fig:rollingBall_plot} shows the subsidence of the ball into the table 
-which is in the order of $10^{-5}~m$. The upper right plot shows the velocity of the ball in 
+which is in the order of $10^{-5}$ m. The upper right plot shows the velocity of the ball in 
 x-direction and the lower right plot displays the angular velocity in y-direction.
-The first $0.15~s$ the ball is sliding. Due to sliding friction ($\mu_k = 0.6$), the relative velocity is reduced.
+The first $\SI{0.15}{\second}$ the ball is sliding. Due to sliding friction ($\mu_k = 0.6$), the relative velocity is reduced.
 At the same time, the sliding friction force acts as a torque around the ball center and forces a rotation of
-the ball around the y-direction. At $time = 0.15~s$, the relative velocity in tangential direction $v_{rel,t}$ is zero 
+the ball around the y-direction. At $time = \SI{0.15}{\second}$, the relative velocity in tangential direction $v_{rel,t}$ is zero 
 \begin{equation}
-v_{rel,t} = v_{ball,1} - \omega_{ball,2} r_{ball} = 2.125 - 70 \cdot 0.03 \approx 0 
+v_{rel,t} = v_{ball,1} - \omega_{ball,2} r_{ball} = 2.125 - 70 \cdot 0.03 \approx \SI{0}{\meter \per \second}
 \end{equation}
-and \emph{ideal rolling} of the ball takes place. Since $v_{rel,t} =0$, the sliding friction force
-$\vec{f}_t = 0$, because $\vec{e}_{t,reg}=0$. Therefore, the ball would roll forever, contrary to reality.
+and \emph{ideal rolling} of the ball takes place. Since $v_{rel,t} =\SI{0}{\meter \per \second}$, the sliding friction force
+$\vec{f}_t = \SI{0}{\newton}$, because $\vec{e}_{t,reg}= 0$. Therefore, the ball would roll forever, contrary to reality.
 On the other hand, the rotational resistance torque $\vec{\tau}_{\omega}$ ($\mu_r = 0.02$) acts as a
-rolling resistance that reduces the
-angular velocity $\omega_{ball,2}$ starting at $time = 0.15~s$ and the ball comes to rest at 
+rolling resistance that continuously reduces the
+angular velocity $\omega_{ball,2}$ and the ball comes to rest at 
 some point in the future outside of the plot area (see right upper and lower plot of 
 Fig.~\ref{fig:rollingBall_plot}). The result is that
 (\ref{eq:response}) is able to reproduce the effect of a sliding and rolling 
@@ -294,9 +296,9 @@ response law, velocity dependency of the coefficients $cor, \mu_k, \mu_r$ is neg
 
 \subsubsection*{Collision of two balls}
 
-Two billiard balls are positioned on a billiard table (see Fig.~\ref{fig:twoCollidingBalls}.
-One has an initial velocity and hits the other resting ball after some time.
-Simulation results are shown in Fig.~\ref{fig:twoCollidingBalls_plot}).
+Two billiard balls are positioned on a billiard table, see Fig.~\ref{fig:twoCollidingBalls}.
+One of them has an initial velocity and hits the other resting ball after some time.
+Simulation results are shown in Fig.~\ref{fig:twoCollidingBalls_plot}.
 Before the first ball hits the second one, the
 effects of sliding and rolling occur as analyzed before.
 %
@@ -314,33 +316,31 @@ effects of sliding and rolling occur as analyzed before.
 	\label{fig:twoCollidingBalls_plot}
 \end{figure}
 %
-At $time = 0.55~s$, the first ball hits the second ball. Since the coefficient of restitution between the
-two balls is one, a fully elastic collision takes place. It is well-known that in this case the first ball
-stops and the second ball continues with the velocity of the first ball. This ``exchange`` of velocity
-can be seen in the middle plot of Fig.~\ref{fig:twoCollidingBalls_plot} at $time = 0.55~s$. However, since the first ball
+At $time = \SI{0.55}{\second}$, the first ball hits the second ball. Since the coefficient of restitution between the
+two balls is one, a fully elastic collision takes place. In this case the first ball transfers most of its kinetic energy to the second ball which starts moving with the velocity of the first ball. This ``exchange`` of velocity
+can be observed in the middle plot of Fig.~\ref{fig:twoCollidingBalls_plot} at $time = \SI{0.55}{\second}$. However, since the first ball
 was rolling, the angular momentum was greater zero. This momentum is conserved. Therefore, the first ball continues rolling
-and velocity $v_{ball,1}$ starts from zero and becomes larger.
+and velocity $v_{ball,1}$ rises from zero again.
 Since the relative velocity is no longer zero due to the impact, again a friction force $\vec{f}_t$ is acting
-that introduces again a counter torque at the balls axis which quickly reduces the angular velocity until again
-the relative velocity is zero around $time = 0.65 s$. Both balls are again ideally rolling and due to the
+that introduces a counter torque at the balls axis which quickly reduces the angular velocity until again
+the relative velocity is zero around $time = \SI{0.65}{\second}$. Both balls are again ideally rolling, and due to the
 rotational resistance torque, the angular velocities are slowly reduced until both balls come to rest
-(this is not shown in the plots).
+which is not shown in the plots.
 %
 
 
 
 \subsection{Regularizing the Contact Area}\label{sec:BouncingBox}
 
-A DAE integrator such as IDA, solves a nonlinear algebraic
+A DAE solver such as IDA, see Section \ref{sec:numericSolution}, solves a nonlinear algebraic
 equation system at every time instant. If $\bvec{f}_d, \bvec{f}_c$ in (\ref{eq:DAE}) are not smooth or even not continuous,
-it is highly probable that no solution of this algebraic equation system is found and \emph{simulation stops with an error message}.
+it is most likely that no solution of this algebraic equation system is found and simulation stops.
 This situation easily occurs, for example, if the edges or vertices of two boxes collide on each other, because very small changes of the
 positions of the boxes can change the contact situation drastically. To improve the reliability of the simulation, Modia3D
-uses the approach proposed in \cite{bergen2003}, and is smoothing every shape with a small sphere (default radius $= 1~mm$) that
-is (conceptually) moved over all surfaces. Practically, this smoothing can be very easily and cheaply incorporated in to the
+uses the approach proposed in \cite{bergen2003}, and is smoothing every shape with a small sphere (default radius $= \SI{1}{\milli \meter}$) that
+is (conceptually) moved over all surfaces. Practically, this smoothing can be very easily and cheaply incorporated for the
 convex collision handling. 
 
-A box placed on a table is a standard configuration, as well as a box falling on a table and the box faces that come into contact are completely parallel to each other (see Fig.~\ref{fig:bouncingBox}, left).
 %
 \begin{figure}[tb]
 	\centering
@@ -351,21 +351,20 @@ A box placed on a table is a standard configuration, as well as a box falling on
 	\label{fig:bouncingBox}
 \end{figure}
 %
-Every method that computes only contact points on two colliding objects and the corresponding penetration depth, has the
-large disadvantage that easily an infinite number of solutions exists, as in this case:
-small changes in the configuration can result in very different contact points in the contact area.
-It is then highly probable that simulation with a variable-step integrator fails. Furthermore, the contact force and torque
-depend heavily on the size of the contact area. The penetration depth alone provides not enough information
+Every method that considers only contact points on two colliding objects and the corresponding penetration depth has the
+disadvantage that an infinite number of solutions can occur in some cases. For example this happens, when a box falls on a table and the faces of box and table are parallel (see Fig.~\ref{fig:bouncingBox}, left). Imagine small changes in the configuration can result in identification of very different contact points in the contact area.
+It is then highly probable that simulation with a variable-step solver fails. Furthermore, the contact force and torque
+depend heavily on the size of the contact area. The penetration depth alone does not provide enough information
 to calculate reasonable values that are in accordance with physics. For both cases, it would be necessary to take the
-complete contact area and volume into account, as, for example done in \cite{Elmqvist2015}. This is much more costly
+complete contact area and volume into account, as done e.g. in \cite{Elmqvist2015}. This method is however much more costly
 and probably only works reasonably for soft contacts where the contact volume is large enough.
-To summarize, collision handling with variable-step integrators and penetration depth computation 
-can most likely only work reliably for \emph{point contacts} that are smoothly changing.
+To summarize, collision handling with variable-step solvers and penetration depth computation 
+can most likely only work reliably for point contacts that are smoothly changing.
 
 To cope with this severe difficulty in a simple way, the Modia3D supported primitives are currently being
 regularized to enforce point contacts. For example, if a contact material is defined for a box, a small sphere
-(default radius $= 1~mm$) is attached automatically at every vertex of a box. An example is shown in 
-Fig.~\ref{fig:bouncingBox}, where the left side of the figure shows the original size of these spheres and the
+(default radius $= \SI{1}{\milli \meter}$) is attached automatically at every vertex of a box. An example is shown in 
+Fig.~\ref{fig:bouncingBox}, where the left figure shows the original size of these spheres and the
 right figure shows the spheres enlarged by a factor of 30. When such a box bounces on a table or is in rest
-on a table, point contacts between four spheres and the table occur and the integrator has no problem
-to compute a solution.
+on a table, point contacts between four spheres and the table occur and the problems
+to compute a solution can be overcome.

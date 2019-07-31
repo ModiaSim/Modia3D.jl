@@ -14,7 +14,7 @@ Such types of objects are called
 \emph{Object3D}\footnote{\href{https://threejs.org/docs/index.html\#api/core/Object3D}{https://threejs.org/docs/index.html\#api/core/Object3D}} in Three.js. 
 In Modia3D the name \emph{Object3D} is used. This very flexible approach allows to define many optional components and variants and treat them in a modular way. The Julia programming language is particularly suited for this \textit{component-oriented} programming pattern and therefore key-concepts of Julia, such as multiple dispatch, are heavily used in Modia3D. 
 	
-Hierarchical structuring for grouping and aggregation is performed with the Modia3D macro @assembly. Julia macros are metaprogramming\footnote{\href{https://docs.julialang.org/en/v1/manual/metaprogramming}{https://docs.julialang.org/en/v1/manual/metaprogramming}} language elements and a macro name starts with @. It generates an abstract syntax tree (AST) of Julia code which is automatically compiled and executed at the line where the macro is called. 
+Hierarchical structuring for grouping and aggregation is performed with the Modia3D macro \texttt{@assembly}. Julia macros are metaprogramming\footnote{\href{https://docs.julialang.org/en/v1/manual/metaprogramming}{https://docs.julialang.org/en/v1/manual/metaprogramming}} language elements and a macro name starts with \texttt{@}. It generates an abstract syntax tree (AST) of Julia code which is automatically compiled and executed at the line where the macro is called. 
 Fig.~\ref{fig:bar} shows a bar that is constructed from several Object3D elements
 and is defined with the following Julia code:
 \begin{lstlisting}[language = Julia]
@@ -33,16 +33,16 @@ end
 \begin{figure}[htb]
 	\centering
 	\includegraphics[width=0.3\textwidth]{figures/fourBar.pdf}  
-	\caption{Planar fourbar mechanism.\label{fig:Fourbar}}
+	\caption{Planar four-bar mechanism.\label{fig:Fourbar}}
 \end{figure}
-The first Object3D is a \texttt{SolidBeam} geometry that is made of Aluminium and is visualized in blue color. Mass, center of mass and inertia matrix are computed internally from this information. The next two objects place coordinate systems on the first object defining locations for revolute joints. Three instances of the \texttt{Bar} assembly together with a ground object  (= the fourth bar) are used to build up the \emph{fourbar} mechanism\footnote{\href{https://en.wikipedia.org/wiki/Four-bar\_linkage}{https://en.wikipedia.org/wiki/Four-bar\_linkage}}
+The first Object3D is a \texttt{SolidBeam} geometry that is made of aluminium and is visualized in blue color. Mass, center of mass and inertia matrix are computed internally from this information. The next two objects place coordinate systems on the first object. Three instances of the \texttt{Bar} assembly together with a ground object  (= the fourth bar) are used to build up the four-bar mechanism\footnote{\href{https://en.wikipedia.org/wiki/Four-bar\_linkage}{https://en.wikipedia.org/wiki/Four-bar\_linkage}}
 shown in Fig.~\ref{fig:Fourbar}.
 The Julia code of this mechanism is shown in the next listing:
 %
 \begin{lstlisting}[language = Julia]
 @assembly Fourbar(;Lx=0.1) begin
 	world	= Object3D(CoordinateSystem(0.6)) 
-	pos1 	= Object3D(world,r=[Lx/2,0.0,Lx/2) 
+	pos1 	= Object3D(world,r=[Lx/2,0.0,Lx/2]) 
 	pos2 	= Object3D(pos1, r=[Lx,0.0,0.0]) 
 	ground 	= Object3D(world,Box(..),..) 
 	bar1	= Bar(Lx=Lx) 
