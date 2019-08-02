@@ -446,7 +446,8 @@ function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64
                 pair.contactPairMaterial = ch.lastContactDict[pairID].contactPairMaterial    # improve later (should avoid to inquire pairID twice)
             else
                 # determine contact pair material
-                pair.contactPairMaterial = contactStart(obj1, obj2, rContact, contactNormal, scene.options.elasticContactReductionFactor)
+                pair.contactPairMaterial = contactStart(obj1, obj2, rContact, contactNormal,
+                                                         scene.options.elasticContactReductionFactor)
                 simh.restart = max(simh.restart, ModiaMath.Restart)
                 simh.newEventIteration = false
                 if ModiaMath.isLogEvents(simh.logger)
@@ -461,7 +462,8 @@ function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64
         end
 
         # println("length(ch.dictCommunicate) ", length(ch.dictCommunicate) )
-        (f1,f2,t1,t2) = responseCalculation(pair.contactPairMaterial, obj1, obj2, rContact, contactNormal, pair.distanceWithHysteresis, time, file)
+        (f1,f2,t1,t2) = responseCalculation(pair.contactPairMaterial, obj1, obj2, rContact, contactNormal,
+                                             pair.distanceWithHysteresis, time, file)
 
         # Transform forces/torques in local part frames
         obj1.dynamics.f += obj1.R_abs*f1

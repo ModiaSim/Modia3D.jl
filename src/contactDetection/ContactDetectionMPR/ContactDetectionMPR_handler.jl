@@ -95,7 +95,10 @@ function updateNoContactPair!(pair::NoContactPair, contactPoint1, contactPoint2,
     return nothing
 end
 
-
+Base.:isless( value1::ContactPair, value2::ContactPair) = value1.distanceWithHysteresis < value2.distanceWithHysteresis
+Base.:isequal(value1::ContactPair, value2::ContactPair) = value1.distanceWithHysteresis == value2.distanceWithHysteresis
+Base.:isless( value1::NoContactPair, value2::NoContactPair) = value1.distanceWithHysteresis < value2.distanceWithHysteresis
+Base.:isequal(value1::NoContactPair, value2::NoContactPair) = value1.distanceWithHysteresis == value2.distanceWithHysteresis
 
 Base.:isless(key1::DistanceKey, key2::DistanceKey) =   key1.contact &&  key2.contact ? key1.pairID < key2.pairID :
                                                      ( key1.contact && !key2.contact ? true                        :
@@ -129,8 +132,7 @@ mutable struct ContactDetectionMPR_handler <: Modia3D.AbstractContactDetection
 
   lastContactDict::Dict{PairID,ContactPair}
   contactDict::Dict{    PairID,ContactPair}
-  noContactDict::Dict{  PairID,NoContactPair}
-  distanceSet::SortedSet{DistanceKey}
+  noContactMinVal::Float64
 
   tol_rel::Float64
   niter_max::Int
@@ -153,8 +155,7 @@ mutable struct ContactDetectionMPR_handler <: Modia3D.AbstractContactDetection
     handler.distanceComputed = false
     handler.lastContactDict  = Dict{PairID,ContactPair}()
     handler.contactDict      = Dict{PairID,ContactPair}()
-    handler.noContactDict    = Dict{PairID,NoContactPair}()
-    handler.distanceSet      = SortedSet{DistanceKey}()
+    handler.noContactMinVal  = 42.0
 
     handler.tol_rel          = tol_rel
     handler.niter_max        = niter_max

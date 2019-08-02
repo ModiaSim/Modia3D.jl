@@ -15,7 +15,8 @@ cmatCushion = Modia3D.ElasticContactMaterial2("BilliardCushion")
 diameter = 0.06
 radius = diameter/2
 distance_balls = sqrt(3)/2*diameter
-dist = 0.0001
+#dist = 0.0001
+dist = 0.0
 
 TableX = 2.24
 TableY = 1.12
