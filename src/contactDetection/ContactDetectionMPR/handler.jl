@@ -140,7 +140,7 @@ function computeDistances(ch::Composition.ContactDetectionMPR_handler, world::Co
 end
 
 
-const zEps  = 1.e-10
+const zEps  = 1.e-8
 const zEps2 = 2*zEps
 
 

@@ -2,6 +2,22 @@
     module Simulate_NewtonsCradle
 
 Model of [Newtons' Cradle](https://en.wikipedia.org/wiki/Newton%27s_cradle).
+
+The balls of the Newton Cradle are initially placed in such a way, that there is a small
+distance between the balls, so the balls are **not** touching each other. This distance was
+determined (by trial-and-error) in such a way, that collisions between the balls
+occur in sequence (so if ball1 hits ball2, then ball3 is hit by ball2 only after the
+contact between ball1 and ball2 has already ended; this can be easily determined by
+setting `simulate!(..., log=true)`). Only in this case, the simulation matches the
+real experiment. If the balls are directly touching each other, multiple contacts
+occur at the same time instant and the simulation result is then no longer according
+to reality.
+
+See also:
+
+M. Payr (2008): **[An Experimental and Theoretical Study of Perfect Multiple
+                Contact Collisions in Linear Chains of Balls.](http://www.zfm.ethz.ch/e/dynamics/payr_collisions.htm)**
+                Dissertation, ETH Zürich.
 """
 module Simulate_NewtonsCradle
 
@@ -13,8 +29,8 @@ vmatSolids   = Material(color="Red"      , transparency=0.0)   # material of sol
 
 diameter   = 0.02
 lengthWire = 0.15
-# rsmall     = diameter/100
-rsmall = 0.0
+rsmall     = diameter/100
+#rsmall = 0.0
 
 Lx = diameter/2
 Ly = 5*diameter
@@ -54,7 +70,7 @@ end
 end
 
 gravField     = UniformGravityField(g=9.81, n=[0,0,-1])
-newtonsCradle = NewtonsCradle(sceneOptions=SceneOptions(elasticContactReductionFactor=1e8, gravityField=gravField, visualizeFrames=false,
+newtonsCradle = NewtonsCradle(sceneOptions=SceneOptions(elasticContactReductionFactor=1.0, gravityField=gravField, visualizeFrames=false,
                                                         defaultFrameLength=2*diameter, enableContactDetection=true))
 
 # Modia3D.visualizeAssembly!( newtonsCradle )
