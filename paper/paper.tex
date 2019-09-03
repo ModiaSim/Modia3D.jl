@@ -17,7 +17,8 @@
 
 \usepackage{booktabs}
 \usepackage{enumitem}
-\usepackage[\sisetup{per-mode=symbol}]{siunitx}
+%\usepackage[\sisetup{per-mode=symbol}]{siunitx}
+\usepackage{siunitx}
 
 \begin{document}
 
@@ -30,7 +31,7 @@ Modia3D is an experimental Julia package to model and simulate 3D mechanical sys
 Ideas from modern game engines are used to achieve a highly flexible setup
 and features of multi-body algorithms are used to get a rigid mathematical formulation and
 support, for example, of closed kinematic loops. Collision handling is performed on convex
-geometries with elastic response calculation. 
+geometries with elastic response calculation.
 A Modia3D model is solved with
 a variable-step solver. This is important to combine Modia3D with the equation-based modeling system Modia in the future.
 \end{abstract}
