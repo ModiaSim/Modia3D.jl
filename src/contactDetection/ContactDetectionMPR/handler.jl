@@ -198,9 +198,7 @@ function storeDistancesForSolver!(world::Composition.Object3D, pairID::Compositi
         else
           if ch.noContactMinVal > distanceWithHysteresis
             ch.noContactMinVal = distanceWithHysteresis
-          end
-        end
-    end
+    end; end; end
 
 
 #=

@@ -212,23 +212,10 @@ end
 function skalarization(r0,r1,r2,r3)
   x = maximum([abs.(r0.p) abs.(r1.p) abs.(r2.p) abs.(r3.p)])
   scale = 1/x
-  #=
-  println("x = ", x)
-  println("before = ", r0.p)
-  println("before = ", r1.p)
-  println("before = " , r2.p)
-  println("before = ", r3.p)
-  =#
   r0.p = scaleVector(scale, r0.p)
   r1.p = scaleVector(scale, r1.p)
   r2.p = scaleVector(scale, r2.p)
   r3.p = scaleVector(scale, r3.p)
-  #=
-  println("after = " , r0.p)
-  println("after = ", r1.p)
-  println("after = ", r2.p)
-  println("after = ", r3.p)
-  =#
   return (r0,r1,r2,r3,scale)
 end
 

@@ -149,14 +149,11 @@ mutable struct ContactDetectionMPR_handler <: Modia3D.AbstractContactDetection
     @assert(tol_rel > 0.0)
     @assert(niter_max > 0)
     @assert(neps > 0.0)
-
     handler = new()
-
     handler.distanceComputed = false
     handler.lastContactDict  = Dict{PairID,ContactPair}()
     handler.contactDict      = Dict{PairID,ContactPair}()
     handler.noContactMinVal  = 42.0
-
     handler.tol_rel          = tol_rel
     handler.niter_max        = niter_max
     handler.neps             = neps

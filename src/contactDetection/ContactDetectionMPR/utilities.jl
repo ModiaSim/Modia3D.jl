@@ -43,41 +43,6 @@ function unpack(i::Int64)
   return (i1,i2,i3,i4)
 end
 
-#=
-function zeroCrossingSort(vecA::Vector{Int64}, vecB::Vector{Int64}, max_collisions::Int64, collisionPairs::Int64)
-  temp = zeros(Int64,collisionPairs)  # register for vecA
-  # i ... collision pair
-  # temp[i] ... position of collision pair in vector A
-  for i in eachindex(vecA)
-    temp[vecA[i]] = i
-  end
-
-
-  vecC = SVector{max_collisions, Int64}(zeros(Int64, max_collisions))
-  notSortedB = []
-  for i in eachindex(vecB)
-    if temp[vecB[i]] == 0
-      push!(notSortedB, vecB[i])
-    else
-      vecC[temp[vecB[i]]] = vecB[i]
-    end
-  end
-
-  counter_notSorted = 0
-  for i in eachindex(vecC)
-    if vecC[i] == 0
-      counter_notSorted += 1
-      vecC[i] = notSortedB[counter_notSorted]
-      temp[vecA[i]] = 0
-      temp[vecC[i]] = i
-    end
-  end
-
-  println("vecC = ", vecC)
- println("temp = ", temp)
- return vecC
-end
-=#
 
 # Functions to test properties of portal
 
