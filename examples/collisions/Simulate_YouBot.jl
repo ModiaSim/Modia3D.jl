@@ -241,13 +241,12 @@ youBot    = YouBot(sceneOptions=SceneOptions(gravityField=gravField, visualizeFr
 #Modia3D.visualizeAssembly!(youBot)
 
 model  = Modia3D.SimulationModel( youBot, maxNumberOfSteps=500 )
-#result = ModiaMath.simulate!(model, stopTime=2.764, log=true, interval=0.001, tolerance=1e-5)
 result = ModiaMath.simulate!(model, stopTime=5.0, log=true, interval=0.001, tolerance=1e-5)
 
 ModiaMath.plot(result,[("link1.rev.controller.phi_ref", "link1.rev.rev.phi") ("link4.rev.controller.phi_ref", "link4.rev.rev.phi");
                        ("link2.rev.controller.phi_ref", "link2.rev.rev.phi") ("link5.rev.controller.phi_ref", "link5.rev.rev.phi");
                        ("link3.rev.controller.phi_ref", "link3.rev.rev.phi") ("gripper.prism.controller.phi_ref", "gripper.prism.prism.s")], figure=3 )
 
-# ModiaMath.plot(result, "sphere.r[3]", figure=4)
+println("... success of examples/collisions/Simulate_YouBot.jl")
 
 end

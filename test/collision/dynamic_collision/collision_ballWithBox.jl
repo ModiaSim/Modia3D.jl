@@ -8,14 +8,13 @@ vmat1 = Modia3D.Material(color="LightBlue" , transparency=0.5)    # material of 
 vmat2 = deepcopy(vmat1)                                           # material of convex decomposition of SolidFileMesh
 vmat2.transparency = 0.7
 
-cmat = Modia3D.ContactMaterialElastic(c=1e10, d = 1e5)
 
 @assembly ThreeDFiles begin
   world = Modia3D.Object3D(visualizeFrame=true)
 
-  sphereMoving     = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidSphere(0.5) , "Aluminium", vmat1; contactMaterial = cmat); r=[-2.249999, 0.0, 0.0],  fixed=false) # , R=ModiaMath.rot2(-pi/2) )
+  sphereMoving     = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidSphere(0.5) , "Steel", vmat1; contactMaterial = "Steel"); r=[0.0, 0.0, 0.0],  fixed=false) # , R=ModiaMath.rot2(-pi/2) )
 
-  box     = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidBox(1.0,4.0,5.5) , "Aluminium", vmat1; contactMaterial = cmat); r=[-3.0, 0.0, -2.0], fixed=true) # R=ModiaMath.rot2(-pi/3) )
+  box     = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidBox(1.0,4.0,5.5) , "Steel", vmat1; contactMaterial = "Steel"); r=[-3.0, 0.0, -2.0], fixed=true) # R=ModiaMath.rot2(-pi/3) )
 end
 
 gravField = Modia3D.UniformGravityField(g=9.81, n=[-1,0,0])
@@ -23,7 +22,7 @@ threeD = ThreeDFiles(sceneOptions=Modia3D.SceneOptions(gravityField=gravField,vi
 
 
 model = Modia3D.SimulationModel( threeD )
-result = ModiaMath.simulate!(model; stopTime=8.0, tolerance=1e-8,interval=0.001, log=false)
+result = ModiaMath.simulate!(model; stopTime=4.0, tolerance=1e-8,interval=0.001, log=false)
 
 
 println("... success of collision_ballWithBox.jl!")

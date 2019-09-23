@@ -151,6 +151,6 @@ grid(true)
 xlabel("\$v_{abs}\$")
 legend(["\$reg(v_{abs},0.1)\$"])
 
-
+println("... success of Plot_cor.jl!")
 
 end

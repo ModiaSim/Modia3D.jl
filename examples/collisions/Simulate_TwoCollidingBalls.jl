@@ -9,7 +9,6 @@ module Simulate_TwoRollingAndCollidingBalls
 using Modia3D
 import Modia3D.ModiaMath
 
-vmatGraphics = Material(color="LightBlue" , transparency=0.5)    # material of Graphics
 vmatSolids   = Material(color="Red"       , transparency=0.0)    # material of solids
 vmatTable    = Material(color="Green"     , transparency=0.1)    # material of table
 
@@ -32,32 +31,13 @@ gravField         = UniformGravityField(g=9.81, n=[0,0,-1])
 twoCollidingBalls = TwoCollidingBalls(sceneOptions=SceneOptions(gravityField=gravField, visualizeFrames=false,
                                                                 defaultFrameLength=0.1, enableContactDetection=true))
 
-#Modia3D.visualizeAssembly!( twoCollidingBalls )
 model = SimulationModel( twoCollidingBalls )
-#ModiaMath.print_ModelVariables(model)
-
-#=
-using PyPlot
-using PyCall
-
-pyplot_rc = PyCall.PyDict(PyPlot.matplotlib["rcParams"])
-pyplot_rc["font.family"]      = "sans-serif"
-pyplot_rc["font.sans-serif"]  = ["Calibri", "Arial", "Verdana", "Lucida Grande"]
-pyplot_rc["font.size"]        = 12.0
-pyplot_rc["lines.linewidth"]  = 1.5
-pyplot_rc["grid.linewidth"]   = 0.5
-pyplot_rc["axes.grid"]        = true
-pyplot_rc["axes.titlesize"]   = "medium"
-pyplot_rc["figure.titlesize"] = "medium"
-=#
 
 result = ModiaMath.simulate!(model; stopTime=1.0, tolerance=1e-8, log=false)
 
 ModiaMath.plot(result, [ ("ball1.r[1]", "ball2.r[1]"),
                          ("ball1.v[1]", "ball2.v[1]"),
                          ("ball1.w[2]", "ball2.w[2]")])
-
-#                        ("ball1.r[3]", "ball2.r[3]"),
 
 println("... success of examples/collisions/Simulate_TwoCollidingBalls.jl!")
 end

@@ -13,9 +13,9 @@ cmat = "Steel"
 @assembly ThreeDFiles begin
   world = Modia3D.Object3D(visualizeFrame=true)
 
-  sphereMoving     = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidSphere(0.5) , "Aluminium", vmat1; contactMaterial = cmat); r=[0.0, 0.0, 0.0],  fixed=false) # R=ModiaMath.rot2(-pi/2),
+  sphereMoving     = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidSphere(0.5) , "Steel", vmat1; contactMaterial = cmat); r=[0.0, 0.0, 0.0],  fixed=false) # R=ModiaMath.rot2(-pi/2),
 
-  box     = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidBox(1.0,4.0,10.0) , "Aluminium", vmat1; contactMaterial = cmat); r=[-3.0, 0.0, -2.0], fixed=true, R=ModiaMath.rot2(-pi/3))
+  box     = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidBox(1.0,4.0,10.0) , "Steel", vmat1; contactMaterial = cmat); r=[-3.0, 0.0, -2.0], fixed=true, R=ModiaMath.rot2(-pi/3))
 end
 
 gravField = Modia3D.UniformGravityField(g=9.81, n=[-1,0,0])

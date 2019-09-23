@@ -171,5 +171,5 @@ ylabel("height [m]")
 legend(["impulsive response",
         "compliant response"])
 
-println("... success of examples/collisions/Simulate_BouncingBall!")
+println("... success of examples/collisions/Simulate_BouncingBall.jl")
 end

@@ -45,7 +45,10 @@ youBot    = YouBot(sceneOptions=SceneOptions(gravityField=gravField, visualizeFr
 
 #Modia3D.visualizeAssembly!(youBot)
 model  = Modia3D.SimulationModel( youBot )
-result = ModiaMath.simulate!(model, stopTime=1.0, log=true, interval=0.001, tolerance=1e-5)
+result = ModiaMath.simulate!(model, stopTime=1.0, log=false, interval=0.001, tolerance=1e-5)
 
 ModiaMath.plot(result, "workpiece.box.r[3]", figure=1)
+
+println("... success of Simulate_YouBotBoxOnTable.jl!")
+
 end

@@ -1,4 +1,4 @@
-module tests_SolidFileMesh
+module collision_2_boxes
 
 using Modia3D
 using Modia3D.StaticArrays
@@ -31,6 +31,6 @@ model = Modia3D.SimulationModel( threeD )
 result = ModiaMath.simulate!(model; stopTime=0.71, tolerance=1e-6,interval=0.001, log=false)
 
 
-println("... success of tests_SolidFileMesh.jl!")
+println("... success of collision_2_boxes.jl!")
 
 end

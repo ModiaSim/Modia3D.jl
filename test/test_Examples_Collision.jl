@@ -4,73 +4,50 @@ import Modia3D
 
 # Test Modia3D - Examples
 
+collisionPath = joinpath(Modia3D.path, "examples", "collisions")
+include(joinpath(collisionPath, "Simulate_Billiards_OneBall.jl"))
+include(joinpath(collisionPath, "Simulate_BouncingBall.jl"))
+include(joinpath(collisionPath, "Simulate_NewtonsCradle.jl"))
+include(joinpath(collisionPath, "Simulate_SlidingAndRollingBall.jl"))
+include(joinpath(collisionPath, "Simulate_TwoCollidingBalls.jl"))
+include(joinpath(collisionPath, "Simulate_YouBot.jl"))
+
+
 # test/collision
 
 collisionPath = joinpath(Modia3D.path, "test", "collision")
-# include(joinpath(collisionPath, "Collision_3Elements.jl"))
+include(joinpath(collisionPath, "Collision_3Elements.jl"))
 # include(joinpath(collisionPath, "Collision_Bars.jl")) # is not working needs to be fixed
+include(joinpath(collisionPath, "Plot_cor.jl"))
+include(joinpath(collisionPath, "Plot_SlidingFriction.jl"))
 include(joinpath(collisionPath, "Test_Collision.jl"))
 include(joinpath(collisionPath, "Test_Collision_moreRevolutes.jl"))
 include(joinpath(collisionPath, "Test_Collision_StarSetting.jl"))
 include(joinpath(collisionPath, "Test_MiniBsp.jl"))
 include(joinpath(collisionPath, "Test_Solids.jl"))
 
-# test/dynamics
-dynamicsPath = joinpath(Modia3D.path, "test", "dynamics")
-include(joinpath(dynamicsPath, "Simulate_ControllerDamper.jl"))
-include(joinpath(dynamicsPath, "Simulate_DamperMacro.jl"))
-include(joinpath(dynamicsPath, "Simulate_FourBar.jl"))
-include(joinpath(dynamicsPath, "Simulate_pathPlanning.jl"))
-include(joinpath(dynamicsPath, "Simulate_PendulumWithFixedJoint.jl"))
 
-# test/inertiaTensor
-inertiaPath = joinpath(Modia3D.path, "test", "inertiaTensor")
-include(joinpath(inertiaPath, "Test_2Rev_ZylZ_BarX.jl"))
-include(joinpath(inertiaPath, "Test_3Rev_ZylZ_BarX_BarY.jl"))
-include(joinpath(inertiaPath, "Test_InertiaTensor.jl"))
+# test/collision/boxOnTable
+collisionPath = joinpath(Modia3D.path, "test", "collision","boxOnTable")
+# include(joinpath(collisionPath, "Simulate_BoxOnTable.jl"))  # is not working needs to be fixed
+# include(joinpath(collisionPath, "Simulate_ContactBox3OnTable.jl")) # is not working needs to be fixed
+include(joinpath(collisionPath, "Simulate_ContactBoxOnTable.jl"))
+include(joinpath(collisionPath, "Simulate_YouBotBoxOnTable.jl"))
 
-# test/revoluteJoints
-testJointsPath = joinpath(Modia3D.path, "test", "joints")
-include(joinpath(testJointsPath, "Test_KinematicRevoluteJoints.jl"))
-include(joinpath(testJointsPath, "Test_Dynamic_Pendulum_xAxis.jl"))
-include(joinpath(testJointsPath, "Test_Dynamic_Pendulum_yAxis.jl"))
-include(joinpath(testJointsPath, "Test_Dynamic_Pendulum_zAxis.jl"))
-include(joinpath(testJointsPath, "Test_Prismatic_xAxis.jl"))
-include(joinpath(testJointsPath, "Test_Prismatic_yAxis.jl"))
-include(joinpath(testJointsPath, "Test_Prismatic_zAxis.jl"))
-include(joinpath(testJointsPath, "Move_FourBar_xAxis.jl"))
-include(joinpath(testJointsPath, "Move_FourBar_yAxis.jl"))
-include(joinpath(testJointsPath, "Move_FourBar_zAxis.jl"))
+# test/collision/dynamic_collision
+collisionPath = joinpath(Modia3D.path, "test", "collision","dynamic_collision")
+include(joinpath(collisionPath, "collision_2_boxes.jl"))
+include(joinpath(collisionPath, "collision_ballWithBall.jl"))
+include(joinpath(collisionPath, "collision_ballWithBox.jl"))
+include(joinpath(collisionPath, "collision_ballWithBox_45Deg.jl"))
+include(joinpath(collisionPath, "collision_BallWithBox_Prismatic.jl"))
+include(joinpath(collisionPath, "collision_ballWithBox_45Deg.jl"))
+include(joinpath(collisionPath, "collision_newtons_cradle.jl"))
 
-# test/kinematics
-kinematicsPath = joinpath(Modia3D.path, "test", "kinematics")
-include(joinpath(kinematicsPath, "Move_FourBar_noMacros.jl"))
-
-# test/massComputation
-massCompPath = joinpath(Modia3D.path, "test", "massComputation")
-include(joinpath(massCompPath, "test_massComputation.jl"))
-
-# test/signalToFlange
-signalToFlangePath = joinpath(Modia3D.path, "test", "signalToFlange")
-include(joinpath(signalToFlangePath, "Test_Signal1Assembly.jl"))
-include(joinpath(signalToFlangePath, "Test_Signal4Assemblies.jl"))
-
-# test/visual
-visuPath = joinpath(Modia3D.path, "test", "visual")
-include(joinpath(visuPath, "visual_3Bars.jl"))
-
-# test/volumeComputation
-volCompPath = joinpath(Modia3D.path, "test", "volumeComputation")
-include(joinpath(volCompPath, "volume_computation3D_obj.jl"))
-
-# test/withoutAssembly/kinematics
-wAKinematicsPath = joinpath(Modia3D.path, "test", "withoutAssembly","kinematics")
-include(joinpath(wAKinematicsPath, "Move_Pendulum.jl"))
-
-# examples/withoutAssembly/visual
-wAVisualPath = joinpath(Modia3D.path, "test", "withoutAssembly","visual")
-include(joinpath(wAVisualPath, "Visualize_Beam.jl"))
+# test/collision/contactForceLaw
+collisionPath = joinpath(Modia3D.path, "test", "collision","contactForceLaw")
+include(joinpath(collisionPath, "bouncingBallComparedWithImpulsesjl.jl"))
 
 
-println("\n ...test_Examples finished!")
+println("\n ...test_Examples_Collision finished!")
 end

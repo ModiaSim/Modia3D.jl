@@ -10,8 +10,7 @@ vmatSolids = Modia3D.Material(color="Red" , transparency=0.5)         # material
 
 
 #c = 1e9, d = 100.0
-cmat = Modia3D.ContactMaterialElastic(c=1e9, d=0.0)
-
+cmat = "Steel"
 Lx = 0.3
 Ly = 4.2
 Lz = 0.1
@@ -54,7 +53,7 @@ lengthWire = 4.0
   cyl    = Modia3D.Cylinder(0.15,Lx; material=vmatGraphics)
   cylinder   = Modia3D.Object3D(frame1, cyl; R=ModiaMath.rot2(-pi/2), visualizeFrame=false)
 
-  sphere = Modia3D.Object3D(frame2, Modia3D.Solid(Modia3D.SolidSphere(diameter) , "Aluminium", vmatSolids; contactMaterial = cmat);   fixed=true ) # , R=ModiaMath.rot2(-pi/2) )
+  sphere = Modia3D.Object3D(frame2, Modia3D.Solid(Modia3D.SolidSphere(diameter) , "Steel", vmatSolids; contactMaterial = cmat);   fixed=true ) # , R=ModiaMath.rot2(-pi/2) )
 
 end
 

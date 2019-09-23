@@ -39,10 +39,10 @@ contactBoxOnTable = ContactBoxOnTable(sceneOptions=Modia3D.SceneOptions(gravityF
 
 model = Modia3D.SimulationModel( contactBoxOnTable, maxNumberOfSteps =1000 )
 #ModiaMath.print_ModelVariables(model)
-result = ModiaMath.simulate!(model; stopTime=1.0, tolerance=1e-5, interval=0.001, log=true)
+result = ModiaMath.simulate!(model; stopTime=1.0, tolerance=1e-5, interval=0.001, log=false)
 
 ModiaMath.plot(result, ["box.box.r[3]","box.box.v[3]"])
 
-println("... success of Simulate_ContactBoxOnTable.jl!")
+println("... success of Simulate_ContactBox3OnTable.jl!")
 
 end

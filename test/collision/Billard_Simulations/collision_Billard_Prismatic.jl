@@ -1,4 +1,4 @@
-module collision_Billard
+module collision_Billard_Prismatic
 
 using Modia3D
 using Modia3D.StaticArrays
@@ -106,5 +106,5 @@ model = Modia3D.SimulationModel( bill )
 result = ModiaMath.simulate!(model; stopTime=10.0, tolerance=1e-8,interval=0.001, log=false)
 
 
-println("... success of collision_Billard.jl!")
+println("... success of collision_Billard_Prismatic.jl!")
 end

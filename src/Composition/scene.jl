@@ -70,16 +70,20 @@ mutable struct ContactPairs
                    ncounter += 1
       end; end; end; end; end
       nmax = ncounter
-      #println("nz = ", nz)
+      # println("ncounter " , ncounter)
       if ncounter <= nz_max
          allPossibleContactPairsInz = true
-         nz = ncounter
+         if ncounter > 2
+            nz = ncounter
+         else
+            nz = 2
+         end
       else
          allPossibleContactPairsInz = false
          nz = nz_max
       end
 
-      #println("nachher nz = ", nz)
+      # println("nachher nz = ", nz)
       # Allocate storage
       if nz > 0
          world.contactVisuObj1 = Vector{Object3D}[]

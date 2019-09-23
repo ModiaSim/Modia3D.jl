@@ -21,4 +21,5 @@ grid(true)
 xlabel("\$|\\vec{v}_{rel,t}|\$")
 legend(["\$ |\\vec{v}_{rel,t}| / reg( |\\vec{v}_{rel,t}|, 0.01) \$"])
 
+println("... success of Plot_SlidingFriction.jl!")
 end
