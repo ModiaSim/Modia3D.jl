@@ -8,6 +8,15 @@
 [![The MIT License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](https://github.com/ModiaSim/Modia3D.jl/blob/master/LICENSE.md)
 
 
+## Modia Project
+
+The [Modelica standard library](https://github.com/modelica/ModelicaStandardLibrary) supports the modeling of 3-dimensional multi-body systems with its sub library Modelica.Mechanics.MultiBody. There have been several attempts to improve this library with regards to visualization, collision handling or support of larger models. Over the years it was recognized that the technology of current [Modelica](https://www.modelica.org) has some natural limitations.
+
+Therefore, the open source [Modia](https://github.com/ModiaSim/Modia.jl) project was launched as a domain-specific extension of the  [Julia](https://julialang.org) programming language. The equation-based modeling language is called Modia as well as the experimental [modeling environment](https://github.com/ModiaSim) consisting of several Julia packages. The intention is to utilize the results of this prototyping in the design of the next Modelica language generation.
+
+
+## Modia3D
+
 Modia3D is a Julia package to model fixed and moving objects in 3D (*e.g.* visual shapes, rigid bodies).
 These objects are driven kinematically by pre-defined time functions or are moving dynamically by
 solving Differential Algebraic Equations (DAEs)
@@ -24,7 +33,8 @@ Papers about Modia3D:
 - *[Collision Handling with Variable-Step Integrators](docs/resources/documentation/CollisionHandling_Neumayr_Otter_2017.pdf)* ([EOOLT 2017, December](http://www.eoolt.org/2017/))
 - *[Component-Based 3D Modeling of Dynamic Systems](http://www.ep.liu.se/ecp/154/019/ecp18154019.pdf)* ([American Modelica Conference 2018, October](https://www.modelica.org/events/modelica2018Americas/index_html))
 - *[Algorithms for Component-Based 3D Modeling](http://www.ep.liu.se/ecp/157/039/ecp19157039.pdf)* ([13th International Modelica Conference 2019, March](https://modelica.org/events/modelica2019))
-
+- *Modia3D: Modeling and Simulation of 3D-Systems in Julia* ([JuliaCon 2019, July](https://juliacon.org/2019/), under review)
+- *Collision Handling with Elastic Response Calculation and Zero-Crossing Functions* (will be published on ([EOOLT 2019, November](http://www.eoolt.org/2019/))
 
 Before releasing version 1.0, Modia3D shall be
 easily combinable with [Modia](https://github.com/ModiaSim/Modia.jl), for example to define a controlled
@@ -33,11 +43,7 @@ By this approach the best of both worlds can be combined:
 Special 3D algorithms (Modia3D) + power/flexibility of equation based modeling (Modia).
 
 
-## Modia Project
 
-The [Modelica standard library](https://github.com/modelica/ModelicaStandardLibrary) supports the modeling of 3-dimensional multi-body systems with its sub library Modelica.Mechanics.MultiBody. There have been several attempts to improve this library with regards to visualization, collision handling or support of larger models, for example. Over the years it was recognized that the technology of current [Modelica](https://www.modelica.org) has some natural limitations.
-
-Therefore, the open source [Modia](https://github.com/ModiaSim/Modia.jl) project was launched as a domain-specific extension of the  [Julia](https://julialang.org) programming language. The equation-based modeling language is called Modia as well as the experimental [modeling environment](https://github.com/ModiaSim) consisting of several Julia packages. The intention is to utilize the results of this prototyping in the design of the next Modelica language generation.
 
 
 ## Installation
