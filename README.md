@@ -12,10 +12,12 @@
 
 The [Modelica standard library](https://github.com/modelica/ModelicaStandardLibrary) supports the modeling of 3-dimensional multi-body systems with its sub library Modelica.Mechanics.MultiBody. There have been several attempts to improve this library with regards to visualization, collision handling or support of larger models. Over the years it was recognized that the technology of current [Modelica](https://www.modelica.org) has some natural limitations.
 
-Therefore, the open source [Modia](https://github.com/ModiaSim/Modia.jl) project was launched as a domain-specific extension of the  [Julia](https://julialang.org) programming language. The equation-based modeling language is called Modia as well as the experimental [modeling environment](https://github.com/ModiaSim) consisting of several Julia packages. The intention is to utilize the results of this prototyping in the design of the next Modelica language generation.
+Therefore, the open source [Modia](https://github.com/ModiaSim/Modia.jl) project was launched as a domain-specific extension of the  [Julia](https://julialang.org) programming language. The equation-based modeling language is called Modia as well as the experimental [modeling environment](https://github.com/ModiaSim) consisting of several Julia packages. The intention is to utilize the results of this research and prototyping in the design of the next Modelica language generation.
 
 
 ## Modia3D
+
+One part of the Modia project is [Modia3D](https://github.com/ModiaSim/Modia3D.jl). Initially, it is an experimental modeling and simulation environment for 3D mechanical systems, but it shall be expanded into other domains in the future.
 
 Modia3D is a Julia package to model fixed and moving objects in 3D (*e.g.* visual shapes, rigid bodies).
 These objects are driven kinematically by pre-defined time functions or are moving dynamically by

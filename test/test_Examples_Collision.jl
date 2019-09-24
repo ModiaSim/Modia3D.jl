@@ -14,7 +14,6 @@ include(joinpath(collisionPath, "Simulate_YouBot.jl"))
 
 
 # test/collision
-
 collisionPath = joinpath(Modia3D.path, "test", "collision")
 include(joinpath(collisionPath, "Collision_3Elements.jl"))
 # include(joinpath(collisionPath, "Collision_Bars.jl")) # is not working needs to be fixed
@@ -34,6 +33,7 @@ collisionPath = joinpath(Modia3D.path, "test", "collision","boxOnTable")
 include(joinpath(collisionPath, "Simulate_ContactBoxOnTable.jl"))
 include(joinpath(collisionPath, "Simulate_YouBotBoxOnTable.jl"))
 
+
 # test/collision/dynamic_collision
 collisionPath = joinpath(Modia3D.path, "test", "collision","dynamic_collision")
 include(joinpath(collisionPath, "collision_2_boxes.jl"))
@@ -44,10 +44,37 @@ include(joinpath(collisionPath, "collision_BallWithBox_Prismatic.jl"))
 include(joinpath(collisionPath, "collision_ballWithBox_45Deg.jl"))
 include(joinpath(collisionPath, "collision_newtons_cradle.jl"))
 
+
 # test/collision/contactForceLaw
 collisionPath = joinpath(Modia3D.path, "test", "collision","contactForceLaw")
-include(joinpath(collisionPath, "bouncingBallComparedWithImpulsesjl.jl"))
+include(joinpath(collisionPath, "bouncingBallComparedWithImpulses.jl"))
+include(joinpath(collisionPath, "contactForceLaw_2_boxes.jl"))
+include(joinpath(collisionPath, "contactForceLaw_2_boxes_Prismatic.jl"))
+include(joinpath(collisionPath, "contactForceLaw_2_boxes2.jl"))
+include(joinpath(collisionPath, "contactForceLaw_Ball.jl"))
+include(joinpath(collisionPath, "contactForceLaw_ballWithBall.jl"))
+include(joinpath(collisionPath, "contactForceLaw_ballWithBox_45Deg.jl"))
+include(joinpath(collisionPath, "contactForceLaw_ballWithBox_Prismatic.jl"))
+include(joinpath(collisionPath, "contactForceLaw_newtons_cradle.jl"))
 
+
+# test/collision/Billard_Simulation
+collisionPath = joinpath(Modia3D.path, "test", "collision","Billard_Simulations", "BallCushion")
+include(joinpath(collisionPath, "BillardBall1_Cushion1_directHit.jl"))
+include(joinpath(collisionPath, "BillardBall1_Cushion4_arbitraryHit.jl"))
+include(joinpath(collisionPath, "BillardBall1_Cushion4_directHit.jl"))
+
+
+collisionPath = joinpath(Modia3D.path, "test", "collision","Billard_Simulations", "rollingBall")
+include(joinpath(collisionPath, "colliding2rollingBalls_plot1.jl"))
+include(joinpath(collisionPath, "colliding2rollingBalls_plot2.jl"))
+include(joinpath(collisionPath, "rollingBall1.jl"))
+
+
+collisionPath = joinpath(Modia3D.path, "test", "collision","Billard_Simulations", "billard")
+# include(joinpath(collisionPath, "Billard_Balls4.jl")) # takes not too long, but still to long for an example test
+# include(joinpath(collisionPath, "Billard_Balls4_Prismatic.jl")) # takes not too long, but still to long for an example test
+# include(joinpath(collisionPath, "Billard_Balls16.jl")) # takes too long
 
 println("\n ...test_Examples_Collision finished!")
 end

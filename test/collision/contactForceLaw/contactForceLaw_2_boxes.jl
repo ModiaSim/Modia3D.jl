@@ -8,7 +8,7 @@ vmat1 = Modia3D.Material(color="LightBlue" , transparency=0.5)    # material of 
 vmat2 = deepcopy(vmat1)                                           # material of convex decomposition of SolidFileMesh
 vmat2.transparency = 0.7
 
-cmat = Modia3D.ElasticContactMaterial(name="DryWood", mu_r = 0.0, mu_k = 0.0, cor=1.0)
+cmat = "DryWood"
 
 zDim = 1.0
 boxDim = 0.3

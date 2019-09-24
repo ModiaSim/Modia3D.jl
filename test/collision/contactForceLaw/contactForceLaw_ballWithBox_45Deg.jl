@@ -8,9 +8,7 @@ vmat1 = Modia3D.Material(color="LightBlue" , transparency=0.5)    # material of 
 vmat2 = deepcopy(vmat1)                                           # material of convex decomposition of SolidFileMesh
 vmat2.transparency = 0.7
 
-cmat = Modia3D.ElasticContactMaterial(name="Steel")
-#cmat = Modia3D.ContactMaterialElastic(c=1e9, d=0.0)
-
+cmat = "Steel"
 
 @assembly ThreeDFiles begin
   world = Modia3D.Object3D(visualizeFrame=true)

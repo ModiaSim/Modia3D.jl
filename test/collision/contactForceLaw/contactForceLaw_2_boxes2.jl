@@ -1,4 +1,4 @@
-module tests_boxes2
+module contactForceLaw_2_boxes2
 
 using Modia3D
 using Modia3D.StaticArrays
@@ -33,6 +33,6 @@ result = ModiaMath.simulate!(model; stopTime=2.0, tolerance=1e-8,interval=0.001,
 
 ModiaMath.plot(result, ["boxMoving.box.r[3]","boxMoving.box.v[3]"])
 
-println("... success of tests_SolidFileMesh.jl!")
+println("... success of contactForceLaw_2_boxes2.jl!")
 
 end

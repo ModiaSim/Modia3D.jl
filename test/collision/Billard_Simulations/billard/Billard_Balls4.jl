@@ -1,4 +1,4 @@
-module contactForceLaw_Billard_BallCushion
+module Billard_Balls4
 
 using Modia3D
 using Modia3D.StaticArrays
@@ -6,19 +6,22 @@ import Modia3D.ModiaMath
 
 
 vmatBalls = Modia3D.Material(color="Red" , transparency=0.0)
-vmatTable = Modia3D.Material(color="DarkGreen" , transparency=0.4)
+vmatTable = Modia3D.Material(color="DarkGreen" , transparency=0.5)
 
-cmatTable   = Modia3D.ElasticContactMaterial2("BilliardTable")
-cmatBall    = Modia3D.ElasticContactMaterial2("BilliardBall")
-cmatCushion = Modia3D.ElasticContactMaterial2("BilliardCushion")
+cmatTable   = "BilliardTable"
+cmatBall    = "BilliardBall"
+cmatCushion = "BilliardCushion"
 
 diameter = 0.06
 radius = diameter/2
+distance_balls = sqrt(3)/2*diameter
+dist = 0.0001
 
-TableX = 1.24
+TableX = 2.24
 TableY = 1.12
-TableZ = 0.03
-LyBox = 0.03
+TableZ = 0.05
+LyBox = 0.05
+LzBox = 0.05
 hz  = 7*radius/5
 hzz = hz/3
 
@@ -41,41 +44,29 @@ end
   cushion21 = Modia3D.Object3D(world    , cushionPart21, r=[0.0, TableY/2 - LyBox/2 , hz/2], fixed=true)
   cushion22 = Modia3D.Object3D(cushion21, cushionPart22, r=[0.0, -LyBox/4 , hz/2+hzz/2], fixed=true)
   cushion41 = Modia3D.Object3D(world    , cushionPart21, r=[0.0, -TableY/2 + LyBox/2 , hz/2], fixed=true)
-  cushion42 = Modia3D.Object3D(cushion21, cushionPart22, r=[0.0, LyBox/4 , hz/2+hzz/2], fixed=true)
+  cushion42 = Modia3D.Object3D(cushion41, cushionPart22, r=[0.0, LyBox/4 , hz/2+hzz/2], fixed=true)
 end
 
-#=
 @assembly BillardBall(world, xPos, yPos) begin
   ball = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidSphere(diameter), "BilliardBall", vmatBalls ; contactMaterial = cmatBall), fixed = false, r=[xPos, yPos, diameter/2])
 end
-=#
 
-distance_balls = sqrt(3)/2*diameter
-
-dist = 0.0001
-
-@assembly Billiard() begin
+@assembly Billard() begin
   world = Modia3D.Object3D(visualizeFrame=false)
   table = Table(world)
   cushion = Cushion(world)
-  ball1 = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidSphere(diameter), "BilliardBall", vmatBalls ; contactMaterial = cmatBall), fixed = false, r=[0.0, 0.0, diameter/2], v_start=[6.0, 3.0, 0.0], visualizeFrame=true)
+  ballStart = Modia3D.Object3D(world, Modia3D.Solid(Modia3D.SolidSphere(diameter), "BilliardBall", vmatBalls ; contactMaterial = cmatBall), fixed = false, r=[-0.8, -0.1, diameter/2], v_start=[3.0, 0.1, 0.0])
+
+  ball1 = BillardBall(world, TableX/6, 0.0)
+  ball2  = BillardBall(world, TableX/6 + 1*distance_balls + dist,  1/2*(diameter+dist))
+  ball3  = BillardBall(world, TableX/6 + 1*distance_balls + dist, -1/2*(diameter+dist))
 end
 
 gravField = Modia3D.UniformGravityField(g=9.81, n=[0,0,-1])
-bill = Billiard(sceneOptions=Modia3D.SceneOptions(gravityField=gravField,visualizeFrames=false, defaultFrameLength=0.1,nz_max = 100, enableContactDetection=true, visualizeContactPoints=false, visualizeSupportPoints=false))
+bill = Billard(sceneOptions=Modia3D.SceneOptions(gravityField=gravField,visualizeFrames=false, defaultFrameLength=0.2,nz_max = 100, enableContactDetection=true, visualizeContactPoints=false, visualizeSupportPoints=false))
 
-# Modia3D.visualizeAssembly!( bill )
+model = Modia3D.SimulationModel( bill )
+result = ModiaMath.simulate!(model; stopTime=5.0, tolerance=1e-8,interval=0.0001, log=false)
 
-
-model = Modia3D.SimulationModel( bill, maxNumberOfSteps=1000 )
-# ModiaMath.print_ModelVariables(model)
-result = ModiaMath.simulate!(model; stopTime=0.5, tolerance=1e-8,log=true)
-
-ModiaMath.plot(result, [("ball1.r[1]"),
-                        ("ball1.v[1]"),
-                        ("ball1.w[2]")])
-                        # ("ball1.r[3]"), ("ball1.v[3]"),
-
-
-println("... success of contactForceLaw_Billard_BallCushion.jl!")
+println("... success of Billard_Balls4.jl!")
 end

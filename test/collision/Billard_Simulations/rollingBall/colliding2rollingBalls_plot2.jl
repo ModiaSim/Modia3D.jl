@@ -1,4 +1,4 @@
-module contactForceLaw_rollingBall_2balls
+module colliding2rollingBalls_plot2
 
 using Modia3D
 using Modia3D.StaticArrays
@@ -9,15 +9,15 @@ vmatGraphics = Modia3D.Material(color="LightBlue" , transparency=0.5)    # mater
 vmatSolids = Modia3D.Material(color="Red" , transparency=0.0)         # material of solids
 vmatTable = Modia3D.Material(color="Green", transparency=0.1)         # material of table
 
-cmatTable = Modia3D.ElasticContactMaterial2("BilliardTable")
-cmatBall = Modia3D.ElasticContactMaterial2("BilliardBall")
+cmatTable = "BilliardTable"
+cmatBall = "BilliardBall"
 
 LxGround = 3.0
 LyBox = 0.5
 LzBox = 0.02
 diameter = 0.06
 @assembly Table(world) begin
-  withBox = Modia3D.Solid(Modia3D.SolidBox(LxGround, LyBox, LzBox) , "DryWood", vmatTable; contactMaterial = cmatTable)
+  withBox = Modia3D.Solid(Modia3D.SolidBox(LxGround, LyBox, LzBox) , "BilliardTable", vmatTable; contactMaterial = cmatTable)
   box1 = Modia3D.Object3D(world, withBox, r=[1.5, 0.0, -LzBox/2], fixed=true)
 end
 
@@ -30,15 +30,10 @@ end
                            contactMaterial = cmatBall), fixed = false, r=[1.5, 0.0, diameter/2], visualizeFrame=true)
 end
 
-
 gravField = Modia3D.UniformGravityField(g=9.81, n=[0,0,-1])
 bill = TwoRollingBalls(sceneOptions=Modia3D.SceneOptions(gravityField=gravField,visualizeFrames=false,
                        defaultFrameLength=0.1,nz_max = 100, enableContactDetection=true, visualizeContactPoints=false, visualizeSupportPoints=false))
-
-#Modia3D.visualizeAssembly!( bill )
-
 model = Modia3D.SimulationModel( bill )
-#ModiaMath.print_ModelVariables(model)
 
 using PyPlot
 using PyCall
@@ -85,8 +80,5 @@ l_t    = length(t)
 dist = ( ball_r[2] - ball_r[1] ) / (t[2] - t[1] )
 distEnd = ( ball_r[l_t] - ball_r[l_t - 1] ) / (t[l_t] - t[l_t-1] )
 
-println("dist = ", dist)
-println("distEnd = ", distEnd)
-
-println("... success of contactForceLaw_rollingBall_2balls.jl!")
+println("... success of colliding2rollingBalls_plot2.jl!")
 end
