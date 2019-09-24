@@ -19,31 +19,35 @@ Therefore, the open source [Modia](https://github.com/ModiaSim/Modia.jl) project
 
 One part of the Modia project is [Modia3D](https://github.com/ModiaSim/Modia3D.jl). Initially, it is an experimental modeling and simulation environment for 3D mechanical systems, but it shall be expanded into other domains in the future.
 
-Modia3D is a Julia package to model fixed and moving objects in 3D (*e.g.* visual shapes, rigid bodies).
-These objects are driven kinematically by pre-defined time functions or are moving dynamically by
-solving Differential Algebraic Equations (DAEs)
-with a variable-step DAE solver.
+Ideas from modern computer game engines are used to achieve a highly flexible setup of mechanical systems including collision handling. Other features are utilized from multi-body programs, such as hierarchical structuring, support for closed kinematic loops, and elastic response calculation.
+The underlying mathematical formulation are hybrid Differential Algebraic Equations (DAEs) that are solved with the variable-step solver IDA via the Sundials.jl Julia package.
+Emphasis is on variable-step solvers to combine Modia3D with equation-based modeling in the future, using Modia3D assemblies as components within one high level programming environment (for example a joint of a Modia3D system is driven by a Modia model of an electrical motor and gearbox).
 
-Collision handling with elastic response calculation is
-performed for objects that are defined with a contact material and (a) have a convex geometry,
-(b) can be approximated by a set of convex geometries, or (c) have a concave geometry
-that is (automatically) approximated by its convex hull.
+Features of the Modia3D Julia package are modeling fixed and moving objects in 3D (*e.g.* visual shapes, rigid bodies). These objects are driven kinematically by pre-defined time functions or are moving dynamically by solving Differential Algebraic Equations (DAEs) with a variable-step DAE solver.
+
+Further, collision handling with elastic response calculation is performed for objects that are defined with a contact material and have a convex geometry, or can be approximated by a set of convex geometries, or have a concave geometry which is (automatically) approximated by its convex hull.
+Collision handling with elastic response calculation and error controlled integration is challenging.
+Contact handling in Modia3D uses variable-step solvers where the penetration depths and Euclidean distances computed with the improved Minkowski Portal Refinement (MPR) algorithm [1] are utilized to construct appropriate zero-crossing functions.
+Whenever a collision with elastic response calculation occurs, the model response is drastically changed. An advanced contact law is introduced in [5] and many detailed examples using it are discussed in [4]. The user's view of Modia3D is introduced in [2] showing the very flexible definition of 3D systems. Some key algorithms are discussed in [3].
 A more detailed overview of the available features is given in the
 [Modia3D documentation](https://ModiaSim.github.io/Modia3D.jl/stable).
-Papers about Modia3D:
+Papers and videos about Modia3D:
 
-- *[Collision Handling with Variable-Step Integrators](docs/resources/documentation/CollisionHandling_Neumayr_Otter_2017.pdf)* ([EOOLT 2017, December](http://www.eoolt.org/2017/))
-- *[Component-Based 3D Modeling of Dynamic Systems](http://www.ep.liu.se/ecp/154/019/ecp18154019.pdf)* ([American Modelica Conference 2018, October](https://www.modelica.org/events/modelica2018Americas/index_html))
-- *[Algorithms for Component-Based 3D Modeling](http://www.ep.liu.se/ecp/157/039/ecp19157039.pdf)* ([13th International Modelica Conference 2019, March](https://modelica.org/events/modelica2019))
-- *Modia3D: Modeling and Simulation of 3D-Systems in Julia* ([JuliaCon 2019, July](https://juliacon.org/2019/), under review)
-- *Collision Handling with Elastic Response Calculation and Zero-Crossing Functions* (will be published on ([EOOLT 2019, November](http://www.eoolt.org/2019/))
+- [1] *[Collision Handling with Variable-Step Integrators](docs/resources/documentation/CollisionHandling_Neumayr_Otter_2017.pdf)* ([EOOLT 2017, December](http://www.eoolt.org/2017/))
+- [2] *[Component-Based 3D Modeling of Dynamic Systems](http://www.ep.liu.se/ecp/154/019/ecp18154019.pdf)* ([American Modelica Conference 2018, October](https://www.modelica.org/events/modelica2018Americas/index_html))
+- [3] *[Algorithms for Component-Based 3D Modeling](http://www.ep.liu.se/ecp/157/039/ecp19157039.pdf)* ([13th International Modelica Conference 2019, March](https://modelica.org/events/modelica2019))
+- [4] *Modia3D: Modeling and Simulation of 3D-Systems in Julia* ([JuliaCon 2019, July](https://juliacon.org/2019/), under review); talk recorded on [YouTube](https://www.youtube.com/watch?v=b3WfqXZRKpA)
+- [5] *Collision Handling with Elastic Response Calculation and Zero-Crossing Functions* (will be published on ([EOOLT 2019, November](http://www.eoolt.org/2019/))
 
-Before releasing version 1.0, Modia3D shall be
-easily combinable with [Modia](https://github.com/ModiaSim/Modia.jl), for example to define a controlled
-electrical motor with Modia, and add 3D behavior/visualization with Modia3D.
-By this approach the best of both worlds can be combined:
-Special 3D algorithms (Modia3D) + power/flexibility of equation based modeling (Modia).
+### 3D Renderer and Work-In-Progress Web App
 
+Modia3D provides a generic interface to visualize simulation results with different 3D renderers. The [free community edition](https://visualization.ltx.de/) as well as the professional edition of the
+[DLR Visualization library](http://www.systemcontrolinnovationlab.de/the-dlr-visualization-library/) are supported. Currently, another team is developing a free 2D/3D web-based authoring tool that includes result visualization, but it is not available at the moment.
+
+### Goals for Modia3D
+
+Before releasing version 1.0, Modia3D shall be easily combinable with Modia, for example to define a controlled electrical motor with Modia, and add 3D behavior/visualization with Modia3D.
+By this approach the best of both worlds can be combined: Special 3D algorithms (Modia3D) + power/flexibility of equation based modeling (Modia).
 
 
 
@@ -86,7 +90,7 @@ are supported. To install the free version for *Windows* or for *Linux* perform 
    `include("$(Modia3D.path)/examples/dynamics/Simulate_DoublePendulumWithDampers.jl")`
 
 If Modia3D cannot use one of the renderers above, it will continue with renderer **NoRenderer**
-that is animation is switched off.
+where animation is switched off.
 
 
 ## Documentation
@@ -156,6 +160,8 @@ The technique to handle kinematic loops for dynamic simulations is demonstrated 
 `include("$(ModiaMath.path)/examples/withoutMacros_withoutVariables/Simulate_PendulumDAE.jl")`
 and is described in the paper *[Transformation of Differential Algebraic Array Equations to
 Index One Form](http://www.ep.liu.se/ecp/132/064/ecp17132565.pdf)*.
+
+Up to now, Modia3D is implemented for functionality and not tuned for efficiency. Therefore, there are no benchmarks yet and in particular no comparison with Modelica models.
 
 
 ## Issues and Contributions
