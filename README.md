@@ -54,41 +54,25 @@ julia> ]add Modia3D
         add PyPlot     # in order that plots are shown
 ```
 
-Modia3D uses [PyPlot](https://github.com/JuliaPy/PyPlot.jl) for plotting.
-If `PyPlot` is not available in your current Julia environment
-an information message is printed and all `plot(..)` calls are ignored.
+Modia3D uses [PyPlot](https://github.com/JuliaPy/PyPlot.jl) for plotting. If `PyPlot` is not available in your current Julia environment an information message is printed and all `plot(..)` calls are ignored.
 
-In order that plot windows are displayed, you need to add `PyPlot` to your current environment
-via `]add PyPlot`. Often this automatic installation fails and it is recommended to follow
-the instructions
-[Installing PyPlot in a robust way](https://github.com/ModiaSim/ModiaMath.jl/wiki/Installing-PyPlot-in-a-robust-way).
+In order that plot windows are displayed, you need to add `PyPlot` to your current environment via `]add PyPlot`. Often this automatic installation fails and it is recommended to follow the instructions [Installing PyPlot in a robust way](https://github.com/ModiaSim/ModiaMath.jl/wiki/Installing-PyPlot-in-a-robust-way).
 
-Modia3D visualizes the movement of 3D objects with a renderer.
-Currently, the (free) community or the (commercial) professional version of the
-[DLR Visualization](http://www.systemcontrolinnovationlab.de/the-dlr-visualization-library/) library
-are supported. To install the free version for *Windows* or for *Linux* perform the following steps:
+Modia3D visualizes the movement of 3D objects with a renderer. Currently, the (free) community or the (commercial) professional version of the [DLR Visualization](http://www.systemcontrolinnovationlab.de/the-dlr-visualization-library/) library are supported. To install the free version for *Windows* or for *Linux* perform the following steps:
 
-1. Go to [https://visualization.ltx.de/](https://visualization.ltx.de/),
-   provide your contact information and click on *Request download* for *Community Edition*.
-   Afterwards, you get a link to download the library and you need to unzip the file.
+1. Go to [https://visualization.ltx.de/](https://visualization.ltx.de/), provide your contact information and click on *Request download* for *Community Edition*. Afterwards, you get a link to download the library and you need to unzip the file.
 
-2. In your Julia **startup file** (`HOME/.julia/config/startup.jl`) include the environment variable
-   `ENV["DLR_VISUALIZATION"] = "<path-to-library>/Visualization/Extras/SimVis"`.
-   Make sure that the SimVis executable under this directory has execution rights.
-   For example in Linux with command:
-   `chmod +x <path-to-library>/Visualization/Extras/SimVis`
+2. In your Julia **startup file** (`HOME/.julia/config/startup.jl`) include the environment variable `ENV["DLR_VISUALIZATION"] = "<path-to-library>/Visualization/Extras/SimVis"`. Make sure that the SimVis executable under this directory has execution rights. For example in Linux with command:`chmod +x <path-to-library>/Visualization/Extras/SimVis`
 
-3. Start Julia and run one of the examples, for example
-   `include("$(Modia3D.path)/examples/dynamics/Simulate_DoublePendulumWithDampers.jl")`
+3. Start Julia and run one of the examples, for example   `include("$(Modia3D.path)/examples/dynamics/Simulate_DoublePendulumWithDampers.jl")`
 
-If Modia3D cannot use one of the renderers above, it will continue with renderer **NoRenderer**
-where result animation is switched off.
+If Modia3D cannot use one of the renderers above, it will continue with renderer **NoRenderer** where result animation is switched off.
 
 ## Usage of Modia3D by Example
 Modia3D has a very modular and flexible component-based design, and it allows hierarchical structuring. The following example, of a single pendulum, gives a short insight of both concepts. For further information see [2, 3] and the documentation.
 
 ### To define a model
-The [ModiaMath]( https://github.com/ModiaSim/ModiaMath.jl) package is imported. It belongs also to the Modia modeling environment, and it is needed to solve and communicate with the IDA DAE-solver.
+The [ModiaMath]( https://github.com/ModiaSim/ModiaMath.jl) package another part of the Modia modeling environment is imported. It is needed to solve and communicate with the IDA DAE-solver.
 
 Two visualization materials (visuMaterial1, visuMaterial2) are defined, and optional parameters (color, transparency) are set. There are further optional parameters, but they are not used here.
 
@@ -96,8 +80,7 @@ The component-based structuring is realized with the Object3D function. It is a 
 
 The world Object3D takes as input argument a coordinate system and the beam Object3D is a solid. In this setting the blue beam is a solid beam made of aluminium, with its dimensions Lx, Ly, Lz. The bearing Object3D's parent is the beam Object3D, and it is positioned relatively to its parent, with the optional argument r. The red cylinder Object3D its parent is the bearing. It is for representing a revolute joint between the world and the bearing.
 
-The hierarchical structuring is realized with the @assembly macro. It is for structuring, grouping features, and allows the easy reusability of these groups.  
-A simulation model consists of the top assembly, and other properties needed for simulation, e.g the pendulum is simulated for 5 sec.
+The hierarchical structuring is realized with the `@assembly` macro. It is for structuring, grouping features, and allows the easy reusability of these groups. A simulation model consists of the top assembly, and other properties needed for simulation, e.g the pendulum is simulated for 5 sec.
 
 ```julia
 import ModiaMath
@@ -118,7 +101,7 @@ simulationModel = Modia3D.SimulationModel(Pendulum(Lx=0.8),stopTime=5.0);
 
 
 ### To simulate a model, animate and plot results
-The model is simulated with the ModiaMath command simulate!, and the results are plotted (see right figure). A 3D animation is shown, if the DLR Visualization Library is enabled (see left figure).
+The model is simulated with the ModiaMath command `simulate!`, and the results are plotted (see right figure). A 3D animation is shown, if the DLR Visualization Library is enabled (see left figure).
 
 ```julia
 result = ModiaMath.simulate!(simulationModel);
@@ -129,7 +112,7 @@ ModiaMath.plot(result, ["revolute.phi", "revolute.w"]);
 
 
 ### To run examples
-This is just a selection of examples. There are further [examples](https://github.com/Modia/examples) available (see Modia3D/examples).
+This is just a selection of examples. There are further [examples](https://github.com/ModiaSim/Modia3D/examples) available (see Modia3D/examples).
 ```julia
   import Modia3D
   include("$(Modia3D.path)/examples/dynamics/Simulate_DoublePendulumWithDampers.jl")
@@ -140,7 +123,7 @@ This is just a selection of examples. There are further [examples](https://githu
 ```
 
 ### To run tests
-To make sure the available version of Modia3D is working, please execute runtests.jl. Additionally to unit tests there are further [test examples](https://github.com/Modia/test) available.
+To make sure the available version of Modia3D is working, please execute runtests.jl. Additionally to unit tests there are further [test examples](https://github.com/ModiaSim/Modia3D/test) available.
 ```julia
   import Modia3D
   include("$(Modia3D.path)/test/runtests.jl")
@@ -151,11 +134,7 @@ The package has been tested with Julia on Windows 7, via the TravisCL on Linux (
 
 Note, the collision handling has still bugs and the elastic response calculation is not yet robust. This needs to be improved.
 
-Furthermore, kinematic loops are currently only supported for 2D loops and if they are driven kinematically.
-The technique to handle kinematic loops for dynamic simulations is demonstrated in the example
-`include("$(ModiaMath.path)/examples/withoutMacros_withoutVariables/Simulate_PendulumDAE.jl")`
-and is described in the paper *[Transformation of Differential Algebraic Array Equations to
-Index One Form](http://www.ep.liu.se/ecp/132/064/ecp17132565.pdf)*.
+Furthermore, kinematic loops are currently only supported for 2D loops and if they are driven kinematically. The technique to handle kinematic loops for dynamic simulations is demonstrated in the example `include("$(ModiaMath.path)/examples/withoutMacros_withoutVariables/Simulate_PendulumDAE.jl")` and is described in the paper *[Transformation of Differential Algebraic Array Equations to Index One Form](http://www.ep.liu.se/ecp/132/064/ecp17132565.pdf)*.
 
 Up to now, Modia3D is implemented for functionality and not tuned for efficiency. Therefore, there are no benchmarks yet and in particular no comparison with Modelica models.
 
