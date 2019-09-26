@@ -34,7 +34,6 @@ is associated with an Object3D `object3D`:
 
 Other functions in module `Solids`:
 - [`Modia3D.SolidMaterial`](@ref)(name) returns the solid properties of material `name`.
-- [`Modia3D.ElasticContactMaterial`](@ref)(name) returns the elastic contact properties of material `name`.
 
 # Main developers
 Andrea Neumayr and Martin Otter, [DLR - Institute of System Dynamics and Control](https://www.dlr.de/sr/en)
@@ -59,9 +58,6 @@ export solidMaterialPairsPalette, CommonCollisionProperties, getCommonCollisionP
 export SolidMaterial2, solidMaterialPalette2
 export SolidMaterial3, solidMaterialPalette3
 
-export ElasticContactMaterial, ElasticContactMaterialFromMaterialData, ElasticContactMaterialFromMaterialName
-export ElasticContactMaterial2   # just temporarily
-export ElasticContactPairMaterial2
 export contactPairMaterialPalette, ContactPairMaterial, TwoNamesKey
 
 using StaticArrays
@@ -78,7 +74,6 @@ include("concaveProperties.jl")
 include("geometry.jl")
 include("solidMaterial.jl")
 include("massProperties.jl")
-include("contactMaterial.jl")
 include("contactPairMaterials.jl")
 include("solid.jl")
 

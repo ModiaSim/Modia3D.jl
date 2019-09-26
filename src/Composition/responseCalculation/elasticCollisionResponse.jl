@@ -79,13 +79,8 @@ function contactStart(matPair::Solids.ElasticContactPairMaterial,
                       contactNormal::ModiaMath.Vector3D,
                       elasticContactReductionFactor::Float64)::ElasticContactPairResponseMaterial
     # Compute spring constant
-    if typeof(obj1.data.contactMaterial) == Solids.ElasticContactMaterial2
-        name1 = obj1.data.contactMaterial.name
-        name2 = obj2.data.contactMaterial.name
-    else
-        name1 = obj1.data.contactMaterial
-        name2 = obj2.data.contactMaterial
-    end
+    name1 = obj1.data.contactMaterial
+    name2 = obj2.data.contactMaterial
     mat1  = Solids.solidMaterialPalette[name1]
     mat2  = Solids.solidMaterialPalette[name2]
     E1    = mat1.YoungsModulus

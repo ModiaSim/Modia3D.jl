@@ -81,10 +81,9 @@ function getModelResidues!(m::Model, t::Float64, _x::Vector{Float64}, _derx::Vec
     return nothing
 end
 
-#vsmall = 0.1
-material = "Steel"
-cmat = Modia3D.ElasticContactMaterial2(material)
-#cmat.vsmall = vsmall
+material = 
+cmat = "Steel"
+
 
 cor = 0.7
 vsmall = 0.01

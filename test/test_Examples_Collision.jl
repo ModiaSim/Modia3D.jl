@@ -28,8 +28,6 @@ include(joinpath(collisionPath, "Test_Solids.jl"))
 
 # test/collision/boxOnTable
 collisionPath = joinpath(Modia3D.path, "test", "collision","boxOnTable")
-# include(joinpath(collisionPath, "Simulate_BoxOnTable.jl"))  # is not working needs to be fixed
-# include(joinpath(collisionPath, "Simulate_ContactBox3OnTable.jl")) # is not working needs to be fixed
 include(joinpath(collisionPath, "Simulate_ContactBoxOnTable.jl"))
 include(joinpath(collisionPath, "Simulate_YouBotBoxOnTable.jl"))
 

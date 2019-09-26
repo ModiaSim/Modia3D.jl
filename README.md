@@ -69,7 +69,11 @@ Modia3D visualizes the movement of 3D objects with a renderer. Currently, the (f
 If Modia3D cannot use one of the renderers above, it will continue with renderer **NoRenderer** where result animation is switched off.
 
 ## Usage of Modia3D by Example
-Modia3D has a very modular and flexible component-based design, and it allows hierarchical structuring. The following example, of a single pendulum, gives a short insight of both concepts. For further information see [2, 3] and the documentation.
+Modia3D has a very modular and flexible component-based design, and it allows hierarchical structuring. The following example, of a single pendulum, gives a short insight of both concepts. For further information see [2, 3], the documentation, and the file `Simulate_Pendulum.jl`.
+```julia
+  import Modia3D
+  include("$(Modia3D.path)/examples/dynamics/Simulate_Pendulum_explained.jl")
+```
 
 ### To define a model
 The [ModiaMath]( https://github.com/ModiaSim/ModiaMath.jl) package another part of the Modia modeling environment is imported. It is needed to solve and communicate with the IDA DAE-solver.
@@ -84,7 +88,7 @@ The hierarchical structuring is realized with the `@assembly` macro. It is for s
 
 ```julia
 import ModiaMath
-using Modia3D
+using  Modia3D
 
 visuMaterial1 = Modia3D.Material(color="LightBlue", transparency=0.3);
 visuMaterial2 = Modia3D.Material(color="Red");
@@ -112,18 +116,17 @@ ModiaMath.plot(result, ["revolute.phi", "revolute.w"]);
 
 
 ### To run examples
-This is just a selection of examples. There are further [examples](https://github.com/ModiaSim/Modia3D/examples) available (see Modia3D/examples).
+This is just a selection of examples. There are further examples available.
 ```julia
   import Modia3D
   include("$(Modia3D.path)/examples/dynamics/Simulate_DoublePendulumWithDampers.jl")
   include("$(Modia3D.path)/examples/collisions/Simulate_NewtonsCradle.jl")
   include("$(Modia3D.path)/examples/kinematics/Move_FourBar.jl")
   include("$(Modia3D.path)/examples/visual/Move_AllVisualObjects.jl")
-
 ```
 
 ### To run tests
-To make sure the available version of Modia3D is working, please execute runtests.jl. Additionally to unit tests there are further [test examples](https://github.com/ModiaSim/Modia3D/test) available.
+To make sure the available version of Modia3D is working, please execute runtests.jl. Additionally to unit tests there are further test examples available.
 ```julia
   import Modia3D
   include("$(Modia3D.path)/test/runtests.jl")
