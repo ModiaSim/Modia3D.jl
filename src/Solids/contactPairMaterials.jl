@@ -82,7 +82,7 @@ struct TwoNamesKey
 end
 
 Base.:isequal(keyA::TwoNamesKey, keyB::TwoNamesKey) = keyA.name1 == keyB.name1 && keyA.name2 == keyB.name2
-
+Base.:isless(keyA::TwoNamesKey, keyB::TwoNamesKey) = keyA.name1 < keyB.name1 || ( keyA.name1 == keyB.name1 && keyA.name2 < keyB.name2 )
 
 """
     readContactPairMaterialFromJSON(fileName)
