@@ -37,7 +37,7 @@ in order that a simulation is successful:
 ## Material constants
 
 The response calculation uses the following material constants from the
-[Solid material](@ref) palette and from the 
+[Solid material](@ref) palette and from the
 [Contact pair material](@ref) palette.
 
 - `E` in [N/m^2]: Young's modulus of contact material (``\gt 0``).
@@ -64,9 +64,9 @@ Finally, the heuristic factor ``k_{red}`` (default = 1.0) can be defined with ke
  the integrator. This in turn means that typically at least a relative
  tolerance of ``10^{-8}`` needs to be used for the integration, in order that
  the penetration depth is computed with 2 or 3 significant digits.
- To improve simulation speed, factor `k_{red}``
+ To improve simulation speed, factor ``k_{red}``
  reduces the stiffness of the contact and therefore enlarges the
- penetration depth. If `k_{red}`` is for example set to ``10^{-4}``, the penetration
+ penetration depth. If ``k_{red}`` is for example set to ``10^{-4}``, the penetration
  depth might be in the order of ``10^{-3} m`` and then a relative tolerance
  of ``10^{-5}`` might be sufficient. In many cases, the essential response
  characteristic is not changed (just the penetration depth is larger),
