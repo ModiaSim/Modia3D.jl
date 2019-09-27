@@ -1,5 +1,4 @@
-﻿
-# Materials
+﻿# Materials
 
 Modia3D uses various materials for different kind of purposes. In this section an overview
 of the material data and material palettes is given, as well as links to more detailed
