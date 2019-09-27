@@ -14,12 +14,12 @@ The *Modia platform* is a prototype system for the next modeling and simulation 
 
 ## Modia3D
 
-Modia3D provides 3D geometry to physical systems so that geometrical objects can be
+[Modia3D](https://github.com/ModiaSim/Modia3D.jl) provides 3D geometry to physical systems so that geometrical objects can be
 directly accessed and utilized in a model. Functions are provided, for example, to compute the volume,
 mass, and inertia of a geometrical object or the distance between two objects.
 Furthermore, Modia3D models 3D mechanical systems and shall be expanded into other domains in the future
 (for example to utilize the 3D geometry to model heat flow in buildings or satellites).
-In the future it will be possible, for example, to model the 3D mechanical part of a robot with Modia3D and the electrical motors and gearboxes are driving the joints with Modia.
+In the future it will be possible, for example, to model the 3D mechanical part of a robot with Modia3D and the electrical motors and gearboxes that are driving the joints with Modia.
 
 Modia3D uses ideas from modern computer game engines to achieve a highly flexible setup of mechanical systems including collision handling. Other features are utilized from multi-body programs, such as support for closed kinematic loops, and elastic response calculation. The underlying mathematical formulation are hybrid Differential Algebraic Equations (DAEs) that are solved with the variable-step solver IDA via the [Sundials.jl](https://github.com/JuliaDiffEq/Sundials.jl) Julia package.
 
