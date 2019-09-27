@@ -21,6 +21,8 @@ in order that a simulation is successful:
   the penetration depth is computed from the difference of tolerance-controlled
   variables and the precision will be not sufficient if a higher tolerance will be
   used because the penetration depth is in the order of ``10^{-5} .. 10^{-6}~ m``.
+  A relative tolerancie of ``10^{-5}`` might be used, if the heuristic
+  elastic contact reduction factor  ``k_{red} = 10^{4}`` (see below).
 
 - A reasonable reliable simulation requires that objects have only
   *point contact*, since otherwise the contact point can easily ``jump`` between
@@ -29,16 +31,14 @@ in order that a simulation is successful:
   For this reason, all geometrical objects are slightly modified in various ways
   for the collision handling. Most important, all geometries are *smoothed* with a
   small sphere (e.g. with radius = 1mm) that is moved over all surfaces.
-  Small spheres are attached at every vertex of a box so that contact most likely
-  appears at these spheres or at the edges, that are smoothed with spheres.
+
 
 
 ## Material constants
 
-The response calculation uses the following material constants from
-the [`Modia3D.solidMaterialPalette3`](@ref) and the
-[`Modia3D.contactMaterialPalette`](@ref) palettes given
-the names of the materials, such as `"Steel"`.
+The response calculation uses the following material constants from the
+[Solid material](@ref) palette and from the 
+[Contact pair material](@ref) palette.
 
 - `E` in [N/m^2]: Young's modulus of contact material (``\gt 0``).
 - `nu`: Poisson's ratio of contact material (``0 \lt nu \lt 1``).
@@ -54,6 +54,24 @@ and relative angular velocities. This region is defined by the following constan
 - `wsmall` in [rad/s]: Used for regularization when computing the unit vector in direction of
                        the relative angular velocity (see below).
 
+Finally, the heuristic factor ``k_{red}`` (default = 1.0) can be defined with keyword argument
+`elasticContactReductionFactor` in the `SceneOptions` constructor. The goals is the following:
+ Applying the elastic response calculation on hard materials
+ such as steel, typically results in penetration depths in the order of
+ ``10^{-5} .. 10^{-5} m``. A penetration depth is implicitly computed by the
+ difference of the absolute positions of the objects in contact and
+ these absolute positions are typically error-controlled variables of
+ the integrator. This in turn means that typically at least a relative
+ tolerance of ``10^{-8}`` needs to be used for the integration, in order that
+ the penetration depth is computed with 2 or 3 significant digits.
+ To improve simulation speed, factor `k_{red}``
+ reduces the stiffness of the contact and therefore enlarges the
+ penetration depth. If `k_{red}`` is for example set to ``10^{-4}``, the penetration
+ depth might be in the order of ``10^{-3} m`` and then a relative tolerance
+ of ``10^{-5}`` might be sufficient. In many cases, the essential response
+ characteristic is not changed (just the penetration depth is larger),
+ but simulation speed is significantly improved.
+
 
 ## Response calculation
 
@@ -66,7 +84,7 @@ the remaining force law on [^2] with some extensions and corrections):
 
 ```math
 \begin{align}
-f_n        &= \max\left(0, c_{res} \cdot c_{geo} \cdot \delta^{n_{geo}} \cdot (1 + d \cdot \dot{\delta}) \right) \\
+f_n        &= k_{red} \max\left(0, c_{res} \cdot c_{geo} \cdot \delta^{n_{geo}} \cdot (1 + d \cdot \dot{\delta}) \right) \\
 \vec{f}_n &= f_n \cdot \vec{e}_n \\
 \vec{f}_t &= -\mu_{k} \cdot f_n \cdot \vec{e}_{t,reg} \\
 \vec{\tau} &= -\mu_{r} \cdot \mu_{r,geo}  \cdot f_n \cdot \vec{e}_{\omega,reg}
@@ -104,6 +122,7 @@ where
 - ``\mu_r``: Rotational rolling resistance torque coefficient between objects 1 and 2.
 - ``\mu_{r,geo}``: Factor in ``\vec{\tau}`` that is determined from the geometries of the
                     two objects (see below).
+- ``k_{red}``: Elastic contact reduction factor.
 
 The ``\max(..)`` operator in equation (1) is provided, in order
 to guarantee that ``f_n`` is always a compressive and never a pulling force because

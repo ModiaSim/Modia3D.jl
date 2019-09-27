@@ -12,12 +12,12 @@
 
 The *Modia platform* is a prototype system for the next modeling and simulation generation of physical systems described by differential and algebraic equations. It consists currently of the following Julia packages that are all under development (not all are yet publicly available):
 
-- Modia - Equation based modeling
-- Modiator - 2D/3D web-app model editor
-- ModiaMath - Simulation enviroment
-- Modia3D - 3D geometry and 3D mechanics
-- ModiaMedia - Thermodynamic property models
-- Modelia - Modelica model importer
+- *[Modia](https://github.com/ModiaSim/Modia.jl)* - Equation based modeling
+- *Modiator* - 2D/3D web-app model editor
+- *[ModiaMath](https://github.com/ModiaSim/ModiaMath.jl)* - Simulation enviroment
+- *[Modia3D](https://github.com/ModiaSim/Modia3D.jl)* - 3D geometry and 3D mechanics
+- *[ModiaMedia](https://github.com/ModiaSim/ModiaMedia.jl)* - Thermodynamic property models
+- *Modelia* - [Modelica model](https://www.modelica.org/modelicalanguage) importer
 
 
 ## Modia3D

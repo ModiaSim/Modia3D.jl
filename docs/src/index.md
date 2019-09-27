@@ -1,29 +1,40 @@
 # Modia3D
 
-[Modia3D](https://github.com/ModiaSim/Modia3D.jl) is a Julia package to model fixed and
-moving objects in 3D (*e.g.* visual shapes, rigid bodies).
-These objects are driven kinematically by pre-defined time functions or are moving dynamically by
-solving Differential Algebraic Equations (DAEs)
-with a variable-step DAE solver.
+## Modia Platform
 
-Collision handling with elastic response calculation is
-performed for objects that are defined with a contact material and (a) have a convex geometry, or
-(b) can be approximated by a set of convex geometries, or (c) have a concave geometry
-that is (automatically) approximated by its convex hull.
-A more detailed overview of the available features is given in the
-[Modia3D documentation](https://ModiaSim.github.io/Modia3D.jl/stable).
-Papers about Modia3D:
+The *Modia platform* is a prototype system for the next modeling and simulation generation of physical systems described by differential and algebraic equations. It consists currently of the following Julia packages that are all under development (not all are yet publicly available):
 
-- *[Collision Handling with Variable-Step Integrators](../resources/documentation/CollisionHandling_Neumayr_Otter_2017.pdf)* ([EOOLT 2017, December](http://www.eoolt.org/2017/))
-- *[Component-Based 3D Modeling of Dynamic Systems](http://www.ep.liu.se/ecp/154/019/ecp18154019.pdf)*([American Modelica Conference 2018, October](https://www.modelica.org/events/modelica2018Americas/index_html))
-- *[Algorithms for Component-Based 3D Modeling](http://www.ep.liu.se/ecp/157/039/ecp19157039.pdf)*([13th International Modelica Conference 2019, March](https://modelica.org/events/modelica2019))
+- *[Modia](https://github.com/ModiaSim/Modia.jl)* - Equation based modeling
+- *Modiator* - 2D/3D web-app model editor
+- *[ModiaMath](https://github.com/ModiaSim/ModiaMath.jl)* - Simulation enviroment
+- *[Modia3D](https://github.com/ModiaSim/Modia3D.jl)* - 3D geometry and 3D mechanics
+- *[ModiaMedia](https://github.com/ModiaSim/ModiaMedia.jl)* - Thermodynamic property models
+- *Modelia* - [Modelica model](https://www.modelica.org/modelicalanguage) importer
 
 
-Before releasing version 1.0, Modia3D shall be
-easily combinable with [Modia](https://github.com/ModiaSim/Modia.jl), for example to define a controlled
-electrical motor with Modia, and add 3D behavior/visualization with Modia3D.
-By this approach the best of both worlds can be combined:
-Special 3D algorithms (Modia3D) + power/flexibility of equation based modeling (Modia).
+## Modia3D
+
+Modia3D provides 3D geometry to physical systems so that geometrical objects can be
+directly accessed and utilized in a model. Functions are provided, for example, to compute the volume,
+mass, and inertia of a geometrical object or the distance between two objects.
+Furthermore, Modia3D models 3D mechanical systems and shall be expanded into other domains in the future
+(for example to utilize the 3D geometry to model heat flow in buildings or satellites).
+In the future it will be possible, for example, to model the 3D mechanical part of a robot with Modia3D and the electrical motors and gearboxes are driving the joints with Modia.
+
+Modia3D uses ideas from modern computer game engines to achieve a highly flexible setup of mechanical systems including collision handling. Other features are utilized from multi-body programs, such as support for closed kinematic loops, and elastic response calculation. The underlying mathematical formulation are hybrid Differential Algebraic Equations (DAEs) that are solved with the variable-step solver IDA via the [Sundials.jl](https://github.com/JuliaDiffEq/Sundials.jl) Julia package.
+
+Collision handling with elastic response calculation is performed for geometrical objects that are defined with a contact material and have a convex geometry or are approximated by the convex hull of a concave geometry.
+Penetration depths and Euclidean distances are computed with the improved Minkowski Portal Refinement (MPR) algorithm [1].
+The details of the contact law are provided in [5] and several examples are discussed in [4]. The user's view of Modia3D is introduced in [2] showing the very flexible definition of 3D systems. Some key algorithms are discussed in [3].
+A more detailed overview of the available features is also given in the [Modia3D documentation](https://ModiaSim.github.io/Modia3D.jl/stable).
+
+Papers and videos about Modia3D:
+
+- [1] *[Collision Handling with Variable-Step Integrators](resources/documentation/CollisionHandling_Neumayr_Otter_2017.pdf)* ([EOOLT 2017, December](http://www.eoolt.org/2017/))
+- [2] *[Component-Based 3D Modeling of Dynamic Systems](http://www.ep.liu.se/ecp/154/019/ecp18154019.pdf)* ([American Modelica Conference 2018, October](https://www.modelica.org/events/modelica2018Americas/index_html))
+- [3] *[Algorithms for Component-Based 3D Modeling](http://www.ep.liu.se/ecp/157/039/ecp19157039.pdf)* ([13th International Modelica Conference 2019, March](https://modelica.org/events/modelica2019))
+- [4] *Modia3D: Modeling and Simulation of 3D-Systems in Julia* ([JuliaCon 2019, July](https://juliacon.org/2019/), under review); talk recorded on [YouTube](https://www.youtube.com/watch?v=b3WfqXZRKpA)
+- [5] *Collision Handling with Elastic Response Calculation and Zero-Crossing Functions* (accepted for publication at ([EOOLT 2019, November](http://www.eoolt.org/2019/))
 
 
 ## Package Features
@@ -123,15 +134,15 @@ There are the following operations on an instance of an assembly:
 
 ### Version 0.4.0
 
-- Collision handling significantly improved
-  o New elastic response characteristics.
-  o Contact start and end detection with zero crossing functions improved.
-  o Many bugs removed
-  o Several examples for collision handling added.
+- Collision handling significantly improved:
+  * New elastic response characteristics.
+  * Contact start and end detection with zero crossing functions improved.
+  * Many bugs removed.
+  * Several examples for collision handling added.
 
 - KUKA YouBot robot example added (together with simple PTP path planning).
 
-- Documentation considerably improved
+- Documentation considerably improved.
 
 
 ### Version 0.3.0

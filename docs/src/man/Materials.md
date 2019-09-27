@@ -24,7 +24,8 @@ information. The following materia data is supported
  name is associated with an Int-vector where the entries correspond to RGB values.
  Default color definitions are available via the [`Modia3D.colorPalette`](@ref)
  dictionary, where the color name is used as key and which is filled during the first
- usage of Modia3D from file `Modia3D/src/Graphics/colors.json`.
+ usage of Modia3D from file `Modia3D/palettes/colors.json`.
+
 
 ### Content of colors palette
 
@@ -44,18 +45,18 @@ This data is used for visualization. Currently, there is no dictionary provided.
 
 ## Solid material
 
-The dictionary [`Modia3D.solidMaterialPalette3`](@ref) provides material constants of *one solid*.
+The dictionary [`Modia3D.solidMaterialPalette`](@ref) provides material constants of *one solid*.
 The *key* is the *material name* as a string, and the *value* is an instance of the mutable struct
-[`Modia3D.SolidMaterial3`](@ref). This data is used, for example, to compute mass and inertia of an object
+[`Modia3D.SolidMaterial`](@ref). This data is used, for example, to compute mass and inertia of an object
 (with *density* and the object geometry), or to compute the spring constant
 for a compliant contact (with *Youngs's modulus* and *Poisson's ratio*).
-It is filled during the first usage of Modia3D from file `Modia3D/src/Solids/solidMaterials.json`.
+It is filled during the first usage of Modia3D from file `Modia3D/palettes/solidMaterials.json`.
 
 ### Content of solid material palette
 
 ```@repl
 import Modia3D
-Modia3D.listKeys(Modia3D.solidMaterialPalette3)
+Modia3D.listKeys(Modia3D.solidMaterialPalette)
 ```
 
 
@@ -65,7 +66,7 @@ Modia3D.listKeys(Modia3D.solidMaterialPalette3)
 The dictionary [`Modia3D.contactPairMaterialPalette`](@ref) provides
 omaterial constants that are related to *two* solids that are in contact to each other,
 for example the *coefficient of restitution*  between a `"Steel"` and an `"Aluminium"` object.
-It is filled during the first usage of Modia3D from file `Modia3D/src/Solids/contactPairMaterials.json`.
+It is filled during the first usage of Modia3D from file `Modia3D/palettes/contactPairMaterials.json`.
 
 ### Content of contact pairs palette
 

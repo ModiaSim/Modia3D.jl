@@ -56,7 +56,7 @@ export regularize, resultantCoefficientOfRestitution, resultantDampingCoefficien
 export solidMaterialPairsPalette, CommonCollisionProperties, getCommonCollisionProperties
 
 
-export contactPairMaterialPalette, ContactPairMaterial, TwoNamesKey
+export contactPairMaterialPalette, ElasticContactPairMaterial, TwoNamesKey
 
 using StaticArrays
 import JSON

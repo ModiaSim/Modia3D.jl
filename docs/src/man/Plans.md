@@ -18,9 +18,6 @@ Features planned for version 1.0:
 
 - **ContactDetectionMPR**
   - The MPR algorithm for distance computation needs to be more thoroughly tested.
-  - Add an option to getDistances(ch) to only compute the distances of contact pairs that
-    had a negative distance in the last call of selectContactPairs(ch)
-    (to enhance efficiency of the simulation with a variable-step integrator).
 
 - **Solids**
   - Making contact handling more robust and more thoroughly testing the contact response calculation.
@@ -65,7 +62,7 @@ The following features are planed after version 1.0 (especially together with in
 
 - **GUI**
   - Support of an open source, web-browser-based GUI to graphically define 3D assemblies and use the GUI also as
-    default renderer (along the paper [3D Schematics of Modelica Models and Gamification](http://www.ep.liu.se/ecp/118/057/ecp15118527.pdf); 
+    default renderer (along the paper [3D Schematics of Modelica Models and Gamification](http://www.ep.liu.se/ecp/118/057/ecp15118527.pdf);
     probably using [three.js](https://threejs.org) as underlying web-browser, webgml based rendering engine).
 
 - **Composition**
