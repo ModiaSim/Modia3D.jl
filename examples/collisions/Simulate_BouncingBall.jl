@@ -125,8 +125,9 @@ function Base.getproperty(result::ModiaMath.ResultWithVariables, name::AbstractS
     return sig
 end
 
-using PyPlot
 #=
+# The following commands can only be used if PyPlot is available
+using PyPlot
 using PyCall
 
 fig, ax = PyPlot.subplots(figsize=(3,9))
@@ -140,8 +141,6 @@ pyplot_rc["grid.linewidth"]   = 0.5
 pyplot_rc["axes.grid"]        = true
 pyplot_rc["axes.titlesize"]   = "medium"
 pyplot_rc["figure.titlesize"] = "medium"
-=#
-
 
 t1      = result1["time"]
 h1      = result1["h"]
@@ -154,8 +153,6 @@ v2 = result2."ball.v[3]"
 
 figure(3)
 clf()
-
-#=
 plot(t1,h1,"b", t2,h2,"r", t1,cor_res,"g")
 grid(true)
 xlabel("time [s]")
@@ -163,13 +160,15 @@ ylabel("height [m]")
 legend(["impulsive response",
         "compliant response",
         "\$cor_{res}\$"])
-=#
+
 plot(t1,h1,"b", t2,h2,"r")
 grid(true)
 xlabel("time [s]")
 ylabel("height [m]")
 legend(["impulsive response",
         "compliant response"])
+=#
+
 
 println("... success of examples/collisions/Simulate_BouncingBall.jl")
 end
