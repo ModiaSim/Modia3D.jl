@@ -50,12 +50,14 @@ const gearRatio5    = 71.0
 const J5            = effectiveInertia(motorInertia5, gearRatio5)
 
 
+#=
 println("")
 println("J1 = $J1, gearRatio1 = $gearRatio1")
 println("J2 = $J2, gearRatio2 = $gearRatio2")
 println("J3 = $J3, gearRatio3 = $gearRatio3")
 println("J4 = $J4, gearRatio4 = $gearRatio4")
 println("J5 = $J5, gearRatio5 = $gearRatio5\n")
+=#
 
 
 # Damper
