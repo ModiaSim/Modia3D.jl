@@ -131,8 +131,9 @@ The following code shows how to execute some of these examples.
   include("$(Modia3D.path)/examples/kinematics/Move_FourBar.jl")
   include("$(Modia3D.path)/examples/visual/Move_AllVisualObjects.jl")
 ```
-
-The next figure shows a screenshot of the animation of example `Simulate_YouBot.jl `:
+### Complex Model Simulation
+At this package status more complex model simulations are possible, for example, a robot is kicking a ball off a table.
+See `$(Modia3D.path)/examples/collisions/Simulate_YouBot.jl`:
 
 ![PendulumPlot](docs/resources/images/youbot-robot.jpg)
 
