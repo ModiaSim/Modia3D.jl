@@ -55,8 +55,6 @@ export solidMaterial, solidMaterialPalette, defaultContactMaterial
 export regularize, resultantCoefficientOfRestitution, resultantDampingCoefficient
 export solidMaterialPairsPalette, CommonCollisionProperties, getCommonCollisionProperties
 
-export SolidMaterial2, solidMaterialPalette2
-export SolidMaterial3, solidMaterialPalette3
 
 export contactPairMaterialPalette, ContactPairMaterial, TwoNamesKey
 
