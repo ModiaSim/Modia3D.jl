@@ -121,6 +121,19 @@ There are the following operations on an instance of an assembly:
 
 ## Release Notes
 
+### Version 0.4.0
+
+- Collision handling significantly improved
+  o New elastic response characteristics.
+  o Contact start and end detection with zero crossing functions improved.
+  o Many bugs removed
+  o Several examples for collision handling added.
+
+- KUKA YouBot robot example added (together with simple PTP path planning).
+
+- Documentation considerably improved
+
+
 ### Version 0.3.0
 
 - The first version that requires Julia >= 1.0 (all Julia 0.6 and 0.7 code was removed).

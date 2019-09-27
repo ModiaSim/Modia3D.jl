@@ -113,8 +113,8 @@ Base.:isequal(key1::DistanceKey, key2::DistanceKey) = key1.pairID == key2.pairID
 """
     handler = ContactDetectionMPR_handler(;tol_rel = 1e-4, niter_max=100, neps=sqrt(eps()))
 
-Generate a new contact handler for usage of the MPR algorithm in module
-[`Modia3D.ContactDetectionMPR`](@ref). The handler instance contains all information
+Generate a new contact handler for usage of the MPR algorithm
+The handler instance contains all information
 about the contact situation.
 
 # Arguments
