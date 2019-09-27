@@ -1,4 +1,5 @@
-﻿# Collision Handling
+﻿
+# Collision Handling
 
 Modia3D supports collisions of objects that are defined with a contact material
 and (a) have a convex geometry, or (b) can be approximated by a set of
