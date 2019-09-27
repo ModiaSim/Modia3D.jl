@@ -66,7 +66,7 @@ Finally, the heuristic factor ``k_{red}`` (default = 1.0) can be defined with ke
  the penetration depth is computed with 2 or 3 significant digits.
  To improve simulation speed, factor ``k_{red}``
  reduces the stiffness of the contact and therefore enlarges the
- penetration depth. If ``k_{red}`` is for example set to ``10^{-4}``, the penetration
+ penetration depth. If ``k_{red}`` is for example set to ``10^{4}``, the penetration
  depth might be in the order of ``10^{-3} m`` and then a relative tolerance
  of ``10^{-5}`` might be sufficient. In many cases, the essential response
  characteristic is not changed (just the penetration depth is larger),

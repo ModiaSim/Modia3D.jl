@@ -64,7 +64,7 @@ Modia3D.listKeys(Modia3D.solidMaterialPalette)
 ## Contact pair material
 
 The dictionary [`Modia3D.contactPairMaterialPalette`](@ref) provides
-omaterial constants that are related to *two* solids that are in contact to each other,
+material constants that are related to *two* solids that are in contact to each other,
 for example the *coefficient of restitution*  between a `"Steel"` and an `"Aluminium"` object.
 It is filled during the first usage of Modia3D from file `Modia3D/palettes/contactPairMaterials.json`.
 
