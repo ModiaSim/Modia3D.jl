@@ -17,8 +17,8 @@ include(joinpath(collisionPath, "Simulate_YouBot.jl"))
 collisionPath = joinpath(Modia3D.path, "test", "collision")
 include(joinpath(collisionPath, "Collision_3Elements.jl"))
 # include(joinpath(collisionPath, "Collision_Bars.jl")) # is not working needs to be fixed
-include(joinpath(collisionPath, "Plot_cor.jl"))
-include(joinpath(collisionPath, "Plot_SlidingFriction.jl"))
+# include(joinpath(collisionPath, "Plot_cor.jl"))             # not included since PyPlot required
+#include(joinpath(collisionPath, "Plot_SlidingFriction.jl"))  # not included since PyPlot required
 include(joinpath(collisionPath, "Test_Collision.jl"))
 include(joinpath(collisionPath, "Test_Collision_moreRevolutes.jl"))
 include(joinpath(collisionPath, "Test_Collision_StarSetting.jl"))
@@ -45,7 +45,7 @@ include(joinpath(collisionPath, "collision_newtons_cradle.jl"))
 
 # test/collision/contactForceLaw
 collisionPath = joinpath(Modia3D.path, "test", "collision","contactForceLaw")
-include(joinpath(collisionPath, "bouncingBallComparedWithImpulses.jl"))
+# include(joinpath(collisionPath, "bouncingBallComparedWithImpulses.jl"))  # not included since PyPlot required
 include(joinpath(collisionPath, "contactForceLaw_2_boxes.jl"))
 include(joinpath(collisionPath, "contactForceLaw_2_boxes_Prismatic.jl"))
 include(joinpath(collisionPath, "contactForceLaw_2_boxes2.jl"))
@@ -63,10 +63,10 @@ include(joinpath(collisionPath, "BillardBall1_Cushion4_arbitraryHit.jl"))
 include(joinpath(collisionPath, "BillardBall1_Cushion4_directHit.jl"))
 
 
-collisionPath = joinpath(Modia3D.path, "test", "collision","Billard_Simulations", "rollingBall")
-include(joinpath(collisionPath, "colliding2rollingBalls_plot1.jl"))
-include(joinpath(collisionPath, "colliding2rollingBalls_plot2.jl"))
-include(joinpath(collisionPath, "rollingBall1.jl"))
+# collisionPath = joinpath(Modia3D.path, "test", "collision","Billard_Simulations", "rollingBall")
+# include(joinpath(collisionPath, "colliding2rollingBalls_plot1.jl"))   # not included since PyPlot required
+# include(joinpath(collisionPath, "colliding2rollingBalls_plot2.jl"))   # not included since PyPlot required
+# include(joinpath(collisionPath, "rollingBall1.jl"))                   # not included since PyPlot required
 
 
 collisionPath = joinpath(Modia3D.path, "test", "collision","Billard_Simulations", "billard")
