@@ -127,6 +127,11 @@ include(joinpath(Modia3D.path, "src", "contactDetection", "ContactDetectionMPR",
 
 #-------------------------------------- Gravity field ----------------------------------
 
+"""
+    gravityField = NoGravityField()
+
+Generate an instance of type `NoGravityField` that defines no gravity.
+"""
 struct NoGravityField <: Modia3D.AbstractGravityField
    gvec::SVector{3,Float64} # [m/s^2] Vector of gravity acceleration
    NoGravityField() = new(SVector{3,Float64}(0.0, 0.0, 0.0))
@@ -169,7 +174,7 @@ const EarthRadius = 6.3781e6     # [m]           Radius of earth (https://en.wik
 
 
 """
-    PointGravityField(mass), PointGravityField(;mue=G*EarthMass)
+    PointGravityField([mass|;mue=G*EarthMass])
 
 Return a PointGravityField struct with the gravity field constant mue (mue = G*mass).
 
@@ -202,6 +207,86 @@ gravityAcceleration(grav::PointGravityField, r_abs::AbstractVector) = -(grav.mue
 
 #-------------------------------------- Global Scene Options -------------------------------
 
+"""
+    sceneOptions = Modia3D.SceneOptions(;kwargs...)
+
+Define global options for a simulation of the scene with keyword arguments:
+
+| Keyword arguments             | defaults                                |
+|:------------------------------|:----------------------------------------|
+| enableContactDetection        | true                                    |
+| elasticContactReductionFactor | 1.0                                     |
+| gravityField                  | [`Modia3D.UniformGravityField`](@ref)() |
+| enableVisualization           | true                                    |
+| visualizeGravity              | true                                    |
+| visualizeFrames               | false                                   |
+| visualizeConvexHulls          | true                                    |
+| visualizeContactPoints        | false                                   |
+| visualizeSupportPoints        | false                                   |
+| nominalLength                 | 1.0                                     |
+| defaultFrameLength            | 0.2*nominalLength                       |
+| defaultJointLength            | nominalLength/10                        |
+| defaultJointWidth             | nominalLength/20                        |
+| defaultForceLength            | nominalLength/10                        |
+| defaultForceWidth             | nominalLength/20                        |
+| defaultBodyDiameter           | nominalLength/9                         |
+| defaultWidthFraction          | 20                                      |
+| defaultArrowDiameter          | nominalLength/40                        |
+| `defaultN_to_m`               | 1000                                    |
+| `defaultNm_to_m`              | 1000                                    |
+| useOptimizedStructure         | true                                    |
+| defaultContactSphereDiameter  | 0.1                                     |
+| contactDetection              | ContactDetectionMPR_handler()           |
+
+
+# Optional keyword arguments
+
+- `enableContactDetection::Bool`: = true, if contact detection is enabled
+- `elasticContactReductionFactor::Float64`: used_contact_compliance = contact_compliance * elasticContactReductionFactor (> 0).
+- `gravityField::Modia3D.AbstractGravityField`: Type of gravity field, such as:
+  [`Modia3D.NoGravityField`](@ref),
+  [`Modia3D.UniformGravityField`](@ref),
+  [`Modia3D.PointGravityField`](@ref).
+- `enableVisualization::Bool`: = true, if animation is enabled
+- `visualizeGravity::Bool`: = true, if gravity field shall be visualized (acceleration vector or field center)
+- `visualizeFrames::Bool`: = true, if all frames shall be visualized
+- `visualizeConvexHulls::Bool`: = true, if convex hulls (used for contact detection) shall be visualized
+- `visualizeContactPoints::Bool`: = true, if contact points shall be visualized
+- `visualizeSupportPoints::Bool` = true, if support points shall be visualized
+- `nominalLength::Float64`: [m] Nominal length of 3D system
+- `defaultFrameLength::Float64`: [m] Default for frame length if visualizeFrames = true (but not world frame)
+- `defaultJointLength::Float64`: [m] Default for the fixed length of a shape representing a joint
+- `defaultJointWidth::Float64`:  [m] Default for the fixed width of a shape representing a joint
+- `defaultForceLength::Float64`: [m] Default for the fixed length of a shape representing a force (e.g., damper)
+- `defaultForceWidth::Float64`:  [m] Default for the fixed width of a shape representing a force (e.g., spring, bushing)
+- `defaultBodyDiameter::Float64`: [m] Default for diameter of sphere representing the center of mass of a body
+- `defaultWidthFraction::Float64`: Default for shape width as a fraction of shape length
+- `defaultArrowDiameter::Float64`: [m] Default for arrow diameter (e.g., of forces, torques, sensors)
+- `defaultN_to_m::Float64`: [N/m] Default scaling of force arrows (length = force/defaultN_to_m)
+- `defaultNm_to_m::Float64`: [N.m/m] Default scaling of torque arrows (length = torque/defaultNm_to_m)
+- `useOptimizedStructure::Bool`: = true, if the optimized structure (with super objects, and common inertia) is used
+- `defaultContactSphereDiameter::Float64`: [m] Diameter of sphere used for contact point visualization
+- `contactDetection::Modia3D.AbstractContactDetection`: Handler used for contact detection
+  (for example to determine the smallest distance between two objects).
+
+
+# Example
+
+For all the details see "Modia3D/examples/dynamics/Simulate_Pendulum.jl":
+
+```julia
+
+@assembly Pendulum(;Lx = 1.0) begin
+   ...
+end
+
+pendulum = Pendulum(Lx=1.6, sceneOptions=
+             Modia3D.SceneOptions(visualizeFrames=true, defaultFrameLength=0.3))
+model    = Modia3D.SimulationModel( pendulum )
+result   = ModiaMath.simulate!(model, stopTime=4.5)
+```
+
+"""
 struct SceneOptions
    useOptimizedStructure::Bool    # = true, if the optimized structure (with super objects, and common inertia) is used
 

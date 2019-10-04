@@ -114,7 +114,7 @@ end
 """
     contactPairMaterialPalette
 
-Dictionary of contact pair material data, see [`Modia3D.ContactPairMaterial`](@ref)
+Dictionary of contact pair material data, see [`Modia3D.ElasticContactPairMaterial`](@ref)
 """
 contactPairMaterialPalette = readContactPairMaterialFromJSON( joinpath(Modia3D.path, "palettes", "contactPairMaterials.json") )
 

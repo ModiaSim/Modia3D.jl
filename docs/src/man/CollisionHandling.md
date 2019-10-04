@@ -5,7 +5,7 @@ Modia3D supports collisions of objects that are defined with a contact material
 and (a) have a convex geometry, or (b) can be approximated by a set of
 convex geometries, or (c) have a concave geometry that is (automatically)
 approximated by its convex hull. When contact occurs, the response
-is computed with elastic force/torque laws based on the
+is computed with elastic (nonlinear) force/torque laws based on the
 penetration depth and the relative motion of the objects in contact.
 It is planned to optionally also support impulsive response calculation
 in the future.
@@ -20,9 +20,10 @@ in order that a simulation is successful:
   otherwise a variable step-size integrator will typically fail. The reason is that
   the penetration depth is computed from the difference of tolerance-controlled
   variables and the precision will be not sufficient if a higher tolerance will be
-  used because the penetration depth is in the order of ``10^{-5} .. 10^{-6}~ m``.
+  used because the penetration depth of hard contact materials 
+  is in the order of ``10^{-5} .. 10^{-6}~ m``.
   A relative tolerancie of ``10^{-5}`` might be used, if the heuristic
-  elastic contact reduction factor  ``k_{red} = 10^{4}`` (see below).
+  elastic contact reduction factor  is set to ``k_{red} = 10^{4}`` (see [Material constants](@ref) below).
 
 - A reasonable reliable simulation requires that objects have only
   *point contact*, since otherwise the contact point can easily ``jump`` between
@@ -55,22 +56,23 @@ and relative angular velocities. This region is defined by the following constan
                        the relative angular velocity (see below).
 
 Finally, the heuristic factor ``k_{red}`` (default = 1.0) can be defined with keyword argument
-`elasticContactReductionFactor` in the `SceneOptions` constructor. The goals is the following:
- Applying the elastic response calculation on hard materials
- such as steel, typically results in penetration depths in the order of
- ``10^{-5} .. 10^{-5} m``. A penetration depth is implicitly computed by the
- difference of the absolute positions of the objects in contact and
- these absolute positions are typically error-controlled variables of
- the integrator. This in turn means that typically at least a relative
- tolerance of ``10^{-8}`` needs to be used for the integration, in order that
- the penetration depth is computed with 2 or 3 significant digits.
- To improve simulation speed, factor ``k_{red}``
- reduces the stiffness of the contact and therefore enlarges the
- penetration depth. If ``k_{red}`` is for example set to ``10^{4}``, the penetration
- depth might be in the order of ``10^{-3} m`` and then a relative tolerance
- of ``10^{-5}`` might be sufficient. In many cases, the essential response
- characteristic is not changed (just the penetration depth is larger),
- but simulation speed is significantly improved.
+`elasticContactReductionFactor` in the [`Modia3D.SceneOptions`](@ref) constructor.
+The goal is the following:
+Applying the elastic response calculation on hard materials
+such as steel, typically results in penetration depths in the order of
+``10^{-5} .. 10^{-6} m``. A penetration depth is implicitly computed by the
+difference of the absolute positions of the objects in contact and
+these absolute positions are typically error-controlled variables of
+the integrator. This in turn means that typically at least a relative
+tolerance of ``10^{-8}`` needs to be used for the integration, in order that
+the penetration depth is computed with 2 or 3 significant digits.
+To improve simulation speed, factor ``k_{red}``
+reduces the stiffness of the contact and therefore enlarges the
+penetration depth. If ``k_{red}`` is for example set to ``10^{4}``, the penetration
+depth might be in the order of ``10^{-3} m`` and then a relative tolerance
+of ``10^{-5}`` might be sufficient. In many cases, the essential response
+characteristic is not changed (just the penetration depth is larger),
+but simulation speed is significantly improved.
 
 
 ## Response calculation
@@ -188,7 +190,7 @@ friction force and contact torque have a similar characteristic)
 There are several proposal to compute the damping coefficient as a function
 of the coefficient of restitution ``cor`` and the
 velocity when contact starts ``\dot{\delta}^-``.
-For a comparision of the different formulations see [^1].
+For a comparision of the different formulations see [^1], [^3].
 
 Whenever the coefficient of restitution ``cor > 0``, then an object 2 jumping on an object 1 will
 mathematically never come to rest, although this is unphysical. To fix this, the value of a
