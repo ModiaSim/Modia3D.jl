@@ -20,10 +20,10 @@ in order that a simulation is successful:
   otherwise a variable step-size integrator will typically fail. The reason is that
   the penetration depth is computed from the difference of tolerance-controlled
   variables and the precision will be not sufficient if a higher tolerance will be
-  used because the penetration depth of hard contact materials 
+  used because the penetration depth of hard contact materials
   is in the order of ``10^{-5} .. 10^{-6}~ m``.
   A relative tolerancie of ``10^{-5}`` might be used, if the heuristic
-  elastic contact reduction factor  is set to ``k_{red} = 10^{4}`` (see [Material constants](@ref) below).
+  elastic contact reduction factor  is set to ``k_{red} = 10^{-4}`` (see [Material constants](@ref) below).
 
 - A reasonable reliable simulation requires that objects have only
   *point contact*, since otherwise the contact point can easily ``jump`` between
@@ -68,7 +68,7 @@ tolerance of ``10^{-8}`` needs to be used for the integration, in order that
 the penetration depth is computed with 2 or 3 significant digits.
 To improve simulation speed, factor ``k_{red}``
 reduces the stiffness of the contact and therefore enlarges the
-penetration depth. If ``k_{red}`` is for example set to ``10^{4}``, the penetration
+penetration depth. If ``k_{red}`` is for example set to ``10^{-4}``, the penetration
 depth might be in the order of ``10^{-3} m`` and then a relative tolerance
 of ``10^{-5}`` might be sufficient. In many cases, the essential response
 characteristic is not changed (just the penetration depth is larger),
@@ -252,4 +252,3 @@ similar responses:
       [A review of continuous contact-force models in multibody dynamics](https://doi.org/10.1016/j.ijmecsci.2018.07.010).
       International Journal of Mechanical Sciences, Volume 145,
       Sept., pages 171-187.
-
