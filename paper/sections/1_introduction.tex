@@ -3,21 +3,58 @@
 %%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 
-Modia3D\footnote{\href{https://github.com/ModiaSim/Modia3D.jl}{https://github.com/ModiaSim/Modia3D.jl}} is an experimental modeling and simulation environment for 3D mechanical systems. It is based on the Julia programming language \cite{bezanson2017julia}.
-Ideas from modern computer game engines are used to achieve a highly flexible setup of mechanical
-systems including collision handling. Other features are utilized from multi-body programs, 
-such as hierarchical structuring, support of closed kinematic loops and elastic response calculation.
-The underlying mathematical formulation are hybrid DAEs (Differential Algebraic Equations) that are solved with the variable-step solver IDA via the Sundials.jl Julia package \cite{Sundials2005,Rackauckas2017}.
-Emphasis is on variable-step solvers because Modia3D shall be combined with 
-equation-based modeling in the future, using Modia3D assemblies as components in the Julia package
-Modia\footnote{\href{https://github.com/ModiaSim/Modia.jl}{https://github.com/ModiaSim/Modia.jl}} \cite{Modia1,Modia2}
-(for example a joint of a Modia3D system is driven by a Modia model of an 
-electrical motor and gearbox).
-Collision handling with elastic response calculation and error controlled integration
-is challenging and this article discusses some of the difficulties and how they are solved.
+The open source Modia prototype platform, see table~\ref{table:ModiaPlatform}, consists of various packages
+based on the Julia programming language \cite{bezanson2017julia} to model and simulate physical systems
+described by differential and algebraic equations. The goal is
+to simulate, e.g. robots, vehicles, aircraft, buildings or power plants,
+and to experiment with novel features for the next Modelica\textsuperscript{\textcopyright} language
+generation\footnote{\href{https://www.modelica.org/modelicalanguage}{https://www.modelica.org/modelicalanguage}}.
+
+Modia3D\footnote{\href{https://github.com/ModiaSim/Modia3D.jl}{https://github.com/ModiaSim/Modia3D.jl}}
+is an experimental modeling and simulation environment to provide 3D geometry and 3D mechanical systems
+for the Modia platform. The goal is to fully integrate Modia3D with Modia's equation-based modeling and
+provide a common graphical user interface with the web app Modiator. This will
+allow to model, for example, the 3D-mechanics of a robot with Modia3D and the electrical motors, gear boxes,
+sensors and controllers with Modia. One enhancement with respect to the widely-used Modelica language
+will be that specialized algorithms for 3D kinematics and mechanics, combined with equation-based modeling,
+allows more robust and efficient simulations of complex systems.
+
+Modia3D uses ideas of modern computer
+game engines\footnote{\href{https://en.wikipedia.org/wiki/List_of_game_engines}{https://en.wikipedia.org/wiki/List\_of\_game\_engines}},
+to achieve a highly flexible setup of mechanical systems including collision handling. 
+Contrary to game engines, numerical integration is performed with a variable-step solver
+(IDA via the Sundials.jl Julia package \cite{Sundials2005,Rackauckas2017}) as needed for applications
+where system simulations have to match reality with a certain precision.
+In Modia3D, collision handling is performed with elastic response calculation and not
+with impulses, as it is common for game engines. The reason is that simulation results are closer to reality
+and it is easier to treat complex contact situations correctly. For example, it is hard to model situations
+with impulses in a physically correct way if combined effects such as rolling, sliding, friction and 
+collisions with several bodies occur at the same time instant. 
+
+Modia3D uses algorithms and features from multi-body
+programs\footnote{\href{http://real.uwaterloo.ca/~mbody/\#Software}{http://real.uwaterloo.ca/mbody/\#Software}}
+such as rigid mathematical formulation with hybrid DAEs (Differential Algebraic Equations), for example, to
+describe closed kinematic loops. Whereas game engines often make compromises here. On the other hand,
+multi-body programs are usually far from the flexible setup of games.
 
 Modia3D provides a generic interface to visualize simulation results with different 3D renderers. Currently, the free community edition as well as the professional edition\footnote{\href{https://visualization.ltx.de/}{https://visualization.ltx.de/}} of the
-\emph{DLR Visualization}  library\footnote{\href{http://www.systemcontrolinnovationlab.de/the-dlr-visualization-library/}{http://www.systemcontrolinnovationlab.de/the-dlr-visualization-library/}} \cite{bellmann2009, hellerer2014} are supported. Currently, another team is developing a free 2D/3D web-based authoring tool that will include result visualization.
+\emph{DLR Visualization}  library\footnote{\href{http://www.systemcontrolinnovationlab.de/the-dlr-visualization-library/}{http://www.systemcontrolinnovationlab.de/the-dlr-visualization-library/}} \cite{bellmann2009, hellerer2014} are supported. Another team is developing Modiator, a free 2D/3D web-based authoring and rendering tool.
 
 The user's view of Modia3D was introduced in \cite{Neumayr2018} showing the very flexible definition of 3D systems.
-Some key algorithms are discussed in \cite{Neumayr2017,Neumayr2019}. This article gives an overview of Modia3D from a user's perspective, and in particular how collisions between objects are defined. Furthermore, existing elastic response formulations are combined and enhanced so that a minimum number of material data of colliding objects has to be provided.
+Some key algorithms are discussed in \cite{Neumayr2017,Neumayr2019}. Collision handling with elastic response calculation and error controlled integration
+is challenging and this article discusses some of the difficulties and how they are solved. Further, it gives an overview of Modia3D from a user's perspective, and in particular how collisions between objects are defined.
+
+\begin{table}[t]
+	\tbl{Julia packages of Modia platform (\href{https://github.com/ModiaSim}{github.com/ModiaSim}).}{
+		\begin{tabular}{ll} \hline
+			Modia      & Equation-based modeling of physical systems \\
+			Modiator   & 2D and 3D web app model editor (\textit{not yet public}) \\
+			ModiaMath  & Simulation environment for differential-algebraic equations \\
+			Modia3D    & 3D geometries and 3D mechanics with collision handling \\
+			ModiaMedia & Thermodynamic property models \\ 
+			Modelia    & Modelica model importer (\textit{not yet public})
+	\end{tabular}}
+	\label{table:ModiaPlatform} 
+\end{table}
+
+%Furthermore, existing elastic response formulations are combined and enhanced so that a minimum number of material data of colliding objects has to be provided.

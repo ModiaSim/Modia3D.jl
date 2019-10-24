@@ -10,20 +10,8 @@ collisions of \emph{many} objects are supported in \emph{real-time} and that a s
 reasonably realistic. Game engines typically make compromises regarding physics (see for
 example \cite{Erez2015}, where it is pointed out that NVIDIA PhysX and Havok neglect
 Coriolis forces).
-When designing an industrial product, it is important that a model of the collision between objects
-is \emph{validated by measurements}. Therefore, the simulation results must
+When designing an industrial product, it is important that collision models can be \emph{validated by measurements}. Therefore, the simulation results must
 be much closer to reality as in a game.
-
-In Modia3D, a currently used algorithm computes the closest distance and/or the penetration depth
-between two \emph{convex} objects.
-If two objects are penetrating each other, two contact forces $\vec{f}_n, \vec{f}_t$ and 
-a contact torque $\vec{\tau}_{\omega}$ are computed from the penetration depth and the relative movement
-and are applied at one point of the contact area (see Fig.~\ref{fig:forces}).
-The advantages of this approach compared to a response calculation with impulses
-is that (a) simulation results are closer
-to reality and (b) it is easier to treat complex contact situations correctly. For example, if several objects have contact at the same time instant, as in the billiard table benchmark of section~\ref{sec:Examples}, 
-it is difficult to solve a model with an impulsive response calculation. The drawback of an elastic
-response calculation is that simulation is often much slower.
 
 
 
@@ -53,7 +41,8 @@ This model is defined with the following Julia program
 (\texttt{r} is the position vector from the parent -- defined with the first
 argument -- to the reference frame of the object and \texttt{fixed} defines
 whether the object is fixed or not fixed in space):
-%
+\newpage
+
 \begin{lstlisting}[language = Julia]
 @assembly BouncingBall begin
   world = Object3D()
@@ -71,18 +60,9 @@ model  = SimulationModel(bounce)
 result = simulate!(model; stopTime=3.0)
 \end{lstlisting}
 
-\begin{figure}[h]
-	\centering
-	\includegraphics[width=0.25\textwidth]{figures/forces.pdf}
-	\caption{Contact normal force $\vec{f}_n$, contact tangential force $\vec{f}_t$ 
-		(= sliding friction force) and contact torque $\vec{\tau}_{\omega}$
-		between two penetrating objects. $\vec{e}_n, \vec{e}_t, \vec{e}_{\omega}$ are unit vectors
-		in direction of the respective relative movement.}
-	\label{fig:forces}
-\end{figure}
 
 %
-\begin{figure}[htb]
+\begin{figure}[tb]
 	\centering
 	\includegraphics[width=0.2\textwidth]{figures/bouncingBall.png}
 	\caption{Ball falling on a table.}
@@ -169,6 +149,16 @@ distribution in tangential direction and that the response characteristics provi
 approximation of the resultant force and torque of these distributions.
 %
 
+\begin{figure}[t]
+	\centering
+	\includegraphics[width=0.25\textwidth]{figures/forces.pdf}
+	\caption{Contact normal force $\vec{f}_n$, contact tangential force $\vec{f}_t$ 
+		(= sliding friction force) and contact torque $\vec{\tau}_{\omega}$
+		between two penetrating objects. $\vec{e}_n, \vec{e}_t, \vec{e}_{\omega}$ are unit vectors
+		in direction of the respective relative movement.}
+	\label{fig:forces}
+\end{figure}
+
 %
 The MPR-algorithm computes the contact point, $\delta$, and a unit vector $\vec{e}_n$ that is orthogonal
 to the contacting surfaces. The novel response characteristic of (\ref{eq:response})
@@ -231,7 +221,7 @@ experiments:
 In Fig.~\ref{fig:bouncingBallPlot}, the height of the bouncing ball (see model
 of Fig.~\ref{fig:bouncingBall}) is shown as a function of time.
 %
-\begin{figure}[htb]
+\begin{figure}[b]
 	\centering
 	\includegraphics[width=0.48\textwidth]{figures/bouncingBall_plot.pdf}
 	\caption{Bouncing ball (see Fig.~\ref{fig:bouncingBall}) with impulsive contact
@@ -335,24 +325,14 @@ which is not shown in the plots.
 A DAE solver such as IDA, see Section \ref{sec:numericSolution}, solves a nonlinear algebraic
 equation system at every time instant. If $\bvec{f}_d, \bvec{f}_c$ in (\ref{eq:DAE}) are not smooth or even not continuous,
 it is most likely that no solution of this algebraic equation system is found and simulation stops.
-This situation easily occurs, for example, if the edges or vertices of two boxes collide on each other, because very small changes of the
+This situation occurs easily, for example, if the edges or vertices of two boxes collide on each other, because very small changes of the
 positions of the boxes can change the contact situation drastically. To improve the reliability of the simulation, Modia3D
 uses the approach proposed in \cite{bergen2003}, and is smoothing every shape with a small sphere (default radius $= \SI{1}{\milli \meter}$) that
 is (conceptually) moved over all surfaces. Practically, this smoothing can be very easily and cheaply incorporated for the
 convex collision handling. 
 
-%
-\begin{figure}[tb]
-	\centering
-	\includegraphics[width=0.2\textwidth]{figures/bouncingBox1.png}
-	\includegraphics[width=0.2\textwidth]{figures/bouncingBox2.png}
-	\caption{Bouncing box. Left figure: vertex spheres in original size. Right figure:
-             vertex spheres enlarged by a factor of 30.}
-	\label{fig:bouncingBox}
-\end{figure}
-%
 Every method that considers only contact points on two colliding objects and the corresponding penetration depth has the
-disadvantage that an infinite number of solutions can occur in some cases. For example this happens, when a box falls on a table and the faces of box and table are parallel (see Fig.~\ref{fig:bouncingBox}, left). Imagine small changes in the configuration can result in identification of very different contact points in the contact area.
+disadvantage that an infinite number of solutions can occur in some cases. For example this happens, when a box falls on a table and the faces of box and table are parallel. Imagine small changes in the configuration can result in identification of very different contact points in the contact area.
 It is then highly probable that simulation with a variable-step solver fails. Furthermore, the contact force and torque
 depend heavily on the size of the contact area. The penetration depth alone does not provide enough information
 to calculate reasonable values that are in accordance with physics. For both cases, it would be necessary to take the
@@ -361,10 +341,3 @@ and probably only works reasonably for soft contacts where the contact volume is
 To summarize, collision handling with variable-step solvers and penetration depth computation 
 can most likely only work reliably for point contacts that are smoothly changing.
 
-To cope with this severe difficulty in a simple way, the Modia3D supported primitives are currently being
-regularized to enforce point contacts. For example, if a contact material is defined for a box, a small sphere
-(default radius $= \SI{1}{\milli \meter}$) is attached automatically at every vertex of a box. An example is shown in 
-Fig.~\ref{fig:bouncingBox}, where the left figure shows the original size of these spheres and the
-right figure shows the spheres enlarged by a factor of 30. When such a box bounces on a table or is in rest
-on a table, point contacts between four spheres and the table occur and the problems
-to compute a solution can be overcome.
