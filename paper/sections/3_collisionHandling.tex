@@ -13,18 +13,6 @@ Coriolis forces).
 When designing an industrial product, it is important that collision models can be \emph{validated by measurements}. Therefore, the simulation results must
 be much closer to reality as in a game.
 
-%In Modia3D, a currently used algorithm computes the closest distance and/or the penetration depth
-%between two \emph{convex} objects.
-%If two objects are penetrating each other, two contact forces $\vec{f}_n, \vec{f}_t$ and 
-%a contact torque $\vec{\tau}_{\omega}$ are computed from the penetration depth and the relative movement
-%and are applied at one point of the contact area (see Fig.~\ref{fig:forces}).
-%The advantages of this approach compared to a response calculation with impulses
-%is that (a) simulation results are closer
-%to reality and (b) it is easier to treat complex contact situations correctly. For example, if several objects have contact at the same time instant, as in the billiard table benchmark of section~\ref{sec:Examples}, 
-%it is difficult to solve a model with an impulsive response calculation. The drawback of an elastic
-%response calculation is that simulation is often much slower.
-
-
 
 \subsection{User's View}
 
@@ -342,16 +330,6 @@ uses the approach proposed in \cite{bergen2003}, and is smoothing every shape wi
 is (conceptually) moved over all surfaces. Practically, this smoothing can be very easily and cheaply incorporated for the
 convex collision handling. 
 
-%
-%\begin{figure}[tb]
-%	\centering
-%	\includegraphics[width=0.2\textwidth]{figures/bouncingBox1.png}
-%	\includegraphics[width=0.2\textwidth]{figures/bouncingBox2.png}
-%	\caption{Bouncing box. Left figure: vertex spheres in original size. Right figure:
-%             vertex spheres enlarged by a factor of 30.}
-%	\label{fig:bouncingBox}
-%\end{figure}
-%
 Every method that considers only contact points on two colliding objects and the corresponding penetration depth has the
 disadvantage that an infinite number of solutions can occur in some cases. For example this happens, when a box falls on a table and the faces of box and table are parallel. Imagine small changes in the configuration can result in identification of very different contact points in the contact area.
 It is then highly probable that simulation with a variable-step solver fails. Furthermore, the contact force and torque
@@ -361,11 +339,3 @@ complete contact area and volume into account, as done e.g. in \cite{Elmqvist201
 and probably only works reasonably for soft contacts where the contact volume is large enough.
 To summarize, collision handling with variable-step solvers and penetration depth computation 
 can most likely only work reliably for point contacts that are smoothly changing.
-
-%To cope with this severe difficulty in a simple way, the Modia3D supported primitives are currently being
-%regularized to enforce point contacts. For example, if a contact material is defined for a box, a small sphere
-%(default radius $= \SI{1}{\milli \meter}$) is attached automatically at every vertex of a box. An example is shown in 
-%Fig.~\ref{fig:bouncingBox}, where the left figure shows the original size of these spheres and the
-%right figure shows the spheres enlarged by a factor of 30. When such a box bounces on a table or is in rest
-%on a table, point contacts between four spheres and the table occur and the problems
-%to compute a solution can be overcome.
