@@ -20,7 +20,7 @@ will be that specialized algorithms for 3D kinematics and mechanics, combined wi
 allows more robust and efficient simulations of complex systems.
 
 Modia3D uses ideas of modern computer
-game engines\footnote{\href{https://en.wikipedia.org/wiki/List_of_game_engines}{https://en.wikipedia.org/wiki/List\_of\_game\_engines}},
+    game engines\footnote{\href{https://en.wikipedia.org/wiki/List_of_game_engines}{https://en.wikipedia.org/wiki/List\_of\_game\_engines}},
 to achieve a highly flexible setup of mechanical systems including collision handling. 
 Contrary to game engines, numerical integration is performed with a variable-step solver
 (IDA via the Sundials.jl Julia package \cite{Sundials2005,Rackauckas2017}) as needed for applications
@@ -34,8 +34,8 @@ collisions with several bodies occur at the same time instant.
 Modia3D uses algorithms and features from multi-body
 programs\footnote{\href{http://real.uwaterloo.ca/~mbody/\#Software}{http://real.uwaterloo.ca/mbody/\#Software}}
 such as rigid mathematical formulation with hybrid DAEs (Differential Algebraic Equations), for example, to
-describe closed kinematic loops. Whereas game engines often make compromises here. On the other hand,
-multi-body programs are usually far from the flexible setup of games.
+describe closed kinematic loops, whereas game engines often make compromises here. On the other hand,
+multi-body programs are usually far from the flexible setup of games (see also section~\ref{sect_flexibleDefinition}).
 
 Modia3D provides a generic interface to visualize simulation results with different 3D renderers. Currently, the free community edition as well as the professional edition\footnote{\href{https://visualization.ltx.de/}{https://visualization.ltx.de/}} of the
 \emph{DLR Visualization}  library\footnote{\href{http://www.systemcontrolinnovationlab.de/the-dlr-visualization-library/}{http://www.systemcontrolinnovationlab.de/the-dlr-visualization-library/}} \cite{bellmann2009, hellerer2014} are supported. Another team is developing Modiator, a free 2D/3D web-based authoring and rendering tool.
@@ -45,8 +45,8 @@ Some key algorithms are discussed in \cite{Neumayr2017,Neumayr2019}. Collision h
 is challenging and this article discusses some of the difficulties and how they are solved. Further, it gives an overview of Modia3D from a user's perspective, and in particular how collisions between objects are defined.
 
 \begin{table}[t]
-	\tbl{Julia packages of Modia platform (\href{https://github.com/ModiaSim}{github.com/ModiaSim}).}{
-		\begin{tabular}{ll} \hline
+	\tbl{Julia packages of the Modia platform \footnotesize{(\href{https://github.com/ModiaSim}{github.com/ModiaSim})}.}{
+		\begin{tabular}{@{\hspace{2pt}}ll@{\hspace{0pt}}} \hline
 			Modia      & Equation-based modeling of physical systems \\
 			Modiator   & 2D and 3D web app model editor (\textit{not yet public}) \\
 			ModiaMath  & Simulation environment for differential-algebraic equations \\
