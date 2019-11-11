@@ -44,7 +44,7 @@ export Fixed
 export Revolute, setAngle!, connect, addRevoluteTorqueObject, computeTorque
 export Prismatic, setDistance!
 export FreeMotion
-export getModelResidues!
+export getModelResidues!, getSimulationModelResidues!
 export distanceAndAngles, distance, planarRotationAngle
 
 export Flange, RevoluteFlange

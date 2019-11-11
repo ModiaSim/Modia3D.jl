@@ -58,6 +58,103 @@ function get_WorldObject3D(assembly::Modia3D.AbstractAssembly)::Object3D
 end
 
 
+
+"""
+    model = Modia3D.Model(assembly::Modia3D.AbstractAssembly;
+                          analysis::ModiaMath.AnalysisType=ModiaMath.DynamicAnalysis)
+
+Generate a `Modia3D.Model` from an `assembly` generated with macro [`Modia3D.@assembly`](@ref)
+and the type of `analysis` to be carried out on the `assembly`.
+"""
+struct Model
+    name::String
+    nz::Int   # Number of event indicators
+    assembly::Modia3D.AbstractAssembly
+    var::ModiaMath.ModelVariables
+    analysis::ModiaMath.AnalysisType
+    x_start::Vector{Float64}
+    x_fixed::Vector{Bool}
+    x_nominal::Vector{Float64}
+    is_constraint::Vector{Bool}
+
+    function Model(assembly::Modia3D.AbstractAssembly;
+                   analysis::ModiaMath.AnalysisType=ModiaMath.DynamicAnalysis)
+
+        name = Modia3D.trailingPartOfName( string( typeof(assembly) ) )
+        world = get_WorldObject3D(assembly)
+        assembly._internal.referenceObject3D = world
+        # println("\n... world reference frame: ", ModiaMath.fullName(world))
+
+        # Determine Variables in assembly
+        var = ModiaMath.ModelVariables(assembly, analysis=analysis)
+        #ModiaMath.print_ModelVariables(var)
+
+        # Set initial values for x
+        x_start   = zeros(var.nx)
+        x_fixed   = fill(false,var.nx)
+        x_nominal = fill(1.0  ,var.nx)
+        ModiaMath.copy_start_to_x!(var, x_start, x_fixed, x_nominal)
+        # println("... x0 = ", x_start)
+
+        # Last nfc equations are the constraint equations
+        is_constraint = fill(false, var.nx)
+        for i = (var.nx-var.nfc+1):var.nx
+            is_constraint[i] = true
+        end
+
+        # Construct Scene(..) object
+        so = assembly._internal.sceneOptions
+        sceneOptions::SceneOptions = typeof(so) == NOTHING ? SceneOptions() : so
+        scene = Scene(sceneOptions)
+        scene.analysis = analysis
+        assembly._internal.scene = scene
+        if !scene.options.enableContactDetection
+            scene.collide = false
+        end
+
+        # Build tree for optimized structure or standard structure
+        # collision handling is only available for optimized structure
+        nz = 0
+        if scene.options.useOptimizedStructure
+            build_superObjs!(scene, world)
+            if !scene.options.enableContactDetection
+               scene.collide = false
+            end
+
+            if scene.collide
+                initializeContactDetection!(world, scene)
+                if scene.collide
+                    nz = scene.options.contactDetection.contactPairs.nz
+                    append!(scene.allVisuElements, world.contactVisuObj1)
+                    append!(scene.allVisuElements, world.contactVisuObj2)
+                    append!(scene.allVisuElements, world.supportVisuObj1A)
+                    append!(scene.allVisuElements, world.supportVisuObj1B)
+                    append!(scene.allVisuElements, world.supportVisuObj1C)
+                    append!(scene.allVisuElements, world.supportVisuObj2A)
+                    append!(scene.allVisuElements, world.supportVisuObj2B)
+                    append!(scene.allVisuElements, world.supportVisuObj2C)
+                end
+            end
+            initializeMassComputation!(scene)
+        else
+            build_tree!(scene, world)
+            if scene.options.enableContactDetection
+                error("Collision handling is only possible with the optimized structure. Please set useOptimizedStructure = true in Modia3D.SceneOptions.")
+            end
+        end
+
+        # Initialize connections between signals and frames, joints, ...
+        build_SignalObject3DConnections!(assembly)
+        scene.initAnalysis = true
+
+        # Generate Model object
+        new(name, nz, assembly, var, analysis, x_start, x_fixed, x_nominal, is_constraint)
+   end
+end
+
+
+
+
 """
     simModel = SimulationModel(assembly::Modia3D.AbstractAssembly;
                                analysis::ModiaMath.AnalysisType=ModiaMath.DynamicAnalysis,
@@ -73,95 +170,27 @@ engine are defined. These values should be adapted so that assembly-specific, me
 defaults are provided.
 """
 struct SimulationModel <: ModiaMath.AbstractSimulationModel
-   modelName::String
-   simulationState::ModiaMath.SimulationState
-   assembly::Modia3D.AbstractAssembly
-   var::ModiaMath.ModelVariables
-   analysis::ModiaMath.AnalysisType
+    modelName::String
+    simulationState::ModiaMath.SimulationState
+    var::ModiaMath.ModelVariables
+    model::Model
 
-   function SimulationModel(assembly::Modia3D.AbstractAssembly;
-                            analysis::ModiaMath.AnalysisType=ModiaMath.DynamicAnalysis,
-                            startTime = 0.0,
-                            stopTime  = 1.0,
-                            tolerance = 1e-4,
-                            interval  = (stopTime-startTime)/500.0,
-                            maxStepSize=NaN,
-                            maxNumberOfSteps=missing,
-                            hev = 1e-8,
-                            scaleConstraintsAtEvents::Bool = true)
-      modelName = Modia3D.trailingPartOfName( string( typeof(assembly) ) )
-      world = get_WorldObject3D(assembly)
-      assembly._internal.referenceObject3D = world
-      # println("\n... world reference frame: ", ModiaMath.fullName(world))
-
-      # Determine Variables in assembly
-      var = ModiaMath.ModelVariables(assembly, analysis=analysis)
-      #ModiaMath.print_ModelVariables(var)
-
-      # Set initial values for x
-      x = zeros(var.nx)
-      x_fixed   = fill(false,var.nx)
-      x_nominal = fill(1.0  ,var.nx)
-      ModiaMath.copy_start_to_x!(var, x, x_fixed, x_nominal)
-      # println("... x0 = ", x)
-
-      # Last nfc equations are the constraint equations
-      is_constraint = fill(false, var.nx)
-      for i = (var.nx-var.nfc+1):var.nx
-         is_constraint[i] = true
-      end
-
-      # Construct Scene(..) object
-      so = assembly._internal.sceneOptions
-      sceneOptions::SceneOptions = typeof(so) == NOTHING ? SceneOptions() : so
-      scene = Scene(sceneOptions)
-      scene.analysis = analysis
-      assembly._internal.scene = scene
-      if !scene.options.enableContactDetection
-          scene.collide = false
-      end
-
-      # Build tree for optimized structure or standard structure
-      # collision handling is only available for optimized structure
-      nz = 0
-      if scene.options.useOptimizedStructure
-         build_superObjs!(scene, world)
-         if !scene.options.enableContactDetection
-             scene.collide = false
-         end
-
-         if scene.collide
-            initializeContactDetection!(world, scene)
-            if scene.collide
-                nz = scene.options.contactDetection.contactPairs.nz
-                append!(scene.allVisuElements, world.contactVisuObj1)
-                append!(scene.allVisuElements, world.contactVisuObj2)
-                append!(scene.allVisuElements, world.supportVisuObj1A)
-                append!(scene.allVisuElements, world.supportVisuObj1B)
-                append!(scene.allVisuElements, world.supportVisuObj1C)
-                append!(scene.allVisuElements, world.supportVisuObj2A)
-                append!(scene.allVisuElements, world.supportVisuObj2B)
-                append!(scene.allVisuElements, world.supportVisuObj2C)
-            end
-         end
-         initializeMassComputation!(scene)
-      else
-         build_tree!(scene, world)
-         if scene.options.enableContactDetection
-            error("Collision handling is only possible with the optimized structure. Please set useOptimizedStructure = true in Modia3D.SceneOptions.")
-         end
-      end
-
-      # Initialize connections between signals and frames, joints, ...
-      build_SignalObject3DConnections!(assembly)
-      scene.initAnalysis = true
-
-      # Generate simulationState
-      simulationState = ModiaMath.SimulationState(modelName, getModelResidues!, x, ModiaMath.Variables.getVariableName;
-                                x_fixed   = x_fixed,
-                                x_nominal = x_nominal,
-                                is_constraint = is_constraint,
-                                nz = nz,
+    function SimulationModel(assembly::Modia3D.AbstractAssembly;
+                             analysis::ModiaMath.AnalysisType=ModiaMath.DynamicAnalysis,
+                             startTime = 0.0,
+                             stopTime  = 1.0,
+                             tolerance = 1e-4,
+                             interval  = (stopTime-startTime)/500.0,
+                             maxStepSize=NaN,
+                             maxNumberOfSteps=missing,
+                             hev = 1e-8,
+                             scaleConstraintsAtEvents::Bool = true)
+        model           = Model(assembly; analysis=analysis)
+        simulationState = ModiaMath.SimulationState(model.name, getSimulationModelResidues!, model.x_start, ModiaMath.Variables.getVariableName;
+                                x_fixed          = model.x_fixed,
+                                x_nominal        = model.x_nominal,
+                                is_constraint    = model.is_constraint,
+                                nz               = model.nz,
                                 defaultStartTime = startTime,
                                 defaultStopTime  = stopTime,
                                 defaultTolerance = tolerance,
@@ -206,14 +235,14 @@ struct SimulationModel <: ModiaMath.AbstractSimulationModel
       end
       println("... end allVisuElements")
 =#
-      new(modelName, simulationState,assembly,var,analysis)
+       new(model.name, simulationState, model.var, model)
    end
 end
 
-ModiaMath.print_ModelVariables(model::SimulationModel) = ModiaMath.print_ModelVariables(model.var)
-print_ModelVariables(          model::SimulationModel) = ModiaMath.print_ModelVariables(model.var)
+ModiaMath.print_ModelVariables(simModel::SimulationModel) = ModiaMath.print_ModelVariables(simModel.model.var)
+print_ModelVariables(          simModel::SimulationModel) = ModiaMath.print_ModelVariables(simModel.model.var)
 
-getResultNames(model::SimulationModel) = model.var.result_names
+getResultNames(simModel::SimulationModel) = simModel.model.var.result_names
 
 
 function initializeFlowVariables(scene::Scene)
@@ -258,22 +287,24 @@ function computationSignals(scene::Scene, sim::ModiaMath.SimulationState)
 end
 
 # Return a table of actual variable and residue values from nonlinear solver in case of error
-function ModiaMath.getVariableAndResidueValues(m::SimulationModel)
-   var = m.var
+function ModiaMath.getVariableAndResidueValues(simModel::SimulationModel)
+   var = simModel.model.var
    v_table = ModiaMath.get_variableValueTable(var)
-   r_table = ModiaMath.get_residueValueTable(var, m.simulationState.derxev)
+   r_table = ModiaMath.get_residueValueTable(var, simModel.simulationState.derxev)
    return (v_table, r_table)
 end
 
 
 const str_DUMMY = "dummyDistance(nothing,nothing)"
 
+getSimulationModelResidues!(simModel::SimulationModel, time::Float64, _x::Vector{Float64}, _derx::Vector{Float64}, _r::Vector{Float64}, _w::Vector{Float64}) =
+    getModelResidues!(simModel.model, simModel.simulationState, time, _x, _derx, _r, _w)
 
-function getModelResidues!(m::SimulationModel, time::Float64, _x::Vector{Float64}, _derx::Vector{Float64}, _r::Vector{Float64}, _w::Vector{Float64})
+function getModelResidues!(m::Model, sim::ModiaMath.SimulationState,
+                           time::Float64, _x::Vector{Float64}, _derx::Vector{Float64}, _r::Vector{Float64}, _w::Vector{Float64})
    # println("... time = ", time, ", x = ", _x, ", derx = ", _derx)
-   sim              = m.simulationState
-   world            = m.assembly._internal.referenceObject3D
-   scene            = m.assembly._internal.scene
+   world = m.assembly._internal.referenceObject3D
+   scene = m.assembly._internal.scene
    if scene.options.useOptimizedStructure
       tree          = scene.treeAccVelo
    else
