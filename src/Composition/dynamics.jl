@@ -58,10 +58,126 @@ function get_WorldObject3D(assembly::Modia3D.AbstractAssembly)::Object3D
 end
 
 
+"""
+    realScalar = getFlangeVariable(assembly::Modia3D.AbstractAssembly, name::String)
+
+Return the reference of a Revolute or Prismatic flange variable, given the top-level `assembly`
+and the full path `name` of the flange variable. If one of the following flange variable names
+is provided, a reference to the respective RealScalar is returned:
+```
+flange_b.phi
+flange_b.s
+flange_b.tau
+flange_b.f
+der(<full-name>.flange_b.phi)
+der(<full-name>.flange_b.s)
+```
+
+If one of the following flange names is provided, `nothing` is returned:
+```
+flange_a.phi
+flange_a.s
+flange_a.tau
+flange_a.f
+der(<full-name>.flange_a.phi)
+der(<full-name>.flange_a.s)
+```
+"""
+function getFlangeVariable(assembly::Modia3D.AbstractAssembly, name::String)::Union{ModiaMath.RealScalar,Nothing}
+    # Handle der(..)
+    lenName = length(name)
+    if lenName >= 4 && SubString(name,1,4) == "der("
+        if SubString(name,lenName,lenName) != ")" || lenName < 6
+            error("Wrong name = \"", name, "\"")
+        end
+        name2 = SubString(name,5,lenName-1)
+        der   = true
+    else
+        name2 = name
+        der   = false
+    end
+
+    field = assembly
+    while true
+        #println("... before. name2 = ", name2)
+        i = findnext(".", name2, 1)
+        #println("... after.")
+        if i==nothing || length(name2) <= i[1] || i[1] <= 1
+            error("Name not found: \"", name, "\"")
+        end
+        fieldName = Symbol(SubString(name2,1,i[1]-1))
+        name2     = SubString(name2,i[1]+1)
+        if !isdefined(field, fieldName)
+            error("Name not found: \"", name, "\"")
+        end
+        field = getfield(field, fieldName)
+
+        # Handle the names "flange_a" and "flange_b"
+        #println("... field name = ", fieldName, ", typeof(field) = ", typeof(field))
+        if name2=="flange_a.phi"
+            if typeof(field) == Modia3D.Composition.TreeJointRevolute
+                return nothing
+            else
+                error("Name = \"", name, "\" is no flange variable of a Revolute joint")
+            end
+        elseif name2=="flange_a.tau"
+            if typeof(field) == Modia3D.Composition.TreeJointRevolute
+                return nothing
+            else
+                error("Name = \"", name, "\" is no flange variable of a Revolute joint")
+            end
+        elseif name2=="flange_a.s"
+            if typeof(field) == Modia3D.Composition.TreeJointPrismatic
+                return nothing
+            else
+                error("Name = \"", name, "\" is no flange variable of a Prismatic joint")
+            end
+        elseif name2=="flange_a.f"
+            if typeof(field) == Modia3D.Composition.TreeJointPrismatic
+                return nothing
+            else
+                error("Name = \"", name, "\" is no flange variable of a Prismatic joint")
+            end
+        elseif name2=="flange_b.phi"
+            if typeof(field) == Modia3D.Composition.TreeJointRevolute
+                return der ? getfield(field,:w) : getfield(field,:phi)
+            else
+                error("Name = \"", name, "\" is no flange variable of a Revolute joint")
+            end
+        elseif name2=="flange_b.tau"
+            if typeof(field) == Modia3D.Composition.TreeJointRevolute
+                if der
+                    error("Name = \"", name, "\" is no flange variable of a Revolute joint")
+                end
+                return getfield(field,:tau)
+            else
+                error("Name = \"", name, "\" is no flange variable of a Revolute joint")
+            end
+        elseif name2=="flange_b.s"
+            if typeof(field) == Modia3D.Composition.TreeJointPrismatic
+                return der ? getfield(field,:v) : getfield(field,:s)
+            else
+                error("Name = \"", name, "\" is no flange variable of a Prismatic joint")
+            end
+        elseif name2=="flange_b.f"
+            if typeof(field) == Modia3D.Composition.TreeJointPrismatic
+                if der
+                    error("Name = \"", name, "\" is no flange variable of a Prismatic joint")
+                end
+                return getfield(field,:f)
+            else
+                error("Name = \"", name, "\" is no flange variable of a Prismatic joint")
+            end
+        end
+    end
+end
+
 
 """
     model = Modia3D.Model(assembly::Modia3D.AbstractAssembly;
-                          analysis::ModiaMath.AnalysisType=ModiaMath.DynamicAnalysis)
+                          analysis::ModiaMath.AnalysisType=ModiaMath.DynamicAnalysis,
+                          potentialNames::Vector{String} = fill("",0),
+                          flowNames::Vector{String}      = fill("",0))
 
 Generate a `Modia3D.Model` from an `assembly` generated with macro [`Modia3D.@assembly`](@ref)
 and the type of `analysis` to be carried out on the `assembly`.
@@ -77,8 +193,14 @@ struct Model
     x_nominal::Vector{Float64}
     is_constraint::Vector{Bool}
 
+    # For connection with Modia
+    potentials::Vector{Union{ModiaMath.RealScalar,Nothing}}
+    flows::Vector{Union{ModiaMath.RealScalar,Nothing}}
+
     function Model(assembly::Modia3D.AbstractAssembly;
-                   analysis::ModiaMath.AnalysisType=ModiaMath.DynamicAnalysis)
+                   analysis::ModiaMath.AnalysisType=ModiaMath.DynamicAnalysis,
+                   potentialNames::Vector{String} = fill("",0),
+                   flowNames::Vector{String}      = fill("",0))
 
         name = Modia3D.trailingPartOfName( string( typeof(assembly) ) )
         world = get_WorldObject3D(assembly)
@@ -147,17 +269,28 @@ struct Model
         build_SignalObject3DConnections!(assembly)
         scene.initAnalysis = true
 
+        # Generate potentials and flows
+        potentials = Vector{Union{ModiaMath.RealScalar,Nothing}}(nothing, length(potentialNames))
+        flows      = Vector{Union{ModiaMath.RealScalar,Nothing}}(nothing, length(flowNames))
+        for i = 1:length(potentialNames)
+            potentials[i] = getFlangeVariable(assembly, potentialNames[i])
+            #println("... potentials[", i, "] = ", potentials[i]==nothing ? "nothing" : ModiaMath.instanceName(potentials[i]))
+        end
+        for i = 1:length(flowNames)
+            flows[i] = getFlangeVariable(assembly, flowNames[i])
+            #println("... flows[", i, "] = ", flows[i]==nothing ? "nothing" : ModiaMath.instanceName(flows[i]))
+        end
+
         # Generate Model object
-        new(name, nz, assembly, var, analysis, x_start, x_fixed, x_nominal, is_constraint)
+        new(name, nz, assembly, var, analysis, x_start, x_fixed, x_nominal, is_constraint, potentials, flows)
    end
 end
 
 
 
-
 """
     simModel = SimulationModel(assembly::Modia3D.AbstractAssembly;
-                               analysis::ModiaMath.AnalysisType=ModiaMath.DynamicAnalysis,
+                               analysis::ModiaMath.dAnalysisType=ModiaMath.DynamicAnalysis,
                                startTime = 0.0, stopTime  = 1.0, tolerance = 1e-4,
                                interval  = (stopTime-startTime)/500.0,
                                maxStepSize = NaN, maxNumberOfSteps=missing)
@@ -186,7 +319,7 @@ struct SimulationModel <: ModiaMath.AbstractSimulationModel
                              hev = 1e-8,
                              scaleConstraintsAtEvents::Bool = true)
         model           = Model(assembly; analysis=analysis)
-        simulationState = ModiaMath.SimulationState(model.name, getSimulationModelResidues!, model.x_start, ModiaMath.Variables.getVariableName;
+        simulationState = ModiaMath.SimulationState(model.name, getModelResidues!, model.x_start, ModiaMath.Variables.getVariableName;
                                 x_fixed          = model.x_fixed,
                                 x_nominal        = model.x_nominal,
                                 is_constraint    = model.is_constraint,
@@ -238,6 +371,9 @@ struct SimulationModel <: ModiaMath.AbstractSimulationModel
        new(model.name, simulationState, model.var, model)
    end
 end
+
+ModiaMath.print_ModelVariables(model::Model) = ModiaMath.print_ModelVariables(model.var)
+print_ModelVariables(          model::Model) = ModiaMath.print_ModelVariables(model.var)
 
 ModiaMath.print_ModelVariables(simModel::SimulationModel) = ModiaMath.print_ModelVariables(simModel.model.var)
 print_ModelVariables(          simModel::SimulationModel) = ModiaMath.print_ModelVariables(simModel.model.var)
@@ -295,13 +431,91 @@ function ModiaMath.getVariableAndResidueValues(simModel::SimulationModel)
 end
 
 
+
+
+# Only temporarily here. Shall be moved to ModiaMath
+"""
+    copy_x_to_variables!(x::Vector{Float64}, vars::ModelVariables)
+
+Copy `x` of the integrator interface to the model variables `vars`.
+"""
+function copy_x_to_variables!(x::Vector{Float64}, m::ModiaMath.ModelVariables)::Nothing
+    @assert(length(x) == m.nx)
+
+    for v in m.x_var
+        #println("... typeof(", fullName(v), ") = ", typeof(v), ", isimmutable(v) = ", isimmutable(v))
+        if ModiaMath.isScalar(v)
+            v.value = x[ v.ivar ]
+        elseif isimmutable(v.value)
+            # v is an immutable array (e.g. SVector{3,Float64})
+            v.value = x[ v.ivar:v.ivar + length(v.value) - 1 ]
+        else
+            vv = v.value
+            for j in 1:length(vv)
+                vv[j] = x[ v.ivar + j - 1 ]
+            end
+        end
+    end
+    return nothing
+end
+
+
+"""
+    copy_derx_to_variables!(time::Float64, derx::Vector{Float64}, vars::ModelVariables)
+
+Copy `time` and `derx` of the integrator interface to the model variables `vars`.
+"""
+function copy_derx_to_variables!(time::Float64, derx::Vector{Float64}, m::ModiaMath.ModelVariables)::Nothing
+    @assert(length(derx) == m.nx)
+
+    m.var[1].value = time
+    for v in m.derx_var
+        if ModiaMath.isScalar(v)
+            v.value = derx[ v.ivar ]
+        elseif isimmutable(v.value)
+            # v is an immutable array (e.g. SVector{3,Float64})
+            v.value = derx[ v.ivar:v.ivar + length(v.value) - 1 ]
+        else
+            vv = v.value
+            for j in 1:length(vv)
+                vv[j] = derx[ v.ivar + j - 1 ]
+            end
+        end
+    end
+
+    return nothing
+end
+
+
+
+"""
+    modelf1!(model, x, potentials)
+
+Copy the potential variables defined for `model::Modia3D.Model` from `x` to vector `potentials`,
+"""
+function model_f1!(model::Model, x::Vector{Float64}, potentials::Vector{Float64})::Nothing
+    @assert( length(model.potentials) == length(potentials) )
+
+    # Copy (time,x) to model variables
+    copy_x_to_variables!(x, model.var)
+
+    # Copy selected potential variables from model to output argument potentials
+    for i = 1:length(potentials)
+        potentials[i] = model.potentials[i] == nothing ? 0.0 : model.potentials[i].value
+    end
+    return nothing
+end
+
+
 const str_DUMMY = "dummyDistance(nothing,nothing)"
+const zeroVector = Vector{Float64}()
 
-getSimulationModelResidues!(simModel::SimulationModel, time::Float64, _x::Vector{Float64}, _derx::Vector{Float64}, _r::Vector{Float64}, _w::Vector{Float64}) =
-    getModelResidues!(simModel.model, simModel.simulationState, time, _x, _derx, _r, _w)
+getModelResidues!(simModel::SimulationModel, time::Float64, _x::Vector{Float64}, _derx::Vector{Float64}, _r::Vector{Float64}, _w::Vector{Float64}) =
+    model_f2!(simModel.model, simModel.simulationState, time, _x, _derx, zeroVector, _r, _w)
 
-function getModelResidues!(m::Model, sim::ModiaMath.SimulationState,
-                           time::Float64, _x::Vector{Float64}, _derx::Vector{Float64}, _r::Vector{Float64}, _w::Vector{Float64})
+function model_f2!(m::Model, sim::ModiaMath.SimulationState,
+                   time::Float64, _x::Vector{Float64}, _derx::Vector{Float64}, _flows::Vector{Float64},
+                   _r::Vector{Float64}, _w::Vector{Float64})
    # println("... time = ", time, ", x = ", _x, ", derx = ", _derx)
    world = m.assembly._internal.referenceObject3D
    scene = m.assembly._internal.scene
@@ -351,6 +565,7 @@ function getModelResidues!(m::Model, sim::ModiaMath.SimulationState,
    @assert(length(_derx) == var.nx)
    @assert(length(_r)    == var.nx)
    @assert(length(_w)    == 0)
+   @assert(length(_flows) == length(m.flows))
 
    storeResults = ModiaMath.isStoreResult(sim) && (scene.visualize || var.nwr > 0 || var.nwc > 0 )
 
@@ -360,13 +575,24 @@ function getModelResidues!(m::Model, sim::ModiaMath.SimulationState,
    end
 
    # Copy x and derx to variables
-   ModiaMath.copy_x_and_derx_to_variables!(time, _x, _derx, var)
+   if length(m.potentials) == 0
+       ModiaMath.copy_x_and_derx_to_variables!(time, _x, _derx, var)
+   else
+       copy_derx_to_variables!(time, _derx, var)
+   end
 
    # Compute signals
    initializeFlowVariables(scene)
    computationSignals(scene, sim)
    setPotentialVariables(scene)
    setFlowVariables(scene)
+
+   # Copy flows to model variables
+   for i = 1:length(_flows)
+       if m.flows[i] != nothing
+          m.flows[i].value = _flows[i]
+       end
+   end
 
    # Initialize force/torque of world-frame
    world.dynamics.f = ModiaMath.ZeroVector3D

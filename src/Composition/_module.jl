@@ -36,7 +36,7 @@ export initialize, initAnalysis!, performAnalysis!, closeAnalysis!, visualize!, 
 export updatePosition!, update!, driveJoint!
 export Object3D, AssemblyInternal, initAssemblyInternal!, initAssemblyComponent!, Scene
 export Part
-export SimulationModel
+export SimulationModel, Model
 export BodyWithTwoFrames, ContactBox, ContactBox2, ContactBox3
 export printObject3DAndAllChildren, writeObject3DAndAllChildrenOnJsonFile
 export set_r!, set_q!, set_r_abs!
@@ -44,7 +44,7 @@ export Fixed
 export Revolute, setAngle!, connect, addRevoluteTorqueObject, computeTorque
 export Prismatic, setDistance!
 export FreeMotion
-export getModelResidues!, getSimulationModelResidues!
+export getModelResidues!, model_f1!, model_f2!
 export distanceAndAngles, distance, planarRotationAngle
 
 export Flange, RevoluteFlange
