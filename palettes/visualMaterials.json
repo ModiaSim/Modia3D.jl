@@ -1,0 +1,30 @@
+{  
+   "RedTransparent": {
+	  "color": [255,0,0],
+      "transparency": 0.7,
+      "shininess": 1.0,
+	  "wireframe": false,
+	  "reflectslight": true
+   },
+      "Red": {
+	  "color": [255,0,0],
+      "transparency": 0.0,
+      "shininess": 1.0,
+	  "wireframe": false,
+	  "reflectslight": true
+   },
+   "GreenTransparent": {
+	  "color": [0,255,0],
+      "transparency": 0.7,
+      "shininess": 1.0,
+	  "wireframe": false,
+	  "reflectslight": true
+   },
+   "BlueTransparent": {
+	  "color": [0,0,255],
+      "transparency": 0.1,
+	  "wireframe": false,
+      "shininess": 1.0,
+	  "reflectslight": true
+   }
+}

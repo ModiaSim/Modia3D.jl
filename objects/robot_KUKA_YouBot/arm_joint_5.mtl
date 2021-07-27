@@ -1,0 +1,12 @@
+# Blender MTL File: 'arm_joint_5.blend'
+# Material Count: 1
+
+newmtl Material_005_001-mate
+Ns 17.647059
+Ka 1.000000 1.000000 1.000000
+Kd 0.000000 0.000000 0.000000
+Ks 0.062500 0.062500 0.062500
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2

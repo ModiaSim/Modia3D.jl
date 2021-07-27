@@ -1,0 +1,45 @@
+{
+    "Steel,Steel": {
+        "responseType": "ElasticResponse",
+        "coefficientOfRestitution": 0.7,
+        "slidingFrictionCoefficient": 0.5,
+        "rotationalResistanceCoefficient": 0.001
+    },
+    "DryWood,DryWood": {
+        "responseType": "ElasticResponse",
+        "coefficientOfRestitution": 0.6,
+        "slidingFrictionCoefficient": 0.3,
+        "rotationalResistanceCoefficient": 0.001
+    },
+    "BilliardBall,BilliardBall": {
+        "responseType": "ElasticResponse",
+        "coefficientOfRestitution": 1.0,
+        "slidingFrictionCoefficient": 0.0,
+        "rotationalResistanceCoefficient": 0.0
+    },
+    "BilliardBall,BilliardTable": {
+        "responseType": "ElasticResponse",
+        "coefficientOfRestitution": 0.0,
+        "slidingFrictionCoefficient": 0.8,
+        "rotationalResistanceCoefficient": 0.01
+    },
+    "BilliardBall,BilliardCushion": {
+        "responseType": "ElasticResponse",
+        "coefficientOfRestitution": 0.98,
+        "slidingFrictionCoefficient": 0.0,
+        "rotationalResistanceCoefficient": 0.0
+    },
+    "BilliardBall,BilliardCue": {
+    "responseType": "ElasticResponse",
+    "coefficientOfRestitution": 0.98,
+    "slidingFrictionCoefficient": 0.0,
+    "rotationalResistanceCoefficient": 0.0
+    },
+    "Observer,Steel": {
+        "responseType": "ObserverResponse",
+        "printAlarm": true
+    },
+    "Observer,Observer": {
+        "responseType": "ObserverResponse"
+    }
+}

@@ -1,0 +1,630 @@
+﻿# License for this file: MIT (expat)
+# Copyright 2017-2018, DLR Institute of System Dynamics and Control
+#
+# This file is part of module
+#   Modia3D.Composition (Modia3D/Composition/_module.jl)
+#
+
+
+# Dummy feature
+struct EmptyObject3DFeature <: Modia3D.AbstractObject3DFeature
+end
+const emptyObject3DFeature = EmptyObject3DFeature()
+
+
+struct EmptyTwoObject3DObject <: Modia3D.AbstractTwoObject3DObject
+end
+const emptyTwoObject3DObject = EmptyTwoObject3DObject()
+
+
+mutable struct InteractionManner
+    gripper::Bool                    # For objects which gripp movable objects
+    movable::Bool                    # For Object3Ds which can be gripped and displaced
+    lockable::Bool                   # For Object3Ds which lock movable Object3Ds to other Objs
+    movablePos::Union{Int64,Nothing} # each object which belongs to a movable super object, knows its order in the buffer
+    originPos::Int64  # each object knows its origin order in the buffer
+    actualPos::Int64  # each object knows its actual order in the buffer (for movable objs)
+
+    InteractionManner() = new(false, false, false, nothing, 0, 0)
+
+    function InteractionManner(interactionBehavior::InteractionBehavior)
+        if interactionBehavior == Modia3D.Gripper
+            gripper = true
+            movable = false
+            lockable = false
+        elseif interactionBehavior == Modia3D.Movable
+            gripper = false
+            movable = true
+            lockable = false
+        elseif interactionBehavior == Modia3D.Lockable
+            gripper = false
+            movable = false
+            lockable = true
+        elseif interactionBehavior == Modia3D.NoInteraction
+            gripper = false
+            movable = false
+            lockable = false
+        end
+        new(gripper, movable, lockable, nothing, 0, 0)
+    end
+end
+
+
+
+"""
+    Object3D(;
+        parent      = nothing,
+        translation = Modia3D.ZeroVector3D,
+        rotation    = Modia3D.ZeroVector3D,
+        feature     = nothing)
+
+Generate a new Object3D object, that is a coordinate system (= frame, object3D) with associated feature that is described relatively to its (optional) parent Object3D.
+
+# Arguments
+
+All arguments have default values. Thus, not all arguments must be defined.
+
+- `parent`: Parent Object3D. If `parent` is present, the Object3D is defined relatively to the parent. If `parent` is not present, the Object3D is either a reference object (such as the world-Object3D), or the object is connected later with a joint to another Object3D.
+
+- `translation`: Vector from the origin of the parent to the origin of the Object3D, resolved in the parent coordinate system in [m]. Example: `translation = [0.0, 0.5, 0.0]` is a relative translation of 0.5 m in y-direction of the parent. If nothing is defined, the default value (= no translation) is taken.
+
+- `rotation`: Vector `[angleX, angleY, angleZ]` to rotate the parent coordinate system along the x-axis with `angleX`, the y-axis with `angleY` and the z-axis with `angleZ` to arrive at the Object3D coordinate system. Angles can be provided in radians or with unit `u"°"` (degree).
+Example: `rotation = [0.0, pi/2, 0.0]` or `rotation = [0.0, 90u"°", 0.0]` defines that a rotation around the y-axis of the parent coordinate system with 90 degrees arrives at the Object3D.
+If nothing is defined, the default value (= no rotation) is taken.
+
+- `feature`: Defines the (optional) property associated with the Object3D by a constructor call. Supported constructors:
+    - `Scene`: A [Scene](@ref) feature marks the root (world, origin) Object3D. It has no parent Object3D and allows to define global properties, such as the gravity field.
+    - `Visual`: A [Visual](@ref) feature defines a shape used for visualization.
+    - `Solid`: A [Solid](@ref) feature defines the solid properties of an Object3D, like mass, inertia tensor, collision behavior.
+    - `nothing`: No feature is associated with the Object3D. This might be useful for helper Object3Ds, for example to mark a point on a shape and connecting it later via a revolute joint.
+
+# Example
+
+```julia
+model = Model(
+    world      = Object3D(feature = Scene()),
+    worldFrame = Object3D(parent  = :world,
+                          feature = Visual(shape=CoordinateSystem())),
+    support    = Object3D(parent  = :world, translation = [0.0, 0.5, 0.0],
+                          feature = Visual(shape = Sphere(diameter=0.1)))
+)
+```
+"""
+mutable struct Object3D <: Modia3D.AbstractObject3D
+    # Tree connection structure of Object3D (for efficient processing of Object3Ds)
+    parent::Object3D                 # Parent Object3D (if parent===Object3D, no parent is yet defined)
+    children::Vector{Object3D}       # All Object3Ds, where Object3D is the parent
+    isRootObj::Bool                  # = true, if it is a root obj of a super obj
+    interactionManner::InteractionManner # stores interaction behavior for gripping
+
+    # Joint properties, defining the relative motion from parent to Object3D
+    joint::Modia3D.AbstractJoint     # ::Fix, ::Revolute, ...
+
+    # Efficient access of joint properties
+    jointKind::JointKind             # Kind of joint
+    jointIndex::Int                  # scene.<jointType>[jointIndex] = joint
+    ndof::Int                        # Number of degrees of freedom
+    canCollide::Bool                 # = false, if no collision parent/Object3D
+    r_rel::SVector{3,Float64}        # Relative position vector from frame of parent Object3D to origin of Object3D frame, resolved in parent frame in [m]
+                                     # (if parent===Object3D, r_rel=Modia3D.ZeroVector3D)
+    R_rel::SMatrix{3,3,Float64,9}    # Rotation matrix from frame of parent Object3D to Object3D frame.
+    r_abs::SVector{3,Float64}        # Absolute position vector from origin of world frame to origin of Object3D frame, resolved in world frame in [m]
+    R_abs::SMatrix{3,3,Float64,9}    # Absolute rotation matrix from world frame to Object3D frame
+    v0::SVector{3,Float64}           # Absolute velocity of Object3D origin, resolved in world frame (= der(r_abs)) in [m/s]
+    w::SVector{3,Float64}            # Absolute angular velocity of Object3D, resolved in Object3D in [rad/s]
+    a0::SVector{3,Float64}           # Absolute acceleration of Object3D origin, resolved in world frame (= der(v0)) in [m/s^2]
+    z::SVector{3,Float64}            # Absolute angular acceleration of Object3D, resolved in Object3D in [rad/s^2]
+    f::SVector{3,Float64}            # Cut-force resolved in Object3D in [N]
+    t::SVector{3,Float64}            # Cut-torque resolved in Object3D in [N*m]
+
+    # Mass properties.
+    #   The root of each super object has potentially hasMass=true. All other Object3Ds have hasMass=false.
+    #   The initial (fixed) mass properties defined in the ModiaLang model are stored in feature.
+    #   Mass properties might change at events (gripping process) - not yet available in the released Modia3D version.
+    hasMass::Bool                 # = false, if m and I_CM are zero. = true, otherwise.
+    m::Float64                    # Mass in [kg]
+    r_CM::SVector{3,Float64}      # Position vector from Object3D to Center of Mass resolved in Object3D in [m]
+    I_CM::SMatrix{3,3,Float64,9}  # Inertia matrix at Center of Mass resolved in a frame in the center of mass that is parallel to Object3D in [kg*m^2]
+
+    # Additional information associated with Object3D
+    feature::Union{Modia3D.AbstractObject3DFeature, Modia3D.AbstractSceneOptions}  # Optional feature associated with Object3D
+    twoObject3Dobject::Vector{Modia3D.AbstractTwoObject3DObject}  # Optional AbstractTwoObject3DObject object associated with Object3D
+    hasCutJoint::Bool          # = true if it has a cut joint
+    hasForceElement::Bool      # = true if it has a force element
+    hasChildJoint::Bool        # = true if its child has a joint
+    computeAcceleration::Bool  # = true if acceleration needs to be computed
+
+    # internal shortcuts to avoid costly dynamic multiple dispatch
+    shapeKind::Shapes.ShapeKind
+    shape::Modia3D.AbstractShape
+    visualMaterial::Shapes.VisualMaterial
+
+    # = True: Coordinate system of Object3D is always visualized
+    # = False: Coordinate system of Object3D is never visualized
+    # = Inherited: Coordinate system of Object3D is visualized, if SceneOptions(visualizeFrames=true)
+    visualizeFrame::Modia3D.Ternary
+    visualizationFrame::Vector{Object3D} # If to be visualized, the Object3D holding the coordinate system.
+
+    # additional 3D Shapes
+    fileMeshConvexShapes::Vector{Object3D} # a graphical decomposition of a 3D mesh must be stored additionally
+
+    # if enabled, contact and support points are set to world Object3D
+    # for visualizing contact points (each contact has two points)
+    contactVisuObj1::Vector{Object3D}
+    contactVisuObj2::Vector{Object3D}
+    # for visualizing support points (each contact has 6 support points, 3 on each collision obj)
+    supportVisuObj1A::Vector{Object3D}
+    supportVisuObj2A::Vector{Object3D}
+    supportVisuObj3A::Vector{Object3D}
+    supportVisuObj1B::Vector{Object3D}
+    supportVisuObj2B::Vector{Object3D}
+    supportVisuObj3B::Vector{Object3D}
+
+    path::String
+
+
+    ###--------------------- Object3D constructor ------------------------------
+    ## Constructor 1
+    # constructor for Modia interface (only keyword arguments)
+    # calls constructor 2 or 3 or 5
+    function Object3D(;
+        parent::Union{Object3D,Nothing}=nothing,
+        path::String="",
+        translation::AbstractVector = Modia3D.ZeroVector3D,
+        rotation::Union{AbstractVector,Frames.RotationMatrix,Nothing} = nothing,
+        feature::Any=nothing,
+        kwargs...)
+        if length(kwargs) > 0
+            @warn "Object3D: path=$path, kwargs = $(kwargs...)"
+        end
+
+        # create Object3D with created feature
+        fixed = true
+        v_start = Modia3D.ZeroVector3D
+        w_start = Modia3D.ZeroVector3D
+        w_startVariables = WCartesian
+
+        visualizeFrame = Modia3D.Inherited
+
+        if isnothing(feature)
+            feature = emptyObject3DFeature
+        else
+            feature = feature
+        end
+
+        if !isnothing(parent)
+            # with parent -> call constructor 3 or 5
+            if !isnothing(rotation) && (typeof(rotation) != Frames.RotationMatrix)
+                rotation = Frames.rot123(rotation[1], rotation[2], rotation[3])
+            end
+            obj = Object3D(parent, feature, fixed=fixed, r=translation, R=rotation, v_start=v_start, w_start=w_start, w_startVariables=w_startVariables, visualizeFrame=visualizeFrame, path=path)
+        else
+            # no parent -> call constructor 2
+            obj = Object3D(feature, visualizeFrame=visualizeFrame, path=path)
+        end
+
+
+        if typeof(feature) == Modia3D.Visual && typeof(feature.shape) == Modia3D.FileMesh && feature.shape.convexPartition
+            createConvexPartition(obj, feature, feature.shape)
+        end
+
+        if typeof(feature) == Modia3D.Solid && typeof(feature.shape) == Modia3D.FileMesh && feature.shape.convexPartition
+            createConvexPartition(obj, feature, feature.shape)
+        end
+
+        return obj
+    end
+
+    ###--------------------- Object3D constructor ------------------------------
+    ## Constructor 2
+    # Object3D constructor: with feature and without parent (less keywords)
+    function Object3D(feature;
+                    visualizeFrame::Union{Modia3D.Ternary,Bool} = Modia3D.Inherited, interactionBehavior::InteractionBehavior = Modia3D.NoInteraction,
+                    path::String="")::Object3D
+        obj = Object3DWithoutParent( new(), visualizeFrame = visualizeFrame, interactionBehavior = interactionBehavior, path=path)
+
+        obj.feature = feature
+        (obj.shapeKind, obj.shape, obj.visualMaterial) = setShapeKind(feature)
+        return obj
+    end
+
+    ###--------------------- Object3D constructor ------------------------------
+    ## Constructor 3
+    # Object3D constructor: with feature and with parent
+    function Object3D(parent::Object3D,
+                      feature::Modia3D.AbstractObject3DFeature = emptyObject3DFeature;
+                      fixed::Bool = true,
+                      interactionBehavior::InteractionBehavior = Modia3D.NoInteraction,
+                      r::AbstractVector = Modia3D.ZeroVector3D,
+                      R::Union{Frames.RotationMatrix,Nothing} = nothing,
+                      q::Union{Frames.Quaternion,Nothing} = nothing,
+                      v_start::AbstractVector = Modia3D.ZeroVector3D,
+                      w_start::AbstractVector = Modia3D.ZeroVector3D,
+                      w_startVariables::WStartVariables = WCartesian,
+                      visualizeFrame::Union{Modia3D.Ternary,Bool} = Modia3D.Inherited,
+                      path::String="")::Object3D
+
+        if !isnothing(R) && !isnothing(q)
+            error("Modia3D.Object3D: either R or q must be nothing but both have a value.")
+        end
+        if !isnothing(R)
+            Modia3D.assertRotationMatrix(R)
+        elseif !isnothing(q)
+            Modia3D.assertQuaternion(q)
+        end
+
+        r_rel = SVector{3,Float64}(r)
+        R_rel = !isnothing(R) ? R : (!isnothing(q) ? Modia3D.from_q(q) : Modia3D.NullRotation)
+        r_abs = parent.r_abs + r_rel
+        R_abs = R_rel*parent.R_abs
+
+        visualizeFrame2 = typeof(visualizeFrame) == Modia3D.Ternary ? visualizeFrame : (visualizeFrame ? Modia3D.True : Modia3D.False)
+
+        (shapeKind, shape, visualMaterial) = setShapeKind(feature)
+        obj = new(parent, Vector{Object3D}[],
+              false, InteractionManner(interactionBehavior), FixedJoint(), FixKind, 0, 0, true,
+              r_rel, R_rel, r_abs, R_abs,
+              Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D,
+              false, 0.0, Modia3D.ZeroVector3D, SMatrix{3,3,Float64,9}(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
+              feature, Modia3D.AbstractTwoObject3DObject[],
+              false, false, false, false,
+              shapeKind, shape, visualMaterial,
+              visualizeFrame2,
+              Vector{Object3D}[], Vector{Object3D}[],
+              Vector{Object3D}[], Vector{Object3D}[], Vector{Object3D}[], Vector{Object3D}[],
+              Vector{Object3D}[], Vector{Object3D}[], Vector{Object3D}[], Vector{Object3D}[],
+              path)
+
+
+        if fixed
+            push!(parent.children, obj)
+
+        else
+            # FreeMotionCardan pushes obj on parent.children
+            rot_start = !isnothing(R) ? rot123fromR(R) : !isnothing(q) ? rot123fromR(Modia3D.from_q(q)) : Modia3D.ZeroVector3D
+            if w_startVariables == WCardan123
+                # convert Cardan123 -> Cartesian
+                om_start = wfromrot123(rot_start, w_start)
+            else
+                om_start = w_start
+            end
+            FreeMotionCardan(; r   = r_rel,
+                               rot = rot_start,
+                               v   = SVector{3,Float64}(v_start),
+                               w   = SVector{3,Float64}(om_start) )
+        end
+
+        return obj
+    end
+
+    ###--------------------- Object3D constructor -----------------------------
+    ## Constructor 4
+    # Constructor used only for internal purposes (not to be directly used by the user)
+    # used by e.g. copyObject3D
+    function Object3D(
+            parent::Object3D, r_rel::SVector{3,Float64},
+            R_rel::SMatrix{3,3,Float64,9}, r_abs::SVector{3,Float64},
+            R_abs::SMatrix{3,3,Float64,9}, feature::Modia3D.AbstractObject3DFeature,
+            visualizeFrame::Modia3D.Ternary, path::String="")
+
+        (shapeKind, shape, visualMaterial) = setShapeKind(feature)
+        new(parent, Vector{Object3D}[], false,
+        InteractionManner(Modia3D.NoInteraction), FixedJoint(), FixKind, 0, 0, true,
+        r_rel, R_rel, r_abs, R_abs,
+        Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D,
+        false, 0.0, Modia3D.ZeroVector3D, SMatrix{3,3,Float64,9}(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
+        feature, Modia3D.AbstractTwoObject3DObject[],
+        false, false, false, false, shapeKind, shape, visualMaterial, visualizeFrame,
+        Vector{Object3D}[], Vector{Object3D}[],
+        Vector{Object3D}[], Vector{Object3D}[], Vector{Object3D}[], Vector{Object3D}[],
+        Vector{Object3D}[], Vector{Object3D}[], Vector{Object3D}[], Vector{Object3D}[],
+        path)
+    end
+end
+
+function setShapeKind(feature)
+    if typeof(feature) == Modia3D.Solid || typeof(feature) == Modia3D.Visual
+        shapeKind = Modia3D.getShapeKind(feature.shape)
+        shape = feature.shape
+        visualMaterial = feature.visualMaterial
+        if shapeKind == Modia3D.UndefinedShapeKind
+            shape = Modia3D.Sphere()
+        end
+        if isnothing(visualMaterial)
+            visualMaterial = Modia3D.VisualMaterial()
+            @warn("No visualMaterial defined for ", shape)
+        end
+        return shapeKind, shape, visualMaterial
+    else
+        return Modia3D.UndefinedShapeKind, Modia3D.Sphere(), Modia3D.VisualMaterial()
+    end
+end
+
+# Object3DWithoutParent is called from constructor 2 (for objs without a parent)
+function Object3DWithoutParent(obj::Object3D;
+                               visualizeFrame::Union{Modia3D.Ternary,Bool} = Modia3D.Inherited, interactionBehavior::InteractionBehavior = Modia3D.NoInteraction,
+                               path::String="")
+    obj.parent             = obj
+    obj.children           = Vector{Object3D}[]
+    obj.isRootObj          = false
+    obj.interactionManner  = InteractionManner(interactionBehavior)
+    obj.joint              = FixedJoint()
+    obj.jointKind          = FixKind
+    obj.jointIndex         = 0
+    obj.ndof               = 0
+    obj.canCollide         = true
+    obj.r_rel              = Modia3D.ZeroVector3D
+    obj.R_rel              = Modia3D.NullRotation
+    obj.r_abs              = Modia3D.ZeroVector3D
+    obj.R_abs              = Modia3D.NullRotation
+    obj.v0                 = Modia3D.ZeroVector3D
+    obj.w                  = Modia3D.ZeroVector3D
+    obj.a0                 = Modia3D.ZeroVector3D
+    obj.z                  = Modia3D.ZeroVector3D
+    obj.f                  = Modia3D.ZeroVector3D
+    obj.t                  = Modia3D.ZeroVector3D
+    obj.hasMass            = false
+    obj.m                  = 0.0
+    obj.r_CM               = Modia3D.ZeroVector3D
+    obj.I_CM               = SMatrix{3,3,Float64,9}(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+    obj.twoObject3Dobject  = Modia3D.AbstractTwoObject3DObject[]
+    obj.hasCutJoint        = false
+    obj.hasForceElement    = false
+    obj.hasChildJoint      = false
+    obj.computeAcceleration = false
+    obj.visualizeFrame     = typeof(visualizeFrame) == Modia3D.Ternary ? visualizeFrame : (visualizeFrame ? Modia3D.True : Modia3D.False)
+    obj.visualizationFrame = Vector{Object3D}[]
+    obj.fileMeshConvexShapes = Vector{Object3D}[]
+    obj.contactVisuObj1    = Vector{Object3D}[]
+    obj.contactVisuObj2    = Vector{Object3D}[]
+    obj.supportVisuObj1A   = Vector{Object3D}[]
+    obj.supportVisuObj2A   = Vector{Object3D}[]
+    obj.supportVisuObj3A   = Vector{Object3D}[]
+    obj.supportVisuObj1B   = Vector{Object3D}[]
+    obj.supportVisuObj2B   = Vector{Object3D}[]
+    obj.supportVisuObj3B   = Vector{Object3D}[]
+    obj.path               = path
+    return obj
+end
+
+# addObject3DVisualizationFrame! calls constructor 4
+#  - internally used for visualizing a frame by a coordinate system
+#    its called: "name of obj" + ".visualizationFrame"
+function addObject3DVisualizationFrame!(obj::Object3D,
+                                        feature::Modia3D.AbstractObject3DFeature, name)
+    push!(obj.visualizationFrame, Object3D(obj.parent,
+                                    obj.r_rel, obj.R_rel, obj.r_abs,
+                                    obj.R_abs, feature, obj.visualizeFrame) )
+end
+
+
+#    its called: "name of obj" + ".mesh[i]"
+# createConvexPartition(obj::Object3D, feature, mesh) = nothing
+function createConvexPartition(obj::Object3D, feature, mesh) # feature Visual
+    (head,ext) = splitext(mesh.filename)
+    if ext == ".obj" && mesh.convexPartition
+        convexDecompositionDirectory = joinpath(dirname(mesh.filename),"convexSolids_" * basename(mesh.filename))
+        contentDir = readdir(convexDecompositionDirectory)
+        # names = Vector{AbstractString}()
+        i = 1
+        for name in contentDir
+            path = String(Symbol(obj.path, ".", "mesh[", i , "]"))
+            (head,ext) = splitext(name)
+            if ext == ".obj"
+                fileMesh = Modia3D.FileMesh(filename = joinpath(convexDecompositionDirectory, name),
+                scale = mesh.scaleFactor, useMaterialColor = mesh.useMaterialColor, smoothNormals = mesh.smoothNormals, convexPartition = false)
+
+                feature = createFileFeature(feature, fileMesh)
+
+                push!(obj.fileMeshConvexShapes, Object3D(obj, feature, path = path) )
+                i = i + 1
+            end
+        end
+    end
+    return nothing
+end
+
+function createFileFeature(feature::Shapes.Visual, fileMesh)
+    return Modia3D.Visual(shape = fileMesh, visualMaterial = feature.visualMaterial)
+end
+
+function createFileFeature(feature::Shapes.Solid, fileMesh)
+    return Modia3D.Solid(shape=fileMesh, massProperties=nothing, solidMaterial=feature.solidMaterial, collision=feature.collision, contactMaterial=feature.contactMaterial, collisionSmoothingRadius=feature.collisionSmoothingRadius, visualMaterial=feature.visualMaterial)
+end
+
+
+function addContactVisuObjToWorld!(world::Object3D, nVisualContSupPoints, defaultContactSphereDiameter)
+    world.contactVisuObj1 = fill(Object3D(), nVisualContSupPoints)
+    world.contactVisuObj2 = fill(Object3D(), nVisualContSupPoints)
+    @inbounds for i = 1:length(world.contactVisuObj1)
+        name1 = String(Symbol(world.path, ".", "contactVisuObj1", "[", i, "]"))
+        name2 = String(Symbol(world.path, ".", "contactVisuObj2", "[", i, "]"))
+
+        feature1 = Modia3D.Visual(shape = Modia3D.Sphere(diameter = defaultContactSphereDiameter), visualMaterial = Modia3D.VisualMaterial(color="Red",   transparency=1.0))
+        feature2 = Modia3D.Visual(shape = Modia3D.Sphere(diameter = defaultContactSphereDiameter), visualMaterial = Modia3D.VisualMaterial(color="Black",   transparency=1.0))
+
+        world.contactVisuObj1[i] =  Object3D(world, feature1, path = name1)
+        world.contactVisuObj2[i] =  Object3D(world, feature2, path = name2)
+    end
+end
+
+function addSupportVisuObjToWorld!(world::Object3D, nVisualContSupPoints, defaultContactSphereDiameter)
+    world.supportVisuObj1A = fill(Object3D(), nVisualContSupPoints)
+    world.supportVisuObj2A = fill(Object3D(), nVisualContSupPoints)
+    world.supportVisuObj3A = fill(Object3D(), nVisualContSupPoints)
+    world.supportVisuObj1B = fill(Object3D(), nVisualContSupPoints)
+    world.supportVisuObj2B = fill(Object3D(), nVisualContSupPoints)
+    world.supportVisuObj3B = fill(Object3D(), nVisualContSupPoints)
+    @inbounds for i = 1:length(world.supportVisuObj1A)
+        name1 = String(Symbol(world.path, ".", "supportVisuObj1A", "[", i, "]"))
+        name2 = String(Symbol(world.path, ".", "supportVisuObj2A", "[", i, "]"))
+        name3 = String(Symbol(world.path, ".", "supportVisuObj3A", "[", i, "]"))
+        name4 = String(Symbol(world.path, ".", "supportVisuObj1B", "[", i, "]"))
+        name5 = String(Symbol(world.path, ".", "supportVisuObj2B", "[", i, "]"))
+        name6 = String(Symbol(world.path, ".", "supportVisuObj3B", "[", i, "]"))
+
+        featureA = Modia3D.Visual(shape = Modia3D.Sphere(diameter = defaultContactSphereDiameter), visualMaterial = Modia3D.VisualMaterial(color="Red", transparency=1.0))
+
+        featureB = Modia3D.Visual(shape = Modia3D.Sphere(diameter = defaultContactSphereDiameter), visualMaterial = Modia3D.VisualMaterial(color="Black", transparency=1.0))
+
+        world.supportVisuObj1A[i] = Object3D(world, featureA, path = name1)
+        world.supportVisuObj2A[i] = Object3D(world, featureA, path = name2)
+        world.supportVisuObj3A[i] = Object3D(world, featureA, path = name3)
+        world.supportVisuObj1B[i] = Object3D(world, featureB, path = name4)
+        world.supportVisuObj2B[i] = Object3D(world, featureB, path = name5)
+        world.supportVisuObj3B[i] = Object3D(world, featureB, path = name6)
+    end
+end
+
+
+# Inquire properties of a Object3D
+fullName(             obj::Object3D) = obj.path # ModiaLang.SimulationModel.modelName + Object3D.path (wird ca. 98x verwendet)
+instanceName(         obj::Object3D) = obj.path
+fullName(obj) = error("fullName not implemented for ", typeof(obj))
+instanceName(obj) = error("instanceName not implemented for ", typeof(obj))
+hasParent(            obj::Object3D) = !(obj.parent === obj)
+hasNoParent(          obj::Object3D) =   obj.parent === obj
+hasChildren(          obj::Object3D) = length(obj.children) > 0
+hasNoChildren(        obj::Object3D) = length(obj.children) == 0
+isWorld(              obj::Object3D) = hasNoParent(obj) && typeof(obj.feature) == Modia3D.SceneOptions
+isNotWorld(           obj::Object3D) = !(isWorld(obj))
+isMovable(            obj::Object3D) = obj.interactionManner.movable
+isLockable(           obj::Object3D) = obj.interactionManner.lockable
+isFixed(              obj::Object3D) = obj.ndof == 0
+isNotFixed(           obj::Object3D) = obj.ndof > 0
+isFree(               obj::Object3D) = obj.ndof == 6
+isNotFree(            obj::Object3D) = obj.ndof < 6
+hasJoint(             obj::Object3D) = obj.ndof > 0 && obj.ndof < 6
+hasNoJoint(           obj::Object3D) = isFixed(obj) || isFree(obj)
+isCoordinateSystem(   obj::Object3D) = typeof(obj.feature) == Shapes.CoordinateSystem
+isNotCoordinateSystem(obj::Object3D) = typeof(obj.feature) != Shapes.CoordinateSystem
+hasForceElement(      obj::Object3D) = obj.hasForceElement
+hasChildJoint(        obj::Object3D) = obj.hasChildJoint
+needsAcceleration(    obj::Object3D) = obj.computeAcceleration
+objectHasMass(        obj::Object3D) = obj.hasMass
+isRootObject(         obj::Object3D) = obj.isRootObj
+objectHasMovablePos(  obj::Object3D) = !isnothing(obj.interactionManner.movablePos)
+
+featureHasMass(obj::Object3D) = featureHasMass(obj.feature)
+featureHasMass(feature::Modia3D.AbstractObject3DFeature) = false
+featureHasMass(feature::Modia3D.AbstractSceneOptions) = false
+featureHasMass(feature::Shapes.Solid)                 = !isnothing(feature.massProperties)
+
+isVisible(obj::Object3D, renderer::Modia3D.AbstractRenderer) = isVisible(obj.feature, renderer)
+isVisible(feature::Modia3D.AbstractObject3DFeature, renderer::Modia3D.AbstractRenderer) = false
+
+isVisible(feature::Modia3D.AbstractSceneOptions, renderer::Modia3D.AbstractRenderer) = false
+
+canCollide(feature::Modia3D.AbstractObject3DFeature) = false
+
+function canCollide(obj::Object3D)::Bool
+    if typeof(obj.feature) == Modia3D.Shapes.Solid
+        if !isnothing(obj.feature.shape) && !isnothing(obj.feature.contactMaterial)
+            if typeof(obj.feature.contactMaterial) == String
+                return obj.feature.contactMaterial != ""
+            else
+                return true
+    end; end; end
+    return false
+end
+
+
+function driveJoint!(obj::Object3D)::Nothing
+    obj.isDriven = true
+    return nothing
+end
+
+
+"""    rootObject3D(obj) - returns the root Object3D of all parents of obj"""
+function rootObject3D(obj::Object3D)::Object3D
+    obj1 = obj
+    while hasParent(obj1)
+        obj1 = obj1.parent
+    end
+    return obj1
+end
+
+
+"""    removeChild!(obj, child) - Remove child from obj.children"""
+function removeChild!(obj::Object3D, child::Object3D)::Nothing
+    children = obj.children
+    for i in eachindex(children)
+        if children[i] === child
+            deleteat!(children,i)
+            return nothing
+    end; end
+    error("\nError from Modia3D.Composition.removeChild!(", obj, ", ", child, ")\n",
+            child, " is not a child of object ", obj)
+end
+
+
+# Print Object3D
+function Base.show(io::IO, obj::Object3D)
+    print(io,"Object3D(path=\"", obj.path, "\"")
+    commaNeeded = true
+
+    if hasParent(obj)
+        if commaNeeded
+            print(io,", ")
+        end
+        print(io, "parent=", obj.parent.path)
+    end
+    if hasJoint(obj)
+        if commaNeeded
+            print(io,", ")
+        end
+        print(io, "joint=", typeof(obj.joint), "(path = \"", obj.joint.path, "\", ...)")
+    end
+    if commaNeeded
+        print(io,", ")
+    end
+    print(io, "feature=", typeof(obj.feature), "(...))")
+end
+#=
+function Base.show(io::IO, obj::Object3D)
+    commaNeeded = true
+    if obj.parent === obj || hasJoint(obj)
+        commaNeeded = false
+        print(io,"Object3D(")
+    else
+        if obj.parent.path == ""
+            print(io,"Object3D(", Modia3D.fullName(obj.parent))
+        else
+            print(io,"Object3D(", obj.parent.path)
+        end
+    end
+
+    if typeof(obj.feature) != EmptyObject3DFeature
+        if commaNeeded
+            print(io,", ")
+        end
+        typeName = string( typeof(obj.feature) )
+        s = findfirst("Modia3D", typeName) # search(typeName, "Modia3D")
+        if s.start == 1
+            typeName = "Modia3D." * Basics.trailingPartOfName( typeName )
+        end
+        #print(io, typeName, "(...)")
+        print(io, typeName, "(")
+        Base.show(io, obj.feature)
+        print(io, ")")
+    end
+
+    if obj.r_rel != Modia3D.ZeroVector3D
+        print(io, "; r_rel = ", obj.r_rel)
+        if obj.path == ""
+            print(io, ")")
+        else
+            print(io,", path = \"", obj.path, "\")")
+        end
+    else
+        if obj.path == ""
+            print(io, ")")
+        else
+            print(io, "; path = \"", obj.path, "\")")
+        end
+    end
+    if obj.path == ""
+        print(io, " # ", Modia3D.instanceName(obj), "\n")
+    end
+end
+=#
