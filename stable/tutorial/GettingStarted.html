@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Getting Started · Modia3D</title><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.039/juliamono-regular.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.11/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../index.html">Modia3D</a></span></div><form class="docs-search" action="../search.html"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../index.html">Home</a></li><li><span class="tocitem">Tutorial</span><ul><li><a class="tocitem" href="Tutorial.html">Modia3D Tutorial</a></li><li class="is-active"><a class="tocitem" href="GettingStarted.html">Getting Started</a><ul class="internal"><li><a class="tocitem" href="#.-Pendulum"><span>1. Pendulum</span></a></li><li><a class="tocitem" href="#.-Pendulum-with-Animation"><span>2. Pendulum with Animation</span></a></li><li><a class="tocitem" href="#.-Pendulum-with-Modia-equations"><span>3. Pendulum with Modia equations</span></a></li><li><a class="tocitem" href="#.-Example-and-Test-Models"><span>4. Example and Test Models</span></a></li></ul></li><li><a class="tocitem" href="HierarchicalModels.html">Hierarchical models</a></li><li><a class="tocitem" href="RecursiveModels.html">Recursive models</a></li><li><a class="tocitem" href="CollisionHandling.html">Collision Handling</a></li></ul></li><li><span class="tocitem">Components</span><ul><li><a class="tocitem" href="../Components/Object3D.html">Object3D</a></li><li><a class="tocitem" href="../Components/Shapes.html">Shapes</a></li><li><a class="tocitem" href="../Components/Joints.html">Joints</a></li><li><a class="tocitem" href="../Components/Materials.html">Materials</a></li><li><a class="tocitem" href="../Components/GravityField.html">Gravity Field</a></li></ul></li><li><span class="tocitem">Internal</span><ul><li><a class="tocitem" href="../internal/Profiling.html">Profiling</a></li><li><a class="tocitem" href="../internal/DynamicDispatch.html">Dynamic Dispatch</a></li><li><a class="tocitem" href="../internal/ContactDetection.html">Contact Detection</a></li><li><a class="tocitem" href="../internal/ContactForceLaw.html">Contact Force Law</a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Tutorial</a></li><li class="is-active"><a href="GettingStarted.html">Getting Started</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href="GettingStarted.html">Getting Started</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/ModiaSim/Modia3D.jl/blob/master/docs/src/tutorial/GettingStarted.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Getting-Started"><a class="docs-heading-anchor" href="#Getting-Started">Getting Started</a><a id="Getting-Started-1"></a><a class="docs-heading-anchor-permalink" href="#Getting-Started" title="Permalink"></a></h1><p>An <a href="../Components/Object3D.html#Object3D">Object3D</a> constructor is the core element of Modia3D. It defines a coordinate system moving in 3D together with associated features like <a href="../Components/Object3D.html#Scene">Scene</a>, <a href="../Components/Object3D.html#Visual">Visual</a> and <a href="../Components/Object3D.html#Solid">Solid</a>:</p><p><img src="../../resources/images/object3d.png" alt="Object3D"/></p><h2 id=".-Pendulum"><a class="docs-heading-anchor" href="#.-Pendulum">1. Pendulum</a><a id=".-Pendulum-1"></a><a class="docs-heading-anchor-permalink" href="#.-Pendulum" title="Permalink"></a></h2><p>In the following example a simple pendulum is defined (this is a copy of <code>$(Modia3D.path)/test/Tutorial/Pendulum1.jl</code>):</p><pre><code class="language-julia hljs">module Pendulum1
+
+using  TinyModia
+import Modia3D
+using  Modia3D.ModiaInterface
+
+Pendulum = Model(
+    world     = Object3D(feature=Scene()),
+    body      = Object3D(feature=Solid(massProperties=MassProperties(mass=1.0))),
+    bodyFrame = Object3D(parent=:body, translation=[-0.5, 0.0, 0.0]),
+    rev       = Revolute(obj1=:world, obj2=:bodyFrame)
+)
+
+pendulum = @instantiateModel(buildModia3D(Pendulum), unitless=true)
+simulate!(pendulum, stopTime=3.0)
+
+@usingModiaPlot   # use the plot package defined by ENV[&quot;MODIA_PLOT&quot;]
+plot(pendulum, &quot;rev.phi&quot;)
+end</code></pre><p>The <code>world</code> <a href="../Components/Object3D.html#Object3D">Object3D</a> has feature <a href="../Components/Object3D.html#Scene">Scene</a> and is therefore the inertial system. The <code>body</code> Object3D is a <a href="../Components/Object3D.html#Solid">Solid</a> and defines the pendulum as a mass point with <code>mass = 1.0</code>. The <code>bodyFrame</code> Object3D defines a coordinate system on the <code>body</code> that is translated along the x-axis. A revolute joint connects <code>world</code> with <code>bodyFrame</code>.</p><p>With command <code>buildModia3D(Pendulum)</code>, the model definition is inspected and a few lines of code included, in order that joint variables are communicated between the Modia equations and the Modia3D multibody program. Keyword <code>unitless=true</code> defines that code generation is performed without units (because Modia3D does not yet fully support units in all components).</p><p>The commands above generate an instance of the model, simulate it and generate the following plot:</p><p><img src="../../resources/images/Tutorial/Pendulum1.png" alt="Tutorial-Pendulum1"/></p><h2 id=".-Pendulum-with-Animation"><a class="docs-heading-anchor" href="#.-Pendulum-with-Animation">2. Pendulum with Animation</a><a id=".-Pendulum-with-Animation-1"></a><a class="docs-heading-anchor-permalink" href="#.-Pendulum-with-Animation" title="Permalink"></a></h2><p>The Object3Ds of the first example are extended with <a href="../Components/Object3D.html#Visual">Visual</a> and <a href="../Components/Object3D.html#Solid">Solid</a> features in order that the pendulum parts are visualized and exported for offline animation by defining <code>animationFile = &quot;Pendulum2.json&quot;</code> in <a href="../Components/Object3D.html#Scene">Scene</a>. The first Object3D <code>obj1</code> is defined as a solid <a href="../Components/Shapes.html#Box">Box</a> with <code>&quot;Blue&quot;</code>color and its <a href="../Components/Materials.html#Solid-material">Solid material</a> is made of <code>&quot;Steel&quot;</code>. Mass, center of mass and inertia tensor are computed from Steel density and from the <a href="../Components/Shapes.html#Box">Box</a> shape. The second Object3D <code>obj2</code> is a visual red <a href="../Components/Shapes.html#Cylinder">Cylinder</a> that is used to visualize the axis of the revolute joint.</p><pre><code class="language-julia hljs">module Pendulum2
+
+using  TinyModia
+import Modia3D
+using  Modia3D.ModiaInterface
+
+Pendulum = Model(
+    world = Object3D(feature=Scene(animationFile=&quot;Pendulum2.json&quot;)),
+    obj1  = Object3D(feature=Solid(shape=Box(lengthX=1.0, lengthY=0.2, lengthZ=0.2),
+                solidMaterial=&quot;Steel&quot;, visualMaterial=VisualMaterial(color=&quot;Blue&quot;))),
+    obj2  = Object3D(parent=:obj1, feature=Visual(shape=Cylinder(diameter=0.1, length=0.21),
+                visualMaterial=VisualMaterial(color=&quot;Red&quot;)), translation=[-0.5, 0.0, 0.0]),
+    rev   = Revolute(obj1=:world, obj2=:obj2)
+)
+
+pendulum = @instantiateModel(buildModia3D(Pendulum), unitless=true)
+simulate!(pendulum, stopTime=3.0)
+
+@usingModiaPlot
+plot(pendulum, &quot;rev.phi&quot;)
+end</code></pre><p>Open <a href="https://threejs.org/editor/">https://threejs.org/editor/</a>, import the json file (File –&gt; Import) and inspect the model in threejs:</p><p><img src="../../resources/images/Tutorial/threejs.png" alt="Tutorial-Pendulum3"/></p><p>Export the animation in glb format (File –&gt; Export GLB) and use an glb/glTF-viewer to inspect the animation (for example the 3D-Viewer of Windows 10).</p><h2 id=".-Pendulum-with-Modia-equations"><a class="docs-heading-anchor" href="#.-Pendulum-with-Modia-equations">3. Pendulum with Modia equations</a><a id=".-Pendulum-with-Modia-equations-1"></a><a class="docs-heading-anchor-permalink" href="#.-Pendulum-with-Modia-equations" title="Permalink"></a></h2><p>The pendulum model from the previous section is extended with a damper that is defined with Modia language components and models the damping (sliding friction) in the revolute joint. In order that this is possible, a <code>RevoluteWithFlange</code> joints has to be used that provides a <code>Flange</code> connector to which a rotational 1-dim. <code>Flange</code> of Modia can be connected. This flange and the Damper, and the Fixed component are defined in a small Modia model library that is included via<code>include(&quot;$(TinyModia.path)/models/AllModels.jl&quot;)</code>. </p><pre><code class="language-julia hljs">module Pendulum3
+
+using  TinyModia
+import Modia3D
+using  Modia3D.ModiaInterface
+
+# TinyModia models
+include(&quot;$(TinyModia.path)/models/AllModels.jl&quot;)
+
+Pendulum = Model(
+    world = Object3D(feature=Scene(animationFile=&quot;Pendulum3.json&quot;)),
+    obj1  = Object3D(feature=Solid(shape=Box(lengthX=1.0, lengthY=0.2, lengthZ=0.2),
+                solidMaterial=&quot;Steel&quot;, visualMaterial=VisualMaterial(color=&quot;Blue&quot;))),
+    obj2  = Object3D(parent=:obj1, feature=Visual(shape=Cylinder(diameter=0.1, length=0.21),
+                visualMaterial=VisualMaterial(color=&quot;Red&quot;)), translation=[-0.5, 0.0, 0.0]),
+    rev   = RevoluteWithFlange(obj1=:world, obj2=:obj2),
+
+    # combine equation based modeling with 3D models
+    damper  = Damper | Map(d=100.0),
+    fixed   = Fixed,
+    connect = :[(damper.flange_b, rev.flange),
+                (damper.flange_a, fixed.flange)]
+)
+
+pendulum = @instantiateModel(buildModia3D(Pendulum), unitless=true)
+simulate!(pendulum, stopTime=3.0)
+
+@usingModiaPlot
+plot(pendulum, &quot;rev.phi&quot;)
+end</code></pre><p>The commands above generate an instance of the model, simulate it and generate the following plot:</p><p><img src="../../resources/images/Tutorial/Pendulum3.png" alt="Tutorial-Pendulum3"/></p><h2 id=".-Example-and-Test-Models"><a class="docs-heading-anchor" href="#.-Example-and-Test-Models">4. Example and Test Models</a><a id=".-Example-and-Test-Models-1"></a><a class="docs-heading-anchor-permalink" href="#.-Example-and-Test-Models" title="Permalink"></a></h2><p>All examples of this tutorial are stored in <code>$(Modia3D.path)/test/Tutorial</code>.</p><pre><code class="language-julia hljs">  import Modia3D
+  include(&quot;$(Modia3D.path)/test/Tutorial/Pendulum1.jl&quot;)
+  include(&quot;$(Modia3D.path)/test/Tutorial/Pendulum2.jl&quot;)
+  include(&quot;$(Modia3D.path)/test/Tutorial/Pendulum3.jl&quot;)
+  include(&quot;$(Modia3D.path)/test/Collision/NewtonsCradle.jl&quot;)</code></pre><p>To run all tests, execute:</p><pre><code class="language-julia hljs">  import Modia3D
+  include(&quot;$(Modia3D.path)/test/runtests.jl&quot;)</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="Tutorial.html">« Modia3D Tutorial</a><a class="docs-footer-nextpage" href="HierarchicalModels.html">Hierarchical models »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.5 on <span class="colophon-date" title="Wednesday 28 July 2021 10:46">Wednesday 28 July 2021</span>. Using Julia version 1.6.0.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
