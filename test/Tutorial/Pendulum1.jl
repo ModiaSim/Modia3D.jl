@@ -1,8 +1,6 @@
 module Pendulum1
 
-using  ModiaLang
-import Modia3D
-using  Modia3D.ModiaInterface
+using  Modia
 
 Pendulum = Model(
     world     = Object3D(feature=Scene()),

@@ -1,11 +1,9 @@
 module Pendulum3
 
-using  ModiaLang
-import Modia3D
-using  Modia3D.ModiaInterface
+using  Modia
 
-# ModiaLang models
-include("$(ModiaLang.path)/models/AllModels.jl")
+# Modia equation-based models
+include("$(Modia.modelsPath)/AllModels.jl")
 
 Pendulum = Model(
     world = Object3D(feature=Scene(animationFile="Pendulum3.json")),
