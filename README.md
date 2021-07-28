@@ -17,7 +17,7 @@ Modia3D is included in [Modia](https://github.com/ModiaSim/Modia.jl) and is avai
 A standalone Modia3D version is installed with
 
 ```julia
-julia> ]add Modia3D
+julia> ]add ModiaLang, Modia3D
 ```
 
 Modia3D animation can be exported in threejs-json-format and then imported in the open source web app [threejs.org](https://threejs.org/editor/) and use all the features of threejs, for example to export in the widely used glb format (= the binary version of the [glTF](https://www.khronos.org/gltf/) format) and use any glb-viewer (for example 3D-Viewer of Windows 10).
