@@ -13,9 +13,7 @@ In the following example a simple pendulum is defined (this is a copy of `$(Modi
 ```julia
 module Pendulum1
 
-using  TinyModia
-import Modia3D
-using  Modia3D.ModiaInterface
+using  Modia
 
 Pendulum = Model(
     world     = Object3D(feature=Scene()),
@@ -48,9 +46,7 @@ The Object3Ds of the first example are extended with [Visual](@ref) and [Solid](
 ```julia
 module Pendulum2
 
-using  TinyModia
-import Modia3D
-using  Modia3D.ModiaInterface
+using  Modia
 
 Pendulum = Model(
     world = Object3D(feature=Scene(animationFile="Pendulum2.json")),
@@ -80,17 +76,17 @@ Export the animation in glb format (File --> Export GLB) and use an glb/glTF-vie
 
 ## 3. Pendulum with Modia equations
 
-The pendulum model from the previous section is extended with a damper that is defined with Modia language components and models the damping (sliding friction) in the revolute joint. In order that this is possible, a `RevoluteWithFlange` joints has to be used that provides a `Flange` connector to which a rotational 1-dim. `Flange` of Modia can be connected. This flange and the Damper, and the Fixed component are defined in a small Modia model library that is included via`include("$(TinyModia.path)/models/AllModels.jl")`. 
+The pendulum model from the previous section is extended with a damper that is defined with Modia language components and models the damping (sliding friction) in the revolute joint. In order that this is possible, a `RevoluteWithFlange` joints has to be used that provides a `Flange` connector to which a rotational 1-dim. `Flange` of Modia can be connected. This flange and the Damper, and the Fixed component are defined in a small Modia model library that is included via`include("$(Modia.path)/models/AllModels.jl")`.
 
 ```julia
 module Pendulum3
 
-using  TinyModia
+using  Modia
 import Modia3D
 using  Modia3D.ModiaInterface
 
-# TinyModia models
-include("$(TinyModia.path)/models/AllModels.jl")
+# Modia Modia equation-based models
+include("$(Modia.modelsPath)/AllModels.jl")
 
 Pendulum = Model(
     world = Object3D(feature=Scene(animationFile="Pendulum3.json")),
@@ -117,7 +113,7 @@ end
 
 The commands above generate an instance of the model, simulate it and generate the following plot:
 
-![Tutorial-Pendulum3](../../resources/images/Tutorial/Pendulum3.png)
+![Pendulum3](../../resources/images/Tutorial/Pendulum3.png)
 
 
 

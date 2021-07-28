@@ -4,29 +4,48 @@ Collision handling with elastic response calculation is performed for convex sha
 
 Collision handling can be globally activated with keyword `enableContactDetection = true` set in the [Scene](@ref). Only [Solid](@ref) [Object3D](@ref)s can take place in collision situations.
 
-The example in `"$(Modia3D.path)/test/Collision/BouncingSphere.jl"` defines a sphere that is bouncing on the ground. The essential statements are:
+The example in `"$(Modia3D.path)/test/Tutorial/BouncingSphere.jl"` defines a sphere that is bouncing on the ground. The essential statements are:
 
 ```
-world = Object3D(feature = Scene(enableContactDetection = true)), # true is default value
+module BouncingSphere3D
 
-bouncingSphere = Object3D(
-            feature = Solid(shape         = Sphere(diameter = 0.5),
-                            solidMaterial = "Steel", # for mass and force computation
-                            collision     = true)),      # enable collision flag
-ground = Object3D(parent = :world,
-            feature = Solid(shape = Box((lengthX=1.5, lengthY=0.5, lengthZ=0.2)),
-                             solidMaterial = "Steel", # for mass and force computation
-                             collision = true))       # enable collision flag
+using Modia
 
+BouncingSphere = Model(
+    boxHeigth = 0.1,
+    world      = Object3D(feature=Scene(enableContactDetection = true,
+                    animationFile = "BouncingSphere.json")),
+    ground     = Object3D(parent=:world, translation=:[0.0,-boxHeigth/2,0.0],
+                    feature=Solid(shape=Box(lengthX=4.0, lengthY=:boxHeigth, lengthZ=0.7),
+                        visualMaterial=VisualMaterial(color="DarkGreen"),
+                        solidMaterial="Steel",
+                        collision=true)),
+    sphere     = Object3D(feature=Solid(shape=Sphere(diameter=0.2),
+                        visualMaterial=VisualMaterial(color="Blue"),
+                        solidMaterial="Steel",
+                        massProperties=MassPropertiesFromShapeAndMass(mass=0.001),
+                        collision=true)),
+    free       = FreeMotion(obj1=:world, obj2=:sphere, r=Var(init=[0.0, 1.0, 0.0]))
+)
+
+bouncingSphere = @instantiateModel(buildModia3D(BouncingSphere), unitless=true)
+simulate!(bouncingSphere, stopTime=2.2, dtmax=0.1)
+
+@usingModiaPlot
+plot(bouncingSphere, "free.r", figure=1)
+
+end
 ```
+
 
 Note:
 
-- Only [Solid](@ref) Object3Ds where a `shape` is defined and `collision=true` is take place in collision handling
+- Only [Solid](@ref) Object3Ds where a `shape` is defined and `collision=true` is considered in collision handling.
 
 - Supported [Shapes](@ref) are: [Sphere](@ref), [Ellipsoid](@ref), [Box](@ref), [Cylinder](@ref), [Cone](@ref), [Capsule](@ref), [Beam](@ref), [FileMesh](@ref).
   - [FileMesh](@ref):
     - Only [.obj files](https://en.wikipedia.org/wiki/Wavefront_.obj_file) are supported.
     - MPR algorithm uses the convex hull of a concave geometry, or you have to partition it into convex sub meshes with e.g., [V-HACD](https://github.com/kmammou/v-hacd).
-    
-- Define in the [Solid](@ref) a `solidMaterial="xxx"` or a `contactMaterial="yyy"` (this defines for example YoungsModulus). The used names must be available in the `Modia3D/palettes/contactPairMaterials.json` where for various combinations of contact materials, additional data is provided (for example the coefficientOfRestitution). For more details about the contact material data, see [Solid material](@ref) and [Contact pair material](@ref). The details of the contact computation are sketched in [Contact Force Law](@ref).
+
+- Make sure mass properties are computed and define how it behaves in contact situations.
+  Define a `solidMaterial="NameOfSolidMaterial"` or a `contactMaterial="NameOfContactMaterial"` (this defines for example YoungsModulus). The used names must be available in the `Modia3D/palettes/contactPairMaterials.json` where for various combinations of contact materials, additional data is provided (for example the `coefficientOfRestitution`). For more details about the contact material data, see [Solid material](@ref) and [Contact pair material](@ref). The details of the contact computation are sketched in [Contact Force Law](@ref).

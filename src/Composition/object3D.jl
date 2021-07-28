@@ -66,11 +66,11 @@ All arguments have default values. Thus, not all arguments must be defined.
 
 - `parent`: Parent Object3D. If `parent` is present, the Object3D is defined relatively to the parent. If `parent` is not present, the Object3D is either a reference object (such as the world-Object3D), or the object is connected later with a joint to another Object3D.
 
-- `translation`: Vector from the origin of the parent to the origin of the Object3D, resolved in the parent coordinate system in [m]. Example: `translation = [0.0, 0.5, 0.0]` is a relative translation of 0.5 m in y-direction of the parent. If nothing is defined, the default value (= no translation) is taken.
+- `translation`: Vector from the origin of the parent to the origin of the Object3D, resolved in the parent coordinate system in [m].
+  - Example: `translation = [0.0, 0.5, 0.0]` is a relative translation of 0.5 m in y-direction of the parent. If nothing is defined, the default value (= no translation) is taken.
 
 - `rotation`: Vector `[angleX, angleY, angleZ]` to rotate the parent coordinate system along the x-axis with `angleX`, the y-axis with `angleY` and the z-axis with `angleZ` to arrive at the Object3D coordinate system. Angles can be provided in radians or with unit `u"°"` (degree).
-Example: `rotation = [0.0, pi/2, 0.0]` or `rotation = [0.0, 90u"°", 0.0]` defines that a rotation around the y-axis of the parent coordinate system with 90 degrees arrives at the Object3D.
-If nothing is defined, the default value (= no rotation) is taken.
+  - Example: `rotation = [0.0, pi/2, 0.0]` or `rotation = [0.0, 90u"°", 0.0]` defines that a rotation around the y-axis of the parent coordinate system with 90 degrees arrives at the Object3D. If nothing is defined, the default value (= no rotation) is taken.
 
 - `feature`: Defines the (optional) property associated with the Object3D by a constructor call. Supported constructors:
     - `Scene`: A [Scene](@ref) feature marks the root (world, origin) Object3D. It has no parent Object3D and allows to define global properties, such as the gravity field.
