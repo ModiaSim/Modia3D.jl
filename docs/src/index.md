@@ -4,7 +4,10 @@
 
 The multibody program supports currently tree-structured multibody systems, but does not (yet) support kinematic loops.
 
-Example videos: xxx
+Example videos:
+
+- [YouBot robots with gripping](https://modiasim.github.io/Modia3D.jl/resources/videos/YouBotsGripping.mp4)
+- [Billiard table with 16 balls](https://modiasim.github.io/Modia3D.jl/resources/videos/Billard16Balls.mp4)
 
 
 ## Installation
