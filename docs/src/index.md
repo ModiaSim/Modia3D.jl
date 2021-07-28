@@ -8,6 +8,7 @@ Example videos:
 
 - [YouBot robots with gripping](https://modiasim.github.io/Modia3D.jl/resources/videos/YouBotsGripping.mp4)
 - [Billiard table with 16 balls](https://modiasim.github.io/Modia3D.jl/resources/videos/Billard16Balls.mp4)
+- [Mobile with depthmax=8](https://modiasim.github.io/Modia3D.jl/resources/videos/Mobile8.mp4)
 
 
 ## Installation
