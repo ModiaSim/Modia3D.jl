@@ -51,6 +51,7 @@ using  ModiaLang
         include(joinpath("Tutorial", "Pendulum1.jl"))
         include(joinpath("Tutorial", "Pendulum2.jl"))
         include(joinpath("Tutorial", "Pendulum3.jl"))
+        include(joinpath("Tutorial", "BouncingSphere.jl"))
     end
 
     Test.@testset "old" begin
