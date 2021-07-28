@@ -3,11 +3,14 @@
 [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://ModiaSim.github.io/Modia3D.jl/stable)
 [![The MIT License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](https://github.com/ModiaSim/Modia3D.jl/blob/master/LICENSE.md)
 
-[Modia3D](https://github.com/ModiaSim/Modia3D.jl) is a Julia package that integrates a multibody program and 3D shapes for visualization and collision handling into the [Modia Modeling Language](https://github.com/ModiaSim/ModiaLang.jl). It is then, for example, possible to model the 3D mechanical part of a robot with Modia3D and the electrical motors and gearboxes that are driving the joints with the Modia language. Collision handling with elastic response calculation is performed for shapes that are defined with a contact material and have a convex geometry or are approximated by the convex hull of a concave geometry. For more details, see the [Modia3D Tutorial](@ref).
+[Modia3D](https://github.com/ModiaSim/Modia3D.jl) is a Julia package that integrates a multibody program and 3D shapes for visualization and collision handling into the [Modia Modeling Language](https://github.com/ModiaSim/ModiaLang.jl). It is then, for example, possible to model the 3D mechanical part of a robot with Modia3D and the electrical motors and gearboxes that are driving the joints with the Modia language. Collision handling with elastic response calculation is performed for shapes that are defined with a contact material and have a convex geometry or are approximated by the convex hull of a concave geometry. For more details, see the [Modia3D Tutorial](https://modiasim.github.io/Modia3D.jl/stable/tutorial/Tutorial.html).
 
 The multibody program supports currently tree-structured multibody systems, but does not (yet) support kinematic loops.
 
-Example videos: xxx
+Example videos:
+
+- [YouBot robots with gripping](https://modiasim.github.io/Modia3D.jl/resources/videos/YouBotsGripping.mp4)
+- [Billiard table with 16 balls](https://modiasim.github.io/Modia3D.jl/resources/videos/Billard16Balls.mp4)
 
 
 ## Installation
