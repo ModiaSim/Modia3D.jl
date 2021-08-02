@@ -427,9 +427,8 @@ function addAABBVisuToWorld!(world::Object3D, AABB::Array{Array{Basics.BoundingB
             aabb = AABB[i][j]
             feature = Modia3D.Visual(shape = Modia3D.Box(
                     lengthX = abs(aabb.x_max - aabb.x_min), lengthY = abs(aabb.y_max - aabb.y_min), lengthZ = abs(aabb.z_max - aabb.z_min)),
-                visualMaterial = Modia3D.VisualMaterial(color="grey96", transparency=0.9)) #  , lengthY , lengthZ
+                visualMaterial = Modia3D.VisualMaterial(color="grey96", transparency=0.8))
             push!(world.AABBVisu,  Object3D(world, feature, path = name) )
-
         end
     end
 

@@ -8,8 +8,7 @@ using LinearAlgebra
 EYE3() = Matrix(1.0I,3,3)
 
 # returns true, if AABB's are touching
-AABB_touching(aabb1::Basics.BoundingBox, aabb2::Basics.BoundingBox) =
-    aabb1.x_max >= aabb2.x_min && aabb1.x_min <= aabb2.x_max &&
+AABB_touching(aabb1::Basics.BoundingBox, aabb2::Basics.BoundingBox) = aabb1.x_max >= aabb2.x_min && aabb1.x_min <= aabb2.x_max &&
     aabb1.y_max >= aabb2.y_min && aabb1.y_min <= aabb2.y_max &&
     aabb1.z_max >= aabb2.z_min && aabb1.z_min <= aabb2.z_max
 
@@ -110,12 +109,17 @@ function computeDistances(scene::Composition.Scene, ch::Composition.ContactDetec
     superObjs = scene.superObjs
     AABB = scene.AABB
     if length(superObjs) > 1
+        k = 0
         @inbounds for i = 1:length(superObjs)
             superObj = superObjs[i].superObjCollision.superObj
             for j = 1:length(superObj)
+                k = k +1
                 obj = superObj[j]
                 AABB[i][j] = Modia3D.boundingBox!(obj,
                     AABB[i][j]; tight=false, scaleFactor=0.01)
+                if scene.options.visualizeBoundingBox
+                    updateVisualBoundingBox!(world.AABBVisu[k], AABB[i][j])
+                end
             end
         end
 
@@ -249,4 +253,16 @@ function Composition.closeContactDetection!(ch::Composition.ContactDetectionMPR_
     empty!(ch.lastContactDict)
     empty!(ch.contactDict)
     ch.noContactMinVal =  42.0
+end
+
+
+function updateVisualBoundingBox!(obj::Composition.Object3D, aabb::Basics.BoundingBox)
+    box::Shapes.Box = obj.shape
+    box.lengthX = abs(aabb.x_max - aabb.x_min)
+    box.lengthY = abs(aabb.y_max - aabb.y_min)
+    box.lengthZ = abs(aabb.z_max - aabb.z_min)
+
+    obj.r_abs = SVector((aabb.x_max + aabb.x_min)/2.0,
+                        (aabb.y_max + aabb.y_min)/2.0,
+                        (aabb.z_max + aabb.z_min)/2.0)
 end
