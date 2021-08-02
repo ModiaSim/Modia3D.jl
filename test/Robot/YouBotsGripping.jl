@@ -1,8 +1,8 @@
 module YouBotsGripping
 
-using ModiaLang
-using Unitful
+using  ModiaLang
 import Modia3D
+using  Unitful
 
 # ModiaLang models
 include("$(ModiaLang.path)/models/Blocks.jl")
@@ -14,22 +14,20 @@ import Modia3D
 using  Modia3D.ModiaInterface
 
 # some constants
+simplifiedContact = true  # use boxes instead of meshes for finger contact
 
 # visual materials
-vmat1 = VisualMaterial(color="LightBlue"  , transparency=0.0)  # material of FileMesh
-vmat2 = VisualMaterial(color="DarkGrey"   , transparency=0.0)  # material of work piece
-vmat3 = VisualMaterial(color="DodgerBlue3", transparency=0.0)  # material of table
-vmat4 = VisualMaterial(color=[255,215,0]  , transparency=0.0)  # material of ground
-workpiece_Lx = 0.04
-workpiece_Ly = 0.04
-workpiece_Lz = 0.08
-tableX    = 0.3
-tableY    = 0.3
-tableZ    = 0.01
-heigthLeg = 0.365
-widthLeg  = 0.02
-diameter = 0.05
-right_finger_offset=0.03
+vmatYellow    = VisualMaterial(color=[255,215,0])    # ground
+vmatBlue      = VisualMaterial(color="DodgerBlue3")  # table
+vmatGrey      = VisualMaterial(color="DarkGrey")     # work piece
+vmatInvisible = VisualMaterial(transparency=1.0)     # contact boxes
+tableX            = 0.3
+tableY            = 0.3
+tableZ            = 0.01
+heigthLeg         = 0.365
+widthLeg          = 0.02
+diameter          = 0.05
+rightFingerOffset = 0.03
 
 # all needed paths to fileMeshes
 base_frame_obj           = joinpath(Modia3D.path, "objects/robot_KUKA_YouBot/base_frame.obj")
@@ -259,39 +257,41 @@ ServoTrans = Model(
 
 Ground = Model(
     ground = Object3D(parent=:world,
-        translation=[0.0, 0.0, -0.005], feature = Solid(shape =Box(lengthX=2.5, lengthY=2.5, lengthZ=0.01), collisionSmoothingRadius=0.001, solidMaterial="DryWood", visualMaterial=vmat4, collision=true))
+        translation=[0.0, 0.0, -0.005], feature = Solid(shape =Box(lengthX=2.5, lengthY=2.5, lengthZ=0.01), solidMaterial="DryWood", visualMaterial=vmatYellow))
 )
 
 Table = Model(
     plate = Object3D(parent=:world, translation=[0.0, 0.0, heigthLeg],
         feature=Solid(shape=Box(lengthX=tableX, lengthY=tableY, lengthZ=tableZ),
-        collisionSmoothingRadius=0.001, solidMaterial="DryWood", collision=true, visualMaterial=vmat3)),
+        collisionSmoothingRadius=0.001, solidMaterial="DryWood", collision=true, visualMaterial=vmatBlue)),
     leg1  = Object3D(parent=:plate, translation=[ tableX/2-widthLeg/2,  tableY/2-widthLeg/2, -heigthLeg/2],
         feature=Solid(shape=Box(lengthX=widthLeg, lengthY=widthLeg, lengthZ=heigthLeg),
-        solidMaterial="DryWood", visualMaterial=vmat3)),
+        solidMaterial="DryWood", visualMaterial=vmatBlue)),
     leg2  = Object3D(parent=:plate, translation=[-tableX/2+widthLeg/2,  tableY/2-widthLeg/2, -heigthLeg/2],
-        feature=Solid(shape=Box(lengthX=widthLeg, lengthY=widthLeg, lengthZ=heigthLeg), solidMaterial="DryWood", visualMaterial=vmat3)),
+        feature=Solid(shape=Box(lengthX=widthLeg, lengthY=widthLeg, lengthZ=heigthLeg), solidMaterial="DryWood", visualMaterial=vmatBlue)),
     leg3  = Object3D(parent=:plate, translation=[ tableX/2-widthLeg/2, -tableY/2+widthLeg/2, -heigthLeg/2],
-        feature=Solid(shape=Box(lengthX=widthLeg, lengthY=widthLeg, lengthZ=heigthLeg), solidMaterial="DryWood", visualMaterial=vmat3)),
+        feature=Solid(shape=Box(lengthX=widthLeg, lengthY=widthLeg, lengthZ=heigthLeg), solidMaterial="DryWood", visualMaterial=vmatBlue)),
     leg4  = Object3D(parent=:plate, translation=[-tableX/2+widthLeg/2, -tableY/2+widthLeg/2, -heigthLeg/2],
-        feature=Solid(shape=Box(lengthX=widthLeg, lengthY=widthLeg, lengthZ=heigthLeg), solidMaterial="DryWood", visualMaterial=vmat3))
+        feature=Solid(shape=Box(lengthX=widthLeg, lengthY=widthLeg, lengthZ=heigthLeg), solidMaterial="DryWood", visualMaterial=vmatBlue))
 )
 
 Base = Model(
     position = [0.0, 0.0, 0.0],
     orientation = [0.0, 0.0, 0.0],
     base_frame = Object3D(parent=:world, translation=:position, rotation=:orientation,
-        feature=Solid(shape=FileMesh(filename = base_frame_obj), massProperties=MassPropertiesFromShapeAndMass(mass=19.803), visualMaterial=vmat1 )),
+        feature=Solid(shape=FileMesh(filename = base_frame_obj), massProperties=MassPropertiesFromShapeAndMass(mass=19.803))),
     plate = Object3D(parent=:base_frame, translation=[-0.159, 0, 0.046],
-        feature=Solid(shape=FileMesh(filename = plate_obj), massProperties=MassPropertiesFromShapeAndMass(mass=2.397), visualMaterial=vmat1, contactMaterial="DryWood", collision=true)),
+        feature=Solid(shape=FileMesh(filename = plate_obj), massProperties=MassPropertiesFromShapeAndMass(mass=2.397), contactMaterial="DryWood", collision=!simplifiedContact)),
+    plate_box = Object3D(parent=:base_frame, translation=[-0.16, 0, 0.0702],# 0.06514],
+        feature=Solid(shape=Box(lengthX=0.22, lengthY=0.22, lengthZ=0.01), massProperties=MassPropertiesFromShapeAndMass(mass=1.0e-9), visualMaterial=vmatInvisible, contactMaterial="DryWood", collision=simplifiedContact)),
     front_right_wheel = Object3D(parent=:base_frame, translation=[0.228, -0.158, -0.034],
-        feature=Solid(shape=FileMesh(filename = front_right_wheel_obj), massProperties=MassPropertiesFromShapeAndMass(mass=1.4), visualMaterial=vmat1)),
+        feature=Solid(shape=FileMesh(filename = front_right_wheel_obj), massProperties=MassPropertiesFromShapeAndMass(mass=1.4))),
     front_left_wheel = Object3D(parent=:base_frame, translation=[0.228, 0.158, -0.034],
-        feature=Solid(shape=FileMesh(filename = front_left_wheel_obj), massProperties=MassPropertiesFromShapeAndMass(mass=1.4), visualMaterial=vmat1)),
+        feature=Solid(shape=FileMesh(filename = front_left_wheel_obj), massProperties=MassPropertiesFromShapeAndMass(mass=1.4))),
     back_right_wheel = Object3D(parent=:base_frame, translation=[-0.228, -0.158, -0.034],
-        feature=Solid(shape=FileMesh(filename = back_right_wheel_obj), massProperties=MassPropertiesFromShapeAndMass(mass=1.4), visualMaterial=vmat1)),
+        feature=Solid(shape=FileMesh(filename = back_right_wheel_obj), massProperties=MassPropertiesFromShapeAndMass(mass=1.4))),
     back_left_wheel   = Object3D(parent=:base_frame, translation=[-0.228, 0.158, -0.034],
-        feature=Solid(shape=FileMesh(filename = back_left_wheel_obj), massProperties=MassPropertiesFromShapeAndMass(mass=1.4), visualMaterial=vmat1))
+        feature=Solid(shape=FileMesh(filename = back_left_wheel_obj), massProperties=MassPropertiesFromShapeAndMass(mass=1.4)))
 )
 
 servoParameters1 = Map(
@@ -365,11 +365,11 @@ servoParameters6 = Map(
                       )
                   )
 
-featureBody1 = Solid(shape = FileMesh(filename = arm_joint_1_obj), massProperties = MassPropertiesFromShapeAndMass(mass=m1), visualMaterial=vmat1)
-featureBody2 = Solid(shape = FileMesh(filename = arm_joint_2_obj), massProperties = MassPropertiesFromShapeAndMass(mass=m2), visualMaterial=vmat1)
-featureBody3 = Solid(shape = FileMesh(filename = arm_joint_3_obj), massProperties = MassPropertiesFromShapeAndMass(mass=m3), visualMaterial=vmat1)
-featureBody4 = Solid(shape = FileMesh(filename = arm_joint_4_obj), massProperties = MassPropertiesFromShapeAndMass(mass=m4), visualMaterial=vmat1)
-featureBody5 = Solid(shape = FileMesh(filename = arm_joint_5_obj), massProperties = MassPropertiesFromShapeAndMass(mass=m5), visualMaterial=vmat1)
+featureBody1 = Solid(shape = FileMesh(filename = arm_joint_1_obj), massProperties = MassPropertiesFromShapeAndMass(mass=m1))
+featureBody2 = Solid(shape = FileMesh(filename = arm_joint_2_obj), massProperties = MassPropertiesFromShapeAndMass(mass=m2))
+featureBody3 = Solid(shape = FileMesh(filename = arm_joint_3_obj), massProperties = MassPropertiesFromShapeAndMass(mass=m3))
+featureBody4 = Solid(shape = FileMesh(filename = arm_joint_4_obj), massProperties = MassPropertiesFromShapeAndMass(mass=m4))
+featureBody5 = Solid(shape = FileMesh(filename = arm_joint_5_obj), massProperties = MassPropertiesFromShapeAndMass(mass=m5))
 
 linkParameters1 = Map(
                     parent1 = Par(value = :(armBase_b)),
@@ -429,14 +429,18 @@ Link = Model(
 Gripper = Model(
     obj1 = Object3D(parent=:(link5.obj2), rotation=Modia3D.rot3(-180u"°")),
     gripper_base_frame = Object3D(parent=:obj1, feature=Solid(shape=
-        FileMesh(filename = gripper_base_frame_obj), massProperties=MassPropertiesFromShapeAndMass(mass=0.199), visualMaterial=vmat1)),
+        FileMesh(filename = gripper_base_frame_obj), massProperties=MassPropertiesFromShapeAndMass(mass=0.199))),
     gripper_left_finger_a = Object3D(),
     gripper_left_finger = Object3D(parent=:gripper_left_finger_a, translation=[0, 0.0082, 0],
-        feature=Solid(shape= FileMesh(filename = gripper_left_finger_obj), massProperties=MassPropertiesFromShapeAndMass(mass=0.010), visualMaterial=vmat1, contactMaterial="DryWood", collision=true)),
+        feature=Solid(shape= FileMesh(filename = gripper_left_finger_obj), massProperties=MassPropertiesFromShapeAndMass(mass=0.010), contactMaterial="DryWood", collision=!simplifiedContact)),
+    gripper_left_finger_box = Object3D(parent=:gripper_left_finger_a, translation=[0.0, 0.0051, 0.0135],
+        feature = Solid(shape=Box(lengthX=0.012, lengthY=0.01, lengthZ=0.045), massProperties=MassPropertiesFromShapeAndMass(mass=1.0e-9), visualMaterial=vmatInvisible, contactMaterial="DryWood", collision=simplifiedContact)),
     gripper_right_finger_a = Object3D(parent=:gripper_base_frame,
-        translation=[0,-right_finger_offset,0]),
+        translation=[0,-rightFingerOffset,0]),
     gripper_right_finger = Object3D(parent=:gripper_right_finger_a, translation=[0, -0.0082, 0],
-        feature = Solid(shape = FileMesh(filename = gripper_right_finger_obj), massProperties=MassPropertiesFromShapeAndMass(mass=0.010), visualMaterial=vmat1, contactMaterial="DryWood", collision=true))
+        feature = Solid(shape = FileMesh(filename = gripper_right_finger_obj), massProperties=MassPropertiesFromShapeAndMass(mass=0.010), contactMaterial="DryWood", collision=!simplifiedContact)),
+    gripper_right_finger_box = Object3D(parent=:gripper_right_finger_a, translation=[0.0, -0.0051, 0.0135],
+        feature = Solid(shape=Box(lengthX=0.012, lengthY=0.01, lengthZ=0.045), massProperties=MassPropertiesFromShapeAndMass(mass=1.0e-9), visualMaterial=vmatInvisible, contactMaterial="DryWood", collision=simplifiedContact))
 )
 
 YouBot(;pathIndexOffset) = Model(
@@ -444,10 +448,8 @@ YouBot(;pathIndexOffset) = Model(
     base = Base,
     arm_base_frame = Object3D(parent=:(base.base_frame),
         translation=[0.143, 0.0, 0.046],
-        feature = Solid(shape = FileMesh(filename = arm_base_frame_obj), massProperties=MassPropertiesFromShapeAndMass(mass=0.961), visualMaterial=vmat1)),
+        feature = Solid(shape = FileMesh(filename = arm_base_frame_obj), massProperties=MassPropertiesFromShapeAndMass(mass=0.961))),
     armBase_b = Object3D(parent=:arm_base_frame, translation=[0.024, 0, 0.115]),
-
-    d = Par(value=0),
 
     link1 = Link | linkParameters1,
     link2 = Link | linkParameters2,
@@ -511,7 +513,7 @@ Scenario = Model(
     ground = Ground,
 
     sphere = Object3D(
-        feature=Solid(shape=Sphere(diameter=diameter), visualMaterial=vmat2, solidMaterial="DryWood", collision=true)),
+        feature=Solid(shape=Sphere(diameter=diameter), visualMaterial=vmatGrey, solidMaterial="DryWood", collision=true)),
 
     sphereJoint = FreeMotion(obj1=:world, obj2=:sphere, r=Var(init=[-0.78, 0.0, 0.1792])),
 
@@ -554,7 +556,11 @@ youbot = @instantiateModel(youbotModel, unitless=true, logCode=false, log=false)
 
 stopTime = 28.0
 tolerance = 1e-6
-requiredFinalStates = [0.005098588621163415, 0.7904121737556418, 0.17913421974014898, -1.1808584434111458e-10, -1.8876534954761716e-9, 8.486137627030156e-14, -1.56254644234447, 1.19094702361201, 0.5302385377472605, 2.4650046881720565e-8, -1.4490666022819623e-8, 6.037263812340052e-8, -5.26966124662204e-13, 5.272157200076587e-13, -6.420075102250651e-12, 6.420895022465998e-12, -1.4632010359881578e-11, 1.463389273612259e-11, -8.98942210229425e-12, 8.990848487275749e-12, 7.01558485718806e-14, -7.016154768941053e-14, -4.0261824765576686e-9, 0.24163532305378999, -0.0007949229292938108, -0.0009396161178589549, 2.440519681004747e-10, -1.0329169767832531e-8, 0.0009999997892488719, 2.1070384904818945e-10, 4.737785348781416e-7, -4.735411588859475e-7, -4.5418227085488e-6, 4.542350432652154e-6, -8.529395745413469e-6, 8.530574995998551e-6, -5.054073925321434e-6, 5.054935295109203e-6, 3.547176126359981e-8, -3.547520300656853e-8, 0.0036227673345955638, 0.20692162950284154, -0.04258310481136973, -0.018519653544561303, 0.00012339404966668323, -0.0014214963178919293, 0.0009709965115748634, 2.899710949283719e-5]
+if simplifiedContact
+    requiredFinalStates = [0.005096798572634927, 0.7904208792775387, 0.18419401975519176, -4.3006962962862887e-8, 5.4420074839254244e-8, 2.5617642017116372e-12, -1.4050487315532205, 1.0491498321581578, 0.3562064805020956, 2.3231001742729985e-7, -3.5384146012997773e-7, -2.41301319984383e-6, -5.035238836618702e-13, 5.037740559360095e-13, -6.423564575536616e-12, 6.424385979928496e-12, -1.4666529107060238e-11, 1.4668415028642223e-11, -9.012231565021411e-12, 9.013660839220848e-12, 9.032058844908219e-14, -9.032628457531957e-14, -3.846985487101555e-9, 0.24163532322207057, -0.0007949230984179443, -0.0009396161972028238, 3.14205108761611e-10, -1.037427434317907e-8, 0.000999999788328581, 2.1162393266388108e-10, 4.760966984099741e-7, -4.7585931443052686e-7, -4.541747754819243e-6, 4.542275462831385e-6, -8.52920186981953e-6, 8.530381089362783e-6, -5.0535822582814115e-6, 5.054443591943805e-6, 3.5345121975063227e-8, -3.5348563654240265e-8, 0.0036404873795592746, 0.20692220253284932, -0.04258215498619998, -0.018517943162263698, 0.00012295347178476954, -0.0014252182810739129, 0.0009709205705321613, 2.90730335075866e-5]
+else
+    requiredFinalStates = [0.005098596727514149, 0.7904159015385256, 0.1791342195707778, -1.1808457144007462e-10, -1.88763357133662e-9, 8.608177052460935e-14, -1.5627420768515174, 1.1910702824997361, 0.5304431666324095, 2.4640818942197007e-8, -1.4491090645065959e-8, 6.037552152197727e-8, -5.269643935234176e-13, 5.272139874305713e-13, -6.420034932436889e-12, 6.420854829588564e-12, -1.4631919047149923e-11, 1.463380141274083e-11, -8.989367532219111e-12, 8.990793910036479e-12, 7.01557712829279e-14, -7.016147036815077e-14, -4.026169255817747e-9, 0.24163532324903933, -0.0007949229288464374, -0.000939616117669137, 2.4405169933839243e-10, -1.0329058212887232e-8, 0.000999999789251148, 2.107015735905466e-10, 4.7377460108628524e-7, -4.7353745252266476e-7, -4.541835528743539e-6, 4.542363196555878e-6, -8.529395514275828e-6, 8.530574712207511e-6, -5.054073275334597e-6, 5.054934647304243e-6, 3.5472140130848604e-8, -3.547558188477468e-8, 0.0036227372301417533, 0.20692153169511313, -0.04258310367908495, -0.018519651281104485, 0.0001233953677379415, -0.0014214723892361516, 0.0009709969998011199, 2.8996621358862662e-5]
+end
 simulate!(youbot, stopTime=stopTime, tolerance=tolerance, log=true, logStates=true, requiredFinalStates=requiredFinalStates)
 
 #=

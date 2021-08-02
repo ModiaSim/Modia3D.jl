@@ -27,7 +27,7 @@ using  ModiaLang
         include(joinpath("Robot", "ServoWithPathAndRevolute.jl"))
         include(joinpath("Robot", "YouBotWithSphere.jl"))
         Test.@test_skip include(joinpath("Robot", "YouBotPingPong.jl")) # too long computation time
-        Test.@test_skip include(joinpath("Robot", "YouBotGripping.jl")) # mpr error on windows, too long computation time
+        include(joinpath("Robot", "YouBotGripping.jl"))
         Test.@test_skip include(joinpath("Robot", "YouBotsGripping.jl")) # too long computation time
     end
 
