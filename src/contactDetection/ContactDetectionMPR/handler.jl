@@ -17,7 +17,8 @@ AABB_touching(aabb1::Basics.BoundingBox, aabb2::Basics.BoundingBox) =
 
 function Composition.initializeContactDetection!(world::Composition.Object3D, scene::Composition.Scene)
     ch = scene.options.contactDetection
-    ch.contactPairs = Composition.ContactPairs(world,  scene.superObjs, scene.allowedToMove,
+    ch.contactPairs = Composition.ContactPairs(world, scene.AABB, scene.superObjs, scene.allowedToMove,
+        scene.options.visualizeBoundingBox,
         scene.options.nVisualContSupPoints, ch.visualizeContactPoints,
         ch.visualizeSupportPoints, ch.defaultContactSphereDiameter)
     if ch.contactPairs.nz == 0

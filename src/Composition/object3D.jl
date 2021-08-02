@@ -18,34 +18,16 @@ const emptyTwoObject3DObject = EmptyTwoObject3DObject()
 
 
 mutable struct InteractionManner
-    gripper::Bool                    # For objects which gripp movable objects
-    movable::Bool                    # For Object3Ds which can be gripped and displaced
-    lockable::Bool                   # For Object3Ds which lock movable Object3Ds to other Objs
-    movablePos::Union{Int64,Nothing} # each object which belongs to a movable super object, knows its order in the buffer
-    originPos::Int64  # each object knows its origin order in the buffer
-    actualPos::Int64  # each object knows its actual order in the buffer (for movable objs)
-
+    gripper::Bool
+    movable::Bool
+    lockable::Bool
+    movablePos::Union{Int64,Nothing}
+    originPos::Int64
+    actualPos::Int64
     InteractionManner() = new(false, false, false, nothing, 0, 0)
 
     function InteractionManner(interactionBehavior::InteractionBehavior)
-        if interactionBehavior == Modia3D.Gripper
-            gripper = true
-            movable = false
-            lockable = false
-        elseif interactionBehavior == Modia3D.Movable
-            gripper = false
-            movable = true
-            lockable = false
-        elseif interactionBehavior == Modia3D.Lockable
-            gripper = false
-            movable = false
-            lockable = true
-        elseif interactionBehavior == Modia3D.NoInteraction
-            gripper = false
-            movable = false
-            lockable = false
-        end
-        new(gripper, movable, lockable, nothing, 0, 0)
+        new(false, false, false, nothing, 0, 0)
     end
 end
 
@@ -95,7 +77,7 @@ mutable struct Object3D <: Modia3D.AbstractObject3D
     parent::Object3D                 # Parent Object3D (if parent===Object3D, no parent is yet defined)
     children::Vector{Object3D}       # All Object3Ds, where Object3D is the parent
     isRootObj::Bool                  # = true, if it is a root obj of a super obj
-    interactionManner::InteractionManner # stores interaction behavior for gripping
+    interactionManner::InteractionManner
 
     # Joint properties, defining the relative motion from parent to Object3D
     joint::Modia3D.AbstractJoint     # ::Fix, ::Revolute, ...
@@ -120,7 +102,6 @@ mutable struct Object3D <: Modia3D.AbstractObject3D
     # Mass properties.
     #   The root of each super object has potentially hasMass=true. All other Object3Ds have hasMass=false.
     #   The initial (fixed) mass properties defined in the ModiaLang model are stored in feature.
-    #   Mass properties might change at events (gripping process) - not yet available in the released Modia3D version.
     hasMass::Bool                 # = false, if m and I_CM are zero. = true, otherwise.
     m::Float64                    # Mass in [kg]
     r_CM::SVector{3,Float64}      # Position vector from Object3D to Center of Mass resolved in Object3D in [m]
@@ -148,6 +129,8 @@ mutable struct Object3D <: Modia3D.AbstractObject3D
     # additional 3D Shapes
     fileMeshConvexShapes::Vector{Object3D} # a graphical decomposition of a 3D mesh must be stored additionally
 
+    # if enabled, all AABBs are visualized and stored in world Object3D
+    AABBVisu::Vector{Object3D}
     # if enabled, contact and support points are set to world Object3D
     # for visualizing contact points (each contact has two points)
     contactVisuObj1::Vector{Object3D}
@@ -270,6 +253,7 @@ mutable struct Object3D <: Modia3D.AbstractObject3D
               false, false, false, false,
               shapeKind, shape, visualMaterial,
               visualizeFrame2,
+              Vector{Object3D}[],
               Vector{Object3D}[], Vector{Object3D}[],
               Vector{Object3D}[], Vector{Object3D}[], Vector{Object3D}[], Vector{Object3D}[],
               Vector{Object3D}[], Vector{Object3D}[], Vector{Object3D}[], Vector{Object3D}[],
@@ -315,6 +299,7 @@ mutable struct Object3D <: Modia3D.AbstractObject3D
         false, 0.0, Modia3D.ZeroVector3D, SMatrix{3,3,Float64,9}(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
         feature, Modia3D.AbstractTwoObject3DObject[],
         false, false, false, false, shapeKind, shape, visualMaterial, visualizeFrame,
+        Vector{Object3D}[],
         Vector{Object3D}[], Vector{Object3D}[],
         Vector{Object3D}[], Vector{Object3D}[], Vector{Object3D}[], Vector{Object3D}[],
         Vector{Object3D}[], Vector{Object3D}[], Vector{Object3D}[], Vector{Object3D}[],
@@ -375,6 +360,7 @@ function Object3DWithoutParent(obj::Object3D;
     obj.visualizeFrame     = typeof(visualizeFrame) == Modia3D.Ternary ? visualizeFrame : (visualizeFrame ? Modia3D.True : Modia3D.False)
     obj.visualizationFrame = Vector{Object3D}[]
     obj.fileMeshConvexShapes = Vector{Object3D}[]
+    obj.AABBVisu           = Vector{Object3D}[]
     obj.contactVisuObj1    = Vector{Object3D}[]
     obj.contactVisuObj2    = Vector{Object3D}[]
     obj.supportVisuObj1A   = Vector{Object3D}[]
@@ -432,6 +418,22 @@ function createFileFeature(feature::Shapes.Solid, fileMesh)
     return Modia3D.Solid(shape=fileMesh, massProperties=nothing, solidMaterial=feature.solidMaterial, collision=feature.collision, contactMaterial=feature.contactMaterial, collisionSmoothingRadius=feature.collisionSmoothingRadius, visualMaterial=feature.visualMaterial)
 end
 
+function addAABBVisuToWorld!(world::Object3D, AABB::Array{Array{Basics.BoundingBox}})
+    k = 0
+    @inbounds for i = 1:length(AABB)
+        for j = 1:length(AABB[i])
+            k = k + 1
+            name = String(Symbol(world.path, ".", "AABBVisu", "[", i, "][",j,"]"))
+            aabb = AABB[i][j]
+            feature = Modia3D.Visual(shape = Modia3D.Box(
+                    lengthX = abs(aabb.x_max - aabb.x_min), lengthY = abs(aabb.y_max - aabb.y_min), lengthZ = abs(aabb.z_max - aabb.z_min)),
+                visualMaterial = Modia3D.VisualMaterial(color="grey96", transparency=0.9)) #  , lengthY , lengthZ
+            push!(world.AABBVisu,  Object3D(world, feature, path = name) )
+
+        end
+    end
+
+end
 
 function addContactVisuObjToWorld!(world::Object3D, nVisualContSupPoints, defaultContactSphereDiameter)
     world.contactVisuObj1 = fill(Object3D(), nVisualContSupPoints)

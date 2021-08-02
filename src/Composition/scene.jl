@@ -34,8 +34,8 @@ mutable struct ContactPairs
     nz::Int                                         # length(z)
     nzContact::Int                                  # length(z | z has contact) length of z where zi has contact
 
-    function ContactPairs(world::Composition.Object3D, superObjs::Array{SuperObjsRow,1},
-                        allowedToMove::Array{Union{Bool,Nothing},1},  nVisualContSupPoints::Int,
+    function ContactPairs(world::Composition.Object3D, AABB::Array{Array{Basics.BoundingBox}}, superObjs::Array{SuperObjsRow,1},
+                        allowedToMove::Array{Union{Bool,Nothing},1}, visualizeBoundingBox::Bool, nVisualContSupPoints::Int,
                         visualizeContactPoints::Bool, visualizeSupportPoints::Bool, defaultContactSphereDiameter::Float64)
         @assert(length(superObjs) > 0)
         @assert(nVisualContSupPoints > 0)
@@ -61,6 +61,11 @@ mutable struct ContactPairs
         if visualizeSupportPoints
             addSupportVisuObjToWorld!(world, nVisualContSupPoints, defaultContactSphereDiameter)
         end
+
+        if visualizeBoundingBox
+            addAABBVisuToWorld!(world, AABB)
+        end
+
 
         new(allowedToMove, dummyObject3D, lengthCollSuperObjs, nz, nzContact)
     end
@@ -266,7 +271,7 @@ struct SceneOptions <: Modia3D.AbstractSceneOptions
     # Contact detection
     contactDetection::Modia3D.AbstractContactDetection
     nVisualContSupPoints::Int               # amount of visual contact or support points
-    gap::Float64                            # defines the gap between two lockable objects
+    gap::Float64
     enableContactDetection::Bool            # = true, if contact detection is enabled
     defaultContactSphereDiameter::Float64   # = true, if contact points are visualized
     elasticContactReductionFactor::Float64  # c_res_used = c_res * elasticContactReductionFactor (> 0)
@@ -290,6 +295,7 @@ struct SceneOptions <: Modia3D.AbstractSceneOptions
     visualizeGravity::Bool                # = true, if gravity field shall be visualized (acceleration vector or field center)
     visualizeFrames::Bool                 # = true, if all frames shall be visualized
     visualizeConvexHulls::Bool            # = true, if convex hulls (used for contact detection) shall be visualized
+    visualizeBoundingBox::Bool            # = true, if AABB's are visualized
     visualizeContactPoints::Bool          # = true, if contact points shall be visualized
     visualizeSupportPoints::Bool          # = true, if support points shall be visualized
     cameraDistance::Float64               # Distance between world frame and camera position
@@ -323,6 +329,7 @@ struct SceneOptions <: Modia3D.AbstractSceneOptions
                            visualizeGravity              = true,
                            visualizeFrames               = false,
                            visualizeConvexHulls          = true,
+                           visualizeBoundingBox          = false,
                            visualizeContactPoints        = false,
                            visualizeSupportPoints        = false,
                            cameraDistance                = 10.0*nominalLength,
@@ -371,6 +378,7 @@ struct SceneOptions <: Modia3D.AbstractSceneOptions
             visualizeGravity,
             visualizeFrames,
             visualizeConvexHulls,
+            visualizeBoundingBox,
             visualizeContactPoints,
             visualizeSupportPoints,
             cameraDistance,
@@ -415,6 +423,7 @@ Defines global properties of the system, such as the gravity field. Exactly one 
 | `enableContactDetection`        | true                                    |
 | `contactDetection`              | [`ContactDetectionMPR_handler`](@ref)`()`|
 | `elasticContactReductionFactor` | 1.0                                     |
+| `visualizeBoundingBox`          | false                                   |
 | `visualizeContactPoints`        | false                                   |
 | `visualizeSupportPoints`        | false                                   |
 | `nVisualContSupPoints`          | 5                                       |
@@ -450,6 +459,8 @@ Defines global properties of the system, such as the gravity field. Exactly one 
 
 - `elasticContactReductionFactor::Float64`: (> 0.0)
   - ``usedContactCompliance = contactCompliance * elasticContactReductionFactor``
+
+- `visualizeBoundingBox::Bool`: Flag enabled for visualizing Axis Aligned Bounding Box (AABB) for all solid shapes allowed to collide
 
 - `visualizeContactPoints::Bool`: Flag enabled for visualizing contact points, and `enableVisualization = true`
 

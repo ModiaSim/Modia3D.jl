@@ -392,6 +392,9 @@ function chooseAndBuildUpTree(world::Object3D, scene::Scene)
                 append!(scene.allVisuElements, world.supportVisuObj2B)
                 append!(scene.allVisuElements, world.supportVisuObj3B)
             end
+            if length(world.AABBVisu) > 0
+                append!(scene.allVisuElements, world.AABBVisu)
+            end
         end
         initializeMassComputation!(scene)
     else
