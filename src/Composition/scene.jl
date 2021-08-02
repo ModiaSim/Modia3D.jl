@@ -511,7 +511,7 @@ mutable struct Scene
     allVisuElements::Vector{Object3D}         # all Object3Ds that should be visualized (for communiating with SimVis)
     updateVisuElements::Vector{Object3D}      # all Object3Ds that are visibly only e.g. visualization frames (must be updated first)
     allCollisionElements::Vector{Object3D}    # all Object3Ds, which are allowed to collide (no order, no super objects)
-    noCPairs::Array{Array{Int64,1}}           # Indices of frames (with respect to collSuperObjs) that can't collide in general (e.g. objects are connected via joints)
+    noCPairs::Vector{Vector{Int64}}           # Indices of frames (with respect to collSuperObjs) that can't collide in general (e.g. objects are connected via joints)
     noCPairsHelp::Dict{Modia3D.AbstractJoint,Array{Int64,1}}
     allowedToMove::Array{Union{Bool,Nothing},1}
     AABB::Vector{Vector{Basics.BoundingBox}}    # Bounding boxes of elements that can collide
@@ -552,7 +552,7 @@ mutable struct Scene
             Vector{Object3D}[],
             Vector{Object3D}[],
             Vector{Object3D}[],
-            Array{Array{Int64,1},1}(),
+            Vector{Vector{Int64}}[],
             Dict{Modia3D.AbstractJoint,Array{Int64,1}}(),
             Array{Union{Bool,Nothing},1}(),
             Vector{Vector{Basics.BoundingBox}}[],

@@ -41,8 +41,8 @@ mutable struct SuperObjsRow
     superObjMovable::SuperObjMovable
     superObjForce::SuperObjForce
     superObjVisu::SuperObjVisu
-    noCPair::Array{Int64,1}
+    noCPair::Vector{Int64}
     function SuperObjsRow()
-        new(SuperObjCollision(), SuperObjMass(), SuperObjMovable(), SuperObjForce(), SuperObjVisu(),  Array{Int64,1}())
+        new(SuperObjCollision(), SuperObjMass(), SuperObjMovable(), SuperObjForce(), SuperObjVisu(),  Vector{Int64}[])
     end
 end
