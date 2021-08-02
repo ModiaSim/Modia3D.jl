@@ -34,7 +34,7 @@ mutable struct ContactPairs
     nz::Int                                         # length(z)
     nzContact::Int                                  # length(z | z has contact) length of z where zi has contact
 
-    function ContactPairs(world::Composition.Object3D, AABB::Array{Array{Basics.BoundingBox}}, superObjs::Array{SuperObjsRow,1},
+    function ContactPairs(world::Composition.Object3D, AABB::Vector{Vector{Basics.BoundingBox}}, superObjs::Array{SuperObjsRow,1},
                         allowedToMove::Array{Union{Bool,Nothing},1}, visualizeBoundingBox::Bool, nVisualContSupPoints::Int,
                         visualizeContactPoints::Bool, visualizeSupportPoints::Bool, defaultContactSphereDiameter::Float64)
         @assert(length(superObjs) > 0)
@@ -514,7 +514,7 @@ mutable struct Scene
     noCPairs::Array{Array{Int64,1}}           # Indices of frames (with respect to collSuperObjs) that can't collide in general (e.g. objects are connected via joints)
     noCPairsHelp::Dict{Modia3D.AbstractJoint,Array{Int64,1}}
     allowedToMove::Array{Union{Bool,Nothing},1}
-    AABB::Array{Array{Basics.BoundingBox}}    # Bounding boxes of elements that can collide
+    AABB::Vector{Vector{Basics.BoundingBox}}    # Bounding boxes of elements that can collide
     #forceElements::Array{Int64,1}
     exportAnimation::Bool                     # animation file export is enabled
     animation::Vector{animationStep}          # animation data of visible Object3Ds
@@ -555,7 +555,7 @@ mutable struct Scene
             Array{Array{Int64,1},1}(),
             Dict{Modia3D.AbstractJoint,Array{Int64,1}}(),
             Array{Union{Bool,Nothing},1}(),
-            Array{Array{Basics.BoundingBox,1},1}(),
+            Vector{Vector{Basics.BoundingBox}}[],
             exportAnimation,
             Vector{animationStep}[],
 
