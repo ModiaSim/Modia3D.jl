@@ -14,26 +14,28 @@ AABB_touching(aabb1::Basics.BoundingBox, aabb2::Basics.BoundingBox) = aabb1.x_ma
 
 
 
-function Composition.initializeContactDetection!(world::Composition.Object3D, scene::Composition.Scene)
-    ch = scene.options.contactDetection
-    ch.contactPairs = Composition.ContactPairs(world, scene.AABB, scene.superObjs, scene.allowedToMove,
-        scene.options.visualizeBoundingBox,
-        scene.options.nVisualContSupPoints, ch.visualizeContactPoints,
-        ch.visualizeSupportPoints, ch.defaultContactSphereDiameter)
-    if ch.contactPairs.nz == 0
-        Composition.closeContactDetection!(ch)
-        scene.collide = false
-            @warn "... From Modia3D collision handler: Collision handling switched off, since no contacts can take place (nz=0).\n" *
-                "... You might need to set canCollide=true at joints.\n"
-        return
+function Composition.initializeContactDetection!(world::Composition.Object3D, scene::Composition.Scene)::Nothing
+    if typeof(scene.options.contactDetection) == Modia3D.ContactDetectionMPR_handler
+        ch::Modia3D.ContactDetectionMPR_handler = scene.options.contactDetection
+        ch.contactPairs = Composition.ContactPairs(world, scene.AABB, scene.superObjs, scene.allowedToMove,
+            scene.options.visualizeBoundingBox,
+            scene.options.nVisualContSupPoints, ch.visualizeContactPoints,
+            ch.visualizeSupportPoints, ch.defaultContactSphereDiameter)
+        if ch.contactPairs.nz == 0
+            Composition.closeContactDetection!(ch)
+            scene.collide = false
+                @warn "... From Modia3D collision handler: Collision handling switched off, since no contacts can take place (nz=0).\n" *
+                    "... You might need to set canCollide=true at joints.\n"
+            return
+        end
+        @assert(ch.contactPairs.ne > 0)
+        @assert(ch.contactPairs.nz > 0)
     end
-    @assert(ch.contactPairs.ne > 0)
-    @assert(ch.contactPairs.nz > 0)
 end
 
 
 function Composition.setComputationFlag(ch::Composition.ContactDetectionMPR_handler)
-  ch.distanceComputed = false
+    ch.distanceComputed = false
 end
 
 # This function performs (a) a broad phase to determine which
@@ -235,7 +237,7 @@ function computeDistanceBetweenAABB(actAABB::Basics.BoundingBox, nextAABB::Basic
     yd = computeDistanceOneAxisAABB(actAABB.y_min, actAABB.y_max, nextAABB.y_min, nextAABB.y_max)
     zd = computeDistanceOneAxisAABB(actAABB.z_min, actAABB.z_max, nextAABB.z_min, nextAABB.z_max)
     distance = sqrt(xd^2 + yd^2 + zd^2)
-    return (distance, nothing, nothing, nothing, false, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D)
+    return (distance, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, false, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D)
 end
 
 
