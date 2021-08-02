@@ -10,7 +10,7 @@ BouncingSphere = Model(
     sphereMaterial = VisualMaterial(color="Red"),
     gravField = UniformGravityField(g=9.81, n=[0, -1, 0]),
     world = Object3D(feature=Scene(gravityField=:gravField,
-                                   visualizeFrames=false, defaultFrameLength=0.2, gap=0.2,
+                                   visualizeFrames=false, defaultFrameLength=0.2, visualizeBoundingBox = true,
                                    enableContactDetection=true, visualizeContactPoints=false)),
     worldFrame = Object3D(parent=:world, feature=Visual(shape=CoordinateSystem(length=0.5))),
     ground = Object3D(parent=:world, translation=:[0.0, -boxHeigth/2, 0.0],
