@@ -1,8 +1,5 @@
-function setCollisionSmoothingRadius(shape, collisionSmoothingRadius) end
+setCollisionSmoothingRadius(shape, collisionSmoothingRadius) = NaN64
 
-# function setCollisionSmoothingRadius(shape::Sphere) end # not defined
-
-# function setCollisionSmoothingRadius(shape::Ellipsoid) end # not defined
 
 function setCollisionSmoothingRadius(shape::Box, collisionSmoothingRadius)
     @assert(collisionSmoothingRadius >= 0.0)
