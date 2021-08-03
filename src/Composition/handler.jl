@@ -191,7 +191,7 @@ function build_superObjs!(scene::Scene, world::Object3D)::Nothing
 
     while actPos <= nPos
         superObjsRow = SuperObjsRow()
-        AABBrow      = Array{Basics.BoundingBox,1}()
+        AABBrow      = Vector{Basics.BoundingBox}[]
         rootSuperObj = buffer[actPos]
 
         fillVisuElements!(scene, rootSuperObj, world)

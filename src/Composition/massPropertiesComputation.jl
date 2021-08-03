@@ -57,8 +57,8 @@ end
 # It sums up common mass, inertia tensor and center of mass.
 # The results are stored twice in actual root of super object:
 #       massProperties: container for actual values
-# function callInitialInertiaTensor!(rootSuperObj::Object3D, actualMassSuperObject::Array{Object3D,1})
-function addMassPropertiesOfAllSuperObjChildsToRootSuperObj!(rootSuperObj::Object3D, actualMassSuperObject::Array{Object3D,1})
+# function callInitialInertiaTensor!(rootSuperObj::Object3D, actualMassSuperObject::Vector{Object3D,1})
+function addMassPropertiesOfAllSuperObjChildsToRootSuperObj!(rootSuperObj::Object3D, actualMassSuperObject::Vector{Object3D})
     if length(actualMassSuperObject) > 0
         for i=1:length(actualMassSuperObject)
             obj = actualMassSuperObject[i]
