@@ -102,7 +102,7 @@ end
 
 
 function multibodyResiduals(id::Int, _leq_mode, simulationModel::ModiaLang.SimulationModel{FloatType}, time, qdd, args...)::Vector{FloatType} where {FloatType}
-     TimerOutputs.@timeit simulationModel.timer "Modia3D" begin 
+     TimerOutputs.@timeit simulationModel.timer "Modia3D" begin
         separateObjects = simulationModel.separateObjects  # is emptied for every new simulate! call
         parameters      = simulationModel.evaluatedParameters
         if haskey(separateObjects, id)
@@ -120,13 +120,13 @@ function multibodyResiduals(id::Int, _leq_mode, simulationModel::ModiaLang.Simul
             nz              = mbs.nz
         else
             first = true
-        
+
             # Search in parameters and retrieve the name of the object with the required id
             # Instantiate the Modia3D system
             #mbsPar = getIdParameter(parameters, id)
             #mbsObj = instantiateDependentObjects(simulationModel.modelModule, mbsPar)
             (world, jointObjects) = checkMultibodySystemAndGetWorldAndJoints(simulationModel, id)
-        
+
             # Construct startIndex vector and number of degrees of freedom per joint
             nJoints         = length(jointObjects)
             jointStartIndex = fill(0,nJoints)
@@ -142,7 +142,7 @@ function multibodyResiduals(id::Int, _leq_mode, simulationModel::ModiaLang.Simul
                 error("Bug in Modia3D/src/Composition/dynamics.jl or in the generated code:\n",
                     "   length(qdd) = ", length(qdd), " is not identical to nqdd = ", nqdd)
             end
-            
+
             # Construct MultibodyData
             scene = initAnalysis2!(world)
             residuals = zeros(FloatType,nqdd)
@@ -157,28 +157,28 @@ function multibodyResiduals(id::Int, _leq_mode, simulationModel::ModiaLang.Simul
             mbs = MultibodyData{FloatType}(length(qdd), world, scene, jointObjects, jointStartIndex,
                                         jointNdof, zStartIndex, nz, residuals, cache_h)
             separateObjects[id] = mbs
-            
+
             if simulationModel.options.log && scene.visualize
                 println("          Modia3D: Number of visual shapes = ", length(scene.allVisuElements))
             end
-            
+
             # Print
             if false
                 printScene(scene)
             end
         end
-    
+
         # Copy generalized position, velocity, acceleration, force values in to the joints
         @assert(length(args) == length(jointObjects))
         setJointVariables!(scene, jointObjects, args, qdd, jointStartIndex, jointNdof)::Nothing
-    
+
         # Compute residuals
         leq_mode = isnothing(_leq_mode) ? -1 : _leq_mode.mode
-    
+
         # Method with improved efficiency
         multibodyResiduals3!(simulationModel, scene, world, time, simulationModel.storeResult, first,
                             ModiaLang.isTerminal(simulationModel) && leq_mode == -1, leq_mode)
-    
+
         # Copy the joint residuals in to the residuals vector
         if leq_mode == 0
             getJointResiduals_for_leq_mode_0!(scene, jointObjects, residuals, jointStartIndex, jointNdof, cache_h)
@@ -245,7 +245,7 @@ function multibodyResiduals3!(sim, scene, world, time, storeResults, isFirstInit
             TimerOutputs.@timeit sim.timer "Modia3D_0 initializeVisualization" Modia3D.Composition.initializeVisualization(Modia3D.renderer[1], scene.allVisuElements)
         end
     end
-    
+
     if isTerminal  #if Modia.isTerminalOfAllSegments(sim)
         TimerOutputs.@timeit sim.timer "Modia3D_4 isTerminal" begin
             if exportAnimation
@@ -266,8 +266,6 @@ function multibodyResiduals3!(sim, scene, world, time, storeResults, isFirstInit
     world.f = Modia3D.ZeroVector3D
     world.t = Modia3D.ZeroVector3D
 
-    compute_vis = storeResults && !isTerminal && (visualize || exportAnimation)
-
     # Computation depending on leq_mode (the mode of the LinearEquationsIterator)
     if leq_mode == 0
         TimerOutputs.@timeit sim.timer "Modia3D_1" begin
@@ -277,17 +275,12 @@ function multibodyResiduals3!(sim, scene, world, time, storeResults, isFirstInit
             #   res := h(q,qd,gravity) - u(q,qd,qdd)   # qdd = 0
             #   cache_h := res + u
             #   return res
-    
+
             # Compute kinematics
             TimerOutputs.@timeit sim.timer "Modia3D_1 computeKinematics!" computeKinematics!(scene, tree, time)
-    
+
             # Compute mass/inertia forces in a forward recursion and initializes forces/torques
             for obj in tree
-                if compute_vis && length( obj.visualizationFrame ) == 1
-                    obj.visualizationFrame[1].r_abs = obj.r_abs
-                    obj.visualizationFrame[1].R_abs = obj.R_abs
-                end
-    
                 if obj.hasMass
                     # Compute inertia forces / torques
                     w     = obj.w
@@ -299,25 +292,25 @@ function multibodyResiduals3!(sim, scene, world, time, storeResults, isFirstInit
                     obj.t = Modia3D.ZeroVector3D
                 end
             end # end forward recursion
-    
+
             # Compute contact forces/torques
             if scene.collide
                 computeContactForcesAndTorques(sim, scene, world, time, nothing)
             end
-    
+
             # Backward recursion (Compute forces/torques and residues)
             TimerOutputs.@timeit sim.timer "Modia3D_1 computeForcesAndResiduals" computeForcesTorquesAndResiduals!(scene, tree, time)
         end
         return nothing
 
     elseif leq_mode > 0
-        TimerOutputs.@timeit sim.timer "Modia3D_2" begin    
+        TimerOutputs.@timeit sim.timer "Modia3D_2" begin
             # Compute   res := M(q)*e_i - u(q,qd,qdd=e_i)
             #           res := res + cache_h
-    
+
             # Compute kinematics
             TimerOutputs.@timeit sim.timer "Modia3D_2 computeKinematics!" computeKinematics_for_leq_mode_pos!(scene, tree, time)
-    
+
             for obj in tree
                 if obj.hasMass
                     # Compute inertia forces / torques
@@ -328,48 +321,55 @@ function multibodyResiduals3!(sim, scene, world, time, storeResults, isFirstInit
                     obj.t = Modia3D.ZeroVector3D
                 end
             end # end forward recursion
-    
+
             # Compute forces/torques and residues in a backward recursion
             TimerOutputs.@timeit sim.timer "Modia3D_2 computeForcesAndResiduals" computeForcesTorquesAndResiduals!(scene, tree,time)
         end
         return nothing
 
     elseif leq_mode == -1
-        TimerOutputs.@timeit sim.timer "Modia3D_3" begin 
-            if compute_vis  # Visualize at a communication point
-                # Compute positions of frames that are only used for visualization
-                TimerOutputs.@timeit sim.timer "Modia3D_3 visualize!" begin
-                    if scene.options.useOptimizedStructure
-                        for obj in scene.updateVisuElements
-                            parent = obj.parent
-                            obj.r_abs = obj.r_rel ≡ Modia3D.ZeroVector3D ? parent.r_abs : parent.r_abs + parent.R_abs'*obj.r_rel
-                            obj.R_abs = obj.R_rel ≡ Modia3D.NullRotation ? parent.R_abs : obj.R_rel*parent.R_abs
-                            # is executed only if an internal Object3D called
-                            if length( obj.visualizationFrame ) == 1
-                                obj.visualizationFrame[1].r_abs = obj.r_abs
-                                obj.visualizationFrame[1].R_abs = obj.R_abs
-                            end
-                            for mesh in obj.fileMeshConvexShapes
-                                mesh.r_abs = obj.r_abs
-                                mesh.R_abs = obj.R_abs
+        TimerOutputs.@timeit sim.timer "Modia3D_3" begin
+            if storeResults && !isTerminal && (visualize || exportAnimation)
+                if abs(sim.options.startTime + scene.outputCounter*sim.options.interval - time) < 1.0e-6*(abs(time) + 1.0)
+                    # Visualize at a communication point
+                    scene.outputCounter += 1
+                    if sim.options.log
+                        println("time = $time")
+                    end
+                    # Compute positions of frames that are only used for visualization
+                    TimerOutputs.@timeit sim.timer "Modia3D_3 visualize!" begin
+                        if scene.options.useOptimizedStructure
+                            for obj in scene.updateVisuElements
+                                parent = obj.parent
+                                obj.r_abs = obj.r_rel ≡ Modia3D.ZeroVector3D ? parent.r_abs : parent.r_abs + parent.R_abs'*obj.r_rel
+                                obj.R_abs = obj.R_rel ≡ Modia3D.NullRotation ? parent.R_abs : obj.R_rel*parent.R_abs
+                                # is executed only if an internal Object3D called
+                                if length( obj.visualizationFrame ) == 1
+                                    obj.visualizationFrame[1].r_abs = obj.r_abs
+                                    obj.visualizationFrame[1].R_abs = obj.R_abs
+                                end
+                                for mesh in obj.fileMeshConvexShapes
+                                    mesh.r_abs = obj.r_abs
+                                    mesh.R_abs = obj.R_abs
+                                end
                             end
                         end
-                    end
-                    if visualize
-                        Modia3D.visualize!(Modia3D.renderer[1], time)
-                    end
-                end
-                if exportAnimation
-                    TimerOutputs.@timeit sim.timer "Modia3D_3 exportAnimation" begin
-                        objectData = []
-                        for obj in scene.allVisuElements
-                            pos = obj.r_abs
-                            ori = Modia3D.from_R(obj.R_abs)
-                            dat = animationData(pos, ori)
-                            push!(objectData, dat)
+                        if visualize
+                            Modia3D.visualize!(Modia3D.renderer[1], time)
                         end
-                        aniStep = animationStep(time, objectData)
-                        push!(scene.animation, aniStep)
+                    end
+                    if exportAnimation
+                        TimerOutputs.@timeit sim.timer "Modia3D_3 exportAnimation" begin
+                            objectData = []
+                            for obj in scene.allVisuElements
+                                pos = obj.r_abs
+                                ori = Modia3D.from_R(obj.R_abs)
+                                dat = animationData(pos, ori)
+                                push!(objectData, dat)
+                            end
+                            aniStep = animationStep(time, objectData)
+                            push!(scene.animation, aniStep)
+                        end
                     end
                 end
             end

@@ -518,6 +518,7 @@ mutable struct Scene
     #forceElements::Array{Int64,1}
     exportAnimation::Bool                     # animation file export is enabled
     animation::Vector{animationStep}          # animation data of visible Object3Ds
+    outputCounter::Int64                      # animation/visualization output step counter
 
     # Data specific to a particular joint type
     revolute::Vector{Revolute}
@@ -558,6 +559,7 @@ mutable struct Scene
             Array{Array{Basics.BoundingBox,1},1}(),
             exportAnimation,
             Vector{animationStep}[],
+            0,
 
             Revolute[],
             Prismatic[],
