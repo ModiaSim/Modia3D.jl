@@ -50,7 +50,7 @@ Additionally, the (free) community or the (commercial) professional version of t
 | [4a] |*[Modia3D: Modeling and Simulation of 3D-Systems in Julia](https://proceedings.juliacon.org/papers/10.21105/jcon.00043)*|[JuliaCon 2019, July](https://juliacon.org/2019/)|[10.21105/jcon.00043](https://doi.org/10.21105/jcon.00043)|
 | [4b] |*[Modia3D: Modeling and Simulation of 3D-Systems in Julia](https://proceedings.juliacon.org/papers/10.21105/jcon.00043)*|[JuliaCon 2019, July](https://juliacon.org/2019/)|[YouTube](https://www.youtube.com/watch?v=b3WfqXZRKpA)|
 | [5] |*Collision Handling with Elastic Response Calculation and Zero-Crossing Functions*|[EOOLT 2019, November](http://www.eoolt.org/2019/)|[10.1145/3365984.3365986](https://doi.org/10.1145/3365984.3365986)|
-| [6] |*Modia – Modeling Multidomain Engineering Systems with Julia*|[JuliaCon 2021, July](https://juliacon.org/2021/)|Video comming soon|
+| [6] |*Modia – Modeling Multidomain Engineering Systems with Julia*|[JuliaCon 2021, July](https://juliacon.org/2021/)|[YouTube](https://www.youtube.com/watch?v=N94si3rOl1g)|
 | [7] |*Modia – Equation Based Modeling and Domain Specific Algorithms*|[14th International Modelica Conference 2021, September](http://www.modelica.org/)|accepted for publication|
 
 
