@@ -26,7 +26,7 @@ Generate a new ContactPairs structure used for communication between the Object3
 """
 mutable struct ContactPairs
     # Solid shapes used in contact detection (provided by Object3D handler)
-    allowedToMove::Array{Union{Bool,Nothing},1}
+    allowedToMove::Vector{Union{Bool,Nothing}}
     dummyObject3D::Modia3D.AbstractObject3DFeature     # Dummy Object3D for non-used elements of z-Vector.
 
     # Dimensions
@@ -35,7 +35,7 @@ mutable struct ContactPairs
     nzContact::Int                                  # length(z | z has contact) length of z where zi has contact
 
     function ContactPairs(world::Composition.Object3D, AABB::Vector{Vector{Basics.BoundingBox}}, superObjs::Array{SuperObjsRow,1},
-                        allowedToMove::Array{Union{Bool,Nothing},1}, visualizeBoundingBox::Bool, nVisualContSupPoints::Int,
+                        allowedToMove::Vector{Union{Bool,Nothing}}, visualizeBoundingBox::Bool, nVisualContSupPoints::Int,
                         visualizeContactPoints::Bool, visualizeSupportPoints::Bool, defaultContactSphereDiameter::Float64)
         @assert(length(superObjs) > 0)
         @assert(nVisualContSupPoints > 0)
@@ -513,7 +513,7 @@ mutable struct Scene
     allCollisionElements::Vector{Object3D}    # all Object3Ds, which are allowed to collide (no order, no super objects)
     noCPairs::Vector{Vector{Int64}}           # Indices of frames (with respect to collSuperObjs) that can't collide in general (e.g. objects are connected via joints)
     noCPairsHelp::Dict{Modia3D.AbstractJoint,Array{Int64,1}}
-    allowedToMove::Array{Union{Bool,Nothing},1}
+    allowedToMove::Vector{Union{Bool,Nothing}}
     AABB::Vector{Vector{Basics.BoundingBox}}    # Bounding boxes of elements that can collide
     #forceElements::Array{Int64,1}
     exportAnimation::Bool                     # animation file export is enabled
@@ -554,7 +554,7 @@ mutable struct Scene
             Vector{Object3D}[],
             Vector{Vector{Int64}}[],
             Dict{Modia3D.AbstractJoint,Array{Int64,1}}(),
-            Array{Union{Bool,Nothing},1}(),
+            Vector{Union{Bool}}[],
             Vector{Vector{Basics.BoundingBox}}[],
             exportAnimation,
             Vector{animationStep}[],
