@@ -1,7 +1,7 @@
 # is for scheduling robot reference motion (not a must at the moment (no channels))
 function scheduleReferenceMotion(ref::ReferencePath,
                                  referenceMotion!::Function)
-    @error("von scheduleReferenceMotion Zeile 4")
+    error("von scheduleReferenceMotion Zeile 4")
     referenceMotion!(ref)
 end
 

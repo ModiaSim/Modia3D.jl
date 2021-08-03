@@ -28,7 +28,7 @@ function supportPoint(obj::Composition.Object3D, e::SVector{3,Float64})
         #fileMesh::Modia3D.FileMesh = obj.shape
         return Modia3D.supportPoint_FileMesh(obj.shape, obj.r_abs, obj.R_abs, e)
     else
-        @error("not supported shape for support points")
+        error("not supported shape for support points")
     end
 end
 
@@ -119,7 +119,7 @@ function boundingBox!(obj::Composition.Object3D, AABB::Basics.BoundingBox; tight
         zmin = Modia3D.supportPoint_i_FileMesh(fileMesh, obj.r_abs[3], SVector(obj.R_abs[:,3]), -1)
         zmax = Modia3D.supportPoint_i_FileMesh(fileMesh, obj.r_abs[3], SVector(obj.R_abs[:,3]), +1)
     else
-        @error("boundingBox! not supported for shape")
+        error("boundingBox! not supported for shape")
     end
 
     if tight    # best fitting AABB which is possible
