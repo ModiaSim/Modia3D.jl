@@ -22,11 +22,11 @@ closeVisualization(renderer::Modia3D.AbstractRenderer)        = error("No render
 Generate a new ContactPairs structure used for communication between the Object3D handler and a ContactDetection handler.
 
 - `DummyObject3D::Modia3D.AbstractObject3DFeature`: A dummy Object3D that can be used in the struct as element of a vector of Object3Ds
-  to fill the array with a dummy value of the correct type.
+  to fill the vector with a dummy value of the correct type.
 """
 mutable struct ContactPairs
     # Solid shapes used in contact detection (provided by Object3D handler)
-    allowedToMove::Array{Union{Bool,Nothing},1}
+    allowedToMove::Vector{Union{Bool,Nothing}}
     dummyObject3D::Modia3D.AbstractObject3DFeature     # Dummy Object3D for non-used elements of z-Vector.
 
     # Dimensions
@@ -34,8 +34,8 @@ mutable struct ContactPairs
     nz::Int                                         # length(z)
     nzContact::Int                                  # length(z | z has contact) length of z where zi has contact
 
-    function ContactPairs(world::Composition.Object3D, AABB::Array{Array{Basics.BoundingBox}}, superObjs::Array{SuperObjsRow,1},
-                        allowedToMove::Array{Union{Bool,Nothing},1}, visualizeBoundingBox::Bool, nVisualContSupPoints::Int,
+    function ContactPairs(world::Composition.Object3D, AABB::Vector{Vector{Basics.BoundingBox}}, superObjs::Vector{SuperObjsRow},
+                        allowedToMove::Vector{Union{Bool,Nothing}}, visualizeBoundingBox::Bool, nVisualContSupPoints::Int,
                         visualizeContactPoints::Bool, visualizeSupportPoints::Bool, defaultContactSphereDiameter::Float64)
         @assert(length(superObjs) > 0)
         @assert(nVisualContSupPoints > 0)
@@ -71,7 +71,7 @@ mutable struct ContactPairs
     end
 end
 
-initializeContactDetection!(ch::Modia3D.AbstractContactDetection, collSuperObjs::Array{Array{Modia3D.AbstractObject3DFeature}}, noCPairs::Array{Array{Int64,1}}) = error("No contact detection handler defined.")
+initializeContactDetection!(ch::Modia3D.AbstractContactDetection, collSuperObjs::Vector{Vector{Modia3D.AbstractObject3DFeature}}, noCPairs::Vector{Vector{Int64}}) = error("No contact detection handler defined.")
 selectContactPairsWithEvent!(ch::Modia3D.AbstractContactDetection)   = error("No contact detection handler defined.")
 selectContactPairsNoEvent!(ch::Modia3D.AbstractContactDetection)     = error("No contact detection handler defined.")
 getDistances!(ch::Modia3D.AbstractContactDetection)                  = error("No contact detection handler defined.")
@@ -500,7 +500,7 @@ mutable struct Scene
     initSuperObj::Bool                        # = true, if super objects are initialized
     initMassComp::Bool                        # = true, if mass computation for optimized structure is initialized
     analysis::Modia3D.AnalysisType            # Type of analysis
-    superObjs::Array{SuperObjsRow,1}          # super objects
+    superObjs::Vector{SuperObjsRow}          # super objects
 
     treeAccVelo::Vector{Object3D}
     tree::Vector{Object3D}                    # Spanning tree of the frames in depth-first order (without world)
@@ -511,11 +511,11 @@ mutable struct Scene
     allVisuElements::Vector{Object3D}         # all Object3Ds that should be visualized (for communiating with SimVis)
     updateVisuElements::Vector{Object3D}      # all Object3Ds that are visibly only e.g. visualization frames (must be updated first)
     allCollisionElements::Vector{Object3D}    # all Object3Ds, which are allowed to collide (no order, no super objects)
-    noCPairs::Array{Array{Int64,1}}           # Indices of frames (with respect to collSuperObjs) that can't collide in general (e.g. objects are connected via joints)
-    noCPairsHelp::Dict{Modia3D.AbstractJoint,Array{Int64,1}}
-    allowedToMove::Array{Union{Bool,Nothing},1}
-    AABB::Array{Array{Basics.BoundingBox}}    # Bounding boxes of elements that can collide
-    #forceElements::Array{Int64,1}
+    noCPairs::Vector{Vector{Int64}}           # Indices of frames (with respect to collSuperObjs) that can't collide in general (e.g. objects are connected via joints)
+    noCPairsHelp::Dict{Modia3D.AbstractJoint,Vector{Int64}}
+    allowedToMove::Vector{Union{Bool,Nothing}}
+    AABB::Vector{Vector{Basics.BoundingBox}}    # Bounding boxes of elements that can collide
+    #forceElements::Vector{Int64}
     exportAnimation::Bool                     # animation file export is enabled
     animation::Vector{animationStep}          # animation data of visible Object3Ds
 
@@ -545,17 +545,17 @@ mutable struct Scene
             false,
             false,
             Modia3D.KinematicAnalysis,
-            Array{SuperObjsRow,1}(),
+            Vector{SuperObjsRow}[],
             Vector{Object3D}[],
             Vector{Object3D}[],
             Vector{Object3D}[],
             Vector{Object3D}[],
             Vector{Object3D}[],
             Vector{Object3D}[],
-            Array{Array{Int64,1},1}(),
-            Dict{Modia3D.AbstractJoint,Array{Int64,1}}(),
-            Array{Union{Bool,Nothing},1}(),
-            Array{Array{Basics.BoundingBox,1},1}(),
+            Vector{Vector{Int64}}[],
+            Dict{Modia3D.AbstractJoint,Vector{Int64}}(),
+            Vector{Union{Bool}}[],
+            Vector{Vector{Basics.BoundingBox}}[],
             exportAnimation,
             Vector{animationStep}[],
 

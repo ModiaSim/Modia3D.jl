@@ -14,7 +14,7 @@ massAndGeoSphere = MassPropertiesFromShape()
 # Objects3D
 ConvexPartitions = Model(
     gravField = UniformGravityField(g=9.81, n=[0, -1, 0]),
-    world = Object3D(feature=Scene(gravityField=:gravField, visualizeBoundingBox = true)),
+    world = Object3D(feature=Scene(gravityField=:gravField)),
 
     sphere = Object3D(feature=Solid(shape=Sphere(diameter=0.2),
                       visualMaterial=mat1, solidMaterial="Steel",

@@ -144,7 +144,7 @@ end
 function tetrahedronEncloseOrigin(r0::SupportPoint,r1::SupportPoint,r2::SupportPoint,r3::SupportPoint,
                                   neps::Float64, niter_max::Int64,
                                   shapeA::Composition.Object3D,shapeB::Composition.Object3D, scale::Float64)
-    aux = SVector(0.0, 0.0, 0.0)
+    aux = Modia3D.ZeroVector3D
     success = false
     for i in 1:niter_max
         aux = cross(r1.p-r0.p,r3.p-r0.p)

@@ -418,7 +418,7 @@ function createFileFeature(feature::Shapes.Solid, fileMesh)
     return Modia3D.Solid(shape=fileMesh, massProperties=nothing, solidMaterial=feature.solidMaterial, collision=feature.collision, contactMaterial=feature.contactMaterial, collisionSmoothingRadius=feature.collisionSmoothingRadius, visualMaterial=feature.visualMaterial)
 end
 
-function addAABBVisuToWorld!(world::Object3D, AABB::Array{Array{Basics.BoundingBox}})
+function addAABBVisuToWorld!(world::Object3D, AABB::Vector{Vector{Basics.BoundingBox}})
     k = 0
     @inbounds for i = 1:length(AABB)
         for j = 1:length(AABB[i])
