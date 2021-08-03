@@ -60,7 +60,7 @@ Currently, only DynamicAnalysis is supported and used.
 
 
 # Used renderer (actual value is defined with __init__() below)
-const renderer = Vector{AbstractRenderer}(undef,1)
+const renderer = Vector{AbstractRenderer}(undef,2)
 
 
 
@@ -136,6 +136,18 @@ function __init__()
     else
         renderer[1] = DLR_Visualization.CommunityEdition(info)
 end; end
+
+function disableRenderer()
+    renderer[2] = renderer[1]
+    renderer[1] = NoRenderer.DummyRenderer(0)
+    return nothing
+end
+function reenableRenderer()
+    if !isnothing(renderer[2])
+        renderer[1] = renderer[2]
+    end
+    return nothing
+end
 
 
 export Object3D
