@@ -49,6 +49,7 @@ function Composition.selectContactPairsWithEvent!(sim, scene::Composition.Scene,
     ch.noContactMinVal =  42.0
     selectContactPairs!(sim,scene,ch,world,true)
     ch.contactPairs.nzContact = length(ch.contactDict)
+    return nothing
 end
 
 
@@ -63,6 +64,7 @@ end
 function Composition.selectContactPairsNoEvent!(sim, scene::Composition.Scene, ch::Composition.ContactDetectionMPR_handler, world::Composition.Object3D)
     ch.noContactMinVal =  42.0
     selectContactPairs!(sim,scene,ch,world,false)
+    return nothing
 end
 
 
@@ -87,6 +89,7 @@ function selectContactPairs!(sim, scene::Composition.Scene, ch::Composition.Cont
         @inbounds simh.z[2] = ch.noContactMinVal
     end
     ch.distanceComputed = true
+    return nothing
 end
 
 
@@ -103,6 +106,7 @@ function Composition.getDistances!(scene::Composition.Scene, ch::Composition.Con
         ch.distanceComputed = true
         #println("Abstand wird berechnet, ", length(ch.contactDict) )
     end
+    return nothing
 end
 
 
@@ -151,6 +155,7 @@ function computeDistances(scene::Composition.Scene, ch::Composition.ContactDetec
                                 storeDistancesForSolver!(world, pairID, ch, actObj, nextObj,
                                 actAABB, nextAABB, phase2, hasEvent)
     end; end; end; end; end; end; end
+    return nothing
 end
 
 
@@ -229,6 +234,7 @@ function storeDistancesForSolver!(world::Composition.Object3D, pairID::Compositi
             if ch.noContactMinVal > distanceWithHysteresis
                 ch.noContactMinVal = distanceWithHysteresis
     end; end; end
+    return nothing
 end
 
 
