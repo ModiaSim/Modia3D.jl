@@ -21,13 +21,13 @@ mutable struct InteractionManner
     gripper::Bool
     movable::Bool
     lockable::Bool
-    movablePos::Union{Int64,Nothing}
+    movablePos::Int64
     originPos::Int64
     actualPos::Int64
-    InteractionManner() = new(false, false, false, nothing, 0, 0)
+    InteractionManner() = new(false, false, false, 0, 0, 0)
 
     function InteractionManner(interactionBehavior::InteractionBehavior)
-        new(false, false, false, nothing, 0, 0)
+        new(false, false, false, 0, 0, 0)
     end
 end
 
