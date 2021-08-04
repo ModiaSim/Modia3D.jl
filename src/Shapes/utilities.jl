@@ -6,11 +6,11 @@
 #          see: https://github.com/kmammou/v-hacd
 
 function getObjInfos(filename::AbstractString, scaleFactor::MVector{3,Float64})
-    objPoints = []
+    objPoints = Vector{SVector{3,Float64}}()
     facesIndizes = []
-    areTriangles = true
-    centroid = Modia3D.ZeroVector3D
-    longestEdge = 0
+    areTriangles::Bool = true
+    centroid::SVector{3,Float64} = Modia3D.ZeroVector3D
+    longestEdge::Float64 = 0.0
     if filename[end-3:end] == ".obj"
         open(filename,"r") do file
             i = 0
@@ -26,7 +26,8 @@ function getObjInfos(filename::AbstractString, scaleFactor::MVector{3,Float64})
                 if isequal(line[1],'v') && isequal(line[2],' ')
                     i += 1
                     tmp = rsplit(rstrip(line),' ')
-                    push!(objPoints,[parse(Float64,tmp[end-2])*scaleFactor[1],parse(Float64,tmp[end-1])*scaleFactor[2],parse(Float64,tmp[end])*scaleFactor[3]])
+                    objPoint = [parse(Float64,tmp[end-2])*scaleFactor[1], parse(Float64,tmp[end-1])*scaleFactor[2], parse(Float64,tmp[end])*scaleFactor[3]]
+                    push!(objPoints, objPoint)
                     if i == 1
                         x_max = objPoints[i][1]
                         x_min = objPoints[i][1]
@@ -45,7 +46,10 @@ function getObjInfos(filename::AbstractString, scaleFactor::MVector{3,Float64})
                     if areTriangles
                         tmp = rsplit(rstrip(line),' ')
                         if length(tmp) == 4
-                            push!(facesIndizes,[parse(Int64,rsplit(tmp[2],"/")[1]), parse(Int64,rsplit(tmp[3],"/")[1]), parse(Int64,rsplit(tmp[4],"/")[1])])
+                            faceIndizes = [parse(Int64,rsplit(tmp[2],"/")[1]),
+                                           parse(Int64,rsplit(tmp[3],"/")[1]),
+                                           parse(Int64,rsplit(tmp[4],"/")[1])]
+                            push!(facesIndizes, faceIndizes)
                         else
                             areTriangles = false
             end; end; end; end
@@ -63,7 +67,6 @@ function getObjInfos(filename::AbstractString, scaleFactor::MVector{3,Float64})
         return (centroid, longestEdge, objPoints, facesIndizes)
     else
         error("Only .obj files are supported for solid FileMesh.")
-        return (nothing, nothing, nothing, nothing)
     end
 end
 

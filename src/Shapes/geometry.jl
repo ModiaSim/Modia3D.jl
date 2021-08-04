@@ -230,9 +230,9 @@ mutable struct FileMesh <: Modia3D.AbstractGeometry
     convexPartition::Bool
 
     # for solids only
-    centroid::MVector{3,Float64}
+    centroid::SVector{3,Float64}
     longestEdge::Float64
-    objPoints::Vector{MVector{3,Float64}}
+    objPoints::Vector{SVector{3,Float64}}
     facesIndizes::Vector{AbstractVector{}}
     volume::Float64
     centroidAlgo::SVector{3,Float64}
