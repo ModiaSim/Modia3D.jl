@@ -202,6 +202,19 @@ function Rfromrot123(rot123::AbstractVector)
 end
 
 
+
+"""
+    R = Rfromrot132(rot132::AbstractVector)
+
+Return rotation matrix `R` from angles with rotation sequence x-z-y to
+rotate from frame `1` to frame `2`.
+"""
+Rfromrot132(rot132::AbstractVector) = Modia3D.rot1(rot132[1])*Modia3D.rot3(rot132[3])*Modia3D.rot2(rot132[2])
+
+
+
+
+
 """
     w = wfromrot123(rot123::AbstractVector, derrot123::AbstractVector)
 
@@ -438,11 +451,13 @@ end
 
 
 """
-    setJointVariables!(scene::Scene, objects::Vector{Object3D}, args, qdd, startIndex, ndof)
+    setJointVariables_q_qd_f!(scene::Scene, objects::Vector{Object3D}, 
+                              startIndex::Vector{Int}, ndof::Vector{Int}, args)
 
-Copy specific variables into the corresponding Object3Ds.
+Copy generalized joints variables (q,qd,f) into the corresponding Object3Ds.
 """
-function setJointVariables!(scene::Scene, objects::Vector{Object3D}, args, qdd, startIndex, ndof)::Nothing
+function setJointVariables_q_qd_f!(scene::Scene, objects::Vector{Object3D}, startIndex::Vector{Int},
+                                   ndof::Vector{Int}, args)::Nothing
     for (i,obj) in enumerate(objects)
         jointKind = obj.jointKind
         args_i    = args[i]
@@ -453,7 +468,6 @@ function setJointVariables!(scene::Scene, objects::Vector{Object3D}, args, qdd, 
             revolute     = scene.revolute[obj.jointIndex]
             revolute.phi = args_i[1]
             revolute.w   = args_i[2]
-            revolute.a   = qdd[beg]
             revolute.tau = args_i[3]
 
         elseif jointKind == PrismaticKind
@@ -461,7 +475,6 @@ function setJointVariables!(scene::Scene, objects::Vector{Object3D}, args, qdd, 
             prismatic   = scene.prismatic[obj.jointIndex]
             prismatic.s = args_i[1]
             prismatic.v = args_i[2]
-            prismatic.a = qdd[beg]
             prismatic.f = args_i[3]
 
         elseif jointKind == AbsoluteFreeMotionKind || jointKind == FreeMotionKind
@@ -471,8 +484,6 @@ function setJointVariables!(scene::Scene, objects::Vector{Object3D}, args, qdd, 
             freeMotion.rot = SVector{3,Float64}(args_i[2])
             freeMotion.v   = SVector{3,Float64}(args_i[3])
             freeMotion.w   = SVector{3,Float64}(args_i[4])
-            freeMotion.a   = qdd[beg+0:beg+2]
-            freeMotion.z   = qdd[beg+3:beg+5]
 
         else
            error("Bug in Modia3D/src/Composition/specifics/specifics.jl (setJointVariables!): jointKind = $jointKind is not known")
@@ -480,6 +491,45 @@ function setJointVariables!(scene::Scene, objects::Vector{Object3D}, args, qdd, 
     end
     return nothing
 end
+
+
+"""
+    setJointVariables_qdd!(scene::Scene, objects::Vector{Object3D}, startIndex::Vector{Int}, 
+                           ndof::Vector{Int}, qdd)
+
+Copy generalized joint accelerations into the corresponding joints.
+"""
+function setJointVariables_qdd!(scene::Scene, objects::Vector{Object3D}, startIndex::Vector{Int},
+                                ndof::Vector{Int}, qdd)::Nothing
+
+    for (i,obj) in enumerate(objects)
+        jointKind = obj.jointKind
+
+        if jointKind == RevoluteKind
+            @assert(ndof[i] == 1)
+            revolute   = scene.revolute[obj.jointIndex]
+            revolute.a = qdd[startIndex[i]]
+
+        elseif jointKind == PrismaticKind
+            @assert(ndof[i] == 1)
+            prismatic   = scene.prismatic[obj.jointIndex]
+            prismatic.a = qdd[startIndex[i]]
+
+        elseif jointKind == AbsoluteFreeMotionKind || jointKind == FreeMotionKind
+            @assert(ndof[i] == 6)
+            qdd2::Vector{Float64} = qdd            
+            beg          = startIndex[i]
+            freeMotion   = scene.freeMotion[obj.jointIndex]
+            freeMotion.a = SVector{3,Float64}(qdd2[beg]  , qdd2[beg+1], qdd2[beg+2])
+            freeMotion.z = SVector{3,Float64}(qdd2[beg+3], qdd2[beg+4], qdd2[beg+5])
+
+        else
+           error("Bug in Modia3D/src/Composition/specifics/specifics.jl (setJointVariables!): jointKind = $jointKind is not known")
+        end
+    end
+    return nothing
+end
+
 
 
 

@@ -43,7 +43,8 @@ function buildModia3D(model)    #(model; path="")
 
     mbsCode = Model(_id = rand(Int),
                     _qdd = Var(start = zeros(ndofTotal)),
-                    mbs_equations = :[0 = multibodyResiduals(_id, _leq_mode, instantiatedModel, time, _qdd, $(args...))
+                    mbs_equations = :[jointVariablesHaveValues = setModiaJointVariables!(_id, _leq_mode, instantiatedModel, time, $(args...))
+                                      0 = multibodyResiduals!(_id, _leq_mode, instantiatedModel, time, jointVariablesHaveValues, _qdd)
                                       $(code...)])
 
                     #mbs_equations = :[zeros($ndofTotal) = multibodyResiduals(_id, _leq_mode, instantiatedModel, time, _qdd, $(args...))
@@ -65,6 +66,10 @@ function getJointInfo!(model, jointInfo, path)::Nothing
         constructor = model[:_constructor]
         if typeof(constructor) <: OrderedDict && haskey(constructor, :ndof)
             ndof = constructor[:ndof]
+            if haskey(model, :_rotName)
+                # Hack to provide the full path name of FreeMotion.rot to the FreeMotion object
+                model[:_rotName] = string(path)*".rot"
+            end
             push!(jointInfo, (path=path, ndof=ndof))
             return
         end

@@ -31,7 +31,8 @@ mutable struct FreeMotion <: Modia3D.AbstractJoint
     ndof::Int
 
     r::SVector{3,Float64}
-    rot::SVector{3,Float64}        # cardan angles (rotation sequence x-y-z)
+    rot::SVector{3,Float64}        
+    isrot123::Bool                 # = true: rotation sequence x-y-z, otherwise x-z-y
 
     v::SVector{3,Float64}
     w::SVector{3,Float64}          # angular velocity vector
@@ -48,7 +49,9 @@ mutable struct FreeMotion <: Modia3D.AbstractJoint
                           r::AbstractVector   = Modia3D.ZeroVector3D,
                           rot::AbstractVector = Modia3D.ZeroVector3D,
                           v::AbstractVector   = Modia3D.ZeroVector3D,
-                          w::AbstractVector   = Modia3D.ZeroVector3D)
+                          w::AbstractVector   = Modia3D.ZeroVector3D,
+                          isrot123::Bool      = true,
+                          z_rot123            = 1.0)   # z_rot123 is a dummy argument (used for zero-crossing detection) and is ignored
 
         #(parent,obj,cutJoint) = attach(obj1, obj2)
         #if cutJoint
@@ -71,14 +74,14 @@ mutable struct FreeMotion <: Modia3D.AbstractJoint
         residue_f = Modia3D.ZeroVector3D
         residue_t = Modia3D.ZeroVector3D
 
-        obj2.joint      = new(path, obj1, obj2, 6, r, rot, v, w, a, z, residue_f, residue_t)
+        obj2.joint      = new(path, obj1, obj2, 6, r, rot, isrot123, v, w, a, z, residue_f, residue_t)
         obj2.parent     = obj1
         obj2.jointKind  = FreeMotionKind
         obj2.jointIndex = 0
         obj2.ndof       = 6
         obj2.canCollide = true
         obj2.r_rel      = r
-        obj2.R_rel      = Rfromrot123(rot)
+        obj2.R_rel      = isrot123 ? Rfromrot123(rot) : Rfromrot132(rot)
 
         push!(obj1.children, obj2)
 
