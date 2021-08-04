@@ -117,3 +117,9 @@ GearWheel
 TextShape
 Font
 ```
+
+## ModelicaShape
+
+```@docs
+ModelicaShape
+```

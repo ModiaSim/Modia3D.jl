@@ -138,6 +138,11 @@ function visualizeObject(obj::Composition.Object3D, id::Ptr{Nothing}, simVis::Si
         visualizeShape(simVis, obj.r_abs, rotateAxis2z(gearWheel.axis, obj.R_abs), SimVisGearWheel, id, obj.visualMaterial,
                        gearWheel.diameter, gearWheel.diameter, gearWheel.length; extras=@MVector[gearWheel.innerDiameter/gearWheel.diameter, gearWheel.teeth, gearWheel.angle*180/pi])
 
+    elseif shapeKind == Modia3D.ModelicaKind
+        modelica::Modia3D.ModelicaShape = obj.shape
+        visualizeShape(simVis, obj.r_abs, obj.R_abs, ShapeType(modelica.type), id, obj.visualMaterial,
+                       modelica.lengthX, modelica.lengthY, modelica.lengthZ; extras=modelica.extra)
+
     elseif shapeKind == Modia3D.FileMeshKind
         fileMesh::Modia3D.FileMesh = obj.shape
         SimVis_setFileObject(simVis, id, Cint(0), obj.r_abs, obj.R_abs,

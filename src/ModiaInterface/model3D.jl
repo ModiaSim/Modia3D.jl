@@ -19,6 +19,7 @@ CoordinateSystem(; kwargs...) = Par(; _constructor = :(Modia3D.CoordinateSystem)
 FileMesh(        ; kwargs...) = Par(; _constructor = :(Modia3D.FileMesh)              , kwargs...)
 Font(            ; kwargs...) = Par(; _constructor = :(Modia3D.Font)                  , kwargs...)
 TextShape(       ; kwargs...) = Par(; _constructor = :(Modia3D.TextShape)             , kwargs...)
+ModelicaShape(   ; kwargs...) = Par(; _constructor = :(Modia3D.ModelicaShape)         , kwargs...)
 Fix(             ; kwargs...) = Par(; _constructor = :(Modia3D.Fix)                   , kwargs...)
 
 MassPropertiesFromShape()  = Par(; _constructor = :(Modia3D.MassPropertiesFromShape))
