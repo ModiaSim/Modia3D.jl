@@ -233,7 +233,7 @@ mutable struct FileMesh <: Modia3D.AbstractGeometry
     centroid::SVector{3,Float64}
     longestEdge::Float64
     objPoints::Vector{SVector{3,Float64}}
-    facesIndizes::Vector{AbstractVector{}}
+    facesIndizes::Vector{SVector{3,Int64}}
     volume::Float64
     centroidAlgo::SVector{3,Float64}
     inertia::SMatrix{3,3,Float64,9}

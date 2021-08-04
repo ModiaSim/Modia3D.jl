@@ -7,7 +7,7 @@
 
 function getObjInfos(filename::AbstractString, scaleFactor::MVector{3,Float64})
     objPoints = Vector{SVector{3,Float64}}()
-    facesIndizes = []
+    facesIndizes = Vector{SVector{3,Int64}}()
     areTriangles::Bool = true
     centroid::SVector{3,Float64} = Modia3D.ZeroVector3D
     longestEdge::Float64 = 0.0
