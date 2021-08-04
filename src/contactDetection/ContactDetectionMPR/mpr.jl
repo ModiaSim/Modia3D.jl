@@ -389,10 +389,9 @@ function mprGeneral(ch::Composition.ContactDetectionMPR_handler, shapeA::Composi
 end
 
 
-function mprTwoSpheres(ch::Composition.ContactDetectionMPR_handler, shapeA::Composition.Object3D, shapeB::Modia3D.Composition.Object3D)
+function mprTwoSpheres(ch::Composition.ContactDetectionMPR_handler, shapeA::Composition.Object3D, shapeB::Modia3D.Composition.Object3D,
+    sphereA::Shapes.Sphere, sphereB::Shapes.Sphere)
     neps = ch.neps
-    sphereA::Shapes.Sphere = shapeA.shape
-    sphereB::Shapes.Sphere = shapeB.shape
     radiusA = sphereA.diameter*0.5
     radiusB = sphereB.diameter*0.5
     centroidSphereA = getCentroid(shapeA)
@@ -443,7 +442,9 @@ function mpr(ch::Composition.ContactDetectionMPR_handler, shapeA::Composition.Ob
     shapeKindB = shapeB.shapeKind
 
     if shapeKindA == Modia3D.SphereKind && shapeKindB == Modia3D.SphereKind
-        mprTwoSpheres(ch, shapeA, shapeB)
+        sphereA::Shapes.Sphere = shapeA.shape
+        sphereB::Shapes.Sphere = shapeB.shape
+        mprTwoSpheres(ch, shapeA, shapeB, sphereA, sphereB)
     else
         mprGeneral(ch, shapeA, shapeB)
     end

@@ -21,13 +21,13 @@ mutable struct InteractionManner
     gripper::Bool
     movable::Bool
     lockable::Bool
-    movablePos::Union{Int64,Nothing}
+    movablePos::Int64
     originPos::Int64
     actualPos::Int64
-    InteractionManner() = new(false, false, false, nothing, 0, 0)
+    InteractionManner() = new(false, false, false, 0, 0, 0)
 
     function InteractionManner(interactionBehavior::InteractionBehavior)
-        new(false, false, false, nothing, 0, 0)
+        new(false, false, false, 0, 0, 0)
     end
 end
 
@@ -116,9 +116,10 @@ mutable struct Object3D <: Modia3D.AbstractObject3D
     computeAcceleration::Bool  # = true if acceleration needs to be computed
 
     # internal shortcuts to avoid costly dynamic multiple dispatch
-    shapeKind::Shapes.ShapeKind
-    shape::Modia3D.AbstractShape
-    visualMaterial::Shapes.VisualMaterial
+    shapeKind::Shapes.ShapeKind             # marks the defined shape
+    shape::Modia3D.AbstractShape            # stores shape defined in Solid or Visual
+    visualMaterial::Shapes.VisualMaterial   # stores visualMaterial defined in Solid or Visual
+    centroid::SVector{3,Float64}            # stores the centroid of a solid shape
 
     # = True: Coordinate system of Object3D is always visualized
     # = False: Coordinate system of Object3D is never visualized
@@ -207,7 +208,7 @@ mutable struct Object3D <: Modia3D.AbstractObject3D
         obj = Object3DWithoutParent( new(), visualizeFrame = visualizeFrame, interactionBehavior = interactionBehavior, path=path)
 
         obj.feature = feature
-        (obj.shapeKind, obj.shape, obj.visualMaterial) = setShapeKind(feature)
+        (obj.shapeKind, obj.shape, obj.visualMaterial, obj.centroid) = setShapeKind(feature)
         return obj
     end
 
@@ -243,7 +244,7 @@ mutable struct Object3D <: Modia3D.AbstractObject3D
 
         visualizeFrame2 = typeof(visualizeFrame) == Modia3D.Ternary ? visualizeFrame : (visualizeFrame ? Modia3D.True : Modia3D.False)
 
-        (shapeKind, shape, visualMaterial) = setShapeKind(feature)
+        (shapeKind, shape, visualMaterial, centroid) = setShapeKind(feature)
         obj = new(parent, Vector{Object3D}[],
               false, InteractionManner(interactionBehavior), FixedJoint(), FixKind, 0, 0, true,
               r_rel, R_rel, r_abs, R_abs,
@@ -251,7 +252,7 @@ mutable struct Object3D <: Modia3D.AbstractObject3D
               false, 0.0, Modia3D.ZeroVector3D, SMatrix{3,3,Float64,9}(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
               feature, Modia3D.AbstractTwoObject3DObject[],
               false, false, false, false,
-              shapeKind, shape, visualMaterial,
+              shapeKind, shape, visualMaterial, centroid,
               visualizeFrame2,
               Vector{Object3D}[],
               Vector{Object3D}[], Vector{Object3D}[],
@@ -291,14 +292,16 @@ mutable struct Object3D <: Modia3D.AbstractObject3D
             R_abs::SMatrix{3,3,Float64,9}, feature::Modia3D.AbstractObject3DFeature,
             visualizeFrame::Modia3D.Ternary, path::String="")
 
-        (shapeKind, shape, visualMaterial) = setShapeKind(feature)
+        (shapeKind, shape, visualMaterial, centroid) = setShapeKind(feature)
         new(parent, Vector{Object3D}[], false,
         InteractionManner(Modia3D.NoInteraction), FixedJoint(), FixKind, 0, 0, true,
         r_rel, R_rel, r_abs, R_abs,
         Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D,
         false, 0.0, Modia3D.ZeroVector3D, SMatrix{3,3,Float64,9}(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
         feature, Modia3D.AbstractTwoObject3DObject[],
-        false, false, false, false, shapeKind, shape, visualMaterial, visualizeFrame,
+        false, false, false, false,
+        shapeKind, shape, visualMaterial, centroid,
+        visualizeFrame,
         Vector{Object3D}[],
         Vector{Object3D}[], Vector{Object3D}[],
         Vector{Object3D}[], Vector{Object3D}[], Vector{Object3D}[], Vector{Object3D}[],
@@ -311,17 +314,23 @@ function setShapeKind(feature)
     if typeof(feature) == Modia3D.Solid || typeof(feature) == Modia3D.Visual
         shapeKind = Modia3D.getShapeKind(feature.shape)
         shape = feature.shape
-        visualMaterial = feature.visualMaterial
+
+        centroid = Modia3D.ZeroVector3D
+        if typeof(feature) == Modia3D.Solid && !isnothing(shape)
+            centroid = Modia3D.centroid(shape)
+        end
+
         if shapeKind == Modia3D.UndefinedShapeKind
             shape = Modia3D.Sphere()
         end
+        visualMaterial = feature.visualMaterial
         if isnothing(visualMaterial)
             visualMaterial = Modia3D.VisualMaterial()
             @warn("No visualMaterial defined for ", shape)
         end
-        return shapeKind, shape, visualMaterial
+        return shapeKind, shape, visualMaterial, centroid
     else
-        return Modia3D.UndefinedShapeKind, Modia3D.Sphere(), Modia3D.VisualMaterial()
+        return Modia3D.UndefinedShapeKind, Modia3D.Sphere(), Modia3D.VisualMaterial(), Modia3D.ZeroVector3D
     end
 end
 

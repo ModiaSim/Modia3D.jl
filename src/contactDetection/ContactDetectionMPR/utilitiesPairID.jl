@@ -56,10 +56,16 @@ function orderPositions(is,i,js,j)
         error("from orderPositions: is == js.")
 end; end
 
-getPositionsOfObj(scene::Composition.Scene, obj::Composition.Object3D,
-                  movablePos::Nothing) = (false, 0, 0)
-getPositionsOfObj(scene::Composition.Scene, obj::Composition.Object3D,
-                  movablePos::Int64) = (true, movablePos, findall(x->x==obj, scene.superObjs[movablePos].superObjMovable.superObj)[1] )
+#getPositionsOfObj(scene::Composition.Scene, obj::Composition.Object3D,
+#                  movablePos::Nothing) = (false, 0, 0)
+function getPositionsOfObj(scene::Composition.Scene,
+            obj::Composition.Object3D, movablePos::Int64)
+    if movablePos == 0
+        return (false, 0, 0)
+    else
+        return (true, movablePos, findall(x->x==obj, scene.superObjs[movablePos].superObjMovable.superObj)[1] )
+    end
+end
 
 function computePairID(scene::Composition.Scene,
         actObj::Composition.Object3D, nextObj::Composition.Object3D,
