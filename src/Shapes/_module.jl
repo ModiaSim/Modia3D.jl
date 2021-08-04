@@ -39,7 +39,7 @@ export rgb, defaultColor, VisualMaterial, colorPalette, visualMaterialPalette
 
 # Visual elements
 export Sphere, Ellipsoid, Box, Cylinder, Capsule, Beam, Cone
-export Spring, GearWheel, CoordinateSystem, Grid, FileMesh
+export Spring, GearWheel, CoordinateSystem, Grid, FileMesh, ModelicaShape
 export changeDimensionsBox
 export Font, TextShape, Screen, XY_Plane, XZ_Plane, YZ_Plane, Left, Right, Center
 
@@ -74,12 +74,9 @@ export NoContactPairMaterial, ObserverContactPairMaterial, ImpulseContactPairMat
 export getShapeKind
 
 # for identifying shapes at compile time
-export ShapeKind, UndefinedShapeKind, SphereKind, EllipsoidKind, BoxKind, CylinderKind, ConeKind, CapsuleKind, BeamKind, FileMeshKind, CoordinateSystemKind, GridKind, SpringKind, GearWheelKind, TextKind
+export ShapeKind, UndefinedShapeKind, SphereKind, EllipsoidKind, BoxKind, CylinderKind, ConeKind, CapsuleKind, BeamKind, FileMeshKind, CoordinateSystemKind, GridKind, SpringKind, GearWheelKind, ModelicaKind, TextKind
 
-@enum ShapeKind UndefinedShapeKind SphereKind EllipsoidKind BoxKind CylinderKind ConeKind CapsuleKind BeamKind FileMeshKind CoordinateSystemKind GridKind SpringKind GearWheelKind TextKind
-
-
-
+@enum ShapeKind UndefinedShapeKind SphereKind EllipsoidKind BoxKind CylinderKind ConeKind CapsuleKind BeamKind FileMeshKind CoordinateSystemKind GridKind SpringKind GearWheelKind ModelicaKind TextKind
 
 include("color.jl")
 include("visualMaterial.jl")
@@ -88,7 +85,6 @@ include("geometry.jl")
 include("shape.jl")
 include("visual.jl")
 include("concaveProperties.jl")
-
 include("inertiaTensorAndVolume.jl")
 include("computePropertiesFileMes.jl")
 include("boundingBoxes.jl")

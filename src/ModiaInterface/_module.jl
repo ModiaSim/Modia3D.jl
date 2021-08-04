@@ -3,7 +3,7 @@ module ModiaInterface
 export Object3D, Scene, Visual, Solid
 export Box, Beam, Cylinder, Sphere, Ellipsoid
 export Cone, Capsule, GearWheel, Grid, SpringShape
-export CoordinateSystem, FileMesh
+export CoordinateSystem, FileMesh, ModelicaShape
 export Font, TextShape
 export VisualMaterial
 export MassProperties, MassPropertiesFromShape

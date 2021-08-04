@@ -131,17 +131,52 @@ mutable struct GearWheel <: Modia3D.AbstractShape
 end
 
 
-getShapeKind(shape::Sphere)    = SphereKind
-getShapeKind(shape::Ellipsoid) = EllipsoidKind
-getShapeKind(shape::Box)       = BoxKind
-getShapeKind(shape::Cylinder)  = CylinderKind
-getShapeKind(shape::Cone)      = ConeKind
-getShapeKind(shape::Capsule)   = CapsuleKind
-getShapeKind(shape::Beam)      = BeamKind
-getShapeKind(shape::FileMesh)  = FileMeshKind
-getShapeKind(shape::Spring)    = SpringKind
+"""
+    ModelicaShape(; type=1, lengthX=1.0, lengthY=1.0, lengthZ=1.0, extra=[0.0, 0.0, 0.0])
+
+Generate a new visual shape according to the [Modelica](https://modelica.org) [Visualization Library](https://www.systemcontrolinnovationlab.de/the-dlr-visualization-library/).
+
+# Arguments
+- `type` defines the type of the shape: 1=box; 2=sphere; 3=cylinder; 4=cone; 5=capsule; 6=coordinate system;
+  7=spring; 8=gearwheel; 9=pipe; 10=grid; 11=beam.
+- `lengthX` defines the length of the shape in x-direction.
+- `lengthY` defines the length of the shape in y-direction.
+- `lengthZ` defines the length of the shape in z-direction.
+- `extra` defines extra parameters for cone, pipe, spring and gearwheel.
+
+# Notes
+- ModelicaShape is intended for import of Modelica models and not for Modia3D models.
+- ModelicaShape is [not supported by animation export](https://github.com/ModiaSim/PrivateModia3D.jl/issues/77).
+"""
+mutable struct ModelicaShape <: Modia3D.AbstractShape
+    type::Int
+    lengthX::Float64
+    lengthY::Float64
+    lengthZ::Float64
+    extra::MVector{3,Float64}
+
+    function ModelicaShape(; type=1, lengthX=1.0, lengthY=1.0, lengthZ=1.0, extra=[0.0, 0.0, 0.0])
+        @assert(1 <= type <= 11)
+        @assert(lengthX >= 0.0)
+        @assert(lengthY >= 0.0)
+        @assert(lengthZ >= 0.0)
+        new(type, lengthX, lengthY, lengthZ, extra)
+    end
+end
+
+
+getShapeKind(shape::Sphere)           = SphereKind
+getShapeKind(shape::Ellipsoid)        = EllipsoidKind
+getShapeKind(shape::Box)              = BoxKind
+getShapeKind(shape::Cylinder)         = CylinderKind
+getShapeKind(shape::Cone)             = ConeKind
+getShapeKind(shape::Capsule)          = CapsuleKind
+getShapeKind(shape::Beam)             = BeamKind
+getShapeKind(shape::FileMesh)         = FileMeshKind
+getShapeKind(shape::Spring)           = SpringKind
 getShapeKind(shape::CoordinateSystem) = CoordinateSystemKind
-getShapeKind(shape::Grid)      = GridKind
-getShapeKind(shape::GearWheel) = GearWheelKind
-getShapeKind(shape::TextShape) = TextKind
-getShapeKind(shape)            = UndefinedShapeKind
+getShapeKind(shape::Grid)             = GridKind
+getShapeKind(shape::GearWheel)        = GearWheelKind
+getShapeKind(shape::ModelicaShape)    = ModelicaKind
+getShapeKind(shape::TextShape)        = TextKind
+getShapeKind(shape)                   = UndefinedShapeKind

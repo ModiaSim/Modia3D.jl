@@ -153,7 +153,7 @@ end
 export Object3D
 
 export Sphere, Ellipsoid, Box, Cylinder, Capsule, Beam, Cone
-export Spring, GearWheel, CoordinateSystem, Grid, FileMesh
+export Spring, GearWheel, CoordinateSystem, Grid, FileMesh, ModelicaShape
 
 export Solid, Visual
 export MassProperties
