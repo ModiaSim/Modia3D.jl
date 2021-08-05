@@ -72,19 +72,8 @@ end
 
 
 ###########      Phase 1, Minkowski Portal Refinement      ###################
-function getCentroid(obj::Composition.Object3D)
-    shapeKind = obj.shapeKind
-    centroidObj::SVector{3,Float64} = Modia3D.ZeroVector3D
-    if shapeKind == Modia3D.ConeKind
-        cone::Modia3D.Cone = obj.shape
-        centroidObj = Modia3D.centroid(cone)
-    elseif shapeKind == Modia3D.FileMeshKind
-        fileMesh::Modia3D.FileMesh = obj.shape
-        centroidObj =  Modia3D.centroid(fileMesh)
-    end
+@inline getCentroid(obj::Composition.Object3D) = (obj.r_abs + obj.R_abs'*obj.centroid)
 
-    return (obj.r_abs + obj.R_abs'*centroidObj)
-end
 
 # checks if centers of shapeA and shapeB are overlapping
 # belongs to construction of r0
