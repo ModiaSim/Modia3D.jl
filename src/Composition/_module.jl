@@ -32,8 +32,7 @@ export Revolute, setAngle!, connect
 export Prismatic, setDistance!
 export FreeMotion
 
-# export getModelResidues!, model_f1!, model_f2!
-export multibodyResiduals
+export multibodyResiduals!, setModiaJointVariables!
 
 export distanceAndAngles, distance, planarRotationAngle
 export measFrameRotation, measFramePosition, measFrameDistance
@@ -67,7 +66,7 @@ export fullName, instanceName
 
 export InteractionBehavior, Gripper, Movable, Lockable, NoInteraction
 
-export rot123fromR
+export rot123fromR, rot132fromR, Rfromrot123, Rfromrot132
 
 export supportPoint, boundingBox!
 

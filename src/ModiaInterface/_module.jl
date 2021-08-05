@@ -12,7 +12,7 @@ export UniformGravityField
 export RefPath, ptpJointSpace, scheduleReferenceMotion
 export calculateRobotMovement
 export getRefPathPosition, getRefPathInitPosition, getVariables
-export multibodyResiduals
+export multibodyResiduals!, setModiaJointVariables!
 export Fix
 export Revolute, RevoluteWithFlange
 export Prismatic, PrismaticWithFlange

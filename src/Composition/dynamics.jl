@@ -101,31 +101,26 @@ struct MultibodyData{FloatType}
 end
 
 
-function multibodyResiduals(id::Int, _leq_mode, simulationModel::ModiaLang.SimulationModel{FloatType}, time, qdd, args...)::Vector{FloatType} where {FloatType}
-     TimerOutputs.@timeit simulationModel.timer "Modia3D" begin
-        separateObjects = simulationModel.separateObjects  # is emptied for every new simulate! call
-        parameters      = simulationModel.evaluatedParameters
+"""
+    jointVariablesHaveValues = setModiaJointVariables!(_id, _leq_mode, instantiatedModel, time, args...)
+
+Set generalized variables (q, qd, f) defined in the Modia model for all joints.
+"""
+function setModiaJointVariables!(id::Int, _leq_mode, instantiatedModel::ModiaLang.SimulationModel{FloatType}, time, args...)::Bool where {FloatType}
+     TimerOutputs.@timeit instantiatedModel.timer "Modia3D_0" begin
+        separateObjects = instantiatedModel.separateObjects  # is emptied for every new simulate! call
         if haskey(separateObjects, id)
-            first = false
             mbs::MultibodyData{FloatType} = separateObjects[id]
-            @assert(length(qdd) == mbs.nqdd)
-            world           = mbs.world
             scene           = mbs.scene
             jointObjects    = mbs.jointObjects
             jointStartIndex = mbs.jointStartIndex
             jointNdof       = mbs.jointNdof
-            residuals       = mbs.residuals
-            cache_h         = mbs.cache_h
-            zStartIndex     = mbs.zStartIndex
-            nz              = mbs.nz
         else
-            first = true
-
             # Search in parameters and retrieve the name of the object with the required id
             # Instantiate the Modia3D system
             #mbsPar = getIdParameter(parameters, id)
-            #mbsObj = instantiateDependentObjects(simulationModel.modelModule, mbsPar)
-            (world, jointObjects) = checkMultibodySystemAndGetWorldAndJoints(simulationModel, id)
+            #mbsObj = instantiateDependentObjects(instantiatedModel.modelModule, mbsPar)
+            (world, jointObjects) = checkMultibodySystemAndGetWorldAndJoints(instantiatedModel, id)
 
             # Construct startIndex vector and number of degrees of freedom per joint
             nJoints         = length(jointObjects)
@@ -138,10 +133,6 @@ function multibodyResiduals(id::Int, _leq_mode, simulationModel::ModiaLang.Simul
                 j += jointNdof[i]
             end
             nqdd = j-1
-            if length(qdd) != nqdd
-                error("Bug in Modia3D/src/Composition/dynamics.jl or in the generated code:\n",
-                    "   length(qdd) = ", length(qdd), " is not identical to nqdd = ", nqdd)
-            end
 
             # Construct MultibodyData
             scene = initAnalysis2!(world)
@@ -149,35 +140,62 @@ function multibodyResiduals(id::Int, _leq_mode, simulationModel::ModiaLang.Simul
             cache_h   = zeros(FloatType,nqdd)
             if scene.options.enableContactDetection
                 nz = 2
-                zStartIndex = ModiaLang.addZeroCrossings(simulationModel, nz)
+                zStartIndex = ModiaLang.addZeroCrossings(instantiatedModel, nz)
             else
                 nz = 0
                 zStartIndex = 0
             end
-            mbs = MultibodyData{FloatType}(length(qdd), world, scene, jointObjects, jointStartIndex,
-                                        jointNdof, zStartIndex, nz, residuals, cache_h)
+            mbs = MultibodyData{FloatType}(nqdd, world, scene, jointObjects, jointStartIndex,
+                                           jointNdof, zStartIndex, nz, residuals, cache_h)
             separateObjects[id] = mbs
-
-            if simulationModel.options.log && scene.visualize
-                println("          Modia3D: Number of visual shapes = ", length(scene.allVisuElements))
-            end
 
             # Print
             if false
                 printScene(scene)
             end
+
+            if scene.visualize
+                TimerOutputs.@timeit instantiatedModel.timer "Modia3D_0 initializeVisualization" Modia3D.Composition.initializeVisualization(Modia3D.renderer[1], scene.allVisuElements)
+                if instantiatedModel.options.log
+                    println("        Modia3D: Number of visual shapes = ", length(scene.allVisuElements))
+                end
+            end
         end
 
-        # Copy generalized position, velocity, acceleration, force values in to the joints
+        # Copy generalized position, velocity, and force values in to the joints
         @assert(length(args) == length(jointObjects))
-        setJointVariables!(scene, jointObjects, args, qdd, jointStartIndex, jointNdof)::Nothing
+        setJointVariables_q_qd_f!(scene, jointObjects, jointStartIndex, jointNdof, args)
+    end
+    return true
+end
+
+
+
+function multibodyResiduals!(id::Int, _leq_mode, instantiatedModel::ModiaLang.SimulationModel{FloatType}, time, jointVariablesHaveValues::Bool, qdd)::Vector{FloatType} where {FloatType}
+     TimerOutputs.@timeit instantiatedModel.timer "Modia3D" begin
+        separateObjects = instantiatedModel.separateObjects  # is emptied for every new simulate! call
+        if !haskey(separateObjects, id)
+            error("Bug in Modia3D/src/composition/dynamics.jl: separateObjects[$id] is not defined.")
+        end
+        mbs::MultibodyData{FloatType} = separateObjects[id]
+        @assert(length(qdd) == mbs.nqdd)
+        world           = mbs.world
+        scene           = mbs.scene
+        jointObjects    = mbs.jointObjects
+        jointStartIndex = mbs.jointStartIndex
+        jointNdof       = mbs.jointNdof
+        residuals       = mbs.residuals
+        cache_h         = mbs.cache_h
+
+        # Set generalized joint accelerations
+        setJointVariables_qdd!(scene, jointObjects, jointStartIndex, jointNdof, qdd)
 
         # Compute residuals
         leq_mode = isnothing(_leq_mode) ? -1 : _leq_mode.mode
 
         # Method with improved efficiency
-        multibodyResiduals3!(simulationModel, scene, world, time, simulationModel.storeResult, first,
-                            ModiaLang.isTerminal(simulationModel) && leq_mode == -1, leq_mode)
+        multibodyResiduals3!(instantiatedModel, scene, world, time, instantiatedModel.storeResult,
+                             ModiaLang.isTerminal(instantiatedModel) && leq_mode == -1, leq_mode)
 
         # Copy the joint residuals in to the residuals vector
         if leq_mode == 0
@@ -233,18 +251,10 @@ For Modia3D:
                    return res := res + cache_h
 =#
 
-function multibodyResiduals3!(sim, scene, world, time, storeResults, isFirstInitial, isTerminal, leq_mode)
+function multibodyResiduals3!(sim, scene, world, time, storeResults, isTerminal, leq_mode)
     tree            = scene.treeForComputation
     visualize       = scene.visualize   # && sim.model.visualiz
     exportAnimation = scene.exportAnimation
-
-    # Handle initialization and termination of model
-    # if Modia.isFirstInitialOfAllSegments(sim)
-    if isFirstInitial
-        if visualize
-            TimerOutputs.@timeit sim.timer "Modia3D_0 initializeVisualization" Modia3D.Composition.initializeVisualization(Modia3D.renderer[1], scene.allVisuElements)
-        end
-    end
 
     if isTerminal  #if Modia.isTerminalOfAllSegments(sim)
         TimerOutputs.@timeit sim.timer "Modia3D_4 isTerminal" begin
@@ -333,9 +343,9 @@ function multibodyResiduals3!(sim, scene, world, time, storeResults, isFirstInit
                 if abs(sim.options.startTime + scene.outputCounter*sim.options.interval - time) < 1.0e-6*(abs(time) + 1.0)
                     # Visualize at a communication point
                     scene.outputCounter += 1
-                    if sim.options.log
-                        println("time = $time")
-                    end
+                    #if sim.options.log
+                    #    println("time = $time")
+                    #end
                     # Compute positions of frames that are only used for visualization
                     TimerOutputs.@timeit sim.timer "Modia3D_3 visualize!" begin
                         if scene.options.useOptimizedStructure
