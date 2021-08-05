@@ -17,10 +17,11 @@ end
     joint = FreeMotion(; obj1, obj2, path="", r, rot, v, w)
 
 Return a `joint` that describes the free movement of `obj2::`[`Object3D`](@ref)
-with respect to `obj1::`[`Object3D`](@ref). The initial position is `r` and the
-initial orientation is `rot` in [Cardan (Tait–Bryan) angles](https://en.wikipedia.org/wiki/Euler_angles#Chained_rotations_equivalence)
-(rotation sequence x-y-z). `v` and `w` are the initial cartesian translational
-and rotational velocity vectors.
+with respect to `obj1::`[`Object3D`](@ref). The initial position is `r`
+(resolved in `obj1`) and the initial orientation is `rot` in [Cardan (Tait–Bryan) angles](https://en.wikipedia.org/wiki/Euler_angles#Chained_rotations_equivalence)
+(rotation sequence x-y-z from `obj1` to `obj2`). `v` (resolved in `obj1`) and `w`
+(resolved in `obj2`) are the initial cartesian translational and rotational
+velocity vectors.
 """
 mutable struct FreeMotion <: Modia3D.AbstractJoint
     path::String

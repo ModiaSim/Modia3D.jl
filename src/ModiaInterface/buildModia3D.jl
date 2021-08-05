@@ -43,7 +43,8 @@ function buildModia3D(model)    #(model; path="")
 
     mbsCode = Model(_id = rand(Int),
                     _qdd = Var(start = zeros(ndofTotal)),
-                    mbs_equations = :[0 = multibodyResiduals(_id, _leq_mode, instantiatedModel, time, _qdd, $(args...))
+                    mbs_equations = :[jointVariablesHaveValues = setModiaJointVariables!(_id, _leq_mode, instantiatedModel, time, $(args...))
+                                      0 = multibodyResiduals!(_id, _leq_mode, instantiatedModel, time, jointVariablesHaveValues, _qdd)
                                       $(code...)])
 
                     #mbs_equations = :[zeros($ndofTotal) = multibodyResiduals(_id, _leq_mode, instantiatedModel, time, _qdd, $(args...))

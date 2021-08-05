@@ -38,7 +38,8 @@ getRefPathInitPosition(args...) = Modia3D.getRefPathInitPosition(args...)
 
 getVariables(args...) = (args...,)
 
-multibodyResiduals(args...) = Modia3D.multibodyResiduals(args...)
+multibodyResiduals!(args...)     = Modia3D.multibodyResiduals!(args...)
+setModiaJointVariables!(args...) = Modia3D.setModiaJointVariables!(args...)
 
 Revolute(; obj1, obj2, axis=3, phi=Var(init=0.0), w=Var(init=0.0), canCollide=true) = Model(; _constructor = Par(value = :(Modia3D.Revolute), _path = true, ndof = 1),
     obj1 = Par(value = obj1),
