@@ -323,13 +323,8 @@ function mprGeneral(ch::Composition.ContactDetectionMPR_handler, shapeA::Composi
             #end
             distance = -dot(r4.n, r4.p)
             barycentric(r1,r2,r3,r4)
-            # println("r4.a = ", r4.a, ", r4.b = ", r4.b, " ,r1.a = ", r1.a, " ,r1.b = ", r1.b," ,r2.a = ", r2.a, " ,r2.b = ",r2.b," ,r3.a = ",r3.a," ,r3.b = ",r3.b)
-            (sphereWithOthers,contactPointA, contactPointB) = handleSphereWithOtherShapes(shapeA, shapeB, r4.n, distance)
-        if sphereWithOthers
-            return (distance, contactPointA, contactPointB, r4.n, true, r1.a, r1.b, r2.a, r2.b, r3.a, r3.b)
-        else
+
             return (distance, r4.a, r4.b, r4.n, true, r1.a, r1.b, r2.a, r2.b, r3.a, r3.b)
-        end
 
         ## TERMINATION CONDITION 3 ##
         elseif abs(dot(r4.p-r1.p, r4.n)) < tol_rel
@@ -344,20 +339,8 @@ function mprGeneral(ch::Composition.ContactDetectionMPR_handler, shapeA::Composi
             #end
             (r4.p, distance) = signedDistanceToPortal(r0.p,r1.p,r2.p,r3.p)
             barycentric(r1,r2,r3,r4)
-            # println("r4.n = ", r4.n)
 
-            (sphereWithOthers,contactPointA, contactPointB) = handleSphereWithOtherShapes(shapeA, shapeB, r4.n, distance)
-            if sphereWithOthers
-                #rContact = (contactPointA + contactPointB)/2
-                #Printf.@printf("TC3: contact normal = [%.3g,%.3g,%.3g], contact position = [%.3g,%.3g,%.3g]\n",
-                #             r4.n[1],r4.n[2],r4.n[3],rContact[1],rContact[2],rContact[3])
-
-                return (distance, contactPointA, contactPointB, r4.n, true, r1.a, r1.b, r2.a, r2.b, r3.a, r3.b)
-            else
-                return (distance, r4.a, r4.b, r4.n, true, r1.a, r1.b, r2.a, r2.b, r3.a, r3.b)
-            end
-            #println("r4.a = ", r4.a, ", r4.b = ", r4.b, " ,r1.a = ", r1.a, " ,r1.b = ", r1.b," ,r2.a = ", r2.a, " ,r2.b = ",r2.b," ,r3.a = ",r3.a," ,r3.b = ",r3.b)
-
+            return (distance, r4.a, r4.b, r4.n, true, r1.a, r1.b, r2.a, r2.b, r3.a, r3.b)
         end
 
         #### Phase 3.3: construct baby tetrahedrons with r1,r2,r3,r4 and create a new portal ###
@@ -399,33 +382,6 @@ function mprTwoSpheres(ch::Composition.ContactDetectionMPR_handler, shapeA::Comp
 end
 
 
-function handleSphereWithOtherShapes(shapeA::Composition.Object3D, shapeB::Composition.Object3D, normal::SVector{3,Float64}, distance::Float64)::Tuple{Bool, SVector{3,Float64}, SVector{3,Float64}}
-    # normal is pointing from shapeA to shapeB
-    shapeKindA = shapeA.shapeKind
-    shapeKindB = shapeB.shapeKind
-
-    if shapeKindA != Modia3D.SphereKind && shapeKindB != Modia3D.SphereKind
-        return (false, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D)
-    elseif shapeKindA == Modia3D.SphereKind
-        centroidSphere = getCentroid(shapeA)
-        sphereA::Shapes.Sphere = shapeA.shape
-        radius = sphereA.diameter*0.5
-        contactPointSphere = centroidSphere + radius*normal
-        contactPointOtherShape = contactPointSphere + distance*normal
-        return (true, contactPointSphere, contactPointOtherShape)
-    elseif shapeKindB == Modia3D.SphereKind
-        normal = -normal
-        centroidSphere = getCentroid(shapeB)
-        sphereB::Shapes.Sphere = shapeB.shape
-        radius = sphereB.diameter*0.5
-        contactPointSphere = centroidSphere + radius*normal
-        contactPointOtherShape = contactPointSphere + distance*normal # distance is negative (otherwise direction of normal must be changed)
-        return (true, contactPointOtherShape, contactPointSphere)
-    end
-end
-
-
-
 function mpr(ch::Composition.ContactDetectionMPR_handler, shapeA::Composition.Object3D, shapeB::Modia3D.Composition.Object3D)
     shapeKindA = shapeA.shapeKind
     shapeKindB = shapeB.shapeKind
@@ -433,8 +389,34 @@ function mpr(ch::Composition.ContactDetectionMPR_handler, shapeA::Composition.Ob
     if shapeKindA == Modia3D.SphereKind && shapeKindB == Modia3D.SphereKind
         sphereA::Shapes.Sphere = shapeA.shape
         sphereB::Shapes.Sphere = shapeB.shape
-        mprTwoSpheres(ch, shapeA, shapeB, sphereA, sphereB)
+        (distance, contactPoint1, contactPoint2, normal, supportPointsDefined,
+        support1A, support1B, support2A, support2B, support3A, support3B) = mprTwoSpheres(ch, shapeA, shapeB, sphereA, sphereB)
+    elseif shapeKindA != Modia3D.SphereKind && shapeKindB != Modia3D.SphereKind
+        (distance, contactPoint1, contactPoint2, normal, supportPointsDefined,
+        support1A, support1B, support2A, support2B, support3A, support3B) = mprGeneral(ch, shapeA, shapeB)
     else
-        mprGeneral(ch, shapeA, shapeB)
+        (distance, contactPoint1, contactPoint2, normal, supportPointsDefined,
+        support1A, support1B, support2A, support2B, support3A, support3B) = mprGeneral(ch, shapeA, shapeB)
+
+        if shapeKindA == Modia3D.SphereKind
+            centroidSphere = getCentroid(shapeA)
+            sphereA1::Shapes.Sphere = shapeA.shape
+            radius = sphereA1.diameter*0.5
+            contactPointSphere = centroidSphere + radius*normal
+            contactPointOtherShape = contactPointSphere + distance*normal
+            contactPoint1 = contactPointSphere
+            contactPoint2 = contactPointOtherShape
+        elseif shapeKindB == Modia3D.SphereKind
+            normalLocal = -normal
+            centroidSphere = getCentroid(shapeB)
+            sphereB1::Shapes.Sphere = shapeB.shape
+            radius = sphereB1.diameter*0.5
+            contactPointSphere = centroidSphere + radius*normalLocal
+            contactPointOtherShape = contactPointSphere + distance*normalLocal # distance is negative (otherwise direction of normal must be changed)
+            contactPoint1 = contactPointOtherShape
+            contactPoint2 = contactPointSphere
+        end
     end
+    return (distance, contactPoint1, contactPoint2, normal, supportPointsDefined,
+    support1A, support1B, support2A, support2B, support3A, support3B)
 end
