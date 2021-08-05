@@ -343,9 +343,9 @@ function multibodyResiduals3!(sim, scene, world, time, storeResults, isTerminal,
                 if abs(sim.options.startTime + scene.outputCounter*sim.options.interval - time) < 1.0e-6*(abs(time) + 1.0)
                     # Visualize at a communication point
                     scene.outputCounter += 1
-                    if sim.options.log
-                        println("time = $time")
-                    end
+                    #if sim.options.log
+                    #    println("time = $time")
+                    #end
                     # Compute positions of frames that are only used for visualization
                     TimerOutputs.@timeit sim.timer "Modia3D_3 visualize!" begin
                         if scene.options.useOptimizedStructure
