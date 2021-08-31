@@ -5,7 +5,7 @@
 # VHACD(): decomposes a concave file mesh in convex sub parts
 #          see: https://github.com/kmammou/v-hacd
 
-function getObjInfos(filename::AbstractString, scaleFactor::MVector{3,Float64})
+function getObjInfos(filename::AbstractString, scaleFactor::SVector{3,Float64})
     objPoints = Vector{SVector{3,Float64}}()
     facesIndizes = Vector{SVector{3,Int64}}()
     areTriangles::Bool = true
