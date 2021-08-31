@@ -146,7 +146,7 @@ function visualizeObject(obj::Composition.Object3D, id::Ptr{Nothing}, simVis::Si
     elseif shapeKind == Modia3D.FileMeshKind
         fileMesh::Modia3D.FileMesh = obj.shape
         SimVis_setFileObject(simVis, id, Cint(0), obj.r_abs, obj.R_abs,
-                             fileMesh.scaleFactor, Cint(obj.visualMaterial.reflectslight), obj.visualMaterial.shininess, obj.visualMaterial.transparency, Cint(obj.visualMaterial.wireframe), Cint(0),
+                             MVector{3,Float64}(fileMesh.scaleFactor), Cint(obj.visualMaterial.reflectslight), obj.visualMaterial.shininess, obj.visualMaterial.transparency, Cint(obj.visualMaterial.wireframe), Cint(0),
                              fileMesh.filename, Cint(fileMesh.smoothNormals), fileMesh.useMaterialColor, MVector{3,Cint}(obj.visualMaterial.color),
                              Cint(obj.visualMaterial.shadowMask), emptyShaderName)
 

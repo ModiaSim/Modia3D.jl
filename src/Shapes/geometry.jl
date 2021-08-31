@@ -224,7 +224,7 @@ The reference frame = Object3D frame is defined by the mesh data.
 """
 mutable struct FileMesh <: Modia3D.AbstractGeometry
     filename::AbstractString
-    scaleFactor::MVector{3,Float64}
+    scaleFactor::SVector{3,Float64}
     useMaterialColor::Bool
     smoothNormals::Bool
     convexPartition::Bool
