@@ -36,7 +36,9 @@ plot(bouncingSphere, "free.r", figure=1)
 
 end
 ```
+The commands above generate an instance of the model, simulate it and generate the following plot:
 
+![Tutorial-Collision](../../resources/images/Tutorial/bouncingSphere.png)
 
 Note:
 

@@ -8,7 +8,7 @@ An [Object3D](@ref) constructor is the core element of Modia3D. It defines a coo
 
 ## 1. Pendulum
 
-In the following example a simple pendulum is defined (this is a copy of `$(Modia3D.path)/test/Tutorial/Pendulum1.jl`):
+In the following example a simple pendulum is defined. This example is a copy of: `$(Modia3D.path)/test/Tutorial/Pendulum1.jl`
 
 ```julia
 module Pendulum1
@@ -25,9 +25,14 @@ Pendulum = Model(
 pendulum = @instantiateModel(buildModia3D(Pendulum), unitless=true)
 simulate!(pendulum, stopTime=3.0)
 
-@usingModiaPlot   # use the plot package defined by ENV["MODIA_PLOT"]
+@usingModiaPlot     # use the plot package defined by ENV["MODIA_PLOT"]
 plot(pendulum, "rev.phi")
 end
+```
+or
+```julia
+import Modia3D
+include("$(Modia3D.path)/test/Tutorial/Pendulum1.jl")
 ```
 
 The `world` [Object3D](@ref) has feature [Scene](@ref) and is therefore the inertial system. The `body` Object3D is a [Solid](@ref) and defines the pendulum as a mass point with `mass = 1.0`. The `bodyFrame` Object3D defines a coordinate system on the `body` that is translated along the x-axis. A revolute joint connects `world` with `bodyFrame`.
@@ -41,7 +46,7 @@ The commands above generate an instance of the model, simulate it and generate t
 
 ## 2. Pendulum with Animation
 
-The Object3Ds of the first example are extended with [Visual](@ref) and [Solid](@ref) features in order that the pendulum parts are visualized and exported for offline animation by defining `animationFile = "Pendulum2.json"` in [Scene](@ref). The first Object3D `obj1` is defined as a solid [Box](@ref) with `"Blue"`color and its [Solid material](@ref) is made of `"Steel"`. Mass, center of mass and inertia tensor are computed from Steel density and from the [Box](@ref) shape. The second Object3D `obj2` is a visual red [Cylinder](@ref) that is used to visualize the axis of the revolute joint.
+The Object3Ds of the first example are extended with [Visual](@ref) and [Solid](@ref) features in order that the pendulum parts are visualized and exported for offline animation by defining `animationFile = "Pendulum2.json"` in [Scene](@ref). The first Object3D `obj1` is defined as a solid [Box](@ref) with `"Blue"`color and its [Solid material](@ref) is made of `"Steel"`. Mass, center of mass and inertia tensor are computed from Steel density and from the [Box](@ref) shape. The second Object3D `obj2` is a visual red [Cylinder](@ref) that is used to visualize the axis of the revolute joint. Please, see example: `$(Modia3D.path)/test/Tutorial/Pendulum2.jl`
 
 ```julia
 module Pendulum2
@@ -64,10 +69,15 @@ simulate!(pendulum, stopTime=3.0)
 plot(pendulum, "rev.phi")
 end
 ```
+or
+```julia
+import Modia3D
+include("$(Modia3D.path)/test/Tutorial/Pendulum2.jl")
+```
 
 Open [https://threejs.org/editor/](https://threejs.org/editor/), import the json file (File --> Import) and inspect the model in threejs:
 
-![Tutorial-Pendulum3](../../resources/images/Tutorial/threejs.png)
+![Tutorial-Pendulum2](../../resources/images/Tutorial/threejs.png)
 
 
 Export the animation in glb format (File --> Export GLB) and use an glb/glTF-viewer to inspect the animation (for example the 3D-Viewer of Windows 10).
@@ -76,16 +86,14 @@ Export the animation in glb format (File --> Export GLB) and use an glb/glTF-vie
 
 ## 3. Pendulum with Modia equations
 
-The pendulum model from the previous section is extended with a damper that is defined with Modia language components and models the damping (sliding friction) in the revolute joint. In order that this is possible, a `RevoluteWithFlange` joints has to be used that provides a `Flange` connector to which a rotational 1-dim. `Flange` of Modia can be connected. This flange and the Damper, and the Fixed component are defined in a small Modia model library that is included via`include("$(Modia.path)/models/AllModels.jl")`.
+The pendulum model from the previous section is extended with a damper that is defined with Modia language components and models the damping (sliding friction) in the revolute joint. In order that this is possible, a `RevoluteWithFlange` joints has to be used that provides a `Flange` connector to which a rotational 1-dim. `Flange` of Modia can be connected. This flange and the Damper, and the Fixed component are defined in a small Modia model library that is included via`include("$(Modia.path)/models/AllModels.jl")`. Please, see example: `$(Modia3D.path)/test/Tutorial/Pendulum3.jl`
 
 ```julia
 module Pendulum3
 
 using  Modia
-import Modia3D
-using  Modia3D.ModiaInterface
 
-# Modia Modia equation-based models
+# Modia equation-based models
 include("$(Modia.modelsPath)/AllModels.jl")
 
 Pendulum = Model(
@@ -96,7 +104,6 @@ Pendulum = Model(
                 visualMaterial=VisualMaterial(color="Red")), translation=[-0.5, 0.0, 0.0]),
     rev   = RevoluteWithFlange(obj1=:world, obj2=:obj2),
 
-    # combine equation based modeling with 3D models
     damper  = Damper | Map(d=100.0),
     fixed   = Fixed,
     connect = :[(damper.flange_b, rev.flange),
@@ -110,11 +117,15 @@ simulate!(pendulum, stopTime=3.0)
 plot(pendulum, "rev.phi")
 end
 ```
+or
+```julia
+import Modia3D
+include("$(Modia3D.path)/test/Tutorial/Pendulum3.jl")
+```
 
 The commands above generate an instance of the model, simulate it and generate the following plot:
 
-![Pendulum3](../../resources/images/Tutorial/Pendulum3.png)
-
+![Tutorial-Pendulum3](../../resources/images/Tutorial/Pendulum3.png)
 
 
 ## 4. Example and Test Models
@@ -126,7 +137,7 @@ All examples of this tutorial are stored in `$(Modia3D.path)/test/Tutorial`.
   include("$(Modia3D.path)/test/Tutorial/Pendulum1.jl")
   include("$(Modia3D.path)/test/Tutorial/Pendulum2.jl")
   include("$(Modia3D.path)/test/Tutorial/Pendulum3.jl")
-  include("$(Modia3D.path)/test/Collision/NewtonsCradle.jl")
+  include("$(Modia3D.path)/test/Tutorial/BouncingSphere.jl")
 ```
 
 To run all tests, execute:
