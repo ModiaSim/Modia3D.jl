@@ -5,7 +5,7 @@ using Modia
 BouncingSphere = Model(
     boxHeigth = 0.1,
     world      = Object3D(feature=Scene(enableContactDetection = true, # default value
-    animationFile="BouncingSphere.json")),
+                        animationFile="BouncingSphere.json")),
     ground     = Object3D(parent=:world, translation=:[0.0,-boxHeigth/2,0.0],
                     feature=Solid(shape=Box(lengthX=4.0, lengthY=:boxHeigth, lengthZ=0.7),
                         visualMaterial=VisualMaterial(color="DarkGreen"),

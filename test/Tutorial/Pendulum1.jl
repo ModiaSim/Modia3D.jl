@@ -9,9 +9,9 @@ Pendulum = Model(
     rev       = Revolute(obj1=:world, obj2=:bodyFrame)
 )
 
-pendulum = @instantiateModel(buildModia3D(Pendulum))
+pendulum = @instantiateModel(buildModia3D(Pendulum), unitless=true)
 simulate!(pendulum, stopTime=3.0)
 
-@usingModiaPlot
+@usingModiaPlot     # use the plot package defined by ENV["MODIA_PLOT"]
 plot(pendulum, "rev.phi")
 end
