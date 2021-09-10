@@ -87,6 +87,28 @@ function exportObject(object, elements, obj::Modia3D.Composition.Object3D, cone:
     return (r_obj, R_obj)
 end
 
+function exportObject(object, elements, obj::Modia3D.Composition.Object3D, capsule::Modia3D.Shapes.Capsule, initPos, initRot)
+    r_obj = Modia3D.ZeroVector3D
+    R_obj = Shapes.rotateAxis2y(capsule.axis, Modia3D.NullRotation)
+    name = String(Modia3D.fullName(obj)) * ".geometry"
+    points = []
+    for i in -9:0
+        angle = i/9 * pi/2
+        point = (; x=capsule.diameter/2*cos(angle), y=-capsule.length/2+capsule.diameter/2*sin(angle))
+        push!(points, point)
+    end
+    for i in 0:9
+        angle = i/9 * pi/2
+        point = (; x=capsule.diameter/2*cos(angle), y=capsule.length/2+capsule.diameter/2*sin(angle))
+        push!(points, point)
+    end
+    geometry = (; name=name, uuid=name2uuid(name), type="LatheGeometry", points=points, phiStart=0, phiLength=2*pi, segments=32)
+    material = printVisuMaterialToJSON(obj, obj.visualMaterial)
+    objectInfo = getObjectInfo(obj, geometry, material, initPos, initRot, R_obj=R_obj)
+    printInfoToFile(object, elements, geometry, material, nothing, objectInfo)
+    return (r_obj, R_obj)
+end
+
 function exportObject(object, elements, obj::Modia3D.Composition.Object3D, beam::Modia3D.Shapes.Beam, initPos, initRot)
     if beam.axis == 1
         r_obj = @SVector[0.0, 0.0, -beam.thickness/2]
@@ -205,6 +227,10 @@ function printObjectToJSON(object, elements, obj; initPos=obj.r_abs, initRot=obj
     elseif shapeKind == Modia3D.ConeKind
         cone::Modia3D.Shapes.Cone = obj.shape
         (r_obj, R_obj) = exportObject(object, elements, obj, cone, initPos, initRot)
+
+    elseif shapeKind == Modia3D.CapsuleKind
+        capsule::Modia3D.Shapes.Capsule = obj.shape
+        (r_obj, R_obj) = exportObject(object, elements, obj, capsule, initPos, initRot)
 
     elseif shapeKind == Modia3D.BeamKind
         beam::Modia3D.Shapes.Beam = obj.shape
@@ -329,7 +355,7 @@ function exportAnimation(scene)
         end
 
         io = open(animationFile, "w")
-        JSON.print(io, scene, 2)  # 3rd parameter: nothing = not human readable; 0 = no indentation; n = number of indentation spaces
+        JSON.print(io, scene, 0)  # 3rd parameter: nothing = not human readable; 0 = no indentation; n = number of indentation spaces
         close(io)
 
         println("done.")

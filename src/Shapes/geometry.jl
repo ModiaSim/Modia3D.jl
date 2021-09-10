@@ -149,7 +149,6 @@ The reference frame = Object3D frame is located at the center of the capsule.
 
 # Notes
 - Some versions of SimVis visualize [half ellipsoids with semi-axis length `length/2` instead of spheres with diameter `diameter`](https://github.com/ModiaSim/PrivateModia3D.jl/issues/54).
-- Capsule is [not supported by animation export](https://github.com/ModiaSim/PrivateModia3D.jl/issues/77).
 """
 mutable struct Capsule <: Modia3D.AbstractGeometry
     axis::Int
