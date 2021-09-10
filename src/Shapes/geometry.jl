@@ -184,8 +184,6 @@ The dimension directions depend on `axis` by circularly shift:
 |   2    |   y      |   z     |   x         |
 |   3    |   z      |   x     |   y         |
 
-# Notes
-- Beam is [not supported by animation export](https://github.com/ModiaSim/PrivateModia3D.jl/issues/77).
 """
 mutable struct Beam <: Modia3D.AbstractGeometry
     axis::Int
