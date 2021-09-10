@@ -92,7 +92,7 @@ The reference frame = Object3D frame is located at the center of the cylinder.
 - `innerDiameter` defines the inner diameter of the cylinder (where `innerDiameter=0` defines a full cylinder).
 
 # Notes
-- `innerDiameter` is not supported by collision and animation export.
+- `innerDiameter` is not supported by collision.
 """
 mutable struct Cylinder <: Modia3D.AbstractGeometry
     axis::Int

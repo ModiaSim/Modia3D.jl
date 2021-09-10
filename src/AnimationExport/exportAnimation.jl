@@ -39,13 +39,34 @@ function exportObject(object, elements, obj::Modia3D.Composition.Object3D, box::
 end
 
 function exportObject(object, elements, obj::Modia3D.Composition.Object3D, cylinder::Modia3D.Shapes.Cylinder, initPos, initRot)
-    r_obj = Modia3D.ZeroVector3D
-    R_obj = Shapes.rotateAxis2y(cylinder.axis, Modia3D.NullRotation)
     name = String(Modia3D.fullName(obj)) * ".geometry"
-    geometry = (; name=name, uuid=name2uuid(name), type="CylinderBufferGeometry", radiusBottom=cylinder.diameter/2, radiusTop=cylinder.diameter/2, height=cylinder.length, radialSegments=32, heightSegments=1)
     material = printVisuMaterialToJSON(obj, obj.visualMaterial)
-    objectInfo = getObjectInfo(obj, geometry, material, initPos, initRot, R_obj=R_obj)
-    printInfoToFile(object, elements, geometry, material, nothing, objectInfo)
+    if cylinder.innerDiameter == 0.0
+        r_obj = Modia3D.ZeroVector3D
+        R_obj = Shapes.rotateAxis2y(cylinder.axis, Modia3D.NullRotation)
+        shape = nothing
+        geometry = (; name=name, uuid=name2uuid(name), type="CylinderBufferGeometry", radiusBottom=cylinder.diameter/2, radiusTop=cylinder.diameter/2, height=cylinder.length, radialSegments=32, heightSegments=1)
+        objectInfo = getObjectInfo(obj, geometry, material, initPos, initRot, R_obj=R_obj)
+    else
+        if cylinder.axis == 1
+            r_obj = @SVector[-cylinder.length/2, 0.0, 0.0]
+        elseif cylinder.axis == 2
+            r_obj = @SVector[0.0, -cylinder.length/2, 0.0]
+        else
+            r_obj = @SVector[0.0, 0.0, -cylinder.length/2]
+        end
+        R_obj = Shapes.rotateAxis2z(cylinder.axis, Modia3D.NullRotation)
+        innerCurves = [(; type="EllipseCurve", aX=0, aY=0, xRadius=cylinder.innerDiameter/2, yRadius=cylinder.innerDiameter/2, aStartAngle=0, aEndAngle=2*pi, aClockwise=false, aRotation=0)]
+        holes = [(; type="Path", curves=innerCurves, currentPoint=[0, 0])]
+        curves = [(; type="EllipseCurve", aX=0, aY=0, xRadius=cylinder.diameter/2, yRadius=cylinder.diameter/2, aStartAngle=0, aEndAngle=2*pi, aClockwise=false, aRotation=0)]
+        shapeName = String(Modia3D.fullName(obj)) * ".shape"
+        shapeUuid = name2uuid(shapeName)
+        shape = (; name=shapeName, uuid=shapeUuid, type="Shape", curves=curves, holes=holes, currentPoint=[0, 0])
+        options = (; depth=cylinder.length, bevelEnabled=false)
+        geometry = (; name=name, uuid=name2uuid(name), type="ExtrudeGeometry", shapes=[shapeUuid], options=options)
+        objectInfo = getObjectInfo(obj, geometry, material, initPos, initRot, r_obj=r_obj, R_obj=R_obj)
+    end
+    printInfoToFile(object, elements, geometry, material, shape, objectInfo)
     return (r_obj, R_obj)
 end
 
