@@ -77,7 +77,7 @@ import Modia3D
 include("$(Modia3D.path)/test/Tutorial/Pendulum2.jl")
 ```
 
-Open the [three.js editor](https://threejs.org/editor/), import the [json file](https://github.com/mrdoob/three.js/wiki/JSON-Object-Scene-format-4) `$(Modia3D.path)/Pendulum2.json` (File --> Import) and inspect the model:
+Open the [three.js editor](https://threejs.org/editor/), import (File --> Import) the [json file](https://github.com/mrdoob/three.js/wiki/JSON-Object-Scene-format-4) `Pendulum2.json` in your working directory and inspect the model:
 
 ![Tutorial-Pendulum2](../../resources/images/Tutorial/threejs_editor.png)
 
