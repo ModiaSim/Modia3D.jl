@@ -1,3 +1,40 @@
+# add shape rotation so that `axis` becomes x-axis
+function rotateAxis2x(axis, R_abs)
+    if axis == 2
+        Rabs = @SMatrix[0 1 0; 0 0 1; 1 0 0] * R_abs
+    elseif axis == 3
+        Rabs = @SMatrix[0 0 1; 1 0 0; 0 1 0] * R_abs
+    else
+        Rabs = R_abs
+    end
+    return Rabs
+end
+
+# add shape rotation so that `axis` becomes y-axis
+function rotateAxis2y(axis, R_abs)
+    if axis == 3
+        Rabs = @SMatrix[0 1 0; 0 0 1; 1 0 0] * R_abs
+    elseif axis == 1
+        Rabs = @SMatrix[0 0 1; 1 0 0; 0 1 0] * R_abs
+    else
+        Rabs = R_abs
+    end
+    return Rabs
+end
+
+# add shape rotation so that `axis` becomes z-axis
+function rotateAxis2z(axis, R_abs)
+    if axis == 1
+        Rabs = @SMatrix[0 1 0; 0 0 1; 1 0 0] * R_abs
+    elseif axis == 2
+        Rabs = @SMatrix[0 0 1; 1 0 0; 0 1 0] * R_abs
+    else
+        Rabs = R_abs
+    end
+    return Rabs
+end
+
+
 # Utility functions for FileMesh.jl
 # getObjInfos(): read file and returns: centroid, longestEdge and all objPoints
 # Remark: at the moment it only works for .obj files

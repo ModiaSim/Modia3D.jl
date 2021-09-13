@@ -71,6 +71,7 @@ export contactPairMaterialPalette, ElasticContactPairMaterial, TwoNamesKey
 
 export NoContactPairMaterial, ObserverContactPairMaterial, ImpulseContactPairMaterial, WheelRailContactPairMaterial
 
+export rotateAxis2x, rotateAxis2y, rotateAxis2z
 export getShapeKind
 
 # for identifying shapes at compile time

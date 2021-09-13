@@ -92,7 +92,7 @@ The reference frame = Object3D frame is located at the center of the cylinder.
 - `innerDiameter` defines the inner diameter of the cylinder (where `innerDiameter=0` defines a full cylinder).
 
 # Notes
-- `innerDiameter` is not supported by collision and animation export.
+- `innerDiameter` is not supported by collision.
 """
 mutable struct Cylinder <: Modia3D.AbstractGeometry
     axis::Int
@@ -149,7 +149,6 @@ The reference frame = Object3D frame is located at the center of the capsule.
 
 # Notes
 - Some versions of SimVis visualize [half ellipsoids with semi-axis length `length/2` instead of spheres with diameter `diameter`](https://github.com/ModiaSim/PrivateModia3D.jl/issues/54).
-- Capsule is [not supported by animation export](https://github.com/ModiaSim/PrivateModia3D.jl/issues/77).
 """
 mutable struct Capsule <: Modia3D.AbstractGeometry
     axis::Int
@@ -184,8 +183,6 @@ The dimension directions depend on `axis` by circularly shift:
 |   2    |   y      |   z     |   x         |
 |   3    |   z      |   x     |   y         |
 
-# Notes
-- Beam is [not supported by animation export](https://github.com/ModiaSim/PrivateModia3D.jl/issues/77).
 """
 mutable struct Beam <: Modia3D.AbstractGeometry
     axis::Int

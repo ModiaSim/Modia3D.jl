@@ -1,86 +1,151 @@
 
 function name2uuid(name::String)
     u4 = UUIDs.UUID("07f2c1e0-90b0-56cf-bda7-b44b56e34eed")  # Modia3D package UUID
-    uuid = string(UUIDs.uuid5(u4, name))
+    return string(UUIDs.uuid5(u4, name))
 end
 
 
-function exportObject(object, shapes, obj::Modia3D.Composition.Object3D, sphere::Modia3D.Shapes.Sphere, initPos, initRot)
+function exportObject(object, elements, obj::Modia3D.Composition.Object3D, sphere::Modia3D.Shapes.Sphere, initPos, initRot)
     r_obj = Modia3D.ZeroVector3D
     R_obj = Modia3D.NullRotation
     name = String(Modia3D.fullName(obj)) * ".geometry"
-    shape = (; name=name, uuid=name2uuid(name), type="SphereBufferGeometry", radius=sphere.diameter/2, heightSegments=16, widthSegments=32)
+    geometry = (; name=name, uuid=name2uuid(name), type="SphereBufferGeometry", radius=sphere.diameter/2, heightSegments=16, widthSegments=32)
     material = printVisuMaterialToJSON(obj, obj.visualMaterial)
-    objectInfo = getObjectInfo(obj, shape, material, initPos, initRot)
-    printInfoToFile(object, shapes, shape, material, objectInfo)
+    objectInfo = getObjectInfo(obj, geometry, material, initPos, initRot)
+    printInfoToFile(object, elements, geometry, material, nothing, objectInfo)
     return (r_obj, R_obj)
 end
 
-function exportObject(object, shapes, obj::Modia3D.Composition.Object3D, ellipsoid::Modia3D.Shapes.Ellipsoid, initPos, initRot)
+function exportObject(object, elements, obj::Modia3D.Composition.Object3D, ellipsoid::Modia3D.Shapes.Ellipsoid, initPos, initRot)
     r_obj = Modia3D.ZeroVector3D
     R_obj = Modia3D.NullRotation
     name = String(Modia3D.fullName(obj)) * ".geometry"
-    shape = (; name=name, uuid=name2uuid(name), type="SphereBufferGeometry", radius=ellipsoid.lengthX/2, heightSegments=16, widthSegments=32)
+    geometry = (; name=name, uuid=name2uuid(name), type="SphereBufferGeometry", radius=ellipsoid.lengthX/2, heightSegments=16, widthSegments=32)
     material = printVisuMaterialToJSON(obj, obj.visualMaterial)
-    objectInfo = getObjectInfo(obj, shape, material, initPos, initRot, scale=[1.0, ellipsoid.lengthY/ellipsoid.lengthX, ellipsoid.lengthZ/ellipsoid.lengthX])
-    printInfoToFile(object, shapes, shape, material, objectInfo)
+    objectInfo = getObjectInfo(obj, geometry, material, initPos, initRot, scale=[1.0, ellipsoid.lengthY/ellipsoid.lengthX, ellipsoid.lengthZ/ellipsoid.lengthX])
+    printInfoToFile(object, elements, geometry, material, nothing, objectInfo)
     return (r_obj, R_obj)
 end
 
-function exportObject(object, shapes, obj::Modia3D.Composition.Object3D, box::Modia3D.Shapes.Box, initPos, initRot)
+function exportObject(object, elements, obj::Modia3D.Composition.Object3D, box::Modia3D.Shapes.Box, initPos, initRot)
     r_obj = Modia3D.ZeroVector3D
     R_obj = Modia3D.NullRotation
     name = String(Modia3D.fullName(obj)) * ".geometry"
-    shape = (; name=name, uuid=name2uuid(name), type="BoxBufferGeometry", width=box.lengthX, height=box.lengthY, depth=box.lengthZ)
+    geometry = (; name=name, uuid=name2uuid(name), type="BoxBufferGeometry", width=box.lengthX, height=box.lengthY, depth=box.lengthZ)
     material = printVisuMaterialToJSON(obj, obj.visualMaterial)
-    objectInfo = getObjectInfo(obj, shape, material, initPos, initRot)
-    printInfoToFile(object, shapes, shape, material, objectInfo)
+    objectInfo = getObjectInfo(obj, geometry, material, initPos, initRot)
+    printInfoToFile(object, elements, geometry, material, nothing, objectInfo)
     return (r_obj, R_obj)
 end
 
-function exportObject(object, shapes, obj::Modia3D.Composition.Object3D, cylinder::Modia3D.Shapes.Cylinder, initPos, initRot)
-    r_obj = Modia3D.ZeroVector3D
-    if cylinder.axis == 1
-        R_obj = @SMatrix[0 -1 0; 1 0 0; 0 0 1]
-    elseif cylinder.axis == 2
-        R_obj = Modia3D.NullRotation
+function exportObject(object, elements, obj::Modia3D.Composition.Object3D, cylinder::Modia3D.Shapes.Cylinder, initPos, initRot)
+    name = String(Modia3D.fullName(obj)) * ".geometry"
+    material = printVisuMaterialToJSON(obj, obj.visualMaterial)
+    if cylinder.innerDiameter == 0.0
+        r_obj = Modia3D.ZeroVector3D
+        R_obj = Shapes.rotateAxis2y(cylinder.axis, Modia3D.NullRotation)
+        shape = nothing
+        geometry = (; name=name, uuid=name2uuid(name), type="CylinderBufferGeometry", radiusBottom=cylinder.diameter/2, radiusTop=cylinder.diameter/2, height=cylinder.length, radialSegments=32, heightSegments=1)
+        objectInfo = getObjectInfo(obj, geometry, material, initPos, initRot, R_obj=R_obj)
     else
-        R_obj = @SMatrix[1 0 0; 0 0 1; 0 -1 0]
+        if cylinder.axis == 1
+            r_obj = @SVector[-cylinder.length/2, 0.0, 0.0]
+        elseif cylinder.axis == 2
+            r_obj = @SVector[0.0, -cylinder.length/2, 0.0]
+        else
+            r_obj = @SVector[0.0, 0.0, -cylinder.length/2]
+        end
+        R_obj = Shapes.rotateAxis2z(cylinder.axis, Modia3D.NullRotation)
+        innerCurves = [(; type="EllipseCurve", aX=0, aY=0, xRadius=cylinder.innerDiameter/2, yRadius=cylinder.innerDiameter/2, aStartAngle=0, aEndAngle=2*pi, aClockwise=false, aRotation=0)]
+        holes = [(; type="Path", curves=innerCurves, currentPoint=[0, 0])]
+        curves = [(; type="EllipseCurve", aX=0, aY=0, xRadius=cylinder.diameter/2, yRadius=cylinder.diameter/2, aStartAngle=0, aEndAngle=2*pi, aClockwise=false, aRotation=0)]
+        shapeName = String(Modia3D.fullName(obj)) * ".shape"
+        shapeUuid = name2uuid(shapeName)
+        shape = (; name=shapeName, uuid=shapeUuid, type="Shape", curves=curves, holes=holes, currentPoint=[0, 0])
+        options = (; depth=cylinder.length, bevelEnabled=false)
+        geometry = (; name=name, uuid=name2uuid(name), type="ExtrudeGeometry", shapes=[shapeUuid], options=options)
+        objectInfo = getObjectInfo(obj, geometry, material, initPos, initRot, r_obj=r_obj, R_obj=R_obj)
     end
-    name = String(Modia3D.fullName(obj)) * ".geometry"
-    shape = (; name=name, uuid=name2uuid(name), type="CylinderBufferGeometry", radiusBottom=cylinder.diameter/2, radiusTop=cylinder.diameter/2, height=cylinder.length, radialSegments=32, heightSegments=1)
-    material = printVisuMaterialToJSON(obj, obj.visualMaterial)
-    objectInfo = getObjectInfo(obj, shape, material, initPos, initRot, R_obj=R_obj)
-    printInfoToFile(object, shapes, shape, material, objectInfo)
+    printInfoToFile(object, elements, geometry, material, shape, objectInfo)
     return (r_obj, R_obj)
 end
 
-function exportObject(object, shapes, obj::Modia3D.Composition.Object3D, cone::Modia3D.Shapes.Cone, initPos, initRot)
+function exportObject(object, elements, obj::Modia3D.Composition.Object3D, cone::Modia3D.Shapes.Cone, initPos, initRot)
     if cone.axis == 1
         r_obj = @SVector[cone.length/2, 0.0, 0.0]
-        R_obj = @SMatrix[0 -1 0; 1 0 0; 0 0 1]
     elseif cone.axis == 2
         r_obj = @SVector[0.0, cone.length/2, 0.0]
-        R_obj = Modia3D.NullRotation
     else
         r_obj = @SVector[0.0, 0.0, cone.length/2]
-        R_obj = @SMatrix[1 0 0; 0 0 1; 0 -1 0]
     end
+    R_obj = Shapes.rotateAxis2y(cone.axis, Modia3D.NullRotation)
     name = String(Modia3D.fullName(obj)) * ".geometry"
-    shape = (; name=name, uuid=name2uuid(name), type="CylinderBufferGeometry", radiusBottom=cone.diameter/2, radiusTop=cone.topDiameter/2, height=cone.length, radialSegments=32, heightSegments=1)
+    geometry = (; name=name, uuid=name2uuid(name), type="CylinderBufferGeometry", radiusBottom=cone.diameter/2, radiusTop=cone.topDiameter/2, height=cone.length, radialSegments=32, heightSegments=1)
     material = printVisuMaterialToJSON(obj, obj.visualMaterial)
-    objectInfo = getObjectInfo(obj, shape, material, initPos, initRot, r_obj=r_obj, R_obj=R_obj)
-    printInfoToFile(object, shapes, shape, material, objectInfo)
+    objectInfo = getObjectInfo(obj, geometry, material, initPos, initRot, r_obj=r_obj, R_obj=R_obj)
+    printInfoToFile(object, elements, geometry, material, nothing, objectInfo)
     return (r_obj, R_obj)
 end
 
-function printInfoToFile(object, shapes, shape, material, objectInfo)
-    push!(shapes.geometries, shape)
-    push!(shapes.materials, material)
+function exportObject(object, elements, obj::Modia3D.Composition.Object3D, capsule::Modia3D.Shapes.Capsule, initPos, initRot)
+    r_obj = Modia3D.ZeroVector3D
+    R_obj = Shapes.rotateAxis2y(capsule.axis, Modia3D.NullRotation)
+    name = String(Modia3D.fullName(obj)) * ".geometry"
+    points = []
+    for i in -9:0
+        angle = i/9 * pi/2
+        point = (; x=capsule.diameter/2*cos(angle), y=-capsule.length/2+capsule.diameter/2*sin(angle))
+        push!(points, point)
+    end
+    for i in 0:9
+        angle = i/9 * pi/2
+        point = (; x=capsule.diameter/2*cos(angle), y=capsule.length/2+capsule.diameter/2*sin(angle))
+        push!(points, point)
+    end
+    geometry = (; name=name, uuid=name2uuid(name), type="LatheGeometry", points=points, phiStart=0, phiLength=2*pi, segments=32)
+    material = printVisuMaterialToJSON(obj, obj.visualMaterial)
+    objectInfo = getObjectInfo(obj, geometry, material, initPos, initRot, R_obj=R_obj)
+    printInfoToFile(object, elements, geometry, material, nothing, objectInfo)
+    return (r_obj, R_obj)
+end
+
+function exportObject(object, elements, obj::Modia3D.Composition.Object3D, beam::Modia3D.Shapes.Beam, initPos, initRot)
+    if beam.axis == 1
+        r_obj = @SVector[0.0, 0.0, -beam.thickness/2]
+    elseif beam.axis == 2
+        r_obj = @SVector[-beam.thickness/2, 0.0, 0.0]
+    else
+        r_obj = @SVector[0.0, -beam.thickness/2, 0.0]
+    end
+    R_obj = Shapes.rotateAxis2x(beam.axis, Modia3D.NullRotation)
+    name = String(Modia3D.fullName(obj)) * ".geometry"
+    curves = [
+        (; type="LineCurve", v1=[-beam.length/2, -beam.width/2], v2=[beam.length/2, -beam.width/2]),
+        (; type="EllipseCurve", aX=beam.length/2, aY=0, xRadius=beam.width/2, yRadius=beam.width/2, aStartAngle=-pi/2, aEndAngle=pi/2, aClockwise=false, aRotation=0),
+        (; type="LineCurve", v1=[beam.length/2, beam.width/2], v2=[-beam.length/2, beam.width/2]),
+        (; type="EllipseCurve", aX=-beam.length/2, aY=0, xRadius=beam.width/2, yRadius=beam.width/2, aStartAngle=pi/2, aEndAngle=-pi/2, aClockwise=false, aRotation=0)
+    ]
+    shapeName = String(Modia3D.fullName(obj)) * ".shape"
+    shapeUuid = name2uuid(shapeName)
+    shape = (; name=shapeName, uuid=shapeUuid, type="Shape", curves=curves, holes=[], currentPoint=[0, 0])
+    options = (; depth=beam.thickness, bevelEnabled=false)
+    geometry = (; name=name, uuid=name2uuid(name), type="ExtrudeGeometry", shapes=[shapeUuid], options=options)
+    material = printVisuMaterialToJSON(obj, obj.visualMaterial)
+    objectInfo = getObjectInfo(obj, geometry, material, initPos, initRot, r_obj=r_obj, R_obj=R_obj)
+    printInfoToFile(object, elements, geometry, material, shape, objectInfo)
+    return (r_obj, R_obj)
+end
+
+function printInfoToFile(object, elements, geometry, material, shape, objectInfo)
+    push!(elements.geometries, geometry)
+    push!(elements.materials, material)
+    if !isnothing(shape)
+        push!(elements.shapes, shape)
+    end
     push!(object.children, objectInfo)
 end
 
-function exportObject(object, shapes, obj::Modia3D.Composition.Object3D, fileMesh::Modia3D.Shapes.FileMesh, initPos, initRot)
+function exportObject(object, elements, obj::Modia3D.Composition.Object3D, fileMesh::Modia3D.Shapes.FileMesh, initPos, initRot)
     r_obj = Modia3D.ZeroVector3D
     R_obj = Modia3D.NullRotation
     filenameOld = fileMesh.filename
@@ -103,8 +168,8 @@ function exportObject(object, shapes, obj::Modia3D.Composition.Object3D, fileMes
     meshObject = JSON.parse(io)
     close(io)
 
-    push!(shapes.geometries, meshObject["geometries"]...)
-    push!(shapes.materials, meshObject["materials"]...)
+    push!(elements.geometries, meshObject["geometries"]...)
+    push!(elements.materials, meshObject["materials"]...)
     objectInfo = getObjectInfoMesh(obj, initPos, initRot, fileMesh.scaleFactor, R_obj, meshObject["object"])
     push!(object.children, objectInfo)
 
@@ -121,9 +186,9 @@ function getObjectInfoMesh(obj, initPos, initRot, scale, R_obj, meshInfo)
     return meshInfo
 end
 
-function getObjectInfo(obj, shape, material, initPos, initRot; r_obj=Modia3D.ZeroVector3D, R_obj=Modia3D.NullRotation, scale=ones(3))
+function getObjectInfo(obj, geometry, material, initPos, initRot; r_obj=Modia3D.ZeroVector3D, R_obj=Modia3D.NullRotation, scale=ones(3))
     name = String(Modia3D.fullName(obj))
-    return (; name=name, uuid=name2uuid(name), type=:Mesh, geometry=get(shape, :uuid, nothing), material=get(material, :uuid, ""), position=initPos+initRot'*r_obj, rotation=Modia3D.rot123fromR(R_obj*initRot), scale=scale )
+    return (; name=name, uuid=name2uuid(name), type=:Mesh, geometry=get(geometry, :uuid, nothing), material=get(material, :uuid, ""), position=initPos+initRot'*r_obj, rotation=Modia3D.rot123fromR(R_obj*initRot), scale=scale )
 end
 
 printVisuMaterialToJSON(obj, visuMaterial) = nothing
@@ -138,34 +203,42 @@ function printVisuMaterialToJSON(obj, visuMaterial::Modia3D.Shapes.VisualMateria
     return material
 end
 
-function printObjectToJSON(object, shapes, obj; initPos=obj.r_abs, initRot=obj.R_abs)
+function printObjectToJSON(object, elements, obj; initPos=obj.r_abs, initRot=obj.R_abs)
     r_obj = Modia3D.ZeroVector3D
     R_obj = Modia3D.NullRotation
     shapeKind = obj.shapeKind
 
     if shapeKind == Modia3D.SphereKind
         sphere::Modia3D.Shapes.Sphere = obj.shape
-        (r_obj, R_obj) = exportObject(object, shapes, obj, sphere, initPos, initRot)
+        (r_obj, R_obj) = exportObject(object, elements, obj, sphere, initPos, initRot)
 
     elseif shapeKind == Modia3D.EllipsoidKind
         ellipsoid::Modia3D.Shapes.Ellipsoid = obj.shape
-        (r_obj, R_obj) = exportObject(object, shapes, obj, ellipsoid, initPos, initRot)
+        (r_obj, R_obj) = exportObject(object, elements, obj, ellipsoid, initPos, initRot)
 
     elseif shapeKind == Modia3D.BoxKind
         box::Modia3D.Shapes.Box = obj.shape
-        (r_obj, R_obj) = exportObject(object, shapes, obj, box, initPos, initRot)
+        (r_obj, R_obj) = exportObject(object, elements, obj, box, initPos, initRot)
 
     elseif shapeKind == Modia3D.CylinderKind
         cylinder::Modia3D.Shapes.Cylinder = obj.shape
-        (r_obj, R_obj) = exportObject(object, shapes, obj, cylinder, initPos, initRot)
+        (r_obj, R_obj) = exportObject(object, elements, obj, cylinder, initPos, initRot)
 
     elseif shapeKind == Modia3D.ConeKind
         cone::Modia3D.Shapes.Cone = obj.shape
-        (r_obj, R_obj) = exportObject(object, shapes, obj, cone, initPos, initRot)
+        (r_obj, R_obj) = exportObject(object, elements, obj, cone, initPos, initRot)
+
+    elseif shapeKind == Modia3D.CapsuleKind
+        capsule::Modia3D.Shapes.Capsule = obj.shape
+        (r_obj, R_obj) = exportObject(object, elements, obj, capsule, initPos, initRot)
+
+    elseif shapeKind == Modia3D.BeamKind
+        beam::Modia3D.Shapes.Beam = obj.shape
+        (r_obj, R_obj) = exportObject(object, elements, obj, beam, initPos, initRot)
 
     elseif shapeKind == Modia3D.FileMeshKind
         fileMesh::Modia3D.Shapes.FileMesh = obj.shape
-        (r_obj, R_obj) = exportObject(object, shapes, obj, fileMesh, initPos, initRot)
+        (r_obj, R_obj) = exportObject(object, elements, obj, fileMesh, initPos, initRot)
 
     else
         @warn("$shapeKind is not supported by animation export.")
@@ -247,7 +320,7 @@ function exportAnimation(scene)
             return nothing
         end
         print("Export animation to $animationFile ... ")
-        shapes = (; geometries=[], materials=[])
+        elements = (; geometries=[], materials=[], shapes=[])
         metadata = (; generator = "Modia3D", type = "Object")
         name = scene.name
         uuid = name2uuid(name)
@@ -266,19 +339,19 @@ function exportAnimation(scene)
             tracks = []
             for obj in allVisuElements
                 iobj = iobj + 1
-                (r_obj, R_obj) = printObjectToJSON(object, shapes, obj, initPos=animation[1].objectData[iobj].position, initRot=Modia3D.from_q(SVector{4,Float64}(animation[1].objectData[iobj].quaternion)) )
+                (r_obj, R_obj) = printObjectToJSON(object, elements, obj, initPos=animation[1].objectData[iobj].position, initRot=Modia3D.from_q(SVector{4,Float64}(animation[1].objectData[iobj].quaternion)) )
                 if !isnothing(R_obj)
                     createAnimationPositionTrack(tracks, animation, obj, iobj, r_obj)
                     createAnimationQuaternionTrack(tracks, animation, obj, iobj, R_obj)
                 end
             end
             animations = [(; name="Simulation", uuid=uuid, tracks)]
-            scene = (; metadata, shapes.geometries, shapes.materials, object, animations)
+            scene = (; metadata, elements.geometries, elements.materials, elements.shapes, object, animations)
         else
             for obj in allVisuElements
-                (r_obj, R_obj) = printObjectToJSON(object, shapes, obj)
+                (r_obj, R_obj) = printObjectToJSON(object, elements, obj)
             end
-            scene = (; metadata, shapes.geometries, shapes.materials, object)
+            scene = (; metadata, elements.geometries, elements.materials, elements.shapes, object)
         end
 
         io = open(animationFile, "w")
