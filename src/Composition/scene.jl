@@ -252,8 +252,8 @@ function cameraPosition(distance, longitude, latitude, cameraUpDir, sceneUpDir)
     else
         # camera upwards := +y direction
     end
-    r_Camera = R_view' * r_Camera
-    R_Camera = R_Camera * R_view
+    r_Camera = SVector{3,Float64}(R_view' * r_Camera)
+    R_Camera = SMatrix{3,3,Float64}(R_Camera * R_view)
     return (r_Camera, R_Camera)
 end
 
@@ -396,12 +396,12 @@ struct SceneOptions <: Modia3D.AbstractSceneOptions
 end
 
 struct animationData
-    position::SVector{3,Float32}    # abs. Object3D position
-    quaternion::SVector{4,Float32}  # abs. Object3D quaternion
+    position::SVector{3,Float64}    # abs. Object3D position
+    quaternion::SVector{4,Float64}  # abs. Object3D quaternion
 end
 
 struct animationStep
-    time::Float32                      # simulation time
+    time::Float64                      # simulation time
     objectData::Vector{animationData}  # animation data of Object3Ds
 end
 
