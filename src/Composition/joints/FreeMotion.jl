@@ -17,14 +17,14 @@ In case of singular state (angle2 +-90 deg, x and z axes parallel) `rot3_guess` 
 """
 function rot123fromR(R::Frames.RotationMatrix; rot3_guess=0.0)
 
-    sbe = R[3,1]
+    sbe = clamp(R[3,1], -1.0, 1.0)
     cbe2 = 1.0 - sbe*sbe
     if (cbe2 > 1e-12)
         al = atan(-R[3,2], R[3,3])
         be = atan(sbe/sqrt(cbe2))
         ga = atan(-R[2,1], R[1,1])
     else
-        # be is 90 deg -> singular, only al+ga is defined -> set ga to zero
+        # be is 90 deg -> singular, only al+ga is defined -> set ga to rot3_guess
         al = atan(R[2,3], R[2,2]) - sign(sbe)*rot3_guess  # ???
         be = sign(sbe)*0.5*pi
         ga = rot3_guess
@@ -41,7 +41,7 @@ In case of singular state (angle2 +-90 deg, x and y axes parallel) `rot3_guess` 
 """
 function rot132fromR(R::Frames.RotationMatrix; rot3_guess=0.0)
 
-    sga = - R[2,1]
+    sga = clamp(-R[2,1], -1.0, 1.0)
     cga2 = 1.0 - sga*sga
     if (cga2 > 1e-12)
         al = atan(R[2,3], R[2,2])

@@ -188,7 +188,7 @@ end
 
 function getObjectInfo(obj, geometry, material, initPos, initRot; r_obj=Modia3D.ZeroVector3D, R_obj=Modia3D.NullRotation, scale=ones(3))
     name = String(Modia3D.fullName(obj))
-    return (; name=name, uuid=name2uuid(name), type=:Mesh, geometry=get(geometry, :uuid, nothing), material=get(material, :uuid, ""), position=initPos+initRot'*r_obj, rotation=Modia3D.rot123fromR(R_obj*initRot), scale=scale )
+    return (; name=name, uuid=name2uuid(name), type=:Mesh, geometry=get(geometry, :uuid, nothing), material=get(material, :uuid, ""), position=initPos+initRot'*r_obj, rotation=Modia3D.rot123fromR(R_obj*initRot), scale=scale)
 end
 
 printVisuMaterialToJSON(obj, visuMaterial) = nothing
@@ -264,7 +264,7 @@ function addCameras!(object, uuid4, position, orientation)
 
     name = "Perspective Camera"
     uuid = string(UUIDs.uuid5(UUIDs.UUID(uuid4), name))
-    camera = (; name=name, uuid=uuid, type="PerspectiveCamera", position=position, rotation=Modia3D.rot123fromR(SMatrix{3,3,Float64}(orientation)))
+    camera = (; name=name, uuid=uuid, type="PerspectiveCamera", position=position, rotation=Modia3D.rot123fromR(orientation))
     push!(object.children, camera)
 
     name="Orthographic Camera XY"
@@ -286,7 +286,7 @@ end
 function createAnimationPositionTrack(tracks, animation, obj, iobj, r_obj)
     keys = []
     for istep in 1:length(animation)
-        r_all = animation[istep].objectData[iobj].position + (Modia3D.from_q(SVector{4,Float64}(animation[istep].objectData[iobj].quaternion)))'*r_obj
+        r_all = animation[istep].objectData[iobj].position + (Modia3D.from_q(animation[istep].objectData[iobj].quaternion))'*r_obj
         push!(keys, (; time=animation[istep].time, value=r_all) )
     end
     name = string(Modia3D.fullName(obj), ".position")
@@ -296,8 +296,8 @@ end
 function createAnimationQuaternionTrack(tracks, animation, obj, iobj, R_obj)
     keys = []
     for istep in 1:length(animation)
-        R_all = Modia3D.from_R(R_obj*Modia3D.from_q(SVector{4,Float64}(animation[istep].objectData[iobj].quaternion)) )
-        push!(keys, (; time=animation[istep].time, value=R_all) )
+        q_all = Modia3D.absoluteRotation(animation[istep].objectData[iobj].quaternion, Modia3D.from_R(R_obj))
+        push!(keys, (; time=animation[istep].time, value=q_all) )
     end
     name = string(Modia3D.fullName(obj), ".quaternion")
     push!(tracks, (; name=name, uuid=name2uuid(name), type="quaternion", keys ) )
@@ -339,7 +339,7 @@ function exportAnimation(scene)
             tracks = []
             for obj in allVisuElements
                 iobj = iobj + 1
-                (r_obj, R_obj) = printObjectToJSON(object, elements, obj, initPos=animation[1].objectData[iobj].position, initRot=Modia3D.from_q(SVector{4,Float64}(animation[1].objectData[iobj].quaternion)) )
+                (r_obj, R_obj) = printObjectToJSON(object, elements, obj, initPos=animation[1].objectData[iobj].position, initRot=Modia3D.from_q(animation[1].objectData[iobj].quaternion))
                 if !isnothing(R_obj)
                     createAnimationPositionTrack(tracks, animation, obj, iobj, r_obj)
                     createAnimationQuaternionTrack(tracks, animation, obj, iobj, R_obj)
