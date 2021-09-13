@@ -1,13 +1,13 @@
 module Pendulum3
 
-using  Modia
+using Modia
 
 # Modia equation-based models
 include("$(Modia.modelsPath)/AllModels.jl")
 
 Pendulum = Model(
     world = Object3D(feature=Scene(animationFile="Pendulum3.json")),
-    obj1  = Object3D(feature=Solid(shape=Box(lengthX=1.0, lengthY=0.2, lengthZ=0.2),
+    obj1  = Object3D(feature=Solid(shape=Beam(axis=1, length=1.0, width=0.2, thickness=0.2),
                 solidMaterial="Steel", visualMaterial=VisualMaterial(color="Blue"))),
     obj2  = Object3D(parent=:obj1, feature=Visual(shape=Cylinder(diameter=0.1, length=0.21),
                 visualMaterial=VisualMaterial(color="Red")), translation=[-0.5, 0.0, 0.0]),
@@ -24,4 +24,5 @@ simulate!(pendulum, stopTime=3.0)
 
 @usingModiaPlot
 plot(pendulum, "rev.phi")
+
 end
