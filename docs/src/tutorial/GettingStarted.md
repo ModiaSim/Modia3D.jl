@@ -13,7 +13,7 @@ In the following example a simple pendulum is defined. This example is a copy of
 ```julia
 module Pendulum1
 
-using  Modia
+using Modia
 
 Pendulum = Model(
     world     = Object3D(feature=Scene()),
@@ -27,6 +27,7 @@ simulate!(pendulum, stopTime=3.0)
 
 @usingModiaPlot     # use the plot package defined by ENV["MODIA_PLOT"]
 plot(pendulum, "rev.phi")
+
 end
 ```
 or
@@ -46,16 +47,16 @@ The commands above generate an instance of the model, simulate it and generate t
 
 ## 2. Pendulum with Animation
 
-The Object3Ds of the first example are extended with [Visual](@ref) and [Solid](@ref) features in order that the pendulum parts are visualized and exported for offline animation by defining `animationFile = "Pendulum2.json"` in [Scene](@ref). The first Object3D `obj1` is defined as a solid [Box](@ref) with `"Blue"`color and its [Solid material](@ref) is made of `"Steel"`. Mass, center of mass and inertia tensor are computed from Steel density and from the [Box](@ref) shape. The second Object3D `obj2` is a visual red [Cylinder](@ref) that is used to visualize the axis of the revolute joint. Please, see example: `$(Modia3D.path)/test/Tutorial/Pendulum2.jl`
+The Object3Ds of the first example are extended with [Visual](@ref) and [Solid](@ref) features in order that the pendulum parts are visualized and exported for offline animation by defining `animationFile = "Pendulum2.json"` in [Scene](@ref). The first Object3D `obj1` is defined as a solid [Beam](@ref) with `"Blue"`color and its [Solid material](@ref) is made of `"Steel"`. Mass, center of mass and inertia tensor are computed from Steel density and from the [Beam](@ref) shape. The second Object3D `obj2` is a visual red [Cylinder](@ref) that is used to visualize the axis of the revolute joint. Please, see example: `$(Modia3D.path)/test/Tutorial/Pendulum2.jl`
 
 ```julia
 module Pendulum2
 
-using  Modia
+using Modia
 
 Pendulum = Model(
     world = Object3D(feature=Scene(animationFile="Pendulum2.json")),
-    obj1  = Object3D(feature=Solid(shape=Box(lengthX=1.0, lengthY=0.2, lengthZ=0.2),
+    obj1  = Object3D(feature=Solid(shape=Beam(axis=1, length=1.0, width=0.2, thickness=0.2),
                 solidMaterial="Steel", visualMaterial=VisualMaterial(color="Blue"))),
     obj2  = Object3D(parent=:obj1, feature=Visual(shape=Cylinder(diameter=0.1, length=0.21),
                 visualMaterial=VisualMaterial(color="Red")), translation=[-0.5, 0.0, 0.0]),
@@ -67,6 +68,7 @@ simulate!(pendulum, stopTime=3.0)
 
 @usingModiaPlot
 plot(pendulum, "rev.phi")
+
 end
 ```
 or
@@ -75,13 +77,13 @@ import Modia3D
 include("$(Modia3D.path)/test/Tutorial/Pendulum2.jl")
 ```
 
-Open [https://threejs.org/editor/](https://threejs.org/editor/), import the json file (File --> Import) and inspect the model in threejs:
+Open the [three.js editor](https://threejs.org/editor/), import (File --> Import) the [json file](https://github.com/mrdoob/three.js/wiki/JSON-Object-Scene-format-4) `Pendulum2.json` in your working directory and inspect the model:
 
-![Tutorial-Pendulum2](../../resources/images/Tutorial/threejs.png)
+![Tutorial-Pendulum2](../../resources/images/Tutorial/threejs_editor.png)
 
+View the simulation animation by clicking the Play button in the Object tab.
 
-Export the animation in glb format (File --> Export GLB) and use an glb/glTF-viewer to inspect the animation (for example the 3D-Viewer of Windows 10).
-
+Export the animation in glb format (File --> Export GLB) to view it in a glb/[glTF](https://www.khronos.org/gltf/) viewer (for example the 3D-Viewer of Windows 10).
 
 
 ## 3. Pendulum with Modia equations
@@ -91,14 +93,14 @@ The pendulum model from the previous section is extended with a damper that is d
 ```julia
 module Pendulum3
 
-using  Modia
+using Modia
 
 # Modia equation-based models
 include("$(Modia.modelsPath)/AllModels.jl")
 
 Pendulum = Model(
     world = Object3D(feature=Scene(animationFile="Pendulum3.json")),
-    obj1  = Object3D(feature=Solid(shape=Box(lengthX=1.0, lengthY=0.2, lengthZ=0.2),
+    obj1  = Object3D(feature=Solid(shape=Beam(axis=1, length=1.0, width=0.2, thickness=0.2),
                 solidMaterial="Steel", visualMaterial=VisualMaterial(color="Blue"))),
     obj2  = Object3D(parent=:obj1, feature=Visual(shape=Cylinder(diameter=0.1, length=0.21),
                 visualMaterial=VisualMaterial(color="Red")), translation=[-0.5, 0.0, 0.0]),
@@ -115,6 +117,7 @@ simulate!(pendulum, stopTime=3.0)
 
 @usingModiaPlot
 plot(pendulum, "rev.phi")
+
 end
 ```
 or
@@ -133,16 +136,20 @@ The commands above generate an instance of the model, simulate it and generate t
 All examples of this tutorial are stored in `$(Modia3D.path)/test/Tutorial`.
 
 ```julia
-  import Modia3D
   include("$(Modia3D.path)/test/Tutorial/Pendulum1.jl")
   include("$(Modia3D.path)/test/Tutorial/Pendulum2.jl")
   include("$(Modia3D.path)/test/Tutorial/Pendulum3.jl")
   include("$(Modia3D.path)/test/Tutorial/BouncingSphere.jl")
 ```
 
-To run all tests, execute:
+To run all tests without graphics, execute:
 
 ```julia
-  import Modia3D
   include("$(Modia3D.path)/test/runtests.jl")
+```
+
+To run all tests with visualization and plots, execute:
+
+```julia
+  include("$(Modia3D.path)/test/runtestsWithGraphics.jl")
 ```
