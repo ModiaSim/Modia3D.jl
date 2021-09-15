@@ -514,7 +514,8 @@ mutable struct Scene
     noCPairs::Vector{Vector{Int64}}           # Indices of frames (with respect to collSuperObjs) that can't collide in general (e.g. objects are connected via joints)
     noCPairsHelp::Dict{Modia3D.AbstractJoint,Vector{Int64}}
     allowedToMove::Vector{Union{Bool,Nothing}}
-    AABB::Vector{Vector{Basics.BoundingBox}}    # Bounding boxes of elements that can collide
+    AABB::Vector{Vector{Basics.BoundingBox}}  # Bounding boxes of elements that can collide
+    zStartIndex::Int                          # start index of collision zero crossing functions
     #forceElements::Vector{Int64}
     exportAnimation::Bool                     # animation file export is enabled
     animation::Vector{animationStep}          # animation data of visible Object3Ds
@@ -557,10 +558,10 @@ mutable struct Scene
             Dict{Modia3D.AbstractJoint,Vector{Int64}}(),
             Vector{Union{Bool}}[],
             Vector{Vector{Basics.BoundingBox}}[],
+            1,
             exportAnimation,
             Vector{animationStep}[],
             0,
-
             Revolute[],
             Prismatic[],
             FreeMotion[])
