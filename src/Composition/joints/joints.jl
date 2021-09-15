@@ -314,7 +314,7 @@ function computeKinematics!(scene::Scene, tree::Vector{Object3D}, time)::Nothing
             freeMotion  = scene.freeMotion[obj.jointIndex]
 
             obj.r_rel = freeMotion.r
-            obj.R_rel = Rfromrot123(freeMotion.rot)
+            obj.R_rel = freeMotion.isrot123 ? Rfromrot123(freeMotion.rot) : Rfromrot132(freeMotion.rot)
 
             obj.r_abs = obj.r_rel
             obj.R_abs = obj.R_rel
@@ -329,7 +329,7 @@ function computeKinematics!(scene::Scene, tree::Vector{Object3D}, time)::Nothing
             freeMotion  = scene.freeMotion[obj.jointIndex]
 
             obj.r_rel = freeMotion.r
-            obj.R_rel = Rfromrot123(freeMotion.rot)
+            obj.R_rel = freeMotion.isrot123 ? Rfromrot123(freeMotion.rot) : Rfromrot132(freeMotion.rot)
 
             obj.r_abs = parent.r_abs + parent.R_abs'*obj.r_rel
             obj.R_abs = obj.R_rel*parent.R_abs
@@ -489,7 +489,8 @@ function setJointVariables_q_qd_f!(scene::Scene, objects::Vector{Object3D}, star
             freeMotion.rot = SVector{3,Float64}(args_i[2])
             freeMotion.v   = SVector{3,Float64}(args_i[3])
             freeMotion.w   = SVector{3,Float64}(args_i[4])
-            
+            freeMotion.isrot123 = args_i[5]
+
         else
            error("Bug in Modia3D/src/Composition/specifics/specifics.jl (setJointVariables!): jointKind = $jointKind is not known")
         end

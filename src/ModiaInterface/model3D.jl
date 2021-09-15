@@ -131,6 +131,41 @@ function J132(rot132::AbstractVector)
 
 end
 
+
+
+"""
+    next_isrot123 = change_rotSequenceInNextIteration!(rot::AbstractVector, isrot123::Bool, instantiatedModel::SimulationModel, x, rot_name)
+
+Change rotation sequence of `rot` from `x-axis, y-axis, z-axis` to `x-axis, z-axis, y-axis` or visa versa in the next event iteration:
+
+- If `isrot123 = true`, return `next_isrot123 = false` and `x[..] = rot132fromR(Rfromrot123(rot))`
+
+- If `isrot123 = false`, return `next_isrot123 = true` and `x[..] = rot123fromR(Rfromrot132(rot))`
+"""
+function change_rotSequenceInNextIteration!(rot::AbstractVector, isrot123::Bool, instantiatedModel::SimulationModel, x, rot_name)::Bool
+    if isrot123
+        #println("        switch $rot_name 123 -> 132")
+        next_rot      = Modia3D.rot132fromR(Modia3D.Rfromrot123(rot))
+        next_isrot123 = false
+    else
+        #println("        switch $rot_name 132 -> 123")
+        next_rot      = Modia3D.rot123fromR(Modia3D.Rfromrot132(rot))
+        next_isrot123 = true
+    end
+
+    # Change x-vector with the next_rot values
+    eqInfo = instantiatedModel.equationInfo
+    startIndex = eqInfo.x_info[ eqInfo.x_dict[rot_name] ].startIndex
+    x[startIndex]   = next_rot[1]
+    x[startIndex+1] = next_rot[2]
+    x[startIndex+2] = next_rot[3]
+    return next_isrot123
+end
+
+
+J123or132(rot, isrot123) = isrot123 ? J123(rot) : J132(rot)
+
+
 FreeMotion(; obj1, obj2, r=Var(init=zeros(3)), rot=Var(init=zeros(3)), v=Var(init=zeros(3)), w=Var(init=zeros(3))) = Model(; _constructor = Par(value = :(Modia3D.FreeMotion), _path = true, ndof = 6),
     obj1 = Par(value = obj1),
     obj2 = Par(value = obj2),
@@ -138,11 +173,20 @@ FreeMotion(; obj1, obj2, r=Var(init=zeros(3)), rot=Var(init=zeros(3)), v=Var(ini
     rot  = rot,
     v    = v,
     w    = w,
+
+    next_isrot123 = Var(start=true),
+    _rotName = "???",  # is changed by buildModia3D to the full path name of "rot"
+
     equations = :[
-        der(r)   = v
-        der(rot) = J123(rot) * w
+        der(r) = v
+
+        isrot123 = pre(next_isrot123)
+        rot2_singularity = positive( abs(rot[2]) - 1.5 )
+        next_isrot123 = if rot2_singularity; change_rotSequenceInNextIteration!(rot, isrot123, instantiatedModel, _x, _rotName) else isrot123 end
+        der(rot) = J123or132(rot,isrot123) * w
+
         der(v) = qdd[1:3]
         der(w) = qdd[4:6]
-        variables = getVariables(r, rot, v, w)
+        variables = getVariables(r, rot, v, w, isrot123)
         ]
 )

@@ -16,7 +16,7 @@ export multibodyResiduals!, setModiaJointVariables!
 export Fix
 export Revolute, RevoluteWithFlange
 export Prismatic, PrismaticWithFlange
-export J123, J132, FreeMotion
+export J123, J132, J123or132, FreeMotion, change_rotSequenceInNextIteration!
 
 export buildModia3D
 

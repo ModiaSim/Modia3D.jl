@@ -66,6 +66,10 @@ function getJointInfo!(model, jointInfo, path)::Nothing
         constructor = model[:_constructor]
         if typeof(constructor) <: OrderedDict && haskey(constructor, :ndof)
             ndof = constructor[:ndof]
+            if haskey(model, :_rotName)
+                # Hack to provide the full path name of FreeMotion.rot to the FreeMotion object
+                model[:_rotName] = string(path)*".rot"
+            end
             push!(jointInfo, (path=path, ndof=ndof))
             return
         end
