@@ -163,6 +163,7 @@ function change_rotSequenceInNextIteration!(rot::AbstractVector, isrot123::Bool,
 end
 
 
+singularRem(ang) = abs(rem2pi(ang, RoundNearest)) - 1.5  # is negative/positive in valid/singular angle range
 J123or132(rot, isrot123) = isrot123 ? J123(rot) : J132(rot)
 
 
@@ -181,7 +182,7 @@ FreeMotion(; obj1, obj2, r=Var(init=zeros(3)), rot=Var(init=zeros(3)), v=Var(ini
         der(r) = v
 
         isrot123 = pre(next_isrot123)
-        rot2_singularity = positive( abs(rot[2]) - 1.5 )
+        rot2_singularity = positive(singularRem(rot[2]))
         next_isrot123 = if rot2_singularity; change_rotSequenceInNextIteration!(rot, isrot123, instantiatedModel, _x, _rotName) else isrot123 end
         der(rot) = J123or132(rot,isrot123) * w
 
