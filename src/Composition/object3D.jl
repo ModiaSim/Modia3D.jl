@@ -115,7 +115,7 @@ mutable struct Object3D <: Modia3D.AbstractObject3D
     hasChildJoint::Bool        # = true if its child has a joint
     computeAcceleration::Bool  # = true if acceleration needs to be computed
 
-    # internal shortcuts to avoid costly dynamic multiple dispatch
+    # internal shortcuts to avoid costly runtime dispatch
     shapeKind::Shapes.ShapeKind             # marks the defined shape
     shape::Modia3D.AbstractShape            # stores shape defined in Solid or Visual
     visualMaterial::Shapes.VisualMaterial   # stores visualMaterial defined in Solid or Visual
