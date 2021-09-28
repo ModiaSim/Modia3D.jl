@@ -13,7 +13,7 @@ Example videos:
 
 ## Installation
 
-Modia3D is included in [Modia](https://github.com/ModiaSim/Modia.jl) and is available, when Modia was installed.
+Modia3D is included in [Modia](https://github.com/ModiaSim/Modia.jl) and is available, when Modia was installed. Please, follow the [extensive installation guide](https://github.com/ModiaSim/Modia3D.jl/wiki/Full-Installation-Guide-for-Julia,-Modia3D,-Modia) or the [lightweight installation guide](https://github.com/ModiaSim/Modia3D.jl/wiki/Lightweight-Installation-Guide:-Julia-Modia3D) for Modia3D.
 
 A standalone Modia3D version is installed with
 
@@ -23,12 +23,12 @@ julia> ]add ModiaLang, Modia3D
 
 Modia3D animation can be exported in threejs-json-format and then imported in the open source web app [threejs.org](https://threejs.org/editor/) and use all the features of threejs, for example to export in the widely used glb format (= the binary version of the [glTF](https://www.khronos.org/gltf/) format) and use any glb-viewer (for example 3D-Viewer of Windows 10).
 
-Additionally, the (free) community or the (commercial) professional version of the [DLR Visualization](http://www.systemcontrolinnovationlab.de/the-dlr-visualization-library/) library is supported that provides online animation (during simulation) and generation of mpg4-videos. To install the free version for *Windows* or for *Linux* perform the following steps:
+Additionally, Modia3D uses the (free) community or the (commercial) professional version of the [DLR Visualization Library](https://visualization.ltx.de/) for 3D simulations. It provides online animation (during simulation) and the generation of mpg4-videos. If you don't use the DLR Visualization Library result animation is switched of.
+Download and install the free DLR SimVis Community Edition, e.g. with [https://visualization.ltx.de/](https://visualization.ltx.de/) .
 
-1. Go to [https://visualization.ltx.de/](https://visualization.ltx.de/), provide your contact information and click on *Request download* for *Community Edition*. Afterwards, you get a link to download the library and you need to unzip the file.
-2. In your Julia **startup file** (`HOME/.julia/config/startup.jl`) include the environment variable `ENV["DLR_VISUALIZATION"] = "<path-to-library>/Visualization/Extras/SimVis"`. Make sure that the SimVis executable under this directory has execution rights. For example in Linux with command:`chmod ug+x <path-to-library>/Visualization/Extras/SimVis/linux/SimVis`
-3. Start Julia and run one of the tests, for example\
-   `include("$(Modia3D.path)/test/Basic/PendulumWithBar1.jl")`
+* Set an environment variable or add it to the [startup.jl file](https://github.com/ModiaSim/Modia3D.jl/wiki/Template-for-startup.jl). Please, read also the [installation guide](https://github.com/ModiaSim/Modia3D.jl/wiki/Full-Installation-Guide-for-Julia,-Modia3D,-Modia).
+   * `ENV["DLR_VISUALIZATION"] = "<path-to-library>/Visualization/Extras/SimVis"`
+   * Make sure that the SimVis executable under this directory has execution rights. For example in Linux with command: `chmod ug+x <path-to-library>/Visualization/Extras/SimVis/linux/SimVis`
 
 
 ## Release Notes
@@ -49,9 +49,11 @@ Additionally, the (free) community or the (commercial) professional version of t
 | [3] |*[Algorithms for Component-Based 3D Modeling](http://www.ep.liu.se/ecp/157/039/ecp19157039.pdf)*|[13th International Modelica Conference 2019, March](https://modelica.org/events/modelica2019)|[10.3384/ecp19157383](https://doi.org/10.3384/ecp19157383)|
 | [4a] |*[Modia3D: Modeling and Simulation of 3D-Systems in Julia](https://proceedings.juliacon.org/papers/10.21105/jcon.00043)*|[JuliaCon 2019, July](https://juliacon.org/2019/)|[10.21105/jcon.00043](https://doi.org/10.21105/jcon.00043)|
 | [4b] |*[Modia3D: Modeling and Simulation of 3D-Systems in Julia](https://proceedings.juliacon.org/papers/10.21105/jcon.00043)*|[JuliaCon 2019, July](https://juliacon.org/2019/)|[YouTube](https://www.youtube.com/watch?v=b3WfqXZRKpA)|
-| [5] |*Collision Handling with Elastic Response Calculation and Zero-Crossing Functions*|[EOOLT 2019, November](http://www.eoolt.org/2019/)|[10.1145/3365984.3365986](https://doi.org/10.1145/3365984.3365986)|
-| [6] |*Modia – Modeling Multidomain Engineering Systems with Julia*|[JuliaCon 2021, July](https://juliacon.org/2021/)|[YouTube](https://www.youtube.com/watch?v=N94si3rOl1g)|
-| [7] |*Modia – Equation Based Modeling and Domain Specific Algorithms*|[14th International Modelica Conference 2021, September](http://www.modelica.org/)|accepted for publication|
+| [5] |*[Collision Handling with Elastic Response Calculation and Zero-Crossing Functions](https://doi.org/10.1145/3365984.3365986)*|[EOOLT 2019, November](http://www.eoolt.org/2019/)|[10.1145/3365984.3365986](https://doi.org/10.1145/3365984.3365986)|
+| [6] |*[Modia – Modeling Multidomain Engineering Systems with Julia](https://www.youtube.com/watch?v=N94si3rOl1g)*|[JuliaCon 2021, July](https://juliacon.org/2021/)|[YouTube](https://www.youtube.com/watch?v=N94si3rOl1g)|
+| [7a] |*[Modia – Equation Based Modeling and Domain Specific Algorithms](https://doi.org/10.3384/ecp2118173)*|[14th International Modelica Conference 2021, September](http://www.modelica.org/)| [10.3384/ecp2118173](https://doi.org/10.3384/ecp2118173) |
+| [7b] |*[Modia – Equation Based Modeling and Domain Specific Algorithms](https://doi.org/10.3384/ecp2118173)*|[14th International Modelica Conference 2021, September](http://www.modelica.org/)| YouTube comming soon |
+
 
 
 
