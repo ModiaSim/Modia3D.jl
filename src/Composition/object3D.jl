@@ -403,7 +403,7 @@ function createConvexPartition(obj::Object3D, feature, mesh) # feature Visual
         # names = Vector{AbstractString}()
         i = 1
         for name in contentDir
-            path = String(Symbol(obj.path, ".", "mesh[", i , "]"))
+            path = String(Symbol(obj.path, ".", "mesh", i ,))
             (head,ext) = splitext(name)
             if ext == ".obj"
                 fileMesh = Modia3D.FileMesh(filename = joinpath(convexDecompositionDirectory, name),
@@ -432,7 +432,7 @@ function addAABBVisuToWorld!(world::Object3D, AABB::Vector{Vector{Basics.Boundin
     @inbounds for i = 1:length(AABB)
         for j = 1:length(AABB[i])
             k = k + 1
-            name = String(Symbol(world.path, ".", "AABBVisu", "[", i, "][",j,"]"))
+            name = String(Symbol(world.path, ".", "AABBVisu", i, j))
             aabb = AABB[i][j]
             feature = Modia3D.Visual(shape = Modia3D.Box(
                     lengthX = abs(aabb.x_max - aabb.x_min), lengthY = abs(aabb.y_max - aabb.y_min), lengthZ = abs(aabb.z_max - aabb.z_min)),
@@ -447,8 +447,8 @@ function addContactVisuObjToWorld!(world::Object3D, nVisualContSupPoints, defaul
     world.contactVisuObj1 = fill(Object3D(), nVisualContSupPoints)
     world.contactVisuObj2 = fill(Object3D(), nVisualContSupPoints)
     @inbounds for i = 1:length(world.contactVisuObj1)
-        name1 = String(Symbol(world.path, ".", "contactVisuObj1", "[", i, "]"))
-        name2 = String(Symbol(world.path, ".", "contactVisuObj2", "[", i, "]"))
+        name1 = String(Symbol(world.path, ".", "contactVisuObj1", i))
+        name2 = String(Symbol(world.path, ".", "contactVisuObj2", i))
 
         feature1 = Modia3D.Visual(shape = Modia3D.Sphere(diameter = defaultContactSphereDiameter), visualMaterial = Modia3D.VisualMaterial(color="Red",   transparency=1.0))
         feature2 = Modia3D.Visual(shape = Modia3D.Sphere(diameter = defaultContactSphereDiameter), visualMaterial = Modia3D.VisualMaterial(color="Black",   transparency=1.0))
@@ -466,12 +466,12 @@ function addSupportVisuObjToWorld!(world::Object3D, nVisualContSupPoints, defaul
     world.supportVisuObj2B = fill(Object3D(), nVisualContSupPoints)
     world.supportVisuObj3B = fill(Object3D(), nVisualContSupPoints)
     @inbounds for i = 1:length(world.supportVisuObj1A)
-        name1 = String(Symbol(world.path, ".", "supportVisuObj1A", "[", i, "]"))
-        name2 = String(Symbol(world.path, ".", "supportVisuObj2A", "[", i, "]"))
-        name3 = String(Symbol(world.path, ".", "supportVisuObj3A", "[", i, "]"))
-        name4 = String(Symbol(world.path, ".", "supportVisuObj1B", "[", i, "]"))
-        name5 = String(Symbol(world.path, ".", "supportVisuObj2B", "[", i, "]"))
-        name6 = String(Symbol(world.path, ".", "supportVisuObj3B", "[", i, "]"))
+        name1 = String(Symbol(world.path, ".", "supportVisuObj1A", i))
+        name2 = String(Symbol(world.path, ".", "supportVisuObj2A", i))
+        name3 = String(Symbol(world.path, ".", "supportVisuObj3A", i))
+        name4 = String(Symbol(world.path, ".", "supportVisuObj1B", i))
+        name5 = String(Symbol(world.path, ".", "supportVisuObj2B", i))
+        name6 = String(Symbol(world.path, ".", "supportVisuObj3B", i))
 
         featureA = Modia3D.Visual(shape = Modia3D.Sphere(diameter = defaultContactSphereDiameter), visualMaterial = Modia3D.VisualMaterial(color="Red", transparency=1.0))
 
