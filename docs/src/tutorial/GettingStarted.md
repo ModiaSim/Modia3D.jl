@@ -32,7 +32,7 @@ end
 ```
 or execute it in the Julia `REPL`
 ```julia
-julia> import Modia3D
+julia> import Modia3D  # is only required for '$(Modia3D.path)' in the include command
 julia> include("$(Modia3D.path)/test/Tutorial/Pendulum1.jl")
 ```
 
