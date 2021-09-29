@@ -36,6 +36,12 @@ plot(bouncingSphere, "free.r", figure=1)
 
 end
 ```
+or
+```julia
+julia> import Modia3D
+julia> include("$(Modia3D.path)/test/Tutorial/BouncingSphere.jl")
+```
+
 The commands above generate an instance of the model, simulate it and generate the following plot:
 
 ![Tutorial-Collision](../../resources/images/Tutorial/bouncingSphere.png)
