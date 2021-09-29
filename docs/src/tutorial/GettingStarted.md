@@ -8,7 +8,7 @@ An [Object3D](@ref) constructor is the core element of Modia3D. It defines a coo
 
 ## 1. Pendulum
 
-In the following example a simple pendulum is defined. This example is a copy of: `$(Modia3D.path)/test/Tutorial/Pendulum1.jl`
+In the following example a simple pendulum is defined. This example is a copy of: `$(Modia3D.path)/test/Tutorial/Pendulum1.jl`. [Here](https://github.com/ModiaSim/Modia3D.jl/wiki/Full-Installation-Guide-for-Julia,-Modia3D,-Modia#running-julia-code-with-vs-codiumvs-code) is a short description of how to execute a Julia file in VS Code,
 
 ```julia
 module Pendulum1
@@ -30,10 +30,10 @@ plot(pendulum, "rev.phi")
 
 end
 ```
-or
+or execute it in the Julia `REPL`
 ```julia
-import Modia3D
-include("$(Modia3D.path)/test/Tutorial/Pendulum1.jl")
+julia> import Modia3D  # is only required for '$(Modia3D.path)' in the include command
+julia> include("$(Modia3D.path)/test/Tutorial/Pendulum1.jl")
 ```
 
 The `world` [Object3D](@ref) has feature [Scene](@ref) and is therefore the inertial system. The `body` Object3D is a [Solid](@ref) and defines the pendulum as a mass point with `mass = 1.0`. The `bodyFrame` Object3D defines a coordinate system on the `body` that is translated along the x-axis. A revolute joint connects `world` with `bodyFrame`.
@@ -73,8 +73,8 @@ end
 ```
 or
 ```julia
-import Modia3D
-include("$(Modia3D.path)/test/Tutorial/Pendulum2.jl")
+julia> import Modia3D
+julia> include("$(Modia3D.path)/test/Tutorial/Pendulum2.jl")
 ```
 
 Open the [three.js editor](https://threejs.org/editor/), import (File --> Import) the [json file](https://github.com/mrdoob/three.js/wiki/JSON-Object-Scene-format-4) `Pendulum2.json` in your working directory and inspect the model:
@@ -122,8 +122,8 @@ end
 ```
 or
 ```julia
-import Modia3D
-include("$(Modia3D.path)/test/Tutorial/Pendulum3.jl")
+julia> import Modia3D
+julia> include("$(Modia3D.path)/test/Tutorial/Pendulum3.jl")
 ```
 
 The commands above generate an instance of the model, simulate it and generate the following plot:
@@ -136,20 +136,21 @@ The commands above generate an instance of the model, simulate it and generate t
 All examples of this tutorial are stored in `$(Modia3D.path)/test/Tutorial`.
 
 ```julia
-  include("$(Modia3D.path)/test/Tutorial/Pendulum1.jl")
-  include("$(Modia3D.path)/test/Tutorial/Pendulum2.jl")
-  include("$(Modia3D.path)/test/Tutorial/Pendulum3.jl")
-  include("$(Modia3D.path)/test/Tutorial/BouncingSphere.jl")
+julia> import Modia3D
+julia> include("$(Modia3D.path)/test/Tutorial/Pendulum1.jl")
+julia> include("$(Modia3D.path)/test/Tutorial/Pendulum2.jl")
+julia> include("$(Modia3D.path)/test/Tutorial/Pendulum3.jl")
+julia> include("$(Modia3D.path)/test/Tutorial/BouncingSphere.jl")
 ```
 
 To run all tests without graphics, execute:
 
 ```julia
-  include("$(Modia3D.path)/test/runtests.jl")
+julia> include("$(Modia3D.path)/test/runtests.jl")
 ```
 
 To run all tests with visualization and plots, execute:
 
 ```julia
-  include("$(Modia3D.path)/test/runtestsWithGraphics.jl")
+julia> include("$(Modia3D.path)/test/runtestsWithGraphics.jl")
 ```
