@@ -403,7 +403,7 @@ function createConvexPartition(obj::Object3D, feature, mesh) # feature Visual
         # names = Vector{AbstractString}()
         i = 1
         for name in contentDir
-            path = String(Symbol(obj.path, ".", "mesh[", i , "]"))
+            path = String(Symbol(obj.path, ".", "mesh", i ,))
             (head,ext) = splitext(name)
             if ext == ".obj"
                 fileMesh = Modia3D.FileMesh(filename = joinpath(convexDecompositionDirectory, name),
