@@ -51,7 +51,7 @@ export animationData, animationStep
 
 export DLR_Visualization, DLR_Visualization_renderer
 
-export ContactDetectionMPR, ContactDetectionMPR_handler
+export ContactDetectionMPR_handler
 export initializeContactDetection!, selectContactPairsNoEvent!, selectContactPairsWithEvent!, getDistances!, setComputationFlag, closeContactDetection!
 
 export responseCalculation, print_ModelVariables
