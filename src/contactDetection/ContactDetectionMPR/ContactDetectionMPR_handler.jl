@@ -1,13 +1,9 @@
 #
 # This file is part of module
 #   Modia3D.Composition (Modia3D/Composition/_module.jl)
-#
-# It is included in file Modia3D/Composition/sceneProperties.jl
-# in order to be used as default for contact detection in SceneProperties(..)
-#
+
 export ContactPair
 export updateContactPair!
-export updateNoContactPair!
 
 using OrderedCollections
 

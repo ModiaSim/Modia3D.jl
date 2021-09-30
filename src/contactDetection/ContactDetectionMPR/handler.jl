@@ -1,9 +1,6 @@
 # License for this file: MIT (expat)
 # Copyright 2017-2018, DLR Institute of System Dynamics and Control
-#
-# This file is part of module
-#   Modia3D.ContactDetectionMPR (Modia3D/contactDetection/ContactDetectionMPR/_module.jl)
-#
+
 using LinearAlgebra
 EYE3() = Matrix(1.0I,3,3)
 

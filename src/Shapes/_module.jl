@@ -57,13 +57,12 @@ export supportPoint_Sphere, supportPoint_Ellipsoid, supportPoint_Box, supportPoi
 export supportPoint_i_Box, supportPoint_i_Cylinder, supportPoint_i_Cone, supportPoint_i_Capsule,supportPoint_i_Beam, supportPoint_i_Ellipsoid, supportPoint_i_FileMesh
 
 # Solid materials
-export InternalMassProperties, MassProperties, SolidMaterial, ContactMaterialElastic, dummyMassProperties
+export MassProperties, SolidMaterial
 
 export MassPropertiesFromShape, MassPropertiesFromShapeAndMass
 
-export solidMaterial, solidMaterialPalette, defaultContactMaterial
+export solidMaterial, solidMaterialPalette
 export regularize, resultantCoefficientOfRestitution, resultantDampingCoefficient
-export solidMaterialPairsPalette, CommonCollisionProperties, getCommonCollisionProperties
 
 # Observer materials
 
