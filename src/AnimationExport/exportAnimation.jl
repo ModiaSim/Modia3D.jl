@@ -4,9 +4,11 @@ function name2uuid(name::String)
     return string(UUIDs.uuid5(u4, name))
 end
 
-const coSysMaterialRed   = (; name="coordinateSystem.red", uuid=name2uuid("coordinateSystem.red"), type="MeshPhongMaterial", color=((255*256 + 0)*256 + 0), opacity=1, transparent=false, shininess=0.5)
-const coSysMaterialGreen = (; name="coordinateSystem.green", uuid=name2uuid("coordinateSystem.green"), type="MeshPhongMaterial", color=((255*0 + 255)*256 + 0), opacity=1, transparent=false, shininess=0.5)
-const coSysMaterialBlue  = (; name="coordinateSystem.blue", uuid=name2uuid("coordinateSystem.blue"), type="MeshPhongMaterial", color=((255*0 + 0)*256 + 255), opacity=1, transparent=false, shininess=0.5)
+colorNum(red, green, blue) = ((red*256 + green)*256 + blue)
+
+const coSysMaterialRed   = (; name="coordinateSystem.red", uuid=name2uuid("coordinateSystem.red"), type="MeshPhongMaterial", color=colorNum(255, 0, 0), opacity=1, transparent=false, shininess=0.5)
+const coSysMaterialGreen = (; name="coordinateSystem.green", uuid=name2uuid("coordinateSystem.green"), type="MeshPhongMaterial", color=colorNum(0, 255, 0), opacity=1, transparent=false, shininess=0.5)
+const coSysMaterialBlue  = (; name="coordinateSystem.blue", uuid=name2uuid("coordinateSystem.blue"), type="MeshPhongMaterial", color=colorNum(0, 0, 255), opacity=1, transparent=false, shininess=0.5)
 
 
 function exportObject(object, elements, obj::Modia3D.Composition.Object3D, sphere::Modia3D.Shapes.Sphere, initPos, initRot)
@@ -203,12 +205,12 @@ function exportObject(object, elements, obj::Modia3D.Composition.Object3D, grid:
     name = Modia3D.fullName(obj)
     geometryName = name * ".geometry"
     array = []
-    for i in 0:div(grid.length+1e-12, grid.distance)
+    for i in 0:Int(div(grid.length+1e-12, grid.distance))
         x = i * grid.distance - grid.length/2
         push!(array, x, -grid.width/2, 0)
         push!(array, x,  grid.width/2, 0)
     end
-    for i in 0:div(grid.width+1e-12, grid.distance)
+    for i in 0:Int(div(grid.width+1e-12, grid.distance))
         y = i * grid.distance - grid.width/2
         push!(array, -grid.length/2, y, 0)
         push!(array,  grid.length/2, y, 0)
@@ -216,7 +218,7 @@ function exportObject(object, elements, obj::Modia3D.Composition.Object3D, grid:
     position = (; itemSize=3, type="Float32Array", array=array)
     geometry = (; name=geometryName, uuid=name2uuid(geometryName), type="BufferGeometry", data=(; attributes=(; position=position)))
     materialName = name * ".material"
-    material = (; name=materialName, uuid=name2uuid(materialName), type="LineBasicMaterial", color=((255*0 + 0)*256 + 255), linewidth=grid.lineWidth)
+    material = (; name=materialName, uuid=name2uuid(materialName), type="LineBasicMaterial", color=colorNum(0, 0, 255), linewidth=grid.lineWidth)
     objectInfo = getObjectInfo(name, geometry, material, initPos, initRot, type="LineSegments", R_obj=R_obj)
     printInfoToFile(object, elements, geometry, material, nothing, objectInfo)
     return (r_obj, R_obj)
