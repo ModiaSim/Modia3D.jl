@@ -197,6 +197,31 @@ function exportObject(object, elements, obj::Modia3D.Composition.Object3D, coord
     return (r_obj, R_obj)
 end
 
+function exportObject(object, elements, obj::Modia3D.Composition.Object3D, grid::Modia3D.Shapes.Grid, initPos, initRot)
+    r_obj = Modia3D.ZeroVector3D
+    R_obj = Shapes.rotateAxis2z(grid.axis, Modia3D.NullRotation)
+    name = Modia3D.fullName(obj)
+    geometryName = name * ".geometry"
+    array = []
+    for i in 0:div(grid.length+1e-12, grid.distance)
+        x = i * grid.distance - grid.length/2
+        push!(array, x, -grid.width/2, 0)
+        push!(array, x,  grid.width/2, 0)
+    end
+    for i in 0:div(grid.width+1e-12, grid.distance)
+        y = i * grid.distance - grid.width/2
+        push!(array, -grid.length/2, y, 0)
+        push!(array,  grid.length/2, y, 0)
+    end
+    position = (; itemSize=3, type="Float32Array", array=array)
+    geometry = (; name=geometryName, uuid=name2uuid(geometryName), type="BufferGeometry", data=(; attributes=(; position=position)))
+    materialName = name * ".material"
+    material = (; name=materialName, uuid=name2uuid(materialName), type="LineBasicMaterial", color=((255*0 + 0)*256 + 255), linewidth=grid.lineWidth)
+    objectInfo = getObjectInfo(name, geometry, material, initPos, initRot, type="LineSegments", R_obj=R_obj)
+    printInfoToFile(object, elements, geometry, material, nothing, objectInfo)
+    return (r_obj, R_obj)
+end
+
 function printInfoToFile(object, elements, geometry, material, shape, objectInfo)
     push!(elements.geometries, geometry)
     if !isnothing(material)
@@ -249,8 +274,8 @@ function getObjectInfoMesh(obj, initPos, initRot, scale, R_obj, meshInfo)
     return meshInfo
 end
 
-function getObjectInfo(name, geometry, material, initPos, initRot; r_obj=Modia3D.ZeroVector3D, R_obj=Modia3D.NullRotation, scale=ones(3))
-    return (; name=name, uuid=name2uuid(name), type=:Mesh, geometry=get(geometry, :uuid, nothing), material=get(material, :uuid, ""), position=initPos+initRot'*r_obj, rotation=Modia3D.rot123fromR(R_obj*initRot), scale=scale)
+function getObjectInfo(name, geometry, material, initPos, initRot; type="Mesh", r_obj=Modia3D.ZeroVector3D, R_obj=Modia3D.NullRotation, scale=ones(3))
+    return (; name=name, uuid=name2uuid(name), type=type, geometry=get(geometry, :uuid, nothing), material=get(material, :uuid, ""), position=initPos+initRot'*r_obj, rotation=Modia3D.rot123fromR(R_obj*initRot), scale=scale)
 end
 
 printVisuMaterialToJSON(obj, visuMaterial) = nothing
@@ -301,6 +326,10 @@ function printObjectToJSON(object, elements, obj; initPos=obj.r_abs, initRot=obj
     elseif shapeKind == Modia3D.CoordinateSystemKind
         coordinateSystem::Modia3D.Shapes.CoordinateSystem = obj.shape
         (r_obj, R_obj) = exportObject(object, elements, obj, coordinateSystem, initPos, initRot)
+
+    elseif shapeKind == Modia3D.GridKind
+        grid::Modia3D.Shapes.Grid = obj.shape
+        (r_obj, R_obj) = exportObject(object, elements, obj, grid, initPos, initRot)
 
     elseif shapeKind == Modia3D.FileMeshKind
         fileMesh::Modia3D.Shapes.FileMesh = obj.shape
