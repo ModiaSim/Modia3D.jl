@@ -539,12 +539,6 @@ function canCollide(obj::Object3D)::Bool
 end
 
 
-function driveJoint!(obj::Object3D)::Nothing
-    obj.isDriven = true
-    return nothing
-end
-
-
 """    rootObject3D(obj) - returns the root Object3D of all parents of obj"""
 function rootObject3D(obj::Object3D)::Object3D
     obj1 = obj

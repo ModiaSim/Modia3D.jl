@@ -21,7 +21,7 @@ Andrea Neumayr and Martin Otter, [DLR - Institute of System Dynamics and Control
 module Composition
 
 export initialize, initAnalysis!, performAnalysis!, closeAnalysis!, visualize!, visualizeWorld!
-export updatePosition!, update!, driveJoint!
+export updatePosition!, update!
 export Object3D
 export RotationVariables, RCardan123
 export WStartVariables, WCartesian, WCardan123

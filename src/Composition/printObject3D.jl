@@ -63,15 +63,6 @@ function printScene(scene)
             println("      v          = ", obj.joint.specific.v)
             println("      w          = ", obj.joint.specific.w)
         end
-
-        hasMassProperties =  scene.options.useOptimizedStructure && objectHasMass(obj) ||
-                             !scene.options.useOptimizedStructure && featureHasMass(obj)
-        if hasMassProperties
-            massProperties::Shapes.InternalMassProperties = scene.options.useOptimizedStructure ? obj.massProperties : obj.feature.massProperties
-            println("    massProperties")
-            println("      m   = ", massProperties.m)
-            println("      rCM = ", massProperties.rCM)
-        end
     end
     println()
 end
