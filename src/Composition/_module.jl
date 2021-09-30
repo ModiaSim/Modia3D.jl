@@ -99,6 +99,9 @@ include(joinpath("joints", "Fix.jl"))
 include(joinpath("joints", "Revolute.jl"))
 include(joinpath("joints", "Prismatic.jl"))
 
+include("contactPairs.jl")
+include(joinpath(Modia3D.path, "src", "contactDetection", "ContactDetectionMPR", "ContactDetectionMPR_handler.jl"))
+
 include("scene.jl") # must be included after superObjects.jl
 include(joinpath("joints", "joints.jl"))
 include(joinpath("joints", "changeJointState.jl"))
