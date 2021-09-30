@@ -22,15 +22,8 @@ function normalizeVector(n::SVector{3,Float64})::SVector{3,Float64}
   end
 end
 
-# MVector / MMatrix
-zeroMVector()   = MVector{3,Float64}(0.0, 0.0, 0.0)
-
 # Standard constants
-const degToRad      = pi/180.0
 const radToDeg      = 180.0/pi
-const ZeroMVector   = MVector{3,Float64}(0.0,0.0,0.0)
-const NoNameDefined = "_NoNameDefined"
-
 
 """    mutable struct BoundingBox - Smallest box that contains a visual element"""
 mutable struct BoundingBox

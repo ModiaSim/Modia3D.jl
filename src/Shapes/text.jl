@@ -143,7 +143,7 @@ mutable struct TextShape <: Modia3D.AbstractShape
 
     function TextShape(; text::AbstractString,
         font::Font=Font(),
-        offset::AbstractVector = Basics.zeroMVector(),
+        offset::AbstractVector = @MVector[0.0, 0.0, 0.0],
         axisAlignment::AxisAlignment=Screen,
         alignment::Alignment=Center)
 
