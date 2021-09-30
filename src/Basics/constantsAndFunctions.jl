@@ -24,19 +24,12 @@ end
 
 # MVector / MMatrix
 zeroMVector()   = MVector{3,Float64}(0.0, 0.0, 0.0)
-onesMVector()   = MVector{3,Float64}(1.0, 1.0, 1.0)
-nullMRotation() = MMatrix{3,3,Float64,9}(1.0,0.0,0.0,0.0,1.0,0.0,0.0,0.0,1.0)
 
 # Standard constants
 const degToRad      = pi/180.0
 const radToDeg      = 180.0/pi
 const ZeroMVector   = MVector{3,Float64}(0.0,0.0,0.0)
 const NoNameDefined = "_NoNameDefined"
-
-
-# Standard types
-const PositionMVector = MVector{3,Float64}
-const RotationMMatrix = MMatrix{3,3,Float64,9}
 
 
 """    mutable struct BoundingBox - Smallest box that contains a visual element"""

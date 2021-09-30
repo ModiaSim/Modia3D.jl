@@ -17,7 +17,7 @@ export trailingPartOfName
 
 export neps, sign_eps, radToDeg, degToRad
 export getAndCheckFullLibraryPath, getEnvironmentVariable
-export zeroMVector, onesMVector, nullMRotation
+export zeroMVector
 export ZeroMVector
 export normalizeVector, BoundingBox
 
@@ -26,7 +26,7 @@ export listKeys
 export deleteItem
 
 export linearMovement
-export PositionMVector, RotationMMatrix, assertRotationMatrix
+export assertRotationMatrix
 
 using  StaticArrays
 using  LinearAlgebra
