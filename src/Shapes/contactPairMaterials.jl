@@ -140,9 +140,6 @@ contactPairMaterialPalette = readContactPairMaterialFromJSON( joinpath(Modia3D.p
 
 
 
-
-
-
 """
     material = getContactPairMaterial(name1, name2)
 
