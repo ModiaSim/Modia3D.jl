@@ -192,8 +192,8 @@ end
 
 
 
-#-------------------------------------- Global Scene Options -------------------------------
-struct SceneOptions <: Modia3D.AbstractSceneOptions
+#-------------------------------------- Global SceneOptions -------------------------------
+struct SceneOptions
 
     # Gravity field
     gravityField::Modia3D.AbstractGravityField
@@ -417,7 +417,7 @@ Defines global properties of the system, such as the gravity field. Exactly one 
 
 - `lightLatitude::Float64`: latitude angle of light position (0 = horizontal)
 """
-mutable struct Scene
+mutable struct Scene <: Modia3D.AbstractScene
     name::String                              # model name
     autoCoordsys::Shapes.CoordinateSystem   # Coordinate system that is automatically included (e.g. due to visualizeFrames=true)
     stack::Vector{Object3D}                   # Stack to traverse objs
@@ -458,7 +458,75 @@ mutable struct Scene
     prismatic::Vector{Prismatic}
     freeMotion::Vector{FreeMotion}
 
-    function Scene(sceneOptions::SceneOptions = SceneOptions())
+
+    function Scene(;gravityField          = UniformGravityField(),
+            useOptimizedStructure         = true,
+            contactDetection              = ContactDetectionMPR_handler(),
+            nVisualContSupPoints          = 5,
+            gap                           = 0.001,
+            enableContactDetection        = true,
+            defaultContactSphereDiameter  = 0.1,
+            elasticContactReductionFactor = 1.0,
+            nominalLength                 = 1.0,
+            defaultFrameLength            = 0.2*nominalLength,
+            defaultJointLength            = nominalLength/10,
+            defaultJointWidth             = nominalLength/20,
+            defaultForceLength            = nominalLength/10,
+            defaultForceWidth             = nominalLength/20,
+            defaultBodyDiameter           = nominalLength/9,
+            defaultWidthFraction          = 20,
+            defaultArrowDiameter          = nominalLength/40,
+            defaultN_to_m                 = 1000,
+            defaultNm_to_m                = 1000,
+            enableVisualization           = true,
+            animationFile                 = nothing,
+            visualizeGravity              = true,
+            visualizeFrames               = false,
+            visualizeConvexHulls          = true,
+            visualizeBoundingBox          = false,
+            visualizeContactPoints        = false,
+            visualizeSupportPoints        = false,
+            cameraDistance                = 10.0*nominalLength,
+            cameraLongitude               = 30/180*pi,
+            cameraLatitude                = 15/180*pi,
+            lightDistance                 = 10.0*nominalLength,
+            lightLongitude                = 60/180*pi,
+            lightLatitude                 = 45/180*pi)
+
+        sceneOptions = SceneOptions(gravityField = gravityField,
+            useOptimizedStructure         = useOptimizedStructure,
+            contactDetection              = contactDetection,
+            nVisualContSupPoints          = nVisualContSupPoints,
+            gap                           = gap,
+            enableContactDetection        = enableContactDetection,
+            defaultContactSphereDiameter  = defaultContactSphereDiameter,
+            elasticContactReductionFactor = elasticContactReductionFactor,
+            nominalLength                 = nominalLength,
+            defaultFrameLength            = defaultFrameLength,
+            defaultJointLength            = defaultJointLength,
+            defaultJointWidth             = defaultJointWidth,
+            defaultForceLength            = defaultForceLength,
+            defaultForceWidth             = defaultForceWidth,
+            defaultBodyDiameter           = defaultBodyDiameter,
+            defaultWidthFraction          = defaultWidthFraction,
+            defaultArrowDiameter          = defaultArrowDiameter,
+            defaultN_to_m                 = defaultN_to_m,
+            defaultNm_to_m                = defaultNm_to_m,
+            enableVisualization           = enableVisualization,
+            animationFile                 = animationFile,
+            visualizeGravity              = visualizeGravity,
+            visualizeFrames               = visualizeFrames,
+            visualizeConvexHulls          = visualizeConvexHulls,
+            visualizeBoundingBox          = visualizeBoundingBox,
+            visualizeContactPoints        = visualizeContactPoints,
+            visualizeSupportPoints        = visualizeSupportPoints,
+            cameraDistance                = cameraDistance,
+            cameraLongitude               = cameraLongitude,
+            cameraLatitude                = cameraLatitude,
+            lightDistance                 = lightDistance,
+            lightLongitude                = lightLongitude,
+            lightLatitude                 = lightLatitude)
+
         exportAnimation = false
         if !isnothing(sceneOptions.animationFile)
             (base, ext) = splitext(sceneOptions.animationFile)
@@ -468,6 +536,7 @@ mutable struct Scene
                 @warn("Extension of animationFile=$(sceneOptions.animationFile) is not 'json'.\n-> Animation export is disabled.")
             end
         end
+
         new("Scene",
             Shapes.CoordinateSystem(length=sceneOptions.defaultFrameLength),
             Vector{Object3D}[],
@@ -493,9 +562,55 @@ mutable struct Scene
             exportAnimation,
             Vector{animationStep}[],
             0,
+            Revolute[],
+            Prismatic[],
+            FreeMotion[])
 
+    end
+#=
+    function Scene(sceneOptions::SceneOptions = SceneOptions())
+
+
+        exportAnimation = false
+        if !isnothing(sceneOptions.animationFile)
+            (base, ext) = splitext(sceneOptions.animationFile)
+            if ext == ".json"
+                exportAnimation = true
+            else
+                @warn("Extension of animationFile=$(sceneOptions.animationFile) is not 'json'.\n-> Animation export is disabled.")
+            end
+        end
+
+
+
+        new("Scene",
+            Shapes.CoordinateSystem(length=sceneOptions.defaultFrameLength),
+            Vector{Object3D}[],
+            Vector{Object3D}[],
+            sceneOptions,
+            false,
+            false,
+            false,
+            false,
+            false,
+            Modia3D.KinematicAnalysis,
+            Vector{SuperObjsRow}[],
+            Vector{Object3D}[],
+            Vector{Object3D}[],
+            Vector{Object3D}[],
+            Vector{Object3D}[],
+            Vector{Object3D}[],
+            Vector{Object3D}[],
+            Vector{Vector{Int64}}[],
+            Dict{Modia3D.AbstractJoint,Vector{Int64}}(),
+            Vector{Union{Bool}}[],
+            Vector{Vector{Basics.BoundingBox}}[],
+            exportAnimation,
+            Vector{animationStep}[],
+            0,
             Revolute[],
             Prismatic[],
             FreeMotion[])
     end
+    =#
 end

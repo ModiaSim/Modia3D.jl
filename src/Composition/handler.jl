@@ -299,8 +299,7 @@ function build_superObjs!(scene::Scene, world::Object3D)::Nothing
 end
 
 
-function visualizeWorld!(world::Object3D; sceneOptions = SceneOptions())::Nothing
-    scene = Scene(sceneOptions)
+function visualizeWorld!(world::Object3D; scene = Scene())::Nothing
     scene.analysis = Modia3D.KinematicAnalysis
     initAnalysis!(world, scene)
     updatePosition!(world)
@@ -400,7 +399,7 @@ function chooseAndBuildUpTree(world::Object3D, scene::Scene)
     else
         build_tree!(scene, world)
         if scene.options.enableContactDetection
-            error("Collision handling is only possible with the optimized structure. Please set useOptimizedStructure = true in Modia3D.SceneOptions.")
+            error("Collision handling is only possible with the optimized structure. Please set useOptimizedStructure = true in Modia3D.Scene.")
         end
     end
     if length(scene.allVisuElements) > 0
