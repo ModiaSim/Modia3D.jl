@@ -303,27 +303,27 @@ end
 
 Defines global properties of the system, such as the gravity field. Exactly one [Object3D](@ref) must have a `Scene` feature defined. This Object3D is used as inertial system (world, root) and is not allowed to have a parent Object3D.
 
-| Keyword arguments             | defaults                                |
-|:------------------------------|:----------------------------------------|
-| `gravityField`                  | [`UniformGravityField`](@ref)`()`         |
-| `enableVisualization`           | true                                    |
-| `visualizeFrames`               | false                                   |
-| `nominalLength`                 | 1.0                                     |
-| `defaultFrameLength`            | 0.2*`nominalLength`                     |
+| Keyword arguments               | defaults                                |
+|:--------------------------------|:----------------------------------------|
+| `gravityField`                  | [`UniformGravityField`](@ref)`()`       |
 | `useOptimizedStructure`         | true                                    |
 | `enableContactDetection`        | true                                    |
 | `contactDetection`              | [`ContactDetectionMPR_handler`](@ref)`()`|
 | `elasticContactReductionFactor` | 1.0                                     |
+| `enableVisualization`           | true                                    |
+| `animationFile`                 | nothing                                 |
+| `visualizeFrames`               | false                                   |
 | `visualizeBoundingBox`          | false                                   |
 | `visualizeContactPoints`        | false                                   |
 | `visualizeSupportPoints`        | false                                   |
+| `nominalLength`                 | 1.0                                     |
+| `defaultFrameLength`            | 0.2*`nominalLength`                     |
 | `nVisualContSupPoints`          | 5                                       |
 | `defaultContactSphereDiameter`  | 0.1                                     |
-| `animationFile`                 | nothing                                 |
-| `cameraDistance`                | 10.0*`nominalLength`                      |
+| `cameraDistance`                | 10.0*`nominalLength`                    |
 | `cameraLongitude`               | 30/180*pi                               |
 | `cameraLatitude`                | 15/180*pi                               |
-| `lightDistance`                 | 10.0*`nominalLength`                      |
+| `lightDistance`                 | 10.0*`nominalLength`                    |
 | `lightLongitude`                | 60/180*pi                               |
 | `lightLatitude`                 | 45/180*pi                               |
 
@@ -334,14 +334,6 @@ Defines global properties of the system, such as the gravity field. Exactly one 
    - [`UniformGravityField`](@ref),
    - [`PointGravityField`](@ref)
 
-- `enableVisualization::Bool`: = true, to enable online animation with DLR SimVis. If SimVis is not installed, this flag has no effect.
-
-- `visualizeFrames::Bool`: = true, to visualize the coordinate system of every [Object3D](@ref) that is not explicitly switched off.
-
-- `nominalLength::Float64`: Nominal length in [m].
-
-- `defaultFrameLength::Float64`: Default frame length in [m] for visualizing little [CoordinateSystem](@ref).
-
 - `useOptimizedStructure::Bool`: = true, if pre-processing the whole system. For example, computing the common mass, common center of mass and common inertia tensor of all rigidly connected Object3Ds that have mass properties.
 
 - `enableContactDetection::Bool`: = true, if contact detection is enable, see [Collision Handling](@ref).
@@ -351,17 +343,25 @@ Defines global properties of the system, such as the gravity field. Exactly one 
 - `elasticContactReductionFactor::Float64`: (> 0.0)
   - ``usedContactCompliance = contactCompliance * elasticContactReductionFactor``
 
+- `enableVisualization::Bool`: = true, to enable online animation with DLR SimVis. If SimVis is not installed, this flag has no effect.
+
+- `animationFile::String`: only if a valid path and name of the animation file is set (it must be a .json file) a json file is exported
+
+- `visualizeFrames::Bool`: = true, to visualize the coordinate system of every [Object3D](@ref) that is not explicitly switched off.
+
 - `visualizeBoundingBox::Bool`: Flag enabled for visualizing Axis Aligned Bounding Box (AABB) for all solid shapes allowed to collide
 
 - `visualizeContactPoints::Bool`: Flag enabled for visualizing contact points, and `enableVisualization = true`
 
 - `visualizeSupportPoints::Bool`: Flag enabled for visualizing support points, and `enableVisualization = true`
 
+- `nominalLength::Float64`: Nominal length in [m].
+
+- `defaultFrameLength::Float64`: Default frame length in [m] for visualizing little [CoordinateSystem](@ref).
+
 - `nVisualContSupPoints::Int64`: defines how many contact as well as support points are visualized (there is a warning if you'll need to increase it)
 
 - `defaultContactSphereDiameter::Float64`: diameter of [Sphere](@ref) in [m] used for contact and support point visualization
-
-- `animationFile::String`: only if a valid path and name of the animation file is set (it must be a .json file) a json file is exported
 
 - `cameraDistance::Float64`: distance between world frame and camera position
 
