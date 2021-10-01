@@ -31,7 +31,7 @@ abstract type AbstractObject3D end
 abstract type AbstractTwoObject3DObject <: AbstractObject3D end  # Object related to two Object3Ds
 abstract type AbstractJoint             <: AbstractTwoObject3DObject end  # Constraint between two Object3Ds
 
-abstract type AbstractSceneOptions end
+abstract type AbstractScene end
 
 using StaticArrays
 @inline cross(x::SVector{3,Float64}, y::SVector{3,Float64}) = @inbounds SVector{3,Float64}(x[2]*y[3]-x[3]*y[2],
@@ -162,7 +162,7 @@ export Revolute, Prismatic
 
 export UniformGravityField, PointGravityField, NoGravityField
 export VisualMaterial
-export SceneOptions, SimulationModel
+export Scene, SimulationModel
 export print_ModelVariables
 
 export PTP_path, pathEndTime, getPosition!, getPosition, getIndex, plotPath

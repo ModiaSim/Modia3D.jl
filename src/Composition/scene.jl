@@ -192,45 +192,33 @@ end
 
 
 
-#-------------------------------------- Global Scene Options -------------------------------
-struct SceneOptions <: Modia3D.AbstractSceneOptions
-
+#-------------------------------------- Global SceneOptions -------------------------------
+struct SceneOptions
     # Gravity field
     gravityField::Modia3D.AbstractGravityField
 
     # Multibody structure
     useOptimizedStructure::Bool    # = true, if the optimized structure (with super objects, and common inertia) is used
 
-    # Contact detection
-    contactDetection::Modia3D.AbstractContactDetection
-    nVisualContSupPoints::Int               # amount of visual contact or support points
-    gap::Float64
+    ### Contact detection ###
     enableContactDetection::Bool            # = true, if contact detection is enabled
-    defaultContactSphereDiameter::Float64   # = true, if contact points are visualized
+    contactDetection::Modia3D.AbstractContactDetection
     elasticContactReductionFactor::Float64  # c_res_used = c_res * elasticContactReductionFactor (> 0)
+    gap::Float64
 
-    # Visual defaults
-    nominalLength::Float64         # [m]     Nominal length of 3D system
-    defaultFrameLength::Float64    # [m]     Default for frame length if visualizeFrames = true (but not world frame)
-    defaultJointLength::Float64    # [m]     Default for the fixed length of a shape representing a joint
-    defaultJointWidth::Float64     # [m]     Default for the fixed width of a shape representing a joint
-    defaultForceLength::Float64    # [m]     Default for the fixed length of a shape representing a force (e.g., damper)
-    defaultForceWidth::Float64     # [m]     Default for the fixed width of a shape representing a force (e.g., spring, bushing)
-    defaultBodyDiameter::Float64   # [m]     Default for diameter of sphere representing the center of mass of a body
-    defaultWidthFraction::Float64  #         Default for shape width as a fraction of shape length
-    defaultArrowDiameter::Float64  # [m]     Default for arrow diameter (e.g., of forces, torques, sensors)
-    defaultN_to_m::Float64         # [N/m]   Default scaling of force arrows (length = force/defaultN_to_m)
-    defaultNm_to_m::Float64        # [N.m/m] Default scaling of torque arrows (length = torque/defaultNm_to_m)
 
-    # Animation
+    ### Animation and Visualization ###
     enableVisualization::Bool             # = true, if online animation is enabled
     animationFile::Union{Nothing,String}  # path&name of animation file
-    visualizeGravity::Bool                # = true, if gravity field shall be visualized (acceleration vector or field center)
     visualizeFrames::Bool                 # = true, if all frames shall be visualized
-    visualizeConvexHulls::Bool            # = true, if convex hulls (used for contact detection) shall be visualized
     visualizeBoundingBox::Bool            # = true, if AABB's are visualized
     visualizeContactPoints::Bool          # = true, if contact points shall be visualized
     visualizeSupportPoints::Bool          # = true, if support points shall be visualized
+    # Visual and Animation defaults
+    nominalLength::Float64                # [m] Nominal length of 3D system
+    defaultFrameLength::Float64           # [m] Default for frame length if visualizeFrames = true (but not world frame)
+    nVisualContSupPoints::Int             # amount of visual contact or support points
+    defaultContactSphereDiameter::Float64 # = true, if contact points are visualized
     cameraDistance::Float64               # Distance between world frame and camera position
     cameraLongitude::Float64              # Longitude angle of camera position (0 = -y/-z/-x direction)
     cameraLatitude::Float64               # Latitude angle of camera position (0 = horizontal)
@@ -238,82 +226,52 @@ struct SceneOptions <: Modia3D.AbstractSceneOptions
     lightLongitude::Float64               # Longitude angle of light position (0 = -y/-z/-x direction)
     lightLatitude::Float64                # Latitude angle of light position (0 = horizontal)
 
-    function SceneOptions(;gravityField                  = UniformGravityField(),
-                           useOptimizedStructure         = true,
-                           contactDetection              = ContactDetectionMPR_handler(),
-                           nVisualContSupPoints          = 5,
-                           gap                           = 0.001,
-                           enableContactDetection        = true,
-                           defaultContactSphereDiameter  = 0.1,
-                           elasticContactReductionFactor = 1.0,
-                           nominalLength                 = 1.0,
-                           defaultFrameLength            = 0.2*nominalLength,
-                           defaultJointLength            = nominalLength/10,
-                           defaultJointWidth             = nominalLength/20,
-                           defaultForceLength            = nominalLength/10,
-                           defaultForceWidth             = nominalLength/20,
-                           defaultBodyDiameter           = nominalLength/9,
-                           defaultWidthFraction          = 20,
-                           defaultArrowDiameter          = nominalLength/40,
-                           defaultN_to_m                 = 1000,
-                           defaultNm_to_m                = 1000,
-                           enableVisualization           = true,
-                           animationFile                 = nothing,
-                           visualizeGravity              = true,
-                           visualizeFrames               = false,
-                           visualizeConvexHulls          = true,
-                           visualizeBoundingBox          = false,
-                           visualizeContactPoints        = false,
-                           visualizeSupportPoints        = false,
-                           cameraDistance                = 10.0*nominalLength,
-                           cameraLongitude               = 30/180*pi,
-                           cameraLatitude                = 15/180*pi,
-                           lightDistance                 = 10.0*nominalLength,
-                           lightLongitude                = 60/180*pi,
-                           lightLatitude                 = 45/180*pi)
-        @assert(nVisualContSupPoints > 0)
+    function SceneOptions(;gravityField    = UniformGravityField(),
+            useOptimizedStructure         = true,
+            enableContactDetection        = true,
+            contactDetection              = ContactDetectionMPR_handler(),
+            elasticContactReductionFactor = 1.0,
+            gap                           = 0.001,
+            enableVisualization           = true,
+            animationFile                 = nothing,
+            visualizeFrames               = false,
+            visualizeBoundingBox          = false,
+            visualizeContactPoints        = false,
+            visualizeSupportPoints        = false,
+            nominalLength                 = 1.0,
+            defaultFrameLength            = 0.2*nominalLength,
+            nVisualContSupPoints          = 5,
+            defaultContactSphereDiameter  = 0.1,
+            cameraDistance                = 10.0*nominalLength,
+            cameraLongitude               = 30/180*pi,
+            cameraLatitude                = 15/180*pi,
+            lightDistance                 = 10.0*nominalLength,
+            lightLongitude                = 60/180*pi,
+            lightLatitude                 = 45/180*pi)
         @assert(gap > 0.0)
-        @assert(defaultContactSphereDiameter > 0.0)
         @assert(nominalLength > 0.0)
         @assert(defaultFrameLength > 0.0)
-        @assert(defaultJointLength > 0.0)
-        @assert(defaultJointWidth > 0.0)
-        @assert(defaultForceLength > 0.0)
-        @assert(defaultForceWidth > 0.0)
-        @assert(defaultBodyDiameter >= 0.0)
-        @assert(defaultArrowDiameter > 0.0)
-        @assert(defaultN_to_m > 0.0)
-        @assert(defaultNm_to_m  > 0.0)
+        @assert(nVisualContSupPoints > 0)
+        @assert(defaultContactSphereDiameter > 0.0)
         @assert(cameraDistance > 0.0)
         @assert(lightDistance > 0.0)
 
         sceneOptions = new(gravityField,
             useOptimizedStructure,
-            contactDetection,
-            nVisualContSupPoints,
-            gap,
             enableContactDetection,
-            defaultContactSphereDiameter,
+            contactDetection,
             elasticContactReductionFactor,
-            nominalLength,
-            defaultFrameLength,
-            defaultJointLength,
-            defaultJointWidth,
-            defaultForceLength,
-            defaultForceWidth,
-            defaultBodyDiameter,
-            defaultWidthFraction,
-            defaultArrowDiameter,
-            defaultN_to_m,
-            defaultNm_to_m,
+            gap,
             enableVisualization,
             animationFile,
-            visualizeGravity,
             visualizeFrames,
-            visualizeConvexHulls,
             visualizeBoundingBox,
             visualizeContactPoints,
             visualizeSupportPoints,
+            nominalLength,
+            defaultFrameLength,
+            nVisualContSupPoints,
+            defaultContactSphereDiameter,
             cameraDistance,
             cameraLongitude,
             cameraLatitude,
@@ -345,27 +303,27 @@ end
 
 Defines global properties of the system, such as the gravity field. Exactly one [Object3D](@ref) must have a `Scene` feature defined. This Object3D is used as inertial system (world, root) and is not allowed to have a parent Object3D.
 
-| Keyword arguments             | defaults                                |
-|:------------------------------|:----------------------------------------|
-| `gravityField`                  | [`UniformGravityField`](@ref)`()`         |
-| `enableVisualization`           | true                                    |
-| `visualizeFrames`               | false                                   |
-| `nominalLength`                 | 1.0                                     |
-| `defaultFrameLength`            | 0.2*`nominalLength`                     |
+| Keyword arguments               | defaults                                |
+|:--------------------------------|:----------------------------------------|
+| `gravityField`                  | [`UniformGravityField`](@ref)`()`       |
 | `useOptimizedStructure`         | true                                    |
 | `enableContactDetection`        | true                                    |
 | `contactDetection`              | [`ContactDetectionMPR_handler`](@ref)`()`|
 | `elasticContactReductionFactor` | 1.0                                     |
+| `enableVisualization`           | true                                    |
+| `animationFile`                 | nothing                                 |
+| `visualizeFrames`               | false                                   |
 | `visualizeBoundingBox`          | false                                   |
 | `visualizeContactPoints`        | false                                   |
 | `visualizeSupportPoints`        | false                                   |
+| `nominalLength`                 | 1.0                                     |
+| `defaultFrameLength`            | 0.2*`nominalLength`                     |
 | `nVisualContSupPoints`          | 5                                       |
 | `defaultContactSphereDiameter`  | 0.1                                     |
-| `animationFile`                 | nothing                                 |
-| `cameraDistance`                | 10.0*`nominalLength`                      |
+| `cameraDistance`                | 10.0*`nominalLength`                    |
 | `cameraLongitude`               | 30/180*pi                               |
 | `cameraLatitude`                | 15/180*pi                               |
-| `lightDistance`                 | 10.0*`nominalLength`                      |
+| `lightDistance`                 | 10.0*`nominalLength`                    |
 | `lightLongitude`                | 60/180*pi                               |
 | `lightLatitude`                 | 45/180*pi                               |
 
@@ -376,14 +334,6 @@ Defines global properties of the system, such as the gravity field. Exactly one 
    - [`UniformGravityField`](@ref),
    - [`PointGravityField`](@ref)
 
-- `enableVisualization::Bool`: = true, to enable online animation with DLR SimVis. If SimVis is not installed, this flag has no effect.
-
-- `visualizeFrames::Bool`: = true, to visualize the coordinate system of every [Object3D](@ref) that is not explicitly switched off.
-
-- `nominalLength::Float64`: Nominal length in [m].
-
-- `defaultFrameLength::Float64`: Default frame length in [m] for visualizing little [CoordinateSystem](@ref).
-
 - `useOptimizedStructure::Bool`: = true, if pre-processing the whole system. For example, computing the common mass, common center of mass and common inertia tensor of all rigidly connected Object3Ds that have mass properties.
 
 - `enableContactDetection::Bool`: = true, if contact detection is enable, see [Collision Handling](@ref).
@@ -393,17 +343,25 @@ Defines global properties of the system, such as the gravity field. Exactly one 
 - `elasticContactReductionFactor::Float64`: (> 0.0)
   - ``usedContactCompliance = contactCompliance * elasticContactReductionFactor``
 
+- `enableVisualization::Bool`: = true, to enable online animation with DLR SimVis. If SimVis is not installed, this flag has no effect.
+
+- `animationFile::String`: only if a valid path and name of the animation file is set (it must be a .json file) a json file is exported
+
+- `visualizeFrames::Bool`: = true, to visualize the coordinate system of every [Object3D](@ref) that is not explicitly switched off.
+
 - `visualizeBoundingBox::Bool`: Flag enabled for visualizing Axis Aligned Bounding Box (AABB) for all solid shapes allowed to collide
 
 - `visualizeContactPoints::Bool`: Flag enabled for visualizing contact points, and `enableVisualization = true`
 
 - `visualizeSupportPoints::Bool`: Flag enabled for visualizing support points, and `enableVisualization = true`
 
+- `nominalLength::Float64`: Nominal length in [m].
+
+- `defaultFrameLength::Float64`: Default frame length in [m] for visualizing little [CoordinateSystem](@ref).
+
 - `nVisualContSupPoints::Int64`: defines how many contact as well as support points are visualized (there is a warning if you'll need to increase it)
 
 - `defaultContactSphereDiameter::Float64`: diameter of [Sphere](@ref) in [m] used for contact and support point visualization
-
-- `animationFile::String`: only if a valid path and name of the animation file is set (it must be a .json file) a json file is exported
 
 - `cameraDistance::Float64`: distance between world frame and camera position
 
@@ -417,7 +375,7 @@ Defines global properties of the system, such as the gravity field. Exactly one 
 
 - `lightLatitude::Float64`: latitude angle of light position (0 = horizontal)
 """
-mutable struct Scene
+mutable struct Scene <: Modia3D.AbstractScene
     name::String                              # model name
     autoCoordsys::Shapes.CoordinateSystem   # Coordinate system that is automatically included (e.g. due to visualizeFrames=true)
     stack::Vector{Object3D}                   # Stack to traverse objs
@@ -458,7 +416,53 @@ mutable struct Scene
     prismatic::Vector{Prismatic}
     freeMotion::Vector{FreeMotion}
 
-    function Scene(sceneOptions::SceneOptions = SceneOptions())
+
+    function Scene(;gravityField          = UniformGravityField(),
+            useOptimizedStructure         = true,
+            enableContactDetection        = true,
+            contactDetection              = ContactDetectionMPR_handler(),
+            elasticContactReductionFactor = 1.0,
+            gap                           = 0.001,
+            enableVisualization           = true,
+            animationFile                 = nothing,
+            visualizeFrames               = false,
+            visualizeBoundingBox          = false,
+            visualizeContactPoints        = false,
+            visualizeSupportPoints        = false,
+            nominalLength                 = 1.0,
+            defaultFrameLength            = 0.2*nominalLength,
+            nVisualContSupPoints          = 5,
+            defaultContactSphereDiameter  = 0.1,
+            cameraDistance                = 10.0*nominalLength,
+            cameraLongitude               = 30/180*pi,
+            cameraLatitude                = 15/180*pi,
+            lightDistance                 = 10.0*nominalLength,
+            lightLongitude                = 60/180*pi,
+            lightLatitude                 = 45/180*pi)
+
+        sceneOptions = SceneOptions(gravityField = gravityField,
+            useOptimizedStructure         = useOptimizedStructure,
+            contactDetection              = contactDetection,
+            nVisualContSupPoints          = nVisualContSupPoints,
+            gap                           = gap,
+            enableContactDetection        = enableContactDetection,
+            defaultContactSphereDiameter  = defaultContactSphereDiameter,
+            elasticContactReductionFactor = elasticContactReductionFactor,
+            nominalLength                 = nominalLength,
+            defaultFrameLength            = defaultFrameLength,
+            enableVisualization           = enableVisualization,
+            animationFile                 = animationFile,
+            visualizeFrames               = visualizeFrames,
+            visualizeBoundingBox          = visualizeBoundingBox,
+            visualizeContactPoints        = visualizeContactPoints,
+            visualizeSupportPoints        = visualizeSupportPoints,
+            cameraDistance                = cameraDistance,
+            cameraLongitude               = cameraLongitude,
+            cameraLatitude                = cameraLatitude,
+            lightDistance                 = lightDistance,
+            lightLongitude                = lightLongitude,
+            lightLatitude                 = lightLatitude)
+
         exportAnimation = false
         if !isnothing(sceneOptions.animationFile)
             (base, ext) = splitext(sceneOptions.animationFile)
@@ -468,6 +472,7 @@ mutable struct Scene
                 @warn("Extension of animationFile=$(sceneOptions.animationFile) is not 'json'.\n-> Animation export is disabled.")
             end
         end
+
         new("Scene",
             Shapes.CoordinateSystem(length=sceneOptions.defaultFrameLength),
             Vector{Object3D}[],
@@ -493,7 +498,6 @@ mutable struct Scene
             exportAnimation,
             Vector{animationStep}[],
             0,
-
             Revolute[],
             Prismatic[],
             FreeMotion[])

@@ -108,7 +108,7 @@ mutable struct Object3D <: Modia3D.AbstractObject3D
     I_CM::SMatrix{3,3,Float64,9}  # Inertia matrix at Center of Mass resolved in a frame in the center of mass that is parallel to Object3D in [kg*m^2]
 
     # Additional information associated with Object3D
-    feature::Union{Modia3D.AbstractObject3DFeature, Modia3D.AbstractSceneOptions}  # Optional feature associated with Object3D
+    feature::Union{Modia3D.AbstractObject3DFeature, Modia3D.AbstractScene}  # Optional feature associated with Object3D
     twoObject3Dobject::Vector{Modia3D.AbstractTwoObject3DObject}  # Optional AbstractTwoObject3DObject object associated with Object3D
     hasCutJoint::Bool          # = true if it has a cut joint
     hasForceElement::Bool      # = true if it has a force element
@@ -123,7 +123,7 @@ mutable struct Object3D <: Modia3D.AbstractObject3D
 
     # = True: Coordinate system of Object3D is always visualized
     # = False: Coordinate system of Object3D is never visualized
-    # = Inherited: Coordinate system of Object3D is visualized, if SceneOptions(visualizeFrames=true)
+    # = Inherited: Coordinate system of Object3D is visualized, if Scene(visualizeFrames=true)
     visualizeFrame::Modia3D.Ternary
     visualizationFrame::Vector{Object3D} # If to be visualized, the Object3D holding the coordinate system.
 
@@ -496,7 +496,7 @@ hasParent(            obj::Object3D) = !(obj.parent === obj)
 hasNoParent(          obj::Object3D) =   obj.parent === obj
 hasChildren(          obj::Object3D) = length(obj.children) > 0
 hasNoChildren(        obj::Object3D) = length(obj.children) == 0
-isWorld(              obj::Object3D) = hasNoParent(obj) && typeof(obj.feature) == Modia3D.SceneOptions
+isWorld(              obj::Object3D) = hasNoParent(obj) && typeof(obj.feature) == Modia3D.Scene
 isNotWorld(           obj::Object3D) = !(isWorld(obj))
 isMovable(            obj::Object3D) = obj.interactionManner.movable
 isLockable(           obj::Object3D) = obj.interactionManner.lockable
@@ -517,13 +517,13 @@ objectHasMovablePos(  obj::Object3D) = !isnothing(obj.interactionManner.movableP
 
 featureHasMass(obj::Object3D) = featureHasMass(obj.feature)
 featureHasMass(feature::Modia3D.AbstractObject3DFeature) = false
-featureHasMass(feature::Modia3D.AbstractSceneOptions) = false
+featureHasMass(feature::Modia3D.AbstractScene) = false
 featureHasMass(feature::Shapes.Solid)                 = !isnothing(feature.massProperties)
 
 isVisible(obj::Object3D, renderer::Modia3D.AbstractRenderer) = isVisible(obj.feature, renderer)
 isVisible(feature::Modia3D.AbstractObject3DFeature, renderer::Modia3D.AbstractRenderer) = false
 
-isVisible(feature::Modia3D.AbstractSceneOptions, renderer::Modia3D.AbstractRenderer) = false
+isVisible(feature::Modia3D.AbstractScene, renderer::Modia3D.AbstractRenderer) = false
 
 canCollide(feature::Modia3D.AbstractObject3DFeature) = false
 

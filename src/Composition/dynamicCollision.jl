@@ -189,7 +189,7 @@ function visualizeContactAndSupportPoints(ch, world)
     end
 end
 
-printWarnContSupPoints(nVisualContSupPoints) = @warn("If all contact points and/or support points should be visualized please set nVisualContSupPoints = $nVisualContSupPoints in SceneOptions.")
+printWarnContSupPoints(nVisualContSupPoints) = @warn("If all contact points and/or support points should be visualized please set nVisualContSupPoints = $nVisualContSupPoints in Scene.")
 
 # the sphere is visible and its absolute position is updated (this point was computed by the mpr algorithm)
 function setVisualizationContactProperties!(obj::Composition.Object3D, transparency::Float64, point::SVector{3,Float64})

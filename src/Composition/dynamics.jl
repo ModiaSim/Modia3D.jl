@@ -6,8 +6,8 @@ function getJointsAndObject3DsWithoutParents!(evaluatedParameters,
         if typeof(value) == Object3D
             if value.parent === value
                 push!(object3DWithoutParents, value)
-            elseif typeof(value.feature) == Modia3D.Composition.SceneOptions
-                error(value.path, ": Object3D has a parent and defines SceneOptions!")
+            elseif typeof(value.feature) == Modia3D.Composition.Scene
+                error(value.path, ": Object3D has a parent and defines Scene!")
             end
 
         elseif typeof(value) <: Modia3D.AbstractJoint
@@ -66,10 +66,10 @@ end
 
 
 function initAnalysis2!(world)
-    # Construct Scene(..) object
+    # use Scene(..) of world object
     Modia3D.Composition.EmptyObject3DFeature
-    if typeof(world.feature) <: Modia3D.SceneOptions
-        scene = Modia3D.Scene(world.feature)
+    if typeof(world.feature) <: Modia3D.Scene
+        scene = world.feature
     else
         scene = Modia3D.Scene()
     end
@@ -150,9 +150,11 @@ function setModiaJointVariables!(id::Int, _leq_mode, instantiatedModel::ModiaLan
             separateObjects[id] = mbs
 
             # Print
+            #=
             if false
                 printScene(scene)
             end
+            =#
 
             if scene.visualize
                 TimerOutputs.@timeit instantiatedModel.timer "Modia3D_0 initializeVisualization" Modia3D.Composition.initializeVisualization(Modia3D.renderer[1], scene.allVisuElements)
