@@ -123,7 +123,7 @@ mutable struct Object3D <: Modia3D.AbstractObject3D
 
     # = True: Coordinate system of Object3D is always visualized
     # = False: Coordinate system of Object3D is never visualized
-    # = Inherited: Coordinate system of Object3D is visualized, if SceneOptions(visualizeFrames=true)
+    # = Inherited: Coordinate system of Object3D is visualized, if Scene(visualizeFrames=true)
     visualizeFrame::Modia3D.Ternary
     visualizationFrame::Vector{Object3D} # If to be visualized, the Object3D holding the coordinate system.
 

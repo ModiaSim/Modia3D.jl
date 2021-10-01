@@ -194,43 +194,31 @@ end
 
 #-------------------------------------- Global SceneOptions -------------------------------
 struct SceneOptions
-
     # Gravity field
     gravityField::Modia3D.AbstractGravityField
 
     # Multibody structure
     useOptimizedStructure::Bool    # = true, if the optimized structure (with super objects, and common inertia) is used
 
-    # Contact detection
-    contactDetection::Modia3D.AbstractContactDetection
-    nVisualContSupPoints::Int               # amount of visual contact or support points
-    gap::Float64
+    ### Contact detection ###
     enableContactDetection::Bool            # = true, if contact detection is enabled
-    defaultContactSphereDiameter::Float64   # = true, if contact points are visualized
+    contactDetection::Modia3D.AbstractContactDetection
     elasticContactReductionFactor::Float64  # c_res_used = c_res * elasticContactReductionFactor (> 0)
+    gap::Float64
 
-    # Visual defaults
-    nominalLength::Float64         # [m]     Nominal length of 3D system
-    defaultFrameLength::Float64    # [m]     Default for frame length if visualizeFrames = true (but not world frame)
-    defaultJointLength::Float64    # [m]     Default for the fixed length of a shape representing a joint
-    defaultJointWidth::Float64     # [m]     Default for the fixed width of a shape representing a joint
-    defaultForceLength::Float64    # [m]     Default for the fixed length of a shape representing a force (e.g., damper)
-    defaultForceWidth::Float64     # [m]     Default for the fixed width of a shape representing a force (e.g., spring, bushing)
-    defaultBodyDiameter::Float64   # [m]     Default for diameter of sphere representing the center of mass of a body
-    defaultWidthFraction::Float64  #         Default for shape width as a fraction of shape length
-    defaultArrowDiameter::Float64  # [m]     Default for arrow diameter (e.g., of forces, torques, sensors)
-    defaultN_to_m::Float64         # [N/m]   Default scaling of force arrows (length = force/defaultN_to_m)
-    defaultNm_to_m::Float64        # [N.m/m] Default scaling of torque arrows (length = torque/defaultNm_to_m)
 
-    # Animation
+    ### Animation and Visualization ###
     enableVisualization::Bool             # = true, if online animation is enabled
     animationFile::Union{Nothing,String}  # path&name of animation file
-    visualizeGravity::Bool                # = true, if gravity field shall be visualized (acceleration vector or field center)
     visualizeFrames::Bool                 # = true, if all frames shall be visualized
-    visualizeConvexHulls::Bool            # = true, if convex hulls (used for contact detection) shall be visualized
     visualizeBoundingBox::Bool            # = true, if AABB's are visualized
     visualizeContactPoints::Bool          # = true, if contact points shall be visualized
     visualizeSupportPoints::Bool          # = true, if support points shall be visualized
+    # Visual and Animation defaults
+    nominalLength::Float64                # [m] Nominal length of 3D system
+    defaultFrameLength::Float64           # [m] Default for frame length if visualizeFrames = true (but not world frame)
+    nVisualContSupPoints::Int             # amount of visual contact or support points
+    defaultContactSphereDiameter::Float64 # = true, if contact points are visualized
     cameraDistance::Float64               # Distance between world frame and camera position
     cameraLongitude::Float64              # Longitude angle of camera position (0 = -y/-z/-x direction)
     cameraLatitude::Float64               # Latitude angle of camera position (0 = horizontal)
@@ -238,82 +226,52 @@ struct SceneOptions
     lightLongitude::Float64               # Longitude angle of light position (0 = -y/-z/-x direction)
     lightLatitude::Float64                # Latitude angle of light position (0 = horizontal)
 
-    function SceneOptions(;gravityField                  = UniformGravityField(),
-                           useOptimizedStructure         = true,
-                           contactDetection              = ContactDetectionMPR_handler(),
-                           nVisualContSupPoints          = 5,
-                           gap                           = 0.001,
-                           enableContactDetection        = true,
-                           defaultContactSphereDiameter  = 0.1,
-                           elasticContactReductionFactor = 1.0,
-                           nominalLength                 = 1.0,
-                           defaultFrameLength            = 0.2*nominalLength,
-                           defaultJointLength            = nominalLength/10,
-                           defaultJointWidth             = nominalLength/20,
-                           defaultForceLength            = nominalLength/10,
-                           defaultForceWidth             = nominalLength/20,
-                           defaultBodyDiameter           = nominalLength/9,
-                           defaultWidthFraction          = 20,
-                           defaultArrowDiameter          = nominalLength/40,
-                           defaultN_to_m                 = 1000,
-                           defaultNm_to_m                = 1000,
-                           enableVisualization           = true,
-                           animationFile                 = nothing,
-                           visualizeGravity              = true,
-                           visualizeFrames               = false,
-                           visualizeConvexHulls          = true,
-                           visualizeBoundingBox          = false,
-                           visualizeContactPoints        = false,
-                           visualizeSupportPoints        = false,
-                           cameraDistance                = 10.0*nominalLength,
-                           cameraLongitude               = 30/180*pi,
-                           cameraLatitude                = 15/180*pi,
-                           lightDistance                 = 10.0*nominalLength,
-                           lightLongitude                = 60/180*pi,
-                           lightLatitude                 = 45/180*pi)
-        @assert(nVisualContSupPoints > 0)
+    function SceneOptions(;gravityField    = UniformGravityField(),
+            useOptimizedStructure         = true,
+            enableContactDetection        = true,
+            contactDetection              = ContactDetectionMPR_handler(),
+            elasticContactReductionFactor = 1.0,
+            gap                           = 0.001,
+            enableVisualization           = true,
+            animationFile                 = nothing,
+            visualizeFrames               = false,
+            visualizeBoundingBox          = false,
+            visualizeContactPoints        = false,
+            visualizeSupportPoints        = false,
+            nominalLength                 = 1.0,
+            defaultFrameLength            = 0.2*nominalLength,
+            nVisualContSupPoints          = 5,
+            defaultContactSphereDiameter  = 0.1,
+            cameraDistance                = 10.0*nominalLength,
+            cameraLongitude               = 30/180*pi,
+            cameraLatitude                = 15/180*pi,
+            lightDistance                 = 10.0*nominalLength,
+            lightLongitude                = 60/180*pi,
+            lightLatitude                 = 45/180*pi)
         @assert(gap > 0.0)
-        @assert(defaultContactSphereDiameter > 0.0)
         @assert(nominalLength > 0.0)
         @assert(defaultFrameLength > 0.0)
-        @assert(defaultJointLength > 0.0)
-        @assert(defaultJointWidth > 0.0)
-        @assert(defaultForceLength > 0.0)
-        @assert(defaultForceWidth > 0.0)
-        @assert(defaultBodyDiameter >= 0.0)
-        @assert(defaultArrowDiameter > 0.0)
-        @assert(defaultN_to_m > 0.0)
-        @assert(defaultNm_to_m  > 0.0)
+        @assert(nVisualContSupPoints > 0)
+        @assert(defaultContactSphereDiameter > 0.0)
         @assert(cameraDistance > 0.0)
         @assert(lightDistance > 0.0)
 
         sceneOptions = new(gravityField,
             useOptimizedStructure,
-            contactDetection,
-            nVisualContSupPoints,
-            gap,
             enableContactDetection,
-            defaultContactSphereDiameter,
+            contactDetection,
             elasticContactReductionFactor,
-            nominalLength,
-            defaultFrameLength,
-            defaultJointLength,
-            defaultJointWidth,
-            defaultForceLength,
-            defaultForceWidth,
-            defaultBodyDiameter,
-            defaultWidthFraction,
-            defaultArrowDiameter,
-            defaultN_to_m,
-            defaultNm_to_m,
+            gap,
             enableVisualization,
             animationFile,
-            visualizeGravity,
             visualizeFrames,
-            visualizeConvexHulls,
             visualizeBoundingBox,
             visualizeContactPoints,
             visualizeSupportPoints,
+            nominalLength,
+            defaultFrameLength,
+            nVisualContSupPoints,
+            defaultContactSphereDiameter,
             cameraDistance,
             cameraLongitude,
             cameraLatitude,
@@ -461,31 +419,20 @@ mutable struct Scene <: Modia3D.AbstractScene
 
     function Scene(;gravityField          = UniformGravityField(),
             useOptimizedStructure         = true,
-            contactDetection              = ContactDetectionMPR_handler(),
-            nVisualContSupPoints          = 5,
-            gap                           = 0.001,
             enableContactDetection        = true,
-            defaultContactSphereDiameter  = 0.1,
+            contactDetection              = ContactDetectionMPR_handler(),
             elasticContactReductionFactor = 1.0,
-            nominalLength                 = 1.0,
-            defaultFrameLength            = 0.2*nominalLength,
-            defaultJointLength            = nominalLength/10,
-            defaultJointWidth             = nominalLength/20,
-            defaultForceLength            = nominalLength/10,
-            defaultForceWidth             = nominalLength/20,
-            defaultBodyDiameter           = nominalLength/9,
-            defaultWidthFraction          = 20,
-            defaultArrowDiameter          = nominalLength/40,
-            defaultN_to_m                 = 1000,
-            defaultNm_to_m                = 1000,
+            gap                           = 0.001,
             enableVisualization           = true,
             animationFile                 = nothing,
-            visualizeGravity              = true,
             visualizeFrames               = false,
-            visualizeConvexHulls          = true,
             visualizeBoundingBox          = false,
             visualizeContactPoints        = false,
             visualizeSupportPoints        = false,
+            nominalLength                 = 1.0,
+            defaultFrameLength            = 0.2*nominalLength,
+            nVisualContSupPoints          = 5,
+            defaultContactSphereDiameter  = 0.1,
             cameraDistance                = 10.0*nominalLength,
             cameraLongitude               = 30/180*pi,
             cameraLatitude                = 15/180*pi,
@@ -503,20 +450,9 @@ mutable struct Scene <: Modia3D.AbstractScene
             elasticContactReductionFactor = elasticContactReductionFactor,
             nominalLength                 = nominalLength,
             defaultFrameLength            = defaultFrameLength,
-            defaultJointLength            = defaultJointLength,
-            defaultJointWidth             = defaultJointWidth,
-            defaultForceLength            = defaultForceLength,
-            defaultForceWidth             = defaultForceWidth,
-            defaultBodyDiameter           = defaultBodyDiameter,
-            defaultWidthFraction          = defaultWidthFraction,
-            defaultArrowDiameter          = defaultArrowDiameter,
-            defaultN_to_m                 = defaultN_to_m,
-            defaultNm_to_m                = defaultNm_to_m,
             enableVisualization           = enableVisualization,
             animationFile                 = animationFile,
-            visualizeGravity              = visualizeGravity,
             visualizeFrames               = visualizeFrames,
-            visualizeConvexHulls          = visualizeConvexHulls,
             visualizeBoundingBox          = visualizeBoundingBox,
             visualizeContactPoints        = visualizeContactPoints,
             visualizeSupportPoints        = visualizeSupportPoints,
@@ -565,52 +501,5 @@ mutable struct Scene <: Modia3D.AbstractScene
             Revolute[],
             Prismatic[],
             FreeMotion[])
-
     end
-#=
-    function Scene(sceneOptions::SceneOptions = SceneOptions())
-
-
-        exportAnimation = false
-        if !isnothing(sceneOptions.animationFile)
-            (base, ext) = splitext(sceneOptions.animationFile)
-            if ext == ".json"
-                exportAnimation = true
-            else
-                @warn("Extension of animationFile=$(sceneOptions.animationFile) is not 'json'.\n-> Animation export is disabled.")
-            end
-        end
-
-
-
-        new("Scene",
-            Shapes.CoordinateSystem(length=sceneOptions.defaultFrameLength),
-            Vector{Object3D}[],
-            Vector{Object3D}[],
-            sceneOptions,
-            false,
-            false,
-            false,
-            false,
-            false,
-            Modia3D.KinematicAnalysis,
-            Vector{SuperObjsRow}[],
-            Vector{Object3D}[],
-            Vector{Object3D}[],
-            Vector{Object3D}[],
-            Vector{Object3D}[],
-            Vector{Object3D}[],
-            Vector{Object3D}[],
-            Vector{Vector{Int64}}[],
-            Dict{Modia3D.AbstractJoint,Vector{Int64}}(),
-            Vector{Union{Bool}}[],
-            Vector{Vector{Basics.BoundingBox}}[],
-            exportAnimation,
-            Vector{animationStep}[],
-            0,
-            Revolute[],
-            Prismatic[],
-            FreeMotion[])
-    end
-    =#
 end
