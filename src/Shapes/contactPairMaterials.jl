@@ -152,12 +152,11 @@ function getContactPairMaterial(name1::AbstractString, name2::AbstractString )::
         # Combination name1,name2 is not present
         value1 = get(contactPairMaterialPalette, TwoNamesKey(name1,name1), NoContactPairMaterial())
         value2 = get(contactPairMaterialPalette, TwoNamesKey(name2,name2), NoContactPairMaterial())
-        if typeof(value1) == NoContactPairMaterial || typeof(value2) == NoContactPairMaterial
-            error("No contact pair material (\"$name1\",\"$name2\") or\n",
-                  "(\"$name1\",\"$name1\") or (\"$name2\",\"$name2\")\n",
-                  "in Modia3D.contactPairMaterialPalette dictionary.")
+        if typeof(value1) != NoContactPairMaterial && typeof(value2) != NoContactPairMaterial
+            return combineContactPairMaterials(value1, value2)
+        else
+            error("No contact pair material (\"$name1\",\"$name2\") is defined in Modia3D.contactPairMaterialPalette dictionary. Therefore, (\"$name1\",\"$name1\") and (\"$name2\",\"$name2\") are merged, at least one of these pairings is not defined as well.")
         end
-        return combineContactPairMaterials(value1, value2)
     end
     return value
 end

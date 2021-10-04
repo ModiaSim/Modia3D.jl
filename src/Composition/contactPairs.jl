@@ -19,9 +19,14 @@ mutable struct ContactPairs
     nz::Int                                         # length(z)
     nzContact::Int                                  # length(z | z has contact) length of z where zi has contact
 
-    function ContactPairs(world::Composition.Object3D, AABB::Vector{Vector{Basics.BoundingBox}}, superObjs::Vector{SuperObjsRow},
-                        allowedToMove::Vector{Union{Bool,Nothing}}, visualizeBoundingBox::Bool, nVisualContSupPoints::Int,
+    function ContactPairs(world::Composition.Object3D, scene,
                         visualizeContactPoints::Bool, visualizeSupportPoints::Bool, defaultContactSphereDiameter::Float64)
+        AABB = scene.AABB
+        superObjs = scene.superObjs
+        allowedToMove = scene.allowedToMove
+        visualizeBoundingBox = scene.options.visualizeBoundingBox
+        nVisualContSupPoints = scene.options.nVisualContSupPoints
+
         @assert(length(superObjs) > 0)
         @assert(nVisualContSupPoints > 0)
         dummyObject3D = Composition.emptyObject3DFeature
@@ -29,6 +34,30 @@ mutable struct ContactPairs
         lengthCollSuperObjs = length(superObjs)
         if lengthCollSuperObjs <= 1
             error("There's nothing to collide. All Object3Ds are rigidly connected.")
+        else
+            # is: actual super - object
+            # js: subsequent super - object
+            # i: Object3D of is_th super - object
+            # j: Object3D of js_th super - object
+            @inbounds for is = 1:length(superObjs)
+                actSuperObj = superObjs[is].superObjCollision.superObj
+                if !isempty(actSuperObj)
+                    for i = 1:length(actSuperObj)
+                        actObj = actSuperObj[i]       # determine contact from this Object3D with all Object3Ds that have larger indices
+                        for js = is+1:length(superObjs)
+                            if !(js in scene.noCPairs[is])    # PairID is not in objects which cant collide
+                                nextSuperObj = superObjs[js].superObjCollision.superObj
+                                for j = 1:length(nextSuperObj)
+                                    nextObj  = nextSuperObj[j]
+                                    name1 = actObj.feature.contactMaterial
+                                    name2 = nextObj.feature.contactMaterial
+                                    Shapes.getContactPairMaterial(name1, name2)
+                                end
+                            end
+                        end
+                    end
+                end
+            end
         end
 
         nzContact = 0
