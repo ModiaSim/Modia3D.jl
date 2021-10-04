@@ -141,12 +141,15 @@ contactPairMaterialPalette = readContactPairMaterialFromJSON( joinpath(Modia3D.p
 
 
 """
-    material = getContactPairMaterial(name1, name2)
+    material = getContactPairMaterial(obj1, obj2)
 
 Return a contact pair material object of the materials with the
 names `name1` and `name2` from dictionary `Modia3D.contactPairMaterialPalette`.
 """
-function getContactPairMaterial(name1::AbstractString, name2::AbstractString )::Modia3D.AbstractContactPairMaterial
+function getContactPairMaterial(obj1, obj2)::Modia3D.AbstractContactPairMaterial
+    name1 = obj1.feature.contactMaterial
+    name2 = obj2.feature.contactMaterial
+
     value = get(contactPairMaterialPalette, TwoNamesKey(name1,name2), NoContactPairMaterial())
     if typeof(value) == NoContactPairMaterial
         # Combination name1,name2 is not present
@@ -155,7 +158,7 @@ function getContactPairMaterial(name1::AbstractString, name2::AbstractString )::
         if typeof(value1) != NoContactPairMaterial && typeof(value2) != NoContactPairMaterial
             return combineContactPairMaterials(value1, value2)
         else
-            error("No contact pair material (\"$name1\",\"$name2\") is defined in Modia3D.contactPairMaterialPalette dictionary. Therefore, (\"$name1\",\"$name1\") and (\"$name2\",\"$name2\") are merged, at least one of these pairings is not defined as well.")
+            error("For contact between \"", Modia3D.fullName(obj1), "\" and \"", Modia3D.fullName(obj2), "\" pairing of the contact materials \"", name1, "\" and \"", name2, "\" is required. But this combination is not available in $Modia3D.path/palettes/contactPairMaterials.json.")
         end
     end
     return value

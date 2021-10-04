@@ -49,9 +49,7 @@ mutable struct ContactPairs
                                 nextSuperObj = superObjs[js].superObjCollision.superObj
                                 for j = 1:length(nextSuperObj)
                                     nextObj  = nextSuperObj[j]
-                                    name1 = actObj.feature.contactMaterial
-                                    name2 = nextObj.feature.contactMaterial
-                                    Shapes.getContactPairMaterial(name1, name2)
+                                    Shapes.getContactPairMaterial(actObj, nextObj)
                                 end
                             end
                         end
