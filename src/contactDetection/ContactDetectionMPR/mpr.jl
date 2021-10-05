@@ -21,14 +21,6 @@ function getSupportPoint(shapeA::Modia3D.Composition.Object3D, shapeB::Compositi
     return SupportPoint((a-b).*scale,n,a,b)
 end
 
-#=
-function getSupportPoint(shapeA::Modia3D.Composition.Object3D, shapeB::Composition.Object3D, n::Nothing; scale::Float64=1.0)
-    println(Modia3D.fullName(shapeA), " r_abs ", shapeA.r_abs, " R_abs ", shapeA.R_abs)
-    println(Modia3D.fullName(shapeB), " r_abs ", shapeB.r_abs, " R_abs ", shapeB.R_abs)
-    error("numerical issues computing normalized vector")
-    return nothing
-end
-=#
 
 function barycentric(r1::SupportPoint,r2::SupportPoint,r3::SupportPoint,r4::SupportPoint)
     r21 = r2.p - r1.p
@@ -178,7 +170,7 @@ function constructR4(r0::SupportPoint,r1::SupportPoint,r2::SupportPoint,r3::Supp
     return (r3, r4, n4)
 end
 
-
+# computes twice a parallelepipedial product (Spatprodukt)
 isNextPortal(r0,r1,r2,r4) = dot( cross( (r2.p-r0.p), (r4.p-r0.p) ), r0.n ) <= 0.0 &&
                             dot( cross( (r4.p-r0.p), (r1.p-r0.p) ), r0.n ) <= 0.0
 
@@ -191,6 +183,7 @@ isNextPortal(r0,r1,r2,r4) = dot( cross( (r2.p-r0.p), (r4.p-r0.p) ), r0.n ) <= 0.
 #   r3r1r4
 function createBabyTetrahedrons(r0::SupportPoint,r1::SupportPoint,r2::SupportPoint,r3::SupportPoint,r4::SupportPoint,
                                 shapeA::Composition.Object3D,shapeB::Composition.Object3D)
+    nextPortal = true
     if isNextPortal(r0,r1,r2,r4)
         r3 = r4
     elseif isNextPortal(r0,r2,r3,r4)
@@ -198,13 +191,9 @@ function createBabyTetrahedrons(r0::SupportPoint,r1::SupportPoint,r2::SupportPoi
     elseif isNextPortal(r0,r3,r1,r4)
         r2 = r4
     else
-        # Compute the closest distance to the portal and return it:
-        (r4.p, distance) = signedDistanceToPortal(r0.p,r1.p,r2.p,r3.p)
-        barycentric(r1,r2,r3,r4)
-        error("MPR: Numerical issues with distance computation between shapeA = ", shapeA, " and shapeB = ", shapeB,". Used distance = ",distance)
-        return (r1, r2, r3)
+        nextPortal = false # the signs of all tried combinations of parallelepipedial products are not negative
     end
-    return (r1, r2, r3)
+    return (nextPortal, r1, r2, r3)
 end
 
 
@@ -221,6 +210,30 @@ function skalarization(r0,r1,r2,r3)
     return (r0, r1, r2, r3, scale)
 end
 
+function finalTC2(r1, r2, r3, r4)
+    #println("TC 2")
+    #if !analyzeFinalPortal(r1.p, r2.p, r3.p, r4.p, neps)
+        # error("shapeA = ", shapeA, " shapeB = ", shapeB)
+    #end
+    distance = -dot(r4.n, r4.p)
+    barycentric(r1,r2,r3,r4)
+    return distance, r1, r2, r3, r4
+end
+
+function finalTC3(r0, r1, r2, r3, r4)
+    #println("TC 3")
+
+    #doesRayIntersectPortal(r1.p,r2.p,r3.p, r4.p,neps)
+    #println("r1.p = ", r1.p , " r2.p = ", r2.p ," r3.p = ", r3.p)
+    #println("r4.p = ", r4.p)
+    #println(" ")
+    #if !analyzeFinalPortal(r1.p, r2.p, r3.p, r4.p, neps)
+        # error("shapeA = ", shapeA, " shapeB = ", shapeB)
+    #end
+    (r4.p, distance) = signedDistanceToPortal(r0.p,r1.p,r2.p,r3.p)
+    barycentric(r1,r2,r3,r4)
+    return distance, r1, r2, r3, r4
+end
 
 # MPR - Minkowski Portal Refinement algorithm
 # construction of points r0 is in the interior of Minkowski Difference and points r1,r2,r3,r4 are on the boundary of Minkowski Difference
@@ -301,6 +314,13 @@ function mprGeneral(ch::Composition.ContactDetectionMPR_handler, shapeA::Composi
 
 
     ###########      Phase 3, Minkowski Portal Refinement      ###################
+    new_tol = 42.0
+    isTC2 = false
+    isTC3 = false
+    r1_new::SupportPoint = r0
+    r2_new::SupportPoint = r0
+    r3_new::SupportPoint = r0
+    r4_new::SupportPoint = r0
     for i in 1:niter_max
         ### Phase 3.1: construct r4 ###
         # Find support point using the tetrahedron face
@@ -311,49 +331,55 @@ function mprGeneral(ch::Composition.ContactDetectionMPR_handler, shapeA::Composi
         # check if the new point r4 is already on the plane of the triangle r1,r2,r3,
         # we're already as close as we can get to the origin
 
+        TC2 = norm(cross(r4.p,r4.n))    # TC2
+        TC3 = abs(dot(r4.p-r1.p, r4.n)) # TC3
         ## TERMINATION CONDITION 2 ##
-        if norm(cross(r4.p,r4.n)) < tol_rel
-            #println("TC 2")
-            #if !analyzeFinalPortal(r1.p, r2.p, r3.p, r4.p, neps)
-                # error("shapeA = ", shapeA, " shapeB = ", shapeB)
-            #end
-            distance = -dot(r4.n, r4.p)
-            barycentric(r1,r2,r3,r4)
-
+        if TC2 < tol_rel
+            (distance,r1,r2,r3,r4) = finalTC2(r1,r2,r3,r4)
             return (distance, r4.a, r4.b, r4.n, true, r1.a, r1.b, r2.a, r2.b, r3.a, r3.b)
 
         ## TERMINATION CONDITION 3 ##
-        elseif abs(dot(r4.p-r1.p, r4.n)) < tol_rel
-            #println("TC 3")
-
-            #doesRayIntersectPortal(r1.p,r2.p,r3.p, r4.p,neps)
-            #println("r1.p = ", r1.p , " r2.p = ", r2.p ," r3.p = ", r3.p)
-            #println("r4.p = ", r4.p)
-            #println(" ")
-            #if !analyzeFinalPortal(r1.p, r2.p, r3.p, r4.p, neps)
-                # error("shapeA = ", shapeA, " shapeB = ", shapeB)
-            #end
-            (r4.p, distance) = signedDistanceToPortal(r0.p,r1.p,r2.p,r3.p)
-            barycentric(r1,r2,r3,r4)
-
+        elseif TC3 < tol_rel
+            (distance,r1,r2,r3,r4) = finalTC3(r0, r1, r2, r3, r4)
             return (distance, r4.a, r4.b, r4.n, true, r1.a, r1.b, r2.a, r2.b, r3.a, r3.b)
+        else
+            if TC2 < new_tol
+                new_tol = TC2
+                isTC2 = true
+                isTC3 = false
+                r1_new = r1
+                r2_new = r2
+                r3_new = r3
+                r4_new = r4
+            end
+            if TC3 < new_tol
+                new_tol = TC3
+                isTC2 = false
+                isTC3 = true
+                r1_new = r1
+                r2_new = r2
+                r3_new = r3
+                r4_new = r4
+            end
         end
 
         #### Phase 3.3: construct baby tetrahedrons with r1,r2,r3,r4 and create a new portal ###
         # Construction of three baby tetrahedrons
-        (r1,r2,r3) = createBabyTetrahedrons(r0,r1,r2,r3,r4,shapeA,shapeB)
+        (nextPortal, r1,r2,r3) = createBabyTetrahedrons(r0,r1,r2,r3,r4,shapeA,shapeB)
 
-
-    #=
-        r0RayOnPortal = isr0RayOnPortal(r0.p,r1.p,r2.p,r3.p)
-        if r0RayOnPortal[1] != true
-        println("r0RayOnPortal = ", r0RayOnPortal, ": Wrong baby-tetrahedron selected. " , i)
+        if !nextPortal # createBabyTetrahedrons failed
+            @warn("MPR (phase 3): Numerical issues with distance computation between $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)). tol_rel increased locally for this computation to $new_tol.")
+            if isTC2
+                (distance,r1,r2,r3,r4) = finalTC2(r1_new,r2_new,r3_new,r4_new)
+                return (distance, r4.a, r4.b, r4.n, true, r1.a, r1.b, r2.a, r2.b, r3.a, r3.b)
+            end
+            if isTC3
+                (distance,r1,r2,r3,r4) = finalTC3(r0, r1_new, r2_new, r3_new, r4_new)
+                return (distance, r4.a, r4.b, r4.n, true, r1.a, r1.b, r2.a, r2.b, r3.a, r3.b)
+            end
         end
-        =#
-
     end
-    error("MPR: Should never get here! Computation failed. Look at shapeA = ", Modia3D.instanceName(shapeA),
-        " shapeB = ",  Modia3D.instanceName(shapeB))
+    error("MPR (phase 3): Numerical issues with distance computation between $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)).")
 end
 
 
