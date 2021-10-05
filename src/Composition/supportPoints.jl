@@ -20,7 +20,7 @@ function supportPoint(obj::Composition.Object3D, e::SVector{3,Float64})
         return Modia3D.supportPoint_Cone(obj.shape, obj.r_abs, obj.R_abs, e, collisionSmoothingRadius)
     elseif shapeKind == Modia3D.CapsuleKind
         #capsule::Modia3D.Capsule = obj.shape
-        return Modia3D.supportPoint_Capsule(obj.shape, obj.r_abs, obj.R_abs, e, collisionSmoothingRadius)
+        return Modia3D.supportPoint_Capsule(obj.shape, obj.r_abs, obj.R_abs, e)
     elseif shapeKind == Modia3D.BeamKind
         #beam::Modia3D.Beam = obj.shape
         return Modia3D.supportPoint_Beam(obj.shape, obj.r_abs, obj.R_abs, e, collisionSmoothingRadius)
@@ -96,12 +96,12 @@ function boundingBox!(obj::Composition.Object3D, AABB::Basics.BoundingBox; tight
         zmax = Modia3D.supportPoint_i_Cone(cone, obj.r_abs[3], SVector(obj.R_abs[:,3]), +1, collisionSmoothingRadius)
     elseif shapeKind == Modia3D.CapsuleKind
         capsule::Modia3D.Capsule = obj.shape
-        xmin = Modia3D.supportPoint_i_Capsule(capsule, obj.r_abs[1], SVector(obj.R_abs[:,1]), -1, collisionSmoothingRadius)
-        xmax = Modia3D.supportPoint_i_Capsule(capsule, obj.r_abs[1], SVector(obj.R_abs[:,1]), +1, collisionSmoothingRadius)
-        ymin = Modia3D.supportPoint_i_Capsule(capsule, obj.r_abs[2], SVector(obj.R_abs[:,2]), -1, collisionSmoothingRadius)
-        ymax = Modia3D.supportPoint_i_Capsule(capsule, obj.r_abs[2], SVector(obj.R_abs[:,2]), +1, collisionSmoothingRadius)
-        zmin = Modia3D.supportPoint_i_Capsule(capsule, obj.r_abs[3], SVector(obj.R_abs[:,3]), -1, collisionSmoothingRadius)
-        zmax = Modia3D.supportPoint_i_Capsule(capsule, obj.r_abs[3], SVector(obj.R_abs[:,3]), +1, collisionSmoothingRadius)
+        xmin = Modia3D.supportPoint_i_Capsule(capsule, obj.r_abs[1], SVector(obj.R_abs[:,1]), -1)
+        xmax = Modia3D.supportPoint_i_Capsule(capsule, obj.r_abs[1], SVector(obj.R_abs[:,1]), +1)
+        ymin = Modia3D.supportPoint_i_Capsule(capsule, obj.r_abs[2], SVector(obj.R_abs[:,2]), -1)
+        ymax = Modia3D.supportPoint_i_Capsule(capsule, obj.r_abs[2], SVector(obj.R_abs[:,2]), +1)
+        zmin = Modia3D.supportPoint_i_Capsule(capsule, obj.r_abs[3], SVector(obj.R_abs[:,3]), -1)
+        zmax = Modia3D.supportPoint_i_Capsule(capsule, obj.r_abs[3], SVector(obj.R_abs[:,3]), +1)
     elseif shapeKind == Modia3D.BeamKind
         beam::Modia3D.Beam = obj.shape
         xmin = Modia3D.supportPoint_i_Beam(beam, obj.r_abs[1], SVector(obj.R_abs[:,1]), -1, collisionSmoothingRadius)
