@@ -74,14 +74,14 @@ function selectContactPairs!(sim, scene::Composition.Scene, ch::Composition.Cont
         # z[1] ... zero crossing function from contact to no contact
         # max. distance (= min. penetration) of active contact pairs
         if isempty(ch.contactDict)
-            @inbounds simh.z[scene.zStartIndex] = -42.0
+            simh.z[scene.zStartIndex] = -42.0
         else
             (pair, key)  = findmax(ch.contactDict)
-            @inbounds simh.z[scene.zStartIndex] = pair.distanceWithHysteresis
+            simh.z[scene.zStartIndex] = pair.distanceWithHysteresis
         end
         # z[2] ... zero crossing function from no contact to contact
         # min. distance of inactive contact pairs
-        @inbounds simh.z[1+scene.zStartIndex] = ch.noContactMinVal
+        simh.z[1+scene.zStartIndex] = ch.noContactMinVal
     end
     ch.distanceComputed = true
     return nothing
