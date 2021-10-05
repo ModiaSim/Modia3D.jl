@@ -6,9 +6,6 @@ The reference frame = Object3D frame coincides with the coordinate system.
 
 # Arguments
 - `length` defines the length of the coordinate system axes.
-
-# Notes
-- CoordinateSystem is [not supported by animation export](https://github.com/ModiaSim/PrivateModia3D.jl/issues/77).
 """
 mutable struct CoordinateSystem <: Modia3D.AbstractShape
     length::Float64
@@ -40,8 +37,6 @@ The dimension directions depend on `axis` by circularly shift:
 |   2    |   z      |   x     |
 |   3    |   x      |   y     |
 
-# Notes
-- Grid is [not supported by animation export](https://github.com/ModiaSim/PrivateModia3D.jl/issues/77).
 """
 mutable struct Grid <: Modia3D.AbstractShape
     axis::Int

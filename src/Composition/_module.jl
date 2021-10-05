@@ -21,7 +21,7 @@ Andrea Neumayr and Martin Otter, [DLR - Institute of System Dynamics and Control
 module Composition
 
 export initialize, initAnalysis!, performAnalysis!, closeAnalysis!, visualize!, visualizeWorld!
-export updatePosition!, update!, driveJoint!
+export updatePosition!, update!
 export Object3D
 export RotationVariables, RCardan123
 export WStartVariables, WCartesian, WCardan123
@@ -45,13 +45,13 @@ export deleteMaterialLastContactDictContactEnd
 
 export NoGravityField, UniformGravityField, PointGravityField, gravityAcceleration
 export G, EarthMass, EarthRadius
-export Scene, SceneOptions
+export Scene
 export upwardsDirection, cameraPosition
 export animationData, animationStep
 
 export DLR_Visualization, DLR_Visualization_renderer
 
-export ContactDetectionMPR, ContactDetectionMPR_handler
+export ContactDetectionMPR_handler
 export initializeContactDetection!, selectContactPairsNoEvent!, selectContactPairsWithEvent!, getDistances!, setComputationFlag, closeContactDetection!
 
 export responseCalculation, print_ModelVariables
@@ -98,6 +98,9 @@ include(joinpath("joints", "FreeMotion.jl"))
 include(joinpath("joints", "Fix.jl"))
 include(joinpath("joints", "Revolute.jl"))
 include(joinpath("joints", "Prismatic.jl"))
+
+include("contactPairs.jl")
+include(joinpath(Modia3D.path, "src", "contactDetection", "ContactDetectionMPR", "ContactDetectionMPR_handler.jl"))
 
 include("scene.jl") # must be included after superObjects.jl
 include(joinpath("joints", "joints.jl"))

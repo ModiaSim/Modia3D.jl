@@ -67,21 +67,7 @@ MassProperties(shape::Modia3D.AbstractGeometry, material::SolidMaterial) =
 MassProperties(shape::Modia3D.AbstractGeometry, materialName::AbstractString) =
                      MassProperties(shape, solidMaterialPalette[materialName])
 
-# structure InternalMassProperties is only for internal purposes
-mutable struct InternalMassProperties <: Modia3D.AbstractMassProperties
-   m::Float64                 # mass in [kg]
-   rCM::Frames.Vector3D   # center of mass in [m]
-   I::SMatrix{3,3,Float64,9}  # inertia matrix in [kg.m^2]
 
-   InternalMassProperties() = new(0.0, Modia3D.ZeroVector3D,
-                                  SMatrix{3,3,Float64,9}(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0))
-end
-
-
-#=
-getMassProperties(massProperties::Union{Modia3D.AbstractMassProperties, Number, AbstractString, SolidMaterial, Nothing},
-                  shape::Modia3D.AbstractGeometry, solidMaterial::Union{AbstractString,SolidMaterial,Nothing}) = createMassProperties(massProperties, shape, solidMaterial)
-=#
 createMassProperties(massProperties::MassProperties, shape, solidMaterial) = massProperties
 
 createMassProperties(massProperties::Union{Number, SolidMaterial, AbstractString}, shape::Modia3D.AbstractGeometry, solidMaterial) = MassProperties(shape, massProperties)

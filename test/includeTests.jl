@@ -45,6 +45,7 @@ Test.@testset "Collision" begin
     include(joinpath("Collision", "NewtonsCradle.jl"))
     include(joinpath("Collision", "Billard4Balls.jl"))
     Test.@test_skip include(joinpath("Collision", "Billard16Balls.jl"))  # too long computation time
+    Test.@test_throws LoadError include(joinpath("Collision", "InValidCollisionPairingError.jl")) # not defined collision pair material
 end
 
 Test.@testset "Tutorial" begin

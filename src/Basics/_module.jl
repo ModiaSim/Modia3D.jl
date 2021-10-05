@@ -15,10 +15,9 @@ module Basics
 
 export trailingPartOfName
 
-export neps, sign_eps, radToDeg, degToRad
+export neps, sign_eps, radToDeg
 export getAndCheckFullLibraryPath, getEnvironmentVariable
-export zeroMVector, onesMVector, nullMRotation
-export ZeroMVector
+
 export normalizeVector, BoundingBox
 
 export readDictOfStructsFromJSON
@@ -26,7 +25,6 @@ export listKeys
 export deleteItem
 
 export linearMovement
-export PositionMVector, RotationMMatrix, assertRotationMatrix
 
 using  StaticArrays
 using  LinearAlgebra

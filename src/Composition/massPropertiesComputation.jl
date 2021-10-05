@@ -19,19 +19,7 @@ function initializeMassComputation!(scene::Scene)
         buffer    = scene.buffer
         for i = 1:length(buffer)
             rootSuperObj = buffer[i]
-            #=
-                if featureHasMass(rootSuperObj) # feature of root object has already mass properties
-                    rootSuperObj.objectHasMass = true
-                    copyMassPropertiesFromFeatureToObject3D(rootSuperObj.massProperties, rootSuperObj.feature.massProperties.m,
-                    rootSuperObj.feature.massProperties.rCM, rootSuperObj.feature.massProperties.I)
-                    callInitialInertiaTensor!(rootSuperObj, superObjs[i].superObjMass.superObj)
-                else # root obj's feature has no mass properties, but common mass super object do
-                    if length(superObjs[i].superObjMass.superObj) > 0
-                        rootSuperObj.objectHasMass = true
-                        callInitialInertiaTensor!(rootSuperObj, superObjs[i].superObjMass.superObj)
-                    end
-                end
-            =#
+
             if featureHasMass(rootSuperObj) # feature of root object has already mass properties
                 rootSuperObj.hasMass = true
                 rootSuperObj.m       = rootSuperObj.feature.massProperties.m
@@ -52,12 +40,10 @@ function initializeMassComputation!(scene::Scene)
     end
 end
 
-# callInitialInertiaTensor! is called at initialization.
 # It loops over all objects of an actual mass super object.
 # It sums up common mass, inertia tensor and center of mass.
 # The results are stored twice in actual root of super object:
 #       massProperties: container for actual values
-# function callInitialInertiaTensor!(rootSuperObj::Object3D, actualMassSuperObject::Vector{Object3D,1})
 function addMassPropertiesOfAllSuperObjChildsToRootSuperObj!(rootSuperObj::Object3D, actualMassSuperObject::Vector{Object3D})
     if length(actualMassSuperObject) > 0
         for i=1:length(actualMassSuperObject)
@@ -158,13 +144,3 @@ function addOrSubtractMassPropertiesOfChildToRoot!(obj_root, obj_child; add=true
         obj_root.I_CM = I
         return nothing
 end; end
-
-
-# helper function for assigning mass properties
-#=
-function assignMassProperties(massProperties, m, rCM, I)
-    massProperties.m   = m
-    massProperties.rCM = rCM
-    massProperties.I   = I
-end
-=#

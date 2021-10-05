@@ -19,7 +19,7 @@ const emptyShaderName=" "
                                 id::Ptr{Nothing},
                                 material::Shapes.VisualMaterial,
                                 Lx::Float64, Ly::Float64, Lz::Float64;
-                                extras::MVector{3,Float64}=Basics.ZeroMVector)
+                                extras::MVector{3,Float64}=@MVector[0.0, 0.0, 0.0])
     mvecSize[1] = Lx
     mvecSize[2] = Ly
     mvecSize[3] = Lz

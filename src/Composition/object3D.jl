@@ -108,14 +108,14 @@ mutable struct Object3D <: Modia3D.AbstractObject3D
     I_CM::SMatrix{3,3,Float64,9}  # Inertia matrix at Center of Mass resolved in a frame in the center of mass that is parallel to Object3D in [kg*m^2]
 
     # Additional information associated with Object3D
-    feature::Union{Modia3D.AbstractObject3DFeature, Modia3D.AbstractSceneOptions}  # Optional feature associated with Object3D
+    feature::Union{Modia3D.AbstractObject3DFeature, Modia3D.AbstractScene}  # Optional feature associated with Object3D
     twoObject3Dobject::Vector{Modia3D.AbstractTwoObject3DObject}  # Optional AbstractTwoObject3DObject object associated with Object3D
     hasCutJoint::Bool          # = true if it has a cut joint
     hasForceElement::Bool      # = true if it has a force element
     hasChildJoint::Bool        # = true if its child has a joint
     computeAcceleration::Bool  # = true if acceleration needs to be computed
 
-    # internal shortcuts to avoid costly dynamic multiple dispatch
+    # internal shortcuts to avoid costly runtime dispatch
     shapeKind::Shapes.ShapeKind             # marks the defined shape
     shape::Modia3D.AbstractShape            # stores shape defined in Solid or Visual
     visualMaterial::Shapes.VisualMaterial   # stores visualMaterial defined in Solid or Visual
@@ -123,7 +123,7 @@ mutable struct Object3D <: Modia3D.AbstractObject3D
 
     # = True: Coordinate system of Object3D is always visualized
     # = False: Coordinate system of Object3D is never visualized
-    # = Inherited: Coordinate system of Object3D is visualized, if SceneOptions(visualizeFrames=true)
+    # = Inherited: Coordinate system of Object3D is visualized, if Scene(visualizeFrames=true)
     visualizeFrame::Modia3D.Ternary
     visualizationFrame::Vector{Object3D} # If to be visualized, the Object3D holding the coordinate system.
 
@@ -403,7 +403,7 @@ function createConvexPartition(obj::Object3D, feature, mesh) # feature Visual
         # names = Vector{AbstractString}()
         i = 1
         for name in contentDir
-            path = String(Symbol(obj.path, ".", "mesh[", i , "]"))
+            path = String(Symbol(obj.path, ".", "mesh", i ,))
             (head,ext) = splitext(name)
             if ext == ".obj"
                 fileMesh = Modia3D.FileMesh(filename = joinpath(convexDecompositionDirectory, name),
@@ -432,7 +432,7 @@ function addAABBVisuToWorld!(world::Object3D, AABB::Vector{Vector{Basics.Boundin
     @inbounds for i = 1:length(AABB)
         for j = 1:length(AABB[i])
             k = k + 1
-            name = String(Symbol(world.path, ".", "AABBVisu", "[", i, "][",j,"]"))
+            name = String(Symbol(world.path, ".", "AABBVisu", i, j))
             aabb = AABB[i][j]
             feature = Modia3D.Visual(shape = Modia3D.Box(
                     lengthX = abs(aabb.x_max - aabb.x_min), lengthY = abs(aabb.y_max - aabb.y_min), lengthZ = abs(aabb.z_max - aabb.z_min)),
@@ -447,8 +447,8 @@ function addContactVisuObjToWorld!(world::Object3D, nVisualContSupPoints, defaul
     world.contactVisuObj1 = fill(Object3D(), nVisualContSupPoints)
     world.contactVisuObj2 = fill(Object3D(), nVisualContSupPoints)
     @inbounds for i = 1:length(world.contactVisuObj1)
-        name1 = String(Symbol(world.path, ".", "contactVisuObj1", "[", i, "]"))
-        name2 = String(Symbol(world.path, ".", "contactVisuObj2", "[", i, "]"))
+        name1 = String(Symbol(world.path, ".", "contactVisuObj1", i))
+        name2 = String(Symbol(world.path, ".", "contactVisuObj2", i))
 
         feature1 = Modia3D.Visual(shape = Modia3D.Sphere(diameter = defaultContactSphereDiameter), visualMaterial = Modia3D.VisualMaterial(color="Red",   transparency=1.0))
         feature2 = Modia3D.Visual(shape = Modia3D.Sphere(diameter = defaultContactSphereDiameter), visualMaterial = Modia3D.VisualMaterial(color="Black",   transparency=1.0))
@@ -466,12 +466,12 @@ function addSupportVisuObjToWorld!(world::Object3D, nVisualContSupPoints, defaul
     world.supportVisuObj2B = fill(Object3D(), nVisualContSupPoints)
     world.supportVisuObj3B = fill(Object3D(), nVisualContSupPoints)
     @inbounds for i = 1:length(world.supportVisuObj1A)
-        name1 = String(Symbol(world.path, ".", "supportVisuObj1A", "[", i, "]"))
-        name2 = String(Symbol(world.path, ".", "supportVisuObj2A", "[", i, "]"))
-        name3 = String(Symbol(world.path, ".", "supportVisuObj3A", "[", i, "]"))
-        name4 = String(Symbol(world.path, ".", "supportVisuObj1B", "[", i, "]"))
-        name5 = String(Symbol(world.path, ".", "supportVisuObj2B", "[", i, "]"))
-        name6 = String(Symbol(world.path, ".", "supportVisuObj3B", "[", i, "]"))
+        name1 = String(Symbol(world.path, ".", "supportVisuObj1A", i))
+        name2 = String(Symbol(world.path, ".", "supportVisuObj2A", i))
+        name3 = String(Symbol(world.path, ".", "supportVisuObj3A", i))
+        name4 = String(Symbol(world.path, ".", "supportVisuObj1B", i))
+        name5 = String(Symbol(world.path, ".", "supportVisuObj2B", i))
+        name6 = String(Symbol(world.path, ".", "supportVisuObj3B", i))
 
         featureA = Modia3D.Visual(shape = Modia3D.Sphere(diameter = defaultContactSphereDiameter), visualMaterial = Modia3D.VisualMaterial(color="Red", transparency=1.0))
 
@@ -496,7 +496,7 @@ hasParent(            obj::Object3D) = !(obj.parent === obj)
 hasNoParent(          obj::Object3D) =   obj.parent === obj
 hasChildren(          obj::Object3D) = length(obj.children) > 0
 hasNoChildren(        obj::Object3D) = length(obj.children) == 0
-isWorld(              obj::Object3D) = hasNoParent(obj) && typeof(obj.feature) == Modia3D.SceneOptions
+isWorld(              obj::Object3D) = hasNoParent(obj) && typeof(obj.feature) == Modia3D.Scene
 isNotWorld(           obj::Object3D) = !(isWorld(obj))
 isMovable(            obj::Object3D) = obj.interactionManner.movable
 isLockable(           obj::Object3D) = obj.interactionManner.lockable
@@ -517,13 +517,13 @@ objectHasMovablePos(  obj::Object3D) = !isnothing(obj.interactionManner.movableP
 
 featureHasMass(obj::Object3D) = featureHasMass(obj.feature)
 featureHasMass(feature::Modia3D.AbstractObject3DFeature) = false
-featureHasMass(feature::Modia3D.AbstractSceneOptions) = false
+featureHasMass(feature::Modia3D.AbstractScene) = false
 featureHasMass(feature::Shapes.Solid)                 = !isnothing(feature.massProperties)
 
 isVisible(obj::Object3D, renderer::Modia3D.AbstractRenderer) = isVisible(obj.feature, renderer)
 isVisible(feature::Modia3D.AbstractObject3DFeature, renderer::Modia3D.AbstractRenderer) = false
 
-isVisible(feature::Modia3D.AbstractSceneOptions, renderer::Modia3D.AbstractRenderer) = false
+isVisible(feature::Modia3D.AbstractScene, renderer::Modia3D.AbstractRenderer) = false
 
 canCollide(feature::Modia3D.AbstractObject3DFeature) = false
 
@@ -536,12 +536,6 @@ function canCollide(obj::Object3D)::Bool
                 return true
     end; end; end
     return false
-end
-
-
-function driveJoint!(obj::Object3D)::Nothing
-    obj.isDriven = true
-    return nothing
 end
 
 

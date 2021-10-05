@@ -200,7 +200,7 @@ mutable struct Beam <: Modia3D.AbstractGeometry
 end
 
 """
-    FileMesh(; filename::AbstractString="", scale=Basics.onesMVector(),
+    FileMesh(; filename::AbstractString="", scale=SVector{3,Float64}(1.0,1.0,1.0),
     useMaterialColor::Bool=false, smoothNormals::Bool=false, convexPartition::Bool=false)
 
 Generate a new solid or visual shape representing a mesh.
@@ -234,7 +234,7 @@ mutable struct FileMesh <: Modia3D.AbstractGeometry
     volume::Float64
     centroidAlgo::SVector{3,Float64}
     inertia::SMatrix{3,3,Float64,9}
-    function FileMesh(; filename::AbstractString="", scale=Basics.onesMVector(),
+    function FileMesh(; filename::AbstractString="", scale=SVector{3,Float64}(1.0,1.0,1.0),
         useMaterialColor::Bool=false, smoothNormals::Bool=false, convexPartition::Bool=false)
         if !isfile(filename)
         error("FileMesh(\"$filename\",...): file not found.")

@@ -26,8 +26,8 @@ that is the most extreme in direction of unit vector `e`.
 @inline supportPoint_Cone(shape::Cone, r_abs::SVector{3,Float64}, R_abs::SMatrix{3,3,Float64,9}, e::SVector{3,Float64}, collisionSmoothingRadius::Float64) =
             r_abs + R_abs'*supportPoint_abs_Cone(shape, R_abs*e) + e*collisionSmoothingRadius
 
-@inline supportPoint_Capsule(shape::Capsule, r_abs::SVector{3,Float64}, R_abs::SMatrix{3,3,Float64,9}, e::SVector{3,Float64}, collisionSmoothingRadius::Float64) =
-            r_abs + R_abs'*supportPoint_abs_Capsule(shape, R_abs*e) + e*collisionSmoothingRadius
+@inline supportPoint_Capsule(shape::Capsule, r_abs::SVector{3,Float64}, R_abs::SMatrix{3,3,Float64,9}, e::SVector{3,Float64}) =
+            r_abs + R_abs'*supportPoint_abs_Capsule(shape, R_abs*e)
 
 @inline supportPoint_Beam(shape::Beam, r_abs::SVector{3,Float64}, R_abs::SMatrix{3,3,Float64,9}, e::SVector{3,Float64}, collisionSmoothingRadius::Float64) =
             r_abs + R_abs'*supportPoint_abs_Beam(shape, R_abs*e) + e*collisionSmoothingRadius
@@ -248,8 +248,8 @@ Returns the *Axis Aligned Bounding Box* of solid `shape` in argument `AABB`.
 @inline supportPoint_i_Cone(shape::Cone, r_absi::Float64, R_absi::SVector{3,Float64}, isign::Int, collisionSmoothingRadius) =
                r_absi + R_absi'*supportPoint_abs_Cone(shape, isign*R_absi) + isign*collisionSmoothingRadius
 
-@inline supportPoint_i_Capsule(shape::Capsule, r_absi::Float64, R_absi::SVector{3,Float64}, isign::Int, collisionSmoothingRadius) =
-               r_absi + R_absi'*supportPoint_abs_Capsule(shape, isign*R_absi) + isign*collisionSmoothingRadius
+@inline supportPoint_i_Capsule(shape::Capsule, r_absi::Float64, R_absi::SVector{3,Float64}, isign::Int) =
+               r_absi + R_absi'*supportPoint_abs_Capsule(shape, isign*R_absi)
 #
 @inline supportPoint_i_Beam(shape::Beam, r_absi::Float64, R_absi::SVector{3,Float64}, isign::Int, collisionSmoothingRadius) =
                r_absi + R_absi'*supportPoint_abs_Beam(shape, isign*R_absi) + isign*collisionSmoothingRadius

@@ -24,9 +24,7 @@ Return a response material object at contact start.
 """
 function contactStart(obj1::Object3D, obj2::Object3D, rContact::SVector{3,Float64},
                       contactNormal::SVector{3,Float64}, elasticContactReductionFactor::Float64)
-    name1 = obj1.feature.contactMaterial
-    name2 = obj2.feature.contactMaterial
-    material = Shapes.getContactPairMaterial(name1, name2)
+    material = Shapes.getContactPairMaterial(obj1, obj2)
     return contactStart(material, obj1, obj2, rContact, contactNormal, elasticContactReductionFactor)
 end
 
