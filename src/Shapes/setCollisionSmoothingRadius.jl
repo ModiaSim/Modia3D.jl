@@ -25,12 +25,6 @@ function setCollisionSmoothingRadius(shape::Cone, collisionSmoothingRadius)
     return collisionSmoothingRadius2
 end
 
-function setCollisionSmoothingRadius(shape::Capsule, collisionSmoothingRadius)
-    @assert(collisionSmoothingRadius >= 0.0)
-    collisionSmoothingRadius2 = min(collisionSmoothingRadius, 0.1*min(shape.diameter, shape.length)) # at most 10% of the smallest edge length
-    return collisionSmoothingRadius2
-end
-
 function setCollisionSmoothingRadius(shape::Beam, collisionSmoothingRadius)
     @assert(collisionSmoothingRadius >= 0.0)
     collisionSmoothingRadius2 = min(collisionSmoothingRadius, 0.1*min(shape.length, shape.width, shape.thickness)) # at most 10% of the smallest edge length
