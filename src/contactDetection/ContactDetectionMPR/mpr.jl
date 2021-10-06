@@ -144,8 +144,8 @@ function tetrahedronEncloseOrigin(r0::SupportPoint, r1::SupportPoint,
         break
     end
     if success != true
-        @warn("MPR (phase 2): Max. number of iterations (= $niter_max) is reached. niter_max increased locally by 10 and phase 2 is rerun until counter is bigger than 100.")
         if niter_max < 100
+            @warn("MPR (phase 2): Max. number of iterations (= $niter_max) is reached. niter_max increased locally by 10 and phase 2 is rerun.")
             tetrahedronEncloseOrigin(r0, r1org, r2org, r3org, neps, niter_max + 10, shapeA, shapeB, scale)
         else
             error("MPR (phase 2): Max. number of iterations (= $niter_max) is reached and $niter_max > 100.")
@@ -312,13 +312,11 @@ function phase3(r0::SupportPoint, r1::SupportPoint, r2::SupportPoint, r3::Suppor
             end
         end
     end
-    @warn("MPR (phase 3): Numerical issues with distance computation between $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)). Max. number of iterations (= $niter_max) is reached. niter_max increased locally by 10 and phase 3 is rerun until counter is bigger than 100.")
-
     if niter_max < 100
+        @warn("MPR (phase 3): Numerical issues with distance computation between $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)). Max. number of iterations (= $niter_max) is reached. niter_max increased locally by 10 and phase 3 is rerun.")
         phase3(r0, r1org, r2org, r3org, neps, niter_max + 10, tol_rel, shapeA, shapeB, scale)
     else
         @warn("MPR (phase 3): Max. number of iterations (= $niter_max) is reached and $niter_max > 100. tol_rel increased locally for this computation to $new_tol.")
-
         if isTC2
             (distance,r1,r2,r3,r4) = finalTC2(r1_new,r2_new,r3_new,r4_new)
             return (distance, r4.a, r4.b, r4.n, true, r1.a, r1.b, r2.a, r2.b, r3.a, r3.b)
