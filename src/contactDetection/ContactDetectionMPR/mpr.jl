@@ -118,9 +118,13 @@ end
 # loop around to "ensure" the tetrahedron r0,r1,r2 and r3 encloses the origin
 # stimmt so nicht wirklich, muss ich nochmal nachlesen!!!
 # Der Ursprung muss nicht enthalten sein!!!
-function tetrahedronEncloseOrigin(r0::SupportPoint,r1::SupportPoint,r2::SupportPoint,r3::SupportPoint,
-                                  neps::Float64, niter_max::Int64,
-                                  shapeA::Composition.Object3D,shapeB::Composition.Object3D, scale::Float64)
+function tetrahedronEncloseOrigin(r0::SupportPoint, r1::SupportPoint,
+            r2::SupportPoint, r3::SupportPoint,
+            neps::Float64, niter_max::Int64,
+            shapeA::Composition.Object3D, shapeB::Composition.Object3D, scale::Float64)
+    r1org = r1
+    r2org = r2
+    r3org = r3
     aux = Modia3D.ZeroVector3D
     success = false
     for i in 1:niter_max
@@ -140,9 +144,13 @@ function tetrahedronEncloseOrigin(r0::SupportPoint,r1::SupportPoint,r2::SupportP
         break
     end
     if success != true
-        error("MPR: Max. number of iterations is reached in phase2. Look at shapeA = ", shapeA, " shapeB = ", shapeB)
+        @warn("MPR (phase 2): Max. number of iterations (= $niter_max) is reached. niter_max increased locally by 10 and phase 2 is rerun until counter is bigger than 100.")
+        if niter_max < 100
+            tetrahedronEncloseOrigin(r0, r1org, r2org, r3org, neps, niter_max + 10, shapeA, shapeB, scale)
+        else
+            error("MPR (phase 2): Max. number of iterations (= $niter_max) is reached and $niter_max > 100.")
+        end
     end
-    # pointInTetrahedron(r0.p,r1.p,r2.p,r3.p,SVector(0.0, 0.0, 0.0))
     return (r1, r2, r3)
 end
 
