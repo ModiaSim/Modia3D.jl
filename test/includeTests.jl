@@ -23,11 +23,7 @@ Test.@testset "Robot" begin
     include(joinpath("Robot", "ServoWithPathAndRevolute.jl"))
     include(joinpath("Robot", "YouBotWithSphere.jl"))
     Test.@test_skip include(joinpath("Robot", "YouBotPingPong.jl")) # too long computation time
-    if Sys.iswindows()
-        include(joinpath("Robot", "YouBotGripping.jl"))
-    else
-        Test.@test_skip include(joinpath("Robot", "YouBotGripping.jl")) # mpr error on linux https://github.com/ModiaSim/PrivateModia3D.jl/issues/142
-    end
+    include(joinpath("Robot", "YouBotGripping.jl"))
     Test.@test_skip include(joinpath("Robot", "YouBotsGripping.jl")) # too long computation time
 end
 
