@@ -171,7 +171,7 @@ function constructR4(r0::SupportPoint,r1::SupportPoint,r2::SupportPoint,r3::Supp
 end
 
 # computes twice a parallelepipedial product (Spatprodukt)
-isNextPortal(r0,r1,r2,r4) = dot( cross( (r2.p-r0.p), (r4.p-r0.p) ), r0.n ) <= 0.0 &&
+isNextPortal(r0::SupportPoint, r1::SupportPoint, r2::SupportPoint, r4::SupportPoint) = dot( cross( (r2.p-r0.p), (r4.p-r0.p) ), r0.n ) <= 0.0 &&
                             dot( cross( (r4.p-r0.p), (r1.p-r0.p) ), r0.n ) <= 0.0
 
 
@@ -181,8 +181,7 @@ isNextPortal(r0,r1,r2,r4) = dot( cross( (r2.p-r0.p), (r4.p-r0.p) ), r0.n ) <= 0.
 #   r1r2r4
 #   r2r3r4
 #   r3r1r4
-function createBabyTetrahedrons(r0::SupportPoint,r1::SupportPoint,r2::SupportPoint,r3::SupportPoint,r4::SupportPoint,
-                                shapeA::Composition.Object3D,shapeB::Composition.Object3D)
+function createBabyTetrahedrons(r0::SupportPoint, r1::SupportPoint, r2::SupportPoint, r3::SupportPoint, r4::SupportPoint)
     nextPortal = true
     if isNextPortal(r0,r1,r2,r4)
         r3 = r4
@@ -200,7 +199,7 @@ end
 scaleVector(scale, ri) = ri.*scale
 
 
-function skalarization(r0,r1,r2,r3)
+function skalarization(r0::SupportPoint, r1::SupportPoint, r2::SupportPoint, r3::SupportPoint)
     x = maximum([abs.(r0.p) abs.(r1.p) abs.(r2.p) abs.(r3.p)])
     scale = 1/x
     r0.p = scaleVector(scale, r0.p)
@@ -210,7 +209,7 @@ function skalarization(r0,r1,r2,r3)
     return (r0, r1, r2, r3, scale)
 end
 
-function finalTC2(r1, r2, r3, r4)
+function finalTC2(r1::SupportPoint, r2::SupportPoint, r3::SupportPoint, r4::SupportPoint)
     #println("TC 2")
     #if !analyzeFinalPortal(r1.p, r2.p, r3.p, r4.p, neps)
         # error("shapeA = ", shapeA, " shapeB = ", shapeB)
@@ -220,7 +219,8 @@ function finalTC2(r1, r2, r3, r4)
     return distance, r1, r2, r3, r4
 end
 
-function finalTC3(r0, r1, r2, r3, r4)
+
+function finalTC3(r0::SupportPoint, r1::SupportPoint, r2::SupportPoint, r3::SupportPoint, r4::SupportPoint)
     #println("TC 3")
 
     #doesRayIntersectPortal(r1.p,r2.p,r3.p, r4.p,neps)
@@ -330,7 +330,6 @@ function mprGeneral(ch::Composition.ContactDetectionMPR_handler, shapeA::Composi
         ### Phase 3.2: check if r4 is close to the origin ###
         # check if the new point r4 is already on the plane of the triangle r1,r2,r3,
         # we're already as close as we can get to the origin
-
         TC2 = norm(cross(r4.p,r4.n))    # TC2
         TC3 = abs(dot(r4.p-r1.p, r4.n)) # TC3
         ## TERMINATION CONDITION 2 ##
@@ -365,7 +364,7 @@ function mprGeneral(ch::Composition.ContactDetectionMPR_handler, shapeA::Composi
 
         #### Phase 3.3: construct baby tetrahedrons with r1,r2,r3,r4 and create a new portal ###
         # Construction of three baby tetrahedrons
-        (nextPortal, r1,r2,r3) = createBabyTetrahedrons(r0,r1,r2,r3,r4,shapeA,shapeB)
+        (nextPortal, r1,r2,r3) = createBabyTetrahedrons(r0,r1,r2,r3,r4)
 
         if !nextPortal # createBabyTetrahedrons failed
             @warn("MPR (phase 3): Numerical issues with distance computation between $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)). tol_rel increased locally for this computation to $new_tol.")
@@ -379,7 +378,15 @@ function mprGeneral(ch::Composition.ContactDetectionMPR_handler, shapeA::Composi
             end
         end
     end
-    error("MPR (phase 3): Numerical issues with distance computation between $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)).")
+    @warn("MPR (phase 3): Numerical issues with distance computation between $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)). Too less iteration steps (actually $niter_max).  tol_rel increased locally for this computation to $new_tol.")
+    if isTC2
+        (distance,r1,r2,r3,r4) = finalTC2(r1_new,r2_new,r3_new,r4_new)
+        return (distance, r4.a, r4.b, r4.n, true, r1.a, r1.b, r2.a, r2.b, r3.a, r3.b)
+    end
+    if isTC3
+        (distance,r1,r2,r3,r4) = finalTC3(r0, r1_new, r2_new, r3_new, r4_new)
+        return (distance, r4.a, r4.b, r4.n, true, r1.a, r1.b, r2.a, r2.b, r3.a, r3.b)
+    end
 end
 
 
