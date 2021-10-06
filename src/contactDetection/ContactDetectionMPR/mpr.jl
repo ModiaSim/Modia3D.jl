@@ -243,6 +243,93 @@ function finalTC3(r0::SupportPoint, r1::SupportPoint, r2::SupportPoint, r3::Supp
     return distance, r1, r2, r3, r4
 end
 
+
+function phase3(r0::SupportPoint, r1::SupportPoint, r2::SupportPoint, r3::SupportPoint, neps::Float64, niter_max::Int64,tol_rel::Float64, shapeA::Composition.Object3D,shapeB::Composition.Object3D, scale::Float64)
+    r1org = r1
+    r2org = r2
+    r3org = r3
+    new_tol = 42.0
+    isTC2 = false
+    isTC3 = false
+    r1_new::SupportPoint = r0
+    r2_new::SupportPoint = r0
+    r3_new::SupportPoint = r0
+    r4_new::SupportPoint = r0
+    for i in 1:niter_max
+        ### Phase 3.1: construct r4 ###
+        # Find support point using the tetrahedron face
+        (r3,r4,n4) = constructR4(r0,r1,r2,r3,neps,shapeA,shapeB, scale)
+
+
+        ### Phase 3.2: check if r4 is close to the origin ###
+        # check if the new point r4 is already on the plane of the triangle r1,r2,r3,
+        # we're already as close as we can get to the origin
+        TC2 = norm(cross(r4.p,r4.n))    # TC2
+        TC3 = abs(dot(r4.p-r1.p, r4.n)) # TC3
+        ## TERMINATION CONDITION 2 ##
+        if TC2 < tol_rel
+            (distance,r1,r2,r3,r4) = finalTC2(r1,r2,r3,r4)
+            return (distance, r4.a, r4.b, r4.n, true, r1.a, r1.b, r2.a, r2.b, r3.a, r3.b)
+
+        ## TERMINATION CONDITION 3 ##
+        elseif TC3 < tol_rel
+            (distance,r1,r2,r3,r4) = finalTC3(r0, r1, r2, r3, r4)
+            return (distance, r4.a, r4.b, r4.n, true, r1.a, r1.b, r2.a, r2.b, r3.a, r3.b)
+        else
+            if TC2 < new_tol
+                new_tol = TC2
+                isTC2 = true
+                isTC3 = false
+                r1_new = r1
+                r2_new = r2
+                r3_new = r3
+                r4_new = r4
+            end
+            if TC3 < new_tol
+                new_tol = TC3
+                isTC2 = false
+                isTC3 = true
+                r1_new = r1
+                r2_new = r2
+                r3_new = r3
+                r4_new = r4
+            end
+        end
+
+        #### Phase 3.3: construct baby tetrahedrons with r1,r2,r3,r4 and create a new portal ###
+        # Construction of three baby tetrahedrons
+        (nextPortal, r1,r2,r3) = createBabyTetrahedrons(r0,r1,r2,r3,r4)
+
+        if !nextPortal # createBabyTetrahedrons failed
+            @warn("MPR (phase 3): Numerical issues with distance computation between $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)). tol_rel increased locally for this computation to $new_tol.")
+            if isTC2
+                (distance,r1,r2,r3,r4) = finalTC2(r1_new,r2_new,r3_new,r4_new)
+                return (distance, r4.a, r4.b, r4.n, true, r1.a, r1.b, r2.a, r2.b, r3.a, r3.b)
+            end
+            if isTC3
+                (distance,r1,r2,r3,r4) = finalTC3(r0, r1_new, r2_new, r3_new, r4_new)
+                return (distance, r4.a, r4.b, r4.n, true, r1.a, r1.b, r2.a, r2.b, r3.a, r3.b)
+            end
+        end
+    end
+    @warn("MPR (phase 3): Numerical issues with distance computation between $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)). Max. number of iterations (= $niter_max) is reached. niter_max increased locally by 10 and phase 3 is rerun until counter is bigger than 100.")
+
+    if niter_max < 100
+        phase3(r0, r1org, r2org, r3org, neps, niter_max + 10, tol_rel, shapeA, shapeB, scale)
+    else
+        @warn("MPR (phase 3): Max. number of iterations (= $niter_max) is reached and $niter_max > 100. tol_rel increased locally for this computation to $new_tol.")
+
+        if isTC2
+            (distance,r1,r2,r3,r4) = finalTC2(r1_new,r2_new,r3_new,r4_new)
+            return (distance, r4.a, r4.b, r4.n, true, r1.a, r1.b, r2.a, r2.b, r3.a, r3.b)
+        end
+        if isTC3
+            (distance,r1,r2,r3,r4) = finalTC3(r0, r1_new, r2_new, r3_new, r4_new)
+            return (distance, r4.a, r4.b, r4.n, true, r1.a, r1.b, r2.a, r2.b, r3.a, r3.b)
+        end
+    end
+end
+
 # MPR - Minkowski Portal Refinement algorithm
 # construction of points r0 is in the interior of Minkowski Difference and points r1,r2,r3,r4 are on the boundary of Minkowski Difference
 # Phase 1
@@ -322,79 +409,7 @@ function mprGeneral(ch::Composition.ContactDetectionMPR_handler, shapeA::Composi
 
 
     ###########      Phase 3, Minkowski Portal Refinement      ###################
-    new_tol = 42.0
-    isTC2 = false
-    isTC3 = false
-    r1_new::SupportPoint = r0
-    r2_new::SupportPoint = r0
-    r3_new::SupportPoint = r0
-    r4_new::SupportPoint = r0
-    for i in 1:niter_max
-        ### Phase 3.1: construct r4 ###
-        # Find support point using the tetrahedron face
-        (r3,r4,n4) = constructR4(r0,r1,r2,r3,neps,shapeA,shapeB, scale)
-
-
-        ### Phase 3.2: check if r4 is close to the origin ###
-        # check if the new point r4 is already on the plane of the triangle r1,r2,r3,
-        # we're already as close as we can get to the origin
-        TC2 = norm(cross(r4.p,r4.n))    # TC2
-        TC3 = abs(dot(r4.p-r1.p, r4.n)) # TC3
-        ## TERMINATION CONDITION 2 ##
-        if TC2 < tol_rel
-            (distance,r1,r2,r3,r4) = finalTC2(r1,r2,r3,r4)
-            return (distance, r4.a, r4.b, r4.n, true, r1.a, r1.b, r2.a, r2.b, r3.a, r3.b)
-
-        ## TERMINATION CONDITION 3 ##
-        elseif TC3 < tol_rel
-            (distance,r1,r2,r3,r4) = finalTC3(r0, r1, r2, r3, r4)
-            return (distance, r4.a, r4.b, r4.n, true, r1.a, r1.b, r2.a, r2.b, r3.a, r3.b)
-        else
-            if TC2 < new_tol
-                new_tol = TC2
-                isTC2 = true
-                isTC3 = false
-                r1_new = r1
-                r2_new = r2
-                r3_new = r3
-                r4_new = r4
-            end
-            if TC3 < new_tol
-                new_tol = TC3
-                isTC2 = false
-                isTC3 = true
-                r1_new = r1
-                r2_new = r2
-                r3_new = r3
-                r4_new = r4
-            end
-        end
-
-        #### Phase 3.3: construct baby tetrahedrons with r1,r2,r3,r4 and create a new portal ###
-        # Construction of three baby tetrahedrons
-        (nextPortal, r1,r2,r3) = createBabyTetrahedrons(r0,r1,r2,r3,r4)
-
-        if !nextPortal # createBabyTetrahedrons failed
-            @warn("MPR (phase 3): Numerical issues with distance computation between $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)). tol_rel increased locally for this computation to $new_tol.")
-            if isTC2
-                (distance,r1,r2,r3,r4) = finalTC2(r1_new,r2_new,r3_new,r4_new)
-                return (distance, r4.a, r4.b, r4.n, true, r1.a, r1.b, r2.a, r2.b, r3.a, r3.b)
-            end
-            if isTC3
-                (distance,r1,r2,r3,r4) = finalTC3(r0, r1_new, r2_new, r3_new, r4_new)
-                return (distance, r4.a, r4.b, r4.n, true, r1.a, r1.b, r2.a, r2.b, r3.a, r3.b)
-            end
-        end
-    end
-    @warn("MPR (phase 3): Numerical issues with distance computation between $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)). Too less iteration steps (actually $niter_max).  tol_rel increased locally for this computation to $new_tol.")
-    if isTC2
-        (distance,r1,r2,r3,r4) = finalTC2(r1_new,r2_new,r3_new,r4_new)
-        return (distance, r4.a, r4.b, r4.n, true, r1.a, r1.b, r2.a, r2.b, r3.a, r3.b)
-    end
-    if isTC3
-        (distance,r1,r2,r3,r4) = finalTC3(r0, r1_new, r2_new, r3_new, r4_new)
-        return (distance, r4.a, r4.b, r4.n, true, r1.a, r1.b, r2.a, r2.b, r3.a, r3.b)
-    end
+    phase3(r0, r1, r2, r3, neps, niter_max, tol_rel, shapeA, shapeB, scale)
 end
 
 
