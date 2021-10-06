@@ -67,7 +67,7 @@ end
 # belongs to construction of r0
 function checkCentersOfShapesOverlapp(r0::SupportPoint, neps::Float64, shapeA::Composition.Object3D, shapeB::Composition.Object3D)
     if norm(r0.p) <= neps
-        error("MPR: Too large penetration (prerequisite of MPR violated). Centers are overlapping. Look at shapeA = ", shapeA, " shapeB = ", shapeB)
+        error("MPR: Too large penetration (prerequisite of MPR violated). Centers are overlapping. Look at $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)).")
     end
 end
 
@@ -86,7 +86,7 @@ function checkIfShapesArePlanar(r0::SupportPoint,r1::SupportPoint,r2::SupportPoi
             # Shape is purely planar. Computing the shortest distance for a planar shape
             # requires an MPR 2D algorithm (using lines instead of triangles as portals).
             # However, this is not implemented and therefore the shortest distance cannot be computed
-            error("MPR: Shapes are planar and MPR2D is not supported. abs(dot((r2.p-r1.p),n2)). Look at shapeA = ", shapeA, " shapeB = ", shapeB)
+            error("MPR: Shapes are planar and MPR2D is not supported. abs(dot((r2.p-r1.p),n2)). Look at $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)).")
         end
         # new normal to the triangle plane (r0-r1-r2_new)
         n3 = cross(r1.p-r0.p, r2.p-r0.p)   # |n3| > 0 guaranteed, due to construction
@@ -106,7 +106,7 @@ function checkIfShapesArePlanar(r0::SupportPoint,r1::SupportPoint,r2::SupportPoi
             # Shape is purely planar. Computing the shortest distance for a planar shape
             # requires an MPR 2D algorithm (using lines instead of triangles as portals).
             # However, this is not implemented and therefore the shortest distance cannot be computed
-            error("MPR: Shapes are planar and MPR2D is not supported. r1, r2, r3 are on the same ray. abs(dot((r3.p-r1.p),r3.n)) <= neps. Look at shapeA = ", shapeA, " shapeB = ", shapeB)
+            error("MPR: Shapes are planar and MPR2D is not supported. r1, r2, r3 are on the same ray. abs(dot((r3.p-r1.p),r3.n)) <= neps. Look at $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)).")
         end
     end
 
@@ -144,11 +144,11 @@ function tetrahedronEncloseOrigin(r0::SupportPoint, r1::SupportPoint,
         break
     end
     if success != true
-        if niter_max < 100
-            @warn("MPR (phase 2): Max. number of iterations (= $niter_max) is reached. niter_max increased locally by 10 and phase 2 is rerun.")
+        if niter_max <= 100
+            @warn("MPR (phase 2): Max. number of iterations (= $niter_max) is reached. niter_max increased locally by 10 and phase 2 is rerun. Look at $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)).")
             tetrahedronEncloseOrigin(r0, r1org, r2org, r3org, neps, niter_max + 10, shapeA, shapeB, scale)
         else
-            error("MPR (phase 2): Max. number of iterations (= $niter_max) is reached and $niter_max > 100.")
+            error("MPR (phase 2): Max. number of iterations (= $niter_max) is reached and $niter_max > 100, look at $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)).")
         end
     end
     return (r1, r2, r3)
@@ -166,7 +166,7 @@ function constructR4(r0::SupportPoint,r1::SupportPoint,r2::SupportPoint,r3::Supp
             # Shape is purely planar. Computing the shortest distance for a planar shape
             # requires an MPR 2D algorithm (using lines instead of triangles as portals).
             # However, this is not implemented and therefore the shortest distance cannot be computed
-            error("MPR: Shapes are planar and MPR2D is not supported. abs(dot((r3.p-r1.p),r3.n)). Look at shapeA = ", shapeA, " shapeB = ", shapeB)
+            error("MPR: Shapes are planar and MPR2D is not supported. abs(dot((r3.p-r1.p),r3.n)). Look at $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)).")
         end
         n4 = cross(r2.p-r1.p, r3.p-r1.p)   # |n4| > 0 guaranteed, due to construction
     end
@@ -312,11 +312,11 @@ function phase3(r0::SupportPoint, r1::SupportPoint, r2::SupportPoint, r3::Suppor
             end
         end
     end
-    if niter_max < 100
+    if niter_max <= 100
         @warn("MPR (phase 3): Numerical issues with distance computation between $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)). Max. number of iterations (= $niter_max) is reached. niter_max increased locally by 10 and phase 3 is rerun.")
         phase3(r0, r1org, r2org, r3org, neps, niter_max + 10, tol_rel, shapeA, shapeB, scale)
     else
-        @warn("MPR (phase 3): Max. number of iterations (= $niter_max) is reached and $niter_max > 100. tol_rel increased locally for this computation to $new_tol.")
+        @warn("MPR (phase 3): Max. number of iterations (= $niter_max) is reached and $niter_max > 100, look at $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)). tol_rel increased locally for this computation to $new_tol.")
         if isTC2
             (distance,r1,r2,r3,r4) = finalTC2(r1_new,r2_new,r3_new,r4_new)
             return (distance, r4.a, r4.b, r4.n, true, r1.a, r1.b, r2.a, r2.b, r3.a, r3.b)
@@ -421,7 +421,7 @@ function mprTwoSpheres(ch::Composition.ContactDetectionMPR_handler, shapeA::Comp
     n = centroidSphereB - centroidSphereA
     distanceCentroids = norm(n)
     if distanceCentroids <= neps
-        error("Centers of two spheres are overlapping. SphereA = ", shapeA, " sphereB = ", shapeB)
+        error("Centers of two spheres are overlapping. Look at $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)).")
     else
         normal = n/distanceCentroids
     end
