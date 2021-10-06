@@ -93,7 +93,7 @@ struct MultibodyData{FloatType}
     jointObjects::Vector{Object3D}  # References to Object3Ds that have a joint
     jointStartIndex::Vector{Int}    # Start index of joint in qdd
     jointNdof::Vector{Int}          # Number-of-degrees-of-freedom of joint
-    zStartIndex::Int                # eventHandler.z[zStartIndex] is first index of crossing function
+    zStartIndex::Int                # eventHandler.z[zStartIndex] is first index of crossing functions for contact detection
                                     # (or zero, if nableContactDetection=false)
     nz::Int                         # Number of used zero crossing functions
     residuals::Vector{FloatType}    # Residuals - length(residuals) = nqdd
@@ -141,6 +141,7 @@ function setModiaJointVariables!(id::Int, _leq_mode, instantiatedModel::ModiaLan
             if scene.options.enableContactDetection
                 nz = 2
                 zStartIndex = ModiaLang.addZeroCrossings(instantiatedModel, nz)
+                scene.zStartIndex = zStartIndex
             else
                 nz = 0
                 zStartIndex = 0

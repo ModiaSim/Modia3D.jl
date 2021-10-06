@@ -12,6 +12,7 @@ Test.@testset "Basic" begin
     include(joinpath("Basic", "Mobile.jl"))
     include(joinpath("Basic", "BoxPlanarMotion.jl"))
     include(joinpath("Basic", "ShaftFreeMotion.jl"))
+    include(joinpath("Basic", "ShaftFreeMotionAdaptiveRotSequence.jl"))
     Test.@test_throws LoadError include(joinpath("Basic", "Object3DWithoutParentError.jl"))
 end
 
