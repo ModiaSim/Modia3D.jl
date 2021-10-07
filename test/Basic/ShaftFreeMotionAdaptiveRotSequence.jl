@@ -33,8 +33,6 @@ requiredFinalStates = [0.0, 0.7, -7.350074420637136, 0.0, 0.1, -2.1, 0.698131700
 simulate!(shaft, stopTime=stopTime, dtmax=dtmax, log=true, logEvents=true, logStates=true, requiredFinalStates=requiredFinalStates)
 
 @usingModiaPlot
-plot(shaft, "free.rot", figure=1)
-plot(shaft, ["free.r", "free.v", "free.w"], figure=2)
-plot(shaft, "free.isrot123", figure=3)
+plot(shaft, ["free.rot", "free.isrot123", "free.w", "free.r", "free.v"], figure=1)
 
 end
