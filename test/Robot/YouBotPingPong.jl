@@ -339,7 +339,7 @@ Link = Model(
     trans = [0,0,0],
     rota = Par(value = :(nullRot)), #rotation1, #Modia3D.rot1(180u"°"),
 
-    obj1 = Object3D(parent=:parent1, rotation=:rota,  visualizeFrame=false), # feature=:featureVisual,
+    obj1 = Object3D(parent=:parent1, rotation=:rota), # feature=:featureVisual,
     body = Object3D(feature = :featureBody),
     obj2 = Object3D(parent =:body, translation = :trans),
 )
