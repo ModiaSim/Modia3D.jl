@@ -286,7 +286,7 @@ function printVisuMaterialToJSON(obj, visuMaterial::Modia3D.Shapes.VisualMateria
 
     transparent = visuMaterial.transparency > 0
 
-    material = (; name=name, uuid=name2uuid(name), type="MeshPhongMaterial", color=((visuMaterial.color[1]*256 + visuMaterial.color[2])*256 + visuMaterial.color[3]), opacity=1-visuMaterial.transparency, transparent=transparent,
+    material = (; name=name, uuid=name2uuid(name), type="MeshPhongMaterial", color=colorNum(visuMaterial.color[1], visuMaterial.color[2], visuMaterial.color[3]), opacity=1-visuMaterial.transparency, transparent=transparent,
     shininess=visuMaterial.shininess*100, side="DoubleSide")
 
     return material
