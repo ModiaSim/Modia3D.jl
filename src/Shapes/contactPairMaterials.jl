@@ -163,3 +163,28 @@ function getContactPairMaterial(obj1, obj2)::Modia3D.AbstractContactPairMaterial
     end
     return value
 end
+
+
+"""
+    material = checkContactPairMaterialInit(obj1, obj2)
+
+Return a contact pair material object of the materials with the
+names `name1` and `name2` from dictionary `Modia3D.contactPairMaterialPalette`.
+"""
+function checkContactPairMaterialInit(obj1, obj2)::Nothing
+    name1 = obj1.feature.contactMaterial
+    name2 = obj2.feature.contactMaterial
+
+    value = get(contactPairMaterialPalette, TwoNamesKey(name1,name2), NoContactPairMaterial())
+    if typeof(value) == NoContactPairMaterial
+        # Combination name1,name2 is not present
+        value1 = get(contactPairMaterialPalette, TwoNamesKey(name1,name1), NoContactPairMaterial())
+        value2 = get(contactPairMaterialPalette, TwoNamesKey(name2,name2), NoContactPairMaterial())
+        if typeof(value1) != NoContactPairMaterial && typeof(value2) != NoContactPairMaterial
+            return nothing
+        else
+            @warn("If a contact between $(Modia3D.fullName(obj1)) and $(Modia3D.fullName(obj2)) occurs during simulation a pairing of contact materials $name1 and $name2 will be required. But this combination is not available in $Modia3D.path/palettes/contactPairMaterials.json.")
+        end
+    end
+    return nothing
+end
