@@ -4,6 +4,8 @@ import Modia3D
 using  Modia3D.Test
 using  Modia3D.LinearAlgebra
 using StaticArrays
+using DoubleFloats
+
 EYE3() = @SMatrix[1.0  0.0  0.0;
                 0.0   1.0    0.0 ;
                 0.0   0.0    1.0]
@@ -18,7 +20,7 @@ mass  = Modia3D.MassProperties(shape,m)
 solid = Modia3D.Solid(shape=shape, massProperties=mass)
 obj   = Modia3D.Object3D(feature = solid)
 
-rref  = SVector(1.0,2.0,3.0)
+rref  = SVector{3,Double64}(1.0,2.0,3.0)
 Tref  = EYE3()
 obj.r_abs = rref
 obj.R_abs = Tref
@@ -54,7 +56,7 @@ obj = Modia3D.Object3D(feature = solid)
 
 rref  = SVector(1.0,2.0,3.0)
 Tref  = EYE3()
-eref  = SVector(0.0, 0.0, 1.0)
+eref  = SVector{3,Double64}(0.0, 0.0, 1.0)
 obj.r_abs = rref
 obj.R_abs = Tref
 sp    = Modia3D.supportPoint(obj,eref)
@@ -95,7 +97,7 @@ m2    = mass2.m
 
 rref  = SVector(1.0,2.0,3.0)
 Tref  = EYE3()
-eref  = SVector(0.0, 0.0, 1.0)
+eref  = SVector{3,Double64}(0.0, 0.0, 1.0)
 obj.r_abs = rref
 obj.R_abs = Tref
 sp    = Modia3D.supportPoint(obj,eref)
