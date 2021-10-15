@@ -319,11 +319,11 @@ function phase3(r0::SupportPoint, r1::SupportPoint, r2::SupportPoint, r3::Suppor
         @warn("MPR (phase 3): Max. number of iterations (= $niter_max) is reached and $niter_max > 100, look at $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)). tol_rel increased locally for this computation to $new_tol.")
         if isTC2
             (distance,r1,r2,r3,r4) = finalTC2(r1_new,r2_new,r3_new,r4_new)
-            return (distance, r4.a, r4.b, r4.n, true, r1.a, r1.b, r2.a, r2.b, r3.a, r3.b)
+            return (Float64(distance), SVector{3,Float64}(r4.a), SVector{3,Float64}(r4.b), SVector{3,Float64}(r4.n), true, SVector{3,Float64}(r1.a), SVector{3,Float64}(r1.b), SVector{3,Float64}(r2.a), SVector{3,Float64}(r2.b), SVector{3,Float64}(r3.a), SVector{3,Float64}(r3.b) )
         end
         if isTC3
             (distance,r1,r2,r3,r4) = finalTC3(r0, r1_new, r2_new, r3_new, r4_new)
-            return (distance, r4.a, r4.b, r4.n, true, r1.a, r1.b, r2.a, r2.b, r3.a, r3.b)
+            return (Float64(distance), SVector{3,Float64}(r4.a), SVector{3,Float64}(r4.b), SVector{3,Float64}(r4.n), true, SVector{3,Float64}(r1.a), SVector{3,Float64}(r1.b), SVector{3,Float64}(r2.a), SVector{3,Float64}(r2.b), SVector{3,Float64}(r3.a), SVector{3,Float64}(r3.b) )
         end
     end
 end
