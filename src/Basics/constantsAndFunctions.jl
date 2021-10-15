@@ -8,9 +8,9 @@
 
 # Epsilon and sign
 const neps = sqrt( eps() )
-sign_eps(value::Float64; seps::Float64 = 100*neps)::Float64 = value > seps ? 1.0 : (value < -seps ? -1.0 : 0.0)
+sign_eps(value::T; seps::T = 100.0*T(neps)) where {T} = value > seps ? 1.0 : (value < -seps ? -1.0 : 0.0)
 
-function normalizeVector(n::SVector{3,Float64})::SVector{3,Float64}
+function normalizeVector(n::SVector{3,T}) where {T}
   nabs = norm(n)
   if nabs <= neps
     println("neps ", neps)

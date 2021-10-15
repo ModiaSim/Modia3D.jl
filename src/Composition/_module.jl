@@ -77,6 +77,7 @@ using StaticArrays
 using OrderedCollections
 using LinearAlgebra
 using Unitful
+using DoubleFloats
 
 import Base
 import Modia3D

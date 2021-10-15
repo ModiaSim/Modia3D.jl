@@ -26,7 +26,8 @@ Andrea Neumayr and Martin Otter, [DLR - Institute of System Dynamics and Control
 """
 module Shapes
 
-using  StaticArrays
+using StaticArrays
+using DoubleFloats
 import Modia3D
 import Modia3D.Basics
 import Modia3D.Frames

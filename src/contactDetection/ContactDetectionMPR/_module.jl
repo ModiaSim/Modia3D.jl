@@ -22,6 +22,8 @@ import Modia3D.Composition
 import Modia3D.Shapes
 import Printf
 
+using DoubleFloats
+
 using StaticArrays
 using OrderedCollections
 

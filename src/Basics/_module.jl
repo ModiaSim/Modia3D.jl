@@ -13,6 +13,7 @@ Andrea Neumayr and Martin Otter, [DLR - Institute of System Dynamics and Control
 """
 module Basics
 
+
 export trailingPartOfName
 
 export neps, sign_eps, radToDeg
@@ -30,6 +31,7 @@ using  StaticArrays
 using  LinearAlgebra
 using  JSON
 using  Unitful
+using DoubleFloats
 
 include("environment.jl")
 include("constantsAndFunctions.jl")
