@@ -97,7 +97,7 @@ function checkIfShapesArePlanar(r0::SupportPoint,r1::SupportPoint,r2::SupportPoi
     end
 
     # check if portal triangle r1-r2-r3 has degenerated into a line segment <--> points r1,r2,r3 are on the same line
-    r3 = getSupportPoint(shapeA, shapeB, Basics.normalizeVector(n3))
+    r3 = getSupportPoint(shapeA, shapeB, Basics.normalizeVector(n3, neps))
     n3b = cross(r2.p-r1.p, r3.p-r1.p)
     if norm(n3b) <= neps
         # change search direction for r3
@@ -131,13 +131,13 @@ function tetrahedronEncloseOrigin(r0::SupportPoint, r1::SupportPoint,
         aux = cross(r1.p-r0.p,r3.p-r0.p)
         if dot(aux,r0.n) < -neps
             r2 = r3
-            r3 = getSupportPoint(shapeA,shapeB,Basics.normalizeVector(aux), scale=scale)
+            r3 = getSupportPoint(shapeA,shapeB,Basics.normalizeVector(aux, neps), scale=scale)
             continue
         end
         aux = cross(r3.p-r0.p,r2.p-r0.p)
         if dot(aux,r0.n) < -neps
             r1 = r3
-            r3 = getSupportPoint(shapeA,shapeB,Basics.normalizeVector(aux), scale=scale)
+            r3 = getSupportPoint(shapeA,shapeB,Basics.normalizeVector(aux, neps), scale=scale)
             continue
         end
         success = true
@@ -173,7 +173,7 @@ function constructR4(r0::SupportPoint,r1::SupportPoint,r2::SupportPoint,r3::Supp
     if dot(n4,r0.p) >= neps
         n4 = -n4
     end
-    r4 = getSupportPoint(shapeA, shapeB, Basics.normalizeVector(n4), scale=scale)
+    r4 = getSupportPoint(shapeA, shapeB, Basics.normalizeVector(n4, neps), scale=scale)
 
     return (r3, r4, n4)
 end
@@ -373,7 +373,7 @@ function mprGeneral(ch::Composition.ContactDetectionMPR_handler, shapeA::Composi
     # r1 is the farthest point in the direction to the origin
     # first portal point should point in the direction of the origin ray (-r0.p)
     # therefore choose search direction -r0.p
-    r1 = getSupportPoint(shapeA, shapeB, Basics.normalizeVector(r0.n))
+    r1 = getSupportPoint(shapeA, shapeB, Basics.normalizeVector(r0.n, neps))
 
     ### Phase 1.3: construction of initial r2 ###
     n2 = cross(r0.n, r1.p)
