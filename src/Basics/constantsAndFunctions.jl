@@ -7,7 +7,15 @@
 
 
 # Epsilon and sign
-sign_eps(value::T; seps::T = 100.0*sqrt( eps(T) )) where {T} = value > seps ? T(1.0) : (value < -seps ? T(-1.0) : T(0.0) )
+function sign_eps(value::Float64)
+    seps::Float64 = 100.0*sqrt( eps(Float64) )
+    return value > seps ? Float64(1.0) : (value < -seps ? Float64(-1.0) : Float64(0.0) )
+end
+
+function sign_eps(value::Double64)
+    seps::Double64 = 100.0*sqrt( eps(Double64) )
+    return value > seps ? Double64(1.0) : (value < -seps ? Double64(-1.0) : Double64(0.0) )
+end
 
 function normalizeVector(n::SVector{3,T}, neps::T) where {T}
     nabs = norm(n)

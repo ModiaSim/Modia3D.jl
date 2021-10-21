@@ -16,7 +16,7 @@ module Basics
 
 export trailingPartOfName
 
-export neps, sign_eps, radToDeg
+export sign_eps, radToDeg
 export getAndCheckFullLibraryPath, getEnvironmentVariable
 
 export normalizeVector, BoundingBox
