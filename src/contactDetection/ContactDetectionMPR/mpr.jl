@@ -125,7 +125,7 @@ function tetrahedronEncloseOrigin(r0::SupportPoint, r1::SupportPoint,
     r1org = r1
     r2org = r2
     r3org = r3
-    aux = Modia3D.ZeroVector3D
+    aux = SVector{3, Double64}(Modia3D.ZeroVector3D)
     success = false
     for i in 1:niter_max
         aux = cross(r1.p-r0.p,r3.p-r0.p)
@@ -244,11 +244,14 @@ function finalTC3(r0::SupportPoint, r1::SupportPoint, r2::SupportPoint, r3::Supp
 end
 
 
-function phase3(r0::SupportPoint, r1::SupportPoint, r2::SupportPoint, r3::SupportPoint, neps::T, niter_max::Int64, tol_rel::T, shapeA::Composition.Object3D,shapeB::Composition.Object3D, scale::T) where {T}
+function phase3(r0::SupportPoint, r1::SupportPoint, r2::SupportPoint, r3::SupportPoint,
+        neps::Double64, niter_max::Int64, tol_rel::Double64,
+        shapeA::Composition.Object3D, shapeB::Composition.Object3D, scale::Double64)
+
     r1org = r1
     r2org = r2
     r3org = r3
-    new_tol = 42.0
+    new_tol = Double64(42.0)
     isTC2 = false
     isTC3 = false
     r1_new::SupportPoint = r0
@@ -269,12 +272,12 @@ function phase3(r0::SupportPoint, r1::SupportPoint, r2::SupportPoint, r3::Suppor
         ## TERMINATION CONDITION 2 ##
         if TC2 < tol_rel
             (distance,r1,r2,r3,r4) = finalTC2(r1,r2,r3,r4)
-            return (Float64(distance), SVector{3,Float64}(r4.a), SVector{3,Float64}(r4.b), SVector{3,Float64}(r4.n), true, SVector{3,Float64}(r1.a), SVector{3,Float64}(r1.b), SVector{3,Float64}(r2.a), SVector{3,Float64}(r2.b), SVector{3,Float64}(r3.a), SVector{3,Float64}(r3.b) )
+            return distance, r1, r2, r3, r4
 
         ## TERMINATION CONDITION 3 ##
         elseif TC3 < tol_rel
             (distance,r1,r2,r3,r4) = finalTC3(r0, r1, r2, r3, r4)
-            return (Float64(distance), SVector{3,Float64}(r4.a), SVector{3,Float64}(r4.b), SVector{3,Float64}(r4.n), true, SVector{3,Float64}(r1.a), SVector{3,Float64}(r1.b), SVector{3,Float64}(r2.a), SVector{3,Float64}(r2.b), SVector{3,Float64}(r3.a), SVector{3,Float64}(r3.b) )
+            return distance, r1, r2, r3, r4
         else
             if TC2 < new_tol
                 new_tol = TC2
@@ -298,17 +301,17 @@ function phase3(r0::SupportPoint, r1::SupportPoint, r2::SupportPoint, r3::Suppor
 
         #### Phase 3.3: construct baby tetrahedrons with r1,r2,r3,r4 and create a new portal ###
         # Construction of three baby tetrahedrons
-        (nextPortal, r1,r2,r3) = createBabyTetrahedrons(r0,r1,r2,r3,r4)
+        (nextPortal, r1, r2, r3) = createBabyTetrahedrons(r0,r1,r2,r3,r4)
 
         if !nextPortal # createBabyTetrahedrons failed
             @warn("MPR (phase 3): Numerical issues with distance computation between $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)). tol_rel increased locally for this computation to $new_tol.")
             if isTC2
                 (distance,r1,r2,r3,r4) = finalTC2(r1_new,r2_new,r3_new,r4_new)
-                return (Float64(distance), SVector{3,Float64}(r4.a), SVector{3,Float64}(r4.b), SVector{3,Float64}(r4.n), true, SVector{3,Float64}(r1.a), SVector{3,Float64}(r1.b), SVector{3,Float64}(r2.a), SVector{3,Float64}(r2.b), SVector{3,Float64}(r3.a), SVector{3,Float64}(r3.b) )
+                return distance, r1, r2, r3, r4
             end
             if isTC3
                 (distance,r1,r2,r3,r4) = finalTC3(r0, r1_new, r2_new, r3_new, r4_new)
-                return (Float64(distance), SVector{3,Float64}(r4.a), SVector{3,Float64}(r4.b), SVector{3,Float64}(r4.n), true, SVector{3,Float64}(r1.a), SVector{3,Float64}(r1.b), SVector{3,Float64}(r2.a), SVector{3,Float64}(r2.b), SVector{3,Float64}(r3.a), SVector{3,Float64}(r3.b) )
+                return distance, r1, r2, r3, r4
             end
         end
     end
@@ -319,13 +322,15 @@ function phase3(r0::SupportPoint, r1::SupportPoint, r2::SupportPoint, r3::Suppor
         @warn("MPR (phase 3): Max. number of iterations (= $niter_max) is reached and $niter_max > 100, look at $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)). tol_rel increased locally for this computation to $new_tol.")
         if isTC2
             (distance,r1,r2,r3,r4) = finalTC2(r1_new,r2_new,r3_new,r4_new)
-            return (Float64(distance), SVector{3,Float64}(r4.a), SVector{3,Float64}(r4.b), SVector{3,Float64}(r4.n), true, SVector{3,Float64}(r1.a), SVector{3,Float64}(r1.b), SVector{3,Float64}(r2.a), SVector{3,Float64}(r2.b), SVector{3,Float64}(r3.a), SVector{3,Float64}(r3.b) )
+            return distance, r1, r2, r3, r4
         end
         if isTC3
             (distance,r1,r2,r3,r4) = finalTC3(r0, r1_new, r2_new, r3_new, r4_new)
-            return (Float64(distance), SVector{3,Float64}(r4.a), SVector{3,Float64}(r4.b), SVector{3,Float64}(r4.n), true, SVector{3,Float64}(r1.a), SVector{3,Float64}(r1.b), SVector{3,Float64}(r2.a), SVector{3,Float64}(r2.b), SVector{3,Float64}(r3.a), SVector{3,Float64}(r3.b) )
+            return distance, r1, r2, r3, r4
         end
     end
+    @error("passiert das?!?!?")
+    return distance, r1, r2, r3, r4
 end
 
 # MPR - Minkowski Portal Refinement algorithm
@@ -353,9 +358,9 @@ end
 #     Termination Condition 3
 #   Phase 3.3: construct baby tetrahedrons with r1,r2,r3,r4 and create a new portal
 function mprGeneral(ch::Composition.ContactDetectionMPR_handler, shapeA::Composition.Object3D, shapeB::Modia3D.Composition.Object3D)
-    tol_rel = Double64(ch.tol_rel)
+    tol_rel = ch.tol_rel
     niter_max = ch.niter_max
-    neps = Double64(ch.neps)
+    neps = ch.neps
 
     ###########      Phase 1, Minkowski Portal Refinement      ###################
     # Construction of r0 and initial portal triangle points r1, r2, r3
@@ -386,7 +391,7 @@ function mprGeneral(ch::Composition.ContactDetectionMPR_handler, shapeA::Composi
         # e.g. any collision/or distance between two spheres
         #println("TC 1")
         distance = dot(r1.p,normalize(r0.p))
-        return (distance, r1.a, r1.b, r1.n, false, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D)
+        return (Float64(distance), SVector{3,Float64}(r1.a), SVector{3,Float64}(r1.b), SVector{3,Float64}(r1.n), false, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D)
     else
         # normalize n2
         n2 = n2/n2abs
@@ -407,15 +412,16 @@ function mprGeneral(ch::Composition.ContactDetectionMPR_handler, shapeA::Composi
 
 
     ###########      Phase 3, Minkowski Portal Refinement      ###################
-    phase3(r0, r1, r2, r3, neps, niter_max, tol_rel, shapeA, shapeB, scale)
+    (distance, r1, r2, r3, r4) = phase3(r0, r1, r2, r3, neps, niter_max, tol_rel, shapeA, shapeB, scale)
+    return (Float64(distance), SVector{3,Float64}(r4.a), SVector{3,Float64}(r4.b), SVector{3,Float64}(r4.n), true, SVector{3,Float64}(r1.a), SVector{3,Float64}(r1.b), SVector{3,Float64}(r2.a), SVector{3,Float64}(r2.b), SVector{3,Float64}(r3.a), SVector{3,Float64}(r3.b) )
 end
 
 
 function mprTwoSpheres(ch::Composition.ContactDetectionMPR_handler, shapeA::Composition.Object3D, shapeB::Modia3D.Composition.Object3D,
     sphereA::Shapes.Sphere, sphereB::Shapes.Sphere)
-    neps = Double64(ch.neps)
-    radiusA = sphereA.diameter*0.5
-    radiusB = sphereB.diameter*0.5
+    neps = ch.neps
+    radiusA = Double64(sphereA.diameter*0.5)
+    radiusB = Double64(sphereB.diameter*0.5)
     centroidSphereA = getCentroid(shapeA)
     centroidSphereB = getCentroid(shapeB)
     n = centroidSphereB - centroidSphereA
@@ -449,7 +455,7 @@ function mpr(ch::Composition.ContactDetectionMPR_handler, shapeA::Composition.Ob
         support1A, support1B, support2A, support2B, support3A, support3B) = mprGeneral(ch, shapeA, shapeB)
 
         if shapeKindA == Modia3D.SphereKind
-            centroidSphere = getCentroid(shapeA)
+            centroidSphere = SVector{3,Float64}(getCentroid(shapeA))
             sphereA1::Shapes.Sphere = shapeA.shape
             radius = sphereA1.diameter*0.5
             contactPointSphere = centroidSphere + radius*normal
@@ -458,7 +464,7 @@ function mpr(ch::Composition.ContactDetectionMPR_handler, shapeA::Composition.Ob
             contactPoint2 = contactPointOtherShape
         elseif shapeKindB == Modia3D.SphereKind
             normalLocal = -normal
-            centroidSphere = getCentroid(shapeB)
+            centroidSphere = SVector{3,Float64}(getCentroid(shapeB))
             sphereB1::Shapes.Sphere = shapeB.shape
             radius = sphereB1.diameter*0.5
             contactPointSphere = centroidSphere + radius*normalLocal
@@ -467,6 +473,6 @@ function mpr(ch::Composition.ContactDetectionMPR_handler, shapeA::Composition.Ob
             contactPoint2 = contactPointSphere
         end
     end
-    return (Float64(distance), SVector{3,Float64}(contactPoint1), SVector{3,Float64}(contactPoint2), SVector{3,Float64}(normal), supportPointsDefined,
+    return (distance, contactPoint1, contactPoint2, normal, supportPointsDefined,
     support1A, support1B, support2A, support2B, support3A, support3B)
 end

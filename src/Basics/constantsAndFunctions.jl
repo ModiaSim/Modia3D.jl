@@ -15,10 +15,8 @@ function normalizeVector(n::SVector{3,T}, neps::T) where {T}
         println("neps ", neps)
         println("nabs ", nabs)
         @assert(nabs > neps) # && norm(vec) > eps()
-        # return nothing
-    else
-        return n/nabs
     end
+    return n/nabs
 end
 
 # Standard constants
