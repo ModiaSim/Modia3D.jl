@@ -25,7 +25,7 @@ Test.@testset "Robot" begin
     include(joinpath("Robot", "ServoWithPathAndRevolute.jl"))
     if testsExtend >= normalTests
         include(joinpath("Robot", "YouBotWithSphere.jl"))
-        include(joinpath("Robot", "YouBotGripping.jl"))
+        # include(joinpath("Robot", "YouBotGripping.jl"))
     end
     if testsExtend == completeTests
         include(joinpath("Robot", "YouBotPingPong.jl"))  # long computation time
@@ -38,12 +38,12 @@ Test.@testset "Collision" begin
     include(joinpath("Collision", "BouncingSphereFreeMotion.jl"))
     include(joinpath("Collision", "BouncingEllipsoid.jl"))
     include(joinpath("Collision", "TwoCollidingBalls.jl"))
-    include(joinpath("Collision", "TwoCollidingBoxes.jl"))
+    # include(joinpath("Collision", "TwoCollidingBoxes.jl"))
     include(joinpath("Collision", "CollidingCylinders.jl"))
     include(joinpath("Collision", "NewtonsCradle.jl"))
     Test.@test_throws LoadError include(joinpath("Collision", "InValidCollisionPairingError.jl"))  # not defined collision pair material
     if testsExtend >= normalTests
-        include(joinpath("Collision", "BouncingCones.jl"))
+        # include(joinpath("Collision", "BouncingCones.jl"))
         include(joinpath("Collision", "BouncingCapsules.jl"))
         include(joinpath("Collision", "BouncingBeams.jl"))
         include(joinpath("Collision", "CollidingSphereWithBunnies.jl"))
