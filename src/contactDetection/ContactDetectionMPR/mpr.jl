@@ -65,7 +65,7 @@ end
 
 # checks if centers of shapeA and shapeB are overlapping
 # belongs to construction of r0
-function checkCentersOfShapesOverlapp(r0::SupportPoint, neps::Double64, shapeA::Composition.Object3D, shapeB::Composition.Object3D)
+function checkCentersOfShapesOverlapp(r0::SupportPoint, neps::T, shapeA::Composition.Object3D, shapeB::Composition.Object3D) where {T}
     if norm(r0.p) <= neps
         error("MPR: Too large penetration (prerequisite of MPR violated). Centers are overlapping. Look at $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)).")
     end
@@ -125,7 +125,7 @@ function tetrahedronEncloseOrigin(r0::SupportPoint, r1::SupportPoint,
     r1org = r1
     r2org = r2
     r3org = r3
-    aux = SVector{3, Double64}(Modia3D.ZeroVector3D)
+    aux = SVector{3, T}(Modia3D.ZeroVector3D)
     success = false
     for i in 1:niter_max
         aux = cross(r1.p-r0.p,r3.p-r0.p)
@@ -245,13 +245,13 @@ end
 
 
 function phase3(r0::SupportPoint, r1::SupportPoint, r2::SupportPoint, r3::SupportPoint,
-        neps::Double64, niter_max::Int64, tol_rel::Double64,
-        shapeA::Composition.Object3D, shapeB::Composition.Object3D, scale::Double64)
+        neps::T, niter_max::Int64, tol_rel::T,
+        shapeA::Composition.Object3D, shapeB::Composition.Object3D, scale::T) where {T}
 
     r1org = r1
     r2org = r2
     r3org = r3
-    new_tol = Double64(42.0)
+    new_tol = T(42.0)
     isTC2 = false
     isTC3 = false
     r1_new::SupportPoint = r0
