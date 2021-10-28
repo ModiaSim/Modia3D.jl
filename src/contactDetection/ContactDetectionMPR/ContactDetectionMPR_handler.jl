@@ -108,16 +108,16 @@ about the contact situation.
 - `neps`: Small number used to check whether a floating number is close to zero (> 0.0).
 
 """
-mutable struct ContactDetectionMPR_handler <: Modia3D.AbstractContactDetection
+mutable struct ContactDetectionMPR_handler{T} <: Modia3D.AbstractContactDetection
     distanceComputed::Bool
 
     lastContactDict::Dict{PairID,ContactPair}
     contactDict::Dict{    PairID,ContactPair}
     noContactMinVal::Float64
 
-    tol_rel::Double64
+    tol_rel::T
     niter_max::Int
-    neps::Double64
+    neps::T
 
     contactPairs::Composition.ContactPairs
 
@@ -126,12 +126,13 @@ mutable struct ContactDetectionMPR_handler <: Modia3D.AbstractContactDetection
     visualizeSupportPoints::Bool
     defaultContactSphereDiameter::Float64
 
-    function ContactDetectionMPR_handler(; tol_rel= 1.0e-20,
+    function ContactDetectionMPR_handler{T}(; tol_rel= 1.0e-20,
                                         niter_max = 100,
-                                        neps      = 100.0 * eps(Double64) )
+                                        neps      = 100.0 * eps(T) ) where {T}
         @assert(tol_rel > 0.0)
         @assert(niter_max > 0)
         @assert(neps > 0.0)
         new(false, Dict{PairID,ContactPair}(), Dict{PairID,ContactPair}(), 42.0, tol_rel, niter_max, neps)
     end
 end
+ContactDetectionMPR_handler() = ContactDetectionMPR_handler{Double64}()

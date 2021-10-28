@@ -60,7 +60,7 @@ end
 
 
 ###########      Phase 1, Minkowski Portal Refinement      ###################
-@inline getCentroid(obj::Composition.Object3D) = SVector{3, Double64}(obj.r_abs + obj.R_abs'*obj.centroid)
+@inline getCentroid(obj::Composition.Object3D, ch::Composition.ContactDetectionMPR_handler{T}) where {T} = SVector{3, T}(obj.r_abs + obj.R_abs'*obj.centroid)
 
 
 # checks if centers of shapeA and shapeB are overlapping
@@ -357,7 +357,7 @@ end
 #     Termination Condition 2
 #     Termination Condition 3
 #   Phase 3.3: construct baby tetrahedrons with r1,r2,r3,r4 and create a new portal
-function mprGeneral(ch::Composition.ContactDetectionMPR_handler, shapeA::Composition.Object3D, shapeB::Modia3D.Composition.Object3D)
+function mprGeneral(ch::Composition.ContactDetectionMPR_handler{T}, shapeA::Composition.Object3D, shapeB::Modia3D.Composition.Object3D) where {T}
     tol_rel = ch.tol_rel
     niter_max = ch.niter_max
     neps = ch.neps
@@ -368,9 +368,9 @@ function mprGeneral(ch::Composition.ContactDetectionMPR_handler, shapeA::Composi
     ### Phase 1.1: construction of r0 ###
     # r0 is a point inside the Minkowski Difference (centroidA-centroidB)
     # the direction of the origin ray r0 is -r0.p
-    centroidA = getCentroid(shapeA)
-    centroidB = getCentroid(shapeB)
-    r0 = SupportPoint{Double64}(centroidA-centroidB, -(centroidA-centroidB), SVector{3,Double64}(0.0,0.0,0.0), SVector{3,Double64}(0.0,0.0,0.0))
+    centroidA = getCentroid(shapeA, ch)
+    centroidB = getCentroid(shapeB, ch)
+    r0 = SupportPoint{T}(centroidA-centroidB, -(centroidA-centroidB), SVector{3,T}(0.0,0.0,0.0), SVector{3,T}(0.0,0.0,0.0))
     # check if centers of shapes are overlapping
     checkCentersOfShapesOverlapp(r0, neps, shapeA, shapeB)
 
@@ -417,13 +417,13 @@ function mprGeneral(ch::Composition.ContactDetectionMPR_handler, shapeA::Composi
 end
 
 
-function mprTwoSpheres(ch::Composition.ContactDetectionMPR_handler, shapeA::Composition.Object3D, shapeB::Modia3D.Composition.Object3D,
-    sphereA::Shapes.Sphere, sphereB::Shapes.Sphere)
+function mprTwoSpheres(ch::Composition.ContactDetectionMPR_handler{T}, shapeA::Composition.Object3D, shapeB::Modia3D.Composition.Object3D,
+    sphereA::Shapes.Sphere, sphereB::Shapes.Sphere) where {T}
     neps = ch.neps
-    radiusA = Double64(sphereA.diameter*0.5)
-    radiusB = Double64(sphereB.diameter*0.5)
-    centroidSphereA = getCentroid(shapeA)
-    centroidSphereB = getCentroid(shapeB)
+    radiusA = T(sphereA.diameter*0.5)
+    radiusB = T(sphereB.diameter*0.5)
+    centroidSphereA = getCentroid(shapeA, ch)
+    centroidSphereB = getCentroid(shapeB, ch)
     n = centroidSphereB - centroidSphereA
     distanceCentroids = norm(n)
     if distanceCentroids <= neps
@@ -438,7 +438,7 @@ function mprTwoSpheres(ch::Composition.ContactDetectionMPR_handler, shapeA::Comp
 end
 
 
-function mpr(ch::Composition.ContactDetectionMPR_handler, shapeA::Composition.Object3D, shapeB::Modia3D.Composition.Object3D)
+function mpr(ch::Composition.ContactDetectionMPR_handler{T}, shapeA::Composition.Object3D, shapeB::Modia3D.Composition.Object3D) where {T}
     shapeKindA = shapeA.shapeKind
     shapeKindB = shapeB.shapeKind
 
@@ -455,7 +455,7 @@ function mpr(ch::Composition.ContactDetectionMPR_handler, shapeA::Composition.Ob
         support1A, support1B, support2A, support2B, support3A, support3B) = mprGeneral(ch, shapeA, shapeB)
 
         if shapeKindA == Modia3D.SphereKind
-            centroidSphere = SVector{3,Float64}(getCentroid(shapeA))
+            centroidSphere = SVector{3,Float64}(getCentroid(shapeA, ch))
             sphereA1::Shapes.Sphere = shapeA.shape
             radius = sphereA1.diameter*0.5
             contactPointSphere = centroidSphere + radius*normal
@@ -464,7 +464,7 @@ function mpr(ch::Composition.ContactDetectionMPR_handler, shapeA::Composition.Ob
             contactPoint2 = contactPointOtherShape
         elseif shapeKindB == Modia3D.SphereKind
             normalLocal = -normal
-            centroidSphere = SVector{3,Float64}(getCentroid(shapeB))
+            centroidSphere = SVector{3,Float64}(getCentroid(shapeB, ch))
             sphereB1::Shapes.Sphere = shapeB.shape
             radius = sphereB1.diameter*0.5
             contactPointSphere = centroidSphere + radius*normalLocal
