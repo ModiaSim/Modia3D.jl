@@ -4,12 +4,12 @@
 
 # Collision detection algorithm based on the MPR algorithm
 
-mutable struct SupportPoint
-    p::SVector{3,Double64}    # support point
-    n::SVector{3,Double64}    # support normal unit vector
-    a::SVector{3,Double64}    # point on shapeA
-    b::SVector{3,Double64}    # point on shapeB
-    function SupportPoint(p::SVector{3,Double64},n::SVector{3,Double64},a::SVector{3,Double64},b::SVector{3,Double64})
+mutable struct SupportPoint{T}
+    p::SVector{3,T}    # support point
+    n::SVector{3,T}    # support normal unit vector
+    a::SVector{3,T}    # point on shapeA
+    b::SVector{3,T}    # point on shapeB
+    function SupportPoint{T}(p::SVector{3,T},n::SVector{3,T},a::SVector{3,T},b::SVector{3,T}) where {T}
         new(p,n,a,b)
     end
 end
@@ -18,7 +18,7 @@ end
 function getSupportPoint(shapeA::Modia3D.Composition.Object3D, shapeB::Composition.Object3D, n::SVector{3,T}; scale::T=T(1.0) ) where {T}
     a = Modia3D.supportPoint(shapeA, n)
     b = Modia3D.supportPoint(shapeB, -n)
-    return SupportPoint((a-b).*scale,n,a,b)
+    return SupportPoint{T}((a-b).*scale,n,a,b)
 end
 
 
@@ -370,7 +370,7 @@ function mprGeneral(ch::Composition.ContactDetectionMPR_handler, shapeA::Composi
     # the direction of the origin ray r0 is -r0.p
     centroidA = getCentroid(shapeA)
     centroidB = getCentroid(shapeB)
-    r0 = SupportPoint(centroidA-centroidB, -(centroidA-centroidB), SVector{3,Double64}(0.0,0.0,0.0), SVector{3,Double64}(0.0,0.0,0.0))
+    r0 = SupportPoint{Double64}(centroidA-centroidB, -(centroidA-centroidB), SVector{3,Double64}(0.0,0.0,0.0), SVector{3,Double64}(0.0,0.0,0.0))
     # check if centers of shapes are overlapping
     checkCentersOfShapesOverlapp(r0, neps, shapeA, shapeB)
 
