@@ -92,7 +92,7 @@ function checkIfShapesArePlanar(r0::SupportPoint,r1::SupportPoint,r2::SupportPoi
         n3 = cross(r1.p-r0.p, r2.p-r0.p)   # |n3| > 0 guaranteed, due to construction
     end
 
-    if dot(n3,r0.p) >= neps
+    if dot(n3,r0.p) >= 0.0
         n3 = -n3
     end
 
@@ -129,13 +129,13 @@ function tetrahedronEncloseOrigin(r0::SupportPoint, r1::SupportPoint,
     success = false
     for i in 1:niter_max
         aux = cross(r1.p-r0.p,r3.p-r0.p)
-        if dot(aux,r0.n) < -neps
+        if dot(aux,r0.n) < 0.0
             r2 = r3
             r3 = getSupportPoint(shapeA,shapeB,Basics.normalizeVector(aux, neps), scale=scale)
             continue
         end
         aux = cross(r3.p-r0.p,r2.p-r0.p)
-        if dot(aux,r0.n) < -neps
+        if dot(aux,r0.n) < 0.0
             r1 = r3
             r3 = getSupportPoint(shapeA,shapeB,Basics.normalizeVector(aux, neps), scale=scale)
             continue
@@ -170,7 +170,7 @@ function constructR4(r0::SupportPoint,r1::SupportPoint,r2::SupportPoint,r3::Supp
         end
         n4 = cross(r2.p-r1.p, r3.p-r1.p)   # |n4| > 0 guaranteed, due to construction
     end
-    if dot(n4,r0.p) >= neps
+    if dot(n4,r0.p) >= 0.0
         n4 = -n4
     end
     r4 = getSupportPoint(shapeA, shapeB, Basics.normalizeVector(n4, neps), scale=scale)

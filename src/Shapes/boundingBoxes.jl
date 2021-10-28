@@ -74,7 +74,7 @@ end
 # [Gino v.d. Bergen, p. 136, XenoCollide, p. 168, 169]
 @inline function supportPoint_abs_Cylinder(shape::Cylinder, e_abs::SVector{3,T} ) where {T}
     @inbounds begin
-        neps = sqrt(eps(T))
+        neps = 100.0*eps(T)
         shapeLength = T(shape.length)
         shapeDiameter = T(shape.diameter)
         if shape.axis == 1
@@ -121,7 +121,7 @@ end
 # for frustum of a cone: A. Neumayr, G. Hippmann
 @inline function supportPoint_abs_Cone(shape::Cone, e_abs::SVector{3,T}) where {T}
     @inbounds begin
-        neps = sqrt(eps(T))
+        neps = 100.0*eps(T)
         baseRadius = T(shape.diameter/2.0)
         rightCone = T(shape.topDiameter) == T(0.0)
         shapeLength = T(shape.length)
@@ -202,7 +202,7 @@ end
 # G. Hippmann: Outer half circles of beam
 @inline function supportPoint_abs_Beam(shape::Beam, e_abs::SVector{3,T})::SVector{3,T} where {T}
     @inbounds begin
-        neps = sqrt(eps(T))
+        neps = 100.0*eps(T)
         shapeLength = T(shape.length)
         shapeWidth = T(shape.width)
         shapeThickness = T(shape.thickness)
