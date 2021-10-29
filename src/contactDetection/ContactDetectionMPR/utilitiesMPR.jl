@@ -120,9 +120,9 @@ end
 - r4: Point on line r1 + lambda*r21 that is closest to the origin with 0<=lambda<=1, or r4_old, if it is closer.
 - d4: Signed distance of r4 to the origin or d4_old if abs(d4_old) < norm(r1 + lambda*r21)
 """
-function signedDistanceToLineSegmentWithR4(r1::SVector{3,Float64}, r2::SVector{3,Float64},
-    r21::SVector{3,Float64}, e::SVector{3,Float64},
-    r4_old::SVector{3,Float64}, d4_old::Float64=0.0)
+function signedDistanceToLineSegmentWithR4(r1::SVector{3,T}, r2::SVector{3,T},
+    r21::SVector{3,T}, e::SVector{3,T},
+    r4_old::SVector{3,T}, d4_old::T=T(0.0)) where {T}
     # r = r1 + lambda*r21  (0 <= lambda <= 1)
     #
     # The closest point to the line is point r4, such that r21*r4 = 0
@@ -146,8 +146,8 @@ end
 - r4: Point on line r1 + lambda*r21 that is closest to the origin with 0<=lambda<=1.
 - d4: Signed distance of r4 to the origin
 """
-function signedDistanceToLineSegment(r1::SVector{3,Float64}, r2::SVector{3,Float64},
-    r21::SVector{3,Float64}, e::SVector{3,Float64})
+function signedDistanceToLineSegment(r1::SVector{3,T}, r2::SVector{3,T},
+    r21::SVector{3,T}, e::SVector{3,T}) where {T}
     # r = r1 + lambda*r21  (0 <= lambda <= 1)
     #
     # The closest point to the line is point r4, such that r21*r4 = 0
@@ -168,8 +168,8 @@ end
 - r4: Point on triangle portal r1, r2, r3 that is closest to the origin.
 - d : Signed distance of r4 to the origin: d > 0: origin is outside of tetrahedron r0,r1,r2,r3, otherwise inside.
 """
-function signedDistanceToPortal(r0::SVector{3,Float64}, r1::SVector{3,Float64},
-    r2::SVector{3,Float64}, r3::SVector{3,Float64})
+function signedDistanceToPortal(r0::SVector{3,T}, r1::SVector{3,T},
+    r2::SVector{3,T}, r3::SVector{3,T}) where {T}
     # Determine unit normal on portal
     r21 = r2 - r1
     r31 = r3 - r1
