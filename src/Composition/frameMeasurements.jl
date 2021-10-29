@@ -23,7 +23,7 @@ If `frameOrig` is omitted `r` represents the absolute position of `frameMeas`.
 
 If `frameCoord` is omitted `r` is resolved in absolute coordinates.
 """
-function measFramePosition(frameMeas::Object3D; frameOrig::Object3D, frameCoord::Object3D)
+function measFramePosition(frameMeas::Object3D; frameOrig::Union{Object3D, Nothing}=nothing, frameCoord::Union{Object3D, Nothing}=nothing)
     r_OrigMeas = copy(frameMeas.r_abs)  # World_r_OrigMeas := World_r_WorldMeas
     if !isnothing(frameOrig)
         r_OrigMeas = r_OrigMeas - frameOrig.r_abs  # World_r_OrigMeas := World_r_OrigMeas - World_r_WorldOrig
@@ -42,8 +42,8 @@ Return distance `d` and normalized direction vector `n` from origin of frame `fr
 
 If `frameOrig` is omitted `d` and  `n` represent the distance from world frame to `frameMeas`.
 """
-function measFrameDistance(frameMeas::Object3D; frameOrig::Object3D)
-    r_OrigMeas = measFramePosition(frameMeas; frameOrig)
+function measFrameDistance(frameMeas::Object3D; frameOrig::Union{Object3D, Nothing}=nothing)
+    r_OrigMeas = measFramePosition(frameMeas; frameOrig=frameOrig)
     d_OrigMeas = norm(r_OrigMeas)
     if d_OrigMeas > 1.0e-32
         n_OrigMeas = r_OrigMeas / d_OrigMeas
@@ -63,7 +63,7 @@ If `frameOrig` is omitted `w` represents the absolute rotational velocity of `fr
 
 If `frameCoord` is omitted `w` is resolved in absolute coordinates.
 """
-function measFrameRotVelocity(frameMeas::Object3D; frameOrig::Object3D, frameCoord::Object3D)
+function measFrameRotVelocity(frameMeas::Object3D; frameOrig::Union{Object3D, Nothing}=nothing, frameCoord::Union{Object3D, Nothing}=nothing)
     w_OrigMeas = frameMeas.R_abs' * copy(frameMeas.w)  # World_w_WorldMeas := R_MeasWorld^T * Meas_w_WorldMeas
     if !isnothing(frameOrig)
         w_OrigMeas = w_OrigMeas - (frameOrig.R_abs' * frameOrig.w)  # World_w_OrigMeas := World_w_WorldMeas - R_OrigWorld^T * Orig_w_WorldOrig
@@ -86,13 +86,13 @@ If `frameCoord` is omitted `v` is resolved in absolute coordinates.
 
 If `frameObsrv` is omitted `v` is observed in world frame.
 """
-function measFrameTransVelocity(frameMeas::Object3D; frameOrig::Object3D, frameCoord::Object3D, frameObsrv::Object3D)
+function measFrameTransVelocity(frameMeas::Object3D; frameOrig::Union{Object3D, Nothing}=nothing, frameCoord::Union{Object3D, Nothing}=nothing, frameObsrv::Union{Object3D, Nothing}=nothing)
     v_OrigMeas = copy(frameMeas.v0)  # World_v_OrigMeas := World_v_WorldMeas
     if !isnothing(frameOrig)
         v_OrigMeas = v_OrigMeas - frameOrig.v0  # World_v_OrigMeas := World_v_WorldMeas - World_v_WorldOrig
     end
     if !isnothing(frameObsrv)
-        r_OrigMeas = measFramePosition(frameMeas; frameOrig)
+        r_OrigMeas = measFramePosition(frameMeas; frameOrig=frameOrig)
         w_WorldObsrv = measFrameRotVelocity(frameObsrv)
         v_OrigMeas = v_OrigMeas - cross(w_WorldObsrv, r_OrigMeas)  # World_v_OrigMeas := World_v_OrigMeas - World_w_WorldObsrv x World_r_OrigMeas
     end
@@ -110,10 +110,10 @@ Return distance velocity `dd` between origin of frame `frameOrig` and origin of 
 
 If `frameOrig` is omitted `dd` represents the distance velocity between world frame and `frameMeas`.
 """
-function measFrameDistVelocity(frameMeas::Object3D; frameOrig::Object3D)
-    (d_OrigMeas, n_OrigMeas) = measFrameDistance(frameMeas; frameOrig)
-    v_OrigMeas = measFrameTransVelocity(frameMeas; frameOrig)
-    dd_OrigMeas = n_OrigMeas * v_OrigMeas
+function measFrameDistVelocity(frameMeas::Object3D; frameOrig::Union{Object3D, Nothing}=nothing)
+    (d_OrigMeas, n_OrigMeas) = measFrameDistance(frameMeas; frameOrig=frameOrig)
+    v_OrigMeas = measFrameTransVelocity(frameMeas; frameOrig=frameOrig)
+    dd_OrigMeas = dot(n_OrigMeas, v_OrigMeas)
     return dd_OrigMeas
 end
 
@@ -129,13 +129,13 @@ If `frameCoord` is omitted `wd` is resolved in absolute coordinates.
 
 If `frameObsrv` is omitted `wd` is observed in world frame.
 """
-function measFrameRotAcceleration(frameMeas::Object3D; frameOrig::Object3D, frameCoord::Object3D, frameObsrv::Object3D)
+function measFrameRotAcceleration(frameMeas::Object3D; frameOrig::Union{Object3D, Nothing}=nothing, frameCoord::Union{Object3D, Nothing}=nothing, frameObsrv::Union{Object3D, Nothing}=nothing)
     wd_OrigMeas = frameMeas.R_abs' * copy(frameMeas.z)  # World_wd_WorldMeas := R_MeasWorld^T * Meas_wd_WorldMeas
     if !isnothing(frameOrig)
         wd_OrigMeas = wd_OrigMeas - (frame.Orig.R_abs' * frameOrig.z)  # World_wd_OrigMeas := World_wd_WorldMeas - R_OrigWorld^T * Orig_wd_WorldOrig
     end
     if !isnothing(frameObsrv)
-        w_OrigMeas = measFrameRotVelocity(frameMeas; frameOrig)
+        w_OrigMeas = measFrameRotVelocity(frameMeas; frameOrig=frameOrig)
         w_WorldObsrv = measFrameRotVelocity(frameObsrv)
         wd_OrigMeas = wd_OrigMeas - cross(w_WorldObsrv, w_OrigMeas)  # World_wd_OrigMeas := World_wd_OrigMeas - World_w_WorldObsrv x World_w_OrigMeas
     end
@@ -157,14 +157,14 @@ If `frameCoord` is omitted `a` is resolved in absolute coordinates.
 
 If `frameObsrv` is omitted `a` is observed in world frame.
 """
-function measFrameTransAcceleration(frameMeas::Object3D; frameOrig::Object3D, frameCoord::Object3D, frameObsrv::Object3D)
+function measFrameTransAcceleration(frameMeas::Object3D; frameOrig::Union{Object3D, Nothing}=nothing, frameCoord::Union{Object3D, Nothing}=nothing, frameObsrv::Union{Object3D, Nothing}=nothing)
     a_OrigMeas = copy(frameMeas.a0)  # World_a_OrigMeas := World_a_WorldMeas
     if !isnothing(frameOrig)
         a_OrigMeas = a_OrigMeas - frameOrig.a0  # World_a_OrigMeas := World_a_WorldMeas - World_a_WorldOrig
     end
     if !isnothing(frameObsrv)
-        r_OrigMeas = measFramePosition(frameMeas; frameOrig)
-        v_OrigMeas = measFrameTransVelocity(frameMeas; frameOrig)
+        r_OrigMeas = measFramePosition(frameMeas; frameOrig=frameOrig)
+        v_OrigMeas = measFrameTransVelocity(frameMeas; frameOrig=frameOrig)
         w_WorldObsrv = measFrameRotVelocity(frameObsrv)
         wd_WorldObsrv = measFrameRotAcceleration(frameObsrv)
         a_OrigMeas = a_OrigMeas                                              # World_a_OrigMeas := World_a_OrigMeas
@@ -186,16 +186,16 @@ Return distance acceleration `ddd` between origin of frame `frameOrig` and origi
 
 If `frameOrig` is omitted `ddd` represents the distance acceleration between world frame and `frameMeas`.
 """
-function measFrameDistAcceleration(frameMeas::Object3D; frameOrig::Object3D)
+function measFrameDistAcceleration(frameMeas::Object3D; frameOrig::Union{Object3D, Nothing}=nothing)
     # (n * v)d = n*vd + nd*v
     #          = n*a + [r/d]d*v
     #          = n*a + [(v*d - r*dd)/(d*d)]*v
     #          = n*a + v*v/d - (r*v)*(n*v)/(d*d)
     #          = n*a + v*v/d - (n*v)*(n*v)/d
     #          = n*a + (v*v - dd*dd)/d
-    (d_OrigMeas, n_OrigMeas) = measFrameDistance(frameMeas; frameOrig)
-    v_OrigMeas = measFrameTransVelocity(frameMeas; frameOrig)
-    a_OrigMeas = measFrameTransAcceleration(frameMeas; frameOrig)
+    (d_OrigMeas, n_OrigMeas) = measFrameDistance(frameMeas; frameOrig=frameOrig)
+    v_OrigMeas = measFrameTransVelocity(frameMeas; frameOrig=frameOrig)
+    a_OrigMeas = measFrameTransAcceleration(frameMeas; frameOrig=frameOrig)
     dd_OrigMeas = n_OrigMeas * v_OrigMeas
     ddd_OrigMeas =  n_OrigMeas * a_OrigMeas
     if d_OrigMeas > 1.0e-32
