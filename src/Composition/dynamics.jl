@@ -1,7 +1,8 @@
-function getJointsAndObject3DsWithoutParents!(evaluatedParameters,
-                                              object3DWithoutParents::Vector{Object3D},
-                                              jointObjects::Vector{Object3D},
-                                              path::String)::Nothing
+function getJointsAndForceElementsAndObject3DsWithoutParents!(evaluatedParameters,
+                                                           object3DWithoutParents::Vector{Object3D},
+                                                           jointObjects::Vector{Object3D},
+                                                           forceElements::Vector{Modia3D.AbstractForceElement},
+                                                           path::String)::Nothing
     for (key,value) in evaluatedParameters   # zip(keys(evaluatedParameters), evaluatedParameters)
         if typeof(value) == Object3D
             if value.parent === value
@@ -13,8 +14,11 @@ function getJointsAndObject3DsWithoutParents!(evaluatedParameters,
         elseif typeof(value) <: Modia3D.AbstractJoint
             push!(jointObjects, value.obj2)
 
+        elseif typeof(value) <: Modia3D.AbstractForceElement
+            push!(forceElements, value)
+
         elseif typeof(value) <: OrderedDict
-            getJointsAndObject3DsWithoutParents!(value, object3DWithoutParents, jointObjects, path)
+            getJointsAndForceElementsAndObject3DsWithoutParents!(value, object3DWithoutParents, jointObjects, forceElements, path)
         end
     end
     return nothing
@@ -24,21 +28,21 @@ multiBodyName(instantiatedModel, mbsPath) = mbsPath == "" ? instantiatedModel.mo
                                                             instantiatedModel.modelName * "." * mbsPath
 
 """
-    (world, jointObjects) = checkMultibodySystemAndGetWorldAndJoints(instantiatedModel, id)
+    (world, jointObjects, forceElements) = checkMultibodySystemAndGetWorldAndJointsAndForceElements(instantiatedModel, id)
 
 Recursively traverse model and perform the following actions:
 
 - Search for an OrderedDict that has `key = :_id, value = id`
   (identifies the root of the multibody system).
-
 - Search from the root of the multibody system and perform the following actions:
   - Check that from all Object3Ds exactly one of them has no parent.
     Return this parent as `world`.
   - Check that only `world` has potentially a `feature` entry that
     is a SceneOption.
   - Return a vector of joint objects as `joints`.
+  - Return a vector of all force element objects.
 """
-function checkMultibodySystemAndGetWorldAndJoints(instantiatedModel::ModiaLang.SimulationModel{FloatType,ParType,EvaluatedParType,TimeType}, id::Int) where {FloatType,ParType,EvaluatedParType,TimeType}
+function checkMultibodySystemAndGetWorldAndJointsAndForceElements(instantiatedModel::ModiaLang.SimulationModel{FloatType,ParType,EvaluatedParType,TimeType}, id::Int) where {FloatType,ParType,EvaluatedParType,TimeType}
     # Find root mbs of multibody system
     (mbsRoot, mbsPath) = ModiaLang.getIdParameter(instantiatedModel.evaluatedParameters, ParType, id)
     if isnothing(mbsRoot)
@@ -47,7 +51,8 @@ function checkMultibodySystemAndGetWorldAndJoints(instantiatedModel::ModiaLang.S
 
     object3DWithoutParents = Object3D[]
     jointObjects = Object3D[]
-    getJointsAndObject3DsWithoutParents!(mbsRoot, object3DWithoutParents, jointObjects, mbsPath)
+    forceElements = Modia3D.AbstractForceElement[]
+    getJointsAndForceElementsAndObject3DsWithoutParents!(mbsRoot, object3DWithoutParents, jointObjects, forceElements, mbsPath)
 
     if length(object3DWithoutParents) == 0
         error("\n", multiBodyName(instantiatedModel, mbsPath), ": There is either no Object3D or all of them have a parent!\n",
@@ -60,7 +65,7 @@ function checkMultibodySystemAndGetWorldAndJoints(instantiatedModel::ModiaLang.S
         error("\n", instantiatedModel.modelName, ": The following ", length(object3DWithoutParents), " Object3Ds have no parent\n",
               "(note, there must be exactly one Object3D that has no parent):\n", object3DNames, "\n")
     end
-    return (object3DWithoutParents[1], jointObjects)
+    return (object3DWithoutParents[1], jointObjects, forceElements)
 end
 
 
@@ -120,7 +125,7 @@ function setModiaJointVariables!(id::Int, _leq_mode, instantiatedModel::ModiaLan
             # Instantiate the Modia3D system
             #mbsPar = getIdParameter(parameters, id)
             #mbsObj = instantiateDependentObjects(instantiatedModel.modelModule, mbsPar)
-            (world, jointObjects) = checkMultibodySystemAndGetWorldAndJoints(instantiatedModel, id)
+            (world, jointObjects, forceElements) = checkMultibodySystemAndGetWorldAndJointsAndForceElements(instantiatedModel, id)
 
             # Construct startIndex vector and number of degrees of freedom per joint
             nJoints         = length(jointObjects)
@@ -138,6 +143,10 @@ function setModiaJointVariables!(id::Int, _leq_mode, instantiatedModel::ModiaLan
             scene = initAnalysis2!(world)
             residuals = zeros(FloatType,nqdd)
             cache_h   = zeros(FloatType,nqdd)
+            scene.forceElements = forceElements
+            for force in forceElements
+                initializeForceElement(force)
+            end
             if scene.options.enableContactDetection
                 nz = 2
                 zStartIndex = ModiaLang.addZeroCrossings(instantiatedModel, nz)
@@ -256,11 +265,15 @@ For Modia3D:
 
 function multibodyResiduals3!(sim, scene, world, time, storeResults, isTerminal, leq_mode)
     tree            = scene.treeForComputation
+    forceElements   = scene.forceElements
     visualize       = scene.visualize   # && sim.model.visualiz
     exportAnimation = scene.exportAnimation
 
     if isTerminal  #if Modia.isTerminalOfAllSegments(sim)
         TimerOutputs.@timeit sim.timer "Modia3D_4 isTerminal" begin
+            for force in forceElements
+                terminateForceElement(force)
+            end
             if exportAnimation
                 Modia3D.exportAnimation(scene)
             end
@@ -305,6 +318,11 @@ function multibodyResiduals3!(sim, scene, world, time, storeResults, isTerminal,
                     obj.t = Modia3D.ZeroVector3D
                 end
             end # end forward recursion
+
+            # Evaluate force elements
+            for force in forceElements
+                evaluateForceElement(time, force)
+            end
 
             # Compute contact forces/torques
             if scene.collide
