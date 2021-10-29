@@ -17,28 +17,28 @@ that is the most extreme in direction of unit vector `e`.
 - `R_abs::AbstractMatrix`: Rotation matrix to rotate world frame in `shape` reference frame.
 - `e::AbstractVector`: Unit vector pointing into the desired direction.
 """
-@inline supportPoint_Box(shape::Box, r_abs::SVector{3,Float64}, R_abs::SMatrix{3,3,Float64,9}, e::SVector{3,Float64}, collisionSmoothingRadius::Float64) =
+@inline supportPoint_Box(shape::Box, r_abs::SVector{3,T}, R_abs::SMatrix{3,3,T,9}, e::SVector{3,T}, collisionSmoothingRadius::T) where {T} =
             r_abs + R_abs'*supportPoint_abs_Box(shape, R_abs*e, collisionSmoothingRadius) + e*collisionSmoothingRadius
 #
-@inline supportPoint_Cylinder( shape::Cylinder, r_abs::SVector{3,Float64}, R_abs::SMatrix{3,3,Float64,9}, e::SVector{3,Float64}, collisionSmoothingRadius::Float64) =
+@inline supportPoint_Cylinder( shape::Cylinder, r_abs::SVector{3,T}, R_abs::SMatrix{3,3,T,9}, e::SVector{3,T}, collisionSmoothingRadius::T) where {T} =
             r_abs + R_abs'*supportPoint_abs_Cylinder(shape, R_abs*e) + e*collisionSmoothingRadius
 
-@inline supportPoint_Cone(shape::Cone, r_abs::SVector{3,Float64}, R_abs::SMatrix{3,3,Float64,9}, e::SVector{3,Float64}, collisionSmoothingRadius::Float64) =
+@inline supportPoint_Cone(shape::Cone, r_abs::SVector{3,T}, R_abs::SMatrix{3,3,T,9}, e::SVector{3,T}, collisionSmoothingRadius::T) where {T} =
             r_abs + R_abs'*supportPoint_abs_Cone(shape, R_abs*e) + e*collisionSmoothingRadius
 
-@inline supportPoint_Capsule(shape::Capsule, r_abs::SVector{3,Float64}, R_abs::SMatrix{3,3,Float64,9}, e::SVector{3,Float64}) =
+@inline supportPoint_Capsule(shape::Capsule, r_abs::SVector{3,T}, R_abs::SMatrix{3,3,T,9}, e::SVector{3,T}) where {T} =
             r_abs + R_abs'*supportPoint_abs_Capsule(shape, R_abs*e)
 
-@inline supportPoint_Beam(shape::Beam, r_abs::SVector{3,Float64}, R_abs::SMatrix{3,3,Float64,9}, e::SVector{3,Float64}, collisionSmoothingRadius::Float64) =
+@inline supportPoint_Beam(shape::Beam, r_abs::SVector{3,T}, R_abs::SMatrix{3,3,T,9}, e::SVector{3,T}, collisionSmoothingRadius::T) where {T} =
             r_abs + R_abs'*supportPoint_abs_Beam(shape, R_abs*e) + e*collisionSmoothingRadius
 
-@inline supportPoint_Sphere(shape::Sphere, r_abs::SVector{3,Float64}, R_abs::SMatrix{3,3,Float64,9}, e::SVector{3,Float64}) =
+@inline supportPoint_Sphere(shape::Sphere, r_abs::SVector{3,T}, R_abs::SMatrix{3,3,T,9}, e::SVector{3,T}) where {T} =
             r_abs + (shape.diameter/2)*e
 
-@inline supportPoint_Ellipsoid(shape::Ellipsoid, r_abs::SVector{3,Float64}, R_abs::SMatrix{3,3,Float64,9}, e::SVector{3,Float64}) =
+@inline supportPoint_Ellipsoid(shape::Ellipsoid, r_abs::SVector{3,T}, R_abs::SMatrix{3,3,T,9}, e::SVector{3,T}) where {T} =
             r_abs + R_abs'*supportPoint_abs_Ellipsoid(shape, R_abs*e)
 
-@inline supportPoint_FileMesh(shape::FileMesh, r_abs::SVector{3,Float64}, R_abs::SMatrix{3,3,Float64,9}, e::SVector{3,Float64}) =
+@inline supportPoint_FileMesh(shape::FileMesh, r_abs::SVector{3,T}, R_abs::SMatrix{3,3,T,9}, e::SVector{3,T}) where {T} =
             r_abs + R_abs'*supportPoint_abs_FileMesh(shape, R_abs*e)
 
 
@@ -49,15 +49,15 @@ that is the most extreme in direction of unit vector `e`.
 # or Andrea Neumayr took ideas for computing based on those books
 
 # [Gino v.d. Bergen, p. 135]
-@inline supportPoint_abs_Ellipsoid(shape::Ellipsoid, e_abs::SVector{3,Float64}) =
+@inline supportPoint_abs_Ellipsoid(shape::Ellipsoid, e_abs::SVector{3,T}) where {T} =
     @inbounds SVector( (shape.lengthX/2)^2*e_abs[1], (shape.lengthY/2)^2*e_abs[2], (shape.lengthZ/2)^2*e_abs[3] )/norm(SVector((shape.lengthX/2)*e_abs[1], (shape.lengthY/2)*e_abs[2], (shape.lengthZ/2)*e_abs[3]) )
 
 # [Gino v.d. Bergen, p. 135]
-@inline supportPoint_abs_Box(shape::Box, e_abs::SVector{3,Float64},  collisionSmoothingRadius::Float64) =
+@inline supportPoint_abs_Box(shape::Box, e_abs::SVector{3,T},  collisionSmoothingRadius::T) where {T} =
     @inbounds SVector( Basics.sign_eps(e_abs[1])*(shape.lengthX/2-collisionSmoothingRadius), Basics.sign_eps(e_abs[2])*(shape.lengthY/2-collisionSmoothingRadius), Basics.sign_eps(e_abs[3])*(shape.lengthZ/2-collisionSmoothingRadius) )
 
 # [Gino v.d. Bergen, p. 136, XenoCollide, p. 168, 169]
-@inline function supportPoint_abs_Cylinder(shape::Cylinder, e_abs::SVector{3,Float64})
+@inline function supportPoint_abs_Cylinder(shape::Cylinder, e_abs::SVector{3,T}) where {T}
     @inbounds begin
         if shape.axis == 1
             enorm = norm(SVector(e_abs[2], e_abs[3]))
@@ -85,7 +85,7 @@ that is the most extreme in direction of unit vector `e`.
 end
 
 # G. Hippmann: Cylinder + Sphere as bottom and top
-@inline function supportPoint_abs_Capsule(shape::Capsule, e_abs::SVector{3,Float64})
+@inline function supportPoint_abs_Capsule(shape::Capsule, e_abs::SVector{3,T}) where {T}
     @inbounds begin
         if shape.axis == 1
             return Basics.sign_eps(e_abs[1])*SVector(0.5*shape.length, 0.0, 0.0) + 0.5*shape.diameter*e_abs
@@ -99,7 +99,7 @@ end
 
 # for cone: [Gino v.d. Bergen, p. 136]]
 # for frustum of a cone: A. Neumayr, G. Hippmann
-@inline function supportPoint_abs_Cone(shape::Cone, e_abs::SVector{3,Float64})
+@inline function supportPoint_abs_Cone(shape::Cone, e_abs::SVector{3,T}) where {T}
     @inbounds begin
         baseRadius = shape.diameter/2
         rightCone = shape.topDiameter == 0.0
@@ -178,7 +178,7 @@ end
 end
 
 # G. Hippmann: Outer half circles of beam
-@inline function supportPoint_abs_Beam(shape::Beam, e_abs::SVector{3,Float64})
+@inline function supportPoint_abs_Beam(shape::Beam, e_abs::SVector{3,T}) where {T}
     @inbounds begin
         if shape.axis == 1
             enorm = norm(SVector(e_abs[1], e_abs[2]))
@@ -206,7 +206,7 @@ end
 end
 
 # [Gino v.d. Bergen, p. 131]
-@inline function supportPoint_abs_FileMesh(shape::FileMesh, e_abs::SVector{3,Float64})
+@inline function supportPoint_abs_FileMesh(shape::FileMesh, e_abs::SVector{3,T}) where {T}
     e_absVec = Vector{SVector{3,Float64}}(undef, 1)
     e_absVec[1] = e_abs
     (max_value, position) = findmax(broadcast(dot, shape.objPoints, e_absVec))
