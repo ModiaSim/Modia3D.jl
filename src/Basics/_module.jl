@@ -13,6 +13,8 @@ Andrea Neumayr and Martin Otter, [DLR - Institute of System Dynamics and Control
 """
 module Basics
 
+import Modia3D
+
 export trailingPartOfName
 
 export neps, sign_eps, radToDeg

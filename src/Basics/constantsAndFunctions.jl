@@ -7,34 +7,37 @@
 
 
 # Epsilon and sign
-const neps = sqrt( eps() )
-sign_eps(value::Float64; seps::Float64 = 100*neps)::Float64 = value > seps ? 1.0 : (value < -seps ? -1.0 : 0.0)
+const neps = sqrt( eps(Modia3D.MPRFloatType) )
 
-function normalizeVector(n::SVector{3,Float64})::SVector{3,Float64}
-  nabs = norm(n)
-  if nabs <= neps
-    println("neps ", neps)
-    println("nabs ", nabs)
-    @assert(nabs > neps) # && norm(vec) > eps()
-    # return nothing
-  else
+function sign_eps(value::T; ) where {T}
+    seps::T = 100.0*neps
+    return value > seps ? T(1.0) : (value < -seps ? T(-1.0) : T(0.0))
+end
+
+function normalizeVector(n::SVector{3,T}) where {T}
+    nabs = norm(n)
+    if nabs <= neps
+        println("neps ", neps)
+        println("nabs ", nabs)
+        @assert(nabs > neps) # && norm(vec) > eps()
+        # return nothing
+    end
     return n/nabs
-  end
 end
 
 # Standard constants
-const radToDeg      = 180.0/pi
+const radToDeg = 180.0/pi
 
 """    mutable struct BoundingBox - Smallest box that contains a visual element"""
 mutable struct BoundingBox
-   x_min::Float64
-   x_max::Float64
-   y_min::Float64
-   y_max::Float64
-   z_min::Float64
-   z_max::Float64
-   BoundingBox() = new(0.0,0.0,0.0,0.0,0.0,0.0)
-   BoundingBox(x_min,x_max,y_min,y_max,z_min,z_max) = new(x_min,x_max,y_min,y_max,z_min,z_max)
+    x_min::Float64
+    x_max::Float64
+    y_min::Float64
+    y_max::Float64
+    z_min::Float64
+    z_max::Float64
+    BoundingBox() = new(0.0,0.0,0.0,0.0,0.0,0.0)
+    BoundingBox(x_min,x_max,y_min,y_max,z_min,z_max) = new(x_min,x_max,y_min,y_max,z_min,z_max)
 end
 
 
@@ -44,17 +47,17 @@ linearMovement(delta_x, tStart, tEnd, time) = delta_x*(time-tStart)/(tEnd-tStart
 
 # Trailing part of type name
 function trailingPartOfTypeAsString(obj)::String
-   name = string( typeof(obj) )
+    name = string( typeof(obj) )
 
-   # Determine trailing solid (after last ".")
-   i = first(something(findlast(".", name), 0:-1))
-   return i > 0 && i < length(name) ? name[i+1:end] : name
+    # Determine trailing solid (after last ".")
+    i = first(something(findlast(".", name), 0:-1))
+    return i > 0 && i < length(name) ? name[i+1:end] : name
 end
 
 function trailingPartOfName(name::AbstractString)::String
-   # Determine trailing part of name (after last ".")
-   i = first(something(findlast(".", name), 0:-1))
-   return i > 0 && i < length(name) ? name[i+1:end] : name
+    # Determine trailing part of name (after last ".")
+    i = first(something(findlast(".", name), 0:-1))
+    return i > 0 && i < length(name) ? name[i+1:end] : name
 end
 
 
