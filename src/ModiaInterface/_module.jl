@@ -17,6 +17,7 @@ export Fix
 export Revolute, RevoluteWithFlange
 export Prismatic, PrismaticWithFlange
 export J123, J132, J123or132, singularRem, FreeMotion, change_rotSequenceInNextIteration!
+export Bushing, SpringDamperPtP
 
 export buildModia3D
 

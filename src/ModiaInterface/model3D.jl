@@ -21,11 +21,12 @@ Font(            ; kwargs...) = Par(; _constructor = :(Modia3D.Font)            
 TextShape(       ; kwargs...) = Par(; _constructor = :(Modia3D.TextShape)             , kwargs...)
 ModelicaShape(   ; kwargs...) = Par(; _constructor = :(Modia3D.ModelicaShape)         , kwargs...)
 Fix(             ; kwargs...) = Par(; _constructor = :(Modia3D.Fix)                   , kwargs...)
+Bushing(         ; kwargs...) = Par(; _constructor = :(Modia3D.Bushing)               , kwargs...)
+SpringDamperPtP( ; kwargs...) = Par(; _constructor = :(Modia3D.SpringDamperPtP)       , kwargs...)
 
-MassPropertiesFromShape()  = Par(; _constructor = :(Modia3D.MassPropertiesFromShape))
-MassPropertiesFromShapeAndMass(;mass) = Par(; _constructor = :(Modia3D.MassPropertiesFromShapeAndMass), mass = mass)
+MassPropertiesFromShape() = Par(; _constructor = :(Modia3D.MassPropertiesFromShape))
+MassPropertiesFromShapeAndMass(; mass) = Par(; _constructor = :(Modia3D.MassPropertiesFromShapeAndMass), mass = mass)
 UniformGravityField(; kwargs...) = Par(; _constructor = :(Modia3D.UniformGravityField), kwargs...)
-
 
 RefPath(; kwargs...) = Modia3D.ReferencePath(; kwargs...)
 

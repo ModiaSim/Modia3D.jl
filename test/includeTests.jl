@@ -9,6 +9,8 @@ Test.@testset "Basic" begin
     include(joinpath("Basic", "PendulumWithParameterizedDamper.jl"))
     include(joinpath("Basic", "PendulumWithSpring.jl"))
     include(joinpath("Basic", "DoublePendulumWithDampers.jl"))
+    include(joinpath("Basic", "HarmonicOscillator.jl"))
+    include(joinpath("Basic", "BoxSpringDamperPtP.jl"))
     include(joinpath("Basic", "BoxPlanarMotion.jl"))
     include(joinpath("Basic", "ShaftFreeMotion.jl"))
     include(joinpath("Basic", "ShaftFreeMotionAdaptiveRotSequence.jl"))
