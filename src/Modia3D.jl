@@ -94,7 +94,8 @@ convertAndStripUnit(TargetType, requiredUnit, value) =
     numberType(value) <: Unitful.AbstractQuantity && unit.(value) != Unitful.NoUnits ?
             convert(TargetType, ustrip.( uconvert.(requiredUnit, value))) : convert(TargetType, value)
 
-
+# MPRFloatType is used to change betweeen Double64 and Float64 for mpr calculations
+const MPRFloatType = Float64
 
 # Include sub-modules
 include(joinpath("Frames"           , "_module.jl"))

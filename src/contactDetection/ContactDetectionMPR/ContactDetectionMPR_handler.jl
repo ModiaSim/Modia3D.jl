@@ -108,37 +108,31 @@ about the contact situation.
 - `neps`: Small number used to check whether a floating number is close to zero (> 0.0).
 
 """
-mutable struct ContactDetectionMPR_handler <: Modia3D.AbstractContactDetection
-  contactPairs::Composition.ContactPairs
-  distanceComputed::Bool
+mutable struct ContactDetectionMPR_handler{T} <: Modia3D.AbstractContactDetection
+    distanceComputed::Bool
 
-  lastContactDict::Dict{PairID,ContactPair}
-  contactDict::Dict{    PairID,ContactPair}
-  noContactMinVal::Float64
+    lastContactDict::Dict{PairID,ContactPair}
+    contactDict::Dict{    PairID,ContactPair}
+    noContactMinVal::Float64
 
-  tol_rel::Float64
-  niter_max::Int
-  neps::Float64
+    tol_rel::T
+    niter_max::Int
+    neps::T
 
-  # Visualization options
-  visualizeContactPoints::Bool
-  visualizeSupportPoints::Bool
-  defaultContactSphereDiameter::Float64
+    contactPairs::Composition.ContactPairs
 
-  function ContactDetectionMPR_handler(;tol_rel   = 1.0e-7,
-                                        niter_max = 100 ,
-                                        neps      = sqrt(eps()))
-    @assert(tol_rel > 0.0)
-    @assert(niter_max > 0)
-    @assert(neps > 0.0)
-    handler = new()
-    handler.distanceComputed = false
-    handler.lastContactDict  = Dict{PairID,ContactPair}()
-    handler.contactDict      = Dict{PairID,ContactPair}()
-    handler.noContactMinVal  = 42.0
-    handler.tol_rel          = tol_rel
-    handler.niter_max        = niter_max
-    handler.neps             = neps
-    return handler
-  end
+    # Visualization options
+    visualizeContactPoints::Bool
+    visualizeSupportPoints::Bool
+    defaultContactSphereDiameter::Float64
+
+    function ContactDetectionMPR_handler{T}(;tol_rel  = 1.0e-7,
+                                            niter_max = 100 ,
+                                            neps      = sqrt(eps(T))) where {T}
+        @assert(tol_rel > 0.0)
+        @assert(niter_max > 0)
+        @assert(neps > 0.0)
+        new(false, Dict{PairID,ContactPair}(), Dict{PairID,ContactPair}(), 42.0, tol_rel, niter_max, neps)
+    end
 end
+ContactDetectionMPR_handler() = ContactDetectionMPR_handler{Modia3D.MPRFloatType}()
