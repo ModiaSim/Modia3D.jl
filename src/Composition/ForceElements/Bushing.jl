@@ -5,7 +5,7 @@ force = Bushing(; obj1, obj2, stiffness, damping)
 Return a `force` acting as bushing between `obj1::`[`Object3D`](@ref) and
 `obj2::`[`Object3D`](@ref). Vectors `stiffness` and `damping` define the
 stiffness resp. damping values in x, y and z direction of `obj1`. The
-orientation of `obj2` does no influence the resulting forces.
+orientation of `obj2` does not influence the resulting forces.
 """
 mutable struct Bushing <: Modia3D.AbstractForceElement
 

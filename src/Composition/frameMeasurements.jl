@@ -196,10 +196,10 @@ function measFrameDistAcceleration(frameMeas::Object3D; frameOrig::Union{Object3
     (d_OrigMeas, n_OrigMeas) = measFrameDistance(frameMeas; frameOrig=frameOrig)
     v_OrigMeas = measFrameTransVelocity(frameMeas; frameOrig=frameOrig)
     a_OrigMeas = measFrameTransAcceleration(frameMeas; frameOrig=frameOrig)
-    dd_OrigMeas = n_OrigMeas * v_OrigMeas
-    ddd_OrigMeas =  n_OrigMeas * a_OrigMeas
+    dd_OrigMeas = dot(n_OrigMeas, v_OrigMeas)
+    ddd_OrigMeas = dot(n_OrigMeas, a_OrigMeas)
     if d_OrigMeas > 1.0e-32
-        ddd_OrigMeas += (v_OrigMeas*v_OrigMeas - dd_OrigMeas*dd_OrigMeas) / d_OrigMeas
+        ddd_OrigMeas += (dot(v_OrigMeas, v_OrigMeas) - dd_OrigMeas*dd_OrigMeas) / d_OrigMeas
     end
     return ddd_OrigMeas
 end
