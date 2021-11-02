@@ -20,6 +20,7 @@ makedocs(
         "Components/Joints.md"
         "Components/Materials.md"
         "Components/GravityField.md"
+        "Components/ForceElements.md"
      ],
      "Internal" => [
         "internal/Profiling.md"

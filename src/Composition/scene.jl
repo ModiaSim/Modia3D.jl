@@ -377,7 +377,7 @@ Defines global properties of the system, such as the gravity field. Exactly one 
 """
 mutable struct Scene <: Modia3D.AbstractScene
     name::String                              # model name
-    autoCoordsys::Shapes.CoordinateSystem   # Coordinate system that is automatically included (e.g. due to visualizeFrames=true)
+    autoCoordsys::Shapes.CoordinateSystem     # Coordinate system that is automatically included (e.g. due to visualizeFrames=true)
     stack::Vector{Object3D}                   # Stack to traverse objs
     buffer::Vector{Object3D}                  # stores all roots of a super obj
 
@@ -391,7 +391,7 @@ mutable struct Scene <: Modia3D.AbstractScene
     initSuperObj::Bool                        # = true, if super objects are initialized
     initMassComp::Bool                        # = true, if mass computation for optimized structure is initialized
     analysis::Modia3D.AnalysisType            # Type of analysis
-    superObjs::Vector{SuperObjsRow}          # super objects
+    superObjs::Vector{SuperObjsRow}           # super objects
 
     treeAccVelo::Vector{Object3D}
     tree::Vector{Object3D}                    # Spanning tree of the frames in depth-first order (without world)
