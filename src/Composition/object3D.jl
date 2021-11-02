@@ -177,7 +177,7 @@ mutable struct Object3D <: Modia3D.AbstractObject3D
         end
 
         if !isnothing(parent)
-            # with parent -> call constructor 3 or 5
+            # with parent -> call constructor 3
             if !isnothing(rotation) && (typeof(rotation) != Frames.RotationMatrix)
                 rotation = Frames.rot123(rotation[1], rotation[2], rotation[3])
             end

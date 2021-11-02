@@ -1,8 +1,8 @@
 function getJointsAndForceElementsAndObject3DsWithoutParents!(evaluatedParameters,
-                                                           object3DWithoutParents::Vector{Object3D},
-                                                           jointObjects::Vector{Object3D},
-                                                           forceElements::Vector{Modia3D.AbstractForceElement},
-                                                           path::String)::Nothing
+                                                              object3DWithoutParents::Vector{Object3D},
+                                                              jointObjects::Vector{Object3D},
+                                                              forceElements::Vector{Modia3D.AbstractForceElement},
+                                                              path::String)::Nothing
     for (key,value) in evaluatedParameters   # zip(keys(evaluatedParameters), evaluatedParameters)
         if typeof(value) == Object3D
             if value.parent === value
@@ -139,14 +139,16 @@ function setModiaJointVariables!(id::Int, _leq_mode, instantiatedModel::ModiaLan
             end
             nqdd = j-1
 
+            # Initialize force elements
+            for force in forceElements
+                initializeForceElement(force)
+            end
+
             # Construct MultibodyData
             scene = initAnalysis2!(world)
             residuals = zeros(FloatType,nqdd)
             cache_h   = zeros(FloatType,nqdd)
             scene.forceElements = forceElements
-            for force in forceElements
-                initializeForceElement(force)
-            end
             if scene.options.enableContactDetection
                 nz = 2
                 zStartIndex = ModiaLang.addZeroCrossings(instantiatedModel, nz)
@@ -321,7 +323,7 @@ function multibodyResiduals3!(sim, scene, world, time, storeResults, isTerminal,
 
             # Evaluate force elements
             for force in forceElements
-                evaluateForceElement(time, force)
+                evaluateForceElement(force)
             end
 
             # Compute contact forces/torques

@@ -79,13 +79,12 @@ end
 
 
 function assignAccVelo(tree::Vector{Object3D}, obj::Object3D)
-    # compute velocity of this object
-    if canCollide(obj) && !hasChildJoint(obj)
-        push!(tree, obj)
-    end
-    # compute acceleration of this object
     if hasChildJoint(obj) #|| hasCutJoint(obj)
+        # compute acceleration of this object
         obj.computeAcceleration = true
+        push!(tree, obj)
+    elseif hasForceElement(obj) || canCollide(obj)
+        # compute velocity of this object
         push!(tree, obj)
     end
 end

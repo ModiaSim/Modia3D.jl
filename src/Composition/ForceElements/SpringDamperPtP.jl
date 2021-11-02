@@ -29,10 +29,12 @@ end
 
 
 function initializeForceElement(force::SpringDamperPtP)
+    force.obj1.hasForceElement = true
+    force.obj2.hasForceElement = true
     return nothing
 end
 
-function evaluateForceElement(time, force::SpringDamperPtP)
+function evaluateForceElement(force::SpringDamperPtP)
     (pos, norm) = measFrameDistance(force.obj2; frameOrig=force.obj1)
     vel = measFrameDistVelocity(force.obj2; frameOrig=force.obj1)
     frc = force.stiffness * pos + force.damping * vel

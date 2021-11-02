@@ -30,10 +30,12 @@ end
 
 
 function initializeForceElement(force::Bushing)
+    force.obj1.hasForceElement = true
+    force.obj2.hasForceElement = true
     return nothing
 end
 
-function evaluateForceElement(time, force::Bushing)
+function evaluateForceElement(force::Bushing)
     r12 = measFramePosition(force.obj2; frameOrig=force.obj1, frameCoord=force.obj1)
     v12 = measFrameTransVelocity(force.obj2; frameOrig=force.obj1, frameCoord=force.obj1, frameObsrv=force.obj1)
     f12 = force.stiffness .* r12 + force.damping .* v12
