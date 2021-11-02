@@ -32,6 +32,8 @@ export Revolute, setAngle!, connect
 export Prismatic, setDistance!
 export FreeMotion
 
+export Bushing, SpringDamperPtP
+
 export multibodyResiduals!, setModiaJointVariables!
 
 export distanceAndAngles, distance, planarRotationAngle
@@ -93,11 +95,14 @@ include("object3D.jl")
 include("supportPoints.jl")
 include("superObjects.jl")
 
-# Joints must be included before scene, because joint memory is stored in scene
+# Joints and Force Elements must be included before scene, because memory is stored in scene
 include(joinpath("joints", "FreeMotion.jl"))
 include(joinpath("joints", "Fix.jl"))
 include(joinpath("joints", "Revolute.jl"))
 include(joinpath("joints", "Prismatic.jl"))
+
+include(joinpath("ForceElements", "Bushing.jl"))
+include(joinpath("ForceElements", "SpringDamperPtP.jl"))
 
 include("contactPairs.jl")
 include(joinpath(Modia3D.path, "src", "contactDetection", "ContactDetectionMPR", "ContactDetectionMPR_handler.jl"))

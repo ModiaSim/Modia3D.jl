@@ -341,7 +341,7 @@ function computeKinematics!(scene::Scene, tree::Vector{Object3D}, time)::Nothing
             obj.z  = parent.R_abs*parent.z + freeMotion.z
 
         else
-            error("Bug in Modia3D/src/Composition/specifics/specifics.jl (computeKinematics!): jointKind = $jointKind is not known")
+            error("Bug in Modia3D/src/Composition/joints/joints.jl (computeKinematics!): jointKind = $jointKind is not known.")
         end
     end
     return nothing
@@ -396,7 +396,7 @@ function computeKinematics_for_leq_mode_pos!(scene::Scene, tree::Vector{Object3D
             obj.z  = parent.R_abs*parent.z + freeMotion.z
 
         else
-            error("Bug in Modia3D/src/Composition/specifics/specifics.jl (computeKinematics_for_leq_mode_pos!): jointKind = $jointKind is not known")
+            error("Bug in Modia3D/src/Composition/joints/joints.jl (computeKinematics_for_leq_mode_pos!): jointKind = $jointKind is not known.")
         end
     end
     return nothing
@@ -448,7 +448,7 @@ function computeForcesTorquesAndResiduals!(scene::Scene, tree::Vector{Object3D},
             freeMotion.residue_t = obj.t
 
         else
-            error("Bug in Modia3D/src/Composition/specifics/specifics.jl (computeForcesTorquesAndResiduals!): jointKind = $jointKind is not known")
+            error("Bug in Modia3D/src/Composition/joints/joints.jl (computeForcesTorquesAndResiduals!): jointKind = $jointKind is not known.")
         end
     end
     return nothing
@@ -492,7 +492,7 @@ function setJointVariables_q_qd_f!(scene::Scene, objects::Vector{Object3D}, star
             freeMotion.isrot123 = args_i[5]
 
         else
-           error("Bug in Modia3D/src/Composition/specifics/specifics.jl (setJointVariables!): jointKind = $jointKind is not known")
+           error("Bug in Modia3D/src/Composition/joints/joints.jl (setJointVariables_q_qd_f!): jointKind = $jointKind is not known.")
         end
     end
     return nothing
@@ -531,7 +531,7 @@ function setJointVariables_qdd!(scene::Scene, objects::Vector{Object3D}, startIn
             freeMotion.z = SVector{3,Float64}(qdd2[beg+3], qdd2[beg+4], qdd2[beg+5])
 
         else
-           error("Bug in Modia3D/src/Composition/specifics/specifics.jl (setJointVariables!): jointKind = $jointKind is not known")
+           error("Bug in Modia3D/src/Composition/joints/joints.jl (setJointVariables_qdd!): jointKind = $jointKind is not known.")
         end
     end
     return nothing
@@ -571,7 +571,7 @@ function getJointResiduals_for_leq_mode_0!(scene::Scene, objects::Vector{Object3
             residuals[beg+3:beg+5] = freeMotion.residue_t
 
         else
-           error("Bug in Modia3D/src/Composition/specifics/specifics.jl (getJointResiduals_for_leq_mode_0!): jointKind = $jointKind is not known")
+           error("Bug in Modia3D/src/Composition/joints/joints.jl (getJointResiduals_for_leq_mode_0!): jointKind = $jointKind is not known.")
         end
     end
     return nothing
@@ -604,7 +604,7 @@ function getJointResiduals_for_leq_mode_pos!(scene::Scene, objects::Vector{Objec
             residuals[beg+3:beg+5] = freeMotion.residue_t + cache_h[beg+3:beg+5]
 
         else
-           error("Bug in Modia3D/src/Composition/specifics/specifics.jl (getJointResiduals_for_leq_mode_0!): jointKind = $jointKind is not known")
+           error("Bug in Modia3D/src/Composition/joints/joints.jl (getJointResiduals_for_leq_mode_pos!): jointKind = $jointKind is not known.")
         end
     end
     return nothing

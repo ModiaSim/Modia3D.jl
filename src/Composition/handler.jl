@@ -128,7 +128,7 @@ end
 
 # the indices of super objects, which can't collide, are stored in a list
 function fillStackOrBuffer!(scene::Scene, superObj::SuperObjsRow, obj::Object3D, rootSuperObj::Object3D)::Nothing
-    n_children =  length(obj.children)
+    n_children = length(obj.children)
     help = fill(false, n_children)
 
     for i = 1:n_children
@@ -142,16 +142,16 @@ function fillStackOrBuffer!(scene::Scene, superObj::SuperObjsRow, obj::Object3D,
                     push!(superObj.noCPair, length(scene.buffer))
                 end
             else
-            if isMovable(child)
-                push!(scene.buffer, child)
-                child.isRootObj = true
-                child.computeAcceleration = true
-            else
-                push!(scene.stack, child)
-                assignAccVelo(scene.treeAccVelo, child)
-                if !(obj == rootSuperObj)
-                    changeParentToRootObj(rootSuperObj, child)
-                    help[i] = true
+                if isMovable(child)
+                    push!(scene.buffer, child)
+                    child.isRootObj = true
+                    child.computeAcceleration = true
+                else
+                    push!(scene.stack, child)
+                    assignAccVelo(scene.treeAccVelo, child)
+                    if !(obj == rootSuperObj)
+                        changeParentToRootObj(rootSuperObj, child)
+                        help[i] = true
     end; end; end; end; end
 
     if !isempty(obj.children)

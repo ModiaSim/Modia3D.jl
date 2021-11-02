@@ -407,7 +407,7 @@ mutable struct Scene <: Modia3D.AbstractScene
     allowedToMove::Vector{Union{Bool,Nothing}}
     AABB::Vector{Vector{Basics.BoundingBox}}  # Bounding boxes of elements that can collide
     zStartIndex::Int                          # start index of collision zero crossing functions
-    #forceElements::Vector{Int64}
+    forceElements::Vector{Modia3D.AbstractForceElement}
     exportAnimation::Bool                     # animation file export is enabled
     animation::Vector{animationStep}          # animation data of visible Object3Ds
     outputCounter::Int64                      # animation/visualization output step counter
@@ -497,6 +497,7 @@ mutable struct Scene <: Modia3D.AbstractScene
             Vector{Union{Bool}}[],
             Vector{Vector{Basics.BoundingBox}}[],
             1,
+            Vector{Modia3D.AbstractForceElement}[],
             exportAnimation,
             Vector{animationStep}[],
             0,
