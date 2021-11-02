@@ -9,8 +9,6 @@ Test.@testset "Basic" begin
     include(joinpath("Basic", "PendulumWithParameterizedDamper.jl"))
     include(joinpath("Basic", "PendulumWithSpring.jl"))
     include(joinpath("Basic", "DoublePendulumWithDampers.jl"))
-    include(joinpath("Basic", "HarmonicOscillator.jl"))
-    include(joinpath("Basic", "BoxSpringDamperPtP.jl"))
     include(joinpath("Basic", "BoxPlanarMotion.jl"))
     include(joinpath("Basic", "ShaftFreeMotion.jl"))
     include(joinpath("Basic", "ShaftFreeMotionAdaptiveRotSequence.jl"))
@@ -18,6 +16,12 @@ Test.@testset "Basic" begin
     if testsExtend >= normalTests
         include(joinpath("Basic", "Mobile.jl"))
     end
+end
+
+Test.@testset "Force Elements" begin
+    include(joinpath("ForceElements", "HarmonicOscillator.jl"))
+    include(joinpath("ForceElements", "BoxSpringDamperPtP.jl"))
+    include(joinpath("ForceElements", "BoxNonLinearSpringDamperPtP.jl"))
 end
 
 Test.@testset "Robot" begin
