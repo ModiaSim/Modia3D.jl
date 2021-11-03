@@ -7,7 +7,7 @@
 
 
 # Epsilon and sign
-const neps = sqrt( eps(Modia3D.MPRFloatType) )
+const neps = sqrt( eps() )
 
 nepsMPR(::Type{T}) where {T} = sqrt( eps(T) )
 
