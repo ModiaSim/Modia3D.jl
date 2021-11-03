@@ -22,7 +22,7 @@ SpringDamper = Model(
                               feature=Visual(shape=CoordinateSystem(length=:(Length/2))),
                               translation=:[Length/2, Length/2, Length/2]),
     joint = FreeMotion(obj1=:world, obj2=:box),
-    force = SpringDamperPtP(obj1=:world, obj2=:boxCornerFrame, stiffness=:Stiffness, damping=:Damping)
+    force = SpringDamperPtP(obj1=:world, obj2=:boxCornerFrame, springForceLaw=:Stiffness, damperForceLaw=:Damping)
 )
 
 springDamper = @instantiateModel(buildModia3D(SpringDamper), aliasReduction=false, unitless=true)

@@ -13,15 +13,15 @@ influence the resulting forces.
 """
 mutable struct Bushing <: Modia3D.AbstractForceElement
 
-    obj1::Modia3D.AbstractObject3D
-    obj2::Modia3D.AbstractObject3D
+    obj1::Object3D
+    obj2::Object3D
 
     nominalForce::SVector{3,Float64}
     stiffness::SVector{3,Float64}
     damping::SVector{3,Float64}
 
-    function Bushing(; obj1::Modia3D.AbstractObject3D,
-                       obj2::Modia3D.AbstractObject3D,
+    function Bushing(; obj1::Object3D,
+                       obj2::Object3D,
                        nominalForce::AbstractVector = Modia3D.ZeroVector3D,
                        stiffness::AbstractVector = Modia3D.ZeroVector3D,
                        damping::AbstractVector = Modia3D.ZeroVector3D)
