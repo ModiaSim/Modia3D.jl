@@ -11,8 +11,8 @@ const neps = sqrt( eps() )
 
 nepsMPR(::Type{T}) where {T} = sqrt( eps(T) )
 
-function sign_eps(value::T; ) where {T}
-    seps::T = 100.0*neps
+function sign_eps(value::T) where {T}
+    seps::T = 100.0*nepsMPR(T)
     return value > seps ? T(1.0) : (value < -seps ? T(-1.0) : T(0.0))
 end
 
