@@ -65,17 +65,18 @@ end
 
 # checks if centers of shapeA and shapeB are overlapping
 # belongs to construction of r0
-function checkCentersOfShapesOverlapp(r0::SupportPoint, neps::T, shapeA::Composition.Object3D, shapeB::Composition.Object3D) where {T}
-    if norm(r0.p) <= neps
+function checkCentersOfShapesOverlapp(r0::SupportPoint{T}, shapeA::Composition.Object3D, shapeB::Composition.Object3D) where {T}
+    if norm(r0.p) <= Modia3D.nepsMPR(T)
         error("MPR: Too large penetration (prerequisite of MPR violated). Centers are overlapping. Look at $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)).")
     end
 end
 
 
-function checkIfShapesArePlanar(r0::SupportPoint,r1::SupportPoint,r2::SupportPoint,n2::SVector{3,T}, neps::T,
+function checkIfShapesArePlanar(r0::SupportPoint,r1::SupportPoint,r2::SupportPoint,n2::SVector{3,T},
                                 shapeA::Composition.Object3D,shapeB::Composition.Object3D) where {T}
     # r3 is in the direction of plane normal that contains triangle r0-r1-r2
     n3 = cross(r1.p-r0.p, r2.p-r0.p)
+    neps = Modia3D.nepsMPR(T)
     # the triangle r0-r1-r2 has degenerated into a line segment
     if norm(n3) <= neps
         # change search direction for r2
@@ -120,12 +121,13 @@ end
 # Der Ursprung muss nicht enthalten sein!!!
 function tetrahedronEncloseOrigin(r0::SupportPoint, r1::SupportPoint,
             r2::SupportPoint, r3::SupportPoint,
-            neps::T, niter_max::Int64,
+            niter_max::Int64,
             shapeA::Composition.Object3D, shapeB::Composition.Object3D, scale::T) where {T}
     r1org = r1
     r2org = r2
     r3org = r3
     aux = SVector{3, T}(Modia3D.ZeroVector3D)
+    neps = Modia3D.nepsMPR(T)
     success = false
     for i in 1:niter_max
         aux = cross(r1.p-r0.p,r3.p-r0.p)
@@ -146,7 +148,7 @@ function tetrahedronEncloseOrigin(r0::SupportPoint, r1::SupportPoint,
     if success != true
         if niter_max <= 100
             @warn("MPR (phase 2): Max. number of iterations (= $niter_max) is reached. niter_max increased locally by 10 and phase 2 is rerun. Look at $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)).")
-            tetrahedronEncloseOrigin(r0, r1org, r2org, r3org, neps, niter_max + 10, shapeA, shapeB, scale)
+            tetrahedronEncloseOrigin(r0, r1org, r2org, r3org, niter_max + 10, shapeA, shapeB, scale)
         else
             error("MPR (phase 2): Max. number of iterations (= $niter_max) is reached and $niter_max > 100, look at $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)).")
         end
@@ -158,8 +160,9 @@ end
 ###########      Phase 3, Minkowski Portal Refinement      ###################
 # construction of r4
 function constructR4(r0::SupportPoint,r1::SupportPoint,r2::SupportPoint,r3::SupportPoint,
-                     neps::T, shapeA::Composition.Object3D,shapeB::Composition.Object3D, scale::T) where {T}
+                     shapeA::Composition.Object3D,shapeB::Composition.Object3D, scale::T) where {T}
     n4 = cross(r2.p-r1.p, r3.p-r1.p)
+    neps = Modia3D.nepsMPR(T)
     if norm(n4) <= neps
         r3 = getSupportPoint(shapeA, shapeB, -r3.n, scale=scale) # change search direction
         if abs(dot((r3.p-r1.p),r3.n)) <= neps
@@ -219,7 +222,7 @@ end
 
 function finalTC2(r1::SupportPoint, r2::SupportPoint, r3::SupportPoint, r4::SupportPoint)
     #println("TC 2")
-    #if !analyzeFinalPortal(r1.p, r2.p, r3.p, r4.p, neps)
+    #if !analyzeFinalPortal(r1.p, r2.p, r3.p, r4.p)
         # error("shapeA = ", shapeA, " shapeB = ", shapeB)
     #end
     distance = -dot(r4.n, r4.p)
@@ -231,11 +234,11 @@ end
 function finalTC3(r0::SupportPoint, r1::SupportPoint, r2::SupportPoint, r3::SupportPoint, r4::SupportPoint)
     #println("TC 3")
 
-    #doesRayIntersectPortal(r1.p,r2.p,r3.p, r4.p,neps)
+    #doesRayIntersectPortal(r1.p,r2.p,r3.p, r4.p)
     #println("r1.p = ", r1.p , " r2.p = ", r2.p ," r3.p = ", r3.p)
     #println("r4.p = ", r4.p)
     #println(" ")
-    #if !analyzeFinalPortal(r1.p, r2.p, r3.p, r4.p, neps)
+    #if !analyzeFinalPortal(r1.p, r2.p, r3.p, r4.p)
         # error("shapeA = ", shapeA, " shapeB = ", shapeB)
     #end
     (r4.p, distance) = signedDistanceToPortal(r0.p,r1.p,r2.p,r3.p)
@@ -244,7 +247,7 @@ function finalTC3(r0::SupportPoint, r1::SupportPoint, r2::SupportPoint, r3::Supp
 end
 
 
-function phase3(r0::SupportPoint, r1::SupportPoint, r2::SupportPoint, r3::SupportPoint, neps::T, niter_max::Int64, tol_rel::T, shapeA::Composition.Object3D, shapeB::Composition.Object3D, scale::T) where {T}
+function phase3(r0::SupportPoint, r1::SupportPoint, r2::SupportPoint, r3::SupportPoint, niter_max::Int64, tol_rel::T, shapeA::Composition.Object3D, shapeB::Composition.Object3D, scale::T) where {T}
     r1org = r1
     r2org = r2
     r3org = r3
@@ -258,7 +261,7 @@ function phase3(r0::SupportPoint, r1::SupportPoint, r2::SupportPoint, r3::Suppor
     for i in 1:niter_max
         ### Phase 3.1: construct r4 ###
         # Find support point using the tetrahedron face
-        (r3,r4,n4) = constructR4(r0,r1,r2,r3,neps,shapeA,shapeB, scale)
+        (r3,r4,n4) = constructR4(r0,r1,r2,r3,shapeA,shapeB, scale)
 
 
         ### Phase 3.2: check if r4 is close to the origin ###
@@ -314,7 +317,7 @@ function phase3(r0::SupportPoint, r1::SupportPoint, r2::SupportPoint, r3::Suppor
     end
     if niter_max <= 100
         @warn("MPR (phase 3): Numerical issues with distance computation between $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)). Max. number of iterations (= $niter_max) is reached. niter_max increased locally by 10 and phase 3 is rerun.")
-        phase3(r0, r1org, r2org, r3org, neps, niter_max + 10, tol_rel, shapeA, shapeB, scale)
+        phase3(r0, r1org, r2org, r3org, niter_max + 10, tol_rel, shapeA, shapeB, scale)
     else
         @warn("MPR (phase 3): Max. number of iterations (= $niter_max) is reached and $niter_max > 100, look at $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)). tol_rel increased locally for this computation to $new_tol.")
         if isTC2
@@ -357,7 +360,7 @@ end
 function mprGeneral(ch::Composition.ContactDetectionMPR_handler{T}, shapeA::Composition.Object3D, shapeB::Modia3D.Composition.Object3D) where {T}
     tol_rel = ch.tol_rel
     niter_max = ch.niter_max
-    neps = ch.neps
+    neps = Modia3D.nepsMPR(T)
 
     ###########      Phase 1, Minkowski Portal Refinement      ###################
     # Construction of r0 and initial portal triangle points r1, r2, r3
@@ -369,7 +372,7 @@ function mprGeneral(ch::Composition.ContactDetectionMPR_handler{T}, shapeA::Comp
     centroidB = getCentroid(shapeB)
     r0 = SupportPoint{T}(centroidA-centroidB, -(centroidA-centroidB), SVector{3,T}(0.0,0.0,0.0), SVector{3,T}(0.0,0.0,0.0))
     # check if centers of shapes are overlapping
-    checkCentersOfShapesOverlapp(r0, neps, shapeA, shapeB)
+    checkCentersOfShapesOverlapp(r0, shapeA, shapeB)
 
     ### Phase 1.2: construction of initial r1 ###
     # r1 is the farthest point in the direction to the origin
@@ -397,26 +400,25 @@ function mprGeneral(ch::Composition.ContactDetectionMPR_handler{T}, shapeA::Comp
 
     ### Phase 1.4: construction of initial r3 ###
     # r3 is in the direction of plane normal that contains triangle r0-r1-r2
-    (r2, r3, n2, n3) = checkIfShapesArePlanar(r0, r1, r2, n2, neps, shapeA, shapeB)
+    (r2, r3, n2, n3) = checkIfShapesArePlanar(r0, r1, r2, n2, shapeA, shapeB)
 
     (r0,r1,r2,r3,scale) = skalarization(r0,r1,r2,r3)
 
 
     ###########      Phase 2, Minkowski Portal Refinement      ###################
     # loop around to "ensure" the tetrahedron r0,r1,r2 and r3 encloses the origin
-    (r1,r2,r3) = tetrahedronEncloseOrigin(r0,r1,r2,r3,neps,niter_max,shapeA,shapeB, scale)
-    # doesRayIntersectPortal(r1.p,r2.p,r3.p, r0.p,neps) # Portal.A, Portal.B, Portal.C, point, neps
-
+    (r1,r2,r3) = tetrahedronEncloseOrigin(r0,r1,r2,r3,niter_max,shapeA,shapeB, scale)
+    # doesRayIntersectPortal(r1.p,r2.p,r3.p, r0.p) # Portal.A, Portal.B, Portal.C, point,
 
     ###########      Phase 3, Minkowski Portal Refinement      ###################
-    (distance, r1, r2, r3, r4) = phase3(r0, r1, r2, r3, neps, niter_max, tol_rel, shapeA, shapeB, scale)
+    (distance, r1, r2, r3, r4) = phase3(r0, r1, r2, r3, niter_max, tol_rel, shapeA, shapeB, scale)
     return (Float64(distance), SVector{3,Float64}(r4.a), SVector{3,Float64}(r4.b), SVector{3,Float64}(r4.n), true, SVector{3,Float64}(r1.a), SVector{3,Float64}(r1.b), SVector{3,Float64}(r2.a), SVector{3,Float64}(r2.b), SVector{3,Float64}(r3.a), SVector{3,Float64}(r3.b) )
 end
 
 
 function mprTwoSpheres(ch::Composition.ContactDetectionMPR_handler{T}, shapeA::Composition.Object3D, shapeB::Modia3D.Composition.Object3D,
     sphereA::Shapes.Sphere, sphereB::Shapes.Sphere) where {T}
-    neps = ch.neps
+    neps = Modia3D.nepsMPR(T)
     radiusA = T(sphereA.diameter*0.5)
     radiusB = T(sphereB.diameter*0.5)
     centroidSphereA = getCentroid(shapeA)
