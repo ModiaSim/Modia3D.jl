@@ -7,19 +7,21 @@
 
 
 # Epsilon and sign
-const neps = sqrt( eps(Modia3D.MPRFloatType) )
+const neps = sqrt( eps() )
 
-function sign_eps(value::T; ) where {T}
-    seps::T = 100.0*neps
+nepsType(::Type{T}) where {T} = sqrt( eps(T) ) # mpr and bounding box calculation use this
+
+function sign_eps(value::T) where {T}
+    seps::T = 100.0*nepsType(T)
     return value > seps ? T(1.0) : (value < -seps ? T(-1.0) : T(0.0))
 end
 
 function normalizeVector(n::SVector{3,T}) where {T}
     nabs = norm(n)
-    if nabs <= neps
-        println("neps ", neps)
+    if nabs <= nepsType(T)
+        println("neps ", nepsType(T))
         println("nabs ", nabs)
-        @assert(nabs > neps) # && norm(vec) > eps()
+        @assert(nabs > nepsType(T)) # && norm(vec) > eps()
         # return nothing
     end
     return n/nabs

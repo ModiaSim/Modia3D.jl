@@ -78,21 +78,21 @@ end
         halfDiameter = T(0.5*shape.diameter)
         if shape.axis == 1
             enorm = norm(SVector(e_abs[2], e_abs[3]))
-            if enorm <= Modia3D.neps
+            if enorm <= Modia3D.nepsType(T)
                 return Basics.sign_eps(e_abs[1])*SVector(halfLength, 0.0, 0.0)
             else
                 return Basics.sign_eps(e_abs[1])*SVector(halfLength, 0.0, 0.0) + SVector(0.0, (halfDiameter)*e_abs[2], (halfDiameter)*e_abs[3])/enorm
             end
         elseif shape.axis == 2
             enorm = norm(SVector(e_abs[3], e_abs[1]))
-            if enorm <= Modia3D.neps
+            if enorm <= Modia3D.nepsType(T)
                 return Basics.sign_eps(e_abs[2])*SVector(0.0, halfLength, 0.0)
             else
                 return Basics.sign_eps(e_abs[2])*SVector(0.0, halfLength, 0.0) + SVector((halfDiameter)*e_abs[1], 0.0, (halfDiameter)*e_abs[3])/enorm
             end
         else
             enorm = norm(SVector(e_abs[1], e_abs[2]))
-            if enorm <= Modia3D.neps
+            if enorm <= Modia3D.nepsType(T)
                 return Basics.sign_eps(e_abs[3])*SVector(0.0, 0.0, halfLength)
             else
                 return Basics.sign_eps(e_abs[3])*SVector(0.0, 0.0, halfLength) + SVector((halfDiameter)*e_abs[1], (halfDiameter)*e_abs[2], 0.0)/enorm
@@ -137,7 +137,7 @@ end
                     return SVector(shapeLength, 0.0, 0.0)  # apex is support point
                 else  # frustum of a cone
                     enorm = norm(SVector(e_abs[2], e_abs[3]))
-                    if enorm > Modia3D.neps
+                    if enorm > Modia3D.nepsType(T)
                         return SVector(shapeLength, 0.0, 0.0) + SVector(0.0, topRadius*e_abs[2], topRadius*e_abs[3]) / enorm  # point on top circle is support point
                     else
                         return SVector(shapeLength, 0.0, 0.0)  # top circle center is support point
@@ -145,7 +145,7 @@ end
                 end
             else
                 enorm = norm(SVector(e_abs[2], e_abs[3]))
-                if enorm > Modia3D.neps
+                if enorm > Modia3D.nepsType(T)
                     return SVector(0.0, baseRadius*e_abs[2], baseRadius*e_abs[3]) / enorm  # point on base circle is support point
                 else
                     return SVector{3,T}(0.0, 0.0, 0.0)  # base circle center is support point
@@ -158,7 +158,7 @@ end
                     return SVector(0.0, shapeLength, 0.0)  # apex is support point
                 else  # frustum of a cone
                     enorm = norm(SVector(e_abs[3], e_abs[1]))
-                    if enorm > Modia3D.neps
+                    if enorm > Modia3D.nepsType(T)
                         return SVector(0.0, shapeLength, 0.0) + SVector(topRadius*e_abs[1], 0.0, topRadius*e_abs[3]) / enorm  # point on top circle is support point
                     else
                         return SVector(0.0, shapeLength, 0.0)  # top circle center is support point
@@ -166,7 +166,7 @@ end
                 end
             else
                 enorm = norm(SVector(e_abs[3], e_abs[1]))
-                if enorm > Modia3D.neps
+                if enorm > Modia3D.nepsType(T)
                     return SVector(baseRadius*e_abs[1], 0.0, baseRadius*e_abs[3]) / enorm  # point on base circle is support point
                 else
                     return SVector{3,T}(0.0, 0.0, 0.0)  # base circle center is support point
@@ -179,7 +179,7 @@ end
                     return SVector(0.0, 0.0, shapeLength)  # apex is support point
                 else  # frustum of a cone
                     enorm = norm(SVector(e_abs[1], e_abs[2]))
-                    if enorm > Modia3D.neps
+                    if enorm > Modia3D.nepsType(T)
                         return SVector(0.0, 0.0, shapeLength) + SVector(topRadius*e_abs[1], topRadius*e_abs[2], 0.0) / enorm  # point on top circle is support point
                     else
                         return SVector(0.0, 0.0, shapeLength)  # top circle center is support point
@@ -187,7 +187,7 @@ end
                 end
             else
                 enorm = norm(SVector(e_abs[1], e_abs[2]))
-                if enorm > Modia3D.neps
+                if enorm > Modia3D.nepsType(T)
                     return SVector(baseRadius*e_abs[1], baseRadius*e_abs[2], 0.0) / enorm  # point on base circle is support point
                 else
                     return SVector{3,T}(0.0, 0.0, 0.0)  # base circle center is support point
@@ -205,21 +205,21 @@ end
         halfThickness = T(0.5*shape.thickness)
         if shape.axis == 1
             enorm = norm(SVector(e_abs[1], e_abs[2]))
-            if enorm <= Modia3D.neps
+            if enorm <= Modia3D.nepsType(T)
                 return SVector(Basics.sign_eps(e_abs[1])*halfLength, 0.0, Basics.sign_eps(e_abs[3])*halfThickness)
             else
                 return SVector(Basics.sign_eps(e_abs[1])*halfLength, 0.0, Basics.sign_eps(e_abs[3])*halfThickness) + SVector(halfWidth*e_abs[1], halfWidth*e_abs[2], 0.0)/enorm
             end
         elseif shape.axis == 2
             enorm = norm(SVector(e_abs[2], e_abs[3]))
-            if enorm <= Modia3D.neps
+            if enorm <= Modia3D.nepsType(T)
                 return SVector(Basics.sign_eps(e_abs[1])*halfThickness, Basics.sign_eps(e_abs[2])*halfLength, 0.0)
             else
                 return SVector(Basics.sign_eps(e_abs[1])*halfThickness, Basics.sign_eps(e_abs[2])*halfLength, 0.0) + SVector(0.0, halfWidth*e_abs[2], halfWidth*e_abs[3])/enorm
             end
         else
             enorm = norm(SVector(e_abs[3], e_abs[1]))
-            if enorm <= Modia3D.neps
+            if enorm <= Modia3D.nepsType(T)
                 return SVector(0.0, Basics.sign_eps(e_abs[2])*halfThickness, Basics.sign_eps(e_abs[3])*halfLength)
             else
                 return SVector(0.0, Basics.sign_eps(e_abs[2])*halfThickness, Basics.sign_eps(e_abs[3])*halfLength) + SVector(halfWidth*e_abs[1], 0.0, halfWidth*e_abs[3])/enorm

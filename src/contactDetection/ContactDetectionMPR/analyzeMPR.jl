@@ -20,12 +20,13 @@ mutable struct Plane
 end
 
 
-function intersect3DSegmentPlane(seg::Segment, plane::Plane, neps)
+function intersect3DSegmentPlane(seg::Segment, plane::Plane)
    u = seg.P1 - seg.P0
    w = seg.P0 - plane.V0
 
    dividend = -dot(plane.n, w)
    divisor = dot(plane.n, u)
+   neps = Modia3D.nepsType(T)
 
    # checks if segment and plane are parallel
    if abs(divisor) < neps  # segment is parallel to plane
@@ -53,11 +54,11 @@ end
 pointInTriangle(p,a,b,c) = (sameSideTriangle(p,a,b,c) && sameSideTriangle(p,b,a,c) && sameSideTriangle(p,c,a,b))
 
 
-function doesRayIntersectPortal(r1,r2,r3,point,neps)
+function doesRayIntersectPortal(r1,r2,r3,point)
    plane = Plane(r1,r2,r3)
    segment = Segment(point, SVector(0.0, 0.0, 0.0))
 
-   (value, intersectionPoint) = intersect3DSegmentPlane(segment, plane, neps)
+   (value, intersectionPoint) = intersect3DSegmentPlane(segment, plane)
    if value == 1
       if !pointInTriangle(intersectionPoint, r1, r2, r3)
          error("Ray = ", point ," does not intersect portal (r1,r2,r3) = ", r1, r2, r3)
@@ -68,10 +69,10 @@ function doesRayIntersectPortal(r1,r2,r3,point,neps)
    return true
 end
 
-function analyzeFinalPortal(r1, r2, r3, r4, neps)
+function analyzeFinalPortal(r1, r2, r3, r4)
    plane = Plane(r1,r2,r3)
    segment = Segment(r4, SVector(0.0, 0.0, 0.0))
-   (value, intersectionPoint) = intersect3DSegmentPlane(segment, plane, neps)
+   (value, intersectionPoint) = intersect3DSegmentPlane(segment, plane)
    if value == 1
       if !pointInTriangle(intersectionPoint, r1, r2, r3)
          println("Ray r4 = ", r4 ," is not intersecting last portal (r1,r2,r3) = ", r1, r2, r3)

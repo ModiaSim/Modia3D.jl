@@ -94,7 +94,7 @@ Base.:isequal(key1::DistanceKey, key2::DistanceKey) =
 
 
 """
-    handler = ContactDetectionMPR_handler(;tol_rel = 1e-4, niter_max=100, neps=sqrt(eps()))
+    handler = ContactDetectionMPR_handler(;tol_rel = 1e-7, niter_max=100)
 
 Generate a new contact handler for usage of the MPR algorithm
 The handler instance contains all information
@@ -105,8 +105,6 @@ about the contact situation.
 - `tol_rel`: Relative tolerance to compute the contact point (> 0.0)
 - `niter_max`: Maximum number of iterations of the MPR algorithm. If this number is reached,
                an error occurs (> 0).
-- `neps`: Small number used to check whether a floating number is close to zero (> 0.0).
-
 """
 mutable struct ContactDetectionMPR_handler{T} <: Modia3D.AbstractContactDetection
     distanceComputed::Bool
@@ -117,7 +115,6 @@ mutable struct ContactDetectionMPR_handler{T} <: Modia3D.AbstractContactDetectio
 
     tol_rel::T
     niter_max::Int
-    neps::T
 
     contactPairs::Composition.ContactPairs
 
@@ -127,12 +124,10 @@ mutable struct ContactDetectionMPR_handler{T} <: Modia3D.AbstractContactDetectio
     defaultContactSphereDiameter::Float64
 
     function ContactDetectionMPR_handler{T}(;tol_rel  = 1.0e-7,
-                                            niter_max = 100 ,
-                                            neps      = sqrt(eps(T))) where {T}
+                                            niter_max = 100) where {T}
         @assert(tol_rel > 0.0)
         @assert(niter_max > 0)
-        @assert(neps > 0.0)
-        new(false, Dict{PairID,ContactPair}(), Dict{PairID,ContactPair}(), 42.0, tol_rel, niter_max, neps)
+        new(false, Dict{PairID,ContactPair}(), Dict{PairID,ContactPair}(), 42.0, tol_rel, niter_max)
     end
 end
 ContactDetectionMPR_handler() = ContactDetectionMPR_handler{Modia3D.MPRFloatType}()

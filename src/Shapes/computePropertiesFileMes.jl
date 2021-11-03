@@ -14,7 +14,6 @@
 #                         All faces should be specified in right-handed/counter-clockwise order!
 
 
-neps = sqrt(eps())
 
 function helpingFunc(w0,w1,w2)
     tmp0 = w0 + w1
@@ -70,7 +69,7 @@ function computeMassProperties(vertices::Vector{SVector{3,Float64}}, triangle_in
     end
 
     volume = integral[1]
-    if volume > neps
+    if volume > Modia3D.neps
         # center of volume
         centroid = [integral[2], integral[3], integral[4]]/volume
 
