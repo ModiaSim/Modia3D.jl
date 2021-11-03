@@ -4,7 +4,6 @@
 # This file is part of module
 #   Modia3D.Frames (Modia3D/Frames/_module.jl)
 #
-const seps = sqrt(eps())
 
 
 """
@@ -76,7 +75,7 @@ struct Path
 
     function Path(r::AbstractVector, q::AbstractVector=Quaternion[];
                   v::AbstractVector=ones(length(r)),
-                  seps=sqrt(eps()) )
+                  seps=Modia3D.neps )
         nframes = size(r, 1)
         @assert(seps > 0.0)
         @assert(nframes > 1)
