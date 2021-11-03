@@ -17,7 +17,7 @@ import Modia3D
 
 export trailingPartOfName
 
-export nepsMPR, neps, sign_eps, radToDeg
+export nepsType, neps, sign_eps, radToDeg
 export getAndCheckFullLibraryPath, getEnvironmentVariable
 
 export normalizeVector, BoundingBox

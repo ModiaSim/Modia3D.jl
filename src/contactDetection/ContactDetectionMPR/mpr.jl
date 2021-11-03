@@ -66,7 +66,7 @@ end
 # checks if centers of shapeA and shapeB are overlapping
 # belongs to construction of r0
 function checkCentersOfShapesOverlapp(r0::SupportPoint{T}, shapeA::Composition.Object3D, shapeB::Composition.Object3D) where {T}
-    if norm(r0.p) <= Modia3D.nepsMPR(T)
+    if norm(r0.p) <= Modia3D.nepsType(T)
         error("MPR: Too large penetration (prerequisite of MPR violated). Centers are overlapping. Look at $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)).")
     end
 end
@@ -76,7 +76,7 @@ function checkIfShapesArePlanar(r0::SupportPoint,r1::SupportPoint,r2::SupportPoi
                                 shapeA::Composition.Object3D,shapeB::Composition.Object3D) where {T}
     # r3 is in the direction of plane normal that contains triangle r0-r1-r2
     n3 = cross(r1.p-r0.p, r2.p-r0.p)
-    neps = Modia3D.nepsMPR(T)
+    neps = Modia3D.nepsType(T)
     # the triangle r0-r1-r2 has degenerated into a line segment
     if norm(n3) <= neps
         # change search direction for r2
@@ -127,7 +127,7 @@ function tetrahedronEncloseOrigin(r0::SupportPoint, r1::SupportPoint,
     r2org = r2
     r3org = r3
     aux = SVector{3, T}(Modia3D.ZeroVector3D)
-    neps = Modia3D.nepsMPR(T)
+    neps = Modia3D.nepsType(T)
     success = false
     for i in 1:niter_max
         aux = cross(r1.p-r0.p,r3.p-r0.p)
@@ -162,7 +162,7 @@ end
 function constructR4(r0::SupportPoint,r1::SupportPoint,r2::SupportPoint,r3::SupportPoint,
                      shapeA::Composition.Object3D,shapeB::Composition.Object3D, scale::T) where {T}
     n4 = cross(r2.p-r1.p, r3.p-r1.p)
-    neps = Modia3D.nepsMPR(T)
+    neps = Modia3D.nepsType(T)
     if norm(n4) <= neps
         r3 = getSupportPoint(shapeA, shapeB, -r3.n, scale=scale) # change search direction
         if abs(dot((r3.p-r1.p),r3.n)) <= neps
@@ -360,7 +360,7 @@ end
 function mprGeneral(ch::Composition.ContactDetectionMPR_handler{T}, shapeA::Composition.Object3D, shapeB::Modia3D.Composition.Object3D) where {T}
     tol_rel = ch.tol_rel
     niter_max = ch.niter_max
-    neps = Modia3D.nepsMPR(T)
+    neps = Modia3D.nepsType(T)
 
     ###########      Phase 1, Minkowski Portal Refinement      ###################
     # Construction of r0 and initial portal triangle points r1, r2, r3
@@ -418,7 +418,7 @@ end
 
 function mprTwoSpheres(ch::Composition.ContactDetectionMPR_handler{T}, shapeA::Composition.Object3D, shapeB::Modia3D.Composition.Object3D,
     sphereA::Shapes.Sphere, sphereB::Shapes.Sphere) where {T}
-    neps = Modia3D.nepsMPR(T)
+    neps = Modia3D.nepsType(T)
     radiusA = T(sphereA.diameter*0.5)
     radiusB = T(sphereB.diameter*0.5)
     centroidSphereA = getCentroid(shapeA)

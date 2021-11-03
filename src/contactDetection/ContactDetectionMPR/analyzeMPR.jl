@@ -26,7 +26,7 @@ function intersect3DSegmentPlane(seg::Segment, plane::Plane)
 
    dividend = -dot(plane.n, w)
    divisor = dot(plane.n, u)
-   neps = Modia3D.nepsMPR(T)
+   neps = Modia3D.nepsType(T)
 
    # checks if segment and plane are parallel
    if abs(divisor) < neps  # segment is parallel to plane
