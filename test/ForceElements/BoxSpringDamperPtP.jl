@@ -8,6 +8,7 @@ using  Modia3D.ModiaInterface
 SpringDamper = Model(
     Length = 0.1,
     Mass = 1.0,
+    IMoment = 0.1,
     Stiffness = 100.0,
     Damping = 2.0,
     visualMaterial = VisualMaterial(color="IndianRed1", transparency=0.5),
@@ -15,13 +16,13 @@ SpringDamper = Model(
     worldFrame = Object3D(parent=:world,
                           feature=Visual(shape=CoordinateSystem(length=:Length))),
     box = Object3D(feature=Solid(shape=Box(lengthX=:Length, lengthY=:Length, lengthZ=:Length),
-                                 massProperties=MassProperties(; mass=1.0, Ixx=0.1, Iyy=0.1, Izz=0.1),
+                                 massProperties=MassProperties(; mass=:Mass, Ixx=:IMoment, Iyy=:IMoment, Izz=:IMoment),
                                  visualMaterial=:(visualMaterial))),
     boxCornerFrame = Object3D(parent=:box,
                               feature=Visual(shape=CoordinateSystem(length=:(Length/2))),
                               translation=:[Length/2, Length/2, Length/2]),
     joint = FreeMotion(obj1=:world, obj2=:box),
-    force = SpringDamperPtP(obj1=:world, obj2=:boxCornerFrame, stiffness=:Stiffness, damping=:Damping)
+    force = SpringDamperPtP(obj1=:world, obj2=:boxCornerFrame, springForceLaw=:Stiffness, damperForceLaw=:Damping)
 )
 
 springDamper = @instantiateModel(buildModia3D(SpringDamper), aliasReduction=false, unitless=true)
