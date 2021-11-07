@@ -20,6 +20,8 @@ Andrea Neumayr and Martin Otter, [DLR - Institute of System Dynamics and Control
 """
 module Composition
 
+export MultibodyData
+
 export initialize, initAnalysis!, performAnalysis!, closeAnalysis!, visualize!, visualizeWorld!
 export updatePosition!, update!
 export Object3D
@@ -31,6 +33,10 @@ export Fix, FixTranslation
 export Revolute, setAngle!, connect
 export Prismatic, setDistance!
 export FreeMotion
+
+export initJoints!, setJointStates1!, setJointAccelerations1!
+export getJointResiduals_leq_mode_0!, getJointResiduals_all!
+export getJointResiduals_method2!, getJointResiduals_method3!
 
 export Bushing, SpringDamperPtP
 

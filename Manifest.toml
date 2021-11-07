@@ -514,18 +514,6 @@ git-tree-sha1 = "b6225318d687dbde588c6d0cd0b40161826763b1"
 uuid = "961ee093-0014-501f-94e3-6117800e7a78"
 version = "5.26.0"
 
-[[ModiaBase]]
-deps = ["DataFrames", "DiffRules", "LinearAlgebra", "Measurements", "MonteCarloMeasurements", "OrderedCollections", "TimerOutputs", "Unitful"]
-git-tree-sha1 = "36df1afcd6f4967406476ca5292dbc097f2bc1b9"
-uuid = "ec7bf1ca-419d-4510-bbab-199861c55244"
-version = "0.7.3"
-
-[[ModiaLang]]
-deps = ["DataFrames", "DifferentialEquations", "FiniteDiff", "ForwardDiff", "InteractiveUtils", "JSON", "Measurements", "ModiaBase", "ModiaResult", "MonteCarloMeasurements", "OrderedCollections", "Reexport", "Sundials", "Test", "TimerOutputs", "Unitful"]
-git-tree-sha1 = "74bd5394c6a77f635a6cbf5687c20855d26fcb0e"
-uuid = "34b37210-eaa3-4b48-8781-0b87bf559981"
-version = "0.8.1"
-
 [[ModiaResult]]
 deps = ["DataFrames", "DataStructures", "Measurements", "MonteCarloMeasurements", "Pkg", "Tables", "Unitful"]
 git-tree-sha1 = "c1adedaf482b1a189d24617e6d5fbc83898e2928"

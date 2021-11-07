@@ -40,6 +40,6 @@ requiredFinalStates = [-0.1166492890518372, -15.325157691194002]
 simulate!(pendulumWithSpring, stopTime=stopTime, log=true, logStates=true, requiredFinalStates=requiredFinalStates)
 
 @usingModiaPlot
-plot(pendulumWithSpring, ["pendulum.rev.flange.phi", "pendulum.rev.variables[1]"], figure=1)
+plot(pendulumWithSpring, "pendulum.rev.flange.phi", figure=1)
 
 end

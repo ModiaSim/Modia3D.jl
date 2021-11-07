@@ -61,6 +61,6 @@ requiredFinalStates = [-1.6164397926928633, 0.4670955914743122]
 simulate!(pendulumWithFix, stopTime=stopTime, log=true, logStates=true, requiredFinalStates=requiredFinalStates)
 
 @usingModiaPlot
-plot(pendulumWithFix, ["pendulum.rev.flange.phi", "pendulum.rev.variables[1]"], figure=1)
+plot(pendulumWithFix, "pendulum.rev.flange.phi", figure=1)
 
 end

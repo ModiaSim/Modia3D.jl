@@ -101,7 +101,7 @@ Mobile = Model(
 
 println("... @instantiateModel:")
 @time mobile = @instantiateModel(buildModia3D(Mobile), unitless=true, log=false, logDetails=false, logModel=false, logStateSelection=false, 
-                                 logCode=false, logExecution=true, logTiming=false, evaluateParameters=true)
+                                 logCode=false, logExecution=true, logTiming=true, evaluateParameters=true)
 
 const stopTime = 5.0
 const tolerance = 1e-4
