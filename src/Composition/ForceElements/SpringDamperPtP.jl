@@ -16,13 +16,14 @@ Return a `force` acting as point-to-point parallel spring-damper between
 - `nominalForce` defines the nominal force, i.e. the force that acts when
   spring and damper forces are zero. Positive values represent tension.
 - `springForceLaw` defines the force law of the spring:
-  A `Float64` value represents a linear stiffness coefficient.
-  An univariate `Function` is used to compute the spring force dependent
-  of its deflection. Positive values represent tension.
+  - A `Float64` value represents a linear stiffness coefficient.
+  - An univariate `Function` is used to compute the spring force
+    dependent of its deflection. Positive values represent tension.
 - `damperForceLaw` defines the force law of the damper:
-  A `Float64` value represents a linear damping coefficient.
-  An univariate `Function` is used to compute the damper force dependent
-  of its deflection velocity. Positive values represent expansion.
+  - A `Float64` value represents a linear damping coefficient.
+  - An univariate `Function` is used to compute the damper force
+    dependent of its deflection velocity. Positive values represent
+    expansion.
 """
 mutable struct SpringDamperPtP <: Modia3D.AbstractForceElement
 
