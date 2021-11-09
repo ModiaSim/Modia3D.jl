@@ -9,7 +9,7 @@
 # Epsilon and sign
 const neps = sqrt( eps() )
 
-nepsType(::Type{T}) where {T} = sqrt( eps(T) ) # mpr and bounding box calculation use this
+nepsType(::Type{T}) where {T} = 100.0 * eps(T) # mpr and bounding box calculation use this
 
 function sign_eps(value::T) where {T}
     seps::T = 100.0*nepsType(T)

@@ -421,7 +421,7 @@ mutable struct Scene <: Modia3D.AbstractScene
     function Scene(;gravityField          = UniformGravityField(),
             useOptimizedStructure         = true,
             enableContactDetection        = true,
-            mpr_tol_rel                   = 1.0e-7,
+            mpr_tol_rel                   = 1.0e-20,
             elasticContactReductionFactor = 1.0,
             gap                           = 0.001,
             enableVisualization           = true,
