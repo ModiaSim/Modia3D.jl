@@ -75,10 +75,10 @@ mutable struct Bushing <: Modia3D.AbstractForceElement
                        rotDamperForceLaw::AbstractVector = Modia3D.ZeroVector3D,
                        largeAngles::Bool = false )
         for dir in 1:3
-            @assert(typeof(springForceLaw[dir]) == Float64 || typeof(springForceLaw[dir]) == Function)
-            @assert(typeof(damperForceLaw[dir]) == Float64 || typeof(damperForceLaw[dir]) == Function)
-            @assert(typeof(rotSpringForceLaw[dir]) == Float64 || typeof(rotSpringForceLaw[dir]) == Function)
-            @assert(typeof(rotDamperForceLaw[dir]) == Float64 || typeof(rotDamperForceLaw[dir]) == Function)
+            @assert(typeof(springForceLaw[dir]) == Float64 || isa(springForceLaw[dir], Function))
+            @assert(typeof(damperForceLaw[dir]) == Float64 || isa(damperForceLaw[dir], Function))
+            @assert(typeof(rotSpringForceLaw[dir]) == Float64 || isa(rotSpringForceLaw[dir], Function))
+            @assert(typeof(rotDamperForceLaw[dir]) == Float64 || isa(rotDamperForceLaw[dir], Function))
         end
 
         nomForce  = Modia3D.convertAndStripUnit(SVector{3,Float64}, u"N"  , nominalForce)
