@@ -20,6 +20,7 @@ end
 
 Test.@testset "Force Elements" begin
     include(joinpath("ForceElements", "HarmonicOscillator.jl"))
+    include(joinpath("ForceElements", "BoxBushing.jl"))
     include(joinpath("ForceElements", "BoxSpringDamperPtP.jl"))
     include(joinpath("ForceElements", "BoxNonLinearSpringDamperPtP.jl"))
 end

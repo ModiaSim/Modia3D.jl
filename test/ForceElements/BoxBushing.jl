@@ -25,8 +25,8 @@ BoxBushing = Model(
                                  visualMaterial=:(visualMaterial))),
     joint = FreeMotion(obj1=:world, obj2=:box, r=Var(init=[0.2, 0.1, 0.05]), rot=Var(init=startAngles)),
     force = Bushing(obj1=:world, obj2=:box,
-        stiffness=[50.0, 100.0, 200.0], damping=[1.0, 2.0, 4.0],
-        rotStiffness=[5.0, 10.0, 20.0], rotDamping=[0.1, 0.2, 0.4], largeAngles=largeAngles)
+                    springForceLaw=[50.0, 100.0, 200.0], damperForceLaw=[1.0, 2.0, 4.0],
+                    rotSpringForceLaw=[5.0, 10.0, 20.0], rotDamperForceLaw=[0.1, 0.2, 0.4], largeAngles=largeAngles)
 )
 
 boxBushing = @instantiateModel(buildModia3D(BoxBushing), aliasReduction=false, unitless=true)

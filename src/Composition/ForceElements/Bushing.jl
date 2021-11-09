@@ -1,13 +1,13 @@
 
 """
     force = Bushing(; obj1, obj2,
-        nominalForce  = Modia3D.ZeroVector3D,
-        stiffness     = Modia3D.ZeroVector3D,
-        damping       = Modia3D.ZeroVector3D,
-        nominalTorque = Modia3D.ZeroVector3D,
-        rotStiffness  = Modia3D.ZeroVector3D,
-        rotDamping    = Modia3D.ZeroVector3D,
-        largeAngles   = false )
+        nominalForce      = Modia3D.ZeroVector3D,
+        springForceLaw    = Modia3D.ZeroVector3D,
+        damperForceLaw    = Modia3D.ZeroVector3D,
+        nominalTorque     = Modia3D.ZeroVector3D,
+        rotSpringForceLaw = Modia3D.ZeroVector3D,
+        rotDamperForceLaw = Modia3D.ZeroVector3D,
+        largeAngles       = false )
 
 Return a `force` acting as bushing between `obj1::`[`Object3D`](@ref) and
 `obj2::`[`Object3D`](@ref). The force directions are defined by `obj1`,
@@ -18,16 +18,28 @@ i.e. the orientation of `obj2` does not influence the resulting forces.
 - `nominalForce` defines the nominal force vector, i.e. the force that
   acts when spring and damper forces are zero. Positive values act in
   positive axis directions at `obj1` and in opposite directions at `obj2`.
-- `stiffness` defines linear stiffness coefficients in x-, y- and
-  z-direction.
-- `damping` defines linear damping coefficients in x-, y- and
-  z-direction.
+- `springForceLaw` defines the force law of the spring in x-, y- and
+  z-direction:
+  - A `Float64` value represents a linear stiffness coefficient.
+  - An univariate `Function` is used to compute the spring force
+    dependent of its deflection.
+- `damperForceLaw` defines the force law of the damper in x-, y- and
+  z-direction:
+  - A `Float64` value represents a linear damping coefficient.
+  - An univariate `Function` is used to compute the damper force
+    dependent of its deflection velocity.
 - `nominalTorque` defines nominal torques about alpha, beta and gamma
   directions.
-- `rotStiffness` defines linear stiffness coefficients about alpha-,
-  beta- and gamma-direction.
-- `rotDamping` defines linear damping coefficients about alpha-,
-  beta- and gamma-direction.
+- `rotSpringForceLaw` defines the force law of the rotational spring
+  about alpha-, beta- and gamma-direction:
+  - A `Float64` value represents a linear damping coefficient.
+  - An univariate `Function` is used to compute the spring force
+    dependent of its deflection.
+- `rotDamperForceLaw` defines the force law of the rotational damper
+  about alpha-, beta- and gamma-direction:
+  - A `Float64` value represents a linear damping coefficient.
+  - An univariate `Function` is used to compute the damper force
+    dependent of its deflection velocity.
 - `largeAngles` can be used to enable large angle mode.
   - When disabled, small deformation angles (< 10°) are assumed. This
     option deals equally with rotations [alpha, beta gamma] about the
@@ -46,32 +58,68 @@ mutable struct Bushing <: Modia3D.AbstractForceElement
     obj2::Object3D
 
     nominalForce::SVector{3,Float64}
-    stiffness::SVector{3,Float64}
-    damping::SVector{3,Float64}
+    springForceFunction::SVector{3,Function}
+    damperForceFunction::SVector{3,Function}
     nominalTorque::SVector{3,Float64}
-    rotStiffness::SVector{3,Float64}
-    rotDamping::SVector{3,Float64}
+    rotSpringForceFunction::SVector{3,Function}
+    rotDamperForceFunction::SVector{3,Function}
     largeAngles::Bool
 
     function Bushing(; obj1::Object3D,
                        obj2::Object3D,
                        nominalForce::AbstractVector = Modia3D.ZeroVector3D,
-                       stiffness::AbstractVector = Modia3D.ZeroVector3D,
-                       damping::AbstractVector = Modia3D.ZeroVector3D,
+                       springForceLaw::AbstractVector = Modia3D.ZeroVector3D,
+                       damperForceLaw::AbstractVector = Modia3D.ZeroVector3D,
                        nominalTorque::AbstractVector = Modia3D.ZeroVector3D,
-                       rotStiffness::AbstractVector = Modia3D.ZeroVector3D,
-                       rotDamping::AbstractVector = Modia3D.ZeroVector3D,
+                       rotSpringForceLaw::AbstractVector = Modia3D.ZeroVector3D,
+                       rotDamperForceLaw::AbstractVector = Modia3D.ZeroVector3D,
                        largeAngles::Bool = false )
+        for dir in 1:3
+            @assert(typeof(springForceLaw[dir]) == Float64 || typeof(springForceLaw[dir]) == Function)
+            @assert(typeof(damperForceLaw[dir]) == Float64 || typeof(damperForceLaw[dir]) == Function)
+            @assert(typeof(rotSpringForceLaw[dir]) == Float64 || typeof(rotSpringForceLaw[dir]) == Function)
+            @assert(typeof(rotDamperForceLaw[dir]) == Float64 || typeof(rotDamperForceLaw[dir]) == Function)
+        end
 
-        nomForce  = Modia3D.convertAndStripUnit(SVector{3,Float64}, u"N"        , nominalForce)
-        stiff     = Modia3D.convertAndStripUnit(SVector{3,Float64}, u"N/m"      , stiffness)
-        damp      = Modia3D.convertAndStripUnit(SVector{3,Float64}, u"N*s/m"    , damping)
-        nomTorque = Modia3D.convertAndStripUnit(SVector{3,Float64}, u"N*m"      , nominalTorque)
-        rotStiff  = Modia3D.convertAndStripUnit(SVector{3,Float64}, u"N*m/rad"  , rotStiffness)
-        rotDamp   = Modia3D.convertAndStripUnit(SVector{3,Float64}, u"N*m*s/rad", rotDamping)
+        nomForce  = Modia3D.convertAndStripUnit(SVector{3,Float64}, u"N"  , nominalForce)
+        nomTorque = Modia3D.convertAndStripUnit(SVector{3,Float64}, u"N*m", nominalTorque)
+        springForceFunction = Vector{Function}(undef, 3)
+        damperForceFunction = Vector{Function}(undef, 3)
+        rotSpringForceFunction = Vector{Function}(undef, 3)
+        rotDamperForceFunction = Vector{Function}(undef, 3)
+        irand = rand(Int)
+        for dir in 1:3
+            if (typeof(springForceLaw[dir]) == Float64)
+                stiffness = Modia3D.convertAndStripUnit(Float64, u"N/m", springForceLaw[dir])
+                fsymb = Symbol("fc", dir, "_", irand)  # todo: replace irand by force.path
+                springForceFunction[dir] = eval(:($fsymb(pos) = $stiffness * pos))
+            else
+                springForceFunction[dir] = springForceLaw[dir]
+            end
+            if (typeof(damperForceLaw[dir]) == Float64)
+                damping = Modia3D.convertAndStripUnit(Float64, u"N*s/m", damperForceLaw[dir])
+                fsymb = Symbol("fd", dir, "_", irand)  # todo: replace irand by force.path
+                damperForceFunction[dir] = eval(:($fsymb(vel) = $damping * vel))
+            else
+                damperForceFunction[dir] = damperForceLaw[dir]
+            end
+            if (typeof(rotSpringForceLaw[dir]) == Float64)
+                stiffness = Modia3D.convertAndStripUnit(Float64, u"N*m/rad", rotSpringForceLaw[dir])
+                fsymb = Symbol("mc", dir, "_", irand)  # todo: replace irand by force.path
+                rotSpringForceFunction[dir] = eval(:($fsymb(ang) = $stiffness * ang))
+            else
+                rotSpringForceFunction[dir] = rotSpringForceLaw[dir]
+            end
+            if (typeof(rotDamperForceLaw[dir]) == Float64)
+                damping = Modia3D.convertAndStripUnit(Float64, u"N*m*s/rad", rotDamperForceLaw[dir])
+                fsymb = Symbol("md", dir, "_", irand)  # todo: replace irand by force.path
+                rotDamperForceFunction[dir] = eval(:($fsymb(angd) = $damping * angd))
+            else
+                rotDamperForceFunction[dir] = rotDamperForceLaw[dir]
+            end
+        end
 
-        return new(obj1, obj2, nomForce, stiff, damp, nomTorque, rotStiff, rotDamp, largeAngles)
-
+        return new(obj1, obj2, nomForce, springForceFunction, damperForceFunction, nomTorque, rotSpringForceFunction, rotDamperForceFunction, largeAngles)
     end
 end
 
@@ -135,11 +183,15 @@ function evaluateForceElement(force::Bushing)
     v12 = measFrameTransVelocity(force.obj2; frameOrig=force.obj1, frameCoord=force.obj1, frameObsrv=force.obj1)
     (ang, angd, sico) = anglesFromRotation(force.largeAngles, R12, w12)
 
-    f12 = force.stiffness .* r12 + force.damping .* v12 + force.nominalForce
-    mom = force.rotStiffness .* ang + force.rotDamping .* angd + force.nominalTorque
-    t12 = torqueFromMoments(force.largeAngles, mom, sico)
+    f12 = Vector{Float64}(undef, 3)
+    mom = Vector{Float64}(undef, 3)
+    for dir in 1:3
+        f12[dir] = force.springForceFunction[dir](r12[dir]) + force.damperForceFunction[dir](v12[dir]) + force.nominalForce[dir]
+        mom[dir] = force.rotSpringForceFunction[dir](ang[dir]) + force.rotDamperForceFunction[dir](angd[dir]) + force.nominalTorque[dir]
+    end
+    t12 = torqueFromMoments(force.largeAngles, SVector{3}(mom), sico)
 
-    applyFrameForcePair!(force.obj2, force.obj1, f12; frameCoord=force.obj1)
+    applyFrameForcePair!(force.obj2, force.obj1, SVector{3}(f12); frameCoord=force.obj1)
     applyFrameTorquePair!(force.obj2, force.obj1, t12; frameCoord=force.obj1)
     return nothing
 end

@@ -44,12 +44,15 @@ mutable struct SpringDamperPtP <: Modia3D.AbstractForceElement
 
         nomLength = Modia3D.convertAndStripUnit(Float64, u"m", nominalLength)
         nomForce  = Modia3D.convertAndStripUnit(Float64, u"N", nominalForce)
+        irand = rand(Int)
         if (typeof(springForceLaw) == Float64)
             stiffness = Modia3D.convertAndStripUnit(Float64, u"N/m", springForceLaw)
-            springForceLaw = eval(:(fc(pos) = $stiffness * pos))
+            fsymb = Symbol("fc", "_", irand)  # todo: replace irand by force.path
+            springForceLaw = eval(:($fsymb(pos) = $stiffness * pos))
         end
         if (typeof(damperForceLaw) == Float64)
             damping = Modia3D.convertAndStripUnit(Float64, u"N*s/m", damperForceLaw)
+            fsymb = Symbol("fd", "_", irand)  # todo: replace irand by force.path
             damperForceLaw = eval(:(fd(vel) = $damping * vel))
         end
 
