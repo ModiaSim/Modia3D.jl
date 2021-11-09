@@ -308,7 +308,7 @@ Defines global properties of the system, such as the gravity field. Exactly one 
 | `gravityField`                  | [`UniformGravityField`](@ref)`()`       |
 | `useOptimizedStructure`         | true                                    |
 | `enableContactDetection`        | true                                    |
-| `contactDetection`              | [`ContactDetectionMPR_handler`](@ref)`()`|
+| `mpr_tol_rel`                   | 1.0e-20                                 |
 | `elasticContactReductionFactor` | 1.0                                     |
 | `enableVisualization`           | true                                    |
 | `animationFile`                 | nothing                                 |
@@ -338,7 +338,7 @@ Defines global properties of the system, such as the gravity field. Exactly one 
 
 - `enableContactDetection::Bool`: = true, if contact detection is enable, see [Collision Handling](@ref).
 
-- `contactDetection::Modia3D.AbstractContactDetection`: Handler used for contact detection e.g., to determine the smallest distance between two objects.
+- `mpr_tol_rel::1.0e-20`: Local tolerance used for terminating the mpr algorithm. Changing this value might improve speed.
 
 - `elasticContactReductionFactor::Float64`: (> 0.0)
   - ``usedContactCompliance = contactCompliance * elasticContactReductionFactor``
@@ -421,7 +421,7 @@ mutable struct Scene <: Modia3D.AbstractScene
     function Scene(;gravityField          = UniformGravityField(),
             useOptimizedStructure         = true,
             enableContactDetection        = true,
-            contactDetection              = ContactDetectionMPR_handler(),
+            mpr_tol_rel                   = 1.0e-7,
             elasticContactReductionFactor = 1.0,
             gap                           = 0.001,
             enableVisualization           = true,
@@ -443,7 +443,7 @@ mutable struct Scene <: Modia3D.AbstractScene
 
         sceneOptions = SceneOptions(gravityField = gravityField,
             useOptimizedStructure         = useOptimizedStructure,
-            contactDetection              = contactDetection,
+            contactDetection              = ContactDetectionMPR_handler(tol_rel = mpr_tol_rel),
             nVisualContSupPoints          = nVisualContSupPoints,
             gap                           = gap,
             enableContactDetection        = enableContactDetection,
