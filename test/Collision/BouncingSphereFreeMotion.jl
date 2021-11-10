@@ -38,8 +38,8 @@ bouncingSphere = @instantiateModel(buildModia3D(BouncingSphere), unitless=true, 
 
 stopTime = 2.7
 tolerance = 1e-8
-requiredFinalStates = [0.28711931505126853, -0.9780916472966511, -0.20833195055744314, 0.10925258092251605, -3.8123627743313273, -0.9364166852211897, 1.228619049097046, -0.5724547180688829, 0.22566245156307535, -7.694985753129207, 0.3826986158402523, 5.519005772512668]
-simulate!(bouncingSphere, stopTime=stopTime, tolerance=tolerance, log=true, logStates=true, logEvents=true, requiredFinalStates=requiredFinalStates)
+requiredFinalStates = [0.293772074878505, -1.2391513658578504, -0.11411843291553968, 0.11420129485535506, -4.417120013752265, -0.8579844538520917, 2.5996315776217718, -0.42018472064783946, 0.10773235538046359, -7.2176708654581585, 0.8693271212008165, 4.766350077776115]
+simulate!(bouncingSphere, stopTime=stopTime, tolerance=tolerance, log=true, logStates=false, logEvents=false, requiredFinalStates=requiredFinalStates)
 
 @usingModiaPlot
 plot(bouncingSphere, ["free.r" "free.rot"; "free.v" "free.w"], figure=1)

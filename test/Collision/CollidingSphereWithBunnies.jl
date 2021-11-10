@@ -14,7 +14,7 @@ massAndGeoSphere = MassPropertiesFromShape()
 # Objects3D
 ConvexPartitions = Model(
     gravField = UniformGravityField(g=9.81, n=[0, -1, 0]),
-    world = Object3D(feature=Scene(gravityField=:gravField)),
+    world = Object3D(feature=Scene(gravityField=:gravField, mpr_tol_rel = 1.0e-13)),
 
     sphere = Object3D(feature=Solid(shape=Sphere(diameter=0.2),
                       visualMaterial=mat1, solidMaterial="Steel",
@@ -36,6 +36,6 @@ if Sys.iswindows()
 else
     requiredFinalStates = [1.6853549405539088, -1.9603839264641005, 1.5512239899411384, 4.577225786420592, -3.6364005190730575, -1.841958211129179, 16.04685907044025, 0.10996251002097332, 8.10149898250639, 28.66624352831703, 8.399969490696167, 37.24515015558254]
 end
-@time simulate!(convexPartitions, stopTime=stopTime, log=false, logStates=false, logEvents=true, requiredFinalStates=requiredFinalStates)
+simulate!(convexPartitions, stopTime=stopTime, log=true, logStates=false, logEvents=false, requiredFinalStates=requiredFinalStates)
 
 end

@@ -32,10 +32,10 @@ bouncingEllipsoid = @instantiateModel(buildModia3D(BouncingEllipsoid), unitless=
 #@show bouncingEllipsoid.parameterExpressions
 #@show bouncingEllipsoid.parameters
 
-stopTime = 2.5
+stopTime = 2.0
 tolerance = 1e-8
-requiredFinalStates = [-0.8720220901260356, -2.706225861204731, 2.1494619380602984, -0.6654182338218089, -7.480644002905684, 0.8158622722948691, 19.6901637595772, -0.5127178856804271, 0.5844275371325878, 7.417393481447869, -0.15143390608966664, -0.19610822193495095]
-simulate!(bouncingEllipsoid, stopTime=stopTime, tolerance=tolerance, log=true, logStates=true, logEvents=true, requiredFinalStates=requiredFinalStates)
+requiredFinalStates = [-0.45515799147473335, 0.05676993769652407, 1.178459912041914, -0.10966302200496965, -0.367365395565088, 0.2903115082177484, 8.759390647284498, -1.3086676277009546, -2.341163220615624, -0.10934417069415246, -1.1736634425032262, -5.6404159425069835]
+simulate!(bouncingEllipsoid, stopTime=stopTime, tolerance=tolerance, log=true, logStates=true, logEvents=false, requiredFinalStates=requiredFinalStates)
 
 @usingModiaPlot
 plot(bouncingEllipsoid, ["free.r" "free.rot"; "free.v" "free.w"], figure=1)
