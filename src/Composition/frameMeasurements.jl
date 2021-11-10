@@ -5,7 +5,7 @@ Return relative RotationMatrix `R` from frame `frameOrig` into frame `frameMeas`
 
 If `frameOrig` is omitted `R` represents the absolute rotation of `frameMeas`.
 """
-function measFrameRotation(frameMeas::Object3D; frameOrig::Object3D)
+function measFrameRotation(frameMeas::Object3D; frameOrig::Union{Object3D, Nothing}=nothing)
     R_MeasOrig = copy(frameMeas.R_abs)  # R_MeasOrig := R_MeasWorld
     if !isnothing(frameOrig)
         R_MeasOrig = R_MeasOrig * frameOrig.R_abs'  # R_MeasOrig := R_MeasOrig * R_OrigWorld^T
