@@ -16,11 +16,11 @@ Return a `force` acting as point-to-point parallel spring-damper between
 - `nominalForce` defines the nominal force, i.e. the force that acts when
   spring and damper forces are zero. Positive values represent tension.
 - `springForceLaw` defines the force law of the spring:
-  - A `Float64` value represents a linear stiffness coefficient.
+  - A `Real` number represents a linear stiffness coefficient.
   - An univariate `Function` is used to compute the spring force
     dependent of its deflection. Positive values represent tension.
 - `damperForceLaw` defines the force law of the damper:
-  - A `Float64` value represents a linear damping coefficient.
+  - A `Real` number represents a linear damping coefficient.
   - An univariate `Function` is used to compute the damper force
     dependent of its deflection velocity. Positive values represent
     expansion.
@@ -37,20 +37,20 @@ mutable struct SpringDamperPtP <: Modia3D.AbstractForceElement
 
     function SpringDamperPtP(; obj1::Object3D,
                                obj2::Object3D,
-                               nominalLength::Float64 = 0.0,
-                               nominalForce::Float64 = 0.0,
-                               springForceLaw::Union{Float64, Function} = 0.0,
-                               damperForceLaw::Union{Float64, Function} = 0.0 )
+                               nominalLength::Real = 0.0,
+                               nominalForce::Real = 0.0,
+                               springForceLaw::Union{Real, Function} = 0.0,
+                               damperForceLaw::Union{Real, Function} = 0.0 )
 
         nomLength = Modia3D.convertAndStripUnit(Float64, u"m", nominalLength)
         nomForce  = Modia3D.convertAndStripUnit(Float64, u"N", nominalForce)
         irand = rand(Int)
-        if (typeof(springForceLaw) == Float64)
+        if (!isa(springForceLaw, Function))
             stiffness = Modia3D.convertAndStripUnit(Float64, u"N/m", springForceLaw)
             fsymb = Symbol("fc", "_", irand)  # todo: replace irand by force.path
             springForceLaw = eval(:($fsymb(pos) = $stiffness * pos))
         end
-        if (typeof(damperForceLaw) == Float64)
+        if (!isa(damperForceLaw, Function))
             damping = Modia3D.convertAndStripUnit(Float64, u"N*s/m", damperForceLaw)
             fsymb = Symbol("fd", "_", irand)  # todo: replace irand by force.path
             damperForceLaw = eval(:(fd(vel) = $damping * vel))

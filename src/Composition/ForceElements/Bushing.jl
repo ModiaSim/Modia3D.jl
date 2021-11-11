@@ -20,24 +20,24 @@ i.e. the orientation of `obj2` does not influence the resulting forces.
   positive axis directions at `obj1` and in opposite directions at `obj2`.
 - `springForceLaw` defines the force law of the spring in x-, y- and
   z-direction:
-  - A `Float64` value represents a linear stiffness coefficient.
+  - A `Real` number represents a linear stiffness coefficient.
   - An univariate `Function` is used to compute the spring force
     dependent of its deflection.
 - `damperForceLaw` defines the force law of the damper in x-, y- and
   z-direction:
-  - A `Float64` value represents a linear damping coefficient.
+  - A `Real` number represents a linear damping coefficient.
   - An univariate `Function` is used to compute the damper force
     dependent of its deflection velocity.
 - `nominalTorque` defines nominal torques about alpha, beta and gamma
   directions.
 - `rotSpringForceLaw` defines the force law of the rotational spring
   about alpha-, beta- and gamma-direction:
-  - A `Float64` value represents a linear damping coefficient.
+  - A `Real` number represents a linear damping coefficient.
   - An univariate `Function` is used to compute the spring force
     dependent of its deflection.
 - `rotDamperForceLaw` defines the force law of the rotational damper
   about alpha-, beta- and gamma-direction:
-  - A `Float64` value represents a linear damping coefficient.
+  - A `Real` number represents a linear damping coefficient.
   - An univariate `Function` is used to compute the damper force
     dependent of its deflection velocity.
 - `largeAngles` can be used to enable large angle mode.
@@ -74,13 +74,6 @@ mutable struct Bushing <: Modia3D.AbstractForceElement
                        rotSpringForceLaw::AbstractVector = Modia3D.ZeroVector3D,
                        rotDamperForceLaw::AbstractVector = Modia3D.ZeroVector3D,
                        largeAngles::Bool = false )
-        for dir in 1:3
-            @assert(typeof(springForceLaw[dir]) == Float64 || isa(springForceLaw[dir], Function))
-            @assert(typeof(damperForceLaw[dir]) == Float64 || isa(damperForceLaw[dir], Function))
-            @assert(typeof(rotSpringForceLaw[dir]) == Float64 || isa(rotSpringForceLaw[dir], Function))
-            @assert(typeof(rotDamperForceLaw[dir]) == Float64 || isa(rotDamperForceLaw[dir], Function))
-        end
-
         nomForce  = Modia3D.convertAndStripUnit(SVector{3,Float64}, u"N"  , nominalForce)
         nomTorque = Modia3D.convertAndStripUnit(SVector{3,Float64}, u"N*m", nominalTorque)
         springForceFunction = Vector{Function}(undef, 3)
@@ -89,33 +82,33 @@ mutable struct Bushing <: Modia3D.AbstractForceElement
         rotDamperForceFunction = Vector{Function}(undef, 3)
         irand = rand(Int)
         for dir in 1:3
-            if (typeof(springForceLaw[dir]) == Float64)
+            if (isa(springForceLaw[dir], Function))
+                springForceFunction[dir] = springForceLaw[dir]
+            else
                 stiffness = Modia3D.convertAndStripUnit(Float64, u"N/m", springForceLaw[dir])
                 fsymb = Symbol("fc", dir, "_", irand)  # todo: replace irand by force.path
                 springForceFunction[dir] = eval(:($fsymb(pos) = $stiffness * pos))
-            else
-                springForceFunction[dir] = springForceLaw[dir]
             end
-            if (typeof(damperForceLaw[dir]) == Float64)
+            if (isa(damperForceLaw[dir], Function))
+                damperForceFunction[dir] = damperForceLaw[dir]
+            else
                 damping = Modia3D.convertAndStripUnit(Float64, u"N*s/m", damperForceLaw[dir])
                 fsymb = Symbol("fd", dir, "_", irand)  # todo: replace irand by force.path
                 damperForceFunction[dir] = eval(:($fsymb(vel) = $damping * vel))
-            else
-                damperForceFunction[dir] = damperForceLaw[dir]
             end
-            if (typeof(rotSpringForceLaw[dir]) == Float64)
+            if (isa(rotSpringForceLaw[dir], Function))
+                rotSpringForceFunction[dir] = rotSpringForceLaw[dir]
+            else
                 stiffness = Modia3D.convertAndStripUnit(Float64, u"N*m/rad", rotSpringForceLaw[dir])
                 fsymb = Symbol("mc", dir, "_", irand)  # todo: replace irand by force.path
                 rotSpringForceFunction[dir] = eval(:($fsymb(ang) = $stiffness * ang))
-            else
-                rotSpringForceFunction[dir] = rotSpringForceLaw[dir]
             end
-            if (typeof(rotDamperForceLaw[dir]) == Float64)
+            if (isa(rotDamperForceLaw[dir], Function))
+                rotDamperForceFunction[dir] = rotDamperForceLaw[dir]
+            else
                 damping = Modia3D.convertAndStripUnit(Float64, u"N*m*s/rad", rotDamperForceLaw[dir])
                 fsymb = Symbol("md", dir, "_", irand)  # todo: replace irand by force.path
                 rotDamperForceFunction[dir] = eval(:($fsymb(angd) = $damping * angd))
-            else
-                rotDamperForceFunction[dir] = rotDamperForceLaw[dir]
             end
         end
 
