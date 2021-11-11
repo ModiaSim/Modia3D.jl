@@ -146,7 +146,7 @@ function tetrahedronEncloseOrigin(r0::SupportPoint, r1::SupportPoint,
         break
     end
     if success != true
-        if niter_max <= 100
+        if niter_max < 100
             @warn("MPR (phase 2): Max. number of iterations (= $niter_max) is reached. niter_max increased locally by 10 and phase 2 is rerun. Look at $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)).")
             tetrahedronEncloseOrigin(r0, r1org, r2org, r3org, niter_max + 10, shapeA, shapeB, scale)
         else
@@ -315,7 +315,7 @@ function phase3(r0::SupportPoint, r1::SupportPoint, r2::SupportPoint, r3::Suppor
             end
         end
     end
-    if niter_max <= 100
+    if niter_max < 100
         @warn("MPR (phase 3): Numerical issues with distance computation between $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)). Max. number of iterations (= $niter_max) is reached. niter_max increased locally by 10 and phase 3 is rerun.")
         phase3(r0, r1org, r2org, r3org, niter_max + 10, tol_rel, shapeA, shapeB, scale)
     else
@@ -391,7 +391,7 @@ function mprGeneral(ch::Composition.ContactDetectionMPR_handler{T}, shapeA::Comp
         # e.g. any collision/or distance between two spheres
         #println("TC 1")
         distance = dot(r1.p,normalize(r0.p))
-        return (Float64(distance), SVector{3,Float64}(r1.a), SVector{3,Float64}(r1.b), SVector{3,Float64}(r1.n), false, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D)
+        return (distance, r1.a, r1.b, r1.n, false, SVector{3,T}(Modia3D.ZeroVector3D), SVector{3,T}(Modia3D.ZeroVector3D), SVector{3,T}(Modia3D.ZeroVector3D), SVector{3,T}(Modia3D.ZeroVector3D), SVector{3,T}(Modia3D.ZeroVector3D), SVector{3,T}(Modia3D.ZeroVector3D) )
     else
         # normalize n2
         n2 = n2/n2abs
@@ -412,7 +412,7 @@ function mprGeneral(ch::Composition.ContactDetectionMPR_handler{T}, shapeA::Comp
 
     ###########      Phase 3, Minkowski Portal Refinement      ###################
     (distance, r1, r2, r3, r4) = phase3(r0, r1, r2, r3, niter_max, tol_rel, shapeA, shapeB, scale)
-    return (Float64(distance), SVector{3,Float64}(r4.a), SVector{3,Float64}(r4.b), SVector{3,Float64}(r4.n), true, SVector{3,Float64}(r1.a), SVector{3,Float64}(r1.b), SVector{3,Float64}(r2.a), SVector{3,Float64}(r2.b), SVector{3,Float64}(r3.a), SVector{3,Float64}(r3.b) )
+    return ( distance, r4.a, r4.b, r4.n, true, r1.a, r1.b, r2.a, r2.b, r3.a, r3.b )
 end
 
 
@@ -433,7 +433,7 @@ function mprTwoSpheres(ch::Composition.ContactDetectionMPR_handler{T}, shapeA::C
     distance = distanceCentroids - radiusA - radiusB
     contactPointShapeA = centroidSphereA + normal*radiusA
     contactPointShapeB = centroidSphereB - normal*radiusB
-    return (Float64(distance), SVector{3,Float64}(contactPointShapeA), SVector{3,Float64}(contactPointShapeB), SVector{3,Float64}(normal), false, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D)
+    return (distance, contactPointShapeA, contactPointShapeB, normal, false, SVector{3,T}(Modia3D.ZeroVector3D), SVector{3,T}(Modia3D.ZeroVector3D), SVector{3,T}(Modia3D.ZeroVector3D), SVector{3,T}(Modia3D.ZeroVector3D), SVector{3,T}(Modia3D.ZeroVector3D), SVector{3,T}(Modia3D.ZeroVector3D) )
 end
 
 
@@ -454,24 +454,25 @@ function mpr(ch::Composition.ContactDetectionMPR_handler{T}, shapeA::Composition
         support1A, support1B, support2A, support2B, support3A, support3B) = mprGeneral(ch, shapeA, shapeB)
 
         if shapeKindA == Modia3D.SphereKind
-            centroidSphere = SVector{3,Float64}(getCentroid(shapeA))
+            centroidSphere = getCentroid(shapeA)
             sphereA1::Shapes.Sphere = shapeA.shape
-            radius = sphereA1.diameter*0.5
+            radius = T(sphereA1.diameter*0.5)
             contactPointSphere = centroidSphere + radius*normal
             contactPointOtherShape = contactPointSphere + distance*normal
             contactPoint1 = contactPointSphere
             contactPoint2 = contactPointOtherShape
         elseif shapeKindB == Modia3D.SphereKind
             normalLocal = -normal
-            centroidSphere = SVector{3,Float64}(getCentroid(shapeB))
+            centroidSphere = getCentroid(shapeB)
             sphereB1::Shapes.Sphere = shapeB.shape
-            radius = sphereB1.diameter*0.5
+            radius = T(sphereB1.diameter*0.5)
             contactPointSphere = centroidSphere + radius*normalLocal
             contactPointOtherShape = contactPointSphere + distance*normalLocal # distance is negative (otherwise direction of normal must be changed)
             contactPoint1 = contactPointOtherShape
             contactPoint2 = contactPointSphere
         end
     end
-    return (distance, contactPoint1, contactPoint2, normal, supportPointsDefined,
-    support1A, support1B, support2A, support2B, support3A, support3B)
+    return (Float64(distance), SVector{3,Float64}(contactPoint1), SVector{3,Float64}(contactPoint2), SVector{3,Float64}(normal), supportPointsDefined,
+    SVector{3,Float64}(support1A), SVector{3,Float64}(support1B), SVector{3,Float64}(support2A), SVector{3,Float64}(support2B), SVector{3,Float64}(support3A), SVector{3,Float64}(support3B) )
+
 end

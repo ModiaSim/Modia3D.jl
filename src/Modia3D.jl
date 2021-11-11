@@ -96,8 +96,8 @@ convertAndStripUnit(TargetType, requiredUnit, value) =
             convert(TargetType, ustrip.( uconvert.(requiredUnit, value))) : convert(TargetType, value)
 
 # MPRFloatType is used to change betweeen Double64 and Float64 for mpr calculations
-# using DoubleFloats
-const MPRFloatType = Float64
+using DoubleFloats
+const MPRFloatType = Double64
 
 # Include sub-modules
 include(joinpath("Frames"           , "_module.jl"))
