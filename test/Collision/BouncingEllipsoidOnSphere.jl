@@ -8,15 +8,13 @@ BouncingEllipsoid = Model(
     boxHeigth = 0.1,
     gravField = UniformGravityField(g=9.81, n=[0, -1, 0]),
     world = Object3D(feature=Scene(gravityField=:gravField,
-                                   visualizeFrames=false,
+    mprTolerance=1.0e-19,
                                    defaultFrameLength=0.2,
-                                   visualizeBoundingBox = true,
-                                   enableContactDetection=true,
-                                   visualizeContactPoints=false)),
+                                   enableContactDetection=true)),
     worldFrame = Object3D(parent=:world, feature=Visual(shape=CoordinateSystem(length=0.5))),
     ground = Object3D(parent=:world,
                       translation=:[0.0,-boxHeigth/2,0.0],
-                      feature=Solid(shape=Box(lengthX=4.0, lengthY=:boxHeigth, lengthZ=3.0),
+                      feature=Solid(shape=Sphere(diameter=1.5),
                                     visualMaterial=VisualMaterial(color="DarkGreen", transparency=0.5),
                                     solidMaterial="Steel",
                                     collision=true)),
@@ -32,7 +30,7 @@ bouncingEllipsoid = @instantiateModel(buildModia3D(BouncingEllipsoid), unitless=
 
 stopTime = 2.0
 tolerance = 1e-8
-requiredFinalStates = [-0.4545597005152044, 0.05683453468299216, 1.1778521103823525, -0.1092425125321821, -0.3622646259841156, 0.28841460521917095, 8.7681878487027, -1.30949181179306, -2.334787231141352, -0.08949785426141968, -1.1664892577220993, -5.628568253333571]
+requiredFinalStates = [1.9013751140911312, -5.182612613347552, -0.6285338998457255, 1.3889960373284438, -10.631628266236548, -0.35235710867283077, 2.6873629925159035, 0.23896916015991412, -8.030636545239265, 6.713810967152868, -1.2032068837594854, -12.984033346958665]
 simulate!(bouncingEllipsoid, stopTime=stopTime, tolerance=tolerance, log=true, requiredFinalStates=requiredFinalStates)
 
 @usingModiaPlot
