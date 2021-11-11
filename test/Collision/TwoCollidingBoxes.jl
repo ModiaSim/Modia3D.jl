@@ -9,7 +9,7 @@ vmat2 = Modia3D.VisualMaterial(color="Red"  , transparency=0.6)
 cmat = "Steel"
 
 collidingBoxes = Model(
-    world = Object3D(feature=Scene(gravityField=UniformGravityField(g=9.81, n=[-1, 0, 0]), mpr_tol_rel = 1.0e-9,
+    world = Object3D(feature=Scene(gravityField=UniformGravityField(g=9.81, n=[-1, 0, 0]), mprTolerance = 1.0e-9,
                                           enableContactDetection=true)),
 
     fixedBox = Object3D(parent=:world,

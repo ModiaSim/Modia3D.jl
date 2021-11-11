@@ -357,7 +357,7 @@ Gripper = Model(
 
 YouBot = Model(
     gravField = UniformGravityField(g=9.81, n=[0,0,-1]),
-        world = Object3D(feature=Scene(gravityField = :gravField, mpr_tol_rel=1.0e-18,
+        world = Object3D(feature=Scene(gravityField = :gravField, mprTolerance=1.0e-18,
                 visualizeFrames=false, defaultFrameLength=0.1,
                 enableContactDetection=true, elasticContactReductionFactor=1e-4)),
     base = Base,

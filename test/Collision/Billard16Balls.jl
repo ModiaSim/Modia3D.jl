@@ -86,7 +86,7 @@ Ball = Model(
 )
 
 Billard = Model(
-    world = Object3D(feature=Scene(gravityField=UniformGravityField(g=9.81, n=[0, 0, -1]), mpr_tol_rel = 1.0e-18,
+    world = Object3D(feature=Scene(gravityField=UniformGravityField(g=9.81, n=[0, 0, -1]), mprTolerance = 1.0e-18,
                                    enableContactDetection=true,
                                    nominalLength=0.15*TableX)), # animationFile="Billard16Balls.json"
     table = Table,
