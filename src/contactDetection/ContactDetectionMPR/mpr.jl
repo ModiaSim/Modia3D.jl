@@ -416,7 +416,7 @@ function mprGeneral(ch::Composition.ContactDetectionMPR_handler{T}, shapeA::Comp
 end
 
 
-function mprTwoSpheres(ch::Composition.ContactDetectionMPR_handler{T}, shapeA::Composition.Object3D, shapeB::Modia3D.Composition.Object3D,
+function distanceTwoSpheres(ch::Composition.ContactDetectionMPR_handler{T}, shapeA::Composition.Object3D, shapeB::Modia3D.Composition.Object3D,
     sphereA::Shapes.Sphere, sphereB::Shapes.Sphere) where {T}
     neps = Modia3D.nepsType(T)
     radiusA = T(sphereA.diameter*0.5)
@@ -445,31 +445,22 @@ function mpr(ch::Composition.ContactDetectionMPR_handler{T}, shapeA::Composition
         sphereA::Shapes.Sphere = shapeA.shape
         sphereB::Shapes.Sphere = shapeB.shape
         (distance, contactPoint1, contactPoint2, normal, supportPointsDefined,
-        support1A, support1B, support2A, support2B, support3A, support3B) = mprTwoSpheres(ch, shapeA, shapeB, sphereA, sphereB)
-    elseif shapeKindA != Modia3D.SphereKind && shapeKindB != Modia3D.SphereKind
-        (distance, contactPoint1, contactPoint2, normal, supportPointsDefined,
-        support1A, support1B, support2A, support2B, support3A, support3B) = mprGeneral(ch, shapeA, shapeB)
+        support1A, support1B, support2A, support2B, support3A, support3B) = distanceTwoSpheres(ch, shapeA, shapeB, sphereA, sphereB)
     else
         (distance, contactPoint1, contactPoint2, normal, supportPointsDefined,
         support1A, support1B, support2A, support2B, support3A, support3B) = mprGeneral(ch, shapeA, shapeB)
 
-        if shapeKindA == Modia3D.SphereKind
-            centroidSphere = getCentroid(shapeA)
-            sphereA1::Shapes.Sphere = shapeA.shape
-            radius = T(sphereA1.diameter*0.5)
-            contactPointSphere = centroidSphere + radius*normal
-            contactPointOtherShape = contactPointSphere + distance*normal
-            contactPoint1 = contactPointSphere
-            contactPoint2 = contactPointOtherShape
-        elseif shapeKindB == Modia3D.SphereKind
-            normalLocal = -normal
-            centroidSphere = getCentroid(shapeB)
-            sphereB1::Shapes.Sphere = shapeB.shape
-            radius = T(sphereB1.diameter*0.5)
-            contactPointSphere = centroidSphere + radius*normalLocal
-            contactPointOtherShape = contactPointSphere + distance*normalLocal # distance is negative (otherwise direction of normal must be changed)
-            contactPoint1 = contactPointOtherShape
-            contactPoint2 = contactPointSphere
+        if Modia3D.contactPointIsLocallyBijectiveToNormal(shapeA) && Modia3D.contactPointIsLocallyBijectiveToNormal(shapeB)
+            algebraicSign = sign(distance)
+            contactPoint1 = Modia3D.supportPoint(shapeA, normal)
+            contactPoint2 = Modia3D.supportPoint(shapeB, -normal)
+            distance = algebraicSign * norm(contactPoint2 - contactPoint1)
+        elseif Modia3D.contactPointIsLocallyBijectiveToNormal(shapeA) && !Modia3D.contactPointIsLocallyBijectiveToNormal(shapeB)
+            contactPoint1 = Modia3D.supportPoint(shapeA, normal)
+            contactPoint2 = contactPoint1 + distance*normal
+        elseif !Modia3D.contactPointIsLocallyBijectiveToNormal(shapeA) && Modia3D.contactPointIsLocallyBijectiveToNormal(shapeB)
+            contactPoint2 = Modia3D.supportPoint(shapeB, -normal)
+            contactPoint1 = contactPoint2 + distance*-normal
         end
     end
     return (Float64(distance), SVector{3,Float64}(contactPoint1), SVector{3,Float64}(contactPoint2), SVector{3,Float64}(normal), supportPointsDefined,
