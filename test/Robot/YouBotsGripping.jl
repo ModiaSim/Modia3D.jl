@@ -505,6 +505,7 @@ YouBot2 = YouBot(pathIndexOffset=6)
 Scenario = Model(
     gravField = UniformGravityField(g=9.81, n=[0,0,-1]),
     world = Object3D(feature=Scene(gravityField=:gravField, visualizeFrames=false, nominalLength=tableX,
+    mprTolerance = 1.0e-14,
         animationFile="YouBotsGripping.json",
         enableContactDetection=true, elasticContactReductionFactor=1e-3)),
 #   worldFrame = Object3D(parent=:world, feature=Visual(shape=CoordinateSystem(length=0.2))),
