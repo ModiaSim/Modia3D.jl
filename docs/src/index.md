@@ -33,6 +33,46 @@ Download and install the free DLR SimVis Community Edition, e.g. with [https://v
 
 ## Release Notes
 
+### Version 0.5.1
+
+- Collision handling - MPR algorithm
+    - collision pairing material
+        - at initialization: a warning is given if a collision pairing material is not defined
+    - improve support points computation of
+        - FileMesh: use `SVectors` and better computation of support points
+        - Capsule: a Capsule is already smooth therefore collisionSmoothingRadius is removed
+    - MPR algorithm
+        - `Double64` from DoubleFloats.jl package is used for mpr algorithm to increase accuracy
+        - amount of iteration steps is increased if more are needed for phase 2 and phase 3
+        - if it's not possible to quit with the predefined mprTolerance the iteration quits with the best possible tolerance instead
+        - collisions between ellipsoids and other shapes are treated like collisions between spheres and other shapes
+    - store information like centroid in Object3D
+    - remove some type instabilities
+- FreeMotion joint
+    - enable adaptive rotation sequence
+    - add test model
+- Enable ForceElements
+    - add infrastructure
+    - add Bushing and SpringDamperPtP
+    - add test models and documentation
+- Animation export (three.js JSON object scene)
+    - fix initial orientation
+    - enable visualization of bounding boxes (AABB)
+    - enable Beam support
+    - enable Capsule support
+    - enable inner cylinder radius support (pipe)
+    - enable CoordinateSystem support
+    - enable Grid support
+- Visualization with DLR Visualization Library
+    - add visual shape kind ModelicaShape
+    - remove some type instabilities
+- improve testing
+    - enable short and complete test runs
+    - add planar motion test
+- update documentation and installation guide
+- clean up: remove unused code snippets
+
+
 ### Version 0.5.0
 
 - Largely redesigned.
