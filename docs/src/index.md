@@ -35,7 +35,7 @@ Download and install the free DLR SimVis Community Edition, e.g. with [https://v
 
 ### Version 0.5.1
 
-- Collision handling - MPR algorithm
+- Collision handling - MPR algorithm improved to enhance speed and robustness
     - collision pairing material
         - at initialization: a warning is given if a collision pairing material is not defined
     - improve support points computation of
