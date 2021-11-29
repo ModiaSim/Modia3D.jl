@@ -33,6 +33,9 @@ Download and install the free DLR SimVis Community Edition, e.g. with [https://v
 
 ## Release Notes
 
+### Version 0.5.2
+- version number and date updated
+
 ### Version 0.5.1
 
 - Collision handling - MPR algorithm improved to enhance speed and robustness
