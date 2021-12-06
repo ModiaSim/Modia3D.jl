@@ -4,8 +4,8 @@
 module Modia3D
 
 const path = dirname(dirname(@__FILE__))   # Absolute path of package directory
-const Version = "0.5.0"
-const Date = "2021-07-27"
+const Version = "0.6.0"
+const Date = "2021-12-06
 
 # println("\nImporting Modia3D Version $Version ($Date)")
 
@@ -98,7 +98,7 @@ convertAndStripUnit(TargetType, requiredUnit, value) =
 
 # MPRFloatType is used to change betweeen Double64 and Float64 for mpr calculations
 using DoubleFloats
-const MPRFloatType = Float64
+const MPRFloatType = Double64
 
 # Include sub-modules
 include(joinpath("Frames"           , "_module.jl"))

@@ -144,3 +144,13 @@ function boundingBox!(obj::Composition.Object3D, AABB::Basics.BoundingBox; tight
     end
     return AABB
 end
+
+
+function contactPointIsLocallyBijectiveToNormal(obj::Composition.Object3D)
+    isBijective = false
+    shapeKind = obj.shapeKind
+    if shapeKind == Modia3D.SphereKind || shapeKind == Modia3D.EllipsoidKind
+        isBijective = true
+    end
+    return isBijective
+end

@@ -76,7 +76,7 @@ export InteractionBehavior, Gripper, Movable, Lockable, NoInteraction
 
 export rot123fromR, rot132fromR, Rfromrot123, Rfromrot132
 
-export supportPoint, boundingBox!
+export supportPoint, boundingBox!, contactPointIsLocallyBijectiveToNormal
 
 @enum InteractionBehavior Gripper Movable Lockable NoInteraction
 

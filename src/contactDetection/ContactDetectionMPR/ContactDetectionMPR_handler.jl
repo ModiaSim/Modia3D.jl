@@ -123,11 +123,11 @@ mutable struct ContactDetectionMPR_handler{T} <: Modia3D.AbstractContactDetectio
     visualizeSupportPoints::Bool
     defaultContactSphereDiameter::Float64
 
-    function ContactDetectionMPR_handler{T}(;tol_rel  = 1.0e-7,
+    function ContactDetectionMPR_handler{T}(;tol_rel  = 1.0e-20,
                                             niter_max = 100) where {T}
         @assert(tol_rel > 0.0)
         @assert(niter_max > 0)
         new(false, Dict{PairID,ContactPair}(), Dict{PairID,ContactPair}(), 42.0, tol_rel, niter_max)
     end
 end
-ContactDetectionMPR_handler() = ContactDetectionMPR_handler{Modia3D.MPRFloatType}()
+ContactDetectionMPR_handler(; kwargs...) = ContactDetectionMPR_handler{Modia3D.MPRFloatType}(; kwargs...)
