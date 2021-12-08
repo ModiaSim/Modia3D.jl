@@ -42,17 +42,17 @@ end
 
 
 function elasticContactPairCoefficients(obj1::Object3D, obj2::Object3D)
-  if typeof(obj1.feature.shape) == Modia3D.Shapes.Sphere && typeof(obj2.feature.shape) == Modia3D.Shapes.Sphere
+  if typeof(obj1.feature.shape) <: Modia3D.Shapes.Sphere && typeof(obj2.feature.shape) <: Modia3D.Shapes.Sphere
     r1 = obj1.feature.shape.diameter*0.5
     r2 = obj2.feature.shape.diameter*0.5
     mu_r_geo = r1*r2/(r1 + r2)
     n_geo = 1.5
     c_geo = 4/3*sqrt(mu_r_geo)
-  elseif typeof(obj1.feature.shape) == Modia3D.Shapes.Sphere && typeof(obj2.feature.shape) != Modia3D.Shapes.Sphere
+  elseif typeof(obj1.feature.shape) <: Modia3D.Shapes.Sphere && typeof(obj2.feature.shape) != Modia3D.Shapes.Sphere
     mu_r_geo = obj1.feature.shape.diameter*0.5
     n_geo = 1.5
     c_geo = 4/3*sqrt(mu_r_geo)
-  elseif typeof(obj1.feature.shape) != Modia3D.Shapes.Sphere && typeof(obj2.feature.shape) == Modia3D.Shapes.Sphere
+  elseif typeof(obj1.feature.shape) != Modia3D.Shapes.Sphere && typeof(obj2.feature.shape) <: Modia3D.Shapes.Sphere
     mu_r_geo = obj2.feature.shape.diameter*0.5
     n_geo = 1.5
     c_geo = 4/3*sqrt(mu_r_geo)
