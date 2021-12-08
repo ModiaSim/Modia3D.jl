@@ -9,7 +9,7 @@
 
 #-------------------------------------- Default Renderer -------------------------------
 
-initializeVisualization(renderer::Modia3D.AbstractRenderer, allVisuElements::Vector{Object3D{FloatType}}) where {FloatType} = error("No renderer defined.")
+initializeVisualization(renderer::Modia3D.AbstractRenderer, allVisuElements::Vector{Object3D{F}}) where {F} = error("No renderer defined.")
 visualize!(renderer::Modia3D.AbstractRenderer, time) = error("No renderer defined.")
 closeVisualization(renderer::Modia3D.AbstractRenderer)        = error("No renderer defined.")
 
@@ -375,11 +375,11 @@ Defines global properties of the system, such as the gravity field. Exactly one 
 
 - `lightLatitude::Float64`: latitude angle of light position (0 = horizontal)
 """
-mutable struct Scene{FloatType} <: Modia3D.AbstractScene
+mutable struct Scene{F} <: Modia3D.AbstractScene
     name::String                              # model name
     autoCoordsys::Shapes.CoordinateSystem     # Coordinate system that is automatically included (e.g. due to visualizeFrames=true)
-    stack::Vector{Object3D{FloatType}}                   # Stack to traverse objs
-    buffer::Vector{Object3D{FloatType}}                  # stores all roots of a super obj
+    stack::Vector{Object3D{F}}                   # Stack to traverse objs
+    buffer::Vector{Object3D{F}}                  # stores all roots of a super obj
 
     options::SceneOptions                     # Global options defined for the scene
 
@@ -393,15 +393,15 @@ mutable struct Scene{FloatType} <: Modia3D.AbstractScene
     analysis::Modia3D.AnalysisType            # Type of analysis
     superObjs::Vector{SuperObjsRow}           # super objects
 
-    treeAccVelo::Vector{Object3D{FloatType}}
-    tree::Vector{Object3D{FloatType}}                    # Spanning tree of the frames in depth-first order (without world)
-    treeForComputation::Vector{Object3D{FloatType}}      # Tree that is used for the computation
+    treeAccVelo::Vector{Object3D{F}}
+    tree::Vector{Object3D{F}}                    # Spanning tree of the frames in depth-first order (without world)
+    treeForComputation::Vector{Object3D{F}}      # Tree that is used for the computation
                                               # treeForComputation = options.useOptimizedStructure ? treeAccVelo : tree
 
     #cutJoints::Vector{Modia3D.AbstractJoint}  # Vector of all cut-joints
-    allVisuElements::Vector{Object3D{FloatType}}         # all Object3Ds that should be visualized (for communiating with SimVis)
-    updateVisuElements::Vector{Object3D{FloatType}}      # all Object3Ds that are visibly only e.g. visualization frames (must be updated first)
-    allCollisionElements::Vector{Object3D{FloatType}}    # all Object3Ds, which are allowed to collide (no order, no super objects)
+    allVisuElements::Vector{Object3D{F}}         # all Object3Ds that should be visualized (for communiating with SimVis)
+    updateVisuElements::Vector{Object3D{F}}      # all Object3Ds that are visibly only e.g. visualization frames (must be updated first)
+    allCollisionElements::Vector{Object3D{F}}    # all Object3Ds, which are allowed to collide (no order, no super objects)
     noCPairs::Vector{Vector{Int64}}           # Indices of frames (with respect to collSuperObjs) that can't collide in general (e.g. objects are connected via joints)
     noCPairsHelp::Dict{Modia3D.AbstractJoint,Vector{Int64}}
     allowedToMove::Vector{Union{Bool,Nothing}}
@@ -418,7 +418,7 @@ mutable struct Scene{FloatType} <: Modia3D.AbstractScene
     freeMotion::Vector{FreeMotion}
 
 
-    function Scene{FloatType}(;gravityField          = UniformGravityField(),
+    function Scene{F}(;gravityField          = UniformGravityField(),
             useOptimizedStructure         = true,
             enableContactDetection        = true,
             mprTolerance                  = 1.0e-20,
@@ -439,7 +439,7 @@ mutable struct Scene{FloatType} <: Modia3D.AbstractScene
             cameraLatitude                = 15/180*pi,
             lightDistance                 = 10.0*nominalLength,
             lightLongitude                = 60/180*pi,
-            lightLatitude                 = 45/180*pi) where {FloatType}
+            lightLatitude                 = 45/180*pi) where {F}
 
         sceneOptions = SceneOptions(gravityField = gravityField,
             useOptimizedStructure         = useOptimizedStructure,
@@ -476,8 +476,8 @@ mutable struct Scene{FloatType} <: Modia3D.AbstractScene
 
         new("Scene",
             Shapes.CoordinateSystem(length=sceneOptions.defaultFrameLength),
-            Vector{Object3D{FloatType}}[],
-            Vector{Object3D{FloatType}}[],
+            Vector{Object3D{F}}[],
+            Vector{Object3D{F}}[],
             sceneOptions,
             false,
             false,
@@ -486,12 +486,12 @@ mutable struct Scene{FloatType} <: Modia3D.AbstractScene
             false,
             Modia3D.KinematicAnalysis,
             Vector{SuperObjsRow}[],
-            Vector{Object3D{FloatType}}[],
-            Vector{Object3D{FloatType}}[],
-            Vector{Object3D{FloatType}}[],
-            Vector{Object3D{FloatType}}[],
-            Vector{Object3D{FloatType}}[],
-            Vector{Object3D{FloatType}}[],
+            Vector{Object3D{F}}[],
+            Vector{Object3D{F}}[],
+            Vector{Object3D{F}}[],
+            Vector{Object3D{F}}[],
+            Vector{Object3D{F}}[],
+            Vector{Object3D{F}}[],
             Vector{Vector{Int64}}[],
             Dict{Modia3D.AbstractJoint,Vector{Int64}}(),
             Vector{Union{Bool}}[],

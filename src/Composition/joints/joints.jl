@@ -247,14 +247,14 @@ computeKinematics!(scene::Scene, joint::Modia3D.AbstractJoint, obj::Object3D, an
 
 
 """
-    computeKinematics!(scene::Scene, tree::Vector{Object3D{FloatType}}, time)
+    computeKinematics!(scene::Scene, tree::Vector{Object3D{F}}, time)
 
 Compute position, velocity, acceleration variables of the Object3Ds that are connected
 in form of a tree. Variable `tree` contains the Object3Ds in a traversal order (e.g. pre-order traversal).
 `tree[1]` is the root object. It is assumed that the kinematic
 variables of tree[1].parent have a meaningful value.
 """
-function computeKinematics!(scene::Scene, tree::Vector{Object3D{FloatType}}, time)::Nothing where {FloatType}
+function computeKinematics!(scene::Scene, tree::Vector{Object3D{F}}, time)::Nothing where {F}
     for obj in tree
         parent    = obj.parent
         jointKind = obj.jointKind
@@ -350,12 +350,12 @@ end
 
 
 """
-    computeKinematics_for_leq_mode_pos!(scene::Scene, tree::Vector{Object3D{FloatType}}, time)
+    computeKinematics_for_leq_mode_pos!(scene::Scene, tree::Vector{Object3D{F}}, time)
 
 Compute accelerations that are only a function of qdd, but not of q and qd.
 of the Object3Ds that are connected in form of a tree.
 """
-function computeKinematics_for_leq_mode_pos!(scene::Scene, tree::Vector{Object3D{FloatType}}, time)::Nothing where {FloatType}
+function computeKinematics_for_leq_mode_pos!(scene::Scene, tree::Vector{Object3D{F}}, time)::Nothing where {F}
     for obj in tree
         parent    = obj.parent
         jointKind = obj.jointKind
@@ -405,14 +405,14 @@ end
 
 
 """
-    computeForcesTorquesAndResiduals!(scene::Scene, tree::Vector{Object3D{FloatType}}, time)
+    computeForcesTorquesAndResiduals!(scene::Scene, tree::Vector{Object3D{F}}, time)
 
 Compute forces/torques and residuals in a backward recursion from tree[end] to tree[1].
 Variable `tree` contains the Object3Ds in a traversal order (e.g. pre-order traversal).
 It is assumed that all force/torque variables are initialized (e.g. to zero), including
 tree[1].parent.
 """
-function computeForcesTorquesAndResiduals!(scene::Scene, tree::Vector{Object3D{FloatType}}, time)::Nothing where {FloatType}
+function computeForcesTorquesAndResiduals!(scene::Scene, tree::Vector{Object3D{F}}, time)::Nothing where {F}
     for i = length(tree):-1:1
         obj       = tree[i]
         parent    = obj.parent
@@ -457,13 +457,13 @@ end
 
 
 """
-    setJointVariables_q_qd_f!(scene::Scene, objects::Vector{Object3D{FloatType}},
+    setJointVariables_q_qd_f!(scene::Scene, objects::Vector{Object3D{F}},
                               startIndex::Vector{Int}, ndof::Vector{Int}, args)
 
 Copy generalized joints variables (q,qd,f) into the corresponding Object3Ds.
 """
-function setJointVariables_q_qd_f!(scene::Scene, objects::Vector{Object3D{FloatType}}, startIndex::Vector{Int},
-                                   ndof::Vector{Int}, args)::Nothing where {FloatType}
+function setJointVariables_q_qd_f!(scene::Scene, objects::Vector{Object3D{F}}, startIndex::Vector{Int},
+                                   ndof::Vector{Int}, args)::Nothing where {F}
     for (i,obj) in enumerate(objects)
         jointKind = obj.jointKind
         args_i    = args[i]
@@ -501,13 +501,13 @@ end
 
 
 """
-    setJointVariables_qdd!(scene::Scene, objects::Vector{Object3D{FloatType}}, startIndex::Vector{Int},
+    setJointVariables_qdd!(scene::Scene, objects::Vector{Object3D{F}}, startIndex::Vector{Int},
                            ndof::Vector{Int}, qdd)
 
 Copy generalized joint accelerations into the corresponding joints.
 """
-function setJointVariables_qdd!(scene::Scene, objects::Vector{Object3D{FloatType}}, startIndex::Vector{Int},
-                                ndof::Vector{Int}, qdd)::Nothing where {FloatType}
+function setJointVariables_qdd!(scene::Scene, objects::Vector{Object3D{F}}, startIndex::Vector{Int},
+                                ndof::Vector{Int}, qdd)::Nothing where {F}
 
     for (i,obj) in enumerate(objects)
         jointKind = obj.jointKind
@@ -540,11 +540,11 @@ end
 
 
 """
-    getJointResiduals_for_leq_mode_0!(scene::Scene, objects::Vector{Object3D{FloatType}}, residuals, startIndex::Int, ndof::Int, cache_h)
+    getJointResiduals_for_leq_mode_0!(scene::Scene, objects::Vector{Object3D{F}}, residuals, startIndex::Int, ndof::Int, cache_h)
 
 Copy specific variables into their objects for leq_mode = 0.
 """
-function getJointResiduals_for_leq_mode_0!(scene::Scene, objects::Vector{Object3D{FloatType}}, residuals, startIndex::Vector{Int}, ndof::Vector{Int}, cache_h)::Nothing where {FloatType}
+function getJointResiduals_for_leq_mode_0!(scene::Scene, objects::Vector{Object3D{F}}, residuals, startIndex::Vector{Int}, ndof::Vector{Int}, cache_h)::Nothing where {F}
     for (i,obj) in enumerate(objects)
         jointKind = obj.jointKind
         beg       = startIndex[i]
@@ -580,11 +580,11 @@ end
 
 
 """
-    getJointResiduals_for_leq_mode_pos!(scene::Scene, objects::Vector{Object3D{FloatType}}, residuals, startIndex::Int, ndof::Int, cache_h)
+    getJointResiduals_for_leq_mode_pos!(scene::Scene, objects::Vector{Object3D{F}}, residuals, startIndex::Int, ndof::Int, cache_h)
 
 Copy specific variables into their objects for leq_mode > 0.
 """
-function getJointResiduals_for_leq_mode_pos!(scene::Scene, objects::Vector{Object3D{FloatType}}, residuals, startIndex::Vector{Int}, ndof::Vector{Int}, cache_h)::Nothing where {FloatType}
+function getJointResiduals_for_leq_mode_pos!(scene::Scene, objects::Vector{Object3D{F}}, residuals, startIndex::Vector{Int}, ndof::Vector{Int}, cache_h)::Nothing where {F}
     for (i,obj) in enumerate(objects)
         jointKind = obj.jointKind
         beg       = startIndex[i]

@@ -170,7 +170,7 @@ end
 #     these elements form together a super object
 #   elements which are directly connected with a joint can't collide
 #     these elements are excluded from the collision list
-function build_superObjs!(scene::Scene{FloatType}, world::Object3D)::Nothing where {FloatType}
+function build_superObjs!(scene::Scene{F}, world::Object3D)::Nothing where {F}
     if !scene.initSuperObj
     stack = scene.stack
     buffer = scene.buffer
@@ -190,7 +190,7 @@ function build_superObjs!(scene::Scene{FloatType}, world::Object3D)::Nothing whe
     hasMoreCollisionSuperObj = false
 
     while actPos <= nPos
-        superObjsRow = SuperObjsRow{FloatType}()
+        superObjsRow = SuperObjsRow{F}()
         AABBrow      = Vector{Basics.BoundingBox}[]
         rootSuperObj = buffer[actPos]
 

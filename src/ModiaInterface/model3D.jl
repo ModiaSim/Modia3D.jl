@@ -1,6 +1,6 @@
 # ModiaLang interface to Modia3D
-Object3D(        ; kwargs...) = Par(; _constructor = :(Modia3D.Object3D{FloatType}), _path = true, kwargs...)
-Scene(           ; kwargs...) = Par(; _constructor = :(Modia3D.Scene{FloatType})                 , kwargs...)
+Object3D(        ; kwargs...) = Par(; _constructor = :(Modia3D.Object3D{F}), _path = true, kwargs...)
+Scene(           ; kwargs...) = Par(; _constructor = :(Modia3D.Scene{F})                 , kwargs...)
 Visual(          ; kwargs...) = Par(; _constructor = :(Modia3D.Visual)                , kwargs...)
 Solid(           ; kwargs...) = Par(; _constructor = :(Modia3D.Solid)                 , kwargs...)
 Box(             ; kwargs...) = Par(; _constructor = :(Modia3D.Box)                   , kwargs...)
