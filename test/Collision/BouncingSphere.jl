@@ -29,7 +29,7 @@ BouncingSphere = Model(
     prism = Prismatic(obj1=:world, obj2=:sphere, axis=2, s=Var(init=1.0))
 )
 
-bouncingSphere = @instantiateModel(buildModia3D(BouncingSphere), unitless=true, log=false, logStateSelection=false, logCode=false)
+bouncingSphere = @instantiateModel(buildModia3D(BouncingSphere), unitless=true, log=false, logStateSelection=false, logCode=false, FloatType = Float64)
 
 #@show bouncingSphere.parameterExpressions
 #@show bouncingSphere.parameters

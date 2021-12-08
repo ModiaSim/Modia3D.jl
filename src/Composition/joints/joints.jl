@@ -242,8 +242,8 @@ function wfromrot123(rot123::AbstractVector, derrot123::AbstractVector)
 end
 
 # Next function only for backwards compatibility (do not use for new model)
-computeKinematics!(scene::Scene, joint::Modia3D.AbstractJoint, obj::Object3D, analysis::Modia3D.AnalysisType, time::Float64)::Nothing =
-    computeKinematics!(scene, [obj], time)
+computeKinematics!(scene::Scene, joint::Modia3D.AbstractJoint, obj::Object3D, analysis::Modia3D.AnalysisType, time)::Nothing =
+    computeKinematics!(scene, [obj], Float64(time) )
 
 
 """

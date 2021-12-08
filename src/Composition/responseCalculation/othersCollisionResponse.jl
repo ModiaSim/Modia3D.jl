@@ -12,20 +12,20 @@ error("contactStart is not yet implemented for WheelRailContactPairMaterial.")
 
 
 
-responseCalculation(material::Shapes.NoContactPairMaterial, obj1::Object3D, obj2::Object3D, rContact::Frames.Vector3D, e_n::Frames.Vector3D, s::Float64, time::Float64, file, sim) =
+responseCalculation(material::Shapes.NoContactPairMaterial, obj1::Object3D, obj2::Object3D, rContact::Frames.Vector3D, e_n::Frames.Vector3D, s::Float64, time, file, sim) =
 (Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D)
 
-function responseCalculation(material::Shapes.ObserverContactPairMaterial, obj1::Object3D, obj2::Object3D, rContact::Frames.Vector3D, e_n::Frames.Vector3D, s::Float64, time::Float64, file, sim)
+function responseCalculation(material::Shapes.ObserverContactPairMaterial, obj1::Object3D, obj2::Object3D, rContact::Frames.Vector3D, e_n::Frames.Vector3D, s::Float64, time, file, sim)
   if material.printAlarm && ModiaLang.isEvent(sim)
     println("At time event ", time, " two observer objects ", Modia3D.fullName(obj1), " and ", Modia3D.fullName(obj2), " are colliding.")
   end
   return (Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D)
 end
 
-responseCalculation(material::Shapes.ImpulseContactPairMaterial, obj1::Object3D, obj2::Object3D, rContact::Frames.Vector3D, e_n::Frames.Vector3D, s::Float64, time::Float64, file, sim) =
+responseCalculation(material::Shapes.ImpulseContactPairMaterial, obj1::Object3D, obj2::Object3D, rContact::Frames.Vector3D, e_n::Frames.Vector3D, s::Float64, time, file, sim) =
 (Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D)
 
-responseCalculation(material::Shapes.WheelRailContactPairMaterial, obj1::Object3D, obj2::Object3D, rContact::Frames.Vector3D, e_n::Frames.Vector3D, s::Float64, time::Float64, file, sim) =
+responseCalculation(material::Shapes.WheelRailContactPairMaterial, obj1::Object3D, obj2::Object3D, rContact::Frames.Vector3D, e_n::Frames.Vector3D, s::Float64, time, file, sim) =
 (Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D)
 
 

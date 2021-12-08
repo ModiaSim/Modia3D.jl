@@ -129,7 +129,7 @@ at time `time`.
 """
 function responseCalculation(material::ElasticContactPairResponseMaterial, obj1::Object3D, obj2::Object3D,
                              rContact::Frames.Vector3D, e_n::Frames.Vector3D,
-                             s::Float64, time::Float64, file, sim)::Tuple{Frames.Vector3D,Frames.Vector3D,Frames.Vector3D,Frames.Vector3D}
+                             s::Float64, time, file, sim)::Tuple{Frames.Vector3D,Frames.Vector3D,Frames.Vector3D,Frames.Vector3D}
     # Material
     c_res    = material.c_res
     c_geo    = material.c_geo
@@ -184,5 +184,5 @@ end
 
 responseCalculation(material::Nothing, obj1::Object3D, obj2::Object3D,
                     rContact::Frames.Vector3D, e_n::Frames.Vector3D,
-                    s::Float64, time::Float64, file) =
+                    s::Float64, time, file) =
                     (Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D)
