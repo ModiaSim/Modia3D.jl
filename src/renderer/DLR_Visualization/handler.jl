@@ -5,7 +5,7 @@
 #   Modia3D.DLR_Visualization (Modia3D/renderer/DLR_Visualization/_module.jl)
 #
 
-function Composition.initializeVisualization(renderer::Modia3D.AbstractDLR_VisualizationRenderer, velements::Vector{Composition.Object3D})::Nothing
+function Composition.initializeVisualization(renderer::Modia3D.AbstractDLR_VisualizationRenderer, velements::Vector{Composition.Object3D{FloatType}})::Nothing where {FloatType}
     simVis = renderer.simVis
     @assert(length(velements) > 0)
     if simVis.isInitialized
@@ -25,7 +25,7 @@ function Composition.initializeVisualization(renderer::Modia3D.AbstractDLR_Visua
 end
 
 
-function Composition.visualize!(renderer::Modia3D.AbstractDLR_VisualizationRenderer, time::Float64)
+function Composition.visualize!(renderer::Modia3D.AbstractDLR_VisualizationRenderer, time)
     simVis = renderer.simVis
     @assert(length(simVis.velements) > 0)
     if simVis.isInitialized
@@ -34,7 +34,7 @@ function Composition.visualize!(renderer::Modia3D.AbstractDLR_VisualizationRende
         for i in eachindex(velements)
             visualizeObject(velements[i], ids[i], simVis)
         end
-        SimVis_setTime(simVis, time)
+        SimVis_setTime(simVis, Float64(time) )
     else
         error("visualize! called without initializing visualization first.")
     end

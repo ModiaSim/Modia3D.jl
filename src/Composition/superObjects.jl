@@ -1,48 +1,48 @@
-mutable struct SuperObjCollision
-    superObj::Vector{Object3D}
-    function SuperObjCollision()
-        new(Vector{Object3D}[])
+mutable struct SuperObjCollision{FloatType}
+    superObj::Vector{Object3D{FloatType}}
+    function SuperObjCollision{FloatType}() where {FloatType}
+        new(Vector{Object3D{FloatType}}[])
     end
 end
 
-mutable struct SuperObjMass
-    superObj::Vector{Object3D}
-    function SuperObjMass()
-        new(Vector{Object3D}[])
+mutable struct SuperObjMass{FloatType}
+    superObj::Vector{Object3D{FloatType}}
+    function SuperObjMass{FloatType}() where {FloatType}
+        new(Vector{Object3D{FloatType}}[])
     end
 end
 
-mutable struct SuperObjMovable
-    superObj::Vector{Object3D}
-    function SuperObjMovable()
-        new(Vector{Object3D}[])
+mutable struct SuperObjMovable{FloatType}
+    superObj::Vector{Object3D{FloatType}}
+    function SuperObjMovable{FloatType}() where {FloatType}
+        new(Vector{Object3D{FloatType}}[])
     end
 end
 
-mutable struct SuperObjForce
-    superObj::Vector{Object3D}
-    function SuperObjForce()
-        new(Vector{Object3D}[])
+mutable struct SuperObjForce{FloatType}
+    superObj::Vector{Object3D{FloatType}}
+    function SuperObjForce{FloatType}() where {FloatType}
+        new(Vector{Object3D{FloatType}}[])
     end
 end
 
-mutable struct SuperObjVisu
-    superObj::Vector{Object3D}
-    function SuperObjVisu()
-        new(Vector{Object3D}[])
+mutable struct SuperObjVisu{FloatType}
+    superObj::Vector{Object3D{FloatType}}
+    function SuperObjVisu{FloatType}() where {FloatType}
+        new(Vector{Object3D{FloatType}}[])
     end
 end
 
 
 
-mutable struct SuperObjsRow
-    superObjCollision::SuperObjCollision
-    superObjMass::SuperObjMass
-    superObjMovable::SuperObjMovable
-    superObjForce::SuperObjForce
-    superObjVisu::SuperObjVisu
+mutable struct SuperObjsRow{FloatType}
+    superObjCollision::SuperObjCollision{FloatType}
+    superObjMass::SuperObjMass{FloatType}
+    superObjMovable::SuperObjMovable{FloatType}
+    superObjForce::SuperObjForce{FloatType}
+    superObjVisu::SuperObjVisu{FloatType}
     noCPair::Vector{Int64}
-    function SuperObjsRow()
-        new(SuperObjCollision(), SuperObjMass(), SuperObjMovable(), SuperObjForce(), SuperObjVisu(),  Vector{Int64}[])
+    function SuperObjsRow{FloatType}() where {FloatType}
+        new(SuperObjCollision{FloatType}(), SuperObjMass{FloatType}(), SuperObjMovable{FloatType}(), SuperObjForce{FloatType}(), SuperObjVisu{FloatType}(),  Vector{Int64}[])
     end
 end

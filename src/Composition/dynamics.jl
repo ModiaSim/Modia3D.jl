@@ -1,10 +1,11 @@
 function getJointsAndForceElementsAndObject3DsWithoutParents!(evaluatedParameters,
-                                                              object3DWithoutParents::Vector{Object3D},
-                                                              jointObjects::Vector{Object3D},
+                                                              object3DWithoutParents::Vector{Object3D{FloatType}},
+                                                              jointObjects::Vector{Object3D{FloatType}},
                                                               forceElements::Vector{Modia3D.AbstractForceElement},
-                                                              path::String)::Nothing
+                                                              path::String)::Nothing where {FloatType}
     for (key,value) in evaluatedParameters   # zip(keys(evaluatedParameters), evaluatedParameters)
-        if typeof(value) == Object3D
+
+        if typeof(value) <: Object3D
             if value.parent === value
                 push!(object3DWithoutParents, value)
             elseif typeof(value.feature) == Modia3D.Composition.Scene
@@ -49,8 +50,8 @@ function checkMultibodySystemAndGetWorldAndJointsAndForceElements(instantiatedMo
         error(instantiatedModel.modelName, ": did not find _id = ", id, " in the evaluated parameters!")
     end
 
-    object3DWithoutParents = Object3D[]
-    jointObjects = Object3D[]
+    object3DWithoutParents = Object3D{FloatType}[]
+    jointObjects = Object3D{FloatType}[]
     forceElements = Modia3D.AbstractForceElement[]
     getJointsAndForceElementsAndObject3DsWithoutParents!(mbsRoot, object3DWithoutParents, jointObjects, forceElements, mbsPath)
 
@@ -93,9 +94,9 @@ end
 
 struct MultibodyData{FloatType}
     nqdd::Int                       # Length of qdd vector
-    world::Object3D                 # Pointer to world object
-    scene::Scene                    # Pointer to scene
-    jointObjects::Vector{Object3D}  # References to Object3Ds that have a joint
+    world::Object3D{FloatType}                 # Pointer to world object
+    scene::Scene{FloatType}                    # Pointer to scene
+    jointObjects::Vector{Object3D{FloatType}}  # References to Object3Ds that have a joint
     jointStartIndex::Vector{Int}    # Start index of joint in qdd
     jointNdof::Vector{Int}          # Number-of-degrees-of-freedom of joint
     zStartIndex::Int                # eventHandler.z[zStartIndex] is first index of crossing functions for contact detection
@@ -265,7 +266,7 @@ For Modia3D:
                    return res := res + cache_h
 =#
 
-function multibodyResiduals3!(sim, scene, world, time, storeResults, isTerminal, leq_mode)
+function multibodyResiduals3!(sim::ModiaLang.SimulationModel{FloatType}, scene, world, time, storeResults, isTerminal, leq_mode) where {FloatType}
     tree            = scene.treeForComputation
     forceElements   = scene.forceElements
     visualize       = scene.visualize   # && sim.model.visualiz

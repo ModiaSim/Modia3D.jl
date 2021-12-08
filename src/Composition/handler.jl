@@ -170,7 +170,7 @@ end
 #     these elements form together a super object
 #   elements which are directly connected with a joint can't collide
 #     these elements are excluded from the collision list
-function build_superObjs!(scene::Scene, world::Object3D)::Nothing
+function build_superObjs!(scene::Scene{FloatType}, world::Object3D)::Nothing where {FloatType}
     if !scene.initSuperObj
     stack = scene.stack
     buffer = scene.buffer
@@ -190,7 +190,7 @@ function build_superObjs!(scene::Scene, world::Object3D)::Nothing
     hasMoreCollisionSuperObj = false
 
     while actPos <= nPos
-        superObjsRow = SuperObjsRow()
+        superObjsRow = SuperObjsRow{FloatType}()
         AABBrow      = Vector{Basics.BoundingBox}[]
         rootSuperObj = buffer[actPos]
 
@@ -431,7 +431,7 @@ function errorMessageCollision(functionName::String)
 end
 
 
-function visualize!(scene::Scene, time::Float64)
+function visualize!(scene::Scene, time)
     if scene.visualize
         visualize!(Modia3D.renderer[1], time)
     end

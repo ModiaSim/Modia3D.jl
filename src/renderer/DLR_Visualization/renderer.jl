@@ -4,12 +4,20 @@
 # This file is part of module
 #   Modia3D.DLR_Visualization (Modia3D/renderer/DLR_Visualization/_module.jl)
 #
+#=
+mutable struct SimVis_Renderer_WithShapes{FloatType}
+    SimVis_Renderer
+    velements::Vector{Composition.Object3D{FloatType}}
+    ids::Vector{Ptr{Nothing}}                # ids[i] is the SimVis id of velements[i]
+
+
+end
+=#
 
 mutable struct SimVis_Renderer
-    velements::Vector{Composition.Object3D}  # Objects to be visualized
+    velements::AbstractVector{Composition.Object3D}  # Objects to be visualized
     ids::Vector{Ptr{Nothing}}                # ids[i] is the SimVis id of velements[i]
     isInitialized::Bool                      # = true, if SimVis is initialized (SimVis_init was called)
-
     host::String
     port::Int
     sync::Bool

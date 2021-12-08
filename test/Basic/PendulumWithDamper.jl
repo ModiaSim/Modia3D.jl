@@ -41,7 +41,7 @@ PendulumWithDamp = Model(
 
 #@showModel PendulumWithDamp
 
-pendulumWithDamper = @instantiateModel(PendulumWithDamp, unitless=true, log=false, logStateSelection=false, logCode=true)
+pendulumWithDamper = @instantiateModel(PendulumWithDamp, unitless=true, log=false, logStateSelection=false, logCode=false, FloatType = Float32)
 
 stopTime = 10.0
 requiredFinalStates = [-1.578178283450938, 0.061515170100766486]
