@@ -151,7 +151,7 @@ AllShapes = Model(
         ModelicaShape(type=11, lengthX=0.4, lengthY=0.5, lengthZ=0.3), visualMaterial=vmatYellow), translation=[2.0, 0.0, -1.0])
 )
 
-allShapes = @instantiateModel(buildModia3D(AllShapes), unitless=true, log=false, logStateSelection=false, logCode=false)
+allShapes = @instantiateModel(buildModia3D(AllShapes), unitless=true, log=false, logStateSelection=false, logCode=false, FloatType=Float32)
 
 simulate!(allShapes, stopTime=0.0, log=false, logStates=false, logEvents=false)
 

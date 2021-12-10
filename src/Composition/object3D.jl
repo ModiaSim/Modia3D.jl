@@ -192,7 +192,7 @@ mutable struct Object3D{F} <: Modia3D.AbstractObject3D
             createConvexPartition(obj, feature, feature.shape)
         end
 
-        if typeof(feature) == Modia3D.Solid && typeof(feature.shape) == Modia3D.FileMesh && feature.shape.convexPartition
+        if typeof(feature) <: Modia3D.Solid && typeof(feature.shape) == Modia3D.FileMesh && feature.shape.convexPartition
             createConvexPartition(obj, feature, feature.shape)
         end
 
@@ -313,12 +313,12 @@ end
 Object3D(args... ; kwargs...) = Object3D{Float64}(args... ; kwargs...)
 
 function setShapeKind(::Type{F}, feature) where {F}
-    if typeof(feature) == Modia3D.Solid || typeof(feature) == Modia3D.Visual
+    if typeof(feature) <: Modia3D.Solid || typeof(feature) == Modia3D.Visual
         shapeKind = Modia3D.getShapeKind(feature.shape)
         shape = feature.shape
 
         centroid = Modia3D.ZeroVector3D
-        if typeof(feature) == Modia3D.Solid && !isnothing(shape)
+        if typeof(feature) <: Modia3D.Solid && !isnothing(shape)
             centroid = Modia3D.centroid(shape)
         end
 
@@ -425,8 +425,8 @@ function createFileFeature(feature::Shapes.Visual, fileMesh)
     return Modia3D.Visual(shape = fileMesh, visualMaterial = feature.visualMaterial)
 end
 
-function createFileFeature(feature::Shapes.Solid, fileMesh)
-    return Modia3D.Solid(shape=fileMesh, massProperties=nothing, solidMaterial=feature.solidMaterial, collision=feature.collision, contactMaterial=feature.contactMaterial, collisionSmoothingRadius=feature.collisionSmoothingRadius, visualMaterial=feature.visualMaterial)
+function createFileFeature(feature::Shapes.Solid{F}, fileMesh) where {F}
+    return Modia3D.Solid{F}(shape=fileMesh, massProperties=nothing, solidMaterial=feature.solidMaterial, collision=feature.collision, contactMaterial=feature.contactMaterial, collisionSmoothingRadius=feature.collisionSmoothingRadius, visualMaterial=feature.visualMaterial)
 end
 
 function addAABBVisuToWorld!(world::Object3D{F}, AABB::Vector{Vector{Basics.BoundingBox}}) where {F}
@@ -530,7 +530,7 @@ isVisible(feature::Modia3D.AbstractScene, renderer::Modia3D.AbstractRenderer) = 
 canCollide(feature::Modia3D.AbstractObject3DFeature) = false
 
 function canCollide(obj::Object3D)::Bool
-    if typeof(obj.feature) == Modia3D.Shapes.Solid
+    if typeof(obj.feature) <: Modia3D.Shapes.Solid
         if !isnothing(obj.feature.shape) && !isnothing(obj.feature.contactMaterial)
             if typeof(obj.feature.contactMaterial) == String
                 return obj.feature.contactMaterial != ""

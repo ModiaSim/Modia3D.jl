@@ -2,7 +2,7 @@
 Object3D(        ; kwargs...) = Par(; _constructor = :(Modia3D.Object3D{F}), _path = true, kwargs...)
 Scene(           ; kwargs...) = Par(; _constructor = :(Modia3D.Scene{F})                 , kwargs...)
 Visual(          ; kwargs...) = Par(; _constructor = :(Modia3D.Visual)                , kwargs...)
-Solid(           ; kwargs...) = Par(; _constructor = :(Modia3D.Solid)                 , kwargs...)
+Solid(           ; kwargs...) = Par(; _constructor = :(Modia3D.Solid{F})                 , kwargs...)
 Box(             ; kwargs...) = Par(; _constructor = :(Modia3D.Box{F})                   , kwargs...)
 Beam(            ; kwargs...) = Par(; _constructor = :(Modia3D.Beam{F})                  , kwargs...)
 Cylinder(        ; kwargs...) = Par(; _constructor = :(Modia3D.Cylinder{F})              , kwargs...)
