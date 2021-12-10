@@ -6,7 +6,7 @@
 
 This module contains functions for **frames** that is coordinate systems in 3D.
 The orientation of a frame is described either with a 3x3 **rotation matrix**
-or with a **quaternion vector** and its origin is described with a **Vector3D**:
+or with a **quaternion vector** and its origin is described with a **SVector{3,Float64}**:
 
 - `const `[`Modia3D.RotationMatrix`](@ref) = SMatrix{3,3,Float64,9}`:
   Type of a Rotation matrix to rotate from a frame 1 into a frame 2.
@@ -14,8 +14,6 @@ or with a **quaternion vector** and its origin is described with a **Vector3D**:
 - `const `[`Modia3D.Quaternion`](@ref) = SVector{4,Float64}`:
   Type of a Quaternion vector to rotate from a frame 1 into a frame 2.
 
-- `const `[`Modia3D.Vector3D`](@ref) = SVector{3,Float64}`:
-  Type of a vector in 3D space (e.g. position vector of the origin of a frame).
 
 The following constants are defined
 
@@ -26,7 +24,7 @@ The following constants are defined
   Quaternion vector with no rotation from a frame 1 into a frame 2.
 
 - `const `[`Modia3D.ZeroVector3D`](@ref):
-  Vector3D with only zero elements.
+  SVector{3,Float64} with only zero elements.
 
 If an angle is given as an argument to one of the functions below, it might be a
 number (interpreted as having unit `rad`) or a number with a unit
@@ -130,7 +128,7 @@ module Frames
 
 export RotationMatrix, NullRotation  , assertRotationMatrix
 export Quaternion    , NullQuaternion, assertQuaternion
-export Vector3D      , ZeroVector3D  , axisValue
+export ZeroVector3D  , axisValue
 
 export  rot1,  rot2,  rot3,  rot123, rotAxis,  rot_e,  rot_nxy, from_q
 export qrot1, qrot2, qrot3, qrot123,          qrot_e, qrot_nxy, from_R

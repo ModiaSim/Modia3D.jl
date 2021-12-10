@@ -224,7 +224,7 @@ end
 """
     w = wfromrot123(rot123::AbstractVector, derrot123::AbstractVector)
 
-Return relative rotational velocity Vector3D `w` from frame `1` to frame `2` resolved in frame `2`.
+Return relative rotational velocity SVector{3,Float64} `w` from frame `1` to frame `2` resolved in frame `2`.
 
 `rot123` are the Cardan angles (rotation sequence x-y-z) of rotation from frame `1` to frame `2`.
 `derrot123` are the time derivatives of `rot123`.

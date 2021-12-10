@@ -6,15 +6,6 @@
 #
 
 """
-    const Modia3D.SVector{3,Float64} = SVector{3,Float64}
-
-Type of a vector in 3D space (e.g. position vector of the origin of a frame)
-"""
-# const SVector{3,Float64} = SVector{3,Float64}
-
-
-
-"""
     const Modia3D.ZeroVector3D = SVector{3,Float64}(0.0, 0.0, 0.0)
 
 Constant of a SVector{3,Float64} where all elements are zero
