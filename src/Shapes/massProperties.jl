@@ -8,9 +8,9 @@
 
 # MassProperties consisting of mass m, center of mass rCM and inertia tensor I
 struct MassProperties{F} <: Modia3D.AbstractMassProperties
-    m::Float64                 # mass [kg]
-    rCM::SVector{3,Float64}       # position vector from object3d frame to center of mass resolved in object3d frame [m]
-    I::SMatrix{3,3,Float64,9}  # inertia matrix w.r.t. center of mass resolved in object3d frame [kg.m^2]
+    m::F                 # mass [kg]
+    rCM::SVector{3,F}       # position vector from object3d frame to center of mass resolved in object3d frame [m]
+    I::SMatrix{3,3,F,9}  # inertia matrix w.r.t. center of mass resolved in object3d frame [kg.m^2]
 
     #---------------- different constructors for MassProperties -----------------
     # Constructor 0: takes mass, centerOfMass and inertiaMatrix as input values
@@ -53,7 +53,7 @@ end
 
 # Constructor a: mass, centerOfMass and entries of inertia tensor are optional
 #                --> if nothing special is defined it takes predefined values (= zero values)
-MassProperties{F}(; mass::Number=0.0, centerOfMass=Modia3D.ZeroVector3D(Float64),
+MassProperties{F}(; mass::Number=0.0, centerOfMass=Modia3D.ZeroVector3D(F),
                Ixx::Number=0.0, Iyy::Number=0.0, Izz::Number=0.0,
                Ixy::Number=0.0, Ixz::Number=0.0, Iyz::Number=0.0) where {F} =
                   MassProperties{F}(mass, centerOfMass, [Ixx Ixy Ixz; Ixy Iyy Iyz; Ixz Iyz Izz])
