@@ -19,7 +19,7 @@ The reference frame = Object3D frame is located at the center of the sphere.
 - `diameter` defines the diameter of the sphere.
 """
 mutable struct Sphere{F} <: Modia3D.AbstractGeometry
-    diameter::Float64
+    diameter::F
 
     function Sphere{F}(; diameter=1.0) where {F}
         @assert(diameter >= 0.0)
@@ -40,9 +40,9 @@ The reference frame = Object3D frame is located at the center of the ellipsoid.
 - `lengthZ` defines the length of the ellipsoid in z-direction.
 """
 mutable struct Ellipsoid{F} <: Modia3D.AbstractGeometry
-    lengthX::Float64
-    lengthY::Float64
-    lengthZ::Float64
+    lengthX::F
+    lengthY::F
+    lengthZ::F
 
     function Ellipsoid{F}(; lengthX=1.0, lengthY=1.0, lengthZ=1.0) where {F}
         @assert(lengthX >= 0.0)
@@ -69,9 +69,9 @@ The reference frame = Object3D frame is located at the center of the box.
 - `lengthZ` defines the length of the box in z-direction.
 """
 mutable struct Box{F} <: Modia3D.AbstractGeometry
-    lengthX::Float64
-    lengthY::Float64
-    lengthZ::Float64
+    lengthX::F
+    lengthY::F
+    lengthZ::F
 
     function Box{F}(; lengthX=1.0, lengthY=1.0, lengthZ=1.0) where {F}
         @assert(lengthX >= 0.0)
@@ -99,9 +99,9 @@ The reference frame = Object3D frame is located at the center of the cylinder.
 """
 mutable struct Cylinder{F} <: Modia3D.AbstractGeometry
     axis::Int
-    diameter::Float64
-    length::Float64
-    innerDiameter::Float64
+    diameter::F
+    length::F
+    innerDiameter::F
 
     function Cylinder{F}(; axis=3, diameter=1.0, length=1.0, innerDiameter=0.0) where {F}
         @assert(1 <= axis <= 3)
@@ -127,9 +127,9 @@ The reference frame = Object3D frame is located at the center of the base circle
 """
 mutable struct Cone{F} <: Modia3D.AbstractGeometry
     axis::Int
-    diameter::Float64
-    length::Float64
-    topDiameter::Float64
+    diameter::F
+    length::F
+    topDiameter::F
 
     function Cone{F}(; axis=3, diameter=1.0, length=1.0, topDiameter=0.0) where {F}
         @assert(1 <= axis <= 3)
@@ -157,8 +157,8 @@ The reference frame = Object3D frame is located at the center of the capsule.
 """
 mutable struct Capsule{F} <: Modia3D.AbstractGeometry
     axis::Int
-    diameter::Float64
-    length::Float64
+    diameter::F
+    length::F
 
     function Capsule{F}(; axis=3, diameter=1.0, length=1.0) where {F}
         @assert(1 <= axis <= 3)
@@ -192,9 +192,9 @@ The dimension directions depend on `axis` by circularly shift:
 """
 mutable struct Beam{F} <: Modia3D.AbstractGeometry
     axis::Int
-    length::Float64
-    width::Float64
-    thickness::Float64
+    length::F
+    width::F
+    thickness::F
 
     function Beam{F}(; axis=3, length=1.0, width=0.2, thickness=0.1) where {F}
         @assert(1 <= axis <= 3)
