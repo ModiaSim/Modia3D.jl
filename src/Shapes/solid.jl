@@ -98,7 +98,7 @@ struct Solid{F} <: Modia3D.AbstractObject3DFeature
             (shape.volume, shape.centroidAlgo, shape.inertia) = computeMassProperties(shape.objPoints, shape.facesIndizes; bodyCoords=false)
         end
 
-        massProperties = createMassProperties(massProperties, shape, solidMaterial)
+        massProperties = createMassProperties(F, massProperties, shape, solidMaterial)
         new(shape, solidMaterial, massProperties, collision, contactMaterial, setCollisionSmoothingRadius(shape, collisionSmoothingRadius), visualMaterial)
     end
 end
