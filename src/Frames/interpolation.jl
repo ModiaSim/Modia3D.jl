@@ -7,7 +7,7 @@
 
 
 """
-    path = Modia3D.Path(r::Vector{Vector3D},
+    path = Modia3D.Path(r::Vector{SVector{3,Float64}},
                         q::Vector{Quaternion} = Quaternion[];
                         v = ones(length(r)))
 
@@ -49,9 +49,9 @@ and `qt` is the absolute quaternion of the frame at path parameter `t`.
 import Modia3D
 using Unitful
 
-r = [ Modia3D.Vector3D(1,0,0),
-      Modia3D.Vector3D(0,1,0),
-      Modia3D.Vector3D(0,0,1) ]
+r = [ SVector{3,Float64}(1,0,0),
+      SVector{3,Float64}(0,1,0),
+      SVector{3,Float64}(0,0,1) ]
 q = [ Modia3D.NullQuaternion,
       Modia3D.qrot1(45u"°"),
       Modia3D.qrot2(60u"°")]
@@ -70,7 +70,7 @@ end
 """
 struct Path
     t::Vector{Float64}        # path parameter; t=0 is (r[1],q[1])
-    r::Vector{Vector3D}       # Position vectors from world frame to origin of Frames
+    r::Vector{SVector{3,Float64}}       # Position vectors from world frame to origin of Frames
     q::Vector{Quaternion}     # Quaternions describing rotation from world frame to Frames
 
     function Path(r::AbstractVector, q::AbstractVector=Quaternion[];
@@ -179,7 +179,7 @@ end
 
 Return position `r` of `path::`[`Modia3D.Path`](@ref) at path parameter `t::Number`.
 """
-function interpolate_r(path::Path, t::Number)::Vector3D
+function interpolate_r(path::Path, t::Number)::SVector{3,Float64}
     i    = get_interval(path, t)
     tvec = path.t
     tt::Float64  = convert(Float64, t)

@@ -75,8 +75,8 @@ at the start of a collision.
 function contactStart(matPair::Shapes.ElasticContactPairMaterial,
                       obj1::Object3D,
                       obj2::Object3D,
-                      rContact::Frames.Vector3D,
-                      contactNormal::Frames.Vector3D,
+                      rContact::SVector{3,Float64},
+                      contactNormal::SVector{3,Float64},
                       elasticContactReductionFactor::Float64)
     # Compute spring constant
     name1 = obj1.feature.contactMaterial
@@ -128,8 +128,8 @@ the contact normal `contactNormal` and the largest penetration depth `distanceWi
 at time `time`.
 """
 function responseCalculation(material::ElasticContactPairResponseMaterial, obj1::Object3D, obj2::Object3D,
-                             rContact::Frames.Vector3D, e_n::Frames.Vector3D,
-                             s::Float64, time, file, sim)::Tuple{Frames.Vector3D,Frames.Vector3D,Frames.Vector3D,Frames.Vector3D}
+                             rContact::SVector{3,Float64}, e_n::SVector{3,Float64},
+                             s::Float64, time, file, sim)::Tuple{SVector{3,Float64},SVector{3,Float64},SVector{3,Float64},SVector{3,Float64}}
     # Material
     c_res    = material.c_res
     c_geo    = material.c_geo
@@ -183,6 +183,6 @@ function responseCalculation(material::ElasticContactPairResponseMaterial, obj1:
 end
 
 responseCalculation(material::Nothing, obj1::Object3D, obj2::Object3D,
-                    rContact::Frames.Vector3D, e_n::Frames.Vector3D,
+                    rContact::SVector{3,Float64}, e_n::SVector{3,Float64},
                     s::Float64, time, file) =
                     (Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D)

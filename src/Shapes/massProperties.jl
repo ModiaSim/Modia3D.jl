@@ -9,7 +9,7 @@
 # MassProperties consisting of mass m, center of mass rCM and inertia tensor I
 struct MassProperties{F} <: Modia3D.AbstractMassProperties
     m::Float64                 # mass [kg]
-    rCM::Frames.Vector3D       # position vector from object3d frame to center of mass resolved in object3d frame [m]
+    rCM::SVector{3,Float64}       # position vector from object3d frame to center of mass resolved in object3d frame [m]
     I::SMatrix{3,3,Float64,9}  # inertia matrix w.r.t. center of mass resolved in object3d frame [kg.m^2]
 
     #---------------- different constructors for MassProperties -----------------

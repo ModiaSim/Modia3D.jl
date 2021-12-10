@@ -6,20 +6,21 @@
 #
 
 """
-    const Modia3D.Vector3D = SVector{3,Float64}
+    const Modia3D.SVector{3,Float64} = SVector{3,Float64}
 
 Type of a vector in 3D space (e.g. position vector of the origin of a frame)
 """
-const Vector3D = SVector{3,Float64}
+# const SVector{3,Float64} = SVector{3,Float64}
 
 
 
 """
-    const Modia3D.ZeroVector3D = Vector3D(0.0, 0.0, 0.0)
+    const Modia3D.ZeroVector3D = SVector{3,Float64}(0.0, 0.0, 0.0)
 
-Constant of a Vector3D where all elements are zero
+Constant of a SVector{3,Float64} where all elements are zero
 """
-const ZeroVector3D = Vector3D(0.0, 0.0, 0.0)
+const ZeroVector3D = SVector{3,Float64}(0.0, 0.0, 0.0)
+# ZeroVector3D(::Type{F}) where {F} = SVector{3,F}(0, 0, 0)
 
 
 
@@ -27,12 +28,12 @@ const ZeroVector3D = Vector3D(0.0, 0.0, 0.0)
     vec = Modia3D.axisValue(axis, value)
     vec = Modia3D.axisValue(axis, positive, value)
 
-Return `vec::Vector3D` where all elements are zero with exception of `vec[axis] = value` or
-`vec[axis] = positive ? value : -value`.    
+Return `vec::SVector{3,Float64}` where all elements are zero with exception of `vec[axis] = value` or
+`vec[axis] = positive ? value : -value`.
 """
-@inline axisValue(axis::Int, value::Number)::Vector3D = axis==1 ? @SVector([value, 0.0, 0.0]) : (axis==2 ? @SVector([0.0, value, 0.0]) : 
+@inline axisValue(axis::Int, value::Number)::SVector{3,Float64} = axis==1 ? @SVector([value, 0.0, 0.0]) : (axis==2 ? @SVector([0.0, value, 0.0]) :
                                                        (axis==3 ? @SVector([0.0, 0.0, value]) : error("Bug in Modia3D: axisValue($axis, ...) - argument needs to be 1,2 or 3.")))
-@inline axisValue(axis::Int, positive::Bool, value::Number)::Vector3D = positive ? axisValue(axis,value) : axisValue(axis,-value)
+@inline axisValue(axis::Int, positive::Bool, value::Number)::SVector{3,Float64} = positive ? axisValue(axis,value) : axisValue(axis,-value)
 
 
 

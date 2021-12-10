@@ -107,7 +107,7 @@ rot123(angle1::Number, angle2::Number, angle3::Number)::RotationMatrix = rot3(an
 Return RotationMatrix R that rotates with angle `angle` in [radian] along axis `axis` (= 1, 2 or 3), or
 with `angle` if `positive=true` and otherwise with `-angle`.
 """
-@inline rotAxis(axis::Int, angle::Number)::RotationMatrix = axis==3 ? rot3(angle) : (axis==2 ? rot2(angle) : 
+@inline rotAxis(axis::Int, angle::Number)::RotationMatrix = axis==3 ? rot3(angle) : (axis==2 ? rot2(angle) :
                                                            (axis==1 ? rot1(angle) : error("Bug in Modia3D: rotAxis($axis, ...) - argument needs to be 1,2 or 3.")))
 @inline rotAxis(axis::Int, positive::Bool, angle::Number)::RotationMatrix = positive ? rotAxis(axis, angle) : rotAxis(axis, -angle)
 
@@ -118,11 +118,11 @@ with `angle` if `positive=true` and otherwise with `-angle`.
 Return RotationMatrix that rotates around angle `angle` along unit axis `e`.
 This function assumes that `norm(e) == 1`.
 """
-rot_e(e::Vector3D,angle::Number)::RotationMatrix = begin
+rot_e(e::SVector{3,Float64},angle::Number)::RotationMatrix = begin
                                                         (s,c) = sincos(angle)
                                                         e*e' + (NullRotation - e*e')*c - skew(e)*s
                                                    end
-rot_e(e::AbstractVector, angle::Number)::RotationMatrix    = rot_e( Vector3D(e), convert(Float64,angle) )
+rot_e(e::AbstractVector, angle::Number)::RotationMatrix    = rot_e( SVector{3,Float64}(e), convert(Float64,angle) )
 
 
 """
@@ -156,17 +156,17 @@ isapprox(R1,R2)   # returns true
 isapprox(R1,R3)   # returns true
 ```
 """
-function rot_nxy(nx::Vector3D, ny::Vector3D)::RotationMatrix
+function rot_nxy(nx::SVector{3,Float64}, ny::SVector{3,Float64})::RotationMatrix
   abs_nx  = norm(nx)
-  e1      = abs_nx < 1e-10 ?  Vector3D(1.0, 0.0, 0.0) : nx/abs_nx
+  e1      = abs_nx < 1e-10 ?  SVector{3,Float64}(1.0, 0.0, 0.0) : nx/abs_nx
   n3_aux  = cross(e1, ny)
-  e2_aux  = dot(n3_aux,n3_aux) > 1e-6 ? ny : ( abs(e1[1]) > 1e-6 ? Vector3D(0.0,1.0,0.0)
-                                                                 : Vector3D(1.0,0.0,0.0))
+  e2_aux  = dot(n3_aux,n3_aux) > 1e-6 ? ny : ( abs(e1[1]) > 1e-6 ? SVector{3,Float64}(0.0,1.0,0.0)
+                                                                 : SVector{3,Float64}(1.0,0.0,0.0))
   n3_aux2 = cross(e1, e2_aux)
   e3      = normalize(n3_aux2)
   R       = vcat(e1', cross(e3,e1)', e3')
 end
-rot_nxy(nx::AbstractVector, ny::AbstractVector) = rot_nxy(Vector3D(nx), Vector3D(ny))
+rot_nxy(nx::AbstractVector, ny::AbstractVector) = rot_nxy(SVector{3,Float64}(nx), SVector{3,Float64}(ny))
 
 
 
@@ -177,8 +177,8 @@ Transform vector v2 (v resolved in frame 2) to vector v1 (v resolved in frame 1)
 given either [`Modia3D.RotationMatrix`](@ref) ` R` or
 [`Modia3D.Quaternion`](@ref) ` q` (to rotate a frame 1 into a frame 2).
 """
-resolve1(R::RotationMatrix, v2::Vector3D)::Vector3D = R'*v2
-resolve1(R::RotationMatrix, v2::AbstractVector)::Vector3D     = R'*Vector3D(v2)
+resolve1(R::RotationMatrix, v2::SVector{3,Float64})::SVector{3,Float64} = R'*v2
+resolve1(R::RotationMatrix, v2::AbstractVector)::SVector{3,Float64}     = R'*SVector{3,Float64}(v2)
 
 
 
@@ -189,8 +189,8 @@ Transform vector v1 (v resolved in frame 1) to vector v2 (v resolved in frame 2)
 given either [`Modia3D.RotationMatrix`](@ref) ` R` or
 [`Modia3D.Quaternion`](@ref) ` q` (to rotate a frame 1 into a frame 2).
 """
-resolve2(R::RotationMatrix, v1::Vector3D)::Vector3D = R*v1
-resolve2(R::RotationMatrix, v1::AbstractVector)::Vector3D     = R*Vector3D(v1)
+resolve2(R::RotationMatrix, v1::SVector{3,Float64})::SVector{3,Float64} = R*v1
+resolve2(R::RotationMatrix, v1::AbstractVector)::SVector{3,Float64}     = R*SVector{3,Float64}(v1)
 
 
 """
@@ -331,14 +331,14 @@ Return unit vector `e` in direction of axis `axis` (`axis` = 1,2,3 or -1,-2-,3).
 ```julia
 import Modia3D
 
-e1 = ModiMath.eAxis(1)    # e1 = Vector3D(1.0,  0.0, 0.0)
-e2 = ModiMath.eAxis(-2)   # d2 = Vector3D(0.0, -1.0, 0.0)
+e1 = ModiMath.eAxis(1)    # e1 = SVector{3,Float64}(1.0,  0.0, 0.0)
+e2 = ModiMath.eAxis(-2)   # d2 = SVector{3,Float64}(0.0, -1.0, 0.0)
 ```
 """
-eAxis(axis::Int) = axis ==  1 ? Vector3D(  1.0,  0.0,  0.0) :
-                   axis ==  2 ? Vector3D(  0.0,  1.0,  0.0) :
-                   axis ==  3 ? Vector3D(  0.0,  0.0,  1.0) :
-                   axis == -1 ? Vector3D( -1.0,  0.0,  0.0) :
-                   axis == -2 ? Vector3D(  0.0, -1.0,  0.0) :
-                   axis == -3 ? Vector3D(  0.0,  0.0, -1.0) :
+eAxis(axis::Int) = axis ==  1 ? SVector{3,Float64}(  1.0,  0.0,  0.0) :
+                   axis ==  2 ? SVector{3,Float64}(  0.0,  1.0,  0.0) :
+                   axis ==  3 ? SVector{3,Float64}(  0.0,  0.0,  1.0) :
+                   axis == -1 ? SVector{3,Float64}( -1.0,  0.0,  0.0) :
+                   axis == -2 ? SVector{3,Float64}(  0.0, -1.0,  0.0) :
+                   axis == -3 ? SVector{3,Float64}(  0.0,  0.0, -1.0) :
                    error("Modia3D.eAxis(axis): axis = ", axis, " but must be 1, 2, 3, -1, -2, or -3.")
