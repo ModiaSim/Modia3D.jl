@@ -53,7 +53,7 @@ end
 
 # Constructor a: mass, centerOfMass and entries of inertia tensor are optional
 #                --> if nothing special is defined it takes predefined values (= zero values)
-MassProperties{F}(; mass::Number=0.0, centerOfMass=Modia3D.ZeroVector3D,
+MassProperties{F}(; mass::Number=0.0, centerOfMass=Modia3D.ZeroVector3D(Float64),
                Ixx::Number=0.0, Iyy::Number=0.0, Izz::Number=0.0,
                Ixy::Number=0.0, Ixz::Number=0.0, Iyz::Number=0.0) where {F} =
                   MassProperties{F}(mass, centerOfMass, [Ixx Ixy Ixz; Ixy Iyy Iyz; Ixz Iyz Izz])

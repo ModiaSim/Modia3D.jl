@@ -30,8 +30,8 @@ connected to the `world` Object3D. Otherwise, return `obj=obj2`.
 """
 function Fix(; obj1::Object3D,
                obj2::Object3D,
-               translation::AbstractVector = Modia3D.ZeroVector3D,
-               rotation::AbstractVector    = Modia3D.ZeroVector3D)::Object3D
+               translation::AbstractVector = Modia3D.ZeroVector3D(Float64),
+               rotation::AbstractVector    = Modia3D.ZeroVector3D(Float64))::Object3D
 
     (parent, child, cutJoint) = attach(obj1, obj2)
     if cutJoint
@@ -48,7 +48,7 @@ function Fix(; obj1::Object3D,
         obj2.jointIndex = 0
         obj2.ndof       = 0
 
-        if rot == Modia3D.ZeroVector3D
+        if rot == Modia3D.ZeroVector3D(Float64)
             obj2.joint     = FixedTranslationJoint()
             obj2.jointKind = FixTranslationKind
             obj2.R_rel     = Frames.NullRotation
@@ -68,7 +68,7 @@ function Fix(; obj1::Object3D,
         obj1.jointIndex = 0
         obj1.ndof       = 0
 
-        if rot == Modia3D.ZeroVector3D
+        if rot == Modia3D.ZeroVector3D(Float64)
             obj1.joint     = FixedTranslationJoint()
             obj1.jointKind = FixTranslationKind
             obj1.R_rel     = Frames.NullRotation

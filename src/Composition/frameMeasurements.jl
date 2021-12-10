@@ -48,7 +48,7 @@ function measFrameDistance(frameMeas::Object3D; frameOrig::Union{Object3D, Nothi
     if d_OrigMeas > 1.0e-32
         n_OrigMeas = r_OrigMeas / d_OrigMeas
     else
-        n_OrigMeas = Modia3D.ZeroVector3D
+        n_OrigMeas = Modia3D.ZeroVector3D(Float64)
     end
     return d_OrigMeas, n_OrigMeas
 end

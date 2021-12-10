@@ -6,12 +6,11 @@
 #
 
 """
-    const Modia3D.ZeroVector3D = SVector{3,Float64}(0.0, 0.0, 0.0)
+    Modia3D.ZeroVector3D(::Type{F}) where {F} = SVector{3,F}(0, 0, 0)
 
 Constant of a SVector{3,Float64} where all elements are zero
 """
-const ZeroVector3D = SVector{3,Float64}(0.0, 0.0, 0.0)
-# ZeroVector3D(::Type{F}) where {F} = SVector{3,F}(0, 0, 0)
+ZeroVector3D(::Type{F}) where {F} = SVector{3,F}(0, 0, 0)
 
 
 

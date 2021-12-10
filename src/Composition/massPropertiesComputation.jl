@@ -30,7 +30,7 @@ function initializeMassComputation!(scene::Scene)
                 if length(superObjs[i].superObjMass.superObj) > 0
                     rootSuperObj.hasMass = true
                     rootSuperObj.m       = 0.0
-                    rootSuperObj.r_CM    = Modia3D.ZeroVector3D
+                    rootSuperObj.r_CM    = Modia3D.ZeroVector3D(Float64)
                     rootSuperObj.I_CM    = SMatrix{3,3,Float64,9}(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
                     addMassPropertiesOfAllSuperObjChildsToRootSuperObj!(rootSuperObj, superObjs[i].superObjMass.superObj)
                 end
@@ -131,7 +131,7 @@ function addOrSubtractMassPropertiesOfChildToRoot!(obj_root, obj_child; add=true
         if m != 0.0
             rCM = (m_root * rCM_root - m_child * rCM_child_new)/m
         else
-            rCM = Modia3D.ZeroVector3D
+            rCM = Modia3D.ZeroVector3D(Float64)
         end
 
         # I: substract the sum of I_child_steiner and new mass multiplied with skew matrices of

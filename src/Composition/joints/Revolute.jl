@@ -73,11 +73,10 @@ mutable struct Revolute <: Modia3D.AbstractJoint
         obj.jointIndex = 0
         obj.ndof       = 1
         obj.canCollide = canCollide
-        obj.r_rel      = Modia3D.ZeroVector3D
+        obj.r_rel      = Modia3D.ZeroVector3D(Float64)
         obj.R_rel      = Frames.rotAxis(posAxis, posMovement, phi)
 
         parent.hasChildJoint = true
         return obj.joint
     end
 end
-

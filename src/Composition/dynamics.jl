@@ -292,8 +292,8 @@ function multibodyResiduals3!(sim::ModiaLang.SimulationModel{F}, scene, world, t
     end
 
     # Initialize force/torque of world-frame
-    world.f = Modia3D.ZeroVector3D
-    world.t = Modia3D.ZeroVector3D
+    world.f = Modia3D.ZeroVector3D(Float64)
+    world.t = Modia3D.ZeroVector3D(Float64)
 
     # Computation depending on leq_mode (the mode of the LinearEquationsIterator)
     if leq_mode == 0
@@ -317,8 +317,8 @@ function multibodyResiduals3!(sim::ModiaLang.SimulationModel{F}, scene, world, t
                     obj.f = -obj.m*( obj.R_abs*(obj.a0 - grav) + cross(obj.z, obj.r_CM) + cross(w, cross(w, obj.r_CM)))
                     obj.t = -(obj.I_CM*obj.z + cross(w, obj.I_CM*w)) + cross(obj.r_CM, obj.f)
                 else
-                    obj.f = Modia3D.ZeroVector3D
-                    obj.t = Modia3D.ZeroVector3D
+                    obj.f = Modia3D.ZeroVector3D(Float64)
+                    obj.t = Modia3D.ZeroVector3D(Float64)
                 end
             end # end forward recursion
 
@@ -351,8 +351,8 @@ function multibodyResiduals3!(sim::ModiaLang.SimulationModel{F}, scene, world, t
                     obj.f = -obj.m*( obj.R_abs*obj.a0 + cross(obj.z, obj.r_CM) )
                     obj.t = -obj.I_CM*obj.z + cross(obj.r_CM, obj.f)
                 else
-                    obj.f = Modia3D.ZeroVector3D
-                    obj.t = Modia3D.ZeroVector3D
+                    obj.f = Modia3D.ZeroVector3D(Float64)
+                    obj.t = Modia3D.ZeroVector3D(Float64)
                 end
             end # end forward recursion
 
@@ -375,7 +375,7 @@ function multibodyResiduals3!(sim::ModiaLang.SimulationModel{F}, scene, world, t
                         if scene.options.useOptimizedStructure
                             for obj in scene.updateVisuElements
                                 parent = obj.parent
-                                obj.r_abs = obj.r_rel ≡ Modia3D.ZeroVector3D ? parent.r_abs : parent.r_abs + parent.R_abs'*obj.r_rel
+                                obj.r_abs = obj.r_rel ≡ Modia3D.ZeroVector3D(Float64) ? parent.r_abs : parent.r_abs + parent.R_abs'*obj.r_rel
                                 obj.R_abs = obj.R_rel ≡ Modia3D.NullRotation ? parent.R_abs : obj.R_rel*parent.R_abs
                                 # is executed only if an internal Object3D called
                                 if length( obj.visualizationFrame ) == 1

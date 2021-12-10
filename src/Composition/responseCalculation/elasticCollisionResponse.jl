@@ -185,4 +185,4 @@ end
 responseCalculation(material::Nothing, obj1::Object3D, obj2::Object3D,
                     rContact::SVector{3,Float64}, e_n::SVector{3,Float64},
                     s::Float64, time, file) =
-                    (Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D)
+                    (Modia3D.ZeroVector3D(Float64), Modia3D.ZeroVector3D(Float64), Modia3D.ZeroVector3D(Float64), Modia3D.ZeroVector3D(Float64))

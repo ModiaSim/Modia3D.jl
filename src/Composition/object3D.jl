@@ -36,8 +36,8 @@ end
 """
     Object3D(;
         parent      = nothing,
-        translation = Modia3D.ZeroVector3D,
-        rotation    = Modia3D.ZeroVector3D,
+        translation = Modia3D.ZeroVector3D(Float64),
+        rotation    = Modia3D.ZeroVector3D(Float64),
         feature     = nothing)
 
 Generate a new Object3D object, that is a coordinate system (= frame, object3D) with associated feature that is described relatively to its (optional) parent Object3D.
@@ -88,7 +88,7 @@ mutable struct Object3D{F} <: Modia3D.AbstractObject3D
     ndof::Int                        # Number of degrees of freedom
     canCollide::Bool                 # = false, if no collision parent/Object3D
     r_rel::SVector{3,Float64}        # Relative position vector from frame of parent Object3D to origin of Object3D frame, resolved in parent frame in [m]
-                                     # (if parent===Object3D, r_rel=Modia3D.ZeroVector3D)
+                                     # (if parent===Object3D, r_rel=Modia3D.ZeroVector3D(Float64))
     R_rel::SMatrix{3,3,Float64,9}    # Rotation matrix from frame of parent Object3D to Object3D frame.
     r_abs::SVector{3,Float64}        # Absolute position vector from origin of world frame to origin of Object3D frame, resolved in world frame in [m]
     R_abs::SMatrix{3,3,Float64,9}    # Absolute rotation matrix from world frame to Object3D frame
@@ -154,7 +154,7 @@ mutable struct Object3D{F} <: Modia3D.AbstractObject3D
     function Object3D{F}(;
         parent::Union{Object3D,Nothing}=nothing,
         path::String="",
-        translation::AbstractVector = Modia3D.ZeroVector3D,
+        translation::AbstractVector = Modia3D.ZeroVector3D(Float64),
         rotation::Union{AbstractVector,Frames.RotationMatrix,Nothing} = nothing,
         feature::Any=nothing,
         kwargs...) where {F}
@@ -164,8 +164,8 @@ mutable struct Object3D{F} <: Modia3D.AbstractObject3D
 
         # create Object3D with created feature
         fixed = true
-        v_start = Modia3D.ZeroVector3D
-        w_start = Modia3D.ZeroVector3D
+        v_start = Modia3D.ZeroVector3D(Float64)
+        w_start = Modia3D.ZeroVector3D(Float64)
         w_startVariables = WCartesian
 
         visualizeFrame = Modia3D.Inherited
@@ -219,11 +219,11 @@ mutable struct Object3D{F} <: Modia3D.AbstractObject3D
                       feature::Modia3D.AbstractObject3DFeature = emptyObject3DFeature;
                       fixed::Bool = true,
                       interactionBehavior::InteractionBehavior = Modia3D.NoInteraction,
-                      r::AbstractVector = Modia3D.ZeroVector3D,
+                      r::AbstractVector = Modia3D.ZeroVector3D(Float64),
                       R::Union{Frames.RotationMatrix,Nothing} = nothing,
                       q::Union{Frames.Quaternion,Nothing} = nothing,
-                      v_start::AbstractVector = Modia3D.ZeroVector3D,
-                      w_start::AbstractVector = Modia3D.ZeroVector3D,
+                      v_start::AbstractVector = Modia3D.ZeroVector3D(Float64),
+                      w_start::AbstractVector = Modia3D.ZeroVector3D(Float64),
                       w_startVariables::WStartVariables = WCartesian,
                       visualizeFrame::Union{Modia3D.Ternary,Bool} = Modia3D.Inherited,
                       path::String="")::Object3D where {F}
@@ -248,8 +248,8 @@ mutable struct Object3D{F} <: Modia3D.AbstractObject3D
         obj = new(parent, Vector{Object3D{F}}[],
               false, InteractionManner(interactionBehavior), FixedJoint(), FixKind, 0, 0, true,
               r_rel, R_rel, r_abs, R_abs,
-              Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D,
-              false, 0.0, Modia3D.ZeroVector3D, SMatrix{3,3,Float64,9}(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
+              Modia3D.ZeroVector3D(Float64), Modia3D.ZeroVector3D(Float64), Modia3D.ZeroVector3D(Float64), Modia3D.ZeroVector3D(Float64), Modia3D.ZeroVector3D(Float64), Modia3D.ZeroVector3D(Float64),
+              false, 0.0, Modia3D.ZeroVector3D(Float64), SMatrix{3,3,Float64,9}(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
               feature, Modia3D.AbstractTwoObject3DObject[],
               false, false, false, false,
               shapeKind, shape, visualMaterial, centroid,
@@ -266,7 +266,7 @@ mutable struct Object3D{F} <: Modia3D.AbstractObject3D
 
         else
             # FreeMotionCardan pushes obj on parent.children
-            rot_start = !isnothing(R) ? rot123fromR(R) : !isnothing(q) ? rot123fromR(Modia3D.from_q(q)) : Modia3D.ZeroVector3D
+            rot_start = !isnothing(R) ? rot123fromR(R) : !isnothing(q) ? rot123fromR(Modia3D.from_q(q)) : Modia3D.ZeroVector3D(Float64)
             if w_startVariables == WCardan123
                 # convert Cardan123 -> Cartesian
                 om_start = wfromrot123(rot_start, w_start)
@@ -296,8 +296,8 @@ mutable struct Object3D{F} <: Modia3D.AbstractObject3D
         new(parent, Vector{Object3D{F}}[], false,
         InteractionManner(Modia3D.NoInteraction), FixedJoint(), FixKind, 0, 0, true,
         r_rel, R_rel, r_abs, R_abs,
-        Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D,
-        false, 0.0, Modia3D.ZeroVector3D, SMatrix{3,3,Float64,9}(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
+        Modia3D.ZeroVector3D(Float64), Modia3D.ZeroVector3D(Float64), Modia3D.ZeroVector3D(Float64), Modia3D.ZeroVector3D(Float64), Modia3D.ZeroVector3D(Float64), Modia3D.ZeroVector3D(Float64),
+        false, 0.0, Modia3D.ZeroVector3D(Float64), SMatrix{3,3,Float64,9}(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
         feature, Modia3D.AbstractTwoObject3DObject[],
         false, false, false, false,
         shapeKind, shape, visualMaterial, centroid,
@@ -317,7 +317,7 @@ function setShapeKind(::Type{F}, feature) where {F}
         shapeKind = Modia3D.getShapeKind(feature.shape)
         shape = feature.shape
 
-        centroid = Modia3D.ZeroVector3D
+        centroid = Modia3D.ZeroVector3D(Float64)
         if typeof(feature) <: Modia3D.Solid && !isnothing(shape)
             centroid = Modia3D.centroid(shape)
         end
@@ -332,7 +332,7 @@ function setShapeKind(::Type{F}, feature) where {F}
         end
         return shapeKind, shape, visualMaterial, centroid
     else
-        return Modia3D.UndefinedShapeKind, Modia3D.Sphere{F}(), Modia3D.VisualMaterial(), Modia3D.ZeroVector3D
+        return Modia3D.UndefinedShapeKind, Modia3D.Sphere{F}(), Modia3D.VisualMaterial(), Modia3D.ZeroVector3D(Float64)
     end
 end
 
@@ -349,19 +349,19 @@ function Object3DWithoutParent(obj::Object3D{F};
     obj.jointIndex         = 0
     obj.ndof               = 0
     obj.canCollide         = true
-    obj.r_rel              = Modia3D.ZeroVector3D
+    obj.r_rel              = Modia3D.ZeroVector3D(Float64)
     obj.R_rel              = Modia3D.NullRotation
-    obj.r_abs              = Modia3D.ZeroVector3D
+    obj.r_abs              = Modia3D.ZeroVector3D(Float64)
     obj.R_abs              = Modia3D.NullRotation
-    obj.v0                 = Modia3D.ZeroVector3D
-    obj.w                  = Modia3D.ZeroVector3D
-    obj.a0                 = Modia3D.ZeroVector3D
-    obj.z                  = Modia3D.ZeroVector3D
-    obj.f                  = Modia3D.ZeroVector3D
-    obj.t                  = Modia3D.ZeroVector3D
+    obj.v0                 = Modia3D.ZeroVector3D(Float64)
+    obj.w                  = Modia3D.ZeroVector3D(Float64)
+    obj.a0                 = Modia3D.ZeroVector3D(Float64)
+    obj.z                  = Modia3D.ZeroVector3D(Float64)
+    obj.f                  = Modia3D.ZeroVector3D(Float64)
+    obj.t                  = Modia3D.ZeroVector3D(Float64)
     obj.hasMass            = false
     obj.m                  = 0.0
-    obj.r_CM               = Modia3D.ZeroVector3D
+    obj.r_CM               = Modia3D.ZeroVector3D(Float64)
     obj.I_CM               = SMatrix{3,3,Float64,9}(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
     obj.twoObject3Dobject  = Modia3D.AbstractTwoObject3DObject[]
     obj.hasCutJoint        = false
@@ -615,7 +615,7 @@ function Base.show(io::IO, obj::Object3D)
         print(io, ")")
     end
 
-    if obj.r_rel != Modia3D.ZeroVector3D
+    if obj.r_rel != Modia3D.ZeroVector3D(Float64)
         print(io, "; r_rel = ", obj.r_rel)
         if obj.path == ""
             print(io, ")")

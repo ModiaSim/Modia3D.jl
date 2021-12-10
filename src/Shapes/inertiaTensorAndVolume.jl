@@ -91,12 +91,12 @@ Return position vector from solid reference frame to [centroid](https://en.wikip
 of solid `shape::Modia3D.AbstractGeometry` in [m]. If the solid has a uniform density,
 the centroid is identical to the *center of mass*.
 """
-@inline centroid(shape::Sphere) = Modia3D.ZeroVector3D
-@inline centroid(shape::Ellipsoid) = Modia3D.ZeroVector3D
-@inline centroid(shape::Box) = Modia3D.ZeroVector3D
-@inline centroid(shape::Cylinder) = Modia3D.ZeroVector3D
-@inline centroid(shape::Capsule) = Modia3D.ZeroVector3D
-@inline centroid(shape::Beam) = Modia3D.ZeroVector3D
+@inline centroid(shape::Sphere) = Modia3D.ZeroVector3D(Float64)
+@inline centroid(shape::Ellipsoid) = Modia3D.ZeroVector3D(Float64)
+@inline centroid(shape::Box) = Modia3D.ZeroVector3D(Float64)
+@inline centroid(shape::Cylinder) = Modia3D.ZeroVector3D(Float64)
+@inline centroid(shape::Capsule) = Modia3D.ZeroVector3D(Float64)
+@inline centroid(shape::Beam) = Modia3D.ZeroVector3D(Float64)
 
 @inline centHeight(shape::Cone) = shape.length/4*(shape.diameter^2 + 2*shape.diameter*shape.topDiameter + 3*shape.topDiameter^2)/(shape.diameter^2 + shape.diameter*shape.topDiameter + shape.topDiameter^2)  # https://mathworld.wolfram.com/ConicalFrustum.html
 @inline function centroid(shape::Cone)

@@ -46,7 +46,7 @@ function getObjInfos(filename::AbstractString, scaleFactor::SVector{3,Float64})
     objPoints = Vector{SVector{3,Float64}}()
     facesIndizes = Vector{SVector{3,Int64}}()
     areTriangles::Bool = true
-    centroid::SVector{3,Float64} = Modia3D.ZeroVector3D
+    centroid::SVector{3,Float64} = Modia3D.ZeroVector3D(Float64)
     longestEdge::Float64 = 0.0
     if filename[end-3:end] == ".obj"
         open(filename,"r") do file
@@ -57,7 +57,7 @@ function getObjInfos(filename::AbstractString, scaleFactor::SVector{3,Float64})
             y_min::Float64 = 0.0
             z_max::Float64 = 0.0
             z_min::Float64 = 0.0
-            sum = Modia3D.ZeroVector3D
+            sum = Modia3D.ZeroVector3D(Float64)
 
             for line in eachline(file; keep=true)
                 if isequal(line[1],'v') && isequal(line[2],' ')
@@ -94,7 +94,7 @@ function getObjInfos(filename::AbstractString, scaleFactor::SVector{3,Float64})
             if length(objPoints) != 0
                 centroid = sum / length(objPoints)
             else
-                centroid = Modia3D.ZeroVector3D
+                centroid = Modia3D.ZeroVector3D(Float64)
             end
             if !areTriangles
                 empty!(facesIndizes)

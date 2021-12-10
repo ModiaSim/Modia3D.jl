@@ -26,8 +26,8 @@ function attachAndReverseParents(newParent::Object3D, obj::Object3D)::Nothing
       parent_r_rel = parent.r_rel
       parent_R_rel = parent.R_rel
 
-      if r_rel ≡ Modia3D.ZeroVector3D
-         parent.r_rel = Modia3D.ZeroVector3D
+      if r_rel ≡ Modia3D.ZeroVector3D(Float64)
+         parent.r_rel = Modia3D.ZeroVector3D(Float64)
          parent.r_abs = obj1.r_abs
       else
          parent.r_rel = -R_rel*r_rel
@@ -98,7 +98,7 @@ end
 
 #=
 function connect(obj1::Object3D, obj2::Object3D;
-                 r::AbstractVector = Modia3D.ZeroVector3D,
+                 r::AbstractVector = Modia3D.ZeroVector3D(Float64),
                  R::Union{Frames.RotationMatrix,Nothing} = nothing,
                  q::Union{Frames.Quaternion,Nothing} = nothing,
                  fixed::Bool = true)::Nothing
@@ -159,7 +159,7 @@ function updatePosition!(obj::Object3D)::Nothing
 
       parent = obj.parent
 
-      if obj.r_rel ≡ Modia3D.ZeroVector3D
+      if obj.r_rel ≡ Modia3D.ZeroVector3D(Float64)
          obj.r_abs = parent.r_abs
       else
          obj.r_abs = parent.r_abs + parent.R_abs'*obj.r_rel

@@ -126,7 +126,7 @@ function tetrahedronEncloseOrigin(r0::SupportPoint, r1::SupportPoint,
     r1org = r1
     r2org = r2
     r3org = r3
-    aux = SVector{3, T}(Modia3D.ZeroVector3D)
+    aux = SVector{3, T}(Modia3D.ZeroVector3D(Float64))
     neps = Modia3D.nepsType(T)
     success = false
     for i in 1:niter_max
@@ -391,7 +391,7 @@ function mprGeneral(ch::Composition.ContactDetectionMPR_handler{T}, shapeA::Comp
         # e.g. any collision/or distance between two spheres
         #println("TC 1")
         distance = dot(r1.p,normalize(r0.p))
-        return (distance, r1.a, r1.b, r1.n, false, SVector{3,T}(Modia3D.ZeroVector3D), SVector{3,T}(Modia3D.ZeroVector3D), SVector{3,T}(Modia3D.ZeroVector3D), SVector{3,T}(Modia3D.ZeroVector3D), SVector{3,T}(Modia3D.ZeroVector3D), SVector{3,T}(Modia3D.ZeroVector3D) )
+        return (distance, r1.a, r1.b, r1.n, false, SVector{3,T}(Modia3D.ZeroVector3D(Float64)), SVector{3,T}(Modia3D.ZeroVector3D(Float64)), SVector{3,T}(Modia3D.ZeroVector3D(Float64)), SVector{3,T}(Modia3D.ZeroVector3D(Float64)), SVector{3,T}(Modia3D.ZeroVector3D(Float64)), SVector{3,T}(Modia3D.ZeroVector3D(Float64)) )
     else
         # normalize n2
         n2 = n2/n2abs
@@ -433,7 +433,7 @@ function distanceTwoSpheres(ch::Composition.ContactDetectionMPR_handler{T}, shap
     distance = distanceCentroids - radiusA - radiusB
     contactPointShapeA = centroidSphereA + normal*radiusA
     contactPointShapeB = centroidSphereB - normal*radiusB
-    return (distance, contactPointShapeA, contactPointShapeB, normal, false, SVector{3,T}(Modia3D.ZeroVector3D), SVector{3,T}(Modia3D.ZeroVector3D), SVector{3,T}(Modia3D.ZeroVector3D), SVector{3,T}(Modia3D.ZeroVector3D), SVector{3,T}(Modia3D.ZeroVector3D), SVector{3,T}(Modia3D.ZeroVector3D) )
+    return (distance, contactPointShapeA, contactPointShapeB, normal, false, SVector{3,T}(Modia3D.ZeroVector3D(Float64)), SVector{3,T}(Modia3D.ZeroVector3D(Float64)), SVector{3,T}(Modia3D.ZeroVector3D(Float64)), SVector{3,T}(Modia3D.ZeroVector3D(Float64)), SVector{3,T}(Modia3D.ZeroVector3D(Float64)), SVector{3,T}(Modia3D.ZeroVector3D(Float64)) )
 end
 
 
