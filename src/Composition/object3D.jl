@@ -319,7 +319,7 @@ function setShapeKind(::Type{F}, feature) where {F}
 
         centroid = Modia3D.ZeroVector3D(F)
         if typeof(feature) <: Modia3D.Solid && !isnothing(shape)
-            centroid = Modia3D.centroid(F, shape)
+            centroid = Modia3D.centroid(shape)
         end
 
         if shapeKind == Modia3D.UndefinedShapeKind

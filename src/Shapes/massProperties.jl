@@ -60,7 +60,7 @@ MassProperties{F}(; mass::Number=0.0, centerOfMass=Modia3D.ZeroVector3D(F),
 # Constructor b: shape and mass is given, center of mass and inertia tensor is
 #                calculated via shape --> constructor 0 is called
 MassProperties{F}(shape::Modia3D.AbstractGeometry, mass::Number) where {F} =
-                     MassProperties{F}(mass, centroid(F, shape), inertiaMatrix(shape,mass))
+                     MassProperties{F}(mass, centroid(shape), inertiaMatrix(shape,mass))
 # Constructor c: shape and material is given, mass is computed via volume of
 #                shape and density --> constructor b is called
 MassProperties{F}(shape::Modia3D.AbstractGeometry, material::SolidMaterial) where {F} =
