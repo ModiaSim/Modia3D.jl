@@ -103,9 +103,9 @@ mutable struct Object3D{F} <: Modia3D.AbstractObject3D
     #   The root of each super object has potentially hasMass=true. All other Object3Ds have hasMass=false.
     #   The initial (fixed) mass properties defined in the ModiaLang model are stored in feature.
     hasMass::Bool                 # = false, if m and I_CM are zero. = true, otherwise.
-    m::Float64                    # Mass in [kg]
-    r_CM::SVector{3,Float64}      # Position vector from Object3D to Center of Mass resolved in Object3D in [m]
-    I_CM::SMatrix{3,3,Float64,9}  # Inertia matrix at Center of Mass resolved in a frame in the center of mass that is parallel to Object3D in [kg*m^2]
+    m::F                    # Mass in [kg]
+    r_CM::SVector{3,F}      # Position vector from Object3D to Center of Mass resolved in Object3D in [m]
+    I_CM::SMatrix{3,3,F,9}  # Inertia matrix at Center of Mass resolved in a frame in the center of mass that is parallel to Object3D in [kg*m^2]
 
     # Additional information associated with Object3D
     feature::Union{Modia3D.AbstractObject3DFeature, Modia3D.AbstractScene}  # Optional feature associated with Object3D
@@ -249,7 +249,7 @@ mutable struct Object3D{F} <: Modia3D.AbstractObject3D
               false, InteractionManner(interactionBehavior), FixedJoint(), FixKind, 0, 0, true,
               r_rel, R_rel, r_abs, R_abs,
               Modia3D.ZeroVector3D(Float64), Modia3D.ZeroVector3D(Float64), Modia3D.ZeroVector3D(Float64), Modia3D.ZeroVector3D(Float64), Modia3D.ZeroVector3D(Float64), Modia3D.ZeroVector3D(Float64),
-              false, 0.0, Modia3D.ZeroVector3D(Float64), SMatrix{3,3,Float64,9}(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
+              false, F(0.0), Modia3D.ZeroVector3D(F), SMatrix{3,3,F,9}(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
               feature, Modia3D.AbstractTwoObject3DObject[],
               false, false, false, false,
               shapeKind, shape, visualMaterial, centroid,
@@ -297,7 +297,7 @@ mutable struct Object3D{F} <: Modia3D.AbstractObject3D
         InteractionManner(Modia3D.NoInteraction), FixedJoint(), FixKind, 0, 0, true,
         r_rel, R_rel, r_abs, R_abs,
         Modia3D.ZeroVector3D(Float64), Modia3D.ZeroVector3D(Float64), Modia3D.ZeroVector3D(Float64), Modia3D.ZeroVector3D(Float64), Modia3D.ZeroVector3D(Float64), Modia3D.ZeroVector3D(Float64),
-        false, 0.0, Modia3D.ZeroVector3D(Float64), SMatrix{3,3,Float64,9}(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
+        false, F(0.0), Modia3D.ZeroVector3D(F), SMatrix{3,3,F,9}(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
         feature, Modia3D.AbstractTwoObject3DObject[],
         false, false, false, false,
         shapeKind, shape, visualMaterial, centroid,
@@ -360,9 +360,9 @@ function Object3DWithoutParent(obj::Object3D{F};
     obj.f                  = Modia3D.ZeroVector3D(Float64)
     obj.t                  = Modia3D.ZeroVector3D(Float64)
     obj.hasMass            = false
-    obj.m                  = 0.0
-    obj.r_CM               = Modia3D.ZeroVector3D(Float64)
-    obj.I_CM               = SMatrix{3,3,Float64,9}(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+    obj.m                  = F(0.0)
+    obj.r_CM               = Modia3D.ZeroVector3D(F)
+    obj.I_CM               = SMatrix{3,3,F,9}(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
     obj.twoObject3Dobject  = Modia3D.AbstractTwoObject3DObject[]
     obj.hasCutJoint        = false
     obj.hasForceElement    = false
