@@ -91,25 +91,25 @@ Return position vector from solid reference frame to [centroid](https://en.wikip
 of solid `shape::Modia3D.AbstractGeometry` in [m]. If the solid has a uniform density,
 the centroid is identical to the *center of mass*.
 """
-@inline centroid(shape::Sphere) = Modia3D.ZeroVector3D(Float64)
-@inline centroid(shape::Ellipsoid) = Modia3D.ZeroVector3D(Float64)
-@inline centroid(shape::Box) = Modia3D.ZeroVector3D(Float64)
-@inline centroid(shape::Cylinder) = Modia3D.ZeroVector3D(Float64)
-@inline centroid(shape::Capsule) = Modia3D.ZeroVector3D(Float64)
-@inline centroid(shape::Beam) = Modia3D.ZeroVector3D(Float64)
+@inline centroid(::Type{F}, shape::Sphere) where {F} = Modia3D.ZeroVector3D(F)
+@inline centroid(::Type{F}, shape::Ellipsoid) where {F} = Modia3D.ZeroVector3D(F)
+@inline centroid(::Type{F}, shape::Box) where {F} = Modia3D.ZeroVector3D(F)
+@inline centroid(::Type{F}, shape::Cylinder) where {F} = Modia3D.ZeroVector3D(F)
+@inline centroid(::Type{F}, shape::Capsule) where {F} = Modia3D.ZeroVector3D(F)
+@inline centroid(::Type{F}, shape::Beam) where {F} = Modia3D.ZeroVector3D(F)
 
 @inline centHeight(shape::Cone) = shape.length/4*(shape.diameter^2 + 2*shape.diameter*shape.topDiameter + 3*shape.topDiameter^2)/(shape.diameter^2 + shape.diameter*shape.topDiameter + shape.topDiameter^2)  # https://mathworld.wolfram.com/ConicalFrustum.html
-@inline function centroid(shape::Cone)
+@inline function centroid(::Type{F}, shape::Cone) where {F}
     if shape.axis == 1
-        return SVector{3,Float64}([centHeight(shape), 0.0, 0.0])
+        return SVector{3,F}([centHeight(shape), 0.0, 0.0])
     elseif shape.axis == 2
-        return SVector{3,Float64}([0.0, centHeight(shape), 0.0])
+        return SVector{3,F}([0.0, centHeight(shape), 0.0])
     else
-        return SVector{3,Float64}([0.0, 0.0, centHeight(shape)])
+        return SVector{3,F}([0.0, 0.0, centHeight(shape)])
     end
 end
 
-@inline function centroid(shape::FileMesh)
+@inline function centroid(::Type{F}, shape::FileMesh) where {F}
   if !isempty(shape.facesIndizes)
     return shape.centroidAlgo
   else

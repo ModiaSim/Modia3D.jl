@@ -119,7 +119,7 @@ mutable struct Object3D{F} <: Modia3D.AbstractObject3D
     shapeKind::Shapes.ShapeKind             # marks the defined shape
     shape::Modia3D.AbstractShape            # stores shape defined in Solid or Visual
     visualMaterial::Shapes.VisualMaterial   # stores visualMaterial defined in Solid or Visual
-    centroid::SVector{3,Float64}            # stores the centroid of a solid shape
+    centroid::SVector{3,F}            # stores the centroid of a solid shape
 
     # = True: Coordinate system of Object3D is always visualized
     # = False: Coordinate system of Object3D is never visualized
@@ -317,9 +317,9 @@ function setShapeKind(::Type{F}, feature) where {F}
         shapeKind = Modia3D.getShapeKind(feature.shape)
         shape = feature.shape
 
-        centroid = Modia3D.ZeroVector3D(Float64)
+        centroid = Modia3D.ZeroVector3D(F)
         if typeof(feature) <: Modia3D.Solid && !isnothing(shape)
-            centroid = Modia3D.centroid(shape)
+            centroid = Modia3D.centroid(F, shape)
         end
 
         if shapeKind == Modia3D.UndefinedShapeKind
@@ -332,7 +332,7 @@ function setShapeKind(::Type{F}, feature) where {F}
         end
         return shapeKind, shape, visualMaterial, centroid
     else
-        return Modia3D.UndefinedShapeKind, Modia3D.Sphere{F}(), Modia3D.VisualMaterial(), Modia3D.ZeroVector3D(Float64)
+        return Modia3D.UndefinedShapeKind, Modia3D.Sphere{F}(), Modia3D.VisualMaterial(), Modia3D.ZeroVector3D(F)
     end
 end
 
