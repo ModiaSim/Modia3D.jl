@@ -193,7 +193,7 @@ end
 
 
 #-------------------------------------- Global SceneOptions -------------------------------
-struct SceneOptions
+struct SceneOptions{F}
     # Gravity field
     gravityField::Modia3D.AbstractGravityField
 
@@ -203,7 +203,7 @@ struct SceneOptions
     ### Contact detection ###
     enableContactDetection::Bool            # = true, if contact detection is enabled
     contactDetection::Modia3D.AbstractContactDetection
-    elasticContactReductionFactor::Float64  # c_res_used = c_res * elasticContactReductionFactor (> 0)
+    elasticContactReductionFactor::F  # c_res_used = c_res * elasticContactReductionFactor (> 0)
     gap::Float64
 
 
@@ -226,11 +226,11 @@ struct SceneOptions
     lightLongitude::Float64               # Longitude angle of light position (0 = -y/-z/-x direction)
     lightLatitude::Float64                # Latitude angle of light position (0 = horizontal)
 
-    function SceneOptions(;gravityField    = UniformGravityField(),
+    function SceneOptions{F}(;gravityField    = UniformGravityField(),
             useOptimizedStructure         = true,
             enableContactDetection        = true,
             contactDetection              = ContactDetectionMPR_handler(),
-            elasticContactReductionFactor = 1.0,
+            elasticContactReductionFactor = F(1.0),
             gap                           = 0.001,
             enableVisualization           = true,
             animationFile                 = nothing,
@@ -247,7 +247,7 @@ struct SceneOptions
             cameraLatitude                = 15/180*pi,
             lightDistance                 = 10.0*nominalLength,
             lightLongitude                = 60/180*pi,
-            lightLatitude                 = 45/180*pi)
+            lightLatitude                 = 45/180*pi) where {F}
         @assert(gap > 0.0)
         @assert(nominalLength > 0.0)
         @assert(defaultFrameLength > 0.0)
@@ -422,7 +422,7 @@ mutable struct Scene{F} <: Modia3D.AbstractScene
             useOptimizedStructure         = true,
             enableContactDetection        = true,
             mprTolerance                  = 1.0e-20,
-            elasticContactReductionFactor = 1.0,
+            elasticContactReductionFactor = F(1.0),
             gap                           = 0.001,
             enableVisualization           = true,
             animationFile                 = nothing,
@@ -441,7 +441,7 @@ mutable struct Scene{F} <: Modia3D.AbstractScene
             lightLongitude                = 60/180*pi,
             lightLatitude                 = 45/180*pi) where {F}
 
-        sceneOptions = SceneOptions(gravityField = gravityField,
+        sceneOptions = SceneOptions{F}(gravityField = gravityField,
             useOptimizedStructure         = useOptimizedStructure,
             contactDetection              = ContactDetectionMPR_handler{Modia3D.MPRFloatType, F}(tol_rel = mprTolerance),
             nVisualContSupPoints          = nVisualContSupPoints,
