@@ -159,10 +159,10 @@ const zEps2 = 2*zEps
 
 
 function pushCollisionPair!(ch, contact, distanceWithHysteresis, pairID, contactPoint1,
-    contactPoint2, contactNormal, actObj, nextObj, hasevent, supportPointsDefined, support1A, support2A,
-    support3A, support1B, support2B, support3B)::Nothing
+    contactPoint2, contactNormal, actObj::Composition.Object3D{F}, nextObj::Composition.Object3D{F}, hasevent, supportPointsDefined, support1A, support2A,
+    support3A, support1B, support2B, support3B)::Nothing where {F}
     if contact
-        push!(ch.contactDict, pairID => Modia3D.ContactPair(contactPoint1,contactPoint2,
+        push!(ch.contactDict, pairID => Modia3D.ContactPair{F}(contactPoint1,contactPoint2,
             contactNormal, actObj, nextObj, distanceWithHysteresis, supportPointsDefined,
             support1A, support2A, support3A, support1B, support2B, support3B))
     else
