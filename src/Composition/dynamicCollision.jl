@@ -143,8 +143,8 @@ function visualizeContactAndSupportPoints(ch, world)
                 point2 = contactDictCollect[i][2].contactPoint2
             else
                 transparency = 1.0
-                point1 = Modia3D.ZeroVector3D
-                point2 = Modia3D.ZeroVector3D
+                point1 = Modia3D.ZeroVector3D(Float64)
+                point2 = Modia3D.ZeroVector3D(Float64)
             end
             setVisualizationContactProperties!(world.contactVisuObj1[i], transparency, point1)
             setVisualizationContactProperties!(world.contactVisuObj2[i], transparency, point2)
@@ -168,12 +168,12 @@ function visualizeContactAndSupportPoints(ch, world)
                 support3B = contactDictCollect[i][2].support3B
             else
                 transparency = 1.0
-                support1A = Modia3D.ZeroVector3D
-                support2A = Modia3D.ZeroVector3D
-                support3A = Modia3D.ZeroVector3D
-                support1B = Modia3D.ZeroVector3D
-                support2B = Modia3D.ZeroVector3D
-                support3B = Modia3D.ZeroVector3D
+                support1A = Modia3D.ZeroVector3D(Float64)
+                support2A = Modia3D.ZeroVector3D(Float64)
+                support3A = Modia3D.ZeroVector3D(Float64)
+                support1B = Modia3D.ZeroVector3D(Float64)
+                support2B = Modia3D.ZeroVector3D(Float64)
+                support3B = Modia3D.ZeroVector3D(Float64)
             end
             setVisualizationContactProperties!(world.supportVisuObj1A[i], transparency, support1A)
             setVisualizationContactProperties!(world.supportVisuObj2A[i], transparency, support2A)

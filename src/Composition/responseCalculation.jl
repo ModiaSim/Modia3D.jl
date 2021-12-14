@@ -36,7 +36,7 @@ Return the relative velocity in normal direction `contactNormal` at
 contact point `rContact` of the two penetrating objects `obj1, obj2`.
 """
 function normalRelativeVelocityAtContact(obj1::Object3D, obj2::Object3D,
-                                         rContact::Frames.Vector3D, e_n::Frames.Vector3D)
+                                         rContact::SVector{3,Float64}, e_n::SVector{3,Float64})
   r_rel1 = rContact - obj1.r_abs
   r_rel2 = rContact - obj2.r_abs
   w1     = obj1.R_abs'*obj1.w

@@ -12,7 +12,7 @@ const coSysMaterialBlue  = (; name="coordinateSystem.blue", uuid=name2uuid("coor
 
 
 function exportObject(object, elements, obj::Modia3D.Composition.Object3D, sphere::Modia3D.Shapes.Sphere, initPos, initRot)
-    r_obj = Modia3D.ZeroVector3D
+    r_obj = Modia3D.ZeroVector3D(Float64)
     R_obj = Modia3D.NullRotation
     name = Modia3D.fullName(obj)
     geometryName = name * ".geometry"
@@ -24,7 +24,7 @@ function exportObject(object, elements, obj::Modia3D.Composition.Object3D, spher
 end
 
 function exportObject(object, elements, obj::Modia3D.Composition.Object3D, ellipsoid::Modia3D.Shapes.Ellipsoid, initPos, initRot)
-    r_obj = Modia3D.ZeroVector3D
+    r_obj = Modia3D.ZeroVector3D(Float64)
     R_obj = Modia3D.NullRotation
     name = Modia3D.fullName(obj)
     geometryName = name * ".geometry"
@@ -36,7 +36,7 @@ function exportObject(object, elements, obj::Modia3D.Composition.Object3D, ellip
 end
 
 function exportObject(object, elements, obj::Modia3D.Composition.Object3D, box::Modia3D.Shapes.Box, initPos, initRot)
-    r_obj = Modia3D.ZeroVector3D
+    r_obj = Modia3D.ZeroVector3D(Float64)
     R_obj = Modia3D.NullRotation
     name = Modia3D.fullName(obj)
     geometryName = name * ".geometry"
@@ -52,7 +52,7 @@ function exportObject(object, elements, obj::Modia3D.Composition.Object3D, cylin
     geometryName = name * ".geometry"
     material = printVisuMaterialToJSON(obj, obj.visualMaterial)
     if cylinder.innerDiameter == 0.0
-        r_obj = Modia3D.ZeroVector3D
+        r_obj = Modia3D.ZeroVector3D(Float64)
         R_obj = Shapes.rotateAxis2y(cylinder.axis, Modia3D.NullRotation)
         shape = nothing
         geometry = (; name=geometryName, uuid=name2uuid(geometryName), type="CylinderBufferGeometry", radiusBottom=cylinder.diameter/2, radiusTop=cylinder.diameter/2, height=cylinder.length, radialSegments=32, heightSegments=1)
@@ -99,7 +99,7 @@ function exportObject(object, elements, obj::Modia3D.Composition.Object3D, cone:
 end
 
 function exportObject(object, elements, obj::Modia3D.Composition.Object3D, capsule::Modia3D.Shapes.Capsule, initPos, initRot)
-    r_obj = Modia3D.ZeroVector3D
+    r_obj = Modia3D.ZeroVector3D(Float64)
     R_obj = Shapes.rotateAxis2y(capsule.axis, Modia3D.NullRotation)
     name = Modia3D.fullName(obj)
     geometryName = name * ".geometry"
@@ -150,7 +150,7 @@ function exportObject(object, elements, obj::Modia3D.Composition.Object3D, beam:
 end
 
 function exportObject(object, elements, obj::Modia3D.Composition.Object3D, coordinateSystem::Modia3D.Shapes.CoordinateSystem, initPos, initRot)
-    r_obj = Modia3D.ZeroVector3D
+    r_obj = Modia3D.ZeroVector3D(Float64)
     R_obj = Modia3D.NullRotation
     name = Modia3D.fullName(obj)
     group = (; name=name, uuid=name2uuid(name), type="Group", children=[], position=initPos, rotation=Modia3D.rot123fromR(initRot), scale=ones(3))
@@ -200,7 +200,7 @@ function exportObject(object, elements, obj::Modia3D.Composition.Object3D, coord
 end
 
 function exportObject(object, elements, obj::Modia3D.Composition.Object3D, grid::Modia3D.Shapes.Grid, initPos, initRot)
-    r_obj = Modia3D.ZeroVector3D
+    r_obj = Modia3D.ZeroVector3D(Float64)
     R_obj = Shapes.rotateAxis2z(grid.axis, Modia3D.NullRotation)
     name = Modia3D.fullName(obj)
     geometryName = name * ".geometry"
@@ -236,7 +236,7 @@ function printInfoToFile(object, elements, geometry, material, shape, objectInfo
 end
 
 function exportObject(object, elements, obj::Modia3D.Composition.Object3D, fileMesh::Modia3D.Shapes.FileMesh, initPos, initRot)
-    r_obj = Modia3D.ZeroVector3D
+    r_obj = Modia3D.ZeroVector3D(Float64)
     R_obj = Modia3D.NullRotation
     filenameOld = fileMesh.filename
     filename = filenameOld
@@ -276,7 +276,7 @@ function getObjectInfoMesh(obj, initPos, initRot, scale, R_obj, meshInfo)
     return meshInfo
 end
 
-function getObjectInfo(name, geometry, material, initPos, initRot; type="Mesh", r_obj=Modia3D.ZeroVector3D, R_obj=Modia3D.NullRotation, scale=ones(3))
+function getObjectInfo(name, geometry, material, initPos, initRot; type="Mesh", r_obj=Modia3D.ZeroVector3D(Float64), R_obj=Modia3D.NullRotation, scale=ones(3))
     return (; name=name, uuid=name2uuid(name), type=type, geometry=get(geometry, :uuid, nothing), material=get(material, :uuid, ""), position=initPos+initRot'*r_obj, rotation=Modia3D.rot123fromR(R_obj*initRot), scale=scale)
 end
 
@@ -293,7 +293,7 @@ function printVisuMaterialToJSON(obj, visuMaterial::Modia3D.Shapes.VisualMateria
 end
 
 function printObjectToJSON(object, elements, obj; initPos=obj.r_abs, initRot=obj.R_abs)
-    r_obj = Modia3D.ZeroVector3D
+    r_obj = Modia3D.ZeroVector3D(Float64)
     R_obj = Modia3D.NullRotation
     shapeKind = obj.shapeKind
 

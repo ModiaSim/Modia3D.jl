@@ -1,48 +1,48 @@
-mutable struct SuperObjCollision
-    superObj::Vector{Object3D}
-    function SuperObjCollision()
-        new(Vector{Object3D}[])
+mutable struct SuperObjCollision{F}
+    superObj::Vector{Object3D{F}}
+    function SuperObjCollision{F}() where {F}
+        new(Vector{Object3D{F}}[])
     end
 end
 
-mutable struct SuperObjMass
-    superObj::Vector{Object3D}
-    function SuperObjMass()
-        new(Vector{Object3D}[])
+mutable struct SuperObjMass{F}
+    superObj::Vector{Object3D{F}}
+    function SuperObjMass{F}() where {F}
+        new(Vector{Object3D{F}}[])
     end
 end
 
-mutable struct SuperObjMovable
-    superObj::Vector{Object3D}
-    function SuperObjMovable()
-        new(Vector{Object3D}[])
+mutable struct SuperObjMovable{F}
+    superObj::Vector{Object3D{F}}
+    function SuperObjMovable{F}() where {F}
+        new(Vector{Object3D{F}}[])
     end
 end
 
-mutable struct SuperObjForce
-    superObj::Vector{Object3D}
-    function SuperObjForce()
-        new(Vector{Object3D}[])
+mutable struct SuperObjForce{F}
+    superObj::Vector{Object3D{F}}
+    function SuperObjForce{F}() where {F}
+        new(Vector{Object3D{F}}[])
     end
 end
 
-mutable struct SuperObjVisu
-    superObj::Vector{Object3D}
-    function SuperObjVisu()
-        new(Vector{Object3D}[])
+mutable struct SuperObjVisu{F}
+    superObj::Vector{Object3D{F}}
+    function SuperObjVisu{F}() where {F}
+        new(Vector{Object3D{F}}[])
     end
 end
 
 
 
-mutable struct SuperObjsRow
-    superObjCollision::SuperObjCollision
-    superObjMass::SuperObjMass
-    superObjMovable::SuperObjMovable
-    superObjForce::SuperObjForce
-    superObjVisu::SuperObjVisu
+mutable struct SuperObjsRow{F}
+    superObjCollision::SuperObjCollision{F}
+    superObjMass::SuperObjMass{F}
+    superObjMovable::SuperObjMovable{F}
+    superObjForce::SuperObjForce{F}
+    superObjVisu::SuperObjVisu{F}
     noCPair::Vector{Int64}
-    function SuperObjsRow()
-        new(SuperObjCollision(), SuperObjMass(), SuperObjMovable(), SuperObjForce(), SuperObjVisu(),  Vector{Int64}[])
+    function SuperObjsRow{F}() where {F}
+        new(SuperObjCollision{F}(), SuperObjMass{F}(), SuperObjMovable{F}(), SuperObjForce{F}(), SuperObjVisu{F}(),  Vector{Int64}[])
     end
 end

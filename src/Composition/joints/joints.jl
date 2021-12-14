@@ -26,8 +26,8 @@ function attachAndReverseParents(newParent::Object3D, obj::Object3D)::Nothing
       parent_r_rel = parent.r_rel
       parent_R_rel = parent.R_rel
 
-      if r_rel ≡ Modia3D.ZeroVector3D
-         parent.r_rel = Modia3D.ZeroVector3D
+      if r_rel ≡ Modia3D.ZeroVector3D(Float64)
+         parent.r_rel = Modia3D.ZeroVector3D(Float64)
          parent.r_abs = obj1.r_abs
       else
          parent.r_rel = -R_rel*r_rel
@@ -98,7 +98,7 @@ end
 
 #=
 function connect(obj1::Object3D, obj2::Object3D;
-                 r::AbstractVector = Modia3D.ZeroVector3D,
+                 r::AbstractVector = Modia3D.ZeroVector3D(Float64),
                  R::Union{Frames.RotationMatrix,Nothing} = nothing,
                  q::Union{Frames.Quaternion,Nothing} = nothing,
                  fixed::Bool = true)::Nothing
@@ -159,7 +159,7 @@ function updatePosition!(obj::Object3D)::Nothing
 
       parent = obj.parent
 
-      if obj.r_rel ≡ Modia3D.ZeroVector3D
+      if obj.r_rel ≡ Modia3D.ZeroVector3D(Float64)
          obj.r_abs = parent.r_abs
       else
          obj.r_abs = parent.r_abs + parent.R_abs'*obj.r_rel
@@ -224,7 +224,7 @@ end
 """
     w = wfromrot123(rot123::AbstractVector, derrot123::AbstractVector)
 
-Return relative rotational velocity Vector3D `w` from frame `1` to frame `2` resolved in frame `2`.
+Return relative rotational velocity SVector{3,Float64} `w` from frame `1` to frame `2` resolved in frame `2`.
 
 `rot123` are the Cardan angles (rotation sequence x-y-z) of rotation from frame `1` to frame `2`.
 `derrot123` are the time derivatives of `rot123`.
@@ -242,19 +242,19 @@ function wfromrot123(rot123::AbstractVector, derrot123::AbstractVector)
 end
 
 # Next function only for backwards compatibility (do not use for new model)
-computeKinematics!(scene::Scene, joint::Modia3D.AbstractJoint, obj::Object3D, analysis::Modia3D.AnalysisType, time::Float64)::Nothing =
-    computeKinematics!(scene, [obj], time)
+computeKinematics!(scene::Scene, joint::Modia3D.AbstractJoint, obj::Object3D, analysis::Modia3D.AnalysisType, time)::Nothing =
+    computeKinematics!(scene, [obj], Float64(time) )
 
 
 """
-    computeKinematics!(scene::Scene, tree::Vector{Object3D}, time)
+    computeKinematics!(scene::Scene, tree::Vector{Object3D{F}}, time)
 
 Compute position, velocity, acceleration variables of the Object3Ds that are connected
 in form of a tree. Variable `tree` contains the Object3Ds in a traversal order (e.g. pre-order traversal).
 `tree[1]` is the root object. It is assumed that the kinematic
 variables of tree[1].parent have a meaningful value.
 """
-function computeKinematics!(scene::Scene, tree::Vector{Object3D}, time)::Nothing
+function computeKinematics!(scene::Scene, tree::Vector{Object3D{F}}, time)::Nothing where {F}
     for obj in tree
         parent    = obj.parent
         jointKind = obj.jointKind
@@ -350,12 +350,12 @@ end
 
 
 """
-    computeKinematics_for_leq_mode_pos!(scene::Scene, tree::Vector{Object3D}, time)
+    computeKinematics_for_leq_mode_pos!(scene::Scene, tree::Vector{Object3D{F}}, time)
 
 Compute accelerations that are only a function of qdd, but not of q and qd.
 of the Object3Ds that are connected in form of a tree.
 """
-function computeKinematics_for_leq_mode_pos!(scene::Scene, tree::Vector{Object3D}, time)::Nothing
+function computeKinematics_for_leq_mode_pos!(scene::Scene, tree::Vector{Object3D{F}}, time)::Nothing where {F}
     for obj in tree
         parent    = obj.parent
         jointKind = obj.jointKind
@@ -405,14 +405,14 @@ end
 
 
 """
-    computeForcesTorquesAndResiduals!(scene::Scene, tree::Vector{Object3D}, time)
+    computeForcesTorquesAndResiduals!(scene::Scene, tree::Vector{Object3D{F}}, time)
 
 Compute forces/torques and residuals in a backward recursion from tree[end] to tree[1].
 Variable `tree` contains the Object3Ds in a traversal order (e.g. pre-order traversal).
 It is assumed that all force/torque variables are initialized (e.g. to zero), including
 tree[1].parent.
 """
-function computeForcesTorquesAndResiduals!(scene::Scene, tree::Vector{Object3D}, time)::Nothing
+function computeForcesTorquesAndResiduals!(scene::Scene, tree::Vector{Object3D{F}}, time)::Nothing where {F}
     for i = length(tree):-1:1
         obj       = tree[i]
         parent    = obj.parent
@@ -457,13 +457,13 @@ end
 
 
 """
-    setJointVariables_q_qd_f!(scene::Scene, objects::Vector{Object3D},
+    setJointVariables_q_qd_f!(scene::Scene, objects::Vector{Object3D{F}},
                               startIndex::Vector{Int}, ndof::Vector{Int}, args)
 
 Copy generalized joints variables (q,qd,f) into the corresponding Object3Ds.
 """
-function setJointVariables_q_qd_f!(scene::Scene, objects::Vector{Object3D}, startIndex::Vector{Int},
-                                   ndof::Vector{Int}, args)::Nothing
+function setJointVariables_q_qd_f!(scene::Scene, objects::Vector{Object3D{F}}, startIndex::Vector{Int},
+                                   ndof::Vector{Int}, args)::Nothing where {F}
     for (i,obj) in enumerate(objects)
         jointKind = obj.jointKind
         args_i    = args[i]
@@ -501,13 +501,13 @@ end
 
 
 """
-    setJointVariables_qdd!(scene::Scene, objects::Vector{Object3D}, startIndex::Vector{Int},
+    setJointVariables_qdd!(scene::Scene, objects::Vector{Object3D{F}}, startIndex::Vector{Int},
                            ndof::Vector{Int}, qdd)
 
 Copy generalized joint accelerations into the corresponding joints.
 """
-function setJointVariables_qdd!(scene::Scene, objects::Vector{Object3D}, startIndex::Vector{Int},
-                                ndof::Vector{Int}, qdd)::Nothing
+function setJointVariables_qdd!(scene::Scene, objects::Vector{Object3D{F}}, startIndex::Vector{Int},
+                                ndof::Vector{Int}, qdd)::Nothing where {F}
 
     for (i,obj) in enumerate(objects)
         jointKind = obj.jointKind
@@ -540,11 +540,11 @@ end
 
 
 """
-    getJointResiduals_for_leq_mode_0!(scene::Scene, objects::Vector{Object3D}, residuals, startIndex::Int, ndof::Int, cache_h)
+    getJointResiduals_for_leq_mode_0!(scene::Scene, objects::Vector{Object3D{F}}, residuals, startIndex::Int, ndof::Int, cache_h)
 
 Copy specific variables into their objects for leq_mode = 0.
 """
-function getJointResiduals_for_leq_mode_0!(scene::Scene, objects::Vector{Object3D}, residuals, startIndex::Vector{Int}, ndof::Vector{Int}, cache_h)::Nothing
+function getJointResiduals_for_leq_mode_0!(scene::Scene, objects::Vector{Object3D{F}}, residuals, startIndex::Vector{Int}, ndof::Vector{Int}, cache_h)::Nothing where {F}
     for (i,obj) in enumerate(objects)
         jointKind = obj.jointKind
         beg       = startIndex[i]
@@ -580,11 +580,11 @@ end
 
 
 """
-    getJointResiduals_for_leq_mode_pos!(scene::Scene, objects::Vector{Object3D}, residuals, startIndex::Int, ndof::Int, cache_h)
+    getJointResiduals_for_leq_mode_pos!(scene::Scene, objects::Vector{Object3D{F}}, residuals, startIndex::Int, ndof::Int, cache_h)
 
 Copy specific variables into their objects for leq_mode > 0.
 """
-function getJointResiduals_for_leq_mode_pos!(scene::Scene, objects::Vector{Object3D}, residuals, startIndex::Vector{Int}, ndof::Vector{Int}, cache_h)::Nothing
+function getJointResiduals_for_leq_mode_pos!(scene::Scene, objects::Vector{Object3D{F}}, residuals, startIndex::Vector{Int}, ndof::Vector{Int}, cache_h)::Nothing where {F}
     for (i,obj) in enumerate(objects)
         jointKind = obj.jointKind
         beg       = startIndex[i]

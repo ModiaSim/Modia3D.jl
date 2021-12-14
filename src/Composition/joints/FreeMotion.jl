@@ -62,7 +62,7 @@ end
 """
     w = wfromrot132(rot132::AbstractVector, derrot132::AbstractVector)
 
-Return relative rotational velocity Vector3D `w` from frame `1` to frame `2` resolved in frame `2`.
+Return relative rotational velocity SVector{3,Float64} `w` from frame `1` to frame `2` resolved in frame `2`.
 
 `rot132` are the Cardan angles (rotation sequence x-z-y) of rotation from frame `1` to frame `2`.
 `derrot132` are the time derivatives of `rot132`.
@@ -76,4 +76,3 @@ function wfromrot132(rot132::AbstractVector, derrot132::AbstractVector)
                      sbe*cga*derrot132[1] - cbe*derrot132[2]                ]
 
 end
-

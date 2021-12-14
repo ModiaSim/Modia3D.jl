@@ -7,12 +7,12 @@
 
 
 
-get_eAxis(axis::Int) = axis==  1 ? Frames.Vector3D(  1.0,  0.0,  0.0) :
-                       axis==  2 ? Frames.Vector3D(  0.0,  1.0,  0.0) :
-                       axis==  3 ? Frames.Vector3D(  0.0,  0.0,  1.0) :
-                       axis== -1 ? Frames.Vector3D( -1.0,  0.0,  0.0) :
-                       axis== -2 ? Frames.Vector3D(  0.0, -1.0,  0.0) :
-                       axis== -3 ? Frames.Vector3D(  0.0,  0.0, -1.0) :
+get_eAxis(axis::Int) = axis==  1 ? SVector{3,Float64}(  1.0,  0.0,  0.0) :
+                       axis==  2 ? SVector{3,Float64}(  0.0,  1.0,  0.0) :
+                       axis==  3 ? SVector{3,Float64}(  0.0,  0.0,  1.0) :
+                       axis== -1 ? SVector{3,Float64}( -1.0,  0.0,  0.0) :
+                       axis== -2 ? SVector{3,Float64}(  0.0, -1.0,  0.0) :
+                       axis== -3 ? SVector{3,Float64}(  0.0,  0.0, -1.0) :
                        error("Modia3D.Prismatic: axis = ", axis, " but must be 1, 2, 3, -1, -2, or -3.")
 
 """
@@ -36,7 +36,7 @@ mutable struct Prismatic <: Modia3D.AbstractJoint
 
     posAxis::Int             # = 1,2,3
     posMovement::Bool        # = true, if movement along posAxis, otherwise in negative posAxis
-    eAxis::Frames.Vector3D   # Unit vector in direction of axis
+    eAxis::SVector{3,Float64}   # Unit vector in direction of axis
     ndof::Int
     canCollide::Bool         # = false, if no collision between obj1 and obj2
 

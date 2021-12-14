@@ -42,17 +42,17 @@ end
 
 
 function elasticContactPairCoefficients(obj1::Object3D, obj2::Object3D)
-  if typeof(obj1.feature.shape) == Modia3D.Shapes.Sphere && typeof(obj2.feature.shape) == Modia3D.Shapes.Sphere
+  if typeof(obj1.feature.shape) <: Modia3D.Shapes.Sphere && typeof(obj2.feature.shape) <: Modia3D.Shapes.Sphere
     r1 = obj1.feature.shape.diameter*0.5
     r2 = obj2.feature.shape.diameter*0.5
     mu_r_geo = r1*r2/(r1 + r2)
     n_geo = 1.5
     c_geo = 4/3*sqrt(mu_r_geo)
-  elseif typeof(obj1.feature.shape) == Modia3D.Shapes.Sphere && typeof(obj2.feature.shape) != Modia3D.Shapes.Sphere
+  elseif typeof(obj1.feature.shape) <: Modia3D.Shapes.Sphere && typeof(obj2.feature.shape) != Modia3D.Shapes.Sphere
     mu_r_geo = obj1.feature.shape.diameter*0.5
     n_geo = 1.5
     c_geo = 4/3*sqrt(mu_r_geo)
-  elseif typeof(obj1.feature.shape) != Modia3D.Shapes.Sphere && typeof(obj2.feature.shape) == Modia3D.Shapes.Sphere
+  elseif typeof(obj1.feature.shape) != Modia3D.Shapes.Sphere && typeof(obj2.feature.shape) <: Modia3D.Shapes.Sphere
     mu_r_geo = obj2.feature.shape.diameter*0.5
     n_geo = 1.5
     c_geo = 4/3*sqrt(mu_r_geo)
@@ -75,8 +75,8 @@ at the start of a collision.
 function contactStart(matPair::Shapes.ElasticContactPairMaterial,
                       obj1::Object3D,
                       obj2::Object3D,
-                      rContact::Frames.Vector3D,
-                      contactNormal::Frames.Vector3D,
+                      rContact::SVector{3,Float64},
+                      contactNormal::SVector{3,Float64},
                       elasticContactReductionFactor::Float64)
     # Compute spring constant
     name1 = obj1.feature.contactMaterial
@@ -128,8 +128,8 @@ the contact normal `contactNormal` and the largest penetration depth `distanceWi
 at time `time`.
 """
 function responseCalculation(material::ElasticContactPairResponseMaterial, obj1::Object3D, obj2::Object3D,
-                             rContact::Frames.Vector3D, e_n::Frames.Vector3D,
-                             s::Float64, time::Float64, file, sim)::Tuple{Frames.Vector3D,Frames.Vector3D,Frames.Vector3D,Frames.Vector3D}
+                             rContact::SVector{3,Float64}, e_n::SVector{3,Float64},
+                             s::Float64, time, file, sim)::Tuple{SVector{3,Float64},SVector{3,Float64},SVector{3,Float64},SVector{3,Float64}}
     # Material
     c_res    = material.c_res
     c_geo    = material.c_geo
@@ -183,6 +183,6 @@ function responseCalculation(material::ElasticContactPairResponseMaterial, obj1:
 end
 
 responseCalculation(material::Nothing, obj1::Object3D, obj2::Object3D,
-                    rContact::Frames.Vector3D, e_n::Frames.Vector3D,
-                    s::Float64, time::Float64, file) =
-                    (Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D)
+                    rContact::SVector{3,Float64}, e_n::SVector{3,Float64},
+                    s::Float64, time, file) =
+                    (Modia3D.ZeroVector3D(Float64), Modia3D.ZeroVector3D(Float64), Modia3D.ZeroVector3D(Float64), Modia3D.ZeroVector3D(Float64))

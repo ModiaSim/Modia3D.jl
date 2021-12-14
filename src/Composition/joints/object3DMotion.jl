@@ -47,10 +47,10 @@ mutable struct FreeMotion <: Modia3D.AbstractJoint
     function FreeMotion(; obj1::Modia3D.AbstractObject3D,
                           obj2::Modia3D.AbstractObject3D,
                           path::String = "",
-                          r::AbstractVector   = Modia3D.ZeroVector3D,
-                          rot::AbstractVector = Modia3D.ZeroVector3D,
-                          v::AbstractVector   = Modia3D.ZeroVector3D,
-                          w::AbstractVector   = Modia3D.ZeroVector3D,
+                          r::AbstractVector   = Modia3D.ZeroVector3D(Float64),
+                          rot::AbstractVector = Modia3D.ZeroVector3D(Float64),
+                          v::AbstractVector   = Modia3D.ZeroVector3D(Float64),
+                          w::AbstractVector   = Modia3D.ZeroVector3D(Float64),
                           next_isrot123::Bool = true)  # dummy argument, is ignored
 
         #(parent,obj,cutJoint) = attach(obj1, obj2)
@@ -68,12 +68,12 @@ mutable struct FreeMotion <: Modia3D.AbstractJoint
         rot = Modia3D.convertAndStripUnit(SVector{3,Float64}, u"rad", rot)
         v   = Modia3D.convertAndStripUnit(SVector{3,Float64}, u"m/s"  , v)
         w   = Modia3D.convertAndStripUnit(SVector{3,Float64}, u"rad/s", w)
-        a   = Modia3D.ZeroVector3D
-        z   = Modia3D.ZeroVector3D
+        a   = Modia3D.ZeroVector3D(Float64)
+        z   = Modia3D.ZeroVector3D(Float64)
         isrot123 = true    # next_isrot123 is ignored.
 
-        residue_f = Modia3D.ZeroVector3D
-        residue_t = Modia3D.ZeroVector3D
+        residue_f = Modia3D.ZeroVector3D(Float64)
+        residue_t = Modia3D.ZeroVector3D(Float64)
 
         obj2.joint      = new(path, obj1, obj2, 6, r, rot, isrot123, v, w, a, z, residue_f, residue_t)
         obj2.parent     = obj1

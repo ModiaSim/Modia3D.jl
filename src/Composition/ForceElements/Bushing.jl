@@ -1,12 +1,12 @@
 
 """
     force = Bushing(; obj1, obj2,
-        nominalForce      = Modia3D.ZeroVector3D,
-        springForceLaw    = Modia3D.ZeroVector3D,
-        damperForceLaw    = Modia3D.ZeroVector3D,
-        nominalTorque     = Modia3D.ZeroVector3D,
-        rotSpringForceLaw = Modia3D.ZeroVector3D,
-        rotDamperForceLaw = Modia3D.ZeroVector3D,
+        nominalForce      = Modia3D.ZeroVector3D(Float64),
+        springForceLaw    = Modia3D.ZeroVector3D(Float64),
+        damperForceLaw    = Modia3D.ZeroVector3D(Float64),
+        nominalTorque     = Modia3D.ZeroVector3D(Float64),
+        rotSpringForceLaw = Modia3D.ZeroVector3D(Float64),
+        rotDamperForceLaw = Modia3D.ZeroVector3D(Float64),
         largeAngles       = false )
 
 Return a `force` acting as bushing between `obj1::`[`Object3D`](@ref) and
@@ -67,12 +67,12 @@ mutable struct Bushing <: Modia3D.AbstractForceElement
 
     function Bushing(; obj1::Object3D,
                        obj2::Object3D,
-                       nominalForce::AbstractVector = Modia3D.ZeroVector3D,
-                       springForceLaw::AbstractVector = Modia3D.ZeroVector3D,
-                       damperForceLaw::AbstractVector = Modia3D.ZeroVector3D,
-                       nominalTorque::AbstractVector = Modia3D.ZeroVector3D,
-                       rotSpringForceLaw::AbstractVector = Modia3D.ZeroVector3D,
-                       rotDamperForceLaw::AbstractVector = Modia3D.ZeroVector3D,
+                       nominalForce::AbstractVector = Modia3D.ZeroVector3D(Float64),
+                       springForceLaw::AbstractVector = Modia3D.ZeroVector3D(Float64),
+                       damperForceLaw::AbstractVector = Modia3D.ZeroVector3D(Float64),
+                       nominalTorque::AbstractVector = Modia3D.ZeroVector3D(Float64),
+                       rotSpringForceLaw::AbstractVector = Modia3D.ZeroVector3D(Float64),
+                       rotDamperForceLaw::AbstractVector = Modia3D.ZeroVector3D(Float64),
                        largeAngles::Bool = false )
         nomForce  = Modia3D.convertAndStripUnit(SVector{3,Float64}, u"N"  , nominalForce)
         nomTorque = Modia3D.convertAndStripUnit(SVector{3,Float64}, u"N*m", nominalTorque)

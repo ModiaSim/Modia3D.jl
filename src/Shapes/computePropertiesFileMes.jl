@@ -32,12 +32,12 @@ end
 function computeMassProperties(vertices::Vector{SVector{3,Float64}}, triangle_indices::Vector{SVector{3,Int64}}; bodyCoords::Bool=false)
     if isempty(triangle_indices)
         # (volume, centroid, inertia)
-        return (0.0, Modia3D.ZeroVector3D, SMatrix{3,3,Float64,9}(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0) )
+        return (0.0, Modia3D.ZeroVector3D(Float64), SMatrix{3,3,Float64,9}(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0) )
     else
     weights = [1/6, 1/24, 1/24, 1/24, 1/60, 1/60, 1/60, 1/120, 1/120, 1/120]
     integral = zeros(10)
     volume   = 0.0
-    centroid::SVector{3,Float64} = Modia3D.ZeroVector3D
+    centroid::SVector{3,Float64} = Modia3D.ZeroVector3D(Float64)
     inertia::SMatrix{3,3,Float64,9} = SMatrix{3,3,Float64,9}(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
     for i=eachindex(triangle_indices)
         # get vertices of i-th triangle

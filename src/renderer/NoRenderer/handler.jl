@@ -5,11 +5,11 @@
 #   Modia3D.DLR_Visualization (Modia3D/renderer/DLR_Visualization/_module.jl)
 #
 
-function Composition.initializeVisualization(renderer::DummyRenderer, velements::Vector{Composition.Object3D})::Nothing
+function Composition.initializeVisualization(renderer::DummyRenderer, velements::Vector{Composition.Object3D{F}})::Nothing where {F}
 end
 
 
-function Composition.visualize!(renderer::DummyRenderer, time::Float64)
+function Composition.visualize!(renderer::DummyRenderer, time)
 end
 
 

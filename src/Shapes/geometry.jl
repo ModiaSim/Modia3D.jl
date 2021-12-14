@@ -18,14 +18,15 @@ The reference frame = Object3D frame is located at the center of the sphere.
 # Arguments
 - `diameter` defines the diameter of the sphere.
 """
-mutable struct Sphere <: Modia3D.AbstractGeometry
-    diameter::Float64
+mutable struct Sphere{F} <: Modia3D.AbstractGeometry
+    diameter::F
 
-    function Sphere(; diameter=1.0)
+    function Sphere{F}(; diameter=1.0) where {F}
         @assert(diameter >= 0.0)
         new(diameter)
     end
 end
+Sphere(; kwargs...) = Sphere{Float64}(; kwargs...)
 
 """
     Ellipsoid(; lengthX=1.0, lengthY=1.0, lengthZ=1.0)
@@ -38,22 +39,23 @@ The reference frame = Object3D frame is located at the center of the ellipsoid.
 - `lengthY` defines the length of the ellipsoid in y-direction.
 - `lengthZ` defines the length of the ellipsoid in z-direction.
 """
-mutable struct Ellipsoid <: Modia3D.AbstractGeometry
-    lengthX::Float64
-    lengthY::Float64
-    lengthZ::Float64
+mutable struct Ellipsoid{F} <: Modia3D.AbstractGeometry
+    lengthX::F
+    lengthY::F
+    lengthZ::F
 
-    function Ellipsoid(; lengthX=1.0, lengthY=1.0, lengthZ=1.0)
+    function Ellipsoid{F}(; lengthX=1.0, lengthY=1.0, lengthZ=1.0) where {F}
         @assert(lengthX >= 0.0)
         @assert(lengthY >= 0.0)
         @assert(lengthZ >= 0.0)
         if lengthX == lengthY == lengthZ
-            Sphere(diameter=lengthX)
+            Sphere{F}(diameter=lengthX)
         else
             new(lengthX, lengthY, lengthZ)
         end
     end
 end
+Ellipsoid(; kwargs...) = Ellipsoid{Float64}(; kwargs...)
 
 """
     Box(; lengthX=1.0, lengthY=1.0, lengthZ=1.0)
@@ -66,18 +68,19 @@ The reference frame = Object3D frame is located at the center of the box.
 - `lengthY` defines the length of the box in y-direction.
 - `lengthZ` defines the length of the box in z-direction.
 """
-mutable struct Box <: Modia3D.AbstractGeometry
-    lengthX::Float64
-    lengthY::Float64
-    lengthZ::Float64
+mutable struct Box{F} <: Modia3D.AbstractGeometry
+    lengthX::F
+    lengthY::F
+    lengthZ::F
 
-    function Box(; lengthX=1.0, lengthY=1.0, lengthZ=1.0)
+    function Box{F}(; lengthX=1.0, lengthY=1.0, lengthZ=1.0) where {F}
         @assert(lengthX >= 0.0)
         @assert(lengthY >= 0.0)
         @assert(lengthZ >= 0.0)
         new(lengthX, lengthY, lengthZ)
     end
 end
+Box(; kwargs...) = Box{Float64}(; kwargs...)
 
 """
     Cylinder(; axis=3, diameter=1.0, length=1.0, innerDiameter=0.0)
@@ -94,13 +97,13 @@ The reference frame = Object3D frame is located at the center of the cylinder.
 # Notes
 - `innerDiameter` is not supported by collision.
 """
-mutable struct Cylinder <: Modia3D.AbstractGeometry
+mutable struct Cylinder{F} <: Modia3D.AbstractGeometry
     axis::Int
-    diameter::Float64
-    length::Float64
-    innerDiameter::Float64
+    diameter::F
+    length::F
+    innerDiameter::F
 
-    function Cylinder(; axis=3, diameter=1.0, length=1.0, innerDiameter=0.0)
+    function Cylinder{F}(; axis=3, diameter=1.0, length=1.0, innerDiameter=0.0) where {F}
         @assert(1 <= axis <= 3)
         @assert(diameter >= 0.0)
         @assert(length >= 0.0)
@@ -108,6 +111,7 @@ mutable struct Cylinder <: Modia3D.AbstractGeometry
         new(axis, diameter, length, innerDiameter)
     end
 end
+Cylinder(; kwargs...) = Cylinder{Float64}(; kwargs...)
 
 """
     Cone(; axis=3, diameter=1.0, length=1.0, topDiameter=0.0)
@@ -121,13 +125,13 @@ The reference frame = Object3D frame is located at the center of the base circle
 - `length` defines the length of the cone/frustum.
 - `topDiameter` defines the diameter of the top circle of the frustum (where `topDiameter=0` defines a right cone).
 """
-mutable struct Cone <: Modia3D.AbstractGeometry
+mutable struct Cone{F} <: Modia3D.AbstractGeometry
     axis::Int
-    diameter::Float64
-    length::Float64
-    topDiameter::Float64
+    diameter::F
+    length::F
+    topDiameter::F
 
-    function Cone(; axis=3, diameter=1.0, length=1.0, topDiameter=0.0)
+    function Cone{F}(; axis=3, diameter=1.0, length=1.0, topDiameter=0.0) where {F}
         @assert(1 <= axis <= 3)
         @assert(diameter >= 0.0)
         @assert(length >= 0.0)
@@ -135,6 +139,7 @@ mutable struct Cone <: Modia3D.AbstractGeometry
         new(axis, diameter, length, topDiameter)
     end
 end
+Cone(; kwargs...) = Cone{Float64}(; kwargs...)
 
 """
     Capsule(; axis=3, diameter=1.0, length=1.0)
@@ -150,18 +155,19 @@ The reference frame = Object3D frame is located at the center of the capsule.
 # Notes
 - Some versions of SimVis visualize [half ellipsoids with semi-axis length `length/2` instead of spheres with diameter `diameter`](https://github.com/ModiaSim/PrivateModia3D.jl/issues/54).
 """
-mutable struct Capsule <: Modia3D.AbstractGeometry
+mutable struct Capsule{F} <: Modia3D.AbstractGeometry
     axis::Int
-    diameter::Float64
-    length::Float64
+    diameter::F
+    length::F
 
-    function Capsule(; axis=3, diameter=1.0, length=1.0)
+    function Capsule{F}(; axis=3, diameter=1.0, length=1.0) where {F}
         @assert(1 <= axis <= 3)
         @assert(diameter >= 0.0)
         @assert(length >= 0.0)
         new(axis, diameter, length)
     end
 end
+Capsule(; kwargs...) = Capsule{Float64}(; kwargs...)
 
 """
     Beam(; axis=3, length=1.0, width=0.2, thickness=0.1)
@@ -184,13 +190,13 @@ The dimension directions depend on `axis` by circularly shift:
 |   3    |   z      |   x     |   y         |
 
 """
-mutable struct Beam <: Modia3D.AbstractGeometry
+mutable struct Beam{F} <: Modia3D.AbstractGeometry
     axis::Int
-    length::Float64
-    width::Float64
-    thickness::Float64
+    length::F
+    width::F
+    thickness::F
 
-    function Beam(; axis=3, length=1.0, width=0.2, thickness=0.1)
+    function Beam{F}(; axis=3, length=1.0, width=0.2, thickness=0.1) where {F}
         @assert(1 <= axis <= 3)
         @assert(length >= 0.0)
         @assert(width >= 0.0)
@@ -198,6 +204,7 @@ mutable struct Beam <: Modia3D.AbstractGeometry
         new(axis, length, width, thickness)
     end
 end
+Beam(; kwargs...) = Beam{Float64}(; kwargs...)
 
 """
     FileMesh(; filename::AbstractString="", scale=SVector{3,Float64}(1.0,1.0,1.0),

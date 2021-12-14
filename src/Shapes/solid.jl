@@ -51,7 +51,7 @@ Solid(; shape = Sphere(diameter=0.5),
         visualMaterial = VisualMaterial(color="DarkViolet"))
 ```
 """
-struct Solid <: Modia3D.AbstractObject3DFeature
+struct Solid{F} <: Modia3D.AbstractObject3DFeature
     shape::Union{Modia3D.AbstractGeometry,Nothing}
     solidMaterial::Union{SolidMaterial,Nothing}
     massProperties::Union{MassProperties,Nothing}
@@ -60,7 +60,7 @@ struct Solid <: Modia3D.AbstractObject3DFeature
     collisionSmoothingRadius::Float64
     visualMaterial::Union{Shapes.VisualMaterial,Nothing}
 
-    function Solid(;
+    function Solid{F}(;
         shape::Union{Modia3D.AbstractGeometry,Nothing} = nothing,
         solidMaterial::Union{Modia3D.AbstractMassPropertiesInterface,AbstractString,SolidMaterial,Nothing} = nothing,
         massProperties::Union{Modia3D.AbstractMassProperties, Number, AbstractString, SolidMaterial, Nothing} = nothing,
@@ -68,7 +68,7 @@ struct Solid <: Modia3D.AbstractObject3DFeature
         contactMaterial::AbstractString = "",
         collisionSmoothingRadius::Float64=0.0,
         visualMaterial::Union{Shapes.VisualMaterial,AbstractString,Nothing} = Shapes.VisualMaterial(),
-        visualMaterialConvexDecomposition::Union{Shapes.VisualMaterial,AbstractString,Nothing} = Shapes.VisualMaterial())
+        visualMaterialConvexDecomposition::Union{Shapes.VisualMaterial,AbstractString,Nothing} = Shapes.VisualMaterial()) where {F}
 
         if collision && isnothing(shape)
             error("For collision/gripping simulations, a shape must be defined.")
@@ -98,10 +98,11 @@ struct Solid <: Modia3D.AbstractObject3DFeature
             (shape.volume, shape.centroidAlgo, shape.inertia) = computeMassProperties(shape.objPoints, shape.facesIndizes; bodyCoords=false)
         end
 
-        massProperties = createMassProperties(massProperties, shape, solidMaterial)
+        massProperties = createMassProperties(F, massProperties, shape, solidMaterial)
         new(shape, solidMaterial, massProperties, collision, contactMaterial, setCollisionSmoothingRadius(shape, collisionSmoothingRadius), visualMaterial)
     end
 end
+Solid(args...; kwargs...) = Solid{Float64}(args...; kwargs...)
 
 
 function JSON.show_json(io::JSON.StructuralContext, s::JSON.CommonSerialization, solid::Solid)

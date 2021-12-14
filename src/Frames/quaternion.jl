@@ -178,13 +178,13 @@ This function assumes that `norm(e) == 1`.
 From the two possible solutions `q` the one is returned that is closer
 to `q_guess` (note, `q` and `-q` define the same rotation).
 """
-@inline function qrot_e(e::Vector3D, angle::Number; q_guess::Quaternion=NullQuaternion)::Quaternion
+@inline function qrot_e(e::SVector{3,Float64}, angle::Number; q_guess::Quaternion=NullQuaternion)::Quaternion
     sa = sin(angle / 2)
     q = Quaternion(e[1] * sa, e[2] * sa, e[3] * sa, cos(angle / 2))
 
     return dot(q, q_guess) >= 0 ? q : -q
 end
-qrot_e(e::AbstractVector, angle::Number)::Quaternion = qrot_e(Vector3D(e), convert(Float64, angle))
+qrot_e(e::AbstractVector, angle::Number)::Quaternion = qrot_e(SVector{3,Float64}(e), convert(Float64, angle))
 
 
 """
@@ -223,10 +223,10 @@ qrot_nxy(nx, ny)::Quaternion = from_R(rot_nxy(nx, ny))
 
 
 
-resolve1(q::Quaternion, v2::Vector3D)::Vector3D =
+resolve1(q::Quaternion, v2::SVector{3,Float64})::SVector{3,Float64} =
     2 * ((q[4] * q[4] - 0.5) * v2 + dot(q[1:3], v2) * q[1:3] + q[4] * cross(q[1:3], v2))
 
-resolve2(q::Quaternion, v1::Vector3D)::Vector3D =
+resolve2(q::Quaternion, v1::SVector{3,Float64})::SVector{3,Float64} =
     2 * ((q[4] * q[4] - 0.5) * v1 + dot(q[1:3], v1) * q[1:3] - q[4] * cross(q[1:3], v1))
 
 relativeRotation(q1::Quaternion, q2::Quaternion)::Quaternion =
