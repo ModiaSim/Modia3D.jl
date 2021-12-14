@@ -50,7 +50,7 @@ function addIndicesOfCutJointsToSuperObj(scene::Scene)
 end
 
 
-function createAABB_noCPairs(scene::Scene, superObjsRow::SuperObjsRow)
+function createAABB_noCPairs(scene::Scene{F}, superObjsRow::SuperObjsRow) where {F}
     if length(superObjsRow.superObjCollision.superObj) > 0 && !isempty(superObjsRow.noCPair)
         push!(scene.noCPairs, superObjsRow.noCPair)
     else
@@ -58,7 +58,7 @@ function createAABB_noCPairs(scene::Scene, superObjsRow::SuperObjsRow)
     end
 
     if length(superObjsRow.superObjCollision.superObj) > 0
-        AABBrow = [Basics.BoundingBox() for i = 1:length(superObjsRow.superObjCollision.superObj)]
+        AABBrow = [Basics.BoundingBox{F}() for i = 1:length(superObjsRow.superObjCollision.superObj)]
         push!(scene.AABB, AABBrow)
     else
         push!(scene.AABB, [])
@@ -191,7 +191,7 @@ function build_superObjs!(scene::Scene{F}, world::Object3D)::Nothing where {F}
 
     while actPos <= nPos
         superObjsRow = SuperObjsRow{F}()
-        AABBrow      = Vector{Basics.BoundingBox}[]
+        AABBrow      = Vector{Basics.BoundingBox{F}}[]
         rootSuperObj = buffer[actPos]
 
         fillVisuElements!(scene, rootSuperObj, world)

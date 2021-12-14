@@ -405,7 +405,7 @@ mutable struct Scene{F} <: Modia3D.AbstractScene
     noCPairs::Vector{Vector{Int64}}           # Indices of frames (with respect to collSuperObjs) that can't collide in general (e.g. objects are connected via joints)
     noCPairsHelp::Dict{Modia3D.AbstractJoint,Vector{Int64}}
     allowedToMove::Vector{Union{Bool,Nothing}}
-    AABB::Vector{Vector{Basics.BoundingBox}}  # Bounding boxes of elements that can collide
+    AABB::Vector{Vector{Basics.BoundingBox{F}}}  # Bounding boxes of elements that can collide
     zStartIndex::Int                          # start index of collision zero crossing functions
     forceElements::Vector{Modia3D.AbstractForceElement}
     exportAnimation::Bool                     # animation file export is enabled
@@ -495,7 +495,7 @@ mutable struct Scene{F} <: Modia3D.AbstractScene
             Vector{Vector{Int64}}[],
             Dict{Modia3D.AbstractJoint,Vector{Int64}}(),
             Vector{Union{Bool}}[],
-            Vector{Vector{Basics.BoundingBox}}[],
+            Vector{Vector{Basics.BoundingBox{F}}}[],
             1,
             Vector{Modia3D.AbstractForceElement}[],
             exportAnimation,

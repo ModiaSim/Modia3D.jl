@@ -105,7 +105,7 @@ function Composition.getDistances!(scene::Composition.Scene, ch::Composition.Con
 end
 
 
-function computeDistances(scene::Composition.Scene, ch::Composition.ContactDetectionMPR_handler, world::Composition.Object3D, phase2::Bool, hasEvent::Bool=true)
+function computeDistances(scene::Composition.Scene{F}, ch::Composition.ContactDetectionMPR_handler, world::Composition.Object3D, phase2::Bool, hasEvent::Bool=true) where {F}
     noCPairs  = scene.noCPairs
     superObjs = scene.superObjs
     AABB = scene.AABB
@@ -117,7 +117,7 @@ function computeDistances(scene::Composition.Scene, ch::Composition.ContactDetec
                 k = k +1
                 obj = superObj[j]
                 AABB[i][j] = Modia3D.boundingBox!(obj,
-                    AABB[i][j]; tight=false, scaleFactor=0.01)
+                    AABB[i][j]; tight=false, scaleFactor=F(0.01) )
                 if scene.options.visualizeBoundingBox
                     updateVisualBoundingBox!(world.AABBVisu[k], AABB[i][j])
                 end

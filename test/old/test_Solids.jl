@@ -24,8 +24,8 @@ obj.r_abs = rref
 obj.R_abs = Tref
 eref  = rref/norm(rref)
 sp    = Modia3D.supportPoint(obj,eref)
-AABB1 = Modia3D.BoundingBox()
-AABB2 = Modia3D.BoundingBox(rref[1]-r, rref[1]+r, rref[2]-r, rref[2]+r, rref[3]-r, rref[3]+r)
+AABB1 = Modia3D.BoundingBox{Float64}()
+AABB2 = Modia3D.BoundingBox{Float64}(rref[1]-r, rref[1]+r, rref[2]-r, rref[2]+r, rref[3]-r, rref[3]+r)
 Modia3D.boundingBox!(obj, AABB1)
 
 @testset "Modia3D.Solid: Test Sphere" begin
@@ -58,8 +58,8 @@ eref  = SVector(0.0, 0.0, 1.0)
 obj.r_abs = rref
 obj.R_abs = Tref
 sp    = Modia3D.supportPoint(obj,eref)
-AABB1 = Modia3D.BoundingBox()
-AABB2 = Modia3D.BoundingBox(rref[1]-a, rref[1]+a, rref[2]-b, rref[2]+b, rref[3]-c, rref[3]+c)
+AABB1 = Modia3D.BoundingBox{Float64}()
+AABB2 = Modia3D.BoundingBox{Float64}(rref[1]-a, rref[1]+a, rref[2]-b, rref[2]+b, rref[3]-c, rref[3]+c)
 Modia3D.boundingBox!(obj, AABB1)
 
 @testset "Modia3D.Solid: Test Ellipsoid" begin
@@ -99,8 +99,8 @@ eref  = SVector(0.0, 0.0, 1.0)
 obj.r_abs = rref
 obj.R_abs = Tref
 sp    = Modia3D.supportPoint(obj,eref)
-AABB1 = Modia3D.BoundingBox()
-AABB2 = Modia3D.BoundingBox(rref[1]-a/2-solid.collisionSmoothingRadius, rref[1]+a/2+solid.collisionSmoothingRadius, rref[2]-b/2-solid.collisionSmoothingRadius, rref[2]+b/2+solid.collisionSmoothingRadius, rref[3]-c/2-solid.collisionSmoothingRadius, rref[3]+c/2+solid.collisionSmoothingRadius)
+AABB1 = Modia3D.BoundingBox{Float64}()
+AABB2 = Modia3D.BoundingBox{Float64}(rref[1]-a/2-solid.collisionSmoothingRadius, rref[1]+a/2+solid.collisionSmoothingRadius, rref[2]-b/2-solid.collisionSmoothingRadius, rref[2]+b/2+solid.collisionSmoothingRadius, rref[3]-c/2-solid.collisionSmoothingRadius, rref[3]+c/2+solid.collisionSmoothingRadius)
 Modia3D.boundingBox!(obj, AABB1)
 
 @testset "Modia3D.Solid: Test Box and MassProperties" begin

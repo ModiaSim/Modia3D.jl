@@ -35,7 +35,7 @@ function supportPoint(obj::Composition.Object3D{F}, e::SVector{3,T})::SVector{3,
 end
 
 
-function boundingBox!(obj::Composition.Object3D{F}, AABB::Basics.BoundingBox; tight::Bool=true, scaleFactor::Float64=0.01) where {F}
+function boundingBox!(obj::Composition.Object3D{F}, AABB::Basics.BoundingBox{F}; tight::Bool=true, scaleFactor::F=F(0.01) ) where {F}
     shapeKind = obj.shapeKind
     solid::Modia3D.Solid{F} = obj.feature
     collisionSmoothingRadius = solid.collisionSmoothingRadius
@@ -114,12 +114,12 @@ function boundingBox!(obj::Composition.Object3D{F}, AABB::Basics.BoundingBox; ti
         zmax = Modia3D.supportPoint_i_Beam(beam, obj.r_abs[3], SVector(obj.R_abs[:,3]), +1, collisionSmoothingRadius)
     elseif shapeKind == Modia3D.FileMeshKind
         fileMesh::Modia3D.FileMesh = obj.shape
-        xmin = Modia3D.supportPoint_i_FileMesh(fileMesh, obj.r_abs[1], SVector(obj.R_abs[:,1]), -1)
-        xmax = Modia3D.supportPoint_i_FileMesh(fileMesh, obj.r_abs[1], SVector(obj.R_abs[:,1]), +1)
-        ymin = Modia3D.supportPoint_i_FileMesh(fileMesh, obj.r_abs[2], SVector(obj.R_abs[:,2]), -1)
-        ymax = Modia3D.supportPoint_i_FileMesh(fileMesh, obj.r_abs[2], SVector(obj.R_abs[:,2]), +1)
-        zmin = Modia3D.supportPoint_i_FileMesh(fileMesh, obj.r_abs[3], SVector(obj.R_abs[:,3]), -1)
-        zmax = Modia3D.supportPoint_i_FileMesh(fileMesh, obj.r_abs[3], SVector(obj.R_abs[:,3]), +1)
+        xmin = F(Modia3D.supportPoint_i_FileMesh(fileMesh, obj.r_abs[1], SVector(obj.R_abs[:,1]), -1))
+        xmax = F(Modia3D.supportPoint_i_FileMesh(fileMesh, obj.r_abs[1], SVector(obj.R_abs[:,1]), +1))
+        ymin = F(Modia3D.supportPoint_i_FileMesh(fileMesh, obj.r_abs[2], SVector(obj.R_abs[:,2]), -1))
+        ymax = F(Modia3D.supportPoint_i_FileMesh(fileMesh, obj.r_abs[2], SVector(obj.R_abs[:,2]), +1))
+        zmin = F(Modia3D.supportPoint_i_FileMesh(fileMesh, obj.r_abs[3], SVector(obj.R_abs[:,3]), -1))
+        zmax = F(Modia3D.supportPoint_i_FileMesh(fileMesh, obj.r_abs[3], SVector(obj.R_abs[:,3]), +1))
     else
         error("boundingBox! not supported for shape")
     end

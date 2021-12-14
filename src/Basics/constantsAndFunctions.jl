@@ -31,15 +31,15 @@ end
 const radToDeg = 180.0/pi
 
 """    mutable struct BoundingBox - Smallest box that contains a visual element"""
-mutable struct BoundingBox
-    x_min::Float64
-    x_max::Float64
-    y_min::Float64
-    y_max::Float64
-    z_min::Float64
-    z_max::Float64
-    BoundingBox() = new(0.0,0.0,0.0,0.0,0.0,0.0)
-    BoundingBox(x_min,x_max,y_min,y_max,z_min,z_max) = new(x_min,x_max,y_min,y_max,z_min,z_max)
+mutable struct BoundingBox{F}
+    x_min::F
+    x_max::F
+    y_min::F
+    y_max::F
+    z_min::F
+    z_max::F
+    BoundingBox{F}() where {F} = new(F(0.0), F(0.0), F(0.0), F(0.0), F(0.0), F(0.0) )
+    BoundingBox{F}(x_min::F, x_max::F, y_min::F, y_max::F, z_min::F, z_max::F) where {F} = new(x_min, x_max, y_min, y_max, z_min, z_max)
 end
 
 
