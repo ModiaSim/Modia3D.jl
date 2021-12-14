@@ -33,12 +33,12 @@ end
 # (see file ...\Composition\responseCalculation\elasticCollisionResponse.jl)
 # further, at an event simulation status is updated, contact material is replaced
 # and the actual contactDict is stored
-function dealWithContacts!(sim, scene, ch, world, time, file)
+function dealWithContacts!(sim, scene::Scene{F}, ch, world, time, file) where {F}
   simh = sim.eventHandler
   for (pairID, pair) in ch.contactDict
     obj1 = pair.obj1
     obj2 = pair.obj2
-    rContact      = (pair.contactPoint1 + pair.contactPoint2)/2.0
+    rContact      = (pair.contactPoint1 + pair.contactPoint2)/F(2.0)
     contactNormal = pair.contactNormal
     if ModiaLang.isEvent(sim)
       # println("$(sim.time): ", obj1.path, " ", obj2.path)

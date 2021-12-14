@@ -73,11 +73,11 @@ Return a `responseMaterial::ElasticContactPairResponseMaterial` object
 at the start of a collision.
 """
 function contactStart(matPair::Shapes.ElasticContactPairMaterial,
-                      obj1::Object3D,
-                      obj2::Object3D,
-                      rContact::SVector{3,Float64},
-                      contactNormal::SVector{3,Float64},
-                      elasticContactReductionFactor::Float64)
+                      obj1::Object3D{F},
+                      obj2::Object3D{F},
+                      rContact::SVector{3,F},
+                      contactNormal::SVector{3,F},
+                      elasticContactReductionFactor::F) where {F}
     # Compute spring constant
     name1 = obj1.feature.contactMaterial
     name2 = obj2.feature.contactMaterial
@@ -127,9 +127,9 @@ response material `material` the two penetrating objects `obj1, obj2`, the conta
 the contact normal `contactNormal` and the largest penetration depth `distanceWithHysteresis`
 at time `time`.
 """
-function responseCalculation(material::ElasticContactPairResponseMaterial, obj1::Object3D, obj2::Object3D,
-                             rContact::SVector{3,Float64}, e_n::SVector{3,Float64},
-                             s::Float64, time, file, sim)::Tuple{SVector{3,Float64},SVector{3,Float64},SVector{3,Float64},SVector{3,Float64}}
+function responseCalculation(material::ElasticContactPairResponseMaterial, obj1::Object3D{F}, obj2::Object3D{F},
+                             rContact::SVector{3,F}, e_n::SVector{3,F},
+                             s::F, time, file, sim)::Tuple{SVector{3,F},SVector{3,F},SVector{3,F},SVector{3,F}} where {F}
     # Material
     c_res    = material.c_res
     c_geo    = material.c_geo
@@ -182,7 +182,7 @@ function responseCalculation(material::ElasticContactPairResponseMaterial, obj1:
     return (f1,f2,t1,t2)
 end
 
-responseCalculation(material::Nothing, obj1::Object3D, obj2::Object3D,
-                    rContact::SVector{3,Float64}, e_n::SVector{3,Float64},
-                    s::Float64, time, file) =
-                    (Modia3D.ZeroVector3D(Float64), Modia3D.ZeroVector3D(Float64), Modia3D.ZeroVector3D(Float64), Modia3D.ZeroVector3D(Float64))
+responseCalculation(material::Nothing, obj1::Object3D{F}, obj2::Object3D{F},
+                    rContact::SVector{3,F}, e_n::SVector{3,F},
+                    s::F, time, file) where {F} =
+                    (Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F))
