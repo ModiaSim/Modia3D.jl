@@ -5,7 +5,7 @@ Test.@testset "Basic" begin
     include(joinpath("Basic", "PendulumWithBar1.jl"))
     include(joinpath("Basic", "PendulumWithBar2.jl"))
     include(joinpath("Basic", "PendulumWithDamper.jl"))
-    # include(joinpath("Basic", "PendulumWithFix.jl")) # problems with code generation
+    Test.@test_broken include(joinpath("Basic", "PendulumWithFix.jl")) # problems with code generation
     include(joinpath("Basic", "PendulumWithParameterizedDamper.jl"))
     include(joinpath("Basic", "PendulumWithSpring.jl"))
     include(joinpath("Basic", "DoublePendulumWithDampers.jl"))
