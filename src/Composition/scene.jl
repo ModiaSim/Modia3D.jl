@@ -443,7 +443,7 @@ mutable struct Scene{F} <: Modia3D.AbstractScene
 
         sceneOptions = SceneOptions(gravityField = gravityField,
             useOptimizedStructure         = useOptimizedStructure,
-            contactDetection              = ContactDetectionMPR_handler(tol_rel = mprTolerance),
+            contactDetection              = ContactDetectionMPR_handler{Modia3D.MPRFloatType, F}(tol_rel = mprTolerance),
             nVisualContSupPoints          = nVisualContSupPoints,
             gap                           = gap,
             enableContactDetection        = enableContactDetection,

@@ -12,7 +12,7 @@ AABB_touching(aabb1::Basics.BoundingBox, aabb2::Basics.BoundingBox) = aabb1.x_ma
 
 
 function Composition.initializeContactDetection!(world::Composition.Object3D, scene::Composition.Scene)::Nothing
-    if typeof(scene.options.contactDetection) == Modia3D.ContactDetectionMPR_handler{Modia3D.MPRFloatType}
+    if typeof(scene.options.contactDetection) <: Modia3D.ContactDetectionMPR_handler
         ch = scene.options.contactDetection
         ch.contactPairs = Composition.ContactPairs(world, scene, ch.visualizeContactPoints,
             ch.visualizeSupportPoints, ch.defaultContactSphereDiameter)

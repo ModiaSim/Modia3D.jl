@@ -357,7 +357,7 @@ end
 #     Termination Condition 2
 #     Termination Condition 3
 #   Phase 3.3: construct baby tetrahedrons with r1,r2,r3,r4 and create a new portal
-function mprGeneral(ch::Composition.ContactDetectionMPR_handler{T}, shapeA::Composition.Object3D, shapeB::Modia3D.Composition.Object3D) where {T}
+function mprGeneral(ch::Composition.ContactDetectionMPR_handler{T,F}, shapeA::Composition.Object3D, shapeB::Modia3D.Composition.Object3D) where {T,F}
     tol_rel = ch.tol_rel
     niter_max = ch.niter_max
     neps = Modia3D.nepsType(T)
@@ -416,8 +416,8 @@ function mprGeneral(ch::Composition.ContactDetectionMPR_handler{T}, shapeA::Comp
 end
 
 
-function distanceTwoSpheres(ch::Composition.ContactDetectionMPR_handler{T}, shapeA::Composition.Object3D, shapeB::Modia3D.Composition.Object3D,
-    sphereA::Shapes.Sphere, sphereB::Shapes.Sphere) where {T}
+function distanceTwoSpheres(ch::Composition.ContactDetectionMPR_handler{T,F}, shapeA::Composition.Object3D, shapeB::Modia3D.Composition.Object3D,
+    sphereA::Shapes.Sphere, sphereB::Shapes.Sphere) where {T,F}
     neps = Modia3D.nepsType(T)
     radiusA = T(sphereA.diameter*0.5)
     radiusB = T(sphereB.diameter*0.5)
@@ -437,7 +437,7 @@ function distanceTwoSpheres(ch::Composition.ContactDetectionMPR_handler{T}, shap
 end
 
 
-function mpr(ch::Composition.ContactDetectionMPR_handler{T}, shapeA::Composition.Object3D{F}, shapeB::Modia3D.Composition.Object3D{F}) where {T,F}
+function mpr(ch::Composition.ContactDetectionMPR_handler{T,F}, shapeA::Composition.Object3D{F}, shapeB::Modia3D.Composition.Object3D{F}) where {T,F}
     shapeKindA = shapeA.shapeKind
     shapeKindB = shapeB.shapeKind
 

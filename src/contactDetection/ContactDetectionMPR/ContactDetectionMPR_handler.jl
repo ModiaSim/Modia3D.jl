@@ -106,7 +106,7 @@ about the contact situation.
 - `niter_max`: Maximum number of iterations of the MPR algorithm. If this number is reached,
                an error occurs (> 0).
 """
-mutable struct ContactDetectionMPR_handler{T} <: Modia3D.AbstractContactDetection
+mutable struct ContactDetectionMPR_handler{T,F} <: Modia3D.AbstractContactDetection
     distanceComputed::Bool
 
     lastContactDict::Dict{PairID,ContactPair}
@@ -123,11 +123,11 @@ mutable struct ContactDetectionMPR_handler{T} <: Modia3D.AbstractContactDetectio
     visualizeSupportPoints::Bool
     defaultContactSphereDiameter::Float64
 
-    function ContactDetectionMPR_handler{T}(;tol_rel  = 1.0e-20,
-                                            niter_max = 100) where {T}
+    function ContactDetectionMPR_handler{T,F}(;tol_rel  = 1.0e-20,
+                                            niter_max = 100) where {T,F}
         @assert(tol_rel > 0.0)
         @assert(niter_max > 0)
         new(false, Dict{PairID,ContactPair}(), Dict{PairID,ContactPair}(), 42.0, tol_rel, niter_max)
     end
 end
-ContactDetectionMPR_handler(; kwargs...) = ContactDetectionMPR_handler{Modia3D.MPRFloatType}(; kwargs...)
+ContactDetectionMPR_handler(; kwargs...) = ContactDetectionMPR_handler{Modia3D.MPRFloatType, Float64}(; kwargs...)
