@@ -13,7 +13,7 @@
 # otherwise dummy mass properties must be assigned, before computing common properties.
 # The initial common mass properties are stored separatelly.
 # This information is used for computing common mass for dynamically changing structures.
-function initializeMassComputation!(scene::Scene)
+function initializeMassComputation!(scene::Scene{F}) where {F}
     if scene.initMassComp != true
         superObjs = scene.superObjs
         buffer    = scene.buffer
@@ -29,9 +29,9 @@ function initializeMassComputation!(scene::Scene)
             else # root obj's feature has no mass properties, but common mass super object do
                 if length(superObjs[i].superObjMass.superObj) > 0
                     rootSuperObj.hasMass = true
-                    rootSuperObj.m       = 0.0
-                    rootSuperObj.r_CM    = Modia3D.ZeroVector3D(Float64)
-                    rootSuperObj.I_CM    = SMatrix{3,3,Float64,9}(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+                    rootSuperObj.m       = F(0.0)
+                    rootSuperObj.r_CM    = Modia3D.ZeroVector3D(F)
+                    rootSuperObj.I_CM    = SMatrix{3,3,F,9}(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
                     addMassPropertiesOfAllSuperObjChildsToRootSuperObj!(rootSuperObj, superObjs[i].superObjMass.superObj)
                 end
             end
