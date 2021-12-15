@@ -80,3 +80,4 @@ mutable struct Revolute{F} <: Modia3D.AbstractJoint
         return obj.joint
     end
 end
+Revolute(; kwargs...) = Revolute{Float64}(; kwargs...)

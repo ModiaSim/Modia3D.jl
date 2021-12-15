@@ -23,7 +23,7 @@ with respect to `obj1::`[`Object3D`](@ref). The initial position is `r`
 (resolved in `obj2`) are the initial cartesian translational and rotational
 velocity vectors.
 """
-mutable struct FreeMotion <: Modia3D.AbstractJoint
+mutable struct FreeMotion{F} <: Modia3D.AbstractJoint
     path::String
 
     obj1::Modia3D.AbstractObject3D
@@ -44,14 +44,14 @@ mutable struct FreeMotion <: Modia3D.AbstractJoint
     residue_f::SVector{3,Float64}
     residue_t::SVector{3,Float64}
 
-    function FreeMotion(; obj1::Modia3D.AbstractObject3D,
+    function FreeMotion{F}(; obj1::Modia3D.AbstractObject3D,
                           obj2::Modia3D.AbstractObject3D,
                           path::String = "",
                           r::AbstractVector   = Modia3D.ZeroVector3D(Float64),
                           rot::AbstractVector = Modia3D.ZeroVector3D(Float64),
                           v::AbstractVector   = Modia3D.ZeroVector3D(Float64),
                           w::AbstractVector   = Modia3D.ZeroVector3D(Float64),
-                          next_isrot123::Bool = true)  # dummy argument, is ignored
+                          next_isrot123::Bool = true) where {F} # dummy argument, is ignored
 
         #(parent,obj,cutJoint) = attach(obj1, obj2)
         #if cutJoint

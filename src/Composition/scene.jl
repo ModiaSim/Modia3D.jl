@@ -415,7 +415,7 @@ mutable struct Scene{F} <: Modia3D.AbstractScene
     # Data specific to a particular joint type
     revolute::Vector{Revolute{F}}
     prismatic::Vector{Prismatic{F}}
-    freeMotion::Vector{FreeMotion}
+    freeMotion::Vector{FreeMotion{F}}
 
 
     function Scene{F}(;gravityField          = UniformGravityField(),
@@ -503,7 +503,7 @@ mutable struct Scene{F} <: Modia3D.AbstractScene
             0,
             Revolute{F}[],
             Prismatic{F}[],
-            FreeMotion[])
+            FreeMotion{F}[])
     end
 end
 
