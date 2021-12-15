@@ -91,7 +91,7 @@ function addOrSubtractMassPropertiesOfChildToRoot!(obj_root, obj_child; add=true
     # I_child_steiner: I_child needs to be transformed to parents coordinate system
     # I_root_steiner: I_root needs to be transformed to parents coordinate system
     #                 (no need of rotation matrices)
-    I_child_steiner = Modia3D.NullRotation * I_child * Modia3D.NullRotation' +
+    I_child_steiner = Modia3D.NullRotation(Float64) * I_child * Modia3D.NullRotation(Float64)' +
                     m_child * Modia3D.skew(rCM_child_new)' * Modia3D.skew(rCM_child_new)
     I_root_steiner = I_root +
                     m_root * Modia3D.skew(rCM_root)' * Modia3D.skew(rCM_root)

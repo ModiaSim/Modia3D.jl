@@ -51,7 +51,7 @@ function Fix(; obj1::Object3D,
         if rot == Modia3D.ZeroVector3D(Float64)
             obj2.joint     = FixedTranslationJoint()
             obj2.jointKind = FixTranslationKind
-            obj2.R_rel     = Frames.NullRotation
+            obj2.R_rel     = Frames.NullRotation(Float64)
             obj2.R_abs     = obj1.R_abs
             obj2.r_abs     = obj1.r_abs + r_rel
         else
@@ -71,7 +71,7 @@ function Fix(; obj1::Object3D,
         if rot == Modia3D.ZeroVector3D(Float64)
             obj1.joint     = FixedTranslationJoint()
             obj1.jointKind = FixTranslationKind
-            obj1.R_rel     = Frames.NullRotation
+            obj1.R_rel     = Frames.NullRotation(Float64)
             obj1.R_abs     = obj2.R_abs
             obj1.r_rel     = -r_rel
         else

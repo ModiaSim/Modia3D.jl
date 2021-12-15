@@ -238,7 +238,7 @@ mutable struct Object3D{F} <: Modia3D.AbstractObject3D
         end
 
         r_rel = SVector{3,F}(r)
-        R_rel = !isnothing(R) ? R : (!isnothing(q) ? Modia3D.from_q(q) : Modia3D.NullRotation)
+        R_rel = !isnothing(R) ? R : (!isnothing(q) ? Modia3D.from_q(q) : Modia3D.NullRotation(F))
         r_abs = parent.r_abs + r_rel
         R_abs = R_rel*parent.R_abs
 
@@ -350,9 +350,9 @@ function Object3DWithoutParent(obj::Object3D{F};
     obj.ndof               = 0
     obj.canCollide         = true
     obj.r_rel              = Modia3D.ZeroVector3D(F)
-    obj.R_rel              = Modia3D.NullRotation
+    obj.R_rel              = Modia3D.NullRotation(F)
     obj.r_abs              = Modia3D.ZeroVector3D(F)
-    obj.R_abs              = Modia3D.NullRotation
+    obj.R_abs              = Modia3D.NullRotation(F)
     obj.v0                 = Modia3D.ZeroVector3D(F)
     obj.w                  = Modia3D.ZeroVector3D(F)
     obj.a0                 = Modia3D.ZeroVector3D(F)

@@ -337,7 +337,7 @@ function makeJointsAvailable(scene::Scene)
         jointKind = obj.jointKind
 
         if jointKind == FixKind
-            if obj.R_rel === Modia3D.NullRotation
+            if obj.R_rel === Modia3D.NullRotation(Float64)
                 obj.jointKind = FixTranslationKind
             end
 
