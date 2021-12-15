@@ -23,8 +23,8 @@ It is currently not supported that a `Revolute` joint *closes a kinematic loop*.
 mutable struct Revolute{F} <: Modia3D.AbstractJoint
     path::String
 
-    obj1::Object3D
-    obj2::Object3D
+    obj1::Object3D{F}
+    obj2::Object3D{F}
 
     posAxis::Int      # = 1,2,3
     posMovement::Bool # = true, if movement along posAxis, otherwise in negative posAxis
@@ -37,8 +37,8 @@ mutable struct Revolute{F} <: Modia3D.AbstractJoint
     tau::F
     residue::F
 
-    function Revolute{F}(; obj1::Object3D,
-                        obj2::Object3D,
+    function Revolute{F}(; obj1::Object3D{F},
+                        obj2::Object3D{F},
                         path::String="",
                         axis::Int = 3,
                         phi::Real = F(0.0),

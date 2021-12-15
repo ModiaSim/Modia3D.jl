@@ -20,7 +20,7 @@ FileMesh(        ; kwargs...) = Par(; _constructor = :(Modia3D.FileMesh)        
 Font(            ; kwargs...) = Par(; _constructor = :(Modia3D.Font)                  , kwargs...)
 TextShape(       ; kwargs...) = Par(; _constructor = :(Modia3D.TextShape)             , kwargs...)
 ModelicaShape(   ; kwargs...) = Par(; _constructor = :(Modia3D.ModelicaShape)         , kwargs...)
-Fix(             ; kwargs...) = Par(; _constructor = :(Modia3D.Fix)                   , kwargs...)
+Fix(             ; kwargs...) = Par(; _constructor = :(Modia3D.Fix{FloatType})                   , kwargs...)
 Bushing(         ; kwargs...) = Par(; _constructor = :(Modia3D.Bushing)               , kwargs...)
 SpringDamperPtP( ; kwargs...) = Par(; _constructor = :(Modia3D.SpringDamperPtP)       , kwargs...)
 

@@ -31,8 +31,8 @@ It is currently not supported that a `Prismatic` joint *closes a kinematic loop*
 mutable struct Prismatic{F} <: Modia3D.AbstractJoint
     path::String
 
-    obj1::Object3D
-    obj2::Object3D
+    obj1::Object3D{F}
+    obj2::Object3D{F}
 
     posAxis::Int             # = 1,2,3
     posMovement::Bool        # = true, if movement along posAxis, otherwise in negative posAxis
@@ -46,8 +46,8 @@ mutable struct Prismatic{F} <: Modia3D.AbstractJoint
     f::F
     residue::F
 
-    function Prismatic{F}(; obj1::Object3D,
-                         obj2::Object3D,
+    function Prismatic{F}(; obj1::Object3D{F},
+                         obj2::Object3D{F},
                          path::String="",
                          axis::Int = 1,
                          s::Real   = F(0.0),

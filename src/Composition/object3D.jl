@@ -246,7 +246,7 @@ mutable struct Object3D{F} <: Modia3D.AbstractObject3D
 
         (shapeKind, shape, visualMaterial, centroid) = setShapeKind(F, feature)
         obj = new(parent, Vector{Object3D{F}}[],
-              false, InteractionManner(interactionBehavior), FixedJoint(), FixKind, 0, 0, true,
+              false, InteractionManner(interactionBehavior), FixedJoint{F}(), FixKind, 0, 0, true,
               r_rel, R_rel, r_abs, R_abs,
               Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F),
               false, F(0.0), Modia3D.ZeroVector3D(F), SMatrix{3,3,F,9}(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
@@ -294,7 +294,7 @@ mutable struct Object3D{F} <: Modia3D.AbstractObject3D
 
         (shapeKind, shape, visualMaterial, centroid) = setShapeKind(F, feature)
         new(parent, Vector{Object3D{F}}[], false,
-        InteractionManner(Modia3D.NoInteraction), FixedJoint(), FixKind, 0, 0, true,
+        InteractionManner(Modia3D.NoInteraction), FixedJoint{F}(), FixKind, 0, 0, true,
         r_rel, R_rel, r_abs, R_abs,
         Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F),
         false, F(0.0), Modia3D.ZeroVector3D(F), SMatrix{3,3,F,9}(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
@@ -344,7 +344,7 @@ function Object3DWithoutParent(obj::Object3D{F};
     obj.children           = Vector{Object3D{F}}[]
     obj.isRootObj          = false
     obj.interactionManner  = InteractionManner(interactionBehavior)
-    obj.joint              = FixedJoint()
+    obj.joint              = FixedJoint{F}()
     obj.jointKind          = FixKind
     obj.jointIndex         = 0
     obj.ndof               = 0
