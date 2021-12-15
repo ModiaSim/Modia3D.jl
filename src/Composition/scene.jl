@@ -26,7 +26,7 @@ struct NoGravityField <: Modia3D.AbstractGravityField
    gvec::SVector{3,Float64} # [m/s^2] Vector of gravity acceleration
    NoGravityField() = new(SVector{3,Float64}(0.0, 0.0, 0.0))
 end
-gravityAcceleration(grav::NoGravityField, r_abs::SVector{3,Float64})::SVector{3,Float64} = grav.gvec
+gravityAcceleration(grav::NoGravityField, r_abs::SVector{3,F}) where {F} = SVector{3,F}(grav.gvec)
 
 
 """
@@ -57,7 +57,7 @@ struct UniformGravityField <: Modia3D.AbstractGravityField
       new(g*normalize(n))
    end
 end
-gravityAcceleration(grav::UniformGravityField, r_abs::SVector{3,Float64})::SVector{3,Float64} = grav.gvec
+gravityAcceleration(grav::UniformGravityField, r_abs::SVector{3,F}) where {F} = SVector{3,F}(grav.gvec)
 
 
 const G           = 6.67408e-11  # [m3/(kg.s2)]  Newtonian constant of gravitation (https://en.wikipedia.org/wiki/Gravitational_constant)
@@ -96,7 +96,7 @@ struct PointGravityField <: Modia3D.AbstractGravityField
       new(mue)
    end
 end
-gravityAcceleration(grav::PointGravityField, r_abs::SVector{3,Float64})::SVector{3,Float64} = -(grav.mue/dot(r_abs,r_abs))*normalize(r_abs)
+gravityAcceleration(grav::PointGravityField, r_abs::SVector{3,F}) where {F} = SVector{3,F}(-(grav.mue/dot(r_abs,r_abs))*normalize(r_abs))
 
 
 """
