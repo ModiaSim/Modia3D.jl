@@ -13,7 +13,7 @@
 # otherwise dummy mass properties must be assigned, before computing common properties.
 # The initial common mass properties are stored separatelly.
 # This information is used for computing common mass for dynamically changing structures.
-function initializeMassComputation!(scene::Scene)
+function initializeMassComputation!(scene::Scene{F}) where {F}
     if scene.initMassComp != true
         superObjs = scene.superObjs
         buffer    = scene.buffer
@@ -29,9 +29,9 @@ function initializeMassComputation!(scene::Scene)
             else # root obj's feature has no mass properties, but common mass super object do
                 if length(superObjs[i].superObjMass.superObj) > 0
                     rootSuperObj.hasMass = true
-                    rootSuperObj.m       = 0.0
-                    rootSuperObj.r_CM    = Modia3D.ZeroVector3D(Float64)
-                    rootSuperObj.I_CM    = SMatrix{3,3,Float64,9}(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+                    rootSuperObj.m       = F(0.0)
+                    rootSuperObj.r_CM    = Modia3D.ZeroVector3D(F)
+                    rootSuperObj.I_CM    = SMatrix{3,3,F,9}(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
                     addMassPropertiesOfAllSuperObjChildsToRootSuperObj!(rootSuperObj, superObjs[i].superObjMass.superObj)
                 end
             end
@@ -91,7 +91,7 @@ function addOrSubtractMassPropertiesOfChildToRoot!(obj_root, obj_child; add=true
     # I_child_steiner: I_child needs to be transformed to parents coordinate system
     # I_root_steiner: I_root needs to be transformed to parents coordinate system
     #                 (no need of rotation matrices)
-    I_child_steiner = Modia3D.NullRotation * I_child * Modia3D.NullRotation' +
+    I_child_steiner = Modia3D.NullRotation(Float64) * I_child * Modia3D.NullRotation(Float64)' +
                     m_child * Modia3D.skew(rCM_child_new)' * Modia3D.skew(rCM_child_new)
     I_root_steiner = I_root +
                     m_root * Modia3D.skew(rCM_root)' * Modia3D.skew(rCM_root)

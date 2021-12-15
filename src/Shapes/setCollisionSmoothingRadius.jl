@@ -1,9 +1,9 @@
-setCollisionSmoothingRadius(shape, collisionSmoothingRadius) = NaN64
+setCollisionSmoothingRadius(shape, collisionSmoothingRadius::F) where {F} = F(NaN)
 
 
-function setCollisionSmoothingRadius(shape::Box, collisionSmoothingRadius)
+function setCollisionSmoothingRadius(shape::Box{F}, collisionSmoothingRadius::F) where {F}
     @assert(collisionSmoothingRadius >= 0.0)
-    collisionSmoothingRadius2 = min(collisionSmoothingRadius, 0.1*min(shape.lengthX, shape.lengthY, shape.lengthZ)) # at most 10% of the smallest edge length
+    collisionSmoothingRadius2 = min(collisionSmoothingRadius, F(0.1)*min(shape.lengthX, shape.lengthY, shape.lengthZ)) # at most 10% of the smallest edge length
     if collisionSmoothingRadius2 < collisionSmoothingRadius
       println("collisionSmoothingRadius in Box changed from $collisionSmoothingRadius to $collisionSmoothingRadius2")
     end
@@ -13,20 +13,20 @@ function setCollisionSmoothingRadius(shape::Box, collisionSmoothingRadius)
     return collisionSmoothingRadius2
 end
 
-function setCollisionSmoothingRadius(shape::Cylinder, collisionSmoothingRadius)
+function setCollisionSmoothingRadius(shape::Cylinder{F}, collisionSmoothingRadius::F) where{F}
     @assert(collisionSmoothingRadius >= 0.0)
-    collisionSmoothingRadius = min(collisionSmoothingRadius, 0.1*min(shape.diameter, shape.length))  # at most 10% of the smallest edge length
+    collisionSmoothingRadius = min(collisionSmoothingRadius, F(0.1)*min(shape.diameter, shape.length))  # at most 10% of the smallest edge length
     return collisionSmoothingRadius
 end
 
-function setCollisionSmoothingRadius(shape::Cone, collisionSmoothingRadius)
+function setCollisionSmoothingRadius(shape::Cone{F}, collisionSmoothingRadius::F) where {F}
     @assert(collisionSmoothingRadius >= 0.0)
-    collisionSmoothingRadius2 = min(collisionSmoothingRadius, 0.1*min(shape.diameter, shape.length)) # at most 10% of the smallest edge length
+    collisionSmoothingRadius2 = min(collisionSmoothingRadius, F(0.1)*min(shape.diameter, shape.length)) # at most 10% of the smallest edge length
     return collisionSmoothingRadius2
 end
 
-function setCollisionSmoothingRadius(shape::Beam, collisionSmoothingRadius)
+function setCollisionSmoothingRadius(shape::Beam{F}, collisionSmoothingRadius::F) where {F}
     @assert(collisionSmoothingRadius >= 0.0)
-    collisionSmoothingRadius2 = min(collisionSmoothingRadius, 0.1*min(shape.length, shape.width, shape.thickness)) # at most 10% of the smallest edge length
+    collisionSmoothingRadius2 = min(collisionSmoothingRadius, F(0.1)*min(shape.length, shape.width, shape.thickness)) # at most 10% of the smallest edge length
     return collisionSmoothingRadius2
 end

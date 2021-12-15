@@ -1,32 +1,32 @@
-contactStart(matPair::Shapes.NoContactPairMaterial, obj1::Object3D, obj2::Object3D, rContact::SVector{3,Float64}, contactNormal::SVector{3,Float64}, elasticContactReductionFactor::Float64) =
+contactStart(matPair::Shapes.NoContactPairMaterial, obj1::Object3D{F}, obj2::Object3D{F}, rContact::SVector{3,F}, contactNormal::SVector{3,F}, elasticContactReductionFactor::F) where {F} =
 matPair
 
-contactStart(matPair::Shapes.ObserverContactPairMaterial, obj1::Object3D, obj2::Object3D, rContact::SVector{3,Float64}, contactNormal::SVector{3,Float64}, elasticContactReductionFactor::Float64) = matPair
+contactStart(matPair::Shapes.ObserverContactPairMaterial, obj1::Object3D{F}, obj2::Object3D{F}, rContact::SVector{3,F}, contactNormal::SVector{3,F}, elasticContactReductionFactor::F) where {F} = matPair
 
 
-contactStart(matPair::Shapes.ImpulseContactPairMaterial, obj1::Object3D, obj2::Object3D, rContact::SVector{3,Float64}, contactNormal::SVector{3,Float64}, elasticContactReductionFactor::Float64) =
+contactStart(matPair::Shapes.ImpulseContactPairMaterial, obj1::Object3D{F}, obj2::Object3D{F}, rContact::SVector{3,F}, contactNormal::SVector{3,F}, elasticContactReductionFactor::F) where {F} =
 error("contactStart is not yet implemented for ImpulseContactPairMaterial.")
 
-contactStart(matPair::Shapes.WheelRailContactPairMaterial, obj1::Object3D, obj2::Object3D, rContact::SVector{3,Float64}, contactNormal::SVector{3,Float64}, elasticContactReductionFactor::Float64) =
+contactStart(matPair::Shapes.WheelRailContactPairMaterial, obj1::Object3D{F}, obj2::Object3D{F}, rContact::SVector{3,F}, contactNormal::SVector{3,F}, elasticContactReductionFactor::F) where {F} =
 error("contactStart is not yet implemented for WheelRailContactPairMaterial.")
 
 
 
-responseCalculation(material::Shapes.NoContactPairMaterial, obj1::Object3D, obj2::Object3D, rContact::SVector{3,Float64}, e_n::SVector{3,Float64}, s::Float64, time, file, sim) =
-(Modia3D.ZeroVector3D(Float64), Modia3D.ZeroVector3D(Float64), Modia3D.ZeroVector3D(Float64), Modia3D.ZeroVector3D(Float64))
+responseCalculation(material::Shapes.NoContactPairMaterial, obj1::Object3D{F}, obj2::Object3D{F}, rContact::SVector{3,F}, e_n::SVector{3,F}, s::F, time, file, sim) where {F}  =
+(Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F))
 
-function responseCalculation(material::Shapes.ObserverContactPairMaterial, obj1::Object3D, obj2::Object3D, rContact::SVector{3,Float64}, e_n::SVector{3,Float64}, s::Float64, time, file, sim)
+function responseCalculation(material::Shapes.ObserverContactPairMaterial, obj1::Object3D{F}, obj2::Object3D{F}, rContact::SVector{3,F}, e_n::SVector{3,F}, s::F, time, file, sim) where {F}
   if material.printAlarm && ModiaLang.isEvent(sim)
     println("At time event ", time, " two observer objects ", Modia3D.fullName(obj1), " and ", Modia3D.fullName(obj2), " are colliding.")
   end
-  return (Modia3D.ZeroVector3D(Float64), Modia3D.ZeroVector3D(Float64), Modia3D.ZeroVector3D(Float64), Modia3D.ZeroVector3D(Float64))
+  return (Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F))
 end
 
-responseCalculation(material::Shapes.ImpulseContactPairMaterial, obj1::Object3D, obj2::Object3D, rContact::SVector{3,Float64}, e_n::SVector{3,Float64}, s::Float64, time, file, sim) =
-(Modia3D.ZeroVector3D(Float64), Modia3D.ZeroVector3D(Float64), Modia3D.ZeroVector3D(Float64), Modia3D.ZeroVector3D(Float64))
+responseCalculation(material::Shapes.ImpulseContactPairMaterial, obj1::Object3D{F}, obj2::Object3D{F}, rContact::SVector{3,F}, e_n::SVector{3,F}, s::F, time, file, sim) where {F}  =
+(Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F))
 
-responseCalculation(material::Shapes.WheelRailContactPairMaterial, obj1::Object3D, obj2::Object3D, rContact::SVector{3,Float64}, e_n::SVector{3,Float64}, s::Float64, time, file, sim) =
-(Modia3D.ZeroVector3D(Float64), Modia3D.ZeroVector3D(Float64), Modia3D.ZeroVector3D(Float64), Modia3D.ZeroVector3D(Float64))
+responseCalculation(material::Shapes.WheelRailContactPairMaterial, obj1::Object3D{F}, obj2::Object3D{F}, rContact::SVector{3,F}, e_n::SVector{3,F}, s::F, time, file, sim) where {F}  =
+(Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F))
 
 
 contactEnd(mat::Shapes.NoContactPairMaterial,obj1,obj2)::Nothing        = nothing

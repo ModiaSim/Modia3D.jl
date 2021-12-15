@@ -57,7 +57,7 @@ struct Solid{F} <: Modia3D.AbstractObject3DFeature
     massProperties::Union{MassProperties,Nothing}
     collision::Bool
     contactMaterial::Union{String,Modia3D.AbstractContactMaterial,Nothing}
-    collisionSmoothingRadius::Float64
+    collisionSmoothingRadius::F
     visualMaterial::Union{Shapes.VisualMaterial,Nothing}
 
     function Solid{F}(;
@@ -66,7 +66,7 @@ struct Solid{F} <: Modia3D.AbstractObject3DFeature
         massProperties::Union{Modia3D.AbstractMassProperties, Number, AbstractString, SolidMaterial, Nothing} = nothing,
         collision::Bool = false,
         contactMaterial::AbstractString = "",
-        collisionSmoothingRadius::Float64=0.0,
+        collisionSmoothingRadius::F=F(0.0),
         visualMaterial::Union{Shapes.VisualMaterial,AbstractString,Nothing} = Shapes.VisualMaterial(),
         visualMaterialConvexDecomposition::Union{Shapes.VisualMaterial,AbstractString,Nothing} = Shapes.VisualMaterial()) where {F}
 

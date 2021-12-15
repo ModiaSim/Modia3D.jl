@@ -376,7 +376,7 @@ function multibodyResiduals3!(sim::ModiaLang.SimulationModel{F}, scene, world, t
                             for obj in scene.updateVisuElements
                                 parent = obj.parent
                                 obj.r_abs = obj.r_rel ≡ Modia3D.ZeroVector3D(Float64) ? parent.r_abs : parent.r_abs + parent.R_abs'*obj.r_rel
-                                obj.R_abs = obj.R_rel ≡ Modia3D.NullRotation ? parent.R_abs : obj.R_rel*parent.R_abs
+                                obj.R_abs = obj.R_rel ≡ Modia3D.NullRotation(Float64) ? parent.R_abs : obj.R_rel*parent.R_abs
                                 # is executed only if an internal Object3D called
                                 if length( obj.visualizationFrame ) == 1
                                     obj.visualizationFrame[1].r_abs = obj.r_abs

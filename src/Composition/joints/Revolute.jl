@@ -20,30 +20,30 @@ directly or indirectly rigidly fixed to `obj1` or `obj2`).
 
 It is currently not supported that a `Revolute` joint *closes a kinematic loop*.
 """
-mutable struct Revolute <: Modia3D.AbstractJoint
+mutable struct Revolute{F} <: Modia3D.AbstractJoint
     path::String
 
-    obj1::Object3D
-    obj2::Object3D
+    obj1::Object3D{F}
+    obj2::Object3D{F}
 
     posAxis::Int      # = 1,2,3
     posMovement::Bool # = true, if movement along posAxis, otherwise in negative posAxis
     ndof::Int
     canCollide::Bool  # = false, if no collision between obj1 and obj2
 
-    phi::Float64
-    w::Float64
-    a::Float64
-    tau::Float64
-    residue::Float64
+    phi::F
+    w::F
+    a::F
+    tau::F
+    residue::F
 
-    function Revolute(; obj1::Object3D,
-                        obj2::Object3D,
+    function Revolute{F}(; obj1::Object3D{F},
+                        obj2::Object3D{F},
                         path::String="",
                         axis::Int = 3,
-                        phi::Real = 0.0,
-                        w::Real   = 0.0,
-                        canCollide::Bool = false)
+                        phi::Real = F(0.0),
+                        w::Real   = F(0.0),
+                        canCollide::Bool = false) where {F}
 
         (parent,obj,cutJoint) = attach(obj1, obj2)
         if cutJoint
@@ -62,21 +62,21 @@ mutable struct Revolute <: Modia3D.AbstractJoint
         end
 
         axis = obj === obj2 ? axis : -axis
-        phi = Modia3D.convertAndStripUnit(Float64, u"rad"  , phi)
-        w   = Modia3D.convertAndStripUnit(Float64, u"rad/s", w)
+        phi = Modia3D.convertAndStripUnit(F, u"rad"  , phi)
+        w   = Modia3D.convertAndStripUnit(F, u"rad/s", w)
 
         posAxis     = abs(axis)
         posMovement = axis > 0
 
-        obj.joint = new(path, parent, obj, posAxis, posMovement, 1, canCollide, phi, w, 0.0, 0.0, 0.0)
+        obj.joint = new(path, parent, obj, posAxis, posMovement, 1, canCollide, phi, w, F(0.0), F(0.0), F(0.0) )
         obj.jointKind  = RevoluteKind
         obj.jointIndex = 0
         obj.ndof       = 1
         obj.canCollide = canCollide
-        obj.r_rel      = Modia3D.ZeroVector3D(Float64)
+        obj.r_rel      = Modia3D.ZeroVector3D(F)
         obj.R_rel      = Frames.rotAxis(posAxis, posMovement, phi)
-
         parent.hasChildJoint = true
         return obj.joint
     end
 end
+Revolute(; kwargs...) = Revolute{Float64}(; kwargs...)

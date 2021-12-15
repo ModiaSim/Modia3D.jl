@@ -26,7 +26,7 @@ struct NoGravityField <: Modia3D.AbstractGravityField
    gvec::SVector{3,Float64} # [m/s^2] Vector of gravity acceleration
    NoGravityField() = new(SVector{3,Float64}(0.0, 0.0, 0.0))
 end
-gravityAcceleration(grav::NoGravityField, r_abs::SVector{3,Float64})::SVector{3,Float64} = grav.gvec
+gravityAcceleration(grav::NoGravityField, r_abs::SVector{3,F}) where {F} = SVector{3,F}(grav.gvec)
 
 
 """
@@ -57,7 +57,7 @@ struct UniformGravityField <: Modia3D.AbstractGravityField
       new(g*normalize(n))
    end
 end
-gravityAcceleration(grav::UniformGravityField, r_abs::SVector{3,Float64})::SVector{3,Float64} = grav.gvec
+gravityAcceleration(grav::UniformGravityField, r_abs::SVector{3,F}) where {F} = SVector{3,F}(grav.gvec)
 
 
 const G           = 6.67408e-11  # [m3/(kg.s2)]  Newtonian constant of gravitation (https://en.wikipedia.org/wiki/Gravitational_constant)
@@ -96,7 +96,7 @@ struct PointGravityField <: Modia3D.AbstractGravityField
       new(mue)
    end
 end
-gravityAcceleration(grav::PointGravityField, r_abs::SVector{3,Float64})::SVector{3,Float64} = -(grav.mue/dot(r_abs,r_abs))*normalize(r_abs)
+gravityAcceleration(grav::PointGravityField, r_abs::SVector{3,F}) where {F} = SVector{3,F}(-(grav.mue/dot(r_abs,r_abs))*normalize(r_abs))
 
 
 """
@@ -193,7 +193,7 @@ end
 
 
 #-------------------------------------- Global SceneOptions -------------------------------
-struct SceneOptions
+struct SceneOptions{F}
     # Gravity field
     gravityField::Modia3D.AbstractGravityField
 
@@ -203,7 +203,7 @@ struct SceneOptions
     ### Contact detection ###
     enableContactDetection::Bool            # = true, if contact detection is enabled
     contactDetection::Modia3D.AbstractContactDetection
-    elasticContactReductionFactor::Float64  # c_res_used = c_res * elasticContactReductionFactor (> 0)
+    elasticContactReductionFactor::F  # c_res_used = c_res * elasticContactReductionFactor (> 0)
     gap::Float64
 
 
@@ -226,11 +226,11 @@ struct SceneOptions
     lightLongitude::Float64               # Longitude angle of light position (0 = -y/-z/-x direction)
     lightLatitude::Float64                # Latitude angle of light position (0 = horizontal)
 
-    function SceneOptions(;gravityField    = UniformGravityField(),
+    function SceneOptions{F}(;gravityField    = UniformGravityField(),
             useOptimizedStructure         = true,
             enableContactDetection        = true,
             contactDetection              = ContactDetectionMPR_handler(),
-            elasticContactReductionFactor = 1.0,
+            elasticContactReductionFactor = F(1.0),
             gap                           = 0.001,
             enableVisualization           = true,
             animationFile                 = nothing,
@@ -247,7 +247,7 @@ struct SceneOptions
             cameraLatitude                = 15/180*pi,
             lightDistance                 = 10.0*nominalLength,
             lightLongitude                = 60/180*pi,
-            lightLatitude                 = 45/180*pi)
+            lightLatitude                 = 45/180*pi) where {F}
         @assert(gap > 0.0)
         @assert(nominalLength > 0.0)
         @assert(defaultFrameLength > 0.0)
@@ -405,7 +405,7 @@ mutable struct Scene{F} <: Modia3D.AbstractScene
     noCPairs::Vector{Vector{Int64}}           # Indices of frames (with respect to collSuperObjs) that can't collide in general (e.g. objects are connected via joints)
     noCPairsHelp::Dict{Modia3D.AbstractJoint,Vector{Int64}}
     allowedToMove::Vector{Union{Bool,Nothing}}
-    AABB::Vector{Vector{Basics.BoundingBox}}  # Bounding boxes of elements that can collide
+    AABB::Vector{Vector{Basics.BoundingBox{F}}}  # Bounding boxes of elements that can collide
     zStartIndex::Int                          # start index of collision zero crossing functions
     forceElements::Vector{Modia3D.AbstractForceElement}
     exportAnimation::Bool                     # animation file export is enabled
@@ -413,16 +413,16 @@ mutable struct Scene{F} <: Modia3D.AbstractScene
     outputCounter::Int64                      # animation/visualization output step counter
 
     # Data specific to a particular joint type
-    revolute::Vector{Revolute}
-    prismatic::Vector{Prismatic}
-    freeMotion::Vector{FreeMotion}
+    revolute::Vector{Revolute{F}}
+    prismatic::Vector{Prismatic{F}}
+    freeMotion::Vector{FreeMotion{F}}
 
 
     function Scene{F}(;gravityField          = UniformGravityField(),
             useOptimizedStructure         = true,
             enableContactDetection        = true,
             mprTolerance                  = 1.0e-20,
-            elasticContactReductionFactor = 1.0,
+            elasticContactReductionFactor = F(1.0),
             gap                           = 0.001,
             enableVisualization           = true,
             animationFile                 = nothing,
@@ -441,9 +441,9 @@ mutable struct Scene{F} <: Modia3D.AbstractScene
             lightLongitude                = 60/180*pi,
             lightLatitude                 = 45/180*pi) where {F}
 
-        sceneOptions = SceneOptions(gravityField = gravityField,
+        sceneOptions = SceneOptions{F}(gravityField = gravityField,
             useOptimizedStructure         = useOptimizedStructure,
-            contactDetection              = ContactDetectionMPR_handler(tol_rel = mprTolerance),
+            contactDetection              = ContactDetectionMPR_handler{Modia3D.MPRFloatType, F}(tol_rel = mprTolerance),
             nVisualContSupPoints          = nVisualContSupPoints,
             gap                           = gap,
             enableContactDetection        = enableContactDetection,
@@ -495,15 +495,15 @@ mutable struct Scene{F} <: Modia3D.AbstractScene
             Vector{Vector{Int64}}[],
             Dict{Modia3D.AbstractJoint,Vector{Int64}}(),
             Vector{Union{Bool}}[],
-            Vector{Vector{Basics.BoundingBox}}[],
+            Vector{Vector{Basics.BoundingBox{F}}}[],
             1,
             Vector{Modia3D.AbstractForceElement}[],
             exportAnimation,
             Vector{animationStep}[],
             0,
-            Revolute[],
-            Prismatic[],
-            FreeMotion[])
+            Revolute{F}[],
+            Prismatic{F}[],
+            FreeMotion{F}[])
     end
 end
 

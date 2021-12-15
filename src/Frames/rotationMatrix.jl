@@ -29,13 +29,13 @@ v1 = R'*v2
 ```
 """
 const RotationMatrix = SMatrix{3,3,Float64,9}
-
+# RotationMatrix(F) = SMatrix{3,3,F,9}
 
 
 """
 Constant RotationMatrix that defines no rotation from frame 1 to frame 2.
 """
-const NullRotation = SMatrix{3,3,Float64,9}(Matrix(1.0I, 3, 3))
+NullRotation(::Type{F}) where {F} = SMatrix{3,3,F,9}(Matrix(F(1.0)I, 3, 3))
 
 
 
@@ -47,7 +47,7 @@ Assert that matrix R has the properties of a rotation matrix
 """
 function assertRotationMatrix(R::AbstractMatrix)
    @assert(size(R,1)==3, size(R,2)==3)
-   @assert(norm(R'*R - NullRotation) <= 1e-10)
+   @assert(norm(R'*R - NullRotation(Float64)) <= 1e-10)
 end
 
 
@@ -120,7 +120,7 @@ This function assumes that `norm(e) == 1`.
 """
 rot_e(e::SVector{3,Float64},angle::Number)::RotationMatrix = begin
                                                         (s,c) = sincos(angle)
-                                                        e*e' + (NullRotation - e*e')*c - skew(e)*s
+                                                        e*e' + (NullRotation(Float64) - e*e')*c - skew(e)*s
                                                    end
 rot_e(e::AbstractVector, angle::Number)::RotationMatrix    = rot_e( SVector{3,Float64}(e), convert(Float64,angle) )
 
@@ -269,7 +269,7 @@ end
 Derivation of algorithm for planarRotationAngle:
 
 Vector v is resolved in frame 1 and frame 2 according to:
-   (1)  v2 = (e*e' + (NullRotation - e*e')*cos(angle) - skew(e)*sin(angle))*v1
+   (1)  v2 = (e*e' + (NullRotation(Float64) - e*e')*cos(angle) - skew(e)*sin(angle))*v1
            = e*(e'*v1) + (v1 - e*(e'*v1))*cos(angle) - cross(e,v1)*sin(angle)
 
 Equation (1) is multiplied with "v1'" resulting in (note: e'*e = 1)

@@ -60,7 +60,7 @@ end
 
 
 ###########      Phase 1, Minkowski Portal Refinement      ###################
-@inline getCentroid(obj::Composition.Object3D) = SVector{3,Modia3D.MPRFloatType}(obj.r_abs + obj.R_abs'*obj.centroid)
+@inline getCentroid(obj::Composition.Object3D)::SVector{3,Modia3D.MPRFloatType} = SVector{3,Modia3D.MPRFloatType}(obj.r_abs + obj.R_abs'*obj.centroid)
 
 
 # checks if centers of shapeA and shapeB are overlapping
@@ -126,7 +126,7 @@ function tetrahedronEncloseOrigin(r0::SupportPoint, r1::SupportPoint,
     r1org = r1
     r2org = r2
     r3org = r3
-    aux = SVector{3, T}(Modia3D.ZeroVector3D(Float64))
+    aux = Modia3D.ZeroVector3D(T)
     neps = Modia3D.nepsType(T)
     success = false
     for i in 1:niter_max
@@ -357,7 +357,7 @@ end
 #     Termination Condition 2
 #     Termination Condition 3
 #   Phase 3.3: construct baby tetrahedrons with r1,r2,r3,r4 and create a new portal
-function mprGeneral(ch::Composition.ContactDetectionMPR_handler{T}, shapeA::Composition.Object3D, shapeB::Modia3D.Composition.Object3D) where {T}
+function mprGeneral(ch::Composition.ContactDetectionMPR_handler{T,F}, shapeA::Composition.Object3D, shapeB::Modia3D.Composition.Object3D) where {T,F}
     tol_rel = ch.tol_rel
     niter_max = ch.niter_max
     neps = Modia3D.nepsType(T)
@@ -391,7 +391,7 @@ function mprGeneral(ch::Composition.ContactDetectionMPR_handler{T}, shapeA::Comp
         # e.g. any collision/or distance between two spheres
         #println("TC 1")
         distance = dot(r1.p,normalize(r0.p))
-        return (distance, r1.a, r1.b, r1.n, false, SVector{3,T}(Modia3D.ZeroVector3D(Float64)), SVector{3,T}(Modia3D.ZeroVector3D(Float64)), SVector{3,T}(Modia3D.ZeroVector3D(Float64)), SVector{3,T}(Modia3D.ZeroVector3D(Float64)), SVector{3,T}(Modia3D.ZeroVector3D(Float64)), SVector{3,T}(Modia3D.ZeroVector3D(Float64)) )
+        return (distance, r1.a, r1.b, r1.n, false, Modia3D.ZeroVector3D(T), Modia3D.ZeroVector3D(T), Modia3D.ZeroVector3D(T), Modia3D.ZeroVector3D(T), Modia3D.ZeroVector3D(T), Modia3D.ZeroVector3D(T) )
     else
         # normalize n2
         n2 = n2/n2abs
@@ -416,8 +416,8 @@ function mprGeneral(ch::Composition.ContactDetectionMPR_handler{T}, shapeA::Comp
 end
 
 
-function distanceTwoSpheres(ch::Composition.ContactDetectionMPR_handler{T}, shapeA::Composition.Object3D, shapeB::Modia3D.Composition.Object3D,
-    sphereA::Shapes.Sphere, sphereB::Shapes.Sphere) where {T}
+function distanceTwoSpheres(ch::Composition.ContactDetectionMPR_handler{T,F}, shapeA::Composition.Object3D, shapeB::Modia3D.Composition.Object3D,
+    sphereA::Shapes.Sphere, sphereB::Shapes.Sphere) where {T,F}
     neps = Modia3D.nepsType(T)
     radiusA = T(sphereA.diameter*0.5)
     radiusB = T(sphereB.diameter*0.5)
@@ -433,17 +433,17 @@ function distanceTwoSpheres(ch::Composition.ContactDetectionMPR_handler{T}, shap
     distance = distanceCentroids - radiusA - radiusB
     contactPointShapeA = centroidSphereA + normal*radiusA
     contactPointShapeB = centroidSphereB - normal*radiusB
-    return (distance, contactPointShapeA, contactPointShapeB, normal, false, SVector{3,T}(Modia3D.ZeroVector3D(Float64)), SVector{3,T}(Modia3D.ZeroVector3D(Float64)), SVector{3,T}(Modia3D.ZeroVector3D(Float64)), SVector{3,T}(Modia3D.ZeroVector3D(Float64)), SVector{3,T}(Modia3D.ZeroVector3D(Float64)), SVector{3,T}(Modia3D.ZeroVector3D(Float64)) )
+    return (distance, contactPointShapeA, contactPointShapeB, normal, false, Modia3D.ZeroVector3D(T), Modia3D.ZeroVector3D(T), Modia3D.ZeroVector3D(T), Modia3D.ZeroVector3D(T), Modia3D.ZeroVector3D(T), Modia3D.ZeroVector3D(T) )
 end
 
 
-function mpr(ch::Composition.ContactDetectionMPR_handler{T}, shapeA::Composition.Object3D, shapeB::Modia3D.Composition.Object3D) where {T}
+function mpr(ch::Composition.ContactDetectionMPR_handler{T,F}, shapeA::Composition.Object3D{F}, shapeB::Modia3D.Composition.Object3D{F}) where {T,F}
     shapeKindA = shapeA.shapeKind
     shapeKindB = shapeB.shapeKind
 
     if shapeKindA == Modia3D.SphereKind && shapeKindB == Modia3D.SphereKind
-        sphereA::Shapes.Sphere = shapeA.shape
-        sphereB::Shapes.Sphere = shapeB.shape
+        sphereA::Shapes.Sphere{F} = shapeA.shape
+        sphereB::Shapes.Sphere{F} = shapeB.shape
         (distance, contactPoint1, contactPoint2, normal, supportPointsDefined,
         support1A, support1B, support2A, support2B, support3A, support3B) = distanceTwoSpheres(ch, shapeA, shapeB, sphereA, sphereB)
     else
@@ -463,7 +463,7 @@ function mpr(ch::Composition.ContactDetectionMPR_handler{T}, shapeA::Composition
             contactPoint1 = contactPoint2 + distance*-normal
         end
     end
-    return (Float64(distance), SVector{3,Float64}(contactPoint1), SVector{3,Float64}(contactPoint2), SVector{3,Float64}(normal), supportPointsDefined,
-    SVector{3,Float64}(support1A), SVector{3,Float64}(support1B), SVector{3,Float64}(support2A), SVector{3,Float64}(support2B), SVector{3,Float64}(support3A), SVector{3,Float64}(support3B) )
+    return (F(distance), SVector{3,F}(contactPoint1), SVector{3,F}(contactPoint2), SVector{3,F}(normal), supportPointsDefined,
+    SVector{3,F}(support1A), SVector{3,F}(support1B), SVector{3,F}(support2A), SVector{3,F}(support2B), SVector{3,F}(support3A), SVector{3,F}(support3B) )
 
 end

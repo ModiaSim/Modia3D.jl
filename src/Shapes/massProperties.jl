@@ -31,9 +31,9 @@ end
 MassPropertiesFromShape(args...; kwargs...) = MassPropertiesFromShape{Float64}(args...; kwargs...)
 
 struct MassPropertiesFromShapeAndMass{F} <: Modia3D.AbstractMassProperties
-    mass::Number   # mass in [kg]
+    mass::F   # mass in [kg]
 
-    function MassPropertiesFromShapeAndMass{F}(;mass::Number=1.0) where {F}
+    function MassPropertiesFromShapeAndMass{F}(; mass=F(1.0) ) where {F}
         @assert(mass >= 0.0)
         new(mass)
     end
@@ -53,14 +53,14 @@ end
 
 # Constructor a: mass, centerOfMass and entries of inertia tensor are optional
 #                --> if nothing special is defined it takes predefined values (= zero values)
-MassProperties{F}(; mass::Number=0.0, centerOfMass=Modia3D.ZeroVector3D(F),
-               Ixx::Number=0.0, Iyy::Number=0.0, Izz::Number=0.0,
-               Ixy::Number=0.0, Ixz::Number=0.0, Iyz::Number=0.0) where {F} =
+MassProperties{F}(; mass::Number=F(0.0), centerOfMass=Modia3D.ZeroVector3D(F),
+               Ixx::Number=F(0.0), Iyy::Number=F(0.0), Izz::Number=F(0.0),
+               Ixy::Number=F(0.0), Ixz::Number=F(0.0), Iyz::Number=F(0.0)) where {F} =
                   MassProperties{F}(mass, centerOfMass, [Ixx Ixy Ixz; Ixy Iyy Iyz; Ixz Iyz Izz])
 # Constructor b: shape and mass is given, center of mass and inertia tensor is
 #                calculated via shape --> constructor 0 is called
 MassProperties{F}(shape::Modia3D.AbstractGeometry, mass::Number) where {F} =
-                     MassProperties{F}(mass, centroid(shape), inertiaMatrix(shape,mass))
+                     MassProperties{F}(F(mass), centroid(shape), inertiaMatrix(shape,F(mass)))
 # Constructor c: shape and material is given, mass is computed via volume of
 #                shape and density --> constructor b is called
 MassProperties{F}(shape::Modia3D.AbstractGeometry, material::SolidMaterial) where {F} =

@@ -12,7 +12,7 @@ AABB_touching(aabb1::Basics.BoundingBox, aabb2::Basics.BoundingBox) = aabb1.x_ma
 
 
 function Composition.initializeContactDetection!(world::Composition.Object3D, scene::Composition.Scene)::Nothing
-    if typeof(scene.options.contactDetection) == Modia3D.ContactDetectionMPR_handler{Modia3D.MPRFloatType}
+    if typeof(scene.options.contactDetection) <: Modia3D.ContactDetectionMPR_handler
         ch = scene.options.contactDetection
         ch.contactPairs = Composition.ContactPairs(world, scene, ch.visualizeContactPoints,
             ch.visualizeSupportPoints, ch.defaultContactSphereDiameter)
@@ -105,7 +105,7 @@ function Composition.getDistances!(scene::Composition.Scene, ch::Composition.Con
 end
 
 
-function computeDistances(scene::Composition.Scene, ch::Composition.ContactDetectionMPR_handler, world::Composition.Object3D, phase2::Bool, hasEvent::Bool=true)
+function computeDistances(scene::Composition.Scene{F}, ch::Composition.ContactDetectionMPR_handler, world::Composition.Object3D, phase2::Bool, hasEvent::Bool=true) where {F}
     noCPairs  = scene.noCPairs
     superObjs = scene.superObjs
     AABB = scene.AABB
@@ -117,7 +117,7 @@ function computeDistances(scene::Composition.Scene, ch::Composition.ContactDetec
                 k = k +1
                 obj = superObj[j]
                 AABB[i][j] = Modia3D.boundingBox!(obj,
-                    AABB[i][j]; tight=false, scaleFactor=0.01)
+                    AABB[i][j]; tight=false, scaleFactor=F(0.01) )
                 if scene.options.visualizeBoundingBox
                     updateVisualBoundingBox!(world.AABBVisu[k], AABB[i][j])
                 end
@@ -159,10 +159,10 @@ const zEps2 = 2*zEps
 
 
 function pushCollisionPair!(ch, contact, distanceWithHysteresis, pairID, contactPoint1,
-    contactPoint2, contactNormal, actObj, nextObj, hasevent, supportPointsDefined, support1A, support2A,
-    support3A, support1B, support2B, support3B)::Nothing
+    contactPoint2, contactNormal, actObj::Composition.Object3D{F}, nextObj::Composition.Object3D{F}, hasevent, supportPointsDefined, support1A, support2A,
+    support3A, support1B, support2B, support3B)::Nothing where {F}
     if contact
-        push!(ch.contactDict, pairID => Modia3D.ContactPair(contactPoint1,contactPoint2,
+        push!(ch.contactDict, pairID => Modia3D.ContactPair{F}(contactPoint1,contactPoint2,
             contactNormal, actObj, nextObj, distanceWithHysteresis, supportPointsDefined,
             support1A, support2A, support3A, support1B, support2B, support3B))
     else
