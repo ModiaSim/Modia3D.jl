@@ -29,7 +29,7 @@ v1 = R'*v2
 ```
 """
 const RotationMatrix = SMatrix{3,3,Float64,9}
-
+# RotationMatrix(F) = SMatrix{3,3,F,9}
 
 
 """
