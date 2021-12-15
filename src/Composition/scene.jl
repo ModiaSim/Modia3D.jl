@@ -413,7 +413,7 @@ mutable struct Scene{F} <: Modia3D.AbstractScene
     outputCounter::Int64                      # animation/visualization output step counter
 
     # Data specific to a particular joint type
-    revolute::Vector{Revolute}
+    revolute::Vector{Revolute{F}}
     prismatic::Vector{Prismatic{F}}
     freeMotion::Vector{FreeMotion}
 
@@ -501,7 +501,7 @@ mutable struct Scene{F} <: Modia3D.AbstractScene
             exportAnimation,
             Vector{animationStep}[],
             0,
-            Revolute[],
+            Revolute{F}[],
             Prismatic{F}[],
             FreeMotion[])
     end
