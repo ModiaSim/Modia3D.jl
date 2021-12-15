@@ -126,15 +126,15 @@ Return [inertia matrix] (https://en.wikipedia.org/wiki/Moment_of_inertia) `I` of
 [kg*m^2] as `SMatrix{3,3,F,9}`. Hereby it is assumed that `shape` has uniform
 density and `mass` is the mass of `shape` in [kg].
 """
-inertiaMatrix(shape::Sphere{F}, mass::Number) where {F} = InertiaMatrix(F, mass/10*shape.diameter^2*EYE3(F))
+inertiaMatrix(shape::Sphere{F}, mass::F) where {F} = InertiaMatrix(F, mass/10*shape.diameter^2*EYE3(F))
 
-inertiaMatrix(shape::Ellipsoid{F}, mass::Number) where {F} =
+inertiaMatrix(shape::Ellipsoid{F}, mass::F) where {F} =
                 InertiaMatrix(F, mass/20 * Diagonal{F}([shape.lengthY^2 + shape.lengthZ^2, shape.lengthX^2 + shape.lengthZ^2, shape.lengthX^2 + shape.lengthY^2]))
 
-inertiaMatrix(shape::Box{F}, mass::Number) where {F} =
+inertiaMatrix(shape::Box{F}, mass::F) where {F} =
                 InertiaMatrix(F, 1/12*mass * Diagonal{F}([shape.lengthY^2 + shape.lengthZ^2, shape.lengthX^2 + shape.lengthZ^2, shape.lengthX^2 + shape.lengthY^2]))
 
-function inertiaMatrix(shape::Cylinder{F}, mass::Number) where {F}  # https://en.wikipedia.org/wiki/List_of_moments_of_inertia
+function inertiaMatrix(shape::Cylinder{F}, mass::F) where {F}  # https://en.wikipedia.org/wiki/List_of_moments_of_inertia
     Iax  = mass/2*((shape.diameter/2)^2 + (shape.innerDiameter/2)^2)
     Irad = mass/12*(3*((shape.diameter/2)^2 + (shape.innerDiameter/2)^2) + shape.length^2)
     if shape.axis == 1
@@ -146,7 +146,7 @@ function inertiaMatrix(shape::Cylinder{F}, mass::Number) where {F}  # https://en
     end
 end
 
-function inertiaMatrix(shape::Cone{F}, mass::Number) where {F} # https://en.wikipedia.org/wiki/List_of_moments_of_inertia
+function inertiaMatrix(shape::Cone{F}, mass::F) where {F} # https://en.wikipedia.org/wiki/List_of_moments_of_inertia
     if shape.topDiameter == F(0.0)
         Iax  = F(3/40*mass*shape.diameter^2)
         Irad = F(3/80*mass*(shape.diameter^2 + shape.length^2))
@@ -172,7 +172,7 @@ function inertiaMatrix(shape::Cone{F}, mass::Number) where {F} # https://en.wiki
     end
 end
 
-function inertiaMatrix(shape::Capsule{F}, mass::Number) where {F}
+function inertiaMatrix(shape::Capsule{F}, mass::F) where {F}
     rho = F(mass/volume(shape))
     rad = F(shape.diameter/2)
 
@@ -210,7 +210,7 @@ function inertiaMatrix(shape::Capsule{F}, mass::Number) where {F}
     end
 end
 
-function inertiaMatrix(shape::Beam{F}, massGeo::Number) where {F}
+function inertiaMatrix(shape::Beam{F}, massGeo::F) where {F}
     rho = F(massGeo/volume(shape))
 
     volBox = F(shape.length*shape.thickness*shape.width)
