@@ -7,12 +7,12 @@
 
 
 
-get_eAxis(axis::Int) = axis==  1 ? SVector{3,Float64}(  1.0,  0.0,  0.0) :
-                       axis==  2 ? SVector{3,Float64}(  0.0,  1.0,  0.0) :
-                       axis==  3 ? SVector{3,Float64}(  0.0,  0.0,  1.0) :
-                       axis== -1 ? SVector{3,Float64}( -1.0,  0.0,  0.0) :
-                       axis== -2 ? SVector{3,Float64}(  0.0, -1.0,  0.0) :
-                       axis== -3 ? SVector{3,Float64}(  0.0,  0.0, -1.0) :
+get_eAxis(::Type{F}, axis::Int) where {F} = axis==  1 ? SVector{3,F}(  1.0,  0.0,  0.0) :
+                       axis==  2 ? SVector{3,F}(  0.0,  1.0,  0.0) :
+                       axis==  3 ? SVector{3,F}(  0.0,  0.0,  1.0) :
+                       axis== -1 ? SVector{3,F}( -1.0,  0.0,  0.0) :
+                       axis== -2 ? SVector{3,F}(  0.0, -1.0,  0.0) :
+                       axis== -3 ? SVector{3,F}(  0.0,  0.0, -1.0) :
                        error("Modia3D.Prismatic: axis = ", axis, " but must be 1, 2, 3, -1, -2, or -3.")
 
 """
@@ -36,22 +36,22 @@ mutable struct Prismatic{F} <: Modia3D.AbstractJoint
 
     posAxis::Int             # = 1,2,3
     posMovement::Bool        # = true, if movement along posAxis, otherwise in negative posAxis
-    eAxis::SVector{3,Float64}   # Unit vector in direction of axis
+    eAxis::SVector{3,F}   # Unit vector in direction of axis
     ndof::Int
     canCollide::Bool         # = false, if no collision between obj1 and obj2
 
-    s::Float64
-    v::Float64
-    a::Float64
-    f::Float64
-    residue::Float64
+    s::F
+    v::F
+    a::F
+    f::F
+    residue::F
 
     function Prismatic{F}(; obj1::Object3D,
                          obj2::Object3D,
                          path::String="",
                          axis::Int = 1,
-                         s::Real   = 0.0,
-                         v::Real   = 0.0,
+                         s::Real   = F(0.0),
+                         v::Real   = F(0.0),
                          canCollide::Bool = true) where {F}
 
         (parent,obj,cutJoint) = attach(obj1, obj2)
@@ -71,21 +71,21 @@ mutable struct Prismatic{F} <: Modia3D.AbstractJoint
         end
 
         axis  = obj === obj2 ? axis : -axis
-        eAxis = get_eAxis(axis)
+        eAxis = get_eAxis(F, axis)
 
-        s = Modia3D.convertAndStripUnit(Float64, u"m"  , s)
-        v = Modia3D.convertAndStripUnit(Float64, u"m/s", v)
+        s = Modia3D.convertAndStripUnit(F, u"m"  , s)
+        v = Modia3D.convertAndStripUnit(F, u"m/s", v)
 
         posAxis     = abs(axis)
         posMovement = axis > 0
 
-        obj.joint      = new(path, parent, obj, posAxis, posMovement, eAxis, 1, canCollide, s, v, 0.0, 0.0, 0.0)
+        obj.joint      = new(path, parent, obj, posAxis, posMovement, eAxis, 1, canCollide, s, v, F(0.0), F(0.0), F(0.0) )
         obj.jointKind  = PrismaticKind
         obj.jointIndex = 0
         obj.ndof       = 1
         obj.canCollide = canCollide
         obj.r_rel      = eAxis*s
-        obj.R_rel      = Modia3D.NullRotation
+        obj.R_rel      = Modia3D.NullRotation(F)
 
         parent.hasChildJoint = true
         return obj.joint
