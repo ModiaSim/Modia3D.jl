@@ -72,7 +72,7 @@ RevoluteWithFlange(; obj1, obj2, axis=3, phi=Var(init=0.0), w=Var(init=0.0), can
         ]
 )
 
-Prismatic(; obj1, obj2, axis=1, s=Var(init=0.0), v=Var(init=0.0), canCollide=true) = Model(; _constructor = Par(value = :(Modia3D.Prismatic), _path = true, ndof = 1),
+Prismatic(; obj1, obj2, axis=1, s=Var(init=0.0), v=Var(init=0.0), canCollide=true) = Model(; _constructor = Par(value = :(Modia3D.Prismatic{FloatType}), _path = true, ndof = 1),
     obj1 = Par(value = obj1),
     obj2 = Par(value = obj2),
     axis = Par(value = axis),
@@ -86,7 +86,7 @@ Prismatic(; obj1, obj2, axis=1, s=Var(init=0.0), v=Var(init=0.0), canCollide=tru
         ]
 )
 
-PrismaticWithFlange(; obj1, obj2, axis=1, s=Var(init=0.0), v=Var(init=0.0), canCollide=true) = Model(; _constructor = Par(value = :(Modia3D.Prismatic), _path = true, ndof = 1),
+PrismaticWithFlange(; obj1, obj2, axis=1, s=Var(init=0.0), v=Var(init=0.0), canCollide=true) = Model(; _constructor = Par(value = :(Modia3D.Prismatic{FloatType}), _path = true, ndof = 1),
     obj1   = Par(value = obj1),
     obj2   = Par(value = obj2),
     axis   = Par(value = axis),

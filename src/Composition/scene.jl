@@ -414,7 +414,7 @@ mutable struct Scene{F} <: Modia3D.AbstractScene
 
     # Data specific to a particular joint type
     revolute::Vector{Revolute}
-    prismatic::Vector{Prismatic}
+    prismatic::Vector{Prismatic{F}}
     freeMotion::Vector{FreeMotion}
 
 
@@ -502,7 +502,7 @@ mutable struct Scene{F} <: Modia3D.AbstractScene
             Vector{animationStep}[],
             0,
             Revolute[],
-            Prismatic[],
+            Prismatic{F}[],
             FreeMotion[])
     end
 end

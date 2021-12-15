@@ -28,7 +28,7 @@ fixed to `obj1` or `obj2`).
 
 It is currently not supported that a `Prismatic` joint *closes a kinematic loop*.
 """
-mutable struct Prismatic <: Modia3D.AbstractJoint
+mutable struct Prismatic{F} <: Modia3D.AbstractJoint
     path::String
 
     obj1::Object3D
@@ -46,13 +46,13 @@ mutable struct Prismatic <: Modia3D.AbstractJoint
     f::Float64
     residue::Float64
 
-    function Prismatic(; obj1::Object3D,
+    function Prismatic{F}(; obj1::Object3D,
                          obj2::Object3D,
                          path::String="",
                          axis::Int = 1,
                          s::Real   = 0.0,
                          v::Real   = 0.0,
-                         canCollide::Bool = true)
+                         canCollide::Bool = true) where {F}
 
         (parent,obj,cutJoint) = attach(obj1, obj2)
         if cutJoint
