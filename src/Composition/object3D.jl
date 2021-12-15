@@ -215,7 +215,7 @@ mutable struct Object3D{F} <: Modia3D.AbstractObject3D
     ###--------------------- Object3D constructor ------------------------------
     ## Constructor 3
     # Object3D constructor: with feature and with parent
-    function Object3D{F}(parent::Object3D,
+    function Object3D{F}(parent::Object3D{F},
                       feature::Modia3D.AbstractObject3DFeature = emptyObject3DFeature;
                       fixed::Bool = true,
                       interactionBehavior::InteractionBehavior = Modia3D.NoInteraction,
@@ -287,7 +287,7 @@ mutable struct Object3D{F} <: Modia3D.AbstractObject3D
     # Constructor used only for internal purposes (not to be directly used by the user)
     # used by e.g. copyObject3D
     function Object3D{F}(
-            parent::Object3D, r_rel::SVector{3,F},
+            parent::Object3D{F}, r_rel::SVector{3,F},
             R_rel::SMatrix{3,3,F,9}, r_abs::SVector{3,F},
             R_abs::SMatrix{3,3,F,9}, feature::Modia3D.AbstractObject3DFeature,
             visualizeFrame::Modia3D.Ternary, path::String="") where {F}
@@ -396,7 +396,6 @@ end
 
 
 #    its called: "name of obj" + ".mesh[i]"
-# createConvexPartition(obj::Object3D, feature, mesh) = nothing
 function createConvexPartition(obj::Object3D{F}, feature, mesh) where {F} # feature Visual
     (head,ext) = splitext(mesh.filename)
     if ext == ".obj" && mesh.convexPartition
@@ -490,34 +489,34 @@ end
 
 
 # Inquire properties of a Object3D
-fullName(             obj::Object3D) = obj.path # ModiaLang.SimulationModel.modelName + Object3D.path (wird ca. 98x verwendet)
-instanceName(         obj::Object3D) = obj.path
+fullName(             obj::Object3D{F}) where {F} = obj.path # ModiaLang.SimulationModel.modelName + Object3D.path (wird ca. 98x verwendet)
+instanceName(         obj::Object3D{F}) where {F} = obj.path
 fullName(obj) = error("fullName not implemented for ", typeof(obj))
 instanceName(obj) = error("instanceName not implemented for ", typeof(obj))
-hasParent(            obj::Object3D) = !(obj.parent === obj)
-hasNoParent(          obj::Object3D) =   obj.parent === obj
-hasChildren(          obj::Object3D) = length(obj.children) > 0
-hasNoChildren(        obj::Object3D) = length(obj.children) == 0
-isWorld(              obj::Object3D) = hasNoParent(obj) && typeof(obj.feature) == Modia3D.Scene
-isNotWorld(           obj::Object3D) = !(isWorld(obj))
-isMovable(            obj::Object3D) = obj.interactionManner.movable
-isLockable(           obj::Object3D) = obj.interactionManner.lockable
-isFixed(              obj::Object3D) = obj.ndof == 0
-isNotFixed(           obj::Object3D) = obj.ndof > 0
-isFree(               obj::Object3D) = obj.ndof == 6
-isNotFree(            obj::Object3D) = obj.ndof < 6
-hasJoint(             obj::Object3D) = obj.ndof > 0 && obj.ndof < 6
-hasNoJoint(           obj::Object3D) = isFixed(obj) || isFree(obj)
-isCoordinateSystem(   obj::Object3D) = typeof(obj.feature) == Shapes.CoordinateSystem
-isNotCoordinateSystem(obj::Object3D) = typeof(obj.feature) != Shapes.CoordinateSystem
-hasForceElement(      obj::Object3D) = obj.hasForceElement
-hasChildJoint(        obj::Object3D) = obj.hasChildJoint
-needsAcceleration(    obj::Object3D) = obj.computeAcceleration
-objectHasMass(        obj::Object3D) = obj.hasMass
-isRootObject(         obj::Object3D) = obj.isRootObj
-objectHasMovablePos(  obj::Object3D) = !isnothing(obj.interactionManner.movablePos)
+hasParent(            obj::Object3D{F}) where {F} = !(obj.parent === obj)
+hasNoParent(          obj::Object3D{F}) where {F} =   obj.parent === obj
+hasChildren(          obj::Object3D{F}) where {F} = length(obj.children) > 0
+hasNoChildren(        obj::Object3D{F}) where {F} = length(obj.children) == 0
+isWorld(              obj::Object3D{F}) where {F} = hasNoParent(obj) && typeof(obj.feature) == Modia3D.Scene
+isNotWorld(           obj::Object3D{F}) where {F} = !(isWorld(obj))
+isMovable(            obj::Object3D{F}) where {F} = obj.interactionManner.movable
+isLockable(           obj::Object3D{F}) where {F} = obj.interactionManner.lockable
+isFixed(              obj::Object3D{F}) where {F} = obj.ndof == 0
+isNotFixed(           obj::Object3D{F}) where {F} = obj.ndof > 0
+isFree(               obj::Object3D{F}) where {F} = obj.ndof == 6
+isNotFree(            obj::Object3D{F}) where {F} = obj.ndof < 6
+hasJoint(             obj::Object3D{F}) where {F} = obj.ndof > 0 && obj.ndof < 6
+hasNoJoint(           obj::Object3D{F}) where {F} = isFixed(obj) || isFree(obj)
+isCoordinateSystem(   obj::Object3D{F}) where {F} = typeof(obj.feature) == Shapes.CoordinateSystem
+isNotCoordinateSystem(obj::Object3D{F}) where {F} = typeof(obj.feature) != Shapes.CoordinateSystem
+hasForceElement(      obj::Object3D{F}) where {F} = obj.hasForceElement
+hasChildJoint(        obj::Object3D{F}) where {F} = obj.hasChildJoint
+needsAcceleration(    obj::Object3D{F}) where {F} = obj.computeAcceleration
+objectHasMass(        obj::Object3D{F}) where {F} = obj.hasMass
+isRootObject(         obj::Object3D{F}) where {F} = obj.isRootObj
+objectHasMovablePos(  obj::Object3D{F}) where {F} = !isnothing(obj.interactionManner.movablePos)
 
-featureHasMass(obj::Object3D) = featureHasMass(obj.feature)
+featureHasMass(obj::Object3D{F}) where {F} = featureHasMass(obj.feature)
 featureHasMass(feature::Modia3D.AbstractObject3DFeature) = false
 featureHasMass(feature::Modia3D.AbstractScene) = false
 featureHasMass(feature::Shapes.Solid)                 = !isnothing(feature.massProperties)
@@ -542,7 +541,7 @@ end
 
 
 """    rootObject3D(obj) - returns the root Object3D of all parents of obj"""
-function rootObject3D(obj::Object3D)::Object3D
+function rootObject3D(obj::Object3D{F}) where {F}
     obj1 = obj
     while hasParent(obj1)
         obj1 = obj1.parent
@@ -552,7 +551,7 @@ end
 
 
 """    removeChild!(obj, child) - Remove child from obj.children"""
-function removeChild!(obj::Object3D, child::Object3D)::Nothing
+function removeChild!(obj::Object3D{F}, child::Object3D{F})::Nothing where {F}
     children = obj.children
     for i in eachindex(children)
         if children[i] === child
@@ -561,6 +560,7 @@ function removeChild!(obj::Object3D, child::Object3D)::Nothing
     end; end
     error("\nError from Modia3D.Composition.removeChild!(", obj, ", ", child, ")\n",
             child, " is not a child of object ", obj)
+    return nothing
 end
 
 
@@ -586,51 +586,3 @@ function Base.show(io::IO, obj::Object3D)
     end
     print(io, "feature=", typeof(obj.feature), "(...))")
 end
-#=
-function Base.show(io::IO, obj::Object3D)
-    commaNeeded = true
-    if obj.parent === obj || hasJoint(obj)
-        commaNeeded = false
-        print(io,"Object3D(")
-    else
-        if obj.parent.path == ""
-            print(io,"Object3D(", Modia3D.fullName(obj.parent))
-        else
-            print(io,"Object3D(", obj.parent.path)
-        end
-    end
-
-    if typeof(obj.feature) != EmptyObject3DFeature
-        if commaNeeded
-            print(io,", ")
-        end
-        typeName = string( typeof(obj.feature) )
-        s = findfirst("Modia3D", typeName) # search(typeName, "Modia3D")
-        if s.start == 1
-            typeName = "Modia3D." * Basics.trailingPartOfName( typeName )
-        end
-        #print(io, typeName, "(...)")
-        print(io, typeName, "(")
-        Base.show(io, obj.feature)
-        print(io, ")")
-    end
-
-    if obj.r_rel != Modia3D.ZeroVector3D(F)
-        print(io, "; r_rel = ", obj.r_rel)
-        if obj.path == ""
-            print(io, ")")
-        else
-            print(io,", path = \"", obj.path, "\")")
-        end
-    else
-        if obj.path == ""
-            print(io, ")")
-        else
-            print(io, "; path = \"", obj.path, "\")")
-        end
-    end
-    if obj.path == ""
-        print(io, " # ", Modia3D.instanceName(obj), "\n")
-    end
-end
-=#

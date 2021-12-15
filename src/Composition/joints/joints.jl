@@ -7,7 +7,7 @@
 
 
 # Utility function that should not be directly called (only to be called from attach(..)
-function attachAndReverseParents(newParent::Object3D, obj::Object3D)::Nothing
+function attachAndReverseParents(newParent::Object3D{F}, obj::Object3D{F})::Nothing where {F}
    @assert(!(newParent ≡ obj))
 
    # Save elements of obj
@@ -26,15 +26,15 @@ function attachAndReverseParents(newParent::Object3D, obj::Object3D)::Nothing
       parent_r_rel = parent.r_rel
       parent_R_rel = parent.R_rel
 
-      if r_rel ≡ Modia3D.ZeroVector3D(Float64)
-         parent.r_rel = Modia3D.ZeroVector3D(Float64)
+      if r_rel ≡ Modia3D.ZeroVector3D(F)
+         parent.r_rel = Modia3D.ZeroVector3D(F)
          parent.r_abs = obj1.r_abs
       else
          parent.r_rel = -R_rel*r_rel
       end
 
-      if R_rel ≡ Modia3D.NullRotation(Float64)
-         parent.R_rel = Modia3D.NullRotation(Float64)
+      if R_rel ≡ Modia3D.NullRotation(F)
+         parent.R_rel = Modia3D.NullRotation(F)
          parent.R_abs = obj1.R_abs
       else
          parent.R_rel = R_rel'
@@ -96,59 +96,8 @@ function attach(obj1::Object3D, obj2::Object3D)
    end
 end
 
-#=
-function connect(obj1::Object3D, obj2::Object3D;
-                 r::AbstractVector = Modia3D.ZeroVector3D(Float64),
-                 R::Union{Frames.RotationMatrix,Nothing} = nothing,
-                 q::Union{Frames.Quaternion,Nothing} = nothing,
-                 fixed::Bool = true)::Nothing
-   if !isnothing(R) && !isnothing(q)
-      error("Modia3D.connect(...): either R or q must be nothing but both have a value.")
-   end
-   if !isnothing(R)
-      Modia3D.assertRotationMatrix(R)
-   elseif !isnothing(q)
-      Modia3D.assertQuaternion(q)
-   end
 
-
-   (parentObject3D, obj, cutJoint) = attach(obj1, obj2)
-  # println("... connect, fixed = ", fixed, ", obj1=",Modia3D.fullName(obj1), ", obj2 = ", Modia3D.fullName(obj2), ", obj = ", Modia3D.fullName(obj))
-
-
-   if cutJoint
-      error("Error from Modia3D.Composition.connect(", obj1.name, ",", obj2.name, "):\n",
-            "Not yet supported to rigidly connect two objs that have the same root.")
-   end
-
-   r_rel = SVector{3,Float64}(r)
-   R_rel = !isnothing(R) ? R                   :
-   !isnothing(q) ? Modia3D.from_q(q) : Modia3D.NullRotation(Float64)
-
-   obj.r_rel = obj===obj2 ? r_rel : -R_rel*r_rel
-   obj.R_rel = obj===obj2 ? R_rel :  R_rel'
-
-   #r_abs = parent.r_abs + r_rel
-   #R_abs = R_rel*parent.R_abs
-
-
-   if fixed
-      obj.joint = fixedJoint
-   else
-      obj1.hasChildJoint = true
-      q_start = !isnothing(R) ? Modia3D.from_R(R) :
-      !isnothing(q) ? q                   : Modia3D.NullQuaternion
-      q_start = obj===obj2 ? q_start : Modia3D.inverseRotation(q_start)
-
-      obj.joint = FreeMotion(obj, r_start = obj.r_rel, q_start = q_start)
-   end
-   return nothing
-end
-=#
-
-
-
-function updatePosition!(obj::Object3D)::Nothing
+function updatePosition!(obj::Object3D{F})::Nothing where {F}
    stack = Object3D[]
    # Push initial children on stack
    append!(stack, obj.children)
@@ -159,13 +108,13 @@ function updatePosition!(obj::Object3D)::Nothing
 
       parent = obj.parent
 
-      if obj.r_rel ≡ Modia3D.ZeroVector3D(Float64)
+      if obj.r_rel ≡ Modia3D.ZeroVector3D(F)
          obj.r_abs = parent.r_abs
       else
          obj.r_abs = parent.r_abs + parent.R_abs'*obj.r_rel
       end
 
-      if obj.R_rel ≡ Modia3D.NullRotation(Float64)
+      if obj.R_rel ≡ Modia3D.NullRotation(F)
          obj.R_abs = parent.R_abs
       else
          obj.R_abs = obj.R_rel*parent.R_abs
@@ -224,7 +173,7 @@ end
 """
     w = wfromrot123(rot123::AbstractVector, derrot123::AbstractVector)
 
-Return relative rotational velocity SVector{3,Float64} `w` from frame `1` to frame `2` resolved in frame `2`.
+Return relative rotational velocity SVector{3,F} `w` from frame `1` to frame `2` resolved in frame `2`.
 
 `rot123` are the Cardan angles (rotation sequence x-y-z) of rotation from frame `1` to frame `2`.
 `derrot123` are the time derivatives of `rot123`.
@@ -471,24 +420,24 @@ function setJointVariables_q_qd_f!(scene::Scene, objects::Vector{Object3D{F}}, s
         if jointKind == RevoluteKind
             @assert(ndof[i] == 1)
             revolute     = scene.revolute[obj.jointIndex]
-            revolute.phi = args_i[1]
-            revolute.w   = args_i[2]
-            revolute.tau = args_i[3]
+            revolute.phi = F(args_i[1])
+            revolute.w   = F(args_i[2])
+            revolute.tau = F(args_i[3])
 
         elseif jointKind == PrismaticKind
             @assert(ndof[i] == 1)
             prismatic   = scene.prismatic[obj.jointIndex]
-            prismatic.s = args_i[1]
-            prismatic.v = args_i[2]
-            prismatic.f = args_i[3]
+            prismatic.s = F(args_i[1])
+            prismatic.v = F(args_i[2])
+            prismatic.f = F(args_i[3])
 
         elseif jointKind == AbsoluteFreeMotionKind || jointKind == FreeMotionKind
             @assert(ndof[i] == 6)
             freeMotion     = scene.freeMotion[obj.jointIndex]
-            freeMotion.r   = SVector{3,Float64}(args_i[1])
-            freeMotion.rot = SVector{3,Float64}(args_i[2])
-            freeMotion.v   = SVector{3,Float64}(args_i[3])
-            freeMotion.w   = SVector{3,Float64}(args_i[4])
+            freeMotion.r   = SVector{3,F}(args_i[1])
+            freeMotion.rot = SVector{3,F}(args_i[2])
+            freeMotion.v   = SVector{3,F}(args_i[3])
+            freeMotion.w   = SVector{3,F}(args_i[4])
             freeMotion.isrot123 = args_i[5]
 
         else
@@ -524,11 +473,11 @@ function setJointVariables_qdd!(scene::Scene, objects::Vector{Object3D{F}}, star
 
         elseif jointKind == AbsoluteFreeMotionKind || jointKind == FreeMotionKind
             @assert(ndof[i] == 6)
-            qdd2::Vector{Float64} = qdd
+            qdd2::Vector{F} = qdd
             beg          = startIndex[i]
             freeMotion   = scene.freeMotion[obj.jointIndex]
-            freeMotion.a = SVector{3,Float64}(qdd2[beg]  , qdd2[beg+1], qdd2[beg+2])
-            freeMotion.z = SVector{3,Float64}(qdd2[beg+3], qdd2[beg+4], qdd2[beg+5])
+            freeMotion.a = SVector{3,F}(qdd2[beg]  , qdd2[beg+1], qdd2[beg+2])
+            freeMotion.z = SVector{3,F}(qdd2[beg+3], qdd2[beg+4], qdd2[beg+5])
 
         else
            error("Bug in Modia3D/src/Composition/joints/joints.jl (setJointVariables_qdd!): jointKind = $jointKind is not known.")
