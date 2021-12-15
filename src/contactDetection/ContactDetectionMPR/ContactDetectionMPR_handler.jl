@@ -10,17 +10,6 @@ using OrderedCollections
 
 const PairID = Int64
 
-"""
-    key = DistanceKey(contact, distanceWithHysteresis, pairID)
-
-Generate a new distance key.
-"""
-struct DistanceKey
-    contact::Bool
-    distanceWithHysteresis::Float64
-    pairID::PairID
-end
-
 
 """
     ContactPair(contactPointA, contactPointB,
@@ -82,15 +71,6 @@ Base.:isless( value1::ContactPair, value2::ContactPair) =
     value1.distanceWithHysteresis < value2.distanceWithHysteresis
 Base.:isequal(value1::ContactPair, value2::ContactPair) =
     value1.distanceWithHysteresis == value2.distanceWithHysteresis
-
-Base.:isless(key1::DistanceKey, key2::DistanceKey) =
-    key1.contact &&  key2.contact ? key1.pairID < key2.pairID : ( key1.contact && !key2.contact ? true : (!key1.contact &&  key2.contact ? false                       :
-                                                     ( key1.distanceWithHysteresis != key2.distanceWithHysteresis   ?
-                                                       key1.distanceWithHysteresis < key2.distanceWithHysteresis    :
-                                                       key1.pairID                < key2.pairID)))
-
-Base.:isequal(key1::DistanceKey, key2::DistanceKey) =
-    key1.pairID == key2.pairID
 
 
 """
