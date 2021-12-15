@@ -21,7 +21,7 @@ The reference frame = Object3D frame is located at the center of the sphere.
 mutable struct Sphere{F} <: Modia3D.AbstractGeometry
     diameter::F
 
-    function Sphere{F}(; diameter=1.0) where {F}
+    function Sphere{F}(; diameter=F(1.0) ) where {F}
         @assert(diameter >= 0.0)
         new(diameter)
     end
@@ -44,7 +44,7 @@ mutable struct Ellipsoid{F} <: Modia3D.AbstractGeometry
     lengthY::F
     lengthZ::F
 
-    function Ellipsoid{F}(; lengthX=1.0, lengthY=1.0, lengthZ=1.0) where {F}
+    function Ellipsoid{F}(; lengthX=F(1.0), lengthY=F(1.0), lengthZ=F(1.0) ) where {F}
         @assert(lengthX >= 0.0)
         @assert(lengthY >= 0.0)
         @assert(lengthZ >= 0.0)
@@ -73,7 +73,7 @@ mutable struct Box{F} <: Modia3D.AbstractGeometry
     lengthY::F
     lengthZ::F
 
-    function Box{F}(; lengthX=1.0, lengthY=1.0, lengthZ=1.0) where {F}
+    function Box{F}(; lengthX=F(1.0), lengthY=F(1.0), lengthZ=F(1.0) ) where {F}
         @assert(lengthX >= 0.0)
         @assert(lengthY >= 0.0)
         @assert(lengthZ >= 0.0)
@@ -103,7 +103,7 @@ mutable struct Cylinder{F} <: Modia3D.AbstractGeometry
     length::F
     innerDiameter::F
 
-    function Cylinder{F}(; axis=3, diameter=1.0, length=1.0, innerDiameter=0.0) where {F}
+    function Cylinder{F}(; axis=3, diameter=F(1.0), length=F(1.0), innerDiameter=F(0.0) ) where {F}
         @assert(1 <= axis <= 3)
         @assert(diameter >= 0.0)
         @assert(length >= 0.0)
@@ -131,7 +131,7 @@ mutable struct Cone{F} <: Modia3D.AbstractGeometry
     length::F
     topDiameter::F
 
-    function Cone{F}(; axis=3, diameter=1.0, length=1.0, topDiameter=0.0) where {F}
+    function Cone{F}(; axis=3, diameter=F(1.0), length=F(1.0), topDiameter=F(0.0) ) where {F}
         @assert(1 <= axis <= 3)
         @assert(diameter >= 0.0)
         @assert(length >= 0.0)
@@ -160,7 +160,7 @@ mutable struct Capsule{F} <: Modia3D.AbstractGeometry
     diameter::F
     length::F
 
-    function Capsule{F}(; axis=3, diameter=1.0, length=1.0) where {F}
+    function Capsule{F}(; axis=3, diameter=F(1.0), length=F(1.0) ) where {F}
         @assert(1 <= axis <= 3)
         @assert(diameter >= 0.0)
         @assert(length >= 0.0)
@@ -196,7 +196,7 @@ mutable struct Beam{F} <: Modia3D.AbstractGeometry
     width::F
     thickness::F
 
-    function Beam{F}(; axis=3, length=1.0, width=0.2, thickness=0.1) where {F}
+    function Beam{F}(; axis=3, length=F(1.0), width=F(0.2), thickness=F(0.1) ) where {F}
         @assert(1 <= axis <= 3)
         @assert(length >= 0.0)
         @assert(width >= 0.0)
