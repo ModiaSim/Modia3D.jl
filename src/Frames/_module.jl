@@ -8,7 +8,7 @@ This module contains functions for **frames** that is coordinate systems in 3D.
 The orientation of a frame is described either with a 3x3 **rotation matrix**
 or with a **quaternion vector** and its origin is described with a **SVector{3,Float64}**:
 
-- `const `[`Modia3D.RotationMatrix`](@ref) = SMatrix{3,3,Float64,9}`:
+- Rotation matrix `SMatrix{3,3,Float64,9}`:
   Type of a Rotation matrix to rotate from a frame 1 into a frame 2.
 
 - `Quaternion = SVector{4,Float64}`:
@@ -18,7 +18,7 @@ or with a **quaternion vector** and its origin is described with a **SVector{3,F
 The following constants are defined
 
 - `Modia3D.NullRotation(F)`:
-  RotationMatrix with no rotation from a frame 1 into a frame 2.
+  rotation matrix with no rotation from a frame 1 into a frame 2.
 
 - `Modia3D.NullQuaternion(F)`:
   Quaternion vector with no rotation from a frame 1 into a frame 2.
@@ -33,7 +33,7 @@ number (interpreted as having unit `rad`) or a number with a unit
 
 # Constructors for a RotationMatrix R
 
-The following functions return a [`Modia3D.RotationMatrix`](@ref)` R`
+The following functions return a `SMatrix{3,3,F,9}` R`
 to rotate a frame 1 into a frame 2.
 
 | Function                                         | Description                                        |
@@ -65,7 +65,7 @@ From the two possible solutions `q` the one is returned that is closer to `q_gue
 | [`Modia3D.qrot123`](@ref)(angle1, angle2, angle3) | Rotate around angles along x,y,z-axes      |
 | [`Modia3D.qrot_e`](@ref)(e, angle)                | Rotate around `angle` along unit vector `e`|
 | [`Modia3D.qrot_nxy`](@ref)(nx, ny)                | `nx`/`ny` are in x/y-direction of frame 2  |
-| [`Modia3D.from_R`](@ref)(R)                       | Return `q` from RotationMatrix `R`         |
+| [`Modia3D.from_R`](@ref)(R)                       | Return `q` from SMatrix{3,3,F,9} `R`         |
 
 
 # Operations on Frames
@@ -126,7 +126,7 @@ such as multiple dispatch and unit package Unitful)*.
 """
 module Frames
 
-export RotationMatrix, NullRotation  , assertRotationMatrix
+export NullRotation  , assertRotationMatrix
 export NullQuaternion, assertQuaternion
 export ZeroVector3D  , axisValue
 

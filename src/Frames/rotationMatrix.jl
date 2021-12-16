@@ -8,10 +8,6 @@
 @eval using LinearAlgebra
 
 
-const RotationMatrix = SMatrix{3,3,Float64,9}
-# RotationMatrix(F) = SMatrix{3,3,F,9}
-
-
 """
 Constant SMatrix that defines no rotation from frame 1 to frame 2.
 """
