@@ -221,7 +221,7 @@ mutable struct Object3D{F} <: Modia3D.AbstractObject3D
                       fixed::Bool = true,
                       interactionBehavior::InteractionBehavior = Modia3D.NoInteraction,
                       r::AbstractVector = Modia3D.ZeroVector3D(F),
-                      R::Union{Frames.RotationMatrix,Nothing} = nothing,
+                      R::Union{SMatrix{3,3,F,9},Nothing} = nothing,
                       q::Union{Frames.Quaternion,Nothing} = nothing,
                       v_start::AbstractVector = Modia3D.ZeroVector3D(F),
                       w_start::AbstractVector = Modia3D.ZeroVector3D(F),
