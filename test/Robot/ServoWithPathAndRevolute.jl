@@ -83,12 +83,12 @@ axis = 3
 vmat1 = VisualMaterial(color="LightBlue", transparency=0.5)
 m1 = 1.390
 translation1 = [0.033, 0, 0]
-rotation1 =Modia3D.rot1(180u"°")
+rotation1 = [180u"°", 0, 0]
 
 arm_joint_2_obj = joinpath(Modia3D.path, "objects/robot_KUKA_YouBot/arm_joint_2.obj")
 m2 = 1.318
 translation2 = [0.155, 0, 0]
-rotation2=Modia3D.rot123(90u"°", 0.0, -90u"°")
+rotation2= [90u"°", 0.0, -90u"°"]
 
 k1 = 50.0
 k2 = 0.1

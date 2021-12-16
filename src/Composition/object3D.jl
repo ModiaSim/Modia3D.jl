@@ -155,7 +155,7 @@ mutable struct Object3D{F} <: Modia3D.AbstractObject3D
         parent::Union{Object3D,Nothing}=nothing,
         path::String="",
         translation::AbstractVector = Modia3D.ZeroVector3D(F),
-        rotation::Union{AbstractVector,Frames.RotationMatrix,Nothing} = nothing,
+        rotation::Union{AbstractVector,Nothing} = nothing,
         feature::Any=nothing,
         kwargs...) where {F}
         if length(kwargs) > 0
@@ -178,7 +178,8 @@ mutable struct Object3D{F} <: Modia3D.AbstractObject3D
 
         if !isnothing(parent)
             # with parent -> call constructor 3
-            if !isnothing(rotation) && (typeof(rotation) != Frames.RotationMatrix)
+            if !isnothing(rotation)
+                rotation = Modia3D.convertAndStripUnit(SVector{3,F}, u"m"  , rotation)
                 rotation = Frames.rot123(rotation[1], rotation[2], rotation[3])
             end
             obj = Object3D{F}(parent, feature, fixed=fixed, r=translation, R=rotation, v_start=v_start, w_start=w_start, w_startVariables=w_startVariables, visualizeFrame=visualizeFrame, path=path)
