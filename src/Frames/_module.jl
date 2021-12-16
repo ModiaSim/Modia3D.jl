@@ -11,19 +11,19 @@ or with a **quaternion vector** and its origin is described with a **SVector{3,F
 - `const `[`Modia3D.RotationMatrix`](@ref) = SMatrix{3,3,Float64,9}`:
   Type of a Rotation matrix to rotate from a frame 1 into a frame 2.
 
-- `const `[`Modia3D.Quaternion`](@ref) = SVector{4,Float64}`:
+- `Quaternion = SVector{4,Float64}`:
   Type of a Quaternion vector to rotate from a frame 1 into a frame 2.
 
 
 The following constants are defined
 
-- `const `[`Modia3D.NullRotation`](@ref):
+- `Modia3D.NullRotation(F)`:
   RotationMatrix with no rotation from a frame 1 into a frame 2.
 
-- `const `[`Modia3D.NullQuaternion`](@ref):
+- `Modia3D.NullQuaternion(F)`:
   Quaternion vector with no rotation from a frame 1 into a frame 2.
 
-- `const `[`Modia3D.ZeroVector3D`](@ref):
+- `Modia3D.ZeroVector3D(F)`:
   SVector{3,Float64} with only zero elements.
 
 If an angle is given as an argument to one of the functions below, it might be a
@@ -51,10 +51,10 @@ to rotate a frame 1 into a frame 2.
 
 # Constructors for a Quaternion q
 
-The following functions return a [`Modia3D.Quaternion`](@ref)` q`
+The following functions return a `Quaternion SVector{4,F}` ` q`
 to rotate a frame 1 into a frame 2.
 Since `q` and `-q` define the same rotation the constructor functions have
-a keyword argument `q_guess::Quaternion = NullQuaternion`.
+a keyword argument `q_guess::SVector{4,F} = NullQuaternion(F)`.
 From the two possible solutions `q` the one is returned that is closer to `q_guess`.
 
 | Function                                          | Description                                |
@@ -72,8 +72,8 @@ From the two possible solutions `q` the one is returned that is closer to `q_gue
 
 The following functions provide operations on frames. The orientation of a frame is
 defined with argument `Rq` meaning it can be either a
-[`Modia3D.RotationMatrix`](@ref) ` R` or a
-[`Modia3D.Quaternion`](@ref) ` q` (to rotate a frame 1 into a frame 2).
+rotation matrix ` R` or a
+quaternion ` q` (to rotate a frame 1 into a frame 2).
 
 | Function                                       | Description                                   |
 |:-----------------------------------------------|:----------------------------------------------|
@@ -127,7 +127,7 @@ such as multiple dispatch and unit package Unitful)*.
 module Frames
 
 export RotationMatrix, NullRotation  , assertRotationMatrix
-export Quaternion    , NullQuaternion, assertQuaternion
+export NullQuaternion, assertQuaternion
 export ZeroVector3D  , axisValue
 
 export  rot1,  rot2,  rot3,  rot123, rotAxis,  rot_e,  rot_nxy, from_q

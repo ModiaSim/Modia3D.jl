@@ -155,7 +155,7 @@ rot_nxy(nx::AbstractVector, ny::AbstractVector) = rot_nxy(SVector{3,F}(nx), SVec
 
 Transform vector v2 (v resolved in frame 2) to vector v1 (v resolved in frame 1)
 given either SMatrix ` R` or
-[`Modia3D.Quaternion`](@ref) ` q` (to rotate a frame 1 into a frame 2).
+Quaternion ` q` (to rotate a frame 1 into a frame 2).
 """
 resolve1(R::SMatrix{3,3,F,9}, v2::SVector{3,F}) where {F} = SVector{3,F}(R'*v2)
 resolve1(R::SMatrix{3,3,F,9}, v2::AbstractVector) where {F} = SVector{3,F}(R'*SVector{3,Float64}(v2))
@@ -167,7 +167,7 @@ resolve1(R::SMatrix{3,3,F,9}, v2::AbstractVector) where {F} = SVector{3,F}(R'*SV
 
 Transform vector v1 (v resolved in frame 1) to vector v2 (v resolved in frame 2)
 given either SMatrix ` R` or
-[`Modia3D.Quaternion`](@ref) ` q` (to rotate a frame 1 into a frame 2).
+Quaternion ` q` (to rotate a frame 1 into a frame 2).
 """
 resolve2(R::SMatrix{3,3,F,9}, v1::SVector{3,F}) where {F} = SVector{3,F}(R*v1)
 resolve2(R::SMatrix{3,3,F,9}, v1::AbstractVector) where {F} = SVector{3,F}(R*SVector{3,F}(v1))
@@ -177,7 +177,7 @@ resolve2(R::SMatrix{3,3,F,9}, v1::AbstractVector) where {F} = SVector{3,F}(R*SVe
      R2 = Modia3D.absoluteRotation(R1, R_rel)
      q2 = Modia3D.absoluteRotation(q1, q_rel)
 
-Return SMatrix R2` or [`Modia3D.Quaternion`](@ref)` q2`
+Return SMatrix R2` or Quaternion ` q2`
 defining the rotation from frame 0 to frame 2 from SMatrix `R1` or Quaternion `q1`that define the
 rotation from frame 0 to frame 1 and the relative SMatrix `R_rel` or the
 relative Quaternion `q_rel` that define the rotation from frame 1 to frame 2.
@@ -191,7 +191,7 @@ absoluteRotation(R1::SMatrix{3,3,F,9}, R_rel::SMatrix{3,3,F,9}) where {F} = SMat
      q_rel = Modia3D.relativeRotation(q1, q2)
 
 Return relative SMatrix R_rel` or relative
-[`Modia3D.Quaternion`](@ref)` q_rel` defining the rotation from frame 1 to frame 2
+Quaternion ` q_rel` defining the rotation from frame 1 to frame 2
 from absolute SMatrix `R1` or absolute Quaternion `q1`that define the
 rotation from frame 0 to frame 1 and the absolute SMatrix `R2` or the
 absolute Quaternion `q2` that define the rotation from frame 0 to frame 2.
@@ -204,7 +204,7 @@ relativeRotation(R1::SMatrix{3,3,F,9}, R2::SMatrix{3,3,F,9}) where {F} = SMatrix
      q_inv = Modia3D.inverseRotation(q)
 
 Return inverse SMatrix R_inv` or inverse
-[`Modia3D.Quaternion`](@ref)` q_inv` defining the rotation from frame 1 to frame 0
+Quaternion ` q_inv` defining the rotation from frame 1 to frame 0
 from SMatrix `R` or Quaternion `q`that define the
 rotation from frame 0 to frame 1.
 """

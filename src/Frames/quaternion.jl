@@ -18,7 +18,6 @@ q = [e*sin(angle/2),
        cos(angle/2]
 ```
 """
-const Quaternion = SVector{4,Float64}
 
 
 """

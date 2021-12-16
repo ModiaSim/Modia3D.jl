@@ -8,7 +8,7 @@
 
 """
     path = Modia3D.Path(r::Vector{SVector{3,Float64}},
-                        q::Vector{Quaternion} = Quaternion[];
+                        q::Vector{SVector{4,Float64}} = NullQuaternion(Float64);
                         v = ones(length(r)))
 
 Return an instance of a new Path object. The Path object consists of n frames
@@ -71,7 +71,7 @@ end
 struct Path
     t::Vector{Float64}        # path parameter; t=0 is (r[1],q[1])
     r::Vector{SVector{3,Float64}}       # Position vectors from world frame to origin of Frames
-    q::Vector{SVector{4,Float64}}     # Quaternions describing rotation from world frame to Frames
+    q::Vector{SVector{4,Float64}}       # Quaternions describing rotation from world frame to Frames
 
     function Path(r::AbstractVector, q::AbstractVector=SVector{4,Float64}[];
                   v::AbstractVector=ones(length(r)),
@@ -167,7 +167,7 @@ function interpolate(path::Path, t::Number)
     tt::Float64  = convert(Float64, t)
     fac::Float64 = (tt - tvec[i]) / (tvec[i + 1] - tvec[i])
     rt = path.r[i] + fac * (path.r[i + 1] - path.r[i])
-    qt = length(path.q) > 0 ? normalize(path.q[i] + fac * (path.q[i + 1] - path.q[i])) : NulLQuaternion
+    qt = length(path.q) > 0 ? normalize(path.q[i] + fac * (path.q[i + 1] - path.q[i])) : NullQuaternion(Float64)
 
     return (rt, qt)
 end
