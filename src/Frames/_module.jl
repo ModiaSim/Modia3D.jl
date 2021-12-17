@@ -11,8 +11,8 @@ or with a **quaternion vector** and its origin is described with a **SVector{3,F
 - Rotation matrix `SMatrix{3,3,Float64,9}`:
   Type of a Rotation matrix to rotate from a frame 1 into a frame 2.
 
-- `Quaternion = SVector{4,Float64}`:
-  Type of a Quaternion vector to rotate from a frame 1 into a frame 2.
+- `quaternion = SVector{4,Float64}`:
+  Type of a quaternion vector to rotate from a frame 1 into a frame 2.
 
 
 The following constants are defined
@@ -33,7 +33,7 @@ number (interpreted as having unit `rad`) or a number with a unit
 
 # Constructors for a RotationMatrix R
 
-The following functions return a `SMatrix{3,3,F,9}` R`
+The following functions return a rotation matrix `R`
 to rotate a frame 1 into a frame 2.
 
 | Function                                         | Description                                        |
@@ -46,12 +46,12 @@ to rotate a frame 1 into a frame 2.
 | [`Modia3D.rotAxis`](@ref)(axis,positive,angle)   | Rotate around `angle` if `positive`, else `-angle` |
 | [`Modia3D.rot_e`](@ref)(e, angle)                | Rotate around `angle` along unit vector `e`        |
 | [`Modia3D.rot_nxy`](@ref)(nx, ny)                | `nx`/`ny` are in x/y-direction of frame 2          |
-| [`Modia3D.from_q`](@ref)(q)                      | Return `R` from Quaternion `q`                     |
+| [`Modia3D.from_q`](@ref)(q)                      | Return `R` from quaternion `q`                     |
 
 
-# Constructors for a Quaternion q
+# Constructors for a quaternion q
 
-The following functions return a `Quaternion SVector{4,F}` ` q`
+The following functions return a quaternion SVector{4,F} `q`
 to rotate a frame 1 into a frame 2.
 Since `q` and `-q` define the same rotation the constructor functions have
 a keyword argument `q_guess::SVector{4,F} = NullQuaternion(F)`.

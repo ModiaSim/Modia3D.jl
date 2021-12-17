@@ -9,7 +9,7 @@
 
 
 """
-Constant SMatrix that defines no rotation from frame 1 to frame 2.
+Constant rotation matrix that defines no rotation from frame 1 to frame 2.
 """
 NullRotation(::Type{F}) where {F} = SMatrix{3,3,F,9}(Matrix(F(1.0)I, 3, 3))
 
@@ -30,7 +30,7 @@ end
 """
     R = Modia3D.rot1(angle)
 
-Return SMatrix R that rotates with angle `angle` along the x-axis of frame 1.
+Return rotation matrix R that rotates with angle `angle` along the x-axis of frame 1.
 """
 @inline function rot1(angle::F) where {F}
    (s,c) = sincos(angle)
@@ -43,7 +43,7 @@ end
 """
     R = Modia3D.rot2(angle)
 
-Return SMatrix R that rotates with angle `angle` in [radian] along the y-axis of frame 1.
+Return rotation matrix R that rotates with angle `angle` in [radian] along the y-axis of frame 1.
 """
 @inline function rot2(angle::F) where {F}
    (s,c) = sincos(angle)
@@ -56,7 +56,7 @@ end
 """
     R = Modia3D.rot3(angle)
 
-Return SMatrix R that rotates with angle `angle` in [radian] along the z-axis of frame 1.
+Return rotation matrix R that rotates with angle `angle` in [radian] along the z-axis of frame 1.
 """
 @inline function rot3(angle::F) where {F}
    (s,c) = sincos(angle)
@@ -69,7 +69,7 @@ end
 """
     R = Modia3D.rot123(angle1, angle2, angle3)
 
-Return SMatrix R by rotating with angle1 along the x-axis of frame 1,
+Return rotation matrix R by rotating with angle1 along the x-axis of frame 1,
 then with angle2 along the y-axis of this frame and then with angle3 along
 the z-axis of this frame.
 """
@@ -80,7 +80,7 @@ rot123(angle1::F, angle2::F, angle3::F) where {F} = rot3(angle3)*rot2(angle2)*ro
     R = Modia3D.rotAxis(axis, angle)
     R = Modia3D.rotAxis(axis, positive, angle)
 
-Return SMatrix R that rotates with angle `angle` in [radian] along axis `axis` (= 1, 2 or 3), or
+Return rotation matrix R that rotates with angle `angle` in [radian] along axis `axis` (= 1, 2 or 3), or
 with `angle` if `positive=true` and otherwise with `-angle`.
 """
 @inline rotAxis(axis::Int, angle::F) where F = axis==3 ? rot3(angle) : (axis==2 ? rot2(angle) :
@@ -91,7 +91,7 @@ with `angle` if `positive=true` and otherwise with `-angle`.
 """
     R = Modia3D.rot_e(e, angle)
 
-Return SMatrix that rotates around angle `angle` along unit axis `e`.
+Return rotation matrix that rotates around angle `angle` along unit axis `e`.
 This function assumes that `norm(e) == 1`.
 """
 @inline function rot_e(e::SVector{3,F},angle::F) where F
@@ -106,9 +106,9 @@ rot_e(e::AbstractVector, angle::F) where F = rot_e( SVector{3,F}(e), F(angle) )
 
 It is assumed that the two input vectors `nx` and `ny` are resolved in frame 1 and
 are directed along the x and y axis of frame 2.
-The function returns the SMatrix R to rotate from frame 1 to frame 2.
+The function returns the rotation matrix R to rotate from frame 1 to frame 2.
 
-The function is robust in the sense that it returns always a SMatrix R,
+The function is robust in the sense that it returns always a rotation matrix R,
 even if `ny` is not orthogonal to `nx` or if one or both vectors have zero length.
 This is performed in the following way:
 If `nx` and `ny` are not orthogonal to each other, first a unit vector `ey` is
@@ -151,10 +151,10 @@ rot_nxy(nx::AbstractVector, ny::AbstractVector) = rot_nxy(SVector{3,F}(nx), SVec
 
 Transform vector v2 (v resolved in frame 2) to vector v1 (v resolved in frame 1)
 given either SMatrix ` R` or
-Quaternion ` q` (to rotate a frame 1 into a frame 2).
+quaternion `q` (to rotate a frame 1 into a frame 2).
 """
 resolve1(R::SMatrix{3,3,F,9}, v2::SVector{3,F}) where {F} = SVector{3,F}(R'*v2)
-resolve1(R::SMatrix{3,3,F,9}, v2::AbstractVector) where {F} = SVector{3,F}(R'*SVector{3,Float64}(v2))
+resolve1(R::SMatrix{3,3,F,9}, v2::AbstractVector) where {F} = SVector{3,F}(R'*SVector{3,F}(v2))
 
 
 
@@ -163,7 +163,7 @@ resolve1(R::SMatrix{3,3,F,9}, v2::AbstractVector) where {F} = SVector{3,F}(R'*SV
 
 Transform vector v1 (v resolved in frame 1) to vector v2 (v resolved in frame 2)
 given either SMatrix ` R` or
-Quaternion ` q` (to rotate a frame 1 into a frame 2).
+quaternion `q` (to rotate a frame 1 into a frame 2).
 """
 resolve2(R::SMatrix{3,3,F,9}, v1::SVector{3,F}) where {F} = SVector{3,F}(R*v1)
 resolve2(R::SMatrix{3,3,F,9}, v1::AbstractVector) where {F} = SVector{3,F}(R*SVector{3,F}(v1))
@@ -173,10 +173,10 @@ resolve2(R::SMatrix{3,3,F,9}, v1::AbstractVector) where {F} = SVector{3,F}(R*SVe
      R2 = Modia3D.absoluteRotation(R1, R_rel)
      q2 = Modia3D.absoluteRotation(q1, q_rel)
 
-Return SMatrix R2` or Quaternion ` q2`
-defining the rotation from frame 0 to frame 2 from SMatrix `R1` or Quaternion `q1`that define the
-rotation from frame 0 to frame 1 and the relative SMatrix `R_rel` or the
-relative Quaternion `q_rel` that define the rotation from frame 1 to frame 2.
+Return rotation matrix `R2` or quaternion `q2`
+defining the rotation from frame 0 to frame 2 from rotation matrix `R1` or quaternion `q1`that define the
+rotation from frame 0 to frame 1 and the relative rotation matrix `R_rel` or the
+relative quaternion `q_rel` that define the rotation from frame 1 to frame 2.
 """
 absoluteRotation(R1::SMatrix{3,3,F,9}, R_rel::SMatrix{3,3,F,9}) where {F} = SMatrix{3,3,F,9}(R_rel*R1)
 
@@ -186,11 +186,11 @@ absoluteRotation(R1::SMatrix{3,3,F,9}, R_rel::SMatrix{3,3,F,9}) where {F} = SMat
      R_rel = Modia3D.relativeRotation(R1, R2)
      q_rel = Modia3D.relativeRotation(q1, q2)
 
-Return relative SMatrix R_rel` or relative
-Quaternion ` q_rel` defining the rotation from frame 1 to frame 2
-from absolute SMatrix `R1` or absolute Quaternion `q1`that define the
-rotation from frame 0 to frame 1 and the absolute SMatrix `R2` or the
-absolute Quaternion `q2` that define the rotation from frame 0 to frame 2.
+Return relative rotation matrix `R_rel` or relative
+quaternion `q_rel` defining the rotation from frame 1 to frame 2
+from absolute rotation matrix `R1` or absolute quaternion `q1` that define the
+rotation from frame 0 to frame 1 and the absolute rotation matrix `R2` or the
+absolute quaternion `q2` that define the rotation from frame 0 to frame 2.
 """
 relativeRotation(R1::SMatrix{3,3,F,9}, R2::SMatrix{3,3,F,9}) where {F} = SMatrix{3,3,F,9}(R2*R1')
 
@@ -199,9 +199,9 @@ relativeRotation(R1::SMatrix{3,3,F,9}, R2::SMatrix{3,3,F,9}) where {F} = SMatrix
      R_inv = Modia3D.inverseRotation(R)
      q_inv = Modia3D.inverseRotation(q)
 
-Return inverse SMatrix R_inv` or inverse
-Quaternion ` q_inv` defining the rotation from frame 1 to frame 0
-from SMatrix `R` or Quaternion `q`that define the
+Return inverse rotation matrix `R_inv` or inverse
+quaternion `q_inv` defining the rotation from frame 1 to frame 0
+from rotation matrix `R` or quaternion `q` that define the
 rotation from frame 0 to frame 1.
 """
 inverseRotation(R::SMatrix{3,3,F,9}) where {F} = SMatrix{3,3,F,9}(R')
@@ -307,11 +307,11 @@ Return unit vector `e` in direction of axis `axis` (`axis` = 1,2,3 or -1,-2-,3).
 ```julia
 import Modia3D
 
-e1 = ModiMath.eAxis(1)    # e1 = SVector{3,Float64}(1.0,  0.0, 0.0)
-e2 = ModiMath.eAxis(-2)   # d2 = SVector{3,Float64}(0.0, -1.0, 0.0)
+e1 = ModiMath.eAxis(1)    # e1 = SVector{3,F}(1.0,  0.0, 0.0)
+e2 = ModiMath.eAxis(-2)   # d2 = SVector{3,F}(0.0, -1.0, 0.0)
 ```
 """
-eAxis(::Type{F}, axis::Int) where {F} = axis ==  1 ? SVector{3,Float64}(  1.0,  0.0,  0.0) :
+eAxis(::Type{F}, axis::Int) where {F} = axis ==  1 ? SVector{3,F}(  1.0,  0.0,  0.0) :
                    axis ==  2 ? SVector{3,F}(  0.0,  1.0,  0.0) :
                    axis ==  3 ? SVector{3,F}(  0.0,  0.0,  1.0) :
                    axis == -1 ? SVector{3,F}( -1.0,  0.0,  0.0) :

@@ -179,7 +179,7 @@ mutable struct Object3D{F} <: Modia3D.AbstractObject3D
         if !isnothing(parent)
             # with parent -> call constructor 3
             if !isnothing(rotation)
-                rotation = Modia3D.convertAndStripUnit(SVector{3,F}, u"m"  , rotation)
+                rotation = Modia3D.convertAndStripUnit(SVector{3,F}, u"rad", rotation)
                 rotation = Frames.rot123(rotation[1], rotation[2], rotation[3])
             end
             obj = Object3D{F}(parent, feature, fixed=fixed, r=translation, R=rotation, v_start=v_start, w_start=w_start, w_startVariables=w_startVariables, visualizeFrame=visualizeFrame, path=path)

@@ -7,11 +7,11 @@
 
 
 """
-Describes the rotation from a frame 1 into a frame 2 with a SVector{4,F} vector.
+Describes the rotation from a frame 1 into a frame 2 with a quaternion vector.
 If `e` is the (normalized) axis of rotation to rotate frame 1 into frame 2
 (either resolved in frame 1 or frame 2) and `angle`
-is the rotation angle for this rotation then the SVector{4,F} vector
-`q::SVector{4,F}s` is defined as:
+is the rotation angle for this rotation then the quaternion vector
+`q::SVector{4,F}` is defined as:
 
 ```julia
 q = [e*sin(angle/2),
@@ -23,7 +23,7 @@ q = [e*sin(angle/2),
 """
     const Modia3D.NullQuaternion(F) = SVector{4,F}(0.0, 0.0, 0.0, 1.0)
 
-Constant SVector{4,F} vector of a null rotation (= no rotation from frame 1 to frame 2)
+Constant quaternion vector of a null rotation (= no rotation from frame 1 to frame 2)
 """
 NullQuaternion(::Type{F}) where {F} = SVector{4,F}(0.0, 0.0, 0.0, 1.0)
 
@@ -32,7 +32,7 @@ NullQuaternion(::Type{F}) where {F} = SVector{4,F}(0.0, 0.0, 0.0, 1.0)
 """
     Modia3D.assertQuaternion(q::AbstractVector)
 
-Assert that vector `q` has the properties of a `SVector{4,F}` vector
+Assert that vector `q` has the properties of a quaternion vector
 (has 4 elements, `norm(q) = 1`)
 """
 function assertQuaternion(q::AbstractVector)
@@ -44,7 +44,7 @@ end
 """
     R = Modia3D.from_q(q::SVector{4,F})
 
-Return SMatrix{4,4,F,16} `R` from SVector{4,F} `q`.
+Return SMatrix{4,4,F,16} `R` from quaternion `q`.
 """
 from_q(q::SVector{4,F}) where {F} = SMatrix{3,3,F,9}( 2.0 * (q[1] * q[1] + q[4] * q[4]) - 1.0,
                                             2.0 * (q[2] * q[1] - q[3] * q[4]),
@@ -65,7 +65,7 @@ const c4limit = 4.0 * p4limit * p4limit
     q = Modia3D.from_R(R::SMatrix{3,3,F,9};
                        q_guess = NullQuaternion(F))
 
-Return `SVector{4,F} q` from `SMatrix{3,3,F,9} R`.
+Return quaternion `SVector{4,F} q` from rotation matrix `SMatrix{3,3,F,9} R`.
 
 From the two possible solutions `q` the one is returned that is closer
 to `q_guess` (note, `q` and `-q` define the same rotation).
@@ -104,7 +104,7 @@ from_R(R::AbstractMatrix; q_guess::AbstractVector=NullQuaternion(F)) where {F}=
 """
     q = Modia3D.qrot1(angle; q_guess = NullQuaternion(F))
 
-Return SVector{4,F} `q` that rotates with angle `angle` along the x-axis of frame 1.
+Return quaternion `q` that rotates with angle `angle` along the x-axis of frame 1.
 
 From the two possible solutions `q` the one is returned that is closer
 to `q_guess` (note, `q` and `-q` define the same rotation).
@@ -118,7 +118,7 @@ end
 """
     q = Modia3D.qrot2(angle; q_guess = NullQuaternion(F))
 
-Return SVector{4,F} `q` that rotates with angle `angle` along the y-axis of frame 1.
+Return quaternion `q` that rotates with angle `angle` along the y-axis of frame 1.
 
 From the two possible solutions `q` the one is returned that is closer
 to `q_guess` (note, `q` and `-q` define the same rotation).
@@ -132,7 +132,7 @@ end
 """
     q = Modia3D.qrot3(angle; q_guess = NullQuaternion(F))
 
-Return SVector{4,F} `q` that rotates with angle `angle` along the z-axis of frame 1.
+Return quaternion `q` that rotates with angle `angle` along the z-axis of frame 1.
 
 From the two possible solutions `q` the one is returned that is closer
 to `q_guess` (note, `q` and `-q` define the same rotation).
@@ -153,7 +153,7 @@ absoluteRotation(q1::SVector{4,F}, q_rel::SVector{4,F}) where {F} =
 """
     q = Modia3D.qrot123(angle1, angle2, angle3)
 
-Return SVector{4,F} `q` by rotating with angle1 along the x-axis of frame 1,
+Return quaternion `q` by rotating with angle1 along the x-axis of frame 1,
 then with angle2 along the y-axis of this frame and then with angle3 along
 the z-axis of this frame.
 
@@ -167,7 +167,7 @@ qrot123(angle1::F, angle2::F, angle3::F) where {F} = absoluteRotation(absoluteRo
 """
     q = Modia3D.qrot_e(e, angle; q_guess = NullQuaternion(F))
 
-Return SVector{4,F} `q` that rotates with angle `angle` along unit axis `e`.
+Return quaternion `q` that rotates with angle `angle` along unit axis `e`.
 This function assumes that `norm(e) == 1`.
 
 From the two possible solutions `q` the one is returned that is closer
@@ -186,9 +186,9 @@ qrot_e(e::AbstractVector, angle::F) where {F} = qrot_e(SVector{3,F}(e), F(angle)
 
 It is assumed that the two input vectors `nx` and `ny` are resolved in frame 1 and
 are directed along the x and y axis of frame 2.
-The function returns the SVector{4,F} `q` to rotate from frame 1 to frame 2.
+The function returns the quaternion `q` to rotate from frame 1 to frame 2.
 
-The function is robust in the sense that it returns always a SVector{4,F} `q`,
+The function is robust in the sense that it returns always a quaternion `q`,
 even if `ny` is not orthogonal to `nx` or if one or both vectors have zero length.
 This is performed in the following way:
 If `nx` and `ny` are not orthogonal to each other, first a unit vector `ey` is
@@ -197,7 +197,7 @@ determined that is orthogonal to `nx` and is lying in the plane spanned by
 or `ny` is a vector with zero or nearly zero length, a vector `ey` is selected
 arbitrarily such that `ex` and `ey` are orthogonal to each other.
 If both `nx` and `ny` are vectors with zero or nearly zero length, an
-arbitrary SVector{4,F} `q` is returned.
+arbitrary quaternion `q` is returned.
 
 # Example
 

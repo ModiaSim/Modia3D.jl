@@ -1,7 +1,7 @@
 """
     R = measFrameRotation(frameMeas::Object3D; frameOrig::Object3D)
 
-Return relative SMatrix `R` from frame `frameOrig` into frame `frameMeas`.
+Return relative rotation matrix `R` from frame `frameOrig` into frame `frameMeas`.
 
 If `frameOrig` is omitted `R` represents the absolute rotation of `frameMeas`.
 """
@@ -17,7 +17,7 @@ end
 """
     r = measFramePosition(frameMeas::Object3D; frameOrig::Object3D, frameCoord::Object3D)
 
-Return relative position SVector{3,F} `r` from frame `frameOrig` to frame `frameMeas` resolved in frame `frameCoord`.
+Return relative position vector `r` from frame `frameOrig` to frame `frameMeas` resolved in frame `frameCoord`.
 
 If `frameOrig` is omitted `r` represents the absolute position of `frameMeas`.
 
@@ -57,7 +57,7 @@ end
 """
     w = measFrameRotVelocity(frameMeas::Object3D; frameOrig::Object3D, frameCoord::Object3D)
 
-Return relative rotational velocity SVector{3,F} `w` from frame `frameOrig` to frame `frameMeas` resolved in frame `frameCoord`.
+Return relative rotational velocity vector `w` from frame `frameOrig` to frame `frameMeas` resolved in frame `frameCoord`.
 
 If `frameOrig` is omitted `w` represents the absolute rotational velocity of `frameMeas`.
 
@@ -78,7 +78,7 @@ end
 """
     v = measFrameTransVelocity(frameMeas::Object3D; frameOrig::Object3D, frameCoord::Object3D, frameObsrv::Object3D)
 
-Return relative translational velocity SVector{3,F} `v` from frame `frameOrig` to frame `frameMeas` resolved in frame `frameCoord` and observed in frame `frameObsrv`.
+Return relative translational velocity vector `v` from frame `frameOrig` to frame `frameMeas` resolved in frame `frameCoord` and observed in frame `frameObsrv`.
 
 If `frameOrig` is omitted `v` represents the absolute translational velocity of `frameMeas`.
 
@@ -121,7 +121,7 @@ end
 """
     wd = measFrameRotAcceleration(frameMeas::Object3D; frameOrig::Object3D, frameCoord::Object3D, frameObsrv::Object3D)
 
-Return relative rotational acceleration SVector{3,F} `wd` from frame `frameOrig` to frame `frameMeas` resolved in frame `frameCoord` and observed in frame `frameObsrv`.
+Return relative rotational acceleration vector `wd` from frame `frameOrig` to frame `frameMeas` resolved in frame `frameCoord` and observed in frame `frameObsrv`.
 
 If `frameOrig` is omitted `wd` represents the absolute rotational acceleration of `frameMeas`.
 
@@ -149,7 +149,7 @@ end
 """
     a = measFrameTransAcceleration(frameMeas::Object3D; frameOrig::Object3D, frameCoord::Object3D, frameObsrv::Object3D)
 
-Return relative translational acceleration SVector{3,F} `a` from frame `frameOrig` to frame `frameMeas` resolved in frame `frameCoord` and observed in frame `frameObsrv`.
+Return relative translational acceleration vector `a` from frame `frameOrig` to frame `frameMeas` resolved in frame `frameCoord` and observed in frame `frameObsrv`.
 
 If `frameOrig` is omitted `a` represents the absolute translational velocity of `frameMeas`.
 
