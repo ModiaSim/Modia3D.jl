@@ -62,22 +62,22 @@ gearRatio5    = 71.0
 
 m1=1.390
 translation1 =[0.033,0,0]
-rotation1 =Modia3D.rot1(180u"°")
+rotation1 = [180u"°", 0, 0]
 
 m2=1.318
 translation2=[0.155,0,0]
-rotation2=Modia3D.rot123(90u"°", 0.0, -90u"°")
+rotation2 = [90u"°", 0.0, -90u"°"]
 
 m3=0.821
 translation3=[0,0.135,0]
-rotation3=Modia3D.rot3(-90u"°")
+rotation3 = [0, 0, -90u"°"]
 
 m4=0.769
 translation4=[0,0.11316,0]
 
 m5=0.687
 translation5=[0,0,0.05716]
-rotation5=Modia3D.rot1(-90u"°")
+rotation5 = [-90u"°", 0, 0]
 
 ### ----------------- Servo Model -----------------------
 # parameters for Link
@@ -415,7 +415,7 @@ Link = Model(
 )
 
 Gripper = Model(
-    obj1 = Object3D(parent=:(link5.obj2), rotation=Modia3D.rot3(-180u"°")),
+    obj1 = Object3D(parent=:(link5.obj2), rotation = [0, 0, -180u"°"]),
     gripper_base_frame = Object3D(parent=:obj1, feature=Solid(shape=
         FileMesh(filename = gripper_base_frame_obj), massProperties=MassPropertiesFromShapeAndMass(mass=0.199))),
     gripper_left_finger_a = Object3D(),

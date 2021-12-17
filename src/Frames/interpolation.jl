@@ -8,7 +8,7 @@
 
 """
     path = Modia3D.Path(r::Vector{SVector{3,Float64}},
-                        q::Vector{Quaternion} = Quaternion[];
+                        q::Vector{SVector{4,Float64}} = NullQuaternion(Float64);
                         v = ones(length(r)))
 
 Return an instance of a new Path object. The Path object consists of n frames
@@ -49,10 +49,10 @@ and `qt` is the absolute quaternion of the frame at path parameter `t`.
 import Modia3D
 using Unitful
 
-r = [ SVector{3,Float64}(1,0,0),
-      SVector{3,Float64}(0,1,0),
-      SVector{3,Float64}(0,0,1) ]
-q = [ Modia3D.NullQuaternion,
+r = [ SVector{3,F}(1,0,0),
+      SVector{3,F}(0,1,0),
+      SVector{3,F}(0,0,1) ]
+q = [ Modia3D.NullQuaternion(F),
       Modia3D.qrot1(45u"°"),
       Modia3D.qrot2(60u"°")]
 
@@ -71,9 +71,9 @@ end
 struct Path
     t::Vector{Float64}        # path parameter; t=0 is (r[1],q[1])
     r::Vector{SVector{3,Float64}}       # Position vectors from world frame to origin of Frames
-    q::Vector{Quaternion}     # Quaternions describing rotation from world frame to Frames
+    q::Vector{SVector{4,Float64}}       # Quaternions describing rotation from world frame to Frames
 
-    function Path(r::AbstractVector, q::AbstractVector=Quaternion[];
+    function Path(r::AbstractVector, q::AbstractVector=SVector{4,Float64}[];
                   v::AbstractVector=ones(length(r)),
                   seps=Modia3D.neps )
         nframes = size(r, 1)
@@ -167,7 +167,7 @@ function interpolate(path::Path, t::Number)
     tt::Float64  = convert(Float64, t)
     fac::Float64 = (tt - tvec[i]) / (tvec[i + 1] - tvec[i])
     rt = path.r[i] + fac * (path.r[i + 1] - path.r[i])
-    qt = length(path.q) > 0 ? normalize(path.q[i] + fac * (path.q[i + 1] - path.q[i])) : NulLQuaternion
+    qt = length(path.q) > 0 ? normalize(path.q[i] + fac * (path.q[i + 1] - path.q[i])) : NullQuaternion(Float64)
 
     return (rt, qt)
 end
