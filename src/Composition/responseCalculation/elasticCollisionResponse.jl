@@ -131,15 +131,15 @@ function responseCalculation(material::ElasticContactPairResponseMaterial, obj1:
                              rContact::SVector{3,F}, e_n::SVector{3,F},
                              s::F, time, file, sim)::Tuple{SVector{3,F},SVector{3,F},SVector{3,F},SVector{3,F}} where {F}
     # Material
-    c_res    = material.c_res
-    c_geo    = material.c_geo
-    n_geo    = material.n_geo
-    d_res    = material.d_res
-    mu_k     = material.mu_k
-    mu_r     = material.mu_r
-    mu_r_geo = material.mu_r_geo
-    vsmall   = material.vsmall
-    wsmall   = material.wsmall
+    c_res    = F(material.c_res)
+    c_geo    = F(material.c_geo)
+    n_geo    = F(material.n_geo)
+    d_res    = F(material.d_res)
+    mu_k     = F(material.mu_k)
+    mu_r     = F(material.mu_r)
+    mu_r_geo = F(material.mu_r_geo)
+    vsmall   = F(material.vsmall)
+    wsmall   = F(material.wsmall)
 
     ### signed velocity and relative velocity ####
     # Contact points and distances to local part frame (in world frame)
@@ -170,7 +170,7 @@ function responseCalculation(material::ElasticContactPairResponseMaterial, obj1:
     else
       delta_comp = delta
     end
-    fn = -max(0.0, c_res * c_geo * delta_comp * (1 - d_res*delta_dot) )
+    fn = -max(F(0.0), c_res * c_geo * delta_comp * (1 - d_res*delta_dot) )
     ft = -mu_k*fn*e_t_reg
     f1 = fn * e_n + ft
     f2 = -f1

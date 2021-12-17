@@ -91,7 +91,7 @@ mutable struct ContactDetectionMPR_handler{T,F} <: Modia3D.AbstractContactDetect
 
     lastContactDict::Dict{PairID,ContactPair{F}}
     contactDict::Dict{    PairID,ContactPair{F}}
-    noContactMinVal::Float64
+    noContactMinVal::F
 
     tol_rel::T
     niter_max::Int
@@ -107,7 +107,7 @@ mutable struct ContactDetectionMPR_handler{T,F} <: Modia3D.AbstractContactDetect
                                             niter_max = 100) where {T,F}
         @assert(tol_rel > 0.0)
         @assert(niter_max > 0)
-        new(false, Dict{PairID,ContactPair{F}}(), Dict{PairID,ContactPair{F}}(), 42.0, tol_rel, niter_max)
+        new(false, Dict{PairID,ContactPair{F}}(), Dict{PairID,ContactPair{F}}(), F(42.0), tol_rel, niter_max)
     end
 end
 ContactDetectionMPR_handler(; kwargs...) = ContactDetectionMPR_handler{Modia3D.MPRFloatType, Float64}(; kwargs...)

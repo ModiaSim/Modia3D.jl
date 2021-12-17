@@ -130,7 +130,7 @@ end; end
 # visualizeSupportPoints is true
 # if a contact point and/or support point is nothing the point is transparent and therefore invisible
 # otherwise its visualized as a sphere
-function visualizeContactAndSupportPoints(ch, world)
+function visualizeContactAndSupportPoints(ch, world::Composition.Object3D{F}) where {F}
     contactDictCollect = collect(ch.contactDict)
     lengthDict = length(ch.contactDict)
 
@@ -143,8 +143,8 @@ function visualizeContactAndSupportPoints(ch, world)
                 point2 = contactDictCollect[i][2].contactPoint2
             else
                 transparency = 1.0
-                point1 = Modia3D.ZeroVector3D(Float64)
-                point2 = Modia3D.ZeroVector3D(Float64)
+                point1 = Modia3D.ZeroVector3D(F)
+                point2 = Modia3D.ZeroVector3D(F)
             end
             setVisualizationContactProperties!(world.contactVisuObj1[i], transparency, point1)
             setVisualizationContactProperties!(world.contactVisuObj2[i], transparency, point2)
@@ -168,12 +168,12 @@ function visualizeContactAndSupportPoints(ch, world)
                 support3B = contactDictCollect[i][2].support3B
             else
                 transparency = 1.0
-                support1A = Modia3D.ZeroVector3D(Float64)
-                support2A = Modia3D.ZeroVector3D(Float64)
-                support3A = Modia3D.ZeroVector3D(Float64)
-                support1B = Modia3D.ZeroVector3D(Float64)
-                support2B = Modia3D.ZeroVector3D(Float64)
-                support3B = Modia3D.ZeroVector3D(Float64)
+                support1A = Modia3D.ZeroVector3D(F)
+                support2A = Modia3D.ZeroVector3D(F)
+                support3A = Modia3D.ZeroVector3D(F)
+                support1B = Modia3D.ZeroVector3D(F)
+                support2B = Modia3D.ZeroVector3D(F)
+                support3B = Modia3D.ZeroVector3D(F)
             end
             setVisualizationContactProperties!(world.supportVisuObj1A[i], transparency, support1A)
             setVisualizationContactProperties!(world.supportVisuObj2A[i], transparency, support2A)
@@ -192,7 +192,7 @@ end
 printWarnContSupPoints(nVisualContSupPoints) = @warn("If all contact points and/or support points should be visualized please set nVisualContSupPoints = $nVisualContSupPoints in Scene.")
 
 # the sphere is visible and its absolute position is updated (this point was computed by the mpr algorithm)
-function setVisualizationContactProperties!(obj::Composition.Object3D, transparency::Float64, point::SVector{3,Float64})
+function setVisualizationContactProperties!(obj::Composition.Object3D{F}, transparency::Float64, point::SVector{3,F}) where {F}
     obj.r_abs = point
     obj.feature.visualMaterial.transparency = transparency
 end

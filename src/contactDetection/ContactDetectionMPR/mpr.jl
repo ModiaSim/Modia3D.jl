@@ -416,8 +416,8 @@ function mprGeneral(ch::Composition.ContactDetectionMPR_handler{T,F}, shapeA::Co
 end
 
 
-function distanceTwoSpheres(ch::Composition.ContactDetectionMPR_handler{T,F}, shapeA::Composition.Object3D, shapeB::Modia3D.Composition.Object3D,
-    sphereA::Shapes.Sphere, sphereB::Shapes.Sphere) where {T,F}
+function distanceTwoSpheres(ch::Composition.ContactDetectionMPR_handler{T,F}, shapeA::Composition.Object3D{F}, shapeB::Modia3D.Composition.Object3D{F},
+    sphereA::Shapes.Sphere{F}, sphereB::Shapes.Sphere{F}) where {T,F}
     neps = Modia3D.nepsType(T)
     radiusA = T(sphereA.diameter*0.5)
     radiusB = T(sphereB.diameter*0.5)
