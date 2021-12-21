@@ -1,7 +1,7 @@
 # ModiaLang interface to Modia3D
 Object3D(        ; kwargs...) = Par(; _constructor = :(Modia3D.Object3D{FloatType}), _path = true, kwargs...)
 Scene(           ; kwargs...) = Par(; _constructor = :(Modia3D.Scene{FloatType})                 , kwargs...)
-Visual(          ; kwargs...) = Par(; _constructor = :(Modia3D.Visual)                , kwargs...)
+Visual(          ; kwargs...) = Par(; _constructor = :(Modia3D.Visual)                           , kwargs...)
 Solid(           ; kwargs...) = Par(; _constructor = :(Modia3D.Solid{FloatType})                 , kwargs...)
 Box(             ; kwargs...) = Par(; _constructor = :(Modia3D.Box{FloatType})                   , kwargs...)
 Beam(            ; kwargs...) = Par(; _constructor = :(Modia3D.Beam{FloatType})                  , kwargs...)
@@ -10,35 +10,32 @@ Sphere(          ; kwargs...) = Par(; _constructor = :(Modia3D.Sphere{FloatType}
 Ellipsoid(       ; kwargs...) = Par(; _constructor = :(Modia3D.Ellipsoid{FloatType})             , kwargs...)
 Capsule(         ; kwargs...) = Par(; _constructor = :(Modia3D.Capsule{FloatType})               , kwargs...)
 Cone(            ; kwargs...) = Par(; _constructor = :(Modia3D.Cone{FloatType})                  , kwargs...)
-SpringShape(     ; kwargs...) = Par(; _constructor = :(Modia3D.Spring)                , kwargs...)
-GearWheel(       ; kwargs...) = Par(; _constructor = :(Modia3D.GearWheel)             , kwargs...)
-Grid(            ; kwargs...) = Par(; _constructor = :(Modia3D.Grid)                  , kwargs...)
-VisualMaterial(  ; kwargs...) = Par(; _constructor = :(Modia3D.VisualMaterial)        , kwargs...)
+SpringShape(     ; kwargs...) = Par(; _constructor = :(Modia3D.Spring)                           , kwargs...)
+GearWheel(       ; kwargs...) = Par(; _constructor = :(Modia3D.GearWheel)                        , kwargs...)
+Grid(            ; kwargs...) = Par(; _constructor = :(Modia3D.Grid)                             , kwargs...)
+VisualMaterial(  ; kwargs...) = Par(; _constructor = :(Modia3D.VisualMaterial)                   , kwargs...)
 MassProperties(  ; kwargs...) = Par(; _constructor = :(Modia3D.MassProperties{FloatType})        , kwargs...)
-CoordinateSystem(; kwargs...) = Par(; _constructor = :(Modia3D.CoordinateSystem)      , kwargs...)
-FileMesh(        ; kwargs...) = Par(; _constructor = :(Modia3D.FileMesh)              , kwargs...)
-Font(            ; kwargs...) = Par(; _constructor = :(Modia3D.Font)                  , kwargs...)
-TextShape(       ; kwargs...) = Par(; _constructor = :(Modia3D.TextShape)             , kwargs...)
-ModelicaShape(   ; kwargs...) = Par(; _constructor = :(Modia3D.ModelicaShape)         , kwargs...)
+CoordinateSystem(; kwargs...) = Par(; _constructor = :(Modia3D.CoordinateSystem)                 , kwargs...)
+FileMesh(        ; kwargs...) = Par(; _constructor = :(Modia3D.FileMesh)                         , kwargs...)
+Font(            ; kwargs...) = Par(; _constructor = :(Modia3D.Font)                             , kwargs...)
+TextShape(       ; kwargs...) = Par(; _constructor = :(Modia3D.TextShape)                        , kwargs...)
+ModelicaShape(   ; kwargs...) = Par(; _constructor = :(Modia3D.ModelicaShape)                    , kwargs...)
 Fix(             ; kwargs...) = Par(; _constructor = :(Modia3D.Fix{FloatType})                   , kwargs...)
-Bushing(         ; kwargs...) = Par(; _constructor = :(Modia3D.Bushing)               , kwargs...)
-SpringDamperPtP( ; kwargs...) = Par(; _constructor = :(Modia3D.SpringDamperPtP)       , kwargs...)
+Bushing(         ; kwargs...) = Par(; _constructor = :(Modia3D.Bushing{FloatType})               , kwargs...)
+SpringDamperPtP( ; kwargs...) = Par(; _constructor = :(Modia3D.SpringDamperPtP{FloatType})       , kwargs...)
 
-MassPropertiesFromShape() = Par(; _constructor = :(Modia3D.MassPropertiesFromShape{FloatType}))
+MassPropertiesFromShape()              = Par(; _constructor = :(Modia3D.MassPropertiesFromShape{FloatType}))
 MassPropertiesFromShapeAndMass(; mass) = Par(; _constructor = :(Modia3D.MassPropertiesFromShapeAndMass{FloatType}), mass = mass)
-UniformGravityField(; kwargs...) = Par(; _constructor = :(Modia3D.UniformGravityField), kwargs...)
+UniformGravityField(; kwargs...)       = Par(; _constructor = :(Modia3D.UniformGravityField), kwargs...)
 
-RefPath(; kwargs...) = Modia3D.ReferencePath(; kwargs...)
-
-ptpJointSpace(; kwargs...) = Modia3D.ptpJointSpace(; kwargs...)
+RefPath(; kwargs...)                 = Modia3D.ReferencePath(; kwargs...)
+ptpJointSpace(; kwargs...)           = Modia3D.ptpJointSpace(; kwargs...)
 scheduleReferenceMotion(; kwargs...) = Modia3D.scheduleReferenceMotion(; kwargs...)
+calculateRobotMovement(args...)      = Modia3D.calculateRobotMovement(args...)
+getRefPathPosition(args...)          = Modia3D.getRefPathPosition(args...)
+getRefPathInitPosition(args...)      = Modia3D.getRefPathInitPosition(args...)
 
-calculateRobotMovement(args...) = Modia3D.calculateRobotMovement(args...)
-getRefPathPosition(args...) = Modia3D.getRefPathPosition(args...)
-getRefPathInitPosition(args...) = Modia3D.getRefPathInitPosition(args...)
-
-getVariables(args...) = (args...,)
-
+getVariables(args...)            = (args...,)
 multibodyResiduals!(args...)     = Modia3D.multibodyResiduals!(args...)
 setModiaJointVariables!(args...) = Modia3D.setModiaJointVariables!(args...)
 
@@ -163,10 +160,8 @@ function change_rotSequenceInNextIteration!(rot::AbstractVector, isrot123::Bool,
     return next_isrot123
 end
 
-
 singularRem(ang) = abs(rem2pi(ang, RoundNearest)) - 1.5  # is negative/positive in valid/singular angle range
 J123or132(rot, isrot123) = isrot123 ? J123(rot) : J132(rot)
-
 
 FreeMotion(; obj1, obj2, r=Var(init=zeros(3)), rot=Var(init=zeros(3)), v=Var(init=zeros(3)), w=Var(init=zeros(3))) = Model(; _constructor = Par(value = :(Modia3D.FreeMotion{FloatType}), _path = true, ndof = 6),
     obj1 = Par(value = obj1),
