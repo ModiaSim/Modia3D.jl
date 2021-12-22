@@ -25,7 +25,7 @@ Return a `force` acting as point-to-point parallel spring-damper between
     dependent of its deflection velocity. Positive values represent
     expansion.
 """
-mutable struct SpringDamperPtP{F} <: Modia3D.AbstractForceElement
+mutable struct SpringDamperPtP{F <: AbstractFloat} <: Modia3D.AbstractForceElement
 
     obj1::Object3D{F}
     obj2::Object3D{F}
@@ -40,7 +40,7 @@ mutable struct SpringDamperPtP{F} <: Modia3D.AbstractForceElement
                                   nominalLength::Real = F(0.0),
                                   nominalForce::Real = F(0.0),
                                   springForceLaw::Union{Real, Function} = F(0.0),
-                                  damperForceLaw::Union{Real, Function} = F(0.0) ) where {F}
+                                  damperForceLaw::Union{Real, Function} = F(0.0) ) where F <: AbstractFloat
 
         nomLength = Modia3D.convertAndStripUnit(F, u"m", nominalLength)
         nomForce  = Modia3D.convertAndStripUnit(F, u"N", nominalForce)
@@ -62,13 +62,13 @@ end
 SpringDamperPtP(; kwargs...) = SpringDamperPtP{Float64}(; kwargs...)
 
 
-function initializeForceElement(force::SpringDamperPtP{F}) where {F}
+function initializeForceElement(force::SpringDamperPtP{F}) where F <: AbstractFloat
     force.obj1.hasForceElement = true
     force.obj2.hasForceElement = true
     return nothing
 end
 
-function evaluateForceElement(force::SpringDamperPtP{F}) where {F}
+function evaluateForceElement(force::SpringDamperPtP{F}) where F <: AbstractFloat
     (pos, norm) = measFrameDistance(force.obj2; frameOrig=force.obj1)
     vel = measFrameDistVelocity(force.obj2; frameOrig=force.obj1)
 
@@ -80,6 +80,6 @@ function evaluateForceElement(force::SpringDamperPtP{F}) where {F}
     applyFrameForcePair!(force.obj2, force.obj1, f12; frameCoord=force.obj1)
 end
 
-function terminateForceElement(force::SpringDamperPtP{F}) where {F}
+function terminateForceElement(force::SpringDamperPtP{F}) where F <: AbstractFloat
     return nothing
 end
