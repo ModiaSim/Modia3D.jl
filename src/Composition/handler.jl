@@ -327,7 +327,7 @@ function makeTreeAvailable(scene::Scene)
 end
 
 
-function makeJointsAvailable(scene::Scene)
+function makeJointsAvailable(scene::Scene{F}) where {F}
     tree = scene.treeForComputation
     empty!(scene.revolute)
     empty!(scene.prismatic)
@@ -337,7 +337,7 @@ function makeJointsAvailable(scene::Scene)
         jointKind = obj.jointKind
 
         if jointKind == FixKind
-            if obj.R_rel === Modia3D.NullRotation(Float64)
+            if obj.R_rel === Modia3D.NullRotation(F)
                 obj.jointKind = FixTranslationKind
             end
 
