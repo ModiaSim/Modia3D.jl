@@ -562,7 +562,7 @@ end
 
 
 # For backwards compatibility (do not use for new models)
-function setAngle!(revolute::Revolute, phi::Float64)
+function setAngle!(revolute::Revolute, phi::F) where {F}
    obj          = revolute.obj2
    revolute.phi = phi
    obj.R_rel    = Frames.rotAxis(revolute.posAxis, revolute.posMovement, phi)
@@ -572,7 +572,7 @@ end
 
 
 # For backwards compatibility (do not use for new models)
-function setDistance!(prismatic::Prismatic, s::Float64)
+function setDistance!(prismatic::Prismatic, s::F) where {F}
    obj         = prismatic.obj2
    prismatic.s = s
    obj.r_rel   = prismatic.eAxis*s
