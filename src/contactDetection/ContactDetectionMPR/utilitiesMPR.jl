@@ -12,7 +12,7 @@
 - b21, b31 are the barycentric coordinates such that r4 = r1 + b21*(r2-r1) + b31*(r3-r1).
   If r4 is on the portal, b21 >= 0, b31 >= 0 and b21+b31 <= 1
 """
-function isPointOnPortal(r4::SVector{3,Float64}, r1::SVector{3,Float64}, r2::SVector{3,Float64}, r3::SVector{3,Float64})
+function isPointOnPortal(r4::SVector{3,F}, r1::SVector{3,F}, r2::SVector{3,F}, r3::SVector{3,F}) where {F}
     r21 = r2 - r1
     r31 = r3 - r1
     r41 = r4 - r1
@@ -45,7 +45,7 @@ end
 - r: Intersection of normal ray through origin with portal plane
 - onPortal: r is on the portal triangle
 """
-function isNormalRayOnPortal(r1::SVector{3,Float64}, r2::SVector{3,Float64}, r3::SVector{3,Float64})
+function isNormalRayOnPortal(r1::SVector{3,F}, r2::SVector{3,F}, r3::SVector{3,F}) where {F}
     # Determine unit normal on portal
     n = cross(r2-r1, r3-r1)
     e = normalize(n)
@@ -70,7 +70,7 @@ end
 - r: Intersection of ray through origin with portal plane
 - onPortal: r is on the portal triangle
 """
-function isr0RayOnPortal(r0::SVector{3,Float64}, r1::SVector{3,Float64}, r2::SVector{3,Float64}, r3::SVector{3,Float64})
+function isr0RayOnPortal(r0::SVector{3,F}, r1::SVector{3,F}, r2::SVector{3,F}, r3::SVector{3,F}) where {F}
     # Determine unit normal on portal
     n = cross(r2-r1, r3-r1)
     e = normalize(n)
