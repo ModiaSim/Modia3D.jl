@@ -153,6 +153,8 @@ AllShapes = Model(
 
 allShapes = @instantiateModel(buildModia3D(AllShapes), unitless=true, log=false, logStateSelection=false, logCode=false, FloatType=Float32)
 
+
+
 simulate!(allShapes, stopTime=0.0, log=false, logStates=false, logEvents=false)
 
 println("... Basics/AllShapes.jl completed.")
