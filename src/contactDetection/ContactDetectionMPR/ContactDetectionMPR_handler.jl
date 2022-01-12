@@ -20,7 +20,7 @@ const PairID = Int64
 
 Generate a new `ContactPair` object of two objects that have `contact = true`.
 """
-mutable struct ContactPair{F}
+mutable struct ContactPair{F <: AbstractFloat}
     contactPoint1::SVector{3,F}
     contactPoint2::SVector{3,F}
     contactNormal::SVector{3,F}
@@ -41,7 +41,7 @@ mutable struct ContactPair{F}
     ContactPair{F}(contactPoint1::SVector{3,F}, contactPoint2::SVector{3,F},
             contactNormal::SVector{3,F},
             obj1::Object3D{F}, obj2::Object3D{F}, distanceWithHysteresis::F, supportPointsDefined::Bool,
-            support1A::SVector{3,F}, support2A::SVector{3,F}, support3A::SVector{3,F}, support1B::SVector{3,F}, support2B::SVector{3,F}, support3B::SVector{3,F}) where {F} =
+            support1A::SVector{3,F}, support2A::SVector{3,F}, support3A::SVector{3,F}, support1B::SVector{3,F}, support2B::SVector{3,F}, support3B::SVector{3,F}) where F <: AbstractFloat =
         new(contactPoint1, contactPoint2, contactNormal, obj1, obj2, distanceWithHysteresis, supportPointsDefined,
         support1A, support2A, support3A, support1B, support2B, support3B)
 end
@@ -49,7 +49,7 @@ end
 
 function updateContactPair!(pair::ContactPair{F}, contactPoint1::SVector{3,F}, contactPoint2::SVector{3,F}, contactNormal::SVector{3,F},
                             obj1::Object3D{F}, obj2::Object3D{F}, distanceWithHysteresis::F, supportPointsDefined::Bool,
-                            support1A::SVector{3,F}, support2A::SVector{3,F}, support3A::SVector{3,F}, support1B::SVector{3,F}, support2B::SVector{3,F}, support3B::SVector{3,F})::Nothing where {F}
+                            support1A::SVector{3,F}, support2A::SVector{3,F}, support3A::SVector{3,F}, support1B::SVector{3,F}, support2B::SVector{3,F}, support3B::SVector{3,F})::Nothing where F <: AbstractFloat
     pair.contactPoint1 = contactPoint1
     pair.contactPoint2 = contactPoint2
     pair.contactNormal = contactNormal

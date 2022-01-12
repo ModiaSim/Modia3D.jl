@@ -6,11 +6,11 @@
 #
 
 """
-    Modia3D.ZeroVector3D(::Type{F}) where {F} = SVector{3,F}(0, 0, 0)
+    Modia3D.ZeroVector3D(::Type{F}) where F <: AbstractFloat = SVector{3,F}(0, 0, 0)
 
 Constant of a SVector{3,Float64} where all elements are zero
 """
-ZeroVector3D(::Type{F}) where {F} = SVector{3,F}(0, 0, 0)
+ZeroVector3D(::Type{F}) where F <: AbstractFloat = SVector{3,F}(0, 0, 0)
 
 
 
@@ -21,9 +21,9 @@ ZeroVector3D(::Type{F}) where {F} = SVector{3,F}(0, 0, 0)
 Return `vec::SVector{3,Float64}` where all elements are zero with exception of `vec[axis] = value` or
 `vec[axis] = positive ? value : -value`.
 """
-@inline axisValue(axis::Int, value::Number)::SVector{3,Float64} = axis==1 ? @SVector([value, 0.0, 0.0]) : (axis==2 ? @SVector([0.0, value, 0.0]) :
+@inline axisValue(axis::Int, value::Number) = axis==1 ? @SVector([value, 0.0, 0.0]) : (axis==2 ? @SVector([0.0, value, 0.0]) :
                                                        (axis==3 ? @SVector([0.0, 0.0, value]) : error("Bug in Modia3D: axisValue($axis, ...) - argument needs to be 1,2 or 3.")))
-@inline axisValue(axis::Int, positive::Bool, value::Number)::SVector{3,Float64} = positive ? axisValue(axis,value) : axisValue(axis,-value)
+@inline axisValue(axis::Int, positive::Bool, value::Number) = positive ? axisValue(axis,value) : axisValue(axis,-value)
 
 
 

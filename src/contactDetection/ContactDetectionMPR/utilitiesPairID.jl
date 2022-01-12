@@ -2,9 +2,6 @@
 # Copyright 2017-2018, DLR Institute of System Dynamics and Control
 
 
-const Point = SVector{3,Float64}
-
-
 const i16max = Int64(typemax(Int16))
 const i32max = Int64(typemax(Int32))
 

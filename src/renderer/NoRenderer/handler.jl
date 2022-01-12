@@ -5,7 +5,7 @@
 #   Modia3D.DLR_Visualization (Modia3D/renderer/DLR_Visualization/_module.jl)
 #
 
-function Composition.initializeVisualization(renderer::DummyRenderer, velements::Vector{Composition.Object3D{F}})::Nothing where {F}
+function Composition.initializeVisualization(renderer::DummyRenderer, velements::Vector{Composition.Object3D{F}})::Nothing where F <: AbstractFloat
 end
 
 

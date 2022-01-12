@@ -35,7 +35,7 @@ abstract type AbstractForceElement      <: AbstractObject3D end
 abstract type AbstractScene end
 
 using StaticArrays
-@inline cross(x::SVector{3,F}, y::SVector{3,F}) where {F} = @inbounds SVector{3,F}(x[2]*y[3]-x[3]*y[2],
+@inline cross(x::SVector{3,F}, y::SVector{3,F}) where F <: AbstractFloat = @inbounds SVector{3,F}(x[2]*y[3]-x[3]*y[2],
                                                                                            x[3]*y[1]-x[1]*y[3],
                                                                                            x[1]*y[2]-x[2]*y[1])
 

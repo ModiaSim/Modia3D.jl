@@ -5,7 +5,7 @@ Apply torque vector `torque` resolved in frame `frameCoord` at frame `frameApply
 
 If `frameCoord` is omitted `torque` is resolved in absolute coordinates.
 """
-function applyFrameTorque!(frameApply::Object3D, torque::SVector{3,Float64}; frameCoord::Union{Object3D, Nothing}=nothing)
+function applyFrameTorque!(frameApply::Object3D{F}, torque::SVector{3,F}; frameCoord::Union{Object3D, Nothing}=nothing) where F <: AbstractFloat
     if !isnothing(frameCoord)
         torque_abs = frameCoord.R_abs' * torque  # World_torque := R_CoordWorld^T * Coord_torque
     else
@@ -23,7 +23,7 @@ Apply force vector `force` resolved in frame `frameCoord` at origin of frame `fr
 
 If `frameCoord` is omitted `force` is resolved in absolute coordinates.
 """
-function applyFrameForce!(frameApply::Object3D, force::SVector{3,Float64}; frameCoord::Union{Object3D, Nothing}=nothing)
+function applyFrameForce!(frameApply::Object3D{F}, force::SVector{3,F}; frameCoord::Union{Object3D, Nothing}=nothing) where F <: AbstractFloat
     if !isnothing(frameCoord)
         force_abs = frameCoord.R_abs' * force  # World_force := R_CoordWorld^T * Coord_force
     else
@@ -41,7 +41,7 @@ Apply force and torque vectors `force` and `torque` resolved in frame `frameCoor
 
 If `frameCoord` is omitted `force` and `torque` are resolved in absolute coordinates.
 """
-function applyFrameForceTorque!(frameApply::Object3D, force::SVector{3,Float64}, torque::SVector{3,Float64}; frameCoord::Union{Object3D, Nothing}=nothing)
+function applyFrameForceTorque!(frameApply::Object3D{F}, force::SVector{3,F}, torque::SVector{3,F}; frameCoord::Union{Object3D, Nothing}=nothing) where F <: AbstractFloat
     applyFrameForce!(frameApply, force; frameCoord=frameCoord)
     applyFrameTorque!(frameApply, torque; frameCoord=frameCoord)
     return nothing
@@ -55,7 +55,7 @@ Apply torque vector `torque` resolved in frame `frameCoord` at origins of frames
 
 If `frameCoord` is omitted torque` is resolved in absolute coordinates.
 """
-function applyFrameTorquePair!(frameMeas::Object3D, frameOrig::Object3D, torque::SVector{3,Float64}; frameCoord::Union{Object3D, Nothing}=nothing)
+function applyFrameTorquePair!(frameMeas::Object3D{F}, frameOrig::Object3D{F}, torque::SVector{3,F}; frameCoord::Union{Object3D, Nothing}=nothing) where F <: AbstractFloat
     applyFrameTorque!(frameMeas, -torque; frameCoord=frameCoord)
     applyFrameTorque!(frameOrig,  torque; frameCoord=frameCoord)
     return nothing
@@ -70,7 +70,7 @@ In addition a compensation torque is applied at frame `frameOrig` to satisfy tor
 
 If `frameCoord` is omitted `torque` is resolved in absolute coordinates.
 """
-function applyFrameForcePair!(frameMeas::Object3D, frameOrig::Object3D, force::SVector{3,Float64}; frameCoord::Union{Object3D, Nothing}=nothing)
+function applyFrameForcePair!(frameMeas::Object3D{F}, frameOrig::Object3D{F}, force::SVector{3,F}; frameCoord::Union{Object3D, Nothing}=nothing) where F <: AbstractFloat
     applyFrameForce!(frameMeas, -force; frameCoord=frameCoord)
     applyFrameForce!(frameOrig,  force; frameCoord=frameCoord)
     r_OrigMeas = measFramePosition(frameMeas; frameOrig=frameOrig, frameCoord=frameCoord)
@@ -87,7 +87,7 @@ In addition a compensation torque is applied at frame `frameOrig` to satisfy tor
 
 If `frameCoord` is omitted `force` and `torque` are resolved in absolute coordinates.
 """
-function applyFrameForceTorquePair!(frameMeas::Object3D, frameOrig::Object3D, force::SVector{3,Float64}; frameCoord::Union{Object3D, Nothing}=nothing)
+function applyFrameForceTorquePair!(frameMeas::Object3D{F}, frameOrig::Object3D{F}, force::SVector{3,F}; frameCoord::Union{Object3D, Nothing}=nothing) where F <: AbstractFloat
     applyFrameTorquePair!(frameMeas, frameOrig, torque; frameCoord=frameCoord)
     applyFrameForcePair!(frameMeas, frameOrig, force; frameCoord=frameCoord)
     return nothing

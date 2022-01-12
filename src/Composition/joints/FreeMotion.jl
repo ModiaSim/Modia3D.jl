@@ -15,7 +15,7 @@
 Return Cardan angles (rotation sequence x-y-z) from SMatrix{3,3,F,9} `R`.
 In case of singular state (angle2 +-90 deg, x and z axes parallel) `rot3_guess` defines angle3.
 """
-function rot123fromR(R::SMatrix{3,3,F,9}; rot3_guess=F(0.0) ) where {F}
+function rot123fromR(R::SMatrix{3,3,F,9}; rot3_guess=F(0.0) ) where F <: AbstractFloat
 
     sbe = clamp(R[3,1], F(-1.0), F(1.0) )
     cbe2 = F(1.0) - sbe*sbe
@@ -39,7 +39,7 @@ end
 Return Cardan angles (rotation sequence x-z-y) from SMatrix{3,3,F,9} `R`.
 In case of singular state (angle2 +-90 deg, x and y axes parallel) `rot3_guess` defines angle3.
 """
-function rot132fromR(R::SMatrix{3,3,F,9}; rot3_guess=F(0.0) ) where {F}
+function rot132fromR(R::SMatrix{3,3,F,9}; rot3_guess=F(0.0) ) where F <: AbstractFloat
 
     sga = clamp(-R[2,1], -1.0, 1.0)
     cga2 = 1.0 - sga*sga
@@ -67,7 +67,7 @@ Return relative rotational velocity SVector{3,F} `w` from frame `1` to frame `2`
 `rot132` are the Cardan angles (rotation sequence x-z-y) of rotation from frame `1` to frame `2`.
 `derrot132` are the time derivatives of `rot132`.
 """
-function wfromrot132(rot132::SVector{3,F}, derrot132::SVector{3,F}) where {F}
+function wfromrot132(rot132::SVector{3,F}, derrot132::SVector{3,F}) where F <: AbstractFloat
     (sga, cga) = sincos(rot132[2])
     (sbe, cbe) = sincos(rot132[3])
     return SVector{3,F}([cbe*cga*derrot132[1] - sbe*derrot132[2],

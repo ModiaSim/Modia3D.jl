@@ -7,7 +7,7 @@
 
 
 # Utility function that should not be directly called (only to be called from attach(..)
-function attachAndReverseParents(newParent::Object3D{F}, obj::Object3D{F})::Nothing where {F}
+function attachAndReverseParents(newParent::Object3D{F}, obj::Object3D{F})::Nothing where F <: AbstractFloat
    @assert(!(newParent ≡ obj))
 
    # Save elements of obj
@@ -97,7 +97,7 @@ function attach(obj1::Object3D, obj2::Object3D)
 end
 
 
-function updatePosition!(obj::Object3D{F})::Nothing where {F}
+function updatePosition!(obj::Object3D{F})::Nothing where F <: AbstractFloat
    stack = Object3D[]
    # Push initial children on stack
    append!(stack, obj.children)
@@ -203,7 +203,7 @@ in form of a tree. Variable `tree` contains the Object3Ds in a traversal order (
 `tree[1]` is the root object. It is assumed that the kinematic
 variables of tree[1].parent have a meaningful value.
 """
-function computeKinematics!(scene::Scene, tree::Vector{Object3D{F}}, time)::Nothing where {F}
+function computeKinematics!(scene::Scene, tree::Vector{Object3D{F}}, time)::Nothing where F <: AbstractFloat
     for obj in tree
         parent    = obj.parent
         jointKind = obj.jointKind
@@ -304,7 +304,7 @@ end
 Compute accelerations that are only a function of qdd, but not of q and qd.
 of the Object3Ds that are connected in form of a tree.
 """
-function computeKinematics_for_leq_mode_pos!(scene::Scene, tree::Vector{Object3D{F}}, time)::Nothing where {F}
+function computeKinematics_for_leq_mode_pos!(scene::Scene, tree::Vector{Object3D{F}}, time)::Nothing where F <: AbstractFloat
     for obj in tree
         parent    = obj.parent
         jointKind = obj.jointKind
@@ -361,7 +361,7 @@ Variable `tree` contains the Object3Ds in a traversal order (e.g. pre-order trav
 It is assumed that all force/torque variables are initialized (e.g. to zero), including
 tree[1].parent.
 """
-function computeForcesTorquesAndResiduals!(scene::Scene, tree::Vector{Object3D{F}}, time)::Nothing where {F}
+function computeForcesTorquesAndResiduals!(scene::Scene, tree::Vector{Object3D{F}}, time)::Nothing where F <: AbstractFloat
     for i = length(tree):-1:1
         obj       = tree[i]
         parent    = obj.parent
@@ -412,7 +412,7 @@ end
 Copy generalized joints variables (q,qd,f) into the corresponding Object3Ds.
 """
 function setJointVariables_q_qd_f!(scene::Scene, objects::Vector{Object3D{F}}, startIndex::Vector{Int},
-                                   ndof::Vector{Int}, args)::Nothing where {F}
+                                   ndof::Vector{Int}, args)::Nothing where F <: AbstractFloat
     for (i,obj) in enumerate(objects)
         jointKind = obj.jointKind
         args_i    = args[i]
@@ -456,7 +456,7 @@ end
 Copy generalized joint accelerations into the corresponding joints.
 """
 function setJointVariables_qdd!(scene::Scene, objects::Vector{Object3D{F}}, startIndex::Vector{Int},
-                                ndof::Vector{Int}, qdd)::Nothing where {F}
+                                ndof::Vector{Int}, qdd)::Nothing where F <: AbstractFloat
 
     for (i,obj) in enumerate(objects)
         jointKind = obj.jointKind
@@ -493,7 +493,7 @@ end
 
 Copy specific variables into their objects for leq_mode = 0.
 """
-function getJointResiduals_for_leq_mode_0!(scene::Scene, objects::Vector{Object3D{F}}, residuals, startIndex::Vector{Int}, ndof::Vector{Int}, cache_h)::Nothing where {F}
+function getJointResiduals_for_leq_mode_0!(scene::Scene, objects::Vector{Object3D{F}}, residuals, startIndex::Vector{Int}, ndof::Vector{Int}, cache_h)::Nothing where F <: AbstractFloat
     for (i,obj) in enumerate(objects)
         jointKind = obj.jointKind
         beg       = startIndex[i]
@@ -533,7 +533,7 @@ end
 
 Copy specific variables into their objects for leq_mode > 0.
 """
-function getJointResiduals_for_leq_mode_pos!(scene::Scene, objects::Vector{Object3D{F}}, residuals, startIndex::Vector{Int}, ndof::Vector{Int}, cache_h)::Nothing where {F}
+function getJointResiduals_for_leq_mode_pos!(scene::Scene, objects::Vector{Object3D{F}}, residuals, startIndex::Vector{Int}, ndof::Vector{Int}, cache_h)::Nothing where F <: AbstractFloat
     for (i,obj) in enumerate(objects)
         jointKind = obj.jointKind
         beg       = startIndex[i]
@@ -562,7 +562,7 @@ end
 
 
 # For backwards compatibility (do not use for new models)
-function setAngle!(revolute::Revolute, phi::Float64)
+function setAngle!(revolute::Revolute, phi::F) where F <: AbstractFloat
    obj          = revolute.obj2
    revolute.phi = phi
    obj.R_rel    = Frames.rotAxis(revolute.posAxis, revolute.posMovement, phi)
@@ -572,7 +572,7 @@ end
 
 
 # For backwards compatibility (do not use for new models)
-function setDistance!(prismatic::Prismatic, s::Float64)
+function setDistance!(prismatic::Prismatic, s::F) where F <: AbstractFloat
    obj         = prismatic.obj2
    prismatic.s = s
    obj.r_rel   = prismatic.eAxis*s
