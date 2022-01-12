@@ -51,7 +51,7 @@ Solid(; shape = Sphere(diameter=0.5),
         visualMaterial = VisualMaterial(color="DarkViolet"))
 ```
 """
-struct Solid{F} <: Modia3D.AbstractObject3DFeature
+struct Solid{F <: AbstractFloat} <: Modia3D.AbstractObject3DFeature
     shape::Union{Modia3D.AbstractGeometry,Nothing}
     solidMaterial::Union{SolidMaterial,Nothing}
     massProperties::Union{MassProperties,Nothing}
@@ -68,7 +68,7 @@ struct Solid{F} <: Modia3D.AbstractObject3DFeature
         contactMaterial::AbstractString = "",
         collisionSmoothingRadius=F(0.0),
         visualMaterial::Union{Shapes.VisualMaterial,AbstractString,Nothing} = Shapes.VisualMaterial(),
-        visualMaterialConvexDecomposition::Union{Shapes.VisualMaterial,AbstractString,Nothing} = Shapes.VisualMaterial()) where {F}
+        visualMaterialConvexDecomposition::Union{Shapes.VisualMaterial,AbstractString,Nothing} = Shapes.VisualMaterial()) where F <: AbstractFloat
 
         if collision && isnothing(shape)
             error("For collision/gripping simulations, a shape must be defined.")

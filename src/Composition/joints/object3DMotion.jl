@@ -5,11 +5,11 @@
 using Unitful
 
 # FixedJoint is used if an Object3D is rigidly fixed to its parent Object3D
-struct FixedJoint{F} <: Modia3D.AbstractJoint
+struct FixedJoint{F <: AbstractFloat} <: Modia3D.AbstractJoint
 end
 
 # FixedTranslationJoint is used if an Object3D is rigidly fixed to its parent Object3D without any rotation
-struct FixedTranslationJoint{F} <: Modia3D.AbstractJoint
+struct FixedTranslationJoint{F <: AbstractFloat} <: Modia3D.AbstractJoint
 end
 
 
@@ -23,7 +23,7 @@ with respect to `obj1::`[`Object3D`](@ref). The initial position is `r`
 (resolved in `obj2`) are the initial cartesian translational and rotational
 velocity vectors.
 """
-mutable struct FreeMotion{F} <: Modia3D.AbstractJoint
+mutable struct FreeMotion{F <: AbstractFloat} <: Modia3D.AbstractJoint
     path::String
 
     obj1::Modia3D.AbstractObject3D
@@ -51,7 +51,7 @@ mutable struct FreeMotion{F} <: Modia3D.AbstractJoint
                           rot::AbstractVector = Modia3D.ZeroVector3D(F),
                           v::AbstractVector   = Modia3D.ZeroVector3D(F),
                           w::AbstractVector   = Modia3D.ZeroVector3D(F),
-                          next_isrot123::Bool = true) where {F} # dummy argument, is ignored
+                          next_isrot123::Bool = true) where F <: AbstractFloat # dummy argument, is ignored
 
         #(parent,obj,cutJoint) = attach(obj1, obj2)
         #if cutJoint

@@ -20,7 +20,7 @@ directly or indirectly rigidly fixed to `obj1` or `obj2`).
 
 It is currently not supported that a `Revolute` joint *closes a kinematic loop*.
 """
-mutable struct Revolute{F} <: Modia3D.AbstractJoint
+mutable struct Revolute{F <: AbstractFloat} <: Modia3D.AbstractJoint
     path::String
 
     obj1::Object3D{F}
@@ -43,7 +43,7 @@ mutable struct Revolute{F} <: Modia3D.AbstractJoint
                         axis::Int = 3,
                         phi::Real = F(0.0),
                         w::Real   = F(0.0),
-                        canCollide::Bool = false) where {F}
+                        canCollide::Bool = false) where F <: AbstractFloat
 
         (parent,obj,cutJoint) = attach(obj1, obj2)
         if cutJoint

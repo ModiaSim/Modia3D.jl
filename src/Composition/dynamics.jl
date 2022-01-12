@@ -2,7 +2,7 @@ function getJointsAndForceElementsAndObject3DsWithoutParents!(evaluatedParameter
                                                               object3DWithoutParents::Vector{Object3D{F}},
                                                               jointObjects::Vector{Object3D{F}},
                                                               forceElements::Vector{Modia3D.AbstractForceElement},
-                                                              path::String)::Nothing where {F}
+                                                              path::String)::Nothing where F <: AbstractFloat
     for (key,value) in evaluatedParameters   # zip(keys(evaluatedParameters), evaluatedParameters)
 
         if typeof(value) <: Object3D
@@ -92,7 +92,7 @@ end
 
 
 
-struct MultibodyData{F}
+struct MultibodyData{F <: AbstractFloat}
     nqdd::Int                       # Length of qdd vector
     world::Object3D{F}                 # Pointer to world object
     scene::Scene{F}                    # Pointer to scene
@@ -112,7 +112,7 @@ end
 
 Set generalized variables (q, qd, f) defined in the Modia model for all joints.
 """
-function setModiaJointVariables!(id::Int, _leq_mode, instantiatedModel::ModiaLang.SimulationModel{F}, time, args...)::Bool where {F}
+function setModiaJointVariables!(id::Int, _leq_mode, instantiatedModel::ModiaLang.SimulationModel{F}, time, args...)::Bool where F <: AbstractFloat
      TimerOutputs.@timeit instantiatedModel.timer "Modia3D_0" begin
         separateObjects = instantiatedModel.separateObjects  # is emptied for every new simulate! call
         if haskey(separateObjects, id)
@@ -186,7 +186,7 @@ end
 
 
 
-function multibodyResiduals!(id::Int, _leq_mode, instantiatedModel::ModiaLang.SimulationModel{F}, time, jointVariablesHaveValues::Bool, qdd)::Vector{F} where {F}
+function multibodyResiduals!(id::Int, _leq_mode, instantiatedModel::ModiaLang.SimulationModel{F}, time, jointVariablesHaveValues::Bool, qdd)::Vector{F} where F <: AbstractFloat
      TimerOutputs.@timeit instantiatedModel.timer "Modia3D" begin
         separateObjects = instantiatedModel.separateObjects  # is emptied for every new simulate! call
         if !haskey(separateObjects, id)
@@ -266,7 +266,7 @@ For Modia3D:
                    return res := res + cache_h
 =#
 
-function multibodyResiduals3!(sim::ModiaLang.SimulationModel{F}, scene, world, time, storeResults, isTerminal, leq_mode) where {F}
+function multibodyResiduals3!(sim::ModiaLang.SimulationModel{F}, scene, world, time, storeResults, isTerminal, leq_mode) where F <: AbstractFloat
     tree            = scene.treeForComputation
     forceElements   = scene.forceElements
     visualize       = scene.visualize   # && sim.model.visualiz

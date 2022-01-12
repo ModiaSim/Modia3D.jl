@@ -1,7 +1,7 @@
-setCollisionSmoothingRadius(shape, collisionSmoothingRadius::F) where {F} = F(NaN)
+setCollisionSmoothingRadius(shape, collisionSmoothingRadius::F) where F <: AbstractFloat = F(NaN)
 
 
-function setCollisionSmoothingRadius(shape::Box{F}, collisionSmoothingRadius::F) where {F}
+function setCollisionSmoothingRadius(shape::Box{F}, collisionSmoothingRadius::F) where F <: AbstractFloat
     @assert(collisionSmoothingRadius >= 0.0)
     collisionSmoothingRadius2 = min(collisionSmoothingRadius, F(0.1)*min(shape.lengthX, shape.lengthY, shape.lengthZ)) # at most 10% of the smallest edge length
     if collisionSmoothingRadius2 < collisionSmoothingRadius
@@ -13,19 +13,19 @@ function setCollisionSmoothingRadius(shape::Box{F}, collisionSmoothingRadius::F)
     return collisionSmoothingRadius2
 end
 
-function setCollisionSmoothingRadius(shape::Cylinder{F}, collisionSmoothingRadius::F) where{F}
+function setCollisionSmoothingRadius(shape::Cylinder{F}, collisionSmoothingRadius::F) where F <: AbstractFloat
     @assert(collisionSmoothingRadius >= 0.0)
     collisionSmoothingRadius = min(collisionSmoothingRadius, F(0.1)*min(shape.diameter, shape.length))  # at most 10% of the smallest edge length
     return collisionSmoothingRadius
 end
 
-function setCollisionSmoothingRadius(shape::Cone{F}, collisionSmoothingRadius::F) where {F}
+function setCollisionSmoothingRadius(shape::Cone{F}, collisionSmoothingRadius::F) where F <: AbstractFloat
     @assert(collisionSmoothingRadius >= 0.0)
     collisionSmoothingRadius2 = min(collisionSmoothingRadius, F(0.1)*min(shape.diameter, shape.length)) # at most 10% of the smallest edge length
     return collisionSmoothingRadius2
 end
 
-function setCollisionSmoothingRadius(shape::Beam{F}, collisionSmoothingRadius::F) where {F}
+function setCollisionSmoothingRadius(shape::Beam{F}, collisionSmoothingRadius::F) where F <: AbstractFloat
     @assert(collisionSmoothingRadius >= 0.0)
     collisionSmoothingRadius2 = min(collisionSmoothingRadius, F(0.1)*min(shape.length, shape.width, shape.thickness)) # at most 10% of the smallest edge length
     return collisionSmoothingRadius2

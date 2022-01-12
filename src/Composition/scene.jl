@@ -9,7 +9,7 @@
 
 #-------------------------------------- Default Renderer -------------------------------
 
-initializeVisualization(renderer::Modia3D.AbstractRenderer, allVisuElements::Vector{Object3D{F}}) where {F} = error("No renderer defined.")
+initializeVisualization(renderer::Modia3D.AbstractRenderer, allVisuElements::Vector{Object3D{F}}) where F <: AbstractFloat = error("No renderer defined.")
 visualize!(renderer::Modia3D.AbstractRenderer, time) = error("No renderer defined.")
 closeVisualization(renderer::Modia3D.AbstractRenderer)        = error("No renderer defined.")
 
@@ -26,7 +26,7 @@ struct NoGravityField <: Modia3D.AbstractGravityField
    gvec::SVector{3,Float64} # [m/s^2] Vector of gravity acceleration
    NoGravityField() = new(SVector{3,Float64}(0.0, 0.0, 0.0))
 end
-gravityAcceleration(grav::NoGravityField, r_abs::SVector{3,F}) where {F} = SVector{3,F}(grav.gvec)
+gravityAcceleration(grav::NoGravityField, r_abs::SVector{3,F}) where F <: AbstractFloat = SVector{3,F}(grav.gvec)
 
 
 """
@@ -57,7 +57,7 @@ struct UniformGravityField <: Modia3D.AbstractGravityField
       new(g*normalize(n))
    end
 end
-gravityAcceleration(grav::UniformGravityField, r_abs::SVector{3,F}) where {F} = SVector{3,F}(grav.gvec)
+gravityAcceleration(grav::UniformGravityField, r_abs::SVector{3,F}) where F <: AbstractFloat = SVector{3,F}(grav.gvec)
 
 
 const G           = 6.67408e-11  # [m3/(kg.s2)]  Newtonian constant of gravitation (https://en.wikipedia.org/wiki/Gravitational_constant)
@@ -96,7 +96,7 @@ struct PointGravityField <: Modia3D.AbstractGravityField
       new(mue)
    end
 end
-gravityAcceleration(grav::PointGravityField, r_abs::SVector{3,F}) where {F} = SVector{3,F}(-(grav.mue/dot(r_abs,r_abs))*normalize(r_abs))
+gravityAcceleration(grav::PointGravityField, r_abs::SVector{3,F}) where F <: AbstractFloat = SVector{3,F}(-(grav.mue/dot(r_abs,r_abs))*normalize(r_abs))
 
 
 """
@@ -193,7 +193,7 @@ end
 
 
 #-------------------------------------- Global SceneOptions -------------------------------
-struct SceneOptions{F}
+struct SceneOptions{F <: AbstractFloat}
     # Gravity field
     gravityField::Modia3D.AbstractGravityField
 
@@ -247,7 +247,7 @@ struct SceneOptions{F}
             cameraLatitude                = 15/180*pi,
             lightDistance                 = 10.0*nominalLength,
             lightLongitude                = 60/180*pi,
-            lightLatitude                 = 45/180*pi) where {F}
+            lightLatitude                 = 45/180*pi) where F <: AbstractFloat
         @assert(gap > 0.0)
         @assert(nominalLength > 0.0)
         @assert(defaultFrameLength > 0.0)
@@ -375,7 +375,7 @@ Defines global properties of the system, such as the gravity field. Exactly one 
 
 - `lightLatitude::Float64`: latitude angle of light position (0 = horizontal)
 """
-mutable struct Scene{F} <: Modia3D.AbstractScene
+mutable struct Scene{F <: AbstractFloat} <: Modia3D.AbstractScene
     name::String                              # model name
     autoCoordsys::Shapes.CoordinateSystem     # Coordinate system that is automatically included (e.g. due to visualizeFrames=true)
     stack::Vector{Object3D{F}}                   # Stack to traverse objs
@@ -439,7 +439,7 @@ mutable struct Scene{F} <: Modia3D.AbstractScene
             cameraLatitude                = 15/180*pi,
             lightDistance                 = 10.0*nominalLength,
             lightLongitude                = 60/180*pi,
-            lightLatitude                 = 45/180*pi) where {F}
+            lightLatitude                 = 45/180*pi) where F <: AbstractFloat
 
         sceneOptions = SceneOptions{F}(gravityField = gravityField,
             useOptimizedStructure         = useOptimizedStructure,

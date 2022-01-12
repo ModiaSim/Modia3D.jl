@@ -262,23 +262,23 @@ Returns the *Axis Aligned Bounding Box* of solid `shape` in argument `AABB`.
 #------------------------------------------------------------------------------------
 # supportPoint_i are utility functions for boundingBox!(..)
 # it is based on supportPoint_abs (its nearly the same as supportPoint(..))
-@inline supportPoint_i_Box(shape::Box{F}, r_absi::F, R_absi::SVector{3,F}, isign::Int, collisionSmoothingRadius) where {F} =
+@inline supportPoint_i_Box(shape::Box{F}, r_absi::F, R_absi::SVector{3,F}, isign::Int, collisionSmoothingRadius) where F <: AbstractFloat =
                r_absi + R_absi'*supportPoint_abs_Box(shape, isign*R_absi, collisionSmoothingRadius) + isign*collisionSmoothingRadius
 
-@inline supportPoint_i_Cylinder(shape::Cylinder{F}, r_absi::F, R_absi::SVector{3,F}, isign::Int, collisionSmoothingRadius) where {F} =
+@inline supportPoint_i_Cylinder(shape::Cylinder{F}, r_absi::F, R_absi::SVector{3,F}, isign::Int, collisionSmoothingRadius) where F <: AbstractFloat =
                r_absi + R_absi'*supportPoint_abs_Cylinder(shape, isign*R_absi) + isign*collisionSmoothingRadius
 
-@inline supportPoint_i_Cone(shape::Cone{F}, r_absi::F, R_absi::SVector{3,F}, isign::Int, collisionSmoothingRadius) where {F} =
+@inline supportPoint_i_Cone(shape::Cone{F}, r_absi::F, R_absi::SVector{3,F}, isign::Int, collisionSmoothingRadius) where F <: AbstractFloat =
                r_absi + R_absi'*supportPoint_abs_Cone(shape, isign*R_absi) + isign*collisionSmoothingRadius
 
-@inline supportPoint_i_Capsule(shape::Capsule{F}, r_absi::F, R_absi::SVector{3,F}, isign::Int) where {F} =
+@inline supportPoint_i_Capsule(shape::Capsule{F}, r_absi::F, R_absi::SVector{3,F}, isign::Int) where F <: AbstractFloat =
                r_absi + R_absi'*supportPoint_abs_Capsule(shape, isign*R_absi)
 #
-@inline supportPoint_i_Beam(shape::Beam{F}, r_absi::F, R_absi::SVector{3,F}, isign::Int, collisionSmoothingRadius) where {F} =
+@inline supportPoint_i_Beam(shape::Beam{F}, r_absi::F, R_absi::SVector{3,F}, isign::Int, collisionSmoothingRadius) where F <: AbstractFloat =
                r_absi + R_absi'*supportPoint_abs_Beam(shape, isign*R_absi) + isign*collisionSmoothingRadius
 
-@inline supportPoint_i_Ellipsoid(shape::Ellipsoid{F}, r_absi::F, R_absi::SVector{3,F}, isign::Int) where {F} =
+@inline supportPoint_i_Ellipsoid(shape::Ellipsoid{F}, r_absi::F, R_absi::SVector{3,F}, isign::Int) where F <: AbstractFloat =
                r_absi + dot(R_absi, supportPoint_abs_Ellipsoid(shape, isign*R_absi))
 
-@inline supportPoint_i_FileMesh(shape::FileMesh, r_absi::F, R_absi::SVector{3,F}, isign::Int) where {F} =
+@inline supportPoint_i_FileMesh(shape::FileMesh, r_absi::F, R_absi::SVector{3,F}, isign::Int) where F <: AbstractFloat =
                r_absi + dot(R_absi, supportPoint_abs_FileMesh(shape, isign*R_absi))
