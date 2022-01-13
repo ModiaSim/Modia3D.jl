@@ -7,14 +7,14 @@
 
 
 # MassProperties consisting of mass m, center of mass rCM and inertia tensor I
-struct MassProperties{F <: AbstractFloat} <: Modia3D.AbstractMassProperties
+struct MassProperties{F <: Modia3D.VarFloatType} <: Modia3D.AbstractMassProperties
     m::F                 # mass [kg]
     rCM::SVector{3,F}       # position vector from object3d frame to center of mass resolved in object3d frame [m]
     I::SMatrix{3,3,F,9}  # inertia matrix w.r.t. center of mass resolved in object3d frame [kg.m^2]
 
     #---------------- different constructors for MassProperties -----------------
     # Constructor 0: takes mass, centerOfMass and inertiaMatrix as input values
-    function MassProperties{F}(mass::Number, centerOfMass::AbstractVector, inertiaMatrix::AbstractMatrix) where F <: AbstractFloat
+    function MassProperties{F}(mass::Number, centerOfMass::AbstractVector, inertiaMatrix::AbstractMatrix) where F <: Modia3D.VarFloatType
         @assert(mass > 0.0)
         new(mass, centerOfMass, inertiaMatrix)
     end
@@ -23,17 +23,17 @@ end
 MassProperties(args...; kwargs...) = MassProperties{Float64}(args...; kwargs...)
 
 
-struct MassPropertiesFromShape{F <: AbstractFloat} <: Modia3D.AbstractMassProperties
-    function MassPropertiesFromShape{F}() where F <: AbstractFloat
+struct MassPropertiesFromShape{F <: Modia3D.VarFloatType} <: Modia3D.AbstractMassProperties
+    function MassPropertiesFromShape{F}() where F <: Modia3D.VarFloatType
         new()
     end
 end
 MassPropertiesFromShape(args...; kwargs...) = MassPropertiesFromShape{Float64}(args...; kwargs...)
 
-struct MassPropertiesFromShapeAndMass{F <: AbstractFloat} <: Modia3D.AbstractMassProperties
+struct MassPropertiesFromShapeAndMass{F <: Modia3D.VarFloatType} <: Modia3D.AbstractMassProperties
     mass::F   # mass in [kg]
 
-    function MassPropertiesFromShapeAndMass{F}(; mass=F(1.0) ) where F <: AbstractFloat
+    function MassPropertiesFromShapeAndMass{F}(; mass=F(1.0) ) where F <: Modia3D.VarFloatType
         @assert(mass >= 0.0)
         new(mass)
     end
@@ -55,28 +55,28 @@ end
 #                --> if nothing special is defined it takes predefined values (= zero values)
 MassProperties{F}(; mass::Number=F(0.0), centerOfMass=Modia3D.ZeroVector3D(F),
                Ixx::Number=F(0.0), Iyy::Number=F(0.0), Izz::Number=F(0.0),
-               Ixy::Number=F(0.0), Ixz::Number=F(0.0), Iyz::Number=F(0.0)) where F <: AbstractFloat =
+               Ixy::Number=F(0.0), Ixz::Number=F(0.0), Iyz::Number=F(0.0)) where F <: Modia3D.VarFloatType =
                   MassProperties{F}(mass, centerOfMass, [Ixx Ixy Ixz; Ixy Iyy Iyz; Ixz Iyz Izz])
 # Constructor b: shape and mass is given, center of mass and inertia tensor is
 #                calculated via shape --> constructor 0 is called
-MassProperties{F}(shape::Modia3D.AbstractGeometry, mass::Number) where F <: AbstractFloat =
+MassProperties{F}(shape::Modia3D.AbstractGeometry, mass::Number) where F <: Modia3D.VarFloatType =
                      MassProperties{F}(F(mass), centroid(shape), inertiaMatrix(shape,F(mass)))
 # Constructor c: shape and material is given, mass is computed via volume of
 #                shape and density --> constructor b is called
-MassProperties{F}(shape::Modia3D.AbstractGeometry, material::SolidMaterial) where F <: AbstractFloat =
+MassProperties{F}(shape::Modia3D.AbstractGeometry, material::SolidMaterial) where F <: Modia3D.VarFloatType =
                      MassProperties{F}(shape, material.density*volume(shape))
 # Constructor d: shape and materialName is given, material must be defined in
 #                solidMaterialPalette --> constructor c is called
-MassProperties{F}(shape::Modia3D.AbstractGeometry, materialName::AbstractString) where F <: AbstractFloat =
+MassProperties{F}(shape::Modia3D.AbstractGeometry, materialName::AbstractString) where F <: Modia3D.VarFloatType =
                      MassProperties{F}(shape, solidMaterialPalette[materialName])
 
 
-createMassProperties(::Type{F}, massProperties::MassProperties, shape, solidMaterial) where F <: AbstractFloat = massProperties
+createMassProperties(::Type{F}, massProperties::MassProperties, shape, solidMaterial) where F <: Modia3D.VarFloatType = massProperties
 
-createMassProperties(::Type{F}, massProperties::Union{Number, SolidMaterial, AbstractString}, shape::Modia3D.AbstractGeometry, solidMaterial) where F <: AbstractFloat = MassProperties{F}(shape, massProperties)
+createMassProperties(::Type{F}, massProperties::Union{Number, SolidMaterial, AbstractString}, shape::Modia3D.AbstractGeometry, solidMaterial) where F <: Modia3D.VarFloatType = MassProperties{F}(shape, massProperties)
 
 # compute mass properties from shape and material
-function createMassProperties(::Type{F}, massProperties::Union{MassPropertiesFromShape,Nothing}, shape::Modia3D.AbstractGeometry, solidMaterial::Union{AbstractString,SolidMaterial,Nothing}) where F <: AbstractFloat
+function createMassProperties(::Type{F}, massProperties::Union{MassPropertiesFromShape,Nothing}, shape::Modia3D.AbstractGeometry, solidMaterial::Union{AbstractString,SolidMaterial,Nothing}) where F <: Modia3D.VarFloatType
     if isnothing(solidMaterial)
         error("It is not possible to compute mass properties (MassPropertiesFromShape = ", massProperties,") for shape = ", shape , " because no solidMaterial is defined.")
     else
@@ -85,14 +85,14 @@ function createMassProperties(::Type{F}, massProperties::Union{MassPropertiesFro
 end
 
 # compute mass properties from shape and mass
-function createMassProperties(::Type{F}, massProperties::MassPropertiesFromShapeAndMass, shape::Modia3D.AbstractGeometry, solidMaterial::Union{AbstractString,SolidMaterial,Nothing}) where F <: AbstractFloat
+function createMassProperties(::Type{F}, massProperties::MassPropertiesFromShapeAndMass, shape::Modia3D.AbstractGeometry, solidMaterial::Union{AbstractString,SolidMaterial,Nothing}) where F <: Modia3D.VarFloatType
     return Modia3D.MassProperties{F}(shape, massProperties.mass)
 end
 
-function createMassProperties(::Type{F}, massProperties::MassPropertiesFromShape, shape::Nothing, solidMaterial::Union{AbstractString,SolidMaterial,Nothing}) where F <: AbstractFloat
+function createMassProperties(::Type{F}, massProperties::MassPropertiesFromShape, shape::Nothing, solidMaterial::Union{AbstractString,SolidMaterial,Nothing}) where F <: Modia3D.VarFloatType
     error("It is not possible to compute mass properties (MassPropertiesFromShape = ", massProperties,") because no shape is defined.")
 end
 
-function createMassProperties(::Type{F}, massProperties::MassPropertiesFromShapeAndMass, shape::Nothing, solidMaterial::Union{AbstractString,SolidMaterial,Nothing}) where F <: AbstractFloat
+function createMassProperties(::Type{F}, massProperties::MassPropertiesFromShapeAndMass, shape::Nothing, solidMaterial::Union{AbstractString,SolidMaterial,Nothing}) where F <: Modia3D.VarFloatType
     error("It is not possible to compute mass properties (MassPropertiesFromShapeAndMass) if no shape is defined.")
 end

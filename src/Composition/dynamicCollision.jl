@@ -33,7 +33,7 @@ end
 # (see file ...\Composition\responseCalculation\elasticCollisionResponse.jl)
 # further, at an event simulation status is updated, contact material is replaced
 # and the actual contactDict is stored
-function dealWithContacts!(sim, scene::Scene{F}, ch, world, time, file) where F <: AbstractFloat
+function dealWithContacts!(sim, scene::Scene{F}, ch, world, time, file) where F <: Modia3D.VarFloatType
   simh = sim.eventHandler
   for (pairID, pair) in ch.contactDict
     obj1 = pair.obj1
@@ -130,7 +130,7 @@ end; end
 # visualizeSupportPoints is true
 # if a contact point and/or support point is nothing the point is transparent and therefore invisible
 # otherwise its visualized as a sphere
-function visualizeContactAndSupportPoints(ch, world::Composition.Object3D{F}) where F <: AbstractFloat
+function visualizeContactAndSupportPoints(ch, world::Composition.Object3D{F}) where F <: Modia3D.VarFloatType
     contactDictCollect = collect(ch.contactDict)
     lengthDict = length(ch.contactDict)
 
@@ -192,7 +192,7 @@ end
 printWarnContSupPoints(nVisualContSupPoints) = @warn("If all contact points and/or support points should be visualized please set nVisualContSupPoints = $nVisualContSupPoints in Scene.")
 
 # the sphere is visible and its absolute position is updated (this point was computed by the mpr algorithm)
-function setVisualizationContactProperties!(obj::Composition.Object3D{F}, transparency::Float64, point::SVector{3,F}) where F <: AbstractFloat
+function setVisualizationContactProperties!(obj::Composition.Object3D{F}, transparency::Float64, point::SVector{3,F}) where F <: Modia3D.VarFloatType
     obj.r_abs = point
     obj.feature.visualMaterial.transparency = transparency
 end

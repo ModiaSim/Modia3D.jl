@@ -5,7 +5,7 @@
 #   Modia3D.DLR_Visualization (Modia3D/renderer/DLR_Visualization/_module.jl)
 #
 
-function Composition.initializeVisualization(renderer::Modia3D.AbstractDLR_VisualizationRenderer, velements::Vector{Composition.Object3D{F}})::Nothing where F <: AbstractFloat
+function Composition.initializeVisualization(renderer::Modia3D.AbstractDLR_VisualizationRenderer, velements::Vector{Composition.Object3D{F}})::Nothing where F <: Modia3D.VarFloatType
     simVis = renderer.simVis
     @assert(length(velements) > 0)
     if simVis.isInitialized

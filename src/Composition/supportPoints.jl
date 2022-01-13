@@ -35,7 +35,7 @@ function supportPoint(obj::Composition.Object3D{F}, e::SVector{3,T})::SVector{3,
 end
 
 
-function boundingBox!(obj::Composition.Object3D{F}, AABB::Basics.BoundingBox{F}; tight::Bool=true, scaleFactor::F=F(0.01) ) where F <: AbstractFloat
+function boundingBox!(obj::Composition.Object3D{F}, AABB::Basics.BoundingBox{F}; tight::Bool=true, scaleFactor::F=F(0.01) ) where F <: Modia3D.VarFloatType
     shapeKind = obj.shapeKind
     solid::Modia3D.Solid{F} = obj.feature
     collisionSmoothingRadius = solid.collisionSmoothingRadius

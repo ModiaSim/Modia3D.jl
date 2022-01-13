@@ -139,6 +139,7 @@ export planarRotationAngle, eAxis
 export Path, t_pathEnd, interpolate, interpolate_r
 export skew
 
+import Modia3D
 using StaticArrays
 using LinearAlgebra
 

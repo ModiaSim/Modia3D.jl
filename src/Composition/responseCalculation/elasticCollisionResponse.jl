@@ -77,7 +77,7 @@ function contactStart(matPair::Shapes.ElasticContactPairMaterial,
                       obj2::Object3D{F},
                       rContact::SVector{3,F},
                       contactNormal::SVector{3,F},
-                      elasticContactReductionFactor::F) where F <: AbstractFloat
+                      elasticContactReductionFactor::F) where F <: Modia3D.VarFloatType
     # Compute spring constant
     name1 = obj1.feature.contactMaterial
     name2 = obj2.feature.contactMaterial
@@ -129,7 +129,7 @@ at time `time`.
 """
 function responseCalculation(material::ElasticContactPairResponseMaterial, obj1::Object3D{F}, obj2::Object3D{F},
                              rContact::SVector{3,F}, e_n::SVector{3,F},
-                             s::F, time, file, sim)::Tuple{SVector{3,F},SVector{3,F},SVector{3,F},SVector{3,F}} where F <: AbstractFloat
+                             s::F, time, file, sim)::Tuple{SVector{3,F},SVector{3,F},SVector{3,F},SVector{3,F}} where F <: Modia3D.VarFloatType
     # Material
     c_res    = F(material.c_res)
     c_geo    = F(material.c_geo)
@@ -184,5 +184,5 @@ end
 
 responseCalculation(material::Nothing, obj1::Object3D{F}, obj2::Object3D{F},
                     rContact::SVector{3,F}, e_n::SVector{3,F},
-                    s::F, time, file) where F <: AbstractFloat =
+                    s::F, time, file) where F <: Modia3D.VarFloatType =
                     (Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F))

@@ -50,7 +50,7 @@ function addIndicesOfCutJointsToSuperObj(scene::Scene)
 end
 
 
-function createAABB_noCPairs(scene::Scene{F}, superObjsRow::SuperObjsRow) where F <: AbstractFloat
+function createAABB_noCPairs(scene::Scene{F}, superObjsRow::SuperObjsRow) where F <: Modia3D.VarFloatType
     if length(superObjsRow.superObjCollision.superObj) > 0 && !isempty(superObjsRow.noCPair)
         push!(scene.noCPairs, superObjsRow.noCPair)
     else
@@ -170,7 +170,7 @@ end
 #     these elements form together a super object
 #   elements which are directly connected with a joint can't collide
 #     these elements are excluded from the collision list
-function build_superObjs!(scene::Scene{F}, world::Object3D)::Nothing where F <: AbstractFloat
+function build_superObjs!(scene::Scene{F}, world::Object3D)::Nothing where F <: Modia3D.VarFloatType
     if !scene.initSuperObj
     stack = scene.stack
     buffer = scene.buffer
@@ -327,7 +327,7 @@ function makeTreeAvailable(scene::Scene)
 end
 
 
-function makeJointsAvailable(scene::Scene{F}) where F <: AbstractFloat
+function makeJointsAvailable(scene::Scene{F}) where F <: Modia3D.VarFloatType
     tree = scene.treeForComputation
     empty!(scene.revolute)
     empty!(scene.prismatic)

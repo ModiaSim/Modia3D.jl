@@ -18,10 +18,10 @@ The reference frame = Object3D frame is located at the center of the sphere.
 # Arguments
 - `diameter` defines the diameter of the sphere.
 """
-mutable struct Sphere{F <: AbstractFloat} <: Modia3D.AbstractGeometry
+mutable struct Sphere{F <: Modia3D.VarFloatType} <: Modia3D.AbstractGeometry
     diameter::F
 
-    function Sphere{F}(; diameter=F(1.0) ) where F <: AbstractFloat
+    function Sphere{F}(; diameter=F(1.0) ) where F <: Modia3D.VarFloatType
         @assert(diameter >= 0.0)
         new(diameter)
     end
@@ -39,12 +39,12 @@ The reference frame = Object3D frame is located at the center of the ellipsoid.
 - `lengthY` defines the length of the ellipsoid in y-direction.
 - `lengthZ` defines the length of the ellipsoid in z-direction.
 """
-mutable struct Ellipsoid{F <: AbstractFloat} <: Modia3D.AbstractGeometry
+mutable struct Ellipsoid{F <: Modia3D.VarFloatType} <: Modia3D.AbstractGeometry
     lengthX::F
     lengthY::F
     lengthZ::F
 
-    function Ellipsoid{F}(; lengthX=F(1.0), lengthY=F(1.0), lengthZ=F(1.0) ) where F <: AbstractFloat
+    function Ellipsoid{F}(; lengthX=F(1.0), lengthY=F(1.0), lengthZ=F(1.0) ) where F <: Modia3D.VarFloatType
         @assert(lengthX >= 0.0)
         @assert(lengthY >= 0.0)
         @assert(lengthZ >= 0.0)
@@ -68,12 +68,12 @@ The reference frame = Object3D frame is located at the center of the box.
 - `lengthY` defines the length of the box in y-direction.
 - `lengthZ` defines the length of the box in z-direction.
 """
-mutable struct Box{F <: AbstractFloat} <: Modia3D.AbstractGeometry
+mutable struct Box{F <: Modia3D.VarFloatType} <: Modia3D.AbstractGeometry
     lengthX::F
     lengthY::F
     lengthZ::F
 
-    function Box{F}(; lengthX=F(1.0), lengthY=F(1.0), lengthZ=F(1.0) ) where F <: AbstractFloat
+    function Box{F}(; lengthX=F(1.0), lengthY=F(1.0), lengthZ=F(1.0) ) where F <: Modia3D.VarFloatType
         @assert(lengthX >= 0.0)
         @assert(lengthY >= 0.0)
         @assert(lengthZ >= 0.0)
@@ -97,13 +97,13 @@ The reference frame = Object3D frame is located at the center of the cylinder.
 # Notes
 - `innerDiameter` is not supported by collision.
 """
-mutable struct Cylinder{F <: AbstractFloat} <: Modia3D.AbstractGeometry
+mutable struct Cylinder{F <: Modia3D.VarFloatType} <: Modia3D.AbstractGeometry
     axis::Int
     diameter::F
     length::F
     innerDiameter::F
 
-    function Cylinder{F}(; axis=3, diameter=F(1.0), length=F(1.0), innerDiameter=F(0.0) ) where F <: AbstractFloat
+    function Cylinder{F}(; axis=3, diameter=F(1.0), length=F(1.0), innerDiameter=F(0.0) ) where F <: Modia3D.VarFloatType
         @assert(1 <= axis <= 3)
         @assert(diameter >= 0.0)
         @assert(length >= 0.0)
@@ -125,13 +125,13 @@ The reference frame = Object3D frame is located at the center of the base circle
 - `length` defines the length of the cone/frustum.
 - `topDiameter` defines the diameter of the top circle of the frustum (where `topDiameter=0` defines a right cone).
 """
-mutable struct Cone{F <: AbstractFloat} <: Modia3D.AbstractGeometry
+mutable struct Cone{F <: Modia3D.VarFloatType} <: Modia3D.AbstractGeometry
     axis::Int
     diameter::F
     length::F
     topDiameter::F
 
-    function Cone{F}(; axis=3, diameter=F(1.0), length=F(1.0), topDiameter=F(0.0) ) where F <: AbstractFloat
+    function Cone{F}(; axis=3, diameter=F(1.0), length=F(1.0), topDiameter=F(0.0) ) where F <: Modia3D.VarFloatType
         @assert(1 <= axis <= 3)
         @assert(diameter >= 0.0)
         @assert(length >= 0.0)
@@ -155,12 +155,12 @@ The reference frame = Object3D frame is located at the center of the capsule.
 # Notes
 - Some versions of SimVis visualize [half ellipsoids with semi-axis length `length/2` instead of spheres with diameter `diameter`](https://github.com/ModiaSim/PrivateModia3D.jl/issues/54).
 """
-mutable struct Capsule{F <: AbstractFloat} <: Modia3D.AbstractGeometry
+mutable struct Capsule{F <: Modia3D.VarFloatType} <: Modia3D.AbstractGeometry
     axis::Int
     diameter::F
     length::F
 
-    function Capsule{F}(; axis=3, diameter=F(1.0), length=F(1.0) ) where F <: AbstractFloat
+    function Capsule{F}(; axis=3, diameter=F(1.0), length=F(1.0) ) where F <: Modia3D.VarFloatType
         @assert(1 <= axis <= 3)
         @assert(diameter >= 0.0)
         @assert(length >= 0.0)
@@ -190,13 +190,13 @@ The dimension directions depend on `axis` by circularly shift:
 |   3    |   z      |   x     |   y         |
 
 """
-mutable struct Beam{F <: AbstractFloat} <: Modia3D.AbstractGeometry
+mutable struct Beam{F <: Modia3D.VarFloatType} <: Modia3D.AbstractGeometry
     axis::Int
     length::F
     width::F
     thickness::F
 
-    function Beam{F}(; axis=3, length=F(1.0), width=F(0.2), thickness=F(0.1) ) where F <: AbstractFloat
+    function Beam{F}(; axis=3, length=F(1.0), width=F(0.2), thickness=F(0.1) ) where F <: Modia3D.VarFloatType
         @assert(1 <= axis <= 3)
         @assert(length >= 0.0)
         @assert(width >= 0.0)

@@ -35,7 +35,12 @@ abstract type AbstractForceElement      <: AbstractObject3D end
 abstract type AbstractScene end
 
 using StaticArrays
-@inline cross(x::SVector{3,F}, y::SVector{3,F}) where F <: AbstractFloat = @inbounds SVector{3,F}(x[2]*y[3]-x[3]*y[2],
+
+const VarFloatType = AbstractFloat # Union{AbstractFloat, AbstractParticles}
+
+
+
+@inline cross(x::SVector{3,F}, y::SVector{3,F}) where F <: VarFloatType = @inbounds SVector{3,F}(x[2]*y[3]-x[3]*y[2],
                                                                                            x[3]*y[1]-x[1]*y[3],
                                                                                            x[1]*y[2]-x[2]*y[1])
 
@@ -98,6 +103,9 @@ convertAndStripUnit(TargetType, requiredUnit, value) =
 # MPRFloatType is used to change betweeen Double64 and Float64 for mpr calculations
 using DoubleFloats
 const MPRFloatType = Double64
+
+
+
 
 # Include sub-modules
 include(joinpath("Frames"           , "_module.jl"))
