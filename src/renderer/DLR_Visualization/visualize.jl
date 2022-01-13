@@ -30,92 +30,103 @@ const emptyShaderName=" "
 end
 
 
+function convertToAnimation(value)
+    if typeof(value[1]) <: Measurements.Measurement
+		# Plot mean value signal
+		value_mean = Float64.(Measurements.value.(value))
+    else
+        value_mean = Float64.(value)
+    end
+    return value_mean
+end
+
+
 function visualizeObject(obj::Composition.Object3D, id::Ptr{Nothing}, simVis::SimVis_Renderer)
     shapeKind = obj.shapeKind
 
     if shapeKind == Modia3D.SphereKind
         sphere::Modia3D.Sphere = obj.shape
-        visualizeShape(simVis, SVector{3,Float64}(obj.r_abs), SMatrix{3,3,Float64,9}(obj.R_abs), SimVisSphere, id, obj.visualMaterial,
-                       Float64(sphere.diameter), Float64(sphere.diameter), Float64(sphere.diameter) )
+        visualizeShape(simVis, SVector{3,Float64}(convertToAnimation(obj.r_abs)), SMatrix{3,3,Float64,9}(convertToAnimation(obj.R_abs)), SimVisSphere, id, obj.visualMaterial,
+                       convertToAnimation(sphere.diameter), convertToAnimation(sphere.diameter), convertToAnimation(sphere.diameter) )
 
     elseif shapeKind == Modia3D.EllipsoidKind
         ellipsoid::Modia3D.Ellipsoid = obj.shape
-        visualizeShape(simVis, SVector{3,Float64}(obj.r_abs), SMatrix{3,3,Float64,9}(obj.R_abs), SimVisSphere, id, obj.visualMaterial,
-        Float64(ellipsoid.lengthX), Float64(ellipsoid.lengthY), Float64(ellipsoid.lengthZ) )
+        visualizeShape(simVis, SVector{3,Float64}(convertToAnimation(obj.r_abs)), SMatrix{3,3,Float64,9}(convertToAnimation(obj.R_abs)), SimVisSphere, id, obj.visualMaterial,
+        convertToAnimation(ellipsoid.lengthX), convertToAnimation(ellipsoid.lengthY), convertToAnimation(ellipsoid.lengthZ) )
 
     elseif shapeKind == Modia3D.BoxKind
         box::Modia3D.Box = obj.shape
-        visualizeShape(simVis, SVector{3,Float64}(obj.r_abs), SMatrix{3,3,Float64,9}(obj.R_abs), SimVisBox, id, obj.visualMaterial,
-        Float64(box.lengthX), Float64(box.lengthY), Float64(box.lengthZ) )
+        visualizeShape(simVis, SVector{3,Float64}(convertToAnimation(obj.r_abs)), SMatrix{3,3,Float64,9}(convertToAnimation(obj.R_abs)), SimVisBox, id, obj.visualMaterial,
+        convertToAnimation(box.lengthX), convertToAnimation(box.lengthY), convertToAnimation(box.lengthZ) )
 
     elseif shapeKind == Modia3D.CylinderKind
         cylinder::Modia3D.Cylinder = obj.shape
         if cylinder.innerDiameter == 0.0
-            visualizeShape(simVis, SVector{3,Float64}(obj.r_abs), Shapes.rotateAxis2z(cylinder.axis, SMatrix{3,3,Float64,9}(obj.R_abs)), SimVisCylinder, id, obj.visualMaterial,
-            Float64(cylinder.diameter), Float64(cylinder.diameter), Float64(cylinder.length) )
+            visualizeShape(simVis, SVector{3,Float64}(convertToAnimation(obj.r_abs)), Shapes.rotateAxis2z(cylinder.axis, SMatrix{3,3,Float64,9}(convertToAnimation(obj.R_abs))), SimVisCylinder, id, obj.visualMaterial,
+            convertToAnimation(cylinder.diameter), convertToAnimation(cylinder.diameter), convertToAnimation(cylinder.length) )
         else
-            visualizeShape(simVis, SVector{3,Float64}(obj.r_abs), Shapes.rotateAxis2z(cylinder.axis, SMatrix{3,3,Float64,9}(obj.R_abs)), SimVisPipe, id, obj.visualMaterial,
-            Float64(cylinder.diameter), Float64(cylinder.diameter), Float64(cylinder.length); extras=@MVector[0.0, Float64(cylinder.innerDiameter/cylinder.diameter), 1.0])
+            visualizeShape(simVis, SVector{3,Float64}(convertToAnimation(obj.r_abs)), Shapes.rotateAxis2z(cylinder.axis, SMatrix{3,3,Float64,9}(convertToAnimation(obj.R_abs))), SimVisPipe, id, obj.visualMaterial,
+            convertToAnimation(cylinder.diameter), convertToAnimation(cylinder.diameter), convertToAnimation(cylinder.length); extras=@MVector[0.0, convertToAnimation(cylinder.innerDiameter/cylinder.diameter), 1.0])
         end
 
     elseif shapeKind == Modia3D.ConeKind
         cone::Modia3D.Cone = obj.shape
         if cone.axis == 1
-            dr = @MVector[Float64(cone.length/4), 0.0, 0.0]
+            dr = SVector{3,Float64}([convertToAnimation(cone.length/4), 0.0, 0.0])
         elseif cone.axis == 2
-            dr = @MVector[0.0, Float64(cone.length/4), 0.0]
+            dr = SVector{3,Float64}([0.0, convertToAnimation(cone.length/4), 0.0])
         else
-            dr = @MVector[0.0, 0.0, Float64(cone.length/4)]
+            dr = SVector{3,Float64}([0.0, 0.0, convertToAnimation(cone.length/4)])
         end
-        r_abs = obj.r_abs + obj.R_abs' * dr
-        visualizeShape(simVis, r_abs, Shapes.rotateAxis2z(cone.axis, SMatrix{3,3,Float64,9}(obj.R_abs)), SimVisCone, id, obj.visualMaterial,
-        Float64(cone.diameter), Float64(cone.diameter), Float64(cone.length); extras=@MVector[Float64(cone.topDiameter/cone.diameter), 0.0, 0.0])
+        r_abs = SVector{3,Float64}(convertToAnimation(obj.r_abs)) + SMatrix{3,3,Float64,9}(convertToAnimation(obj.R_abs)') * dr
+        visualizeShape(simVis, r_abs, Shapes.rotateAxis2z(cone.axis, SMatrix{3,3,Float64,9}(convertToAnimation(obj.R_abs))), SimVisCone, id, obj.visualMaterial,
+        convertToAnimation(cone.diameter), convertToAnimation(cone.diameter), convertToAnimation(cone.length); extras=@MVector[convertToAnimation(cone.topDiameter/cone.diameter), 0.0, 0.0])
 
     elseif shapeKind == Modia3D.CapsuleKind
         capsule::Modia3D.Capsule = obj.shape
-        visualizeShape(simVis, SVector{3,Float64}(obj.r_abs), Shapes.rotateAxis2z(capsule.axis, SMatrix{3,3,Float64,9}(obj.R_abs)), SimVisCapsule, id, obj.visualMaterial,
-        Float64(capsule.diameter), Float64(capsule.diameter), Float64(capsule.length) )
+        visualizeShape(simVis, SVector{3,Float64}(convertToAnimation(obj.r_abs)), Shapes.rotateAxis2z(capsule.axis, SMatrix{3,3,Float64,9}(convertToAnimation(obj.R_abs))), SimVisCapsule, id, obj.visualMaterial,
+        convertToAnimation(capsule.diameter), convertToAnimation(capsule.diameter), convertToAnimation(capsule.length) )
 
     elseif shapeKind == Modia3D.BeamKind
         beam::Modia3D.Beam = obj.shape
-        visualizeShape(simVis, SVector{3,Float64}(obj.r_abs), Shapes.rotateAxis2x(beam.axis, SMatrix{3,3,Float64,9}(obj.R_abs)), SimVisBeam, id, obj.visualMaterial,
-        Float64(beam.length), Float64(beam.width), Float64(beam.thickness) )
+        visualizeShape(simVis, SVector{3,Float64}(convertToAnimation(obj.r_abs)), Shapes.rotateAxis2x(beam.axis, SMatrix{3,3,Float64,9}(convertToAnimation(obj.R_abs))), SimVisBeam, id, obj.visualMaterial,
+        convertToAnimation(beam.length), convertToAnimation(beam.width), convertToAnimation(beam.thickness) )
 
     elseif shapeKind == Modia3D.CoordinateSystemKind
         coordinateSystem::Modia3D.CoordinateSystem = obj.shape
-        visualizeShape(simVis, SVector{3,Float64}(obj.r_abs), SMatrix{3,3,Float64,9}(obj.R_abs), SimVisCoordSys, id, DefaultMaterial,
+        visualizeShape(simVis, SVector{3,Float64}(convertToAnimation(obj.r_abs)), SMatrix{3,3,Float64,9}(convertToAnimation(obj.R_abs)), SimVisCoordSys, id, DefaultMaterial,
                        coordinateSystem.length, coordinateSystem.length, coordinateSystem.length)
 
     elseif shapeKind == Modia3D.GridKind
         grid::Modia3D.Grid = obj.shape
-        visualizeShape(simVis, SVector{3,Float64}(obj.r_abs), Shapes.rotateAxis2z(grid.axis, SMatrix{3,3,Float64,9}(obj.R_abs)), SimVisGrid, id, DefaultMaterial,
+        visualizeShape(simVis, SVector{3,Float64}(convertToAnimation(obj.r_abs)), Shapes.rotateAxis2z(grid.axis, SMatrix{3,3,Float64,9}(convertToAnimation(obj.R_abs))), SimVisGrid, id, DefaultMaterial,
                        grid.length, grid.width, grid.length; extras=@MVector[grid.distance, grid.lineWidth, 0.0])
 
     elseif shapeKind == Modia3D.SpringKind
         spring::Modia3D.Spring = obj.shape
-        visualizeShape(simVis, SVector{3,Float64}(obj.r_abs), Shapes.rotateAxis2z(spring.axis, SMatrix{3,3,Float64,9}(obj.R_abs)), SimVisSpring, id, obj.visualMaterial,
+        visualizeShape(simVis, SVector{3,Float64}(convertToAnimation(obj.r_abs)), Shapes.rotateAxis2z(spring.axis, SMatrix{3,3,Float64,9}(convertToAnimation(obj.R_abs))), SimVisSpring, id, obj.visualMaterial,
                        spring.length, spring.diameter, spring.diameter; extras=@MVector[spring.windings, spring.wireDiameter/2, 0.0])
 
     elseif shapeKind == Modia3D.GearWheelKind
         gearWheel::Modia3D.GearWheel = obj.shape
-        visualizeShape(simVis, SVector{3,Float64}(obj.r_abs), Shapes.rotateAxis2z(gearWheel.axis, SMatrix{3,3,Float64,9}(obj.R_abs)), SimVisGearWheel, id, obj.visualMaterial,
+        visualizeShape(simVis, SVector{3,Float64}(convertToAnimation(obj.r_abs)), Shapes.rotateAxis2z(gearWheel.axis, SMatrix{3,3,Float64,9}(convertToAnimation(obj.R_abs))), SimVisGearWheel, id, obj.visualMaterial,
                        gearWheel.diameter, gearWheel.diameter, gearWheel.length; extras=@MVector[gearWheel.innerDiameter/gearWheel.diameter, gearWheel.teeth, gearWheel.angle*180/pi])
 
     elseif shapeKind == Modia3D.ModelicaKind
         modelica::Modia3D.ModelicaShape = obj.shape
-        visualizeShape(simVis, SVector{3,Float64}(obj.r_abs), SMatrix{3,3,Float64,9}(obj.R_abs), ShapeType(modelica.type), id, obj.visualMaterial,
+        visualizeShape(simVis, SVector{3,Float64}(convertToAnimation(obj.r_abs)), SMatrix{3,3,Float64,9}(convertToAnimation(obj.R_abs)), ShapeType(modelica.type), id, obj.visualMaterial,
                        modelica.lengthX, modelica.lengthY, modelica.lengthZ; extras=modelica.extra)
 
     elseif shapeKind == Modia3D.FileMeshKind
         fileMesh::Modia3D.FileMesh = obj.shape
-        SimVis_setFileObject(simVis, id, Cint(0), SVector{3,Float64}(obj.r_abs), SMatrix{3,3,Float64,9}(obj.R_abs),
+        SimVis_setFileObject(simVis, id, Cint(0), SVector{3,Float64}(convertToAnimation(obj.r_abs)), SMatrix{3,3,Float64,9}(convertToAnimation(obj.R_abs)),
                              MVector{3,Float64}(fileMesh.scaleFactor), Cint(obj.visualMaterial.reflectslight), obj.visualMaterial.shininess, obj.visualMaterial.transparency, Cint(obj.visualMaterial.wireframe), Cint(0),
                              fileMesh.filename, Cint(fileMesh.smoothNormals), fileMesh.useMaterialColor, MVector{3,Cint}(obj.visualMaterial.color),
                              Cint(obj.visualMaterial.shadowMask), emptyShaderName)
 
     elseif shapeKind == Modia3D.TextKind
         textShape::Modia3D.TextShape = obj.shape
-        SimVis_setTextObject(simVis, id, Cint(textShape.axisAlignment), textShape.text, 0.0, Cint(0), SVector{3,Float64}(obj.r_abs), SMatrix{3,3,Float64,9}(obj.R_abs),
+        SimVis_setTextObject(simVis, id, Cint(textShape.axisAlignment), textShape.text, 0.0, Cint(0), SVector{3,Float64}(convertToAnimation(obj.r_abs)), SMatrix{3,3,Float64,9}(convertToAnimation(obj.R_abs)),
                              textShape.font.charSize, textShape.font.fontFileName, MVector{3,Cint}(textShape.font.color), textShape.font.transparency,
                              textShape.offset, Cint(textShape.alignment), Cint(0))
 
