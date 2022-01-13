@@ -5,6 +5,7 @@ Test.@testset "Basic" begin
     include(joinpath("Basic", "PendulumWithBar1.jl"))
     include(joinpath("Basic", "PendulumWithBar2.jl"))
     include(joinpath("Basic", "PendulumWithDamper.jl"))
+    include(joinpath("Basic", "PendulumWithDamper_Measurements.jl"))
     Test.@test_broken include(joinpath("Basic", "PendulumWithFix.jl")) # problems with code generation
     include(joinpath("Basic", "PendulumWithParameterizedDamper.jl"))
     include(joinpath("Basic", "PendulumWithSpring.jl"))
@@ -21,6 +22,7 @@ end
 Test.@testset "Force Elements" begin
     include(joinpath("ForceElements", "HarmonicOscillator.jl"))
     include(joinpath("ForceElements", "BoxBushing.jl"))
+    include(joinpath("ForceElements", "BoxBushing_Measurements.jl"))
     include(joinpath("ForceElements", "BoxSpringDamperPtP.jl"))
     include(joinpath("ForceElements", "BoxNonLinearSpringDamperPtP.jl"))
 end
