@@ -12,9 +12,9 @@
 
 
 using LinearAlgebra
-EYE3(::Type{F}) where F <: AbstractFloat = Matrix(F(1.0)I,3,3)
+EYE3(::Type{F}) where F <: Modia3D.VarFloatType = Matrix(F(1.0)I,3,3)
 
-InertiaMatrix(::Type{F}, matrix) where F <: AbstractFloat  = SMatrix{3,3,F,9}(matrix)
+InertiaMatrix(::Type{F}, matrix) where F <: Modia3D.VarFloatType  = SMatrix{3,3,F,9}(matrix)
 
 
 ### ------------------------ bottom and top area -------------------------------
@@ -39,11 +39,11 @@ topArea(shape::Cone) = pi*(shape.topDiameter/2)^2
 Return the volume of the solid shape `shape::Modia3D.AbstractGeometry` in [m^3].
 """
 volume(shape::Modia3D.AbstractGeometry) = bottomArea(shape)*lengthGeo(shape)
-volume(shape::Sphere{F}) where F <: AbstractFloat = F(4/3*pi*(shape.diameter/2)^3)
-volume(shape::Ellipsoid{F}) where F <: AbstractFloat = F(4/3*pi*shape.lengthX/2*shape.lengthY/2*shape.lengthZ/2)
-volume(shape::Cone{F}) where F <: AbstractFloat = F(pi/12*shape.length*(shape.diameter^2 + shape.diameter*shape.topDiameter + shape.topDiameter^2))
+volume(shape::Sphere{F}) where F <: Modia3D.VarFloatType = F(4/3*pi*(shape.diameter/2)^3)
+volume(shape::Ellipsoid{F}) where F <: Modia3D.VarFloatType = F(4/3*pi*shape.lengthX/2*shape.lengthY/2*shape.lengthZ/2)
+volume(shape::Cone{F}) where F <: Modia3D.VarFloatType = F(pi/12*shape.length*(shape.diameter^2 + shape.diameter*shape.topDiameter + shape.topDiameter^2))
 
-function volume(shape::Capsule{F}) where F <: AbstractFloat
+function volume(shape::Capsule{F}) where F <: Modia3D.VarFloatType
     r = F(shape.diameter/2)
     h = F(shape.length)
     return F(pi*r^2*h + 4/3*pi*r^3)
@@ -91,15 +91,15 @@ Return position vector from solid reference frame to [centroid](https://en.wikip
 of solid `shape::Modia3D.AbstractGeometry` in [m]. If the solid has a uniform density,
 the centroid is identical to the *center of mass*.
 """
-@inline centroid(shape::Sphere{F}) where F <: AbstractFloat = Modia3D.ZeroVector3D(F)
-@inline centroid(shape::Ellipsoid{F}) where F <: AbstractFloat = Modia3D.ZeroVector3D(F)
-@inline centroid(shape::Box{F}) where F <: AbstractFloat = Modia3D.ZeroVector3D(F)
-@inline centroid(shape::Cylinder{F}) where F <: AbstractFloat = Modia3D.ZeroVector3D(F)
-@inline centroid(shape::Capsule{F}) where F <: AbstractFloat = Modia3D.ZeroVector3D(F)
-@inline centroid(shape::Beam{F}) where F <: AbstractFloat = Modia3D.ZeroVector3D(F)
+@inline centroid(shape::Sphere{F}) where F <: Modia3D.VarFloatType = Modia3D.ZeroVector3D(F)
+@inline centroid(shape::Ellipsoid{F}) where F <: Modia3D.VarFloatType = Modia3D.ZeroVector3D(F)
+@inline centroid(shape::Box{F}) where F <: Modia3D.VarFloatType = Modia3D.ZeroVector3D(F)
+@inline centroid(shape::Cylinder{F}) where F <: Modia3D.VarFloatType = Modia3D.ZeroVector3D(F)
+@inline centroid(shape::Capsule{F}) where F <: Modia3D.VarFloatType = Modia3D.ZeroVector3D(F)
+@inline centroid(shape::Beam{F}) where F <: Modia3D.VarFloatType = Modia3D.ZeroVector3D(F)
 
-@inline centHeight(shape::Cone{F}) where F <: AbstractFloat = F(shape.length/4*(shape.diameter^2 + 2*shape.diameter*shape.topDiameter + 3*shape.topDiameter^2)/(shape.diameter^2 + shape.diameter*shape.topDiameter + shape.topDiameter^2))  # https://mathworld.wolfram.com/ConicalFrustum.html
-@inline function centroid(shape::Cone{F}) where F <: AbstractFloat
+@inline centHeight(shape::Cone{F}) where F <: Modia3D.VarFloatType = F(shape.length/4*(shape.diameter^2 + 2*shape.diameter*shape.topDiameter + 3*shape.topDiameter^2)/(shape.diameter^2 + shape.diameter*shape.topDiameter + shape.topDiameter^2))  # https://mathworld.wolfram.com/ConicalFrustum.html
+@inline function centroid(shape::Cone{F}) where F <: Modia3D.VarFloatType
     if shape.axis == 1
         return SVector{3,F}([centHeight(shape), 0.0, 0.0])
     elseif shape.axis == 2
@@ -126,15 +126,15 @@ Return [inertia matrix] (https://en.wikipedia.org/wiki/Moment_of_inertia) `I` of
 [kg*m^2] as `SMatrix{3,3,F,9}`. Hereby it is assumed that `shape` has uniform
 density and `mass` is the mass of `shape` in [kg].
 """
-inertiaMatrix(shape::Sphere{F}, mass::F) where F <: AbstractFloat = InertiaMatrix(F, mass/10*shape.diameter^2*EYE3(F))
+inertiaMatrix(shape::Sphere{F}, mass::F) where F <: Modia3D.VarFloatType = InertiaMatrix(F, mass/10*shape.diameter^2*EYE3(F))
 
-inertiaMatrix(shape::Ellipsoid{F}, mass::F) where F <: AbstractFloat =
+inertiaMatrix(shape::Ellipsoid{F}, mass::F) where F <: Modia3D.VarFloatType =
                 InertiaMatrix(F, mass/20 * Diagonal{F}([shape.lengthY^2 + shape.lengthZ^2, shape.lengthX^2 + shape.lengthZ^2, shape.lengthX^2 + shape.lengthY^2]))
 
-inertiaMatrix(shape::Box{F}, mass::F) where F <: AbstractFloat =
+inertiaMatrix(shape::Box{F}, mass::F) where F <: Modia3D.VarFloatType =
                 InertiaMatrix(F, 1/12*mass * Diagonal{F}([shape.lengthY^2 + shape.lengthZ^2, shape.lengthX^2 + shape.lengthZ^2, shape.lengthX^2 + shape.lengthY^2]))
 
-function inertiaMatrix(shape::Cylinder{F}, mass::F) where F <: AbstractFloat  # https://en.wikipedia.org/wiki/List_of_moments_of_inertia
+function inertiaMatrix(shape::Cylinder{F}, mass::F) where F <: Modia3D.VarFloatType  # https://en.wikipedia.org/wiki/List_of_moments_of_inertia
     Iax  = mass/2*((shape.diameter/2)^2 + (shape.innerDiameter/2)^2)
     Irad = mass/12*(3*((shape.diameter/2)^2 + (shape.innerDiameter/2)^2) + shape.length^2)
     if shape.axis == 1
@@ -146,7 +146,7 @@ function inertiaMatrix(shape::Cylinder{F}, mass::F) where F <: AbstractFloat  # 
     end
 end
 
-function inertiaMatrix(shape::Cone{F}, mass::F) where F <: AbstractFloat # https://en.wikipedia.org/wiki/List_of_moments_of_inertia
+function inertiaMatrix(shape::Cone{F}, mass::F) where F <: Modia3D.VarFloatType # https://en.wikipedia.org/wiki/List_of_moments_of_inertia
     if shape.topDiameter == F(0.0)
         Iax  = F(3/40*mass*shape.diameter^2)
         Irad = F(3/80*mass*(shape.diameter^2 + shape.length^2))
@@ -172,7 +172,7 @@ function inertiaMatrix(shape::Cone{F}, mass::F) where F <: AbstractFloat # https
     end
 end
 
-function inertiaMatrix(shape::Capsule{F}, mass::F) where F <: AbstractFloat
+function inertiaMatrix(shape::Capsule{F}, mass::F) where F <: Modia3D.VarFloatType
     rho = F(mass/volume(shape))
     rad = F(shape.diameter/2)
 
@@ -210,7 +210,7 @@ function inertiaMatrix(shape::Capsule{F}, mass::F) where F <: AbstractFloat
     end
 end
 
-function inertiaMatrix(shape::Beam{F}, massGeo::F) where F <: AbstractFloat
+function inertiaMatrix(shape::Beam{F}, massGeo::F) where F <: Modia3D.VarFloatType
     rho = F(massGeo/volume(shape))
 
     volBox = F(shape.length*shape.thickness*shape.width)

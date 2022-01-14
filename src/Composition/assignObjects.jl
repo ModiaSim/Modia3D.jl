@@ -78,7 +78,7 @@ function fillVisuElements!(scene::Scene, obj::Object3D, world::Object3D)
 end
 
 
-function assignAccVelo(tree::Vector{Object3D{F}}, obj::Object3D) where F <: AbstractFloat
+function assignAccVelo(tree::Vector{Object3D{F}}, obj::Object3D) where F <: Modia3D.VarFloatType
     if hasChildJoint(obj) #|| hasCutJoint(obj)
         # compute acceleration of this object
         obj.computeAcceleration = true

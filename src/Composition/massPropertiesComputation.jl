@@ -13,7 +13,7 @@
 # otherwise dummy mass properties must be assigned, before computing common properties.
 # The initial common mass properties are stored separatelly.
 # This information is used for computing common mass for dynamically changing structures.
-function initializeMassComputation!(scene::Scene{F}) where F <: AbstractFloat
+function initializeMassComputation!(scene::Scene{F}) where F <: Modia3D.VarFloatType
     if scene.initMassComp != true
         superObjs = scene.superObjs
         buffer    = scene.buffer
@@ -44,7 +44,7 @@ end
 # It sums up common mass, inertia tensor and center of mass.
 # The results are stored twice in actual root of super object:
 #       massProperties: container for actual values
-function addMassPropertiesOfAllSuperObjChildsToRootSuperObj!(rootSuperObj::Object3D, actualMassSuperObject::Vector{Object3D{F}}) where F <: AbstractFloat
+function addMassPropertiesOfAllSuperObjChildsToRootSuperObj!(rootSuperObj::Object3D, actualMassSuperObject::Vector{Object3D{F}}) where F <: Modia3D.VarFloatType
     if length(actualMassSuperObject) > 0
         for i=1:length(actualMassSuperObject)
             obj = actualMassSuperObject[i]
@@ -73,7 +73,7 @@ end
 # Substracting: substract mass properties of a child from its parents mass properties
 
 # function computeInertiaTensorForTwoBodies!(massPropParent, massPropObj, obj; add=true)
-function addOrSubtractMassPropertiesOfChildToRoot!(obj_root::Object3D{F}, obj_child::Object3D{F}; add=true)::Nothing where F <: AbstractFloat
+function addOrSubtractMassPropertiesOfChildToRoot!(obj_root::Object3D{F}, obj_child::Object3D{F}; add=true)::Nothing where F <: Modia3D.VarFloatType
     massProperties_child = obj_child.feature.massProperties
 
     R_child   = obj_child.R_rel

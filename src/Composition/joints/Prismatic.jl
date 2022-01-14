@@ -7,7 +7,7 @@
 
 
 
-get_eAxis(::Type{F}, axis::Int) where F <: AbstractFloat = axis==  1 ? SVector{3,F}(  1.0,  0.0,  0.0) :
+get_eAxis(::Type{F}, axis::Int) where F <: Modia3D.VarFloatType = axis==  1 ? SVector{3,F}(  1.0,  0.0,  0.0) :
                        axis==  2 ? SVector{3,F}(  0.0,  1.0,  0.0) :
                        axis==  3 ? SVector{3,F}(  0.0,  0.0,  1.0) :
                        axis== -1 ? SVector{3,F}( -1.0,  0.0,  0.0) :
@@ -28,7 +28,7 @@ fixed to `obj1` or `obj2`).
 
 It is currently not supported that a `Prismatic` joint *closes a kinematic loop*.
 """
-mutable struct Prismatic{F <: AbstractFloat} <: Modia3D.AbstractJoint
+mutable struct Prismatic{F <: Modia3D.VarFloatType} <: Modia3D.AbstractJoint
     path::String
 
     obj1::Object3D{F}
@@ -52,7 +52,7 @@ mutable struct Prismatic{F <: AbstractFloat} <: Modia3D.AbstractJoint
                          axis::Int = 1,
                          s::Real   = F(0.0),
                          v::Real   = F(0.0),
-                         canCollide::Bool = true) where F <: AbstractFloat
+                         canCollide::Bool = true) where F <: Modia3D.VarFloatType
 
         (parent,obj,cutJoint) = attach(obj1, obj2)
         if cutJoint

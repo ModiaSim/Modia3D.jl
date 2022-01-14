@@ -28,11 +28,11 @@ connected to the `world` Object3D. Otherwise, return `obj=obj2`.
    in [Cardan (Tait–Bryan) angles](https://en.wikipedia.org/wiki/Euler_angles#Chained_rotations_equivalence)
    (rotation sequence x-y-z).
 """
-struct Fix{F <: AbstractFloat}
+struct Fix{F <: Modia3D.VarFloatType}
     function Fix{F}(; obj1::Object3D{F},
                 obj2::Object3D{F},
                 translation::AbstractVector = Modia3D.ZeroVector3D(F),
-                rotation::AbstractVector    = Modia3D.ZeroVector3D(F)) where F <: AbstractFloat
+                rotation::AbstractVector    = Modia3D.ZeroVector3D(F)) where F <: Modia3D.VarFloatType
 
         (parent, child, cutJoint) = attach(obj1, obj2)
         if cutJoint

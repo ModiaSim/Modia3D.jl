@@ -52,7 +52,7 @@ i.e. the orientation of `obj2` does not influence the resulting forces.
     directions [alpha, beta gamma] which differ from the axes [x, y, z]
     of `obj1` and increases computation effort.
 """
-mutable struct Bushing{F <: AbstractFloat} <: Modia3D.AbstractForceElement
+mutable struct Bushing{F <: Modia3D.VarFloatType} <: Modia3D.AbstractForceElement
 
     obj1::Object3D{F}
     obj2::Object3D{F}
@@ -73,7 +73,7 @@ mutable struct Bushing{F <: AbstractFloat} <: Modia3D.AbstractForceElement
                           nominalTorque::AbstractVector = Modia3D.ZeroVector3D(F),
                           rotSpringForceLaw::AbstractVector = Modia3D.ZeroVector3D(F),
                           rotDamperForceLaw::AbstractVector = Modia3D.ZeroVector3D(F),
-                          largeAngles::Bool = false ) where F <: AbstractFloat
+                          largeAngles::Bool = false ) where F <: Modia3D.VarFloatType
         nomForce  = Modia3D.convertAndStripUnit(SVector{3,F}, u"N"  , nominalForce)
         nomTorque = Modia3D.convertAndStripUnit(SVector{3,F}, u"N*m", nominalTorque)
         springForceFunction = Vector{Function}(undef, 3)
@@ -119,7 +119,7 @@ Bushing(; kwargs...) = Bushing{Float64}(; kwargs...)
 
 
 # Compute deformation angles from rotation matrix
-function anglesFromRotation(largeAngles::Bool, R12::SMatrix{3,3,F}, w12::SVector{3,F}) where F <: AbstractFloat
+function anglesFromRotation(largeAngles::Bool, R12::SMatrix{3,3,F}, w12::SVector{3,F}) where F <: Modia3D.VarFloatType
     if largeAngles
         sbe = clamp(R12[3,1], F(-1.0), F(1.0))
         cbe = sqrt(F(1.0) - sbe*sbe)
@@ -152,7 +152,7 @@ function anglesFromRotation(largeAngles::Bool, R12::SMatrix{3,3,F}, w12::SVector
 end
 
 # Compute torque vector from force law moments
-function torqueFromMoments(largeAngles::Bool, moments::SVector{3,F}, sico::SMatrix{2,2,F}) where F <: AbstractFloat
+function torqueFromMoments(largeAngles::Bool, moments::SVector{3,F}, sico::SMatrix{2,2,F}) where F <: Modia3D.VarFloatType
     if largeAngles
         tx = moments[1] + sico[1,2]*moments[3]
         ty = sico[2,1]*moments[2] - sico[1,1]*sico[2,2]*moments[3]
@@ -164,13 +164,13 @@ function torqueFromMoments(largeAngles::Bool, moments::SVector{3,F}, sico::SMatr
 end
 
 
-function initializeForceElement(force::Bushing{F}) where F <: AbstractFloat
+function initializeForceElement(force::Bushing{F}) where F <: Modia3D.VarFloatType
     force.obj1.hasForceElement = true
     force.obj2.hasForceElement = true
     return nothing
 end
 
-function evaluateForceElement(force::Bushing{F}) where F <: AbstractFloat
+function evaluateForceElement(force::Bushing{F}) where F <: Modia3D.VarFloatType
     R12 = measFrameRotation(force.obj2; frameOrig=force.obj1)
     r12 = measFramePosition(force.obj2; frameOrig=force.obj1, frameCoord=force.obj1)
     w12 = measFrameRotVelocity(force.obj2; frameOrig=force.obj1, frameCoord=force.obj1)
@@ -190,6 +190,6 @@ function evaluateForceElement(force::Bushing{F}) where F <: AbstractFloat
     return nothing
 end
 
-function terminateForceElement(force::Bushing{F}) where F <: AbstractFloat
+function terminateForceElement(force::Bushing{F}) where F <: Modia3D.VarFloatType
     return nothing
 end

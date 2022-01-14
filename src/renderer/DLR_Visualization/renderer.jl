@@ -5,7 +5,7 @@
 #   Modia3D.DLR_Visualization (Modia3D/renderer/DLR_Visualization/_module.jl)
 #
 #=
-mutable struct SimVis_Renderer_WithShapes{F <: AbstractFloat}
+mutable struct SimVis_Renderer_WithShapes{F <: Modia3D.VarFloatType}
     SimVis_Renderer
     velements::Vector{Composition.Object3D{F}}
     ids::Vector{Ptr{Nothing}}                # ids[i] is the SimVis id of velements[i]

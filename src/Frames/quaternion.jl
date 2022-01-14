@@ -25,7 +25,7 @@ q = [e*sin(angle/2),
 
 Constant quaternion vector of a null rotation (= no rotation from frame 1 to frame 2)
 """
-NullQuaternion(::Type{F}) where F <: AbstractFloat = SVector{4,F}(0.0, 0.0, 0.0, 1.0)
+NullQuaternion(::Type{F}) where F <: Modia3D.VarFloatType = SVector{4,F}(0.0, 0.0, 0.0, 1.0)
 
 
 
@@ -46,7 +46,7 @@ end
 
 Return SMatrix{4,4,F,16} `R` from quaternion `q`.
 """
-from_q(q::SVector{4,F}) where F <: AbstractFloat = SMatrix{3,3,F,9}( 2.0 * (q[1] * q[1] + q[4] * q[4]) - 1.0,
+from_q(q::SVector{4,F}) where F <: Modia3D.VarFloatType = SMatrix{3,3,F,9}( 2.0 * (q[1] * q[1] + q[4] * q[4]) - 1.0,
                                             2.0 * (q[2] * q[1] - q[3] * q[4]),
                                             2.0 * (q[3] * q[1] + q[2] * q[4]),
                                             2.0 * (q[1] * q[2] + q[3] * q[4]),
@@ -71,7 +71,7 @@ From the two possible solutions `q` the one is returned that is closer
 to `q_guess` (note, `q` and `-q` define the same rotation).
 """
 function from_R(R::SMatrix{3,3,F,9};
-                q_guess::SVector{4,F}=NullQuaternion(F)) where F <: AbstractFloat
+                q_guess::SVector{4,F}=NullQuaternion(F)) where F <: Modia3D.VarFloatType
     # Based on https://d3cw3dd2w32x2b.cloudfront.net/wp-content/uploads/2015/01/matrix-to-quat.pdf
     tt::F = F(0.0)
     if R[3,3] < 0
@@ -96,7 +96,7 @@ function from_R(R::SMatrix{3,3,F,9};
     return dot(q, q_guess) >= 0 ? SVector{4,F}(q) : SVector{4,F}(-q)
 end
 
-from_R(R::AbstractMatrix; q_guess::AbstractVector=NullQuaternion(F)) where F <: AbstractFloat=
+from_R(R::AbstractMatrix; q_guess::AbstractVector=NullQuaternion(F)) where F <: Modia3D.VarFloatType=
     from_R(SMatrix{3,3,F,9}(R); q_guess=SVector{4,F}(q_guess))
 
 
@@ -109,7 +109,7 @@ Return quaternion `q` that rotates with angle `angle` along the x-axis of frame 
 From the two possible solutions `q` the one is returned that is closer
 to `q_guess` (note, `q` and `-q` define the same rotation).
 """
-@inline function qrot1(angle::F; q_guess::SVector{4,F}=NullQuaternion(F)) where F <: AbstractFloat
+@inline function qrot1(angle::F; q_guess::SVector{4,F}=NullQuaternion(F)) where F <: Modia3D.VarFloatType
     q = SVector{4,F}(sin(angle / 2), 0.0, 0.0, cos(angle / 2))
     return dot(q, q_guess) >= 0 ? SVector{4,F}(q) : SVector{4,F}(-q)
 end
@@ -123,7 +123,7 @@ Return quaternion `q` that rotates with angle `angle` along the y-axis of frame 
 From the two possible solutions `q` the one is returned that is closer
 to `q_guess` (note, `q` and `-q` define the same rotation).
 """
-@inline function qrot2(angle::F; q_guess::SVector{4,F}=NullQuaternion(F)) where F <: AbstractFloat
+@inline function qrot2(angle::F; q_guess::SVector{4,F}=NullQuaternion(F)) where F <: Modia3D.VarFloatType
     q = SVector{4,F}(0.0, sin(angle / 2), 0.0, cos(angle / 2))
     return dot(q, q_guess) >= 0 ? SVector{4,F}(q) : SVector{4,F}(-q)
 end
@@ -137,13 +137,13 @@ Return quaternion `q` that rotates with angle `angle` along the z-axis of frame 
 From the two possible solutions `q` the one is returned that is closer
 to `q_guess` (note, `q` and `-q` define the same rotation).
 """
-@inline function qrot3(angle::F; q_guess::SVector{4,F}=NullQuaternion(F)) where F <: AbstractFloat
+@inline function qrot3(angle::F; q_guess::SVector{4,F}=NullQuaternion(F)) where F <: Modia3D.VarFloatType
     q = SVector{4,F}(0.0, 0.0, sin(angle / 2), cos(angle / 2))
     return dot(q, q_guess) >= 0 ? SVector{4,F}(q) : SVector{4,F}(-q)
 end
 
 
-absoluteRotation(q1::SVector{4,F}, q_rel::SVector{4,F}) where F <: AbstractFloat =
+absoluteRotation(q1::SVector{4,F}, q_rel::SVector{4,F}) where F <: Modia3D.VarFloatType =
     SVector{4,F}(SMatrix{4,4,F,16}([ q_rel[4]  q_rel[3] -q_rel[2] q_rel[1];
                                    -q_rel[3]  q_rel[4]  q_rel[1] q_rel[2];
                                     q_rel[2] -q_rel[1]  q_rel[4] q_rel[3];
@@ -160,7 +160,7 @@ the z-axis of this frame.
 From the two possible solutions `q` the one is returned that is closer
 to `q_guess` (note, `q` and `-q` define the same rotation).
 """
-qrot123(angle1::F, angle2::F, angle3::F) where F <: AbstractFloat = absoluteRotation(absoluteRotation(qrot1(angle1), qrot2(angle2)), qrot3(angle3))
+qrot123(angle1::F, angle2::F, angle3::F) where F <: Modia3D.VarFloatType = absoluteRotation(absoluteRotation(qrot1(angle1), qrot2(angle2)), qrot3(angle3))
 
 
 
@@ -173,12 +173,12 @@ This function assumes that `norm(e) == 1`.
 From the two possible solutions `q` the one is returned that is closer
 to `q_guess` (note, `q` and `-q` define the same rotation).
 """
-@inline function qrot_e(e::SVector{3,F}, angle::F; q_guess::SVector{4,F}=NullQuaternion(F)) where F <: AbstractFloat
+@inline function qrot_e(e::SVector{3,F}, angle::F; q_guess::SVector{4,F}=NullQuaternion(F)) where F <: Modia3D.VarFloatType
     sa = sin(angle / 2)
     q = SVector{4,F}(e[1] * sa, e[2] * sa, e[3] * sa, cos(angle / 2))
     return dot(q, q_guess) >= 0 ? SVector{4,F}(q) : SVector{4,F}(-q)
 end
-qrot_e(e::AbstractVector, angle::F) where F <: AbstractFloat = qrot_e(SVector{3,F}(e), F(angle))
+qrot_e(e::AbstractVector, angle::F) where F <: Modia3D.VarFloatType = qrot_e(SVector{3,F}(e), F(angle))
 
 
 """
@@ -216,16 +216,16 @@ qrot_nxy(nx, ny)::SVector{4,F} = from_R(rot_nxy(nx, ny))
 
 
 
-resolve1(q::SVector{4,F}, v2::SVector{3,F}) where F <: AbstractFloat =
+resolve1(q::SVector{4,F}, v2::SVector{3,F}) where F <: Modia3D.VarFloatType =
     SVector{3,F}(2 * ((q[4] * q[4] - F(0.5) ) * v2 + dot(q[1:3], v2) * q[1:3] + q[4] * cross(q[1:3], v2)) )
 
-resolve2(q::SVector{4,F}, v1::SVector{3,F}) where F <: AbstractFloat =
+resolve2(q::SVector{4,F}, v1::SVector{3,F}) where F <: Modia3D.VarFloatType =
     SVector{3,F}(2 * ((q[4] * q[4] - F(0.5) ) * v1 + dot(q[1:3], v1) * q[1:3] - q[4] * cross(q[1:3], v1)) )
 
-relativeRotation(q1::SVector{4,F}, q2::SVector{4,F}) where F <: AbstractFloat =
+relativeRotation(q1::SVector{4,F}, q2::SVector{4,F}) where F <: Modia3D.VarFloatType =
     SVector{4,F}(SMatrix{4,4,F,16}( [ q1[4]  q1[3] -q1[2] -q1[1];
                                     -q1[3]  q1[4]  q1[1] -q1[2];
                                      q1[2] -q1[1]  q1[4] -q1[3];
                                      q1[1]  q1[2]  q1[3]  q1[4]]) * q2)
 
-inverseRotation(q::SVector{4,F}) where F <: AbstractFloat = SVector{4,F}(-q[1], -q[2], -q[3], q[4])
+inverseRotation(q::SVector{4,F}) where F <: Modia3D.VarFloatType = SVector{4,F}(-q[1], -q[2], -q[3], q[4])
