@@ -4,6 +4,7 @@ using  ModiaLang
 import Modia3D
 using  Modia3D.ModiaInterface
 using  Unitful
+using  Test
 
 vmatRed   = Modia3D.VisualMaterial(color="Red")
 vmatGreen = Modia3D.VisualMaterial(color="Green")
@@ -69,9 +70,10 @@ stopTime = 1.3
 tolerance = 1e-8
 
 simulate!(bouncingCones, stopTime=stopTime, tolerance=tolerance, log=true, logStates=true, logEvents=true)
+@test occursin("pairing of the contact materials", bouncingCones.lastMessage)
 
-@usingModiaPlot
-plot(bouncingCones, [("jointX.r", "jointY.r", "jointZ.r") ("jointX.rot", "jointY.rot", "jointZ.rot")
-                     ("jointX.v", "jointY.v", "jointZ.v") ("jointX.w", "jointY.w", "jointZ.w")], figure=1)
+#@usingModiaPlot
+#plot(bouncingCones, [("jointX.r", "jointY.r", "jointZ.r") ("jointX.rot", "jointY.rot", "jointZ.rot")
+#                     ("jointX.v", "jointY.v", "jointZ.v") ("jointX.w", "jointY.w", "jointZ.w")], figure=1)
 
 end

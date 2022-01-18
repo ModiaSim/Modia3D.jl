@@ -3,6 +3,7 @@ module Object3DWithoutParentError
 # Should give an error because of two Object3Ds without parent
 
 using ModiaLang
+using Test
 
 # ModiaLang models
 include("$(ModiaLang.path)/models/Blocks.jl")
@@ -24,7 +25,7 @@ Bar = Model(
                                     visualMaterial=:(vmat1))),
 	frame1 = Object3D(parent=:frame0,
                       translation=:[-Lx/2, 0.0, 0.0],
-                      feature=Visual(shape=Cylinder(axis=3, diameter=:Ly/2, length=1.2*:Lz),
+                      feature=Visual(shape=Cylinder(axis=3, diameter=:(Ly/2), length=:(1.2*Lz)),
                                      visualMaterial=:(vmat2))),
     frame2 = Object3D()  # has no parent
 )
@@ -53,8 +54,9 @@ pendulumWithBar = @instantiateModel(PendulumWithBar, unitless=true)
 stopTime = 10.0
 requiredFinalStates = [-1.5781788131493184, 0.06153205563040136]
 simulate!(pendulumWithBar, stopTime=stopTime, log=true, logStates=true, requiredFinalStates=requiredFinalStates)
+@test occursin("Object3Ds have no parent", pendulumWithBar.lastMessage)
 
-@usingModiaPlot
-plot(pendulumWithBar, ["pendulum.rev.flange.phi", "pendulum.rev.variables[1]"], figure=1)
+#@usingModiaPlot
+#plot(pendulumWithBar, ["pendulum.rev.flange.phi", "pendulum.rev.variables[1]"], figure=1)
 
 end
