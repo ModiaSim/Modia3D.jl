@@ -158,7 +158,7 @@ function getContactPairMaterial(obj1, obj2)::Modia3D.AbstractContactPairMaterial
         if typeof(value1) != NoContactPairMaterial && typeof(value2) != NoContactPairMaterial
             return combineContactPairMaterials(value1, value2)
         else
-            error("For contact between \"", Modia3D.fullName(obj1), "\" and \"", Modia3D.fullName(obj2), "\" pairing of the contact materials \"", name1, "\" and \"", name2, "\" is required. But this combination is not available in $Modia3D.path/palettes/contactPairMaterials.json.")
+            error("\nFor contact between \"", Modia3D.fullName(obj1), "\" and \"", Modia3D.fullName(obj2), "\" pairing of the\ncontact materials \"", name1, "\" and \"", name2, "\" is required.\nBut this combination is not available in ", joinpath(Modia3D.path, "palettes", "contactPairMaterials.json"), ".\n")
         end
     end
     return value

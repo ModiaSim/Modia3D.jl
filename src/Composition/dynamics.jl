@@ -63,8 +63,8 @@ function checkMultibodySystemAndGetWorldAndJointsAndForceElements(instantiatedMo
         for i = 2:length(object3DWithoutParents)
             object3DNames *= "\n   " * object3DWithoutParents[i].path
         end
-        error(instantiatedModel.modelName, ": The following ", length(object3DWithoutParents), " Object3Ds have no parent\n",
-              "(note, there must be exactly one Object3D that has no parent):\n", object3DNames)
+        error("\n", instantiatedModel.modelName, ": The following ", length(object3DWithoutParents), " Object3Ds have no parent\n",
+              "(note, there must be exactly one Object3D that has no parent):\n", object3DNames, "\n")        
     end
     return (object3DWithoutParents[1], jointObjects, forceElements)
 end

@@ -13,7 +13,7 @@ Test.@testset "Basic" begin
     include(joinpath("Basic", "BoxPlanarMotion.jl"))
     include(joinpath("Basic", "ShaftFreeMotion.jl"))
     include(joinpath("Basic", "ShaftFreeMotionAdaptiveRotSequence.jl"))
-    include(joinpath("Basic", "Object3DWithoutParentError.jl"))  # test for too many objects without parent
+    Test.@test_throws LoadError include(joinpath("Basic", "Object3DWithoutParentError.jl"))  # test for too many objects without parent
     if testsExtend >= normalTests
         include(joinpath("Basic", "Mobile.jl"))
     end
@@ -55,7 +55,7 @@ Test.@testset "Collision" begin
     include(joinpath("Collision", "TwoCollidingBoxes.jl"))
     include(joinpath("Collision", "CollidingCylinders.jl"))
     include(joinpath("Collision", "NewtonsCradle.jl"))
-    include(joinpath("Collision", "InValidCollisionPairingError.jl"))  # test for not defined collision pair material
+    Test.@test_throws LoadError include(joinpath("Collision", "InValidCollisionPairingError.jl"))  # test for not defined collision pair material
     if testsExtend >= normalTests
         include(joinpath("Collision", "BouncingCones.jl"))
         include(joinpath("Collision", "BouncingCapsules.jl"))

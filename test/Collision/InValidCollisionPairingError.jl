@@ -68,9 +68,7 @@ bouncingCones = @instantiateModel(buildModia3D(BouncingCones), unitless=true, lo
 
 stopTime = 1.3
 tolerance = 1e-8
-
-simulate!(bouncingCones, stopTime=stopTime, tolerance=tolerance, log=true, logStates=true, logEvents=true)
-@test occursin("pairing of the contact materials", bouncingCones.lastMessage)
+simulate!(bouncingCones, stopTime=stopTime, tolerance=tolerance)
 
 #@usingModiaPlot
 #plot(bouncingCones, [("jointX.r", "jointY.r", "jointZ.r") ("jointX.rot", "jointY.rot", "jointZ.rot")
