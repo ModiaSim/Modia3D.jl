@@ -36,7 +36,8 @@ abstract type AbstractScene end
 
 using StaticArrays
 
-const VarFloatType = AbstractFloat # Union{AbstractFloat, AbstractParticles}
+using MonteCarloMeasurements
+const VarFloatType = Union{AbstractFloat, AbstractParticles}
 
 
 
@@ -179,8 +180,6 @@ export print_ModelVariables
 export PTP_path, pathEndTime, getPosition!, getPosition, getIndex, plotPath
 
 export calculateRobotMovement
-
-export rereadContactPairMaterialFromJSON
 
 # Add import clauses used in examples and test
 import StaticArrays
