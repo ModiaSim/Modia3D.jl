@@ -34,6 +34,16 @@ function convertToFloat64(value)
     if typeof(value[1]) <: Measurements.Measurement
 		# Plot mean value signal
 		value_mean = Float64.(Measurements.value.(value))
+    elseif typeof(value[1]) <: MonteCarloMeasurements.StaticParticles ||
+           typeof(value[1]) <: MonteCarloMeasurements.Particles
+        # Plot mean value signal
+        if isdefined(MonteCarloMeasurements, :pmean)
+            # MonteCarlMeasurements, version >= 1.0
+            value_mean = Float64.(MonteCarloMeasurements.pmean.(value))
+        else
+            # MonteCarloMeasurements, version < 1.0
+            value_mean = Float64.(MonteCarloMeasurements.mean.(value))
+        end
     else
         value_mean = Float64.(value)
     end
