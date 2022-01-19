@@ -76,7 +76,7 @@ function selectContactPairs!(sim, scene::Composition.Scene{F}, ch::Composition.C
             simh.z[scene.zStartIndex] = F(-42.0)
         else
             (pair, key)  = findmax(ch.contactDict)
-            simh.z[scene.zStartIndex] = pair.distanceWithHysteresis
+            simh.z[scene.zStartIndex] = pair.distanceWithHysteresis - F(1e-10)
         end
         # z[2] ... zero crossing function from no contact to contact
         # min. distance of inactive contact pairs
@@ -153,10 +153,6 @@ function computeDistances(scene::Composition.Scene{F}, ch::Composition.ContactDe
 end
 
 
-const zEps  = 1.e-8
-const zEps2 = 2*zEps
-
-
 function pushCollisionPair!(ch, contact, distanceWithHysteresis, pairID, contactPoint1,
     contactPoint2, contactNormal, actObj::Composition.Object3D{F}, nextObj::Composition.Object3D{F}, hasevent, supportPointsDefined, support1A, support2A,
     support3A, support1B, support2B, support3B)::Nothing where F <: Modia3D.VarFloatType
@@ -193,8 +189,8 @@ function storeDistancesForSolver!(world::Composition.Object3D{F}, pairID::Compos
     end
 
 
-    contact                = hasEvent ? distanceOrg < F(-zEps) : hasContact
-    distanceWithHysteresis = contact  ? distanceOrg : distanceOrg + F(zEps2)
+    contact                = hasEvent ? distanceOrg <= F(0) : hasContact
+    distanceWithHysteresis = contact  ? distanceOrg : distanceOrg + F(1e-10)
     #  println("mpr dist: ", distanceWithHysteresis, " ", Modia3D.fullName(actObj), " ", Modia3D.fullName(nextObj))
 
     if hasEvent

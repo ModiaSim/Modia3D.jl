@@ -1,13 +1,13 @@
-contactStart(matPair::Shapes.NoContactPairMaterial, obj1::Object3D{F}, obj2::Object3D{F}, rContact::SVector{3,F}, contactNormal::SVector{3,F}, elasticContactReductionFactor::F) where F <: Modia3D.VarFloatType =
+contactStart(matPair::Shapes.NoContactPairMaterial, obj1::Object3D{F}, obj2::Object3D{F}, rContact::SVector{3,F}, contactNormal::SVector{3,F}, elasticContactReductionFactor::F, maximumContactDamping::F) where F <: Modia3D.VarFloatType =
 matPair
 
-contactStart(matPair::Shapes.ObserverContactPairMaterial, obj1::Object3D{F}, obj2::Object3D{F}, rContact::SVector{3,F}, contactNormal::SVector{3,F}, elasticContactReductionFactor::F) where F <: Modia3D.VarFloatType = matPair
+contactStart(matPair::Shapes.ObserverContactPairMaterial, obj1::Object3D{F}, obj2::Object3D{F}, rContact::SVector{3,F}, contactNormal::SVector{3,F}, elasticContactReductionFactor::F, maximumContactDamping::F) where F <: Modia3D.VarFloatType = matPair
 
 
-contactStart(matPair::Shapes.ImpulseContactPairMaterial, obj1::Object3D{F}, obj2::Object3D{F}, rContact::SVector{3,F}, contactNormal::SVector{3,F}, elasticContactReductionFactor::F) where F <: Modia3D.VarFloatType =
+contactStart(matPair::Shapes.ImpulseContactPairMaterial, obj1::Object3D{F}, obj2::Object3D{F}, rContact::SVector{3,F}, contactNormal::SVector{3,F}, elasticContactReductionFactor::F, maximumContactDamping::F) where F <: Modia3D.VarFloatType =
 error("contactStart is not yet implemented for ImpulseContactPairMaterial.")
 
-contactStart(matPair::Shapes.WheelRailContactPairMaterial, obj1::Object3D{F}, obj2::Object3D{F}, rContact::SVector{3,F}, contactNormal::SVector{3,F}, elasticContactReductionFactor::F) where F <: Modia3D.VarFloatType =
+contactStart(matPair::Shapes.WheelRailContactPairMaterial, obj1::Object3D{F}, obj2::Object3D{F}, rContact::SVector{3,F}, contactNormal::SVector{3,F}, elasticContactReductionFactor::F, maximumContactDamping::F) where F <: Modia3D.VarFloatType =
 error("contactStart is not yet implemented for WheelRailContactPairMaterial.")
 
 

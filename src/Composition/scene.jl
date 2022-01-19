@@ -204,6 +204,7 @@ struct SceneOptions{F <: Modia3D.VarFloatType}
     enableContactDetection::Bool            # = true, if contact detection is enabled
     contactDetection::Modia3D.AbstractContactDetection
     elasticContactReductionFactor::F  # c_res_used = c_res * elasticContactReductionFactor (> 0)
+    maximumContactDamping::F    
     gap::Float64
 
 
@@ -231,6 +232,7 @@ struct SceneOptions{F <: Modia3D.VarFloatType}
             enableContactDetection        = true,
             contactDetection              = ContactDetectionMPR_handler(),
             elasticContactReductionFactor = F(1.0),
+            maximumContactDamping         = F(1000),
             gap                           = 0.001,
             enableVisualization           = true,
             animationFile                 = nothing,
@@ -261,6 +263,7 @@ struct SceneOptions{F <: Modia3D.VarFloatType}
             enableContactDetection,
             contactDetection,
             elasticContactReductionFactor,
+            maximumContactDamping,
             gap,
             enableVisualization,
             animationFile,
@@ -308,8 +311,9 @@ Defines global properties of the system, such as the gravity field. Exactly one 
 | `gravityField`                  | [`UniformGravityField`](@ref)`()`       |
 | `useOptimizedStructure`         | true                                    |
 | `enableContactDetection`        | true                                    |
-| `mprTolerance`                   | 1.0e-20                                 |
+| `mprTolerance`                  | 1.0e-20                                 |
 | `elasticContactReductionFactor` | 1.0                                     |
+| `maximumContactDamping`         | 1000.0                                  |
 | `enableVisualization`           | true                                    |
 | `animationFile`                 | nothing                                 |
 | `visualizeFrames`               | false                                   |
@@ -342,6 +346,8 @@ Defines global properties of the system, such as the gravity field. Exactly one 
 
 - `elasticContactReductionFactor::Float64`: (> 0.0)
   - ``usedContactCompliance = contactCompliance * elasticContactReductionFactor``
+
+- `maximumContactDamping`: Maximum damping factor for elastic contacts
 
 - `enableVisualization::Bool`: = true, to enable online animation with DLR SimVis. If SimVis is not installed, this flag has no effect.
 
@@ -423,6 +429,7 @@ mutable struct Scene{F <: Modia3D.VarFloatType} <: Modia3D.AbstractScene
             enableContactDetection        = true,
             mprTolerance                  = 1.0e-20,
             elasticContactReductionFactor = F(1.0),
+            maximumContactDamping         = F(1000),
             gap                           = 0.001,
             enableVisualization           = true,
             animationFile                 = nothing,
@@ -449,6 +456,7 @@ mutable struct Scene{F <: Modia3D.VarFloatType} <: Modia3D.AbstractScene
             enableContactDetection        = enableContactDetection,
             defaultContactSphereDiameter  = defaultContactSphereDiameter,
             elasticContactReductionFactor = elasticContactReductionFactor,
+            maximumContactDamping         = maximumContactDamping,
             nominalLength                 = nominalLength,
             defaultFrameLength            = defaultFrameLength,
             enableVisualization           = enableVisualization,

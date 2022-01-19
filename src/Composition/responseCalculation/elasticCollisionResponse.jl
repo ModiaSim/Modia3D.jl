@@ -25,19 +25,15 @@ end
 regularize(absv,vsmall) = absv >= vsmall ? absv : absv*(absv/vsmall)*(1.0 - (absv/vsmall)/3.0) + vsmall/3.0
 
 
-resultantCoefficientOfRestitution(cor, abs_vreln, vsmall; cor_min=0.01) =
-    cor + (cor_min - cor)*exp(log(0.01)*(abs_vreln/vsmall))
-
-
-function resultantDampingCoefficient(cor, abs_vreln, vsmall; cor_min=0.01, d_max=1000.0)
+function resultantDampingCoefficient(cor, abs_vreln, vsmall, maximumContactDamping)
     @assert(cor >= 0.0 && cor <= 1.0)
     @assert(abs_vreln >= 0.0)
-    @assert(vsmall  > 0.0)
-    @assert(cor_min > 0.0)
-    @assert(d_max   > 0.0)
+    @assert(vsmall > 0.0)
+    @assert(maximumContactDamping > 0.0)
 
-    cor_res = resultantCoefficientOfRestitution(cor,abs_vreln,vsmall;cor_min=cor_min)
-    return min(d_max, 8.0*(1.0 - cor_res)/(5*cor_res*regularize(abs_vreln,vsmall)))
+    cor_res = abs_vreln > vsmall ? cor : 0.0
+    d_res   = min(maximumContactDamping, 8.0*(1.0 - cor_res)/(5*cor_res*abs_vreln))
+    return d_res
 end
 
 
@@ -67,7 +63,8 @@ end
 
 """
    resonseMaterial = contactStart(matPair::Modia3D.ElasticContactPairMaterial,
-                                  obj1,obj2,rContact,contactNormal)
+                                  obj1,obj2,rContact,contactNormal,elasticContactReductionFactor,
+                                  maximumContactDamping)
 
 Return a `responseMaterial::ElasticContactPairResponseMaterial` object
 at the start of a collision.
@@ -77,7 +74,8 @@ function contactStart(matPair::Shapes.ElasticContactPairMaterial,
                       obj2::Object3D{F},
                       rContact::SVector{3,F},
                       contactNormal::SVector{3,F},
-                      elasticContactReductionFactor::F) where F <: Modia3D.VarFloatType
+                      elasticContactReductionFactor::F,
+                      maximumContactDamping::F) where F <: Modia3D.VarFloatType
     # Compute spring constant
     name1 = obj1.feature.contactMaterial
     name2 = obj2.feature.contactMaterial
@@ -102,7 +100,7 @@ function contactStart(matPair::Shapes.ElasticContactPairMaterial,
 
       # Compute damping constant
       delta_dot_start = normalRelativeVelocityAtContact(obj1, obj2, rContact, contactNormal)
-      d_res = Modia3D.resultantDampingCoefficient(matPair.coefficientOfRestitution, abs(delta_dot_start), matPair.vsmall)
+      d_res = Modia3D.resultantDampingCoefficient(matPair.coefficientOfRestitution, abs(delta_dot_start), matPair.vsmall, maximumContactDamping)
 
       # Determine other coefficients
       (c_geo, n_geo, mu_r_geo) = elasticContactPairCoefficients(obj1,obj2)
@@ -170,7 +168,8 @@ function responseCalculation(material::ElasticContactPairResponseMaterial, obj1:
     else
       delta_comp = delta
     end
-    fn = -max(F(0.0), c_res * c_geo * delta_comp * (1 - d_res*delta_dot) )
+    #fn = -max(F(0.0), c_res * c_geo * delta_comp * (1 - d_res*delta_dot) )
+    fn = -c_res * c_geo * delta_comp * (1 - d_res*delta_dot)
     ft = -mu_k*fn*e_t_reg
     f1 = fn * e_n + ft
     f2 = -f1

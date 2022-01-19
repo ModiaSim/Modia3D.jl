@@ -64,6 +64,8 @@ export MassPropertiesFromShape, MassPropertiesFromShapeAndMass
 export solidMaterial, solidMaterialPalette
 export regularize, resultantCoefficientOfRestitution, resultantDampingCoefficient
 
+export rereadContactPairMaterialFromJSON
+
 # Observer materials
 
 export contactPairMaterialPalette, ElasticContactPairMaterial, TwoNamesKey

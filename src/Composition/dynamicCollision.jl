@@ -77,7 +77,8 @@ function getMaterialContactStart(scene, ch, simh, pair, pairID, obj1, obj2, rCon
     # determine contact pair material
     if scene.options.enableContactDetection
       pair.contactPairMaterial = contactStart(obj1, obj2, rContact, contactNormal,
-                                            scene.options.elasticContactReductionFactor)
+                                              scene.options.elasticContactReductionFactor,
+                                              scene.options.maximumContactDamping)
     end
     simh.restart = max(simh.restart, ModiaLang.Restart)
     simh.newEventIteration = false
@@ -92,9 +93,9 @@ function logEvents(simh, pair, obj1, obj2, rContact, contactNormal)
     name1 = Modia3D.fullName(obj1)
     name2 = Modia3D.fullName(obj2)
     n     = contactNormal
-    println("        distance(", name1, ",", name2, ") = ", pair.distanceWithHysteresis, " became < 0")
+    println("        distance(", name1, ",", name2, ") = ", pair.distanceWithHysteresis, " became <= 0")
 
-    @inbounds println("            contact normal = [", round(n[1], sigdigits=3), ", ", round(n[2], sigdigits=3), ", ", round(n[3], sigdigits=3), "], contact position = [", round(rContact[1], sigdigits=3), ", ", round(rContact[2], sigdigits=3), ", ", round(rContact[3], sigdigits=3),"], c_res = ", round(pair.contactPairMaterial.c_res, sigdigits=3) , " d_res = ", round(pair.contactPairMaterial.d_res, sigdigits=3), "\n")
+    @inbounds println("            contact normal = [", round(n[1], sigdigits=3), ", ", round(n[2], sigdigits=3), ", ", round(n[3], sigdigits=3), "], contact position = [", round(rContact[1], sigdigits=3), ", ", round(rContact[2], sigdigits=3), ", ", round(rContact[3], sigdigits=3),"], c_res = ", round(pair.contactPairMaterial.c_res, sigdigits=3) , " d_res = ", round(pair.contactPairMaterial.d_res, sigdigits=3))
 end; end
 
 # each contact shape pair which was in lastContactDict but isn't in actual contactDict
@@ -115,7 +116,7 @@ function deleteMaterialLastContactDictContactEnd(scene, ch, simh)
       end
       name1 = Modia3D.fullName(pair.obj1)
       name2 = Modia3D.fullName(pair.obj2)
-      println("        distance(", name1, ",", name2, ")  became > 0")
+      println("        distance(", name1, ",", name2, ") = ", pair.distanceWithHysteresis, " became > 0")
   end; end
 
   # delete lastContactDict and save contactDict in lastContactDict

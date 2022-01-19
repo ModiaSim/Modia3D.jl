@@ -138,6 +138,10 @@ Dictionary of contact pair material data, see [`ElasticContactPairMaterial`](@re
 """
 contactPairMaterialPalette = readContactPairMaterialFromJSON( joinpath(Modia3D.path, "palettes", "contactPairMaterials.json") )
 
+function rereadContactPairMaterialFromJSON()
+    global contactPairMaterialPalette = readContactPairMaterialFromJSON( joinpath(Modia3D.path, "palettes", "contactPairMaterials.json") )
+    return nothing
+end
 
 
 """

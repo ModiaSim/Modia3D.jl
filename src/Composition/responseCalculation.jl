@@ -23,9 +23,10 @@
 Return a response material object at contact start.
 """
 function contactStart(obj1::Object3D{F}, obj2::Object3D{F}, rContact::SVector{3,F},
-                      contactNormal::SVector{3,F}, elasticContactReductionFactor::F) where F <: Modia3D.VarFloatType
+                      contactNormal::SVector{3,F}, elasticContactReductionFactor::F,
+                      maximumContactDamping::F) where F <: Modia3D.VarFloatType
     material = Shapes.getContactPairMaterial(obj1, obj2)
-    return contactStart(material, obj1, obj2, rContact, contactNormal, elasticContactReductionFactor)
+    return contactStart(material, obj1, obj2, rContact, contactNormal, elasticContactReductionFactor, maximumContactDamping)
 end
 
 

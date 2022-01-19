@@ -180,6 +180,8 @@ export PTP_path, pathEndTime, getPosition!, getPosition, getIndex, plotPath
 
 export calculateRobotMovement
 
+export rereadContactPairMaterialFromJSON
+
 # Add import clauses used in examples and test
 import StaticArrays
 import Unitful
