@@ -39,7 +39,7 @@ export rgb, defaultColor, VisualMaterial, colorPalette, visualMaterialPalette
 
 # Visual elements
 export changeDimensionsBox
-export Font, TextShape, Screen, XY_Plane, XZ_Plane, YZ_Plane, Left, Right, Center
+export Screen, XY_Plane, XZ_Plane, YZ_Plane, Left, Right, Center
 
 export Visual
 

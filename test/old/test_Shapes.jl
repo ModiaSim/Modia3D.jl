@@ -36,11 +36,11 @@ mesh2 = Modia3D.Visual(shape=Modia3D.Shapes.FileMesh(filename=filename, scale=[2
 mesh3 = Modia3D.Visual(shape=Modia3D.Shapes.FileMesh(filename=filename, scale=[2.0,3.0,4.0],
     useMaterialColor=true, smoothNormals=true))
 
-text1 = Modia3D.TextShape(text="This is a text line")
-font1 = Modia3D.Font()
-font2 = Modia3D.Font(fontFamily="FreeSans", bold=false, italic=false, charSize=0.1,
+text1 = Modia3D.Shapes.TextShape(text="This is a text line")
+font1 = Modia3D.Shapes.Font()
+font2 = Modia3D.Shapes.Font(fontFamily="FreeSans", bold=false, italic=false, charSize=0.1,
     color = "LightBlue", transparency=0.0)
-text2 = Modia3D.TextShape(text="Another text line", font=font2, offset=[0.1,0.2,0.3],
+text2 = Modia3D.Shapes.TextShape(text="Another text line", font=font2, offset=[0.1,0.2,0.3],
     axisAlignment=Modia3D.XZ_Plane,alignment=Modia3D.Left)
 
 

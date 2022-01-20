@@ -135,7 +135,7 @@ function visualizeObject(obj::Composition.Object3D, id::Ptr{Nothing}, simVis::Si
                              Cint(obj.visualMaterial.shadowMask), emptyShaderName)
 
     elseif shapeKind == Modia3D.TextKind
-        textShape::Modia3D.TextShape = obj.shape
+        textShape::Modia3D.Shapes.TextShape = obj.shape
         SimVis_setTextObject(simVis, id, Cint(textShape.axisAlignment), textShape.text, 0.0, Cint(0), SVector{3,Float64}(convertToFloat64(obj.r_abs)), SMatrix{3,3,Float64,9}(convertToFloat64(obj.R_abs)),
                              textShape.font.charSize, textShape.font.fontFileName, MVector{3,Cint}(textShape.font.color), textShape.font.transparency,
                              textShape.offset, Cint(textShape.alignment), Cint(0))
