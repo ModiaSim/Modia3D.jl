@@ -80,7 +80,7 @@ function visualizeObject(obj::Composition.Object3D, id::Ptr{Nothing}, simVis::Si
         end
 
     elseif shapeKind == Modia3D.ConeKind
-        cone::Modia3D.Cone = obj.shape
+        cone::Modia3D.Shapes.Cone = obj.shape
         if cone.axis == 1
             dr = SVector{3,Float64}([convertToFloat64(cone.length/4), 0.0, 0.0])
         elseif cone.axis == 2

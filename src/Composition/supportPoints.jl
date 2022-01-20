@@ -18,7 +18,7 @@ function supportPoint(obj::Composition.Object3D{F}, e::SVector{3,T})::SVector{3,
         #cylinder::Modia3D.Cylinder = obj.shape
         return Modia3D.supportPoint_Cylinder(obj.shape, obj_r_abs, obj_R_abs, e, collisionSmoothingRadius)
     elseif shapeKind == Modia3D.ConeKind
-        #cone::Modia3D.Cone = obj.shape
+        #cone::Modia3D.Shapes.Cone = obj.shape
         return Modia3D.supportPoint_Cone(obj.shape, obj_r_abs, obj_R_abs, e, collisionSmoothingRadius)
     elseif shapeKind == Modia3D.CapsuleKind
         #capsule::Modia3D.Capsule = obj.shape
@@ -89,7 +89,7 @@ function boundingBox!(obj::Composition.Object3D{F}, AABB::Basics.BoundingBox{F};
         zmin = Modia3D.supportPoint_i_Cylinder(cylinder, obj.r_abs[3], SVector(obj.R_abs[:,3]), -1, collisionSmoothingRadius)
         zmax = Modia3D.supportPoint_i_Cylinder(cylinder, obj.r_abs[3], SVector(obj.R_abs[:,3]), +1, collisionSmoothingRadius)
     elseif shapeKind == Modia3D.ConeKind
-        cone::Modia3D.Cone{F} = obj.shape
+        cone::Modia3D.Shapes.Cone{F} = obj.shape
         xmin = Modia3D.supportPoint_i_Cone(cone, obj.r_abs[1], SVector(obj.R_abs[:,1]), -1, collisionSmoothingRadius)
         xmax = Modia3D.supportPoint_i_Cone(cone, obj.r_abs[1], SVector(obj.R_abs[:,1]), +1, collisionSmoothingRadius)
         ymin = Modia3D.supportPoint_i_Cone(cone, obj.r_abs[2], SVector(obj.R_abs[:,2]), -1, collisionSmoothingRadius)
