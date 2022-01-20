@@ -65,7 +65,7 @@ function visualizeObject(obj::Composition.Object3D, id::Ptr{Nothing}, simVis::Si
         convertToFloat64(ellipsoid.lengthX), convertToFloat64(ellipsoid.lengthY), convertToFloat64(ellipsoid.lengthZ) )
 
     elseif shapeKind == Modia3D.BoxKind
-        box::Modia3D.Box = obj.shape
+        box::Modia3D.Shapes.Box = obj.shape
         visualizeShape(simVis, SVector{3,Float64}(convertToFloat64(obj.r_abs)), SMatrix{3,3,Float64,9}(convertToFloat64(obj.R_abs)), SimVisBox, id, obj.visualMaterial,
         convertToFloat64(box.lengthX), convertToFloat64(box.lengthY), convertToFloat64(box.lengthZ) )
 

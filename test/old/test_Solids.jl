@@ -83,7 +83,7 @@ c = 3.0
 m = 4.0
 d = 2700.0
 solidMaterial = Modia3D.SolidMaterial(density=d)
-shape   = Modia3D.Box(lengthX=a, lengthY=b, lengthZ=c)
+shape   = Modia3D.Shapes.Box(lengthX=a, lengthY=b, lengthZ=c)
 mass1 = Modia3D.MassProperties(shape,m)
 mass2 = Modia3D.MassProperties(shape,solidMaterial)
 mass3 = Modia3D.MassProperties(shape,"Aluminium")

@@ -12,7 +12,7 @@ sphere = Modia3D.Visual(shape=Modia3D.Sphere(diameter=2.0),
     visualMaterial=material1)
 ellipsoid = Modia3D.Visual(shape=Modia3D.Ellipsoid(lengthX=1.0, lengthY=2.0,
     lengthZ=3.0))
-box = Modia3D.Visual(shape=Modia3D.Box(lengthX=1.0, lengthY=2.0,
+box = Modia3D.Visual(shape=Modia3D.Shapes.Box(lengthX=1.0, lengthY=2.0,
     lengthZ=3.0))
 cylinder = Modia3D.Visual(shape=Modia3D.Shapes.Cylinder(axis=3, diameter=3.0,
     length=1.0, innerDiameter=1.5))

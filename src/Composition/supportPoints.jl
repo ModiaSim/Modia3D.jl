@@ -12,7 +12,7 @@ function supportPoint(obj::Composition.Object3D{F}, e::SVector{3,T})::SVector{3,
         #ellipsoid::Modia3D.Ellipsoid = obj.shape
         return Modia3D.supportPoint_Ellipsoid(obj.shape, obj_r_abs, obj_R_abs, e)
     elseif shapeKind == Modia3D.BoxKind
-        #box::Modia3D.Box = obj.shape
+        #box::Modia3D.Shapes.Box = obj.shape
         return Modia3D.supportPoint_Box(obj.shape, obj_r_abs, obj_R_abs, e, collisionSmoothingRadius)
     elseif shapeKind == Modia3D.CylinderKind
         #cylinder::Modia3D.Shapes.Cylinder = obj.shape
@@ -73,7 +73,7 @@ function boundingBox!(obj::Composition.Object3D{F}, AABB::Basics.BoundingBox{F};
         zmin = Modia3D.supportPoint_i_Ellipsoid(ellipsoid, obj.r_abs[3], SVector(obj.R_abs[:,3]), -1)
         zmax = Modia3D.supportPoint_i_Ellipsoid(ellipsoid, obj.r_abs[3], SVector(obj.R_abs[:,3]), +1)
     elseif shapeKind == Modia3D.BoxKind
-        box::Modia3D.Box{F} = obj.shape
+        box::Modia3D.Shapes.Box{F} = obj.shape
         xmin = Modia3D.supportPoint_i_Box(box, obj.r_abs[1], SVector(obj.R_abs[:,1]), -1, collisionSmoothingRadius)
         xmax = Modia3D.supportPoint_i_Box(box, obj.r_abs[1], SVector(obj.R_abs[:,1]), +1, collisionSmoothingRadius)
         ymin = Modia3D.supportPoint_i_Box(box, obj.r_abs[2], SVector(obj.R_abs[:,2]), -1, collisionSmoothingRadius)
