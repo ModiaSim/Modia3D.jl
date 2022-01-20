@@ -60,7 +60,7 @@ function visualizeObject(obj::Composition.Object3D, id::Ptr{Nothing}, simVis::Si
                        convertToFloat64(sphere.diameter), convertToFloat64(sphere.diameter), convertToFloat64(sphere.diameter) )
 
     elseif shapeKind == Modia3D.EllipsoidKind
-        ellipsoid::Modia3D.Ellipsoid = obj.shape
+        ellipsoid::Modia3D.Shapes.Ellipsoid = obj.shape
         visualizeShape(simVis, SVector{3,Float64}(convertToFloat64(obj.r_abs)), SMatrix{3,3,Float64,9}(convertToFloat64(obj.R_abs)), SimVisSphere, id, obj.visualMaterial,
         convertToFloat64(ellipsoid.lengthX), convertToFloat64(ellipsoid.lengthY), convertToFloat64(ellipsoid.lengthZ) )
 

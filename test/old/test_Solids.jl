@@ -47,7 +47,7 @@ a = 1.0
 b = 2.0
 c = 3.0
 m = 4.0
-shape  = Modia3D.Ellipsoid(lengthX=2a, lengthY=2b, lengthZ=2c)
+shape  = Modia3D.Shapes.Ellipsoid(lengthX=2a, lengthY=2b, lengthZ=2c)
 mass = Modia3D.MassProperties(shape,m)
 solid = Modia3D.Solid(shape=shape, massProperties=mass)
 obj = Modia3D.Object3D(feature = solid)

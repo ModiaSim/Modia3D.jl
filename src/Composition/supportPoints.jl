@@ -9,7 +9,7 @@ function supportPoint(obj::Composition.Object3D{F}, e::SVector{3,T})::SVector{3,
         #sphere::Modia3D.Sphere = obj.shape
         return Modia3D.supportPoint_Sphere(obj.shape, obj_r_abs, obj_R_abs, e)
     elseif shapeKind == Modia3D.EllipsoidKind
-        #ellipsoid::Modia3D.Ellipsoid = obj.shape
+        #ellipsoid::Modia3D.Shapes.Ellipsoid = obj.shape
         return Modia3D.supportPoint_Ellipsoid(obj.shape, obj_r_abs, obj_R_abs, e)
     elseif shapeKind == Modia3D.BoxKind
         #box::Modia3D.Shapes.Box = obj.shape
@@ -65,7 +65,7 @@ function boundingBox!(obj::Composition.Object3D{F}, AABB::Basics.BoundingBox{F};
             return AABB
         end
     elseif shapeKind == Modia3D.EllipsoidKind
-        ellipsoid::Modia3D.Ellipsoid{F} = obj.shape
+        ellipsoid::Modia3D.Shapes.Ellipsoid{F} = obj.shape
         xmin = Modia3D.supportPoint_i_Ellipsoid(ellipsoid, obj.r_abs[1], SVector(obj.R_abs[:,1]), -1)
         xmax = Modia3D.supportPoint_i_Ellipsoid(ellipsoid, obj.r_abs[1], SVector(obj.R_abs[:,1]), +1)
         ymin = Modia3D.supportPoint_i_Ellipsoid(ellipsoid, obj.r_abs[2], SVector(obj.R_abs[:,2]), -1)
