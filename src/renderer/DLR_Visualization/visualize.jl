@@ -118,7 +118,7 @@ function visualizeObject(obj::Composition.Object3D, id::Ptr{Nothing}, simVis::Si
                        spring.length, spring.diameter, spring.diameter; extras=@MVector[spring.windings, spring.wireDiameter/2, 0.0])
 
     elseif shapeKind == Modia3D.GearWheelKind
-        gearWheel::Modia3D.GearWheel = obj.shape
+        gearWheel::Modia3D.Shapes.GearWheel = obj.shape
         visualizeShape(simVis, SVector{3,Float64}(convertToFloat64(obj.r_abs)), Shapes.rotateAxis2z(gearWheel.axis, SMatrix{3,3,Float64,9}(convertToFloat64(obj.R_abs))), SimVisGearWheel, id, obj.visualMaterial,
                        gearWheel.diameter, gearWheel.diameter, gearWheel.length; extras=@MVector[gearWheel.innerDiameter/gearWheel.diameter, gearWheel.teeth, gearWheel.angle*180/pi])
 

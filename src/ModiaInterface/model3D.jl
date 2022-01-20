@@ -11,7 +11,7 @@ Ellipsoid(       ; kwargs...) = Par(; _constructor = :(Modia3D.Shapes.Ellipsoid{
 Capsule(         ; kwargs...) = Par(; _constructor = :(Modia3D.Shapes.Capsule{FloatType})               , kwargs...)
 Cone(            ; kwargs...) = Par(; _constructor = :(Modia3D.Shapes.Cone{FloatType})                  , kwargs...)
 SpringShape(     ; kwargs...) = Par(; _constructor = :(Modia3D.Spring)                           , kwargs...)
-GearWheel(       ; kwargs...) = Par(; _constructor = :(Modia3D.GearWheel)                        , kwargs...)
+GearWheel(       ; kwargs...) = Par(; _constructor = :(Modia3D.Shapes.GearWheel)                        , kwargs...)
 Grid(            ; kwargs...) = Par(; _constructor = :(Modia3D.Shapes.Grid)                             , kwargs...)
 VisualMaterial(  ; kwargs...) = Par(; _constructor = :(Modia3D.VisualMaterial)                   , kwargs...)
 MassProperties(  ; kwargs...) = Par(; _constructor = :(Modia3D.MassProperties{FloatType})        , kwargs...)
