@@ -24,7 +24,7 @@ function supportPoint(obj::Composition.Object3D{F}, e::SVector{3,T})::SVector{3,
         #capsule::Modia3D.Capsule = obj.shape
         return Modia3D.supportPoint_Capsule(obj.shape, obj_r_abs, obj_R_abs, e)
     elseif shapeKind == Modia3D.BeamKind
-        #beam::Modia3D.Beam = obj.shape
+        #beam::Modia3D.Shapes.Beam = obj.shape
         return Modia3D.supportPoint_Beam(obj.shape, obj_r_abs, obj_R_abs, e, collisionSmoothingRadius)
     elseif shapeKind == Modia3D.FileMeshKind
         #fileMesh::Modia3D.FileMesh = obj.shape
@@ -105,7 +105,7 @@ function boundingBox!(obj::Composition.Object3D{F}, AABB::Basics.BoundingBox{F};
         zmin = Modia3D.supportPoint_i_Capsule(capsule, obj.r_abs[3], SVector(obj.R_abs[:,3]), -1)
         zmax = Modia3D.supportPoint_i_Capsule(capsule, obj.r_abs[3], SVector(obj.R_abs[:,3]), +1)
     elseif shapeKind == Modia3D.BeamKind
-        beam::Modia3D.Beam{F} = obj.shape
+        beam::Modia3D.Shapes.Beam{F} = obj.shape
         xmin = Modia3D.supportPoint_i_Beam(beam, obj.r_abs[1], SVector(obj.R_abs[:,1]), -1, collisionSmoothingRadius)
         xmax = Modia3D.supportPoint_i_Beam(beam, obj.r_abs[1], SVector(obj.R_abs[:,1]), +1, collisionSmoothingRadius)
         ymin = Modia3D.supportPoint_i_Beam(beam, obj.r_abs[2], SVector(obj.R_abs[:,2]), -1, collisionSmoothingRadius)

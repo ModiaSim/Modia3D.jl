@@ -98,7 +98,7 @@ function visualizeObject(obj::Composition.Object3D, id::Ptr{Nothing}, simVis::Si
         convertToFloat64(capsule.diameter), convertToFloat64(capsule.diameter), convertToFloat64(capsule.length) )
 
     elseif shapeKind == Modia3D.BeamKind
-        beam::Modia3D.Beam = obj.shape
+        beam::Modia3D.Shapes.Beam = obj.shape
         visualizeShape(simVis, SVector{3,Float64}(convertToFloat64(obj.r_abs)), Shapes.rotateAxis2x(beam.axis, SMatrix{3,3,Float64,9}(convertToFloat64(obj.R_abs))), SimVisBeam, id, obj.visualMaterial,
         convertToFloat64(beam.length), convertToFloat64(beam.width), convertToFloat64(beam.thickness) )
 
