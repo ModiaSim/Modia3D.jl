@@ -103,7 +103,7 @@ function visualizeObject(obj::Composition.Object3D, id::Ptr{Nothing}, simVis::Si
         convertToFloat64(beam.length), convertToFloat64(beam.width), convertToFloat64(beam.thickness) )
 
     elseif shapeKind == Modia3D.CoordinateSystemKind
-        coordinateSystem::Modia3D.CoordinateSystem = obj.shape
+        coordinateSystem::Modia3D.Shapes.CoordinateSystem = obj.shape
         visualizeShape(simVis, SVector{3,Float64}(convertToFloat64(obj.r_abs)), SMatrix{3,3,Float64,9}(convertToFloat64(obj.R_abs)), SimVisCoordSys, id, DefaultMaterial,
                        coordinateSystem.length, coordinateSystem.length, coordinateSystem.length)
 
