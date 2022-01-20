@@ -113,7 +113,7 @@ function visualizeObject(obj::Composition.Object3D, id::Ptr{Nothing}, simVis::Si
                        grid.length, grid.width, grid.length; extras=@MVector[grid.distance, grid.lineWidth, 0.0])
 
     elseif shapeKind == Modia3D.SpringKind
-        spring::Modia3D.Spring = obj.shape
+        spring::Modia3D.Shapes.Spring = obj.shape
         visualizeShape(simVis, SVector{3,Float64}(convertToFloat64(obj.r_abs)), Shapes.rotateAxis2z(spring.axis, SMatrix{3,3,Float64,9}(convertToFloat64(obj.R_abs))), SimVisSpring, id, obj.visualMaterial,
                        spring.length, spring.diameter, spring.diameter; extras=@MVector[spring.windings, spring.wireDiameter/2, 0.0])
 

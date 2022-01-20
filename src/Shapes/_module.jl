@@ -38,7 +38,6 @@ import JSON
 export rgb, defaultColor, VisualMaterial, colorPalette, visualMaterialPalette
 
 # Visual elements
-export Spring #, GearWheel #, CoordinateSystem , Grid #, FileMesh , ModelicaShape
 export changeDimensionsBox
 export Font, TextShape, Screen, XY_Plane, XZ_Plane, YZ_Plane, Left, Right, Center
 

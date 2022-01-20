@@ -22,7 +22,7 @@ capsule = Modia3D.Visual(shape=Modia3D.Shapes.Capsule(axis=3, diameter=3.0,
     length=1.0))
 beam = Modia3D.Visual(shape=Modia3D.Shapes.Beam(axis=1, length=1.0, width=2.0,
     thickness=3.0), visualMaterial=material1)
-spring = Modia3D.Visual(shape=Modia3D.Spring(axis=3, length=1.0, diameter=3.0,
+spring = Modia3D.Visual(shape=Modia3D.Shapes.Spring(axis=3, length=1.0, diameter=3.0,
     windings=10, wireDiameter=0.2), visualMaterial=material2)
 gearWheel = Modia3D.Visual(shape=Modia3D.Shapes.GearWheel(axis=3, diameter=3.0,
     length=1.0, innerDiameter=2.4, teeth=30, angle=0.2), visualMaterial=material2)
