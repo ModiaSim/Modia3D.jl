@@ -12,7 +12,7 @@ Capsule(         ; kwargs...) = Par(; _constructor = :(Modia3D.Shapes.Capsule{Fl
 Cone(            ; kwargs...) = Par(; _constructor = :(Modia3D.Shapes.Cone{FloatType})                  , kwargs...)
 SpringShape(     ; kwargs...) = Par(; _constructor = :(Modia3D.Spring)                           , kwargs...)
 GearWheel(       ; kwargs...) = Par(; _constructor = :(Modia3D.GearWheel)                        , kwargs...)
-Grid(            ; kwargs...) = Par(; _constructor = :(Modia3D.Grid)                             , kwargs...)
+Grid(            ; kwargs...) = Par(; _constructor = :(Modia3D.Shapes.Grid)                             , kwargs...)
 VisualMaterial(  ; kwargs...) = Par(; _constructor = :(Modia3D.VisualMaterial)                   , kwargs...)
 MassProperties(  ; kwargs...) = Par(; _constructor = :(Modia3D.MassProperties{FloatType})        , kwargs...)
 CoordinateSystem(; kwargs...) = Par(; _constructor = :(Modia3D.CoordinateSystem)                 , kwargs...)

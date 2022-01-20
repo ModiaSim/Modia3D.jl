@@ -108,7 +108,7 @@ function visualizeObject(obj::Composition.Object3D, id::Ptr{Nothing}, simVis::Si
                        coordinateSystem.length, coordinateSystem.length, coordinateSystem.length)
 
     elseif shapeKind == Modia3D.GridKind
-        grid::Modia3D.Grid = obj.shape
+        grid::Modia3D.Shapes.Grid = obj.shape
         visualizeShape(simVis, SVector{3,Float64}(convertToFloat64(obj.r_abs)), Shapes.rotateAxis2z(grid.axis, SMatrix{3,3,Float64,9}(convertToFloat64(obj.R_abs))), SimVisGrid, id, DefaultMaterial,
                        grid.length, grid.width, grid.length; extras=@MVector[grid.distance, grid.lineWidth, 0.0])
 
