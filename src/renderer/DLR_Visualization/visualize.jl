@@ -70,7 +70,7 @@ function visualizeObject(obj::Composition.Object3D, id::Ptr{Nothing}, simVis::Si
         convertToFloat64(box.lengthX), convertToFloat64(box.lengthY), convertToFloat64(box.lengthZ) )
 
     elseif shapeKind == Modia3D.CylinderKind
-        cylinder::Modia3D.Cylinder = obj.shape
+        cylinder::Modia3D.Shapes.Cylinder = obj.shape
         if cylinder.innerDiameter == 0.0
             visualizeShape(simVis, SVector{3,Float64}(convertToFloat64(obj.r_abs)), Shapes.rotateAxis2z(cylinder.axis, SMatrix{3,3,Float64,9}(convertToFloat64(obj.R_abs))), SimVisCylinder, id, obj.visualMaterial,
             convertToFloat64(cylinder.diameter), convertToFloat64(cylinder.diameter), convertToFloat64(cylinder.length) )
