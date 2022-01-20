@@ -189,11 +189,11 @@ mutable struct Object3D{F <: Modia3D.VarFloatType} <: Modia3D.AbstractObject3D
         end
 
 
-        if typeof(feature) == Modia3D.Visual && typeof(feature.shape) == Modia3D.FileMesh && feature.shape.convexPartition
+        if typeof(feature) == Modia3D.Visual && typeof(feature.shape) == Modia3D.Shapes.FileMesh && feature.shape.convexPartition
             createConvexPartition(obj, feature, feature.shape)
         end
 
-        if typeof(feature) <: Modia3D.Solid && typeof(feature.shape) == Modia3D.FileMesh && feature.shape.convexPartition
+        if typeof(feature) <: Modia3D.Solid && typeof(feature.shape) == Modia3D.Shapes.FileMesh && feature.shape.convexPartition
             createConvexPartition(obj, feature, feature.shape)
         end
 
@@ -408,7 +408,7 @@ function createConvexPartition(obj::Object3D{F}, feature, mesh) where F <: Modia
             path = String(Symbol(obj.path, ".", "mesh", i ,))
             (head,ext) = splitext(name)
             if ext == ".obj"
-                fileMesh = Modia3D.FileMesh(filename = joinpath(convexDecompositionDirectory, name),
+                fileMesh = Modia3D.Shapes.FileMesh(filename = joinpath(convexDecompositionDirectory, name),
                 scale = mesh.scaleFactor, useMaterialColor = mesh.useMaterialColor, smoothNormals = mesh.smoothNormals, convexPartition = false)
 
                 feature = createFileFeature(feature, fileMesh)

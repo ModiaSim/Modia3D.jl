@@ -27,7 +27,7 @@ function supportPoint(obj::Composition.Object3D{F}, e::SVector{3,T})::SVector{3,
         #beam::Modia3D.Shapes.Beam = obj.shape
         return Modia3D.supportPoint_Beam(obj.shape, obj_r_abs, obj_R_abs, e, collisionSmoothingRadius)
     elseif shapeKind == Modia3D.FileMeshKind
-        #fileMesh::Modia3D.FileMesh = obj.shape
+        #fileMesh::Modia3D.Shapes.FileMesh = obj.shape
         return Modia3D.supportPoint_FileMesh(obj.shape, obj_r_abs, obj_R_abs, e)
     else
         error("not supported shape for support points")
@@ -113,7 +113,7 @@ function boundingBox!(obj::Composition.Object3D{F}, AABB::Basics.BoundingBox{F};
         zmin = Modia3D.supportPoint_i_Beam(beam, obj.r_abs[3], SVector(obj.R_abs[:,3]), -1, collisionSmoothingRadius)
         zmax = Modia3D.supportPoint_i_Beam(beam, obj.r_abs[3], SVector(obj.R_abs[:,3]), +1, collisionSmoothingRadius)
     elseif shapeKind == Modia3D.FileMeshKind
-        fileMesh::Modia3D.FileMesh = obj.shape
+        fileMesh::Modia3D.Shapes.FileMesh = obj.shape
         xmin = F(Modia3D.supportPoint_i_FileMesh(fileMesh, obj.r_abs[1], SVector(obj.R_abs[:,1]), -1))
         xmax = F(Modia3D.supportPoint_i_FileMesh(fileMesh, obj.r_abs[1], SVector(obj.R_abs[:,1]), +1))
         ymin = F(Modia3D.supportPoint_i_FileMesh(fileMesh, obj.r_abs[2], SVector(obj.R_abs[:,2]), -1))

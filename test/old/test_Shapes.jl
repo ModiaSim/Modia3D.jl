@@ -30,10 +30,10 @@ coordsys = Modia3D.Visual(shape=Modia3D.CoordinateSystem(length=2.0))
 grid= Modia3D.Visual(shape=Modia3D.Grid(axis=3, length=3.0, width=1.0, distance=0.1, lineWidth=2.0))
 
 filename = joinpath(Modia3D.path, "objects", "engine", "crank", "crank.obj")
-mesh1 = Modia3D.Visual(shape=Modia3D.FileMesh(filename=filename))
-mesh2 = Modia3D.Visual(shape=Modia3D.FileMesh(filename=filename, scale=[2.0,2.0,2.0],
+mesh1 = Modia3D.Visual(shape=Modia3D.Shapes.FileMesh(filename=filename))
+mesh2 = Modia3D.Visual(shape=Modia3D.Shapes.FileMesh(filename=filename, scale=[2.0,2.0,2.0],
     useMaterialColor=true, smoothNormals=true))
-mesh3 = Modia3D.Visual(shape=Modia3D.FileMesh(filename=filename, scale=[2.0,3.0,4.0],
+mesh3 = Modia3D.Visual(shape=Modia3D.Shapes.FileMesh(filename=filename, scale=[2.0,3.0,4.0],
     useMaterialColor=true, smoothNormals=true))
 
 text1 = Modia3D.TextShape(text="This is a text line")
