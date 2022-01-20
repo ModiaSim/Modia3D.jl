@@ -123,7 +123,7 @@ function visualizeObject(obj::Composition.Object3D, id::Ptr{Nothing}, simVis::Si
                        gearWheel.diameter, gearWheel.diameter, gearWheel.length; extras=@MVector[gearWheel.innerDiameter/gearWheel.diameter, gearWheel.teeth, gearWheel.angle*180/pi])
 
     elseif shapeKind == Modia3D.ModelicaKind
-        modelica::Modia3D.ModelicaShape = obj.shape
+        modelica::Modia3D.Shapes.ModelicaShape = obj.shape
         visualizeShape(simVis, SVector{3,Float64}(convertToFloat64(obj.r_abs)), SMatrix{3,3,Float64,9}(convertToFloat64(obj.R_abs)), ShapeType(modelica.type), id, obj.visualMaterial,
                        modelica.lengthX, modelica.lengthY, modelica.lengthZ; extras=modelica.extra)
 
