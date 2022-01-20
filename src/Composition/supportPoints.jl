@@ -6,7 +6,7 @@ function supportPoint(obj::Composition.Object3D{F}, e::SVector{3,T})::SVector{3,
     obj_R_abs = SMatrix{3,3,T,9}(obj.R_abs)
 
     if shapeKind == Modia3D.SphereKind
-        #sphere::Modia3D.Sphere = obj.shape
+        #sphere::Modia3D.Shapes.Sphere = obj.shape
         return Modia3D.supportPoint_Sphere(obj.shape, obj_r_abs, obj_R_abs, e)
     elseif shapeKind == Modia3D.EllipsoidKind
         #ellipsoid::Modia3D.Shapes.Ellipsoid = obj.shape
@@ -41,7 +41,7 @@ function boundingBox!(obj::Composition.Object3D{F}, AABB::Basics.BoundingBox{F};
     collisionSmoothingRadius = solid.collisionSmoothingRadius
 
     if shapeKind == Modia3D.SphereKind
-        sphere::Modia3D.Sphere{F} = obj.shape
+        sphere::Modia3D.Shapes.Sphere{F} = obj.shape
         @inbounds begin
             r = sphere.diameter/2
             if tight    # best fitting AABB which is possible

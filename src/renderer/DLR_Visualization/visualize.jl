@@ -55,7 +55,7 @@ function visualizeObject(obj::Composition.Object3D, id::Ptr{Nothing}, simVis::Si
     shapeKind = obj.shapeKind
 
     if shapeKind == Modia3D.SphereKind
-        sphere::Modia3D.Sphere = obj.shape
+        sphere::Modia3D.Shapes.Sphere = obj.shape
         visualizeShape(simVis, SVector{3,Float64}(convertToFloat64(obj.r_abs)), SMatrix{3,3,Float64,9}(convertToFloat64(obj.R_abs)), SimVisSphere, id, obj.visualMaterial,
                        convertToFloat64(sphere.diameter), convertToFloat64(sphere.diameter), convertToFloat64(sphere.diameter) )
 

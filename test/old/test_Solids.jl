@@ -13,7 +13,7 @@ EYE3() = @SMatrix[1.0  0.0  0.0;
 # Test Sphere
 r = 2.0
 m = 3.0
-shape   = Modia3D.Sphere(diameter=2r)
+shape   = Modia3D.Shapes.Sphere(diameter=2r)
 mass  = Modia3D.MassProperties(shape,m)
 solid = Modia3D.Solid(shape=shape, massProperties=mass)
 obj   = Modia3D.Object3D(feature = solid)

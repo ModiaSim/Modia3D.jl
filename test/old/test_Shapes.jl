@@ -8,7 +8,7 @@ using  Modia3D.StaticArrays
 material1 = Modia3D.VisualMaterial(;color="DarkRed", wireframe=true)
 material2 = Modia3D.VisualMaterial(;color=[0,0,255], shininess=0.2)
 
-sphere = Modia3D.Visual(shape=Modia3D.Sphere(diameter=2.0),
+sphere = Modia3D.Visual(shape=Modia3D.Shapes.Sphere(diameter=2.0),
     visualMaterial=material1)
 ellipsoid = Modia3D.Visual(shape=Modia3D.Shapes.Ellipsoid(lengthX=1.0, lengthY=2.0,
     lengthZ=3.0))
