@@ -18,7 +18,7 @@ cylinder = Modia3D.Visual(shape=Modia3D.Cylinder(axis=3, diameter=3.0,
     length=1.0, innerDiameter=1.5))
 cone = Modia3D.Visual(shape=Modia3D.Shapes.Cone(diameter=3.0, length=1.0,
     topDiameter=0.6), visualMaterial=material1)
-capsule = Modia3D.Visual(shape=Modia3D.Capsule(axis=3, diameter=3.0,
+capsule = Modia3D.Visual(shape=Modia3D.Shapes.Capsule(axis=3, diameter=3.0,
     length=1.0))
 beam = Modia3D.Visual(shape=Modia3D.Shapes.Beam(axis=1, length=1.0, width=2.0,
     thickness=3.0), visualMaterial=material1)

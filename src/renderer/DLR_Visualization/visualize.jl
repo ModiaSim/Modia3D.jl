@@ -93,7 +93,7 @@ function visualizeObject(obj::Composition.Object3D, id::Ptr{Nothing}, simVis::Si
         convertToFloat64(cone.diameter), convertToFloat64(cone.diameter), convertToFloat64(cone.length); extras=@MVector[convertToFloat64(cone.topDiameter/cone.diameter), 0.0, 0.0])
 
     elseif shapeKind == Modia3D.CapsuleKind
-        capsule::Modia3D.Capsule = obj.shape
+        capsule::Modia3D.Shapes.Capsule = obj.shape
         visualizeShape(simVis, SVector{3,Float64}(convertToFloat64(obj.r_abs)), Shapes.rotateAxis2z(capsule.axis, SMatrix{3,3,Float64,9}(convertToFloat64(obj.R_abs))), SimVisCapsule, id, obj.visualMaterial,
         convertToFloat64(capsule.diameter), convertToFloat64(capsule.diameter), convertToFloat64(capsule.length) )
 

@@ -8,7 +8,7 @@ Beam(            ; kwargs...) = Par(; _constructor = :(Modia3D.Shapes.Beam{Float
 Cylinder(        ; kwargs...) = Par(; _constructor = :(Modia3D.Cylinder{FloatType})              , kwargs...)
 Sphere(          ; kwargs...) = Par(; _constructor = :(Modia3D.Sphere{FloatType})                , kwargs...)
 Ellipsoid(       ; kwargs...) = Par(; _constructor = :(Modia3D.Ellipsoid{FloatType})             , kwargs...)
-Capsule(         ; kwargs...) = Par(; _constructor = :(Modia3D.Capsule{FloatType})               , kwargs...)
+Capsule(         ; kwargs...) = Par(; _constructor = :(Modia3D.Shapes.Capsule{FloatType})               , kwargs...)
 Cone(            ; kwargs...) = Par(; _constructor = :(Modia3D.Shapes.Cone{FloatType})                  , kwargs...)
 SpringShape(     ; kwargs...) = Par(; _constructor = :(Modia3D.Spring)                           , kwargs...)
 GearWheel(       ; kwargs...) = Par(; _constructor = :(Modia3D.GearWheel)                        , kwargs...)
