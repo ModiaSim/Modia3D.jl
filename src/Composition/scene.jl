@@ -257,7 +257,9 @@ struct SceneOptions{F <: Modia3D.VarFloatType}
         @assert(defaultContactSphereDiameter > 0.0)
         @assert(cameraDistance > 0.0)
         @assert(lightDistance > 0.0)
-
+        if elasticContactReductionFactor > F(1.1) || elasticContactReductionFactor < F(0)
+            error("elasticContactReductionFactor (= elasticContactReductionFactor) has to be in the range 0 .. 1.0")
+        end
         sceneOptions = new(gravityField,
             useOptimizedStructure,
             enableContactDetection,
@@ -312,7 +314,7 @@ Defines global properties of the system, such as the gravity field. Exactly one 
 | `useOptimizedStructure`         | true                                    |
 | `enableContactDetection`        | true                                    |
 | `mprTolerance`                  | 1.0e-20                                 |
-| `elasticContactReductionFactor` | 1.0                                     |
+| `elasticContactReductionFactor` | 1.0     (<= 1.0 required)               |
 | `maximumContactDamping`         | 1000.0                                  |
 | `enableVisualization`           | true                                    |
 | `animationFile`                 | nothing                                 |

@@ -76,7 +76,7 @@ function selectContactPairs!(sim, scene::Composition.Scene{F}, ch::Composition.C
             simh.z[scene.zStartIndex] = F(-42.0)
         else
             (pair, key)  = findmax(ch.contactDict)
-            simh.z[scene.zStartIndex] = pair.distanceWithHysteresis #- F(1e-10)
+            simh.z[scene.zStartIndex] = pair.distanceWithHysteresis - F(1e-16)  #- F(1e-10)
         end
         # z[2] ... zero crossing function from no contact to contact
         # min. distance of inactive contact pairs
@@ -188,9 +188,10 @@ function storeDistancesForSolver!(world::Composition.Object3D{F}, pairID::Compos
       #  println("AABB not overlapping")
     end
 
-
-    contact                = hasEvent ? distanceOrg <= F(0) : hasContact
-    distanceWithHysteresis = contact  ? distanceOrg : distanceOrg + F(1e-10)
+    distanceWithHysteresis = distanceOrg - F(1e-16)    
+    contact                = hasEvent ? distanceWithHysteresis <= F(0) : hasContact
+    # contact                = hasEvent ? distanceOrg <= F(0) : hasContact
+    #distanceWithHysteresis = contact  ? distanceOrg : distanceOrg + F(1e-16)
     #  println("mpr dist: ", distanceWithHysteresis, " ", Modia3D.fullName(actObj), " ", Modia3D.fullName(nextObj))
 
     if hasEvent
