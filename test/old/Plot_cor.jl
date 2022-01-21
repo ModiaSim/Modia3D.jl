@@ -40,21 +40,22 @@ cor_res4 = zeros( length(vrelc) )
 reg = zeros( length(vreld) )
 w   = 0.0
 for i in 1:length(vrela)
-    d_res0a[i] = Modia3D.resultantDampingCoefficient(cor0,vrela[i],vsmall)
-    d_res1a[i] = Modia3D.resultantDampingCoefficient(cor1,vrela[i],vsmall)
-    d_res2a[i] = Modia3D.resultantDampingCoefficient(cor2,vrela[i],vsmall)
-    d_res3a[i] = Modia3D.resultantDampingCoefficient(cor3,vrela[i],vsmall)
-    d_res4a[i] = Modia3D.resultantDampingCoefficient(cor4,vrela[i],vsmall)
+    d_res0a[i] = Modia3D.resultantDampingCoefficient(cor0,vrela[i],vsmall,1000)
+    d_res1a[i] = Modia3D.resultantDampingCoefficient(cor1,vrela[i],vsmall,1000)
+    d_res2a[i] = Modia3D.resultantDampingCoefficient(cor2,vrela[i],vsmall,1000)
+    d_res3a[i] = Modia3D.resultantDampingCoefficient(cor3,vrela[i],vsmall,1000)
+    d_res4a[i] = Modia3D.resultantDampingCoefficient(cor4,vrela[i],vsmall,1000)
 end
 
 for i in 1:length(vrelb)
-    d_res0b[i] = Modia3D.resultantDampingCoefficient(cor0,vrelb[i],vsmall)
-    d_res1b[i] = Modia3D.resultantDampingCoefficient(cor1,vrelb[i],vsmall)
-    d_res2b[i] = Modia3D.resultantDampingCoefficient(cor2,vrelb[i],vsmall)
-    d_res3b[i] = Modia3D.resultantDampingCoefficient(cor3,vrelb[i],vsmall)
-    d_res4b[i] = Modia3D.resultantDampingCoefficient(cor4,vrelb[i],vsmall)
+    d_res0b[i] = Modia3D.resultantDampingCoefficient(cor0,vrelb[i],vsmall,1000)
+    d_res1b[i] = Modia3D.resultantDampingCoefficient(cor1,vrelb[i],vsmall,1000)
+    d_res2b[i] = Modia3D.resultantDampingCoefficient(cor2,vrelb[i],vsmall,1000)
+    d_res3b[i] = Modia3D.resultantDampingCoefficient(cor3,vrelb[i],vsmall,1000)
+    d_res4b[i] = Modia3D.resultantDampingCoefficient(cor4,vrelb[i],vsmall,1000)
 end
 
+#=
 for i in 1:length(vrelc)
     cor_res0[i] = Modia3D.resultantCoefficientOfRestitution(cor0,vrelc[i],vsmall)
     cor_res1[i] = Modia3D.resultantCoefficientOfRestitution(cor1,vrelc[i],vsmall)
@@ -62,11 +63,13 @@ for i in 1:length(vrelc)
     cor_res3[i] = Modia3D.resultantCoefficientOfRestitution(cor3,vrelc[i],vsmall)
     cor_res4[i] = Modia3D.resultantCoefficientOfRestitution(cor4,vrelc[i],vsmall)
 end
+=#
 
 for i in 1:length(vreld)
     reg[i] = Modia3D.regularize(vreld[i],vsmall)
 end
 
+#=
 figure(1)
 clf()
 plot(vrelc, cor_res0, vrelc, cor_res1, vrelc, cor_res2, vrelc, cor_res3, vrelc, cor_res4)
@@ -78,6 +81,7 @@ legend(["\$cor = 1.0, v_{small}=0.01 \\; m/s\$",
         "\$cor = 0.3, v_{small}=0.01 \\; m/s\$",
         "\$cor = 0.1, v_{small}=0.01 \\; m/s\$",
         "\$cor = 0.0, v_{small}=0.01 \\; m/s\$"],loc="upper right")
+=#
 
 figure(2)
 clf()
@@ -91,6 +95,7 @@ legend(["\$cor = 1.0, v_{small}=0.01 \\; m/s\$",
         "\$cor = 0.1, v_{small}=0.01 \\; m/s\$",
         "\$cor = 0.0, v_{small}=0.01 \\; m/s\$"],loc="upper right")
 
+#=
 figure(3)
 clf()
 plot(vrelb, d_res0b, vrelb, d_res1b, vrelb, d_res2b, vrelb, d_res3b, vrelb, d_res4b)
@@ -102,6 +107,7 @@ legend(["\$cor = 1.0, v_{small}=0.01 \\; m/s\$",
         "\$cor = 0.3, v_{small}=0.01 \\; m/s\$",
         "\$cor = 0.1, v_{small}=0.01 \\; m/s\$",
         "\$cor = 0.0, v_{small}=0.01 \\; m/s\$"],loc="upper right")
+=#
 
 figure(4)
 clf()
