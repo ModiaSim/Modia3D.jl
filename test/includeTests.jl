@@ -58,7 +58,7 @@ Test.@testset "Collision" begin
     include(joinpath("Collision", "TwoCollidingBoxes.jl"))
     include(joinpath("Collision", "CollidingCylinders.jl"))
     include(joinpath("Collision", "NewtonsCradle.jl"))
-    include(joinpath("Collision", "ZeroCrossingIssue"))
+    include(joinpath("Collision", "ZeroCrossingIssue.jl"))
     
     Test.@test_throws LoadError include(joinpath("Collision", "InValidCollisionPairingError.jl"))  # test for not defined collision pair material
     if testsExtend >= normalTests
@@ -69,7 +69,7 @@ Test.@testset "Collision" begin
         include(joinpath("Collision", "Billard4Balls.jl"))
     end
     if testsExtend == completeTests
-        include(joinpath("Collision", "Billard16Balls.jl"))  # long computation time
+        include(joinpath("Collision", "Billard16Balls.jl"))  # long computation time: CVODE_BDF: 1450 s. 
     end
 end
 
