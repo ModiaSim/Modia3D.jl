@@ -36,7 +36,8 @@ abstract type AbstractScene end
 
 using StaticArrays
 
-const VarFloatType = AbstractFloat # Union{AbstractFloat, AbstractParticles}
+using MonteCarloMeasurements
+const VarFloatType = Union{AbstractFloat, AbstractParticles}
 
 
 

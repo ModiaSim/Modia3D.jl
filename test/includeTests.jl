@@ -5,7 +5,6 @@ Test.@testset "Basic" begin
     include(joinpath("Basic", "PendulumWithBar1.jl"))
     include(joinpath("Basic", "PendulumWithBar2.jl"))
     include(joinpath("Basic", "PendulumWithDamper.jl"))
-    include(joinpath("Basic", "PendulumWithDamper_Measurements.jl"))
     Test.@test_broken include(joinpath("Basic", "PendulumWithFix.jl")) # problems with code generation
     include(joinpath("Basic", "PendulumWithParameterizedDamper.jl"))
     include(joinpath("Basic", "PendulumWithSpring.jl"))
@@ -15,6 +14,8 @@ Test.@testset "Basic" begin
     include(joinpath("Basic", "ShaftFreeMotionAdaptiveRotSequence.jl"))
     Test.@test_throws LoadError include(joinpath("Basic", "Object3DWithoutParentError.jl"))  # test for too many objects without parent
     if testsExtend >= normalTests
+        include(joinpath("Basic", "PendulumWithDamper_Measurements.jl"))
+        include(joinpath("Basic", "PendulumWithDamper_MonteCarlo.jl"))
         include(joinpath("Basic", "Mobile.jl"))
     end
 end
@@ -22,9 +23,11 @@ end
 Test.@testset "Force Elements" begin
     include(joinpath("ForceElements", "HarmonicOscillator.jl"))
     include(joinpath("ForceElements", "BoxBushing.jl"))
-    include(joinpath("ForceElements", "BoxBushing_Measurements.jl"))
     include(joinpath("ForceElements", "BoxSpringDamperPtP.jl"))
     include(joinpath("ForceElements", "BoxNonLinearSpringDamperPtP.jl"))
+    if testsExtend >= normalTests
+        include(joinpath("ForceElements", "BoxBushing_Measurements.jl"))
+    end
 end
 
 Test.@testset "Robot" begin
