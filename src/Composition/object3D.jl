@@ -189,11 +189,11 @@ mutable struct Object3D{F <: Modia3D.VarFloatType} <: Modia3D.AbstractObject3D
         end
 
 
-        if typeof(feature) == Modia3D.Visual && typeof(feature.shape) == Modia3D.FileMesh && feature.shape.convexPartition
+        if typeof(feature) == Modia3D.Visual && typeof(feature.shape) == Modia3D.Shapes.FileMesh && feature.shape.convexPartition
             createConvexPartition(obj, feature, feature.shape)
         end
 
-        if typeof(feature) <: Modia3D.Solid && typeof(feature.shape) == Modia3D.FileMesh && feature.shape.convexPartition
+        if typeof(feature) <: Modia3D.Solid && typeof(feature.shape) == Modia3D.Shapes.FileMesh && feature.shape.convexPartition
             createConvexPartition(obj, feature, feature.shape)
         end
 
@@ -324,7 +324,7 @@ function setShapeKind(::Type{F}, feature) where F <: Modia3D.VarFloatType
         end
 
         if shapeKind == Modia3D.UndefinedShapeKind
-            shape = Modia3D.Sphere{F}()
+            shape = Modia3D.Shapes.Sphere{F}()
         end
         visualMaterial = feature.visualMaterial
         if isnothing(visualMaterial)
@@ -333,7 +333,7 @@ function setShapeKind(::Type{F}, feature) where F <: Modia3D.VarFloatType
         end
         return shapeKind, shape, visualMaterial, centroid
     else
-        return Modia3D.UndefinedShapeKind, Modia3D.Sphere{F}(), Modia3D.VisualMaterial(), Modia3D.ZeroVector3D(F)
+        return Modia3D.UndefinedShapeKind, Modia3D.Shapes.Sphere{F}(), Modia3D.VisualMaterial(), Modia3D.ZeroVector3D(F)
     end
 end
 
@@ -408,7 +408,7 @@ function createConvexPartition(obj::Object3D{F}, feature, mesh) where F <: Modia
             path = String(Symbol(obj.path, ".", "mesh", i ,))
             (head,ext) = splitext(name)
             if ext == ".obj"
-                fileMesh = Modia3D.FileMesh(filename = joinpath(convexDecompositionDirectory, name),
+                fileMesh = Modia3D.Shapes.FileMesh(filename = joinpath(convexDecompositionDirectory, name),
                 scale = mesh.scaleFactor, useMaterialColor = mesh.useMaterialColor, smoothNormals = mesh.smoothNormals, convexPartition = false)
 
                 feature = createFileFeature(feature, fileMesh)
@@ -436,7 +436,7 @@ function addAABBVisuToWorld!(world::Object3D{F}, AABB::Vector{Vector{Basics.Boun
             k = k + 1
             name = String(Symbol(world.path, ".", "AABBVisu", i, j))
             aabb = AABB[i][j]
-            feature = Modia3D.Visual(shape = Modia3D.Box{F}(
+            feature = Modia3D.Visual(shape = Modia3D.Shapes.Box{F}(
                     lengthX = abs(aabb.x_max - aabb.x_min), lengthY = abs(aabb.y_max - aabb.y_min), lengthZ = abs(aabb.z_max - aabb.z_min)),
                 visualMaterial = Modia3D.VisualMaterial(color="grey96", transparency=0.8))
             push!(world.AABBVisu,  Object3D{F}(world, feature, path = name) )
@@ -452,8 +452,8 @@ function addContactVisuObjToWorld!(world::Object3D{F}, nVisualContSupPoints, def
         name1 = String(Symbol(world.path, ".", "contactVisuObj1", i))
         name2 = String(Symbol(world.path, ".", "contactVisuObj2", i))
 
-        feature1 = Modia3D.Visual(shape = Modia3D.Sphere{F}(diameter = defaultContactSphereDiameter), visualMaterial = Modia3D.VisualMaterial(color="Red",   transparency=1.0))
-        feature2 = Modia3D.Visual(shape = Modia3D.Sphere{F}(diameter = defaultContactSphereDiameter), visualMaterial = Modia3D.VisualMaterial(color="Black",   transparency=1.0))
+        feature1 = Modia3D.Visual(shape = Modia3D.Shapes.Sphere{F}(diameter = defaultContactSphereDiameter), visualMaterial = Modia3D.VisualMaterial(color="Red",   transparency=1.0))
+        feature2 = Modia3D.Visual(shape = Modia3D.Shapes.Sphere{F}(diameter = defaultContactSphereDiameter), visualMaterial = Modia3D.VisualMaterial(color="Black",   transparency=1.0))
 
         world.contactVisuObj1[i] =  Object3D{F}(world, feature1, path = name1)
         world.contactVisuObj2[i] =  Object3D{F}(world, feature2, path = name2)
@@ -475,9 +475,9 @@ function addSupportVisuObjToWorld!(world::Object3D{F}, nVisualContSupPoints, def
         name5 = String(Symbol(world.path, ".", "supportVisuObj2B", i))
         name6 = String(Symbol(world.path, ".", "supportVisuObj3B", i))
 
-        featureA = Modia3D.Visual(shape = Modia3D.Sphere{F}(diameter = defaultContactSphereDiameter), visualMaterial = Modia3D.VisualMaterial(color="Red", transparency=1.0))
+        featureA = Modia3D.Visual(shape = Modia3D.Shapes.Sphere{F}(diameter = defaultContactSphereDiameter), visualMaterial = Modia3D.VisualMaterial(color="Red", transparency=1.0))
 
-        featureB = Modia3D.Visual(shape = Modia3D.Sphere{F}(diameter = defaultContactSphereDiameter), visualMaterial = Modia3D.VisualMaterial(color="Black", transparency=1.0))
+        featureB = Modia3D.Visual(shape = Modia3D.Shapes.Sphere{F}(diameter = defaultContactSphereDiameter), visualMaterial = Modia3D.VisualMaterial(color="Black", transparency=1.0))
 
         world.supportVisuObj1A[i] = Object3D{F}(world, featureA, path = name1)
         world.supportVisuObj2A[i] = Object3D{F}(world, featureA, path = name2)

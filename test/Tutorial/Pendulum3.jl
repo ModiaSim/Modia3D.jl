@@ -1,5 +1,5 @@
 module Pendulum3
-
+import Modia3D # temporarily, needs to be deleted!
 using Modia
 
 # Modia equation-based models

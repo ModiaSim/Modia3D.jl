@@ -38,10 +38,8 @@ import JSON
 export rgb, defaultColor, VisualMaterial, colorPalette, visualMaterialPalette
 
 # Visual elements
-export Sphere, Ellipsoid, Box, Cylinder, Capsule, Beam, Cone
-export Spring, GearWheel, CoordinateSystem, Grid, FileMesh, ModelicaShape
 export changeDimensionsBox
-export Font, TextShape, Screen, XY_Plane, XZ_Plane, YZ_Plane, Left, Right, Center
+export Screen, XY_Plane, XZ_Plane, YZ_Plane, Left, Right, Center
 
 export Visual
 

@@ -13,7 +13,7 @@ EYE3() = @SMatrix[1.0  0.0  0.0;
 # Test Sphere
 r = 2.0
 m = 3.0
-shape   = Modia3D.Sphere(diameter=2r)
+shape   = Modia3D.Shapes.Sphere(diameter=2r)
 mass  = Modia3D.MassProperties(shape,m)
 solid = Modia3D.Solid(shape=shape, massProperties=mass)
 obj   = Modia3D.Object3D(feature = solid)
@@ -47,7 +47,7 @@ a = 1.0
 b = 2.0
 c = 3.0
 m = 4.0
-shape  = Modia3D.Ellipsoid(lengthX=2a, lengthY=2b, lengthZ=2c)
+shape  = Modia3D.Shapes.Ellipsoid(lengthX=2a, lengthY=2b, lengthZ=2c)
 mass = Modia3D.MassProperties(shape,m)
 solid = Modia3D.Solid(shape=shape, massProperties=mass)
 obj = Modia3D.Object3D(feature = solid)
@@ -83,7 +83,7 @@ c = 3.0
 m = 4.0
 d = 2700.0
 solidMaterial = Modia3D.SolidMaterial(density=d)
-shape   = Modia3D.Box(lengthX=a, lengthY=b, lengthZ=c)
+shape   = Modia3D.Shapes.Box(lengthX=a, lengthY=b, lengthZ=c)
 mass1 = Modia3D.MassProperties(shape,m)
 mass2 = Modia3D.MassProperties(shape,solidMaterial)
 mass3 = Modia3D.MassProperties(shape,"Aluminium")
