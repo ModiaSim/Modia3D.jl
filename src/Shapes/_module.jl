@@ -35,19 +35,17 @@ import JSON
 
 
 # Colors and material
-export rgb, defaultColor, VisualMaterial, colorPalette, visualMaterialPalette
+export rgb, defaultColor, colorPalette, visualMaterialPalette
 
 # Visual elements
 export changeDimensionsBox
 export Screen, XY_Plane, XZ_Plane, YZ_Plane, Left, Right, Center
 
-export Visual
 
 # Concave properties
 export ConcaveProperties
 
 # Solid geometries
-export Solid
 export volume, centroid, bottomArea, topArea, longestEdge, lengthGeo, inertiaMatrix
 
 export supportPoint_Sphere, supportPoint_Ellipsoid, supportPoint_Box, supportPoint_Cylinder, supportPoint_Cone, supportPoint_Capsule, supportPoint_Beam, supportPoint_FileMesh
@@ -55,9 +53,7 @@ export supportPoint_Sphere, supportPoint_Ellipsoid, supportPoint_Box, supportPoi
 export supportPoint_i_Box, supportPoint_i_Cylinder, supportPoint_i_Cone, supportPoint_i_Capsule,supportPoint_i_Beam, supportPoint_i_Ellipsoid, supportPoint_i_FileMesh
 
 # Solid materials
-export MassProperties, SolidMaterial
-
-export MassPropertiesFromShape, MassPropertiesFromShapeAndMass
+export SolidMaterial
 
 export solidMaterial, solidMaterialPalette
 export regularize, resultantCoefficientOfRestitution, resultantDampingCoefficient

@@ -64,7 +64,7 @@ function checkMultibodySystemAndGetWorldAndJointsAndForceElements(instantiatedMo
             object3DNames *= "\n   " * object3DWithoutParents[i].path
         end
         error("\n", instantiatedModel.modelName, ": The following ", length(object3DWithoutParents), " Object3Ds have no parent\n",
-              "(note, there must be exactly one Object3D that has no parent):\n", object3DNames, "\n")        
+              "(note, there must be exactly one Object3D that has no parent):\n", object3DNames, "\n")
     end
     return (object3DWithoutParents[1], jointObjects, forceElements)
 end
@@ -74,10 +74,10 @@ end
 function initAnalysis2!(world)
     # use Scene(..) of world object
     Modia3D.Composition.EmptyObject3DFeature
-    if typeof(world.feature) <: Modia3D.Scene
+    if typeof(world.feature) <: Modia3D.Composition.Scene
         scene = world.feature
     else
-        scene = Modia3D.Scene()
+        scene = Modia3D.Composition.Scene()
     end
     scene.analysis = Modia3D.DynamicAnalysis
 

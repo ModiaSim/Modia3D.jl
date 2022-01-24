@@ -22,17 +22,14 @@ module Composition
 
 export initialize, initAnalysis!, performAnalysis!, closeAnalysis!, visualize!, visualizeWorld!
 export updatePosition!, update!
-export Object3D
 export RotationVariables, RCardan123
 export WStartVariables, WCartesian, WCardan123
 export SimulationModel, Model
 export printObject3DAndAllChildren, writeObject3DAndAllChildrenOnJsonFile
-export Fix, FixTranslation
+export FixTranslation
 export Revolute, setAngle!, connect
 export Prismatic, setDistance!
 export FreeMotion
-
-export Bushing, SpringDamperPtP
 
 export multibodyResiduals!, setModiaJointVariables!
 
@@ -45,9 +42,8 @@ export applyFrameTorquePair!, applyFrameForcePair!, applyFrameForceTorquePair!
 
 export deleteMaterialLastContactDictContactEnd
 
-export NoGravityField, UniformGravityField, PointGravityField, gravityAcceleration
+export NoGravityField, PointGravityField, gravityAcceleration
 export G, EarthMass, EarthRadius
-export Scene
 export upwardsDirection, cameraPosition
 export animationData, animationStep
 

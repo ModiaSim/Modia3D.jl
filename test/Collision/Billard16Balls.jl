@@ -5,9 +5,9 @@ using ModiaLang
 import Modia3D
 using  Modia3D.ModiaInterface
 
-vmatBalls   = Modia3D.VisualMaterial(color="AntiqueWhite", transparency=0.0)
-vmatTable   = Modia3D.VisualMaterial(color="DarkGreen", transparency=0.5)
-vmatCushion = Modia3D.VisualMaterial(color="Grey20", transparency=0.5)
+vmatBalls   = Modia3D.Shapes.VisualMaterial(color="AntiqueWhite", transparency=0.0)
+vmatTable   = Modia3D.Shapes.VisualMaterial(color="DarkGreen", transparency=0.5)
+vmatCushion = Modia3D.Shapes.VisualMaterial(color="Grey20", transparency=0.5)
 
 diameter = 0.06
 radius = diameter/2

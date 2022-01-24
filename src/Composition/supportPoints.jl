@@ -1,6 +1,6 @@
 function supportPoint(obj::Composition.Object3D{F}, e::SVector{3,T})::SVector{3, T} where {T,F}
     shapeKind = obj.shapeKind
-    solid::Modia3D.Solid{F} = obj.feature
+    solid::Modia3D.Shapes.Solid{F} = obj.feature
     collisionSmoothingRadius = T(solid.collisionSmoothingRadius)
     obj_r_abs = SVector{3, T}(obj.r_abs)
     obj_R_abs = SMatrix{3,3,T,9}(obj.R_abs)
@@ -37,7 +37,7 @@ end
 
 function boundingBox!(obj::Composition.Object3D{F}, AABB::Basics.BoundingBox{F}; tight::Bool=true, scaleFactor::F=F(0.01) ) where F <: Modia3D.VarFloatType
     shapeKind = obj.shapeKind
-    solid::Modia3D.Solid{F} = obj.feature
+    solid::Modia3D.Shapes.Solid{F} = obj.feature
     collisionSmoothingRadius = solid.collisionSmoothingRadius
 
     if shapeKind == Modia3D.SphereKind

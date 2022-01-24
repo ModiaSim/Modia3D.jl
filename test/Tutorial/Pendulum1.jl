@@ -1,5 +1,5 @@
 module Pendulum1
-
+import Modia3D # temporarily, needs to be deleted!
 using Modia
 
 Pendulum = Model(
