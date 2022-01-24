@@ -27,12 +27,10 @@ export RotationVariables, RCardan123
 export WStartVariables, WCartesian, WCardan123
 export SimulationModel, Model
 export printObject3DAndAllChildren, writeObject3DAndAllChildrenOnJsonFile
-export Fix, FixTranslation
+export FixTranslation
 export Revolute, setAngle!, connect
 export Prismatic, setDistance!
 export FreeMotion
-
-export Bushing, SpringDamperPtP
 
 export multibodyResiduals!, setModiaJointVariables!
 
