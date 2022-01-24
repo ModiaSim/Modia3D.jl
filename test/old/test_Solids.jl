@@ -16,7 +16,7 @@ m = 3.0
 shape   = Modia3D.Shapes.Sphere(diameter=2r)
 mass  = Modia3D.Shapes.MassProperties(shape,m)
 solid = Modia3D.Shapes.Solid(shape=shape, massProperties=mass)
-obj   = Modia3D.Object3D(feature = solid)
+obj   = Modia3D.Composition.Object3D(feature = solid)
 
 rref  = SVector(1.0,2.0,3.0)
 Tref  = EYE3()
@@ -50,7 +50,7 @@ m = 4.0
 shape  = Modia3D.Shapes.Ellipsoid(lengthX=2a, lengthY=2b, lengthZ=2c)
 mass = Modia3D.Shapes.MassProperties(shape,m)
 solid = Modia3D.Shapes.Solid(shape=shape, massProperties=mass)
-obj = Modia3D.Object3D(feature = solid)
+obj = Modia3D.Composition.Object3D(feature = solid)
 
 rref  = SVector(1.0,2.0,3.0)
 Tref  = EYE3()
@@ -88,7 +88,7 @@ mass1 = Modia3D.Shapes.MassProperties(shape,m)
 mass2 = Modia3D.Shapes.MassProperties(shape,solidMaterial)
 mass3 = Modia3D.Shapes.MassProperties(shape,"Aluminium")
 solid = Modia3D.Shapes.Solid(shape=shape, massProperties=mass1)
-obj = Modia3D.Object3D(feature = solid)
+obj = Modia3D.Composition.Object3D(feature = solid)
 
 V     = Modia3D.volume(shape)
 m2    = mass2.m

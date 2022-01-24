@@ -230,7 +230,7 @@ mutable struct Object3D{F <: Modia3D.VarFloatType} <: Modia3D.AbstractObject3D
                       path::String="")::Object3D where F <: Modia3D.VarFloatType
 
         if !isnothing(R) && !isnothing(q)
-            error("Modia3D.Object3D: either R or q must be nothing but both have a value.")
+            error("Modia3D.Composition.Object3D: either R or q must be nothing but both have a value.")
         end
         if !isnothing(R)
             Modia3D.assertRotationMatrix(R)
