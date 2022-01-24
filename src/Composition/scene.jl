@@ -44,7 +44,7 @@ direction `n`.
 ```julia
 import Modia3D
 
-grav = Modia3D.UniformGravityField()
+grav = Modia3D.Composition.UniformGravityField()
    r = Modia3D.EarthRadius
    g = gravityAcceleration(grav,r)  # g is independent of r
 ```
@@ -204,7 +204,7 @@ struct SceneOptions{F <: Modia3D.VarFloatType}
     enableContactDetection::Bool            # = true, if contact detection is enabled
     contactDetection::Modia3D.AbstractContactDetection
     elasticContactReductionFactor::F  # c_res_used = c_res * elasticContactReductionFactor (> 0)
-    maximumContactDamping::F    
+    maximumContactDamping::F
     gap::Float64
 
 

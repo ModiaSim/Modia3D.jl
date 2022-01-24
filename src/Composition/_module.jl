@@ -42,7 +42,7 @@ export applyFrameTorquePair!, applyFrameForcePair!, applyFrameForceTorquePair!
 
 export deleteMaterialLastContactDictContactEnd
 
-export NoGravityField, UniformGravityField, PointGravityField, gravityAcceleration
+export NoGravityField, PointGravityField, gravityAcceleration
 export G, EarthMass, EarthRadius
 export upwardsDirection, cameraPosition
 export animationData, animationStep

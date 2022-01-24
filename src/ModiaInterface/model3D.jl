@@ -26,7 +26,7 @@ SpringDamperPtP( ; kwargs...) = Par(; _constructor = :(Modia3D.Composition.Sprin
 
 MassPropertiesFromShape()              = Par(; _constructor = :(Modia3D.Shapes.MassPropertiesFromShape{FloatType}))
 MassPropertiesFromShapeAndMass(; mass) = Par(; _constructor = :(Modia3D.Shapes.MassPropertiesFromShapeAndMass{FloatType}), mass = mass)
-UniformGravityField(; kwargs...)       = Par(; _constructor = :(Modia3D.UniformGravityField), kwargs...)
+UniformGravityField(; kwargs...)       = Par(; _constructor = :(Modia3D.Composition.UniformGravityField), kwargs...)
 
 RefPath(; kwargs...)                 = Modia3D.ReferencePath(; kwargs...)
 ptpJointSpace(; kwargs...)           = Modia3D.ptpJointSpace(; kwargs...)
