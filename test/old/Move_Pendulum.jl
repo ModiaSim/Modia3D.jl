@@ -21,7 +21,7 @@ cyl = Modia3D.Object3D(parent=frame1, feature = Modia3D.Shapes.Visual(shape =
 rev = Modia3D.Revolute(obj1=world, obj2=frame1)
 
 # Visualize pendulum
-scene = Modia3D.Scene(visualizeFrames=true, defaultFrameLength=0.3*Lx)
+scene = Modia3D.Composition.Scene(visualizeFrames=true, defaultFrameLength=0.3*Lx)
 Modia3D.initAnalysis!(world, scene)
 
 tStart = 0.0

@@ -498,7 +498,7 @@ hasParent(            obj::Object3D{F}) where F <: Modia3D.VarFloatType = !(obj.
 hasNoParent(          obj::Object3D{F}) where F <: Modia3D.VarFloatType =   obj.parent === obj
 hasChildren(          obj::Object3D{F}) where F <: Modia3D.VarFloatType = length(obj.children) > 0
 hasNoChildren(        obj::Object3D{F}) where F <: Modia3D.VarFloatType = length(obj.children) == 0
-isWorld(              obj::Object3D{F}) where F <: Modia3D.VarFloatType = hasNoParent(obj) && typeof(obj.feature) == Modia3D.Scene
+isWorld(              obj::Object3D{F}) where F <: Modia3D.VarFloatType = hasNoParent(obj) && typeof(obj.feature) == Modia3D.Composition.Scene
 isNotWorld(           obj::Object3D{F}) where F <: Modia3D.VarFloatType = !(isWorld(obj))
 isMovable(            obj::Object3D{F}) where F <: Modia3D.VarFloatType = obj.interactionManner.movable
 isLockable(           obj::Object3D{F}) where F <: Modia3D.VarFloatType = obj.interactionManner.lockable

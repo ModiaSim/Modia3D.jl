@@ -399,7 +399,7 @@ function chooseAndBuildUpTree(world::Object3D, scene::Scene)
     else
         build_tree!(scene, world)
         if scene.options.enableContactDetection
-            error("Collision handling is only possible with the optimized structure. Please set useOptimizedStructure = true in Modia3D.Scene.")
+            error("Collision handling is only possible with the optimized structure. Please set useOptimizedStructure = true in Modia3D.Composition.Scene.")
         end
     end
     if length(scene.allVisuElements) > 0

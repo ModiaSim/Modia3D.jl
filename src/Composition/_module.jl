@@ -45,7 +45,6 @@ export deleteMaterialLastContactDictContactEnd
 
 export NoGravityField, UniformGravityField, PointGravityField, gravityAcceleration
 export G, EarthMass, EarthRadius
-export Scene
 export upwardsDirection, cameraPosition
 export animationData, animationStep
 
