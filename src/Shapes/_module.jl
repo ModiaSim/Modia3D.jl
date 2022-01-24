@@ -55,8 +55,6 @@ export supportPoint_i_Box, supportPoint_i_Cylinder, supportPoint_i_Cone, support
 # Solid materials
 export MassProperties, SolidMaterial
 
-export MassPropertiesFromShape, MassPropertiesFromShapeAndMass
-
 export solidMaterial, solidMaterialPalette
 export regularize, resultantCoefficientOfRestitution, resultantDampingCoefficient
 

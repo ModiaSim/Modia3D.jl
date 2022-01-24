@@ -24,8 +24,8 @@ Fix(             ; kwargs...) = Par(; _constructor = :(Modia3D.Fix{FloatType})  
 Bushing(         ; kwargs...) = Par(; _constructor = :(Modia3D.Bushing{FloatType})               , kwargs...)
 SpringDamperPtP( ; kwargs...) = Par(; _constructor = :(Modia3D.SpringDamperPtP{FloatType})       , kwargs...)
 
-MassPropertiesFromShape()              = Par(; _constructor = :(Modia3D.MassPropertiesFromShape{FloatType}))
-MassPropertiesFromShapeAndMass(; mass) = Par(; _constructor = :(Modia3D.MassPropertiesFromShapeAndMass{FloatType}), mass = mass)
+MassPropertiesFromShape()              = Par(; _constructor = :(Modia3D.Shapes.MassPropertiesFromShape{FloatType}))
+MassPropertiesFromShapeAndMass(; mass) = Par(; _constructor = :(Modia3D.Shapes.MassPropertiesFromShapeAndMass{FloatType}), mass = mass)
 UniformGravityField(; kwargs...)       = Par(; _constructor = :(Modia3D.UniformGravityField), kwargs...)
 
 RefPath(; kwargs...)                 = Modia3D.ReferencePath(; kwargs...)
