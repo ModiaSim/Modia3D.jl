@@ -4,8 +4,8 @@ using ModiaLang
 import Modia3D
 using  Modia3D.ModiaInterface
 
-vmat1 = Modia3D.VisualMaterial(color="Green", transparency=0.6)
-vmat2 = Modia3D.VisualMaterial(color="Red"  , transparency=0.6)
+vmat1 = Modia3D.Shapes.VisualMaterial(color="Green", transparency=0.6)
+vmat2 = Modia3D.Shapes.VisualMaterial(color="Red"  , transparency=0.6)
 cmat = "Steel"
 
 collidingBoxes = Model(

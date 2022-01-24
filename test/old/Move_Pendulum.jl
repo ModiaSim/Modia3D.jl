@@ -3,8 +3,8 @@ module Move_Pendulum
 import Modia3D
 
 # Properties
-vmat1 = Modia3D.VisualMaterial(color="LightBlue", transparency=0.5)
-vmat2 = Modia3D.VisualMaterial(color="Red")
+vmat1 = Modia3D.Shapes.VisualMaterial(color="LightBlue", transparency=0.5)
+vmat2 = Modia3D.Shapes.VisualMaterial(color="Red")
 Lx = 1.6
 Ly = 0.2*Lx
 Lz = 0.2*Lx

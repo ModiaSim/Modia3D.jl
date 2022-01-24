@@ -35,7 +35,7 @@ import JSON
 
 
 # Colors and material
-export rgb, defaultColor, VisualMaterial, colorPalette, visualMaterialPalette
+export rgb, defaultColor, colorPalette, visualMaterialPalette
 
 # Visual elements
 export changeDimensionsBox

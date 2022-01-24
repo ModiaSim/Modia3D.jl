@@ -91,6 +91,6 @@ readDictOfStructsFromJSONVisualMaterial(fileName::AbstractString) = readDictOfSt
 """
     const visualMaterialPalette
 
-Dictionary of visual material data, see [`Modia3D.VisualMaterial`](@ref)
+Dictionary of visual material data, see [`Modia3D.Shapes.VisualMaterial`](@ref)
 """
 const visualMaterialPalette = readDictOfStructsFromJSONVisualMaterial( joinpath(Modia3D.path, "palettes", "visualMaterials.json") )

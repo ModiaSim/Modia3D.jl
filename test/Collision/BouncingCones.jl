@@ -5,10 +5,10 @@ import Modia3D
 using  Modia3D.ModiaInterface
 using  Unitful
 
-vmatRed   = Modia3D.VisualMaterial(color="Red")
-vmatGreen = Modia3D.VisualMaterial(color="Green")
-vmatBlue  = Modia3D.VisualMaterial(color="Blue")
-vmatGrey  = Modia3D.VisualMaterial(color="Grey", transparency=0.5)
+vmatRed   = Modia3D.Shapes.VisualMaterial(color="Red")
+vmatGreen = Modia3D.Shapes.VisualMaterial(color="Green")
+vmatBlue  = Modia3D.Shapes.VisualMaterial(color="Blue")
+vmatGrey  = Modia3D.Shapes.VisualMaterial(color="Grey", transparency=0.5)
 
 BouncingCones = Model(
     boxHeigth = 0.1,

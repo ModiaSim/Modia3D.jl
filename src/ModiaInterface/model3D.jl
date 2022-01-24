@@ -13,7 +13,7 @@ Cone(            ; kwargs...) = Par(; _constructor = :(Modia3D.Shapes.Cone{Float
 SpringShape(     ; kwargs...) = Par(; _constructor = :(Modia3D.Shapes.Spring)                           , kwargs...)
 GearWheel(       ; kwargs...) = Par(; _constructor = :(Modia3D.Shapes.GearWheel)                        , kwargs...)
 Grid(            ; kwargs...) = Par(; _constructor = :(Modia3D.Shapes.Grid)                             , kwargs...)
-VisualMaterial(  ; kwargs...) = Par(; _constructor = :(Modia3D.VisualMaterial)                   , kwargs...)
+VisualMaterial(  ; kwargs...) = Par(; _constructor = :(Modia3D.Shapes.VisualMaterial)                   , kwargs...)
 MassProperties(  ; kwargs...) = Par(; _constructor = :(Modia3D.MassProperties{FloatType})        , kwargs...)
 CoordinateSystem(; kwargs...) = Par(; _constructor = :(Modia3D.Shapes.CoordinateSystem)                 , kwargs...)
 FileMesh(        ; kwargs...) = Par(; _constructor = :(Modia3D.Shapes.FileMesh)                         , kwargs...)

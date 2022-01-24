@@ -10,8 +10,8 @@ using ModiaLang
 import Modia3D
 using  Modia3D.ModiaInterface
 
-vmatSolids = Modia3D.VisualMaterial(color="Red"  , transparency=0.0)
-vmatTable  = Modia3D.VisualMaterial(color="Green", transparency=0.1)
+vmatSolids = Modia3D.Shapes.VisualMaterial(color="Red"  , transparency=0.0)
+vmatTable  = Modia3D.Shapes.VisualMaterial(color="Green", transparency=0.1)
 
 LxTable  = 3.0
 LyTable  = 0.5

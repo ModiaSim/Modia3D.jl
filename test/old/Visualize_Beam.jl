@@ -2,7 +2,7 @@ module Visualize_Beam
 
 import Modia3D
 
-mat1  = Modia3D.VisualMaterial(color="LightBlue", transparency=0.5)
+mat1  = Modia3D.Shapes.VisualMaterial(color="LightBlue", transparency=0.5)
 
 world = Modia3D.Object3D(
     feature = Modia3D.Visual(shape=Modia3D.Shapes.CoordinateSystem(length=1.0)))

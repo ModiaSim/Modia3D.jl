@@ -5,8 +5,8 @@ using  Modia3D.Test
 using  Modia3D.StaticArrays
 
 
-material1 = Modia3D.VisualMaterial(;color="DarkRed", wireframe=true)
-material2 = Modia3D.VisualMaterial(;color=[0,0,255], shininess=0.2)
+material1 = Modia3D.Shapes.VisualMaterial(;color="DarkRed", wireframe=true)
+material2 = Modia3D.Shapes.VisualMaterial(;color=[0,0,255], shininess=0.2)
 
 sphere = Modia3D.Visual(shape=Modia3D.Shapes.Sphere(diameter=2.0),
     visualMaterial=material1)
