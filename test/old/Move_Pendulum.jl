@@ -13,7 +13,7 @@ m  = 1.0
 # Pendulum
 world = Modia3D.Object3D(feature = Modia3D.Shapes.Visual(shape =
     Modia3D.Shapes.CoordinateSystem(length=0.5*Lx)))
-body = Modia3D.Object3D(feature = Modia3D.Solid(
+body = Modia3D.Object3D(feature = Modia3D.Shapes.Solid(
     shape = Modia3D.Shapes.Beam(axis=1, length=Lx, width=Ly, thickness=Lz), massProperties=Modia3D.MassProperties(mass=m), visualMaterial=vmat1))
 frame1 = Modia3D.Object3D(parent=body, translation=[-Lx/2, 0.0, 0.0])
 cyl = Modia3D.Object3D(parent=frame1, feature = Modia3D.Shapes.Visual(shape =

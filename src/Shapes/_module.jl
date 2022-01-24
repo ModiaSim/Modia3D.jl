@@ -46,7 +46,6 @@ export Screen, XY_Plane, XZ_Plane, YZ_Plane, Left, Right, Center
 export ConcaveProperties
 
 # Solid geometries
-export Solid
 export volume, centroid, bottomArea, topArea, longestEdge, lengthGeo, inertiaMatrix
 
 export supportPoint_Sphere, supportPoint_Ellipsoid, supportPoint_Box, supportPoint_Cylinder, supportPoint_Cone, supportPoint_Capsule, supportPoint_Beam, supportPoint_FileMesh

@@ -193,7 +193,7 @@ mutable struct Object3D{F <: Modia3D.VarFloatType} <: Modia3D.AbstractObject3D
             createConvexPartition(obj, feature, feature.shape)
         end
 
-        if typeof(feature) <: Modia3D.Solid && typeof(feature.shape) == Modia3D.Shapes.FileMesh && feature.shape.convexPartition
+        if typeof(feature) <: Modia3D.Shapes.Solid && typeof(feature.shape) == Modia3D.Shapes.FileMesh && feature.shape.convexPartition
             createConvexPartition(obj, feature, feature.shape)
         end
 
@@ -314,12 +314,12 @@ end
 Object3D(args... ; kwargs...) = Object3D{Float64}(args... ; kwargs...)
 
 function setShapeKind(::Type{F}, feature) where F <: Modia3D.VarFloatType
-    if typeof(feature) <: Modia3D.Solid || typeof(feature) == Modia3D.Shapes.Visual
+    if typeof(feature) <: Modia3D.Shapes.Solid || typeof(feature) == Modia3D.Shapes.Visual
         shapeKind = Modia3D.getShapeKind(feature.shape)
         shape = feature.shape
 
         centroid = Modia3D.ZeroVector3D(F)
-        if typeof(feature) <: Modia3D.Solid && !isnothing(shape)
+        if typeof(feature) <: Modia3D.Shapes.Solid && !isnothing(shape)
             centroid = Modia3D.centroid(shape)
         end
 
@@ -426,7 +426,7 @@ function createFileFeature(feature::Shapes.Visual, fileMesh)
 end
 
 function createFileFeature(feature::Shapes.Solid{F}, fileMesh) where F <: Modia3D.VarFloatType
-    return Modia3D.Solid{F}(shape=fileMesh, massProperties=nothing, solidMaterial=feature.solidMaterial, collision=feature.collision, contactMaterial=feature.contactMaterial, collisionSmoothingRadius=feature.collisionSmoothingRadius, visualMaterial=feature.visualMaterial)
+    return Modia3D.Shapes.Solid{F}(shape=fileMesh, massProperties=nothing, solidMaterial=feature.solidMaterial, collision=feature.collision, contactMaterial=feature.contactMaterial, collisionSmoothingRadius=feature.collisionSmoothingRadius, visualMaterial=feature.visualMaterial)
 end
 
 function addAABBVisuToWorld!(world::Object3D{F}, AABB::Vector{Vector{Basics.BoundingBox{F}}}) where F <: Modia3D.VarFloatType
