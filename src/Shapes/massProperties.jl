@@ -80,13 +80,13 @@ function createMassProperties(::Type{F}, massProperties::Union{MassPropertiesFro
     if isnothing(solidMaterial)
         error("It is not possible to compute mass properties (MassPropertiesFromShape = ", massProperties,") for shape = ", shape , " because no solidMaterial is defined.")
     else
-        return Modia3D.MassProperties{F}(shape, solidMaterial)
+        return Modia3D.Shapes.MassProperties{F}(shape, solidMaterial)
     end
 end
 
 # compute mass properties from shape and mass
 function createMassProperties(::Type{F}, massProperties::MassPropertiesFromShapeAndMass, shape::Modia3D.AbstractGeometry, solidMaterial::Union{AbstractString,SolidMaterial,Nothing}) where F <: Modia3D.VarFloatType
-    return Modia3D.MassProperties{F}(shape, massProperties.mass)
+    return Modia3D.Shapes.MassProperties{F}(shape, massProperties.mass)
 end
 
 function createMassProperties(::Type{F}, massProperties::MassPropertiesFromShape, shape::Nothing, solidMaterial::Union{AbstractString,SolidMaterial,Nothing}) where F <: Modia3D.VarFloatType

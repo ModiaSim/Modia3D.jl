@@ -14,7 +14,7 @@ EYE3() = @SMatrix[1.0  0.0  0.0;
 r = 2.0
 m = 3.0
 shape   = Modia3D.Shapes.Sphere(diameter=2r)
-mass  = Modia3D.MassProperties(shape,m)
+mass  = Modia3D.Shapes.MassProperties(shape,m)
 solid = Modia3D.Shapes.Solid(shape=shape, massProperties=mass)
 obj   = Modia3D.Object3D(feature = solid)
 
@@ -48,7 +48,7 @@ b = 2.0
 c = 3.0
 m = 4.0
 shape  = Modia3D.Shapes.Ellipsoid(lengthX=2a, lengthY=2b, lengthZ=2c)
-mass = Modia3D.MassProperties(shape,m)
+mass = Modia3D.Shapes.MassProperties(shape,m)
 solid = Modia3D.Shapes.Solid(shape=shape, massProperties=mass)
 obj = Modia3D.Object3D(feature = solid)
 
@@ -84,9 +84,9 @@ m = 4.0
 d = 2700.0
 solidMaterial = Modia3D.SolidMaterial(density=d)
 shape   = Modia3D.Shapes.Box(lengthX=a, lengthY=b, lengthZ=c)
-mass1 = Modia3D.MassProperties(shape,m)
-mass2 = Modia3D.MassProperties(shape,solidMaterial)
-mass3 = Modia3D.MassProperties(shape,"Aluminium")
+mass1 = Modia3D.Shapes.MassProperties(shape,m)
+mass2 = Modia3D.Shapes.MassProperties(shape,solidMaterial)
+mass3 = Modia3D.Shapes.MassProperties(shape,"Aluminium")
 solid = Modia3D.Shapes.Solid(shape=shape, massProperties=mass1)
 obj = Modia3D.Object3D(feature = solid)
 
@@ -127,8 +127,8 @@ II  = [5 1 2;
        1 6 3;
        2 3 7]
 
-mass1 = Modia3D.MassProperties(m,rCM,II)
-mass2 = Modia3D.MassProperties(mass=m,centerOfMass=rCM,Ixx=5,Iyy=6,Izz=7,Ixy=1,Ixz=2,Iyz=3)
+mass1 = Modia3D.Shapes.MassProperties(m,rCM,II)
+mass2 = Modia3D.Shapes.MassProperties(mass=m,centerOfMass=rCM,Ixx=5,Iyy=6,Izz=7,Ixy=1,Ixz=2,Iyz=3)
 
 @testset "Modia3D.Shapes.Solid: Test MassProperties" begin
    @test isapprox(mass1.m, m)
