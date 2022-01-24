@@ -41,7 +41,6 @@ export rgb, defaultColor, colorPalette, visualMaterialPalette
 export changeDimensionsBox
 export Screen, XY_Plane, XZ_Plane, YZ_Plane, Left, Right, Center
 
-export Visual
 
 # Concave properties
 export ConcaveProperties

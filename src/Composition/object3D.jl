@@ -189,7 +189,7 @@ mutable struct Object3D{F <: Modia3D.VarFloatType} <: Modia3D.AbstractObject3D
         end
 
 
-        if typeof(feature) == Modia3D.Visual && typeof(feature.shape) == Modia3D.Shapes.FileMesh && feature.shape.convexPartition
+        if typeof(feature) == Modia3D.Shapes.Visual && typeof(feature.shape) == Modia3D.Shapes.FileMesh && feature.shape.convexPartition
             createConvexPartition(obj, feature, feature.shape)
         end
 
@@ -314,7 +314,7 @@ end
 Object3D(args... ; kwargs...) = Object3D{Float64}(args... ; kwargs...)
 
 function setShapeKind(::Type{F}, feature) where F <: Modia3D.VarFloatType
-    if typeof(feature) <: Modia3D.Solid || typeof(feature) == Modia3D.Visual
+    if typeof(feature) <: Modia3D.Solid || typeof(feature) == Modia3D.Shapes.Visual
         shapeKind = Modia3D.getShapeKind(feature.shape)
         shape = feature.shape
 
@@ -422,7 +422,7 @@ function createConvexPartition(obj::Object3D{F}, feature, mesh) where F <: Modia
 end
 
 function createFileFeature(feature::Shapes.Visual, fileMesh)
-    return Modia3D.Visual(shape = fileMesh, visualMaterial = feature.visualMaterial)
+    return Modia3D.Shapes.Visual(shape = fileMesh, visualMaterial = feature.visualMaterial)
 end
 
 function createFileFeature(feature::Shapes.Solid{F}, fileMesh) where F <: Modia3D.VarFloatType
@@ -436,7 +436,7 @@ function addAABBVisuToWorld!(world::Object3D{F}, AABB::Vector{Vector{Basics.Boun
             k = k + 1
             name = String(Symbol(world.path, ".", "AABBVisu", i, j))
             aabb = AABB[i][j]
-            feature = Modia3D.Visual(shape = Modia3D.Shapes.Box{F}(
+            feature = Modia3D.Shapes.Visual(shape = Modia3D.Shapes.Box{F}(
                     lengthX = abs(aabb.x_max - aabb.x_min), lengthY = abs(aabb.y_max - aabb.y_min), lengthZ = abs(aabb.z_max - aabb.z_min)),
                 visualMaterial = Modia3D.Shapes.VisualMaterial(color="grey96", transparency=0.8))
             push!(world.AABBVisu,  Object3D{F}(world, feature, path = name) )
@@ -452,8 +452,8 @@ function addContactVisuObjToWorld!(world::Object3D{F}, nVisualContSupPoints, def
         name1 = String(Symbol(world.path, ".", "contactVisuObj1", i))
         name2 = String(Symbol(world.path, ".", "contactVisuObj2", i))
 
-        feature1 = Modia3D.Visual(shape = Modia3D.Shapes.Sphere{F}(diameter = defaultContactSphereDiameter), visualMaterial = Modia3D.Shapes.VisualMaterial(color="Red",   transparency=1.0))
-        feature2 = Modia3D.Visual(shape = Modia3D.Shapes.Sphere{F}(diameter = defaultContactSphereDiameter), visualMaterial = Modia3D.Shapes.VisualMaterial(color="Black",   transparency=1.0))
+        feature1 = Modia3D.Shapes.Visual(shape = Modia3D.Shapes.Sphere{F}(diameter = defaultContactSphereDiameter), visualMaterial = Modia3D.Shapes.VisualMaterial(color="Red",   transparency=1.0))
+        feature2 = Modia3D.Shapes.Visual(shape = Modia3D.Shapes.Sphere{F}(diameter = defaultContactSphereDiameter), visualMaterial = Modia3D.Shapes.VisualMaterial(color="Black",   transparency=1.0))
 
         world.contactVisuObj1[i] =  Object3D{F}(world, feature1, path = name1)
         world.contactVisuObj2[i] =  Object3D{F}(world, feature2, path = name2)
@@ -475,9 +475,9 @@ function addSupportVisuObjToWorld!(world::Object3D{F}, nVisualContSupPoints, def
         name5 = String(Symbol(world.path, ".", "supportVisuObj2B", i))
         name6 = String(Symbol(world.path, ".", "supportVisuObj3B", i))
 
-        featureA = Modia3D.Visual(shape = Modia3D.Shapes.Sphere{F}(diameter = defaultContactSphereDiameter), visualMaterial = Modia3D.Shapes.VisualMaterial(color="Red", transparency=1.0))
+        featureA = Modia3D.Shapes.Visual(shape = Modia3D.Shapes.Sphere{F}(diameter = defaultContactSphereDiameter), visualMaterial = Modia3D.Shapes.VisualMaterial(color="Red", transparency=1.0))
 
-        featureB = Modia3D.Visual(shape = Modia3D.Shapes.Sphere{F}(diameter = defaultContactSphereDiameter), visualMaterial = Modia3D.Shapes.VisualMaterial(color="Black", transparency=1.0))
+        featureB = Modia3D.Shapes.Visual(shape = Modia3D.Shapes.Sphere{F}(diameter = defaultContactSphereDiameter), visualMaterial = Modia3D.Shapes.VisualMaterial(color="Black", transparency=1.0))
 
         world.supportVisuObj1A[i] = Object3D{F}(world, featureA, path = name1)
         world.supportVisuObj2A[i] = Object3D{F}(world, featureA, path = name2)
