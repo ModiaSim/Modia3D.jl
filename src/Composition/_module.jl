@@ -29,7 +29,7 @@ export printObject3DAndAllChildren, writeObject3DAndAllChildrenOnJsonFile
 export FixTranslation
 export setAngle!, connect
 export setDistance!
-export FreeMotion
+
 
 export multibodyResiduals!, setModiaJointVariables!
 
