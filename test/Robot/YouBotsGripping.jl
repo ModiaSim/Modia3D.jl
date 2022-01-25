@@ -10,8 +10,7 @@ include("$(ModiaLang.path)/models/Electric.jl")
 include("$(ModiaLang.path)/models/Rotational.jl")
 include("$(ModiaLang.path)/models/Translational.jl")
 
-import Modia3D
-using  Modia3D.ModiaInterface
+using Modia
 
 # some constants
 simplifiedContact = true  # use boxes instead of meshes for finger contact

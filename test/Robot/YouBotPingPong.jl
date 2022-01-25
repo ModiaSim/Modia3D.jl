@@ -9,8 +9,7 @@ include("$(ModiaLang.path)/models/Blocks.jl")
 include("$(ModiaLang.path)/models/Electric.jl")
 include("$(ModiaLang.path)/models/Rotational.jl")
 
-import Modia3D
-using  Modia3D.ModiaInterface
+using Modia
 
 # some constants
 
