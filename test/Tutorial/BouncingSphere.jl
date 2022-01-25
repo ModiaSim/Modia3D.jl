@@ -1,5 +1,4 @@
 module BouncingSphere3D
-import Modia3D # temporarily, needs to be deleted!
 using Modia
 
 BouncingSphere = Model(
