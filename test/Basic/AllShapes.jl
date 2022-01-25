@@ -1,8 +1,7 @@
 module AllShapesTest
 
-using  ModiaLang
+using Modia
 import Modia3D
-using  Modia3D.ModiaInterface
 
 filenameBunny = joinpath(Modia3D.path, "objects", "bunny", "bunny.obj")
 

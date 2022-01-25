@@ -7,8 +7,7 @@ include("$(ModiaLang.path)/models/Blocks.jl")
 include("$(ModiaLang.path)/models/Electric.jl")
 include("$(ModiaLang.path)/models/Rotational.jl")
 
-import Modia3D
-using  Modia3D.ModiaInterface
+using Modia
 
 Bar = Model(
     m  = 0.1,
@@ -51,7 +50,7 @@ import DifferentialEquations
 algorithm = DifferentialEquations.Tsit5()
 stopTime = 10.0
 requiredFinalStates = [-1.578178763749515, 0.06153191687388868]
-simulate!(pendulumWithBar, algorithm, stopTime=stopTime, log=true, logStates=true, requiredFinalStates=requiredFinalStates)
+simulate!(pendulumWithBar, algorithm, stopTime=stopTime, log=true, logStates=false, requiredFinalStates=requiredFinalStates)
 
 @usingModiaPlot
 plot(pendulumWithBar, ["pendulum.rev.flange.phi", "pendulum.rev.variables[1]"], figure=1)
