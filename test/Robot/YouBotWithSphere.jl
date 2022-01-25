@@ -98,7 +98,7 @@ motorInertiaGripper = 0.0
 gearRatioGripper    = 1.0
 
 #### ----------- Path Planning ------------------
-referencePath1 = Modia3D.ReferencePath(
+referencePath1 = Modia3D.PathPlanning.ReferencePath(
     names = ["angle1", "angle2", "angle3", "angle4", "angle5", "gripper"],
     position = [0.0,     0.0,     pi/2,   0.0,    0.0,   0.0],
     v_max =    [2.68512, 2.68512, 4.8879, 5.8997, 5.8997, 1.0],

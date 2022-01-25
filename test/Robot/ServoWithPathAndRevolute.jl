@@ -109,7 +109,7 @@ servoParameters = Map(
                       )
                   )
 
-referencePath1 = Modia3D.ReferencePath(names = ["angle2"],
+referencePath1 = Modia3D.PathPlanning.ReferencePath(names = ["angle2"],
                                             position = [0.0],
                                             v_max = [2.68512],
                                             a_max = [1.5])
