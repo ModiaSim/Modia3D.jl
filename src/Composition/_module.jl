@@ -11,7 +11,7 @@ Structuring of objects moving in 3D. Most important constructors
 |:--------------------------------------------|:----:|:---------------------------------------------|
 | [`Object3D`](@ref)`(...)`                  | 0,6 | Return a reference Object3D, if a parent is given fixed/moving w.r.t. `parent`|
 | [`Modia3D.Composition.Revolute`](@ref)`(obj1,obj2;..)`  | 1 | Return a revolute joint |
-| [`Modia3D.Prismatic`](@ref)`(obj1,obj2;..)` | 1 | Return a prismatic joint |
+| [`Modia3D.Composition.Prismatic`](@ref)`(obj1,obj2;..)` | 1 | Return a prismatic joint |
 
 
 
@@ -28,7 +28,7 @@ export SimulationModel, Model
 export printObject3DAndAllChildren, writeObject3DAndAllChildrenOnJsonFile
 export FixTranslation
 export setAngle!, connect
-export Prismatic, setDistance!
+export setDistance!
 export FreeMotion
 
 export multibodyResiduals!, setModiaJointVariables!
