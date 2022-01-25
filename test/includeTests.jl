@@ -58,10 +58,10 @@ Test.@testset "Collision" begin
     include(joinpath("Collision", "TwoCollidingBoxes.jl"))
     include(joinpath("Collision", "CollidingCylinders.jl"))
     include(joinpath("Collision", "NewtonsCradle.jl"))
-    include(joinpath("Collision", "ZeroCrossingIssue.jl"))
     
     Test.@test_throws LoadError include(joinpath("Collision", "InValidCollisionPairingError.jl"))  # test for not defined collision pair material
     if testsExtend >= normalTests
+        include(joinpath("Collision", "ZeroCrossingIssue.jl"))
         include(joinpath("Collision", "BouncingCones.jl"))
         include(joinpath("Collision", "BouncingCapsules.jl"))
         include(joinpath("Collision", "BouncingBeams.jl"))

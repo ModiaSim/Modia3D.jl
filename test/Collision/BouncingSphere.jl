@@ -15,8 +15,7 @@ BouncingSphere = Model(
                                    visualizeFrames=false,
                                    defaultFrameLength=0.2,
                                    visualizeBoundingBox = true,
-                                   enableContactDetection=true,
-                                   maximumContactDamping=1e3,                                   
+                                   enableContactDetection=true,                                
                                    visualizeContactPoints=false)),
     worldFrame = Object3D(parent=:world, feature=Visual(shape=CoordinateSystem(length=0.5))),
     ground = Object3D(parent=:world,
@@ -38,11 +37,11 @@ bouncingSphere = @instantiateModel(buildModia3D(BouncingSphere), unitless=true, 
 #@show bouncingSphere.parameterExpressions
 #@show bouncingSphere.parameters
 
-stopTime = 2.5
-dtmax = 0.01
+stopTime = 2.2
+dtmax = 0.1
 tolerance = 1e-8 
-requiredFinalStates = [0.0, 0.0]
-simulate!(bouncingSphere, stopTime=stopTime, tolerance=tolerance, dtmax=dtmax, log=true, logStates=false, logEvents=true,
+requiredFinalStates = [-0.4417983315849275, 0.0003869217525311367]
+simulate!(bouncingSphere, stopTime=stopTime, tolerance=tolerance, dtmax=dtmax, log=true, logStates=false, logEvents=false,
           requiredFinalStates_atol = 1e-7, requiredFinalStates=requiredFinalStates)
           
 @usingModiaPlot          
