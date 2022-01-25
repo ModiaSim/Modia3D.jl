@@ -8,8 +8,7 @@ include("$(ModiaLang.path)/models/Blocks.jl")
 include("$(ModiaLang.path)/models/Electric.jl")
 include("$(ModiaLang.path)/models/Rotational.jl")
 
-import Modia3D
-using  Modia3D.ModiaInterface
+using Modia
 
 Controller = Model(
     # Interface
@@ -109,12 +108,12 @@ servoParameters = Map(
                       )
                   )
 
-referencePath1 = Modia3D.ReferencePath(names = ["angle2"],
+referencePath1 = Modia3D.PathPlanning.ReferencePath(names = ["angle2"],
                                             position = [0.0],
                                             v_max = [2.68512],
                                             a_max = [1.5])
 
-Modia3D.ptpJointSpace(referencePath = referencePath1, positions = [0.0; 0.3; 0.0])
+Modia3D.PathPlanning.ptpJointSpace(referencePath = referencePath1, positions = [0.0; 0.3; 0.0])
 
 @show referencePath1
 
@@ -142,12 +141,12 @@ TestServo = Model(
     ]
 )
 
-servo = @instantiateModel(buildModia3D(TestServo), unitless=true, logCode=true, log=false)
+servo = @instantiateModel(buildModia3D(TestServo), unitless=true, logCode=false, log=false)
 
 stopTime = 4.0
 tolerance = 1e-6
 requiredFinalStates = [2.1923247415673457e-7, -2.1923342072392868e-7, -0.06934863003447111]
-simulate!(servo, stopTime=stopTime, tolerance=tolerance, log=true, logStates=true, logEvents=true, requiredFinalStates=requiredFinalStates)
+simulate!(servo, stopTime=stopTime, tolerance=tolerance, log=true, logStates=false, logEvents=false, requiredFinalStates=requiredFinalStates)
 
 @usingModiaPlot
 plotVariables = [("servo.refLoadAngle", "rev.phi"); "servo.ppi.gainOuter.u"; "rev.w"; "servo.ppi.PI.x"; "servo.ppi.refTorque"]

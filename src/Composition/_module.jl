@@ -10,8 +10,8 @@ Structuring of objects moving in 3D. Most important constructors
 | Function                                    | dof | Description |
 |:--------------------------------------------|:----:|:---------------------------------------------|
 | [`Object3D`](@ref)`(...)`                  | 0,6 | Return a reference Object3D, if a parent is given fixed/moving w.r.t. `parent`|
-| [`Modia3D.Revolute`](@ref)`(obj1,obj2;..)`  | 1 | Return a revolute joint |
-| [`Modia3D.Prismatic`](@ref)`(obj1,obj2;..)` | 1 | Return a prismatic joint |
+| [`Modia3D.Composition.Revolute`](@ref)`(obj1,obj2;..)`  | 1 | Return a revolute joint |
+| [`Modia3D.Composition.Prismatic`](@ref)`(obj1,obj2;..)` | 1 | Return a prismatic joint |
 
 
 
@@ -27,11 +27,9 @@ export WStartVariables, WCartesian, WCardan123
 export SimulationModel, Model
 export printObject3DAndAllChildren, writeObject3DAndAllChildrenOnJsonFile
 export FixTranslation
-export Revolute, setAngle!, connect
-export Prismatic, setDistance!
-export FreeMotion
+export setAngle!, connect
+export setDistance!
 
-export multibodyResiduals!, setModiaJointVariables!
 
 export distanceAndAngles, distance, planarRotationAngle
 export measFrameRotation, measFramePosition, measFrameDistance

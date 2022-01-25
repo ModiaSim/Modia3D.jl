@@ -1,11 +1,9 @@
 module TwoCollidingBoxes
 
-using ModiaLang
-import Modia3D
-using  Modia3D.ModiaInterface
+using Modia
 
-vmat1 = Modia3D.Shapes.VisualMaterial(color="Green", transparency=0.6)
-vmat2 = Modia3D.Shapes.VisualMaterial(color="Red"  , transparency=0.6)
+vmat1 = VisualMaterial(color="Green", transparency=0.6)
+vmat2 = VisualMaterial(color="Red"  , transparency=0.6)
 cmat = "Steel"
 
 collidingBoxes = Model(
@@ -43,7 +41,7 @@ if Sys.iswindows()
 else
     requiredFinalStates = [-1.2491609001458825, 3.4171296735804487e-7, 0.06689208772957456, 0.7494258087005188, 1.6721279542955506e-6, 0.5829025911027681, 1.5707788581459448, -3.2574807995825715e-6, 0.183216453113141, -0.00012373469585807555, -3.169934525839379e-5, 1.6744038834216513]
 end
-simulate!(twoCollidingBoxes, stopTime=stopTime, tolerance=tolerance, interval=interval, log=true, logStates=true, logEvents=false, requiredFinalStates=requiredFinalStates)
+simulate!(twoCollidingBoxes, stopTime=stopTime, tolerance=tolerance, interval=interval, log=true, logStates=false, logEvents=false, requiredFinalStates=requiredFinalStates)
 
 @usingModiaPlot
 plot(twoCollidingBoxes, ["movingBoxJoint.r" "movingBoxJoint.rot"; "movingBoxJoint.v" "movingBoxJoint.w"], figure=1)

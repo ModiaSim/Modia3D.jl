@@ -1,14 +1,12 @@
 module CollidingCylindersSimulation
 
 using  Unitful
-using  ModiaLang
-import Modia3D
-using  Modia3D.ModiaInterface
+using Modia
 
-vmatRed   = Modia3D.Shapes.VisualMaterial(color="Red")
-vmatGreen = Modia3D.Shapes.VisualMaterial(color="Green")
-vmatBlue  = Modia3D.Shapes.VisualMaterial(color="Blue")
-vmatGrey  = Modia3D.Shapes.VisualMaterial(color="Grey", transparency=0.5)
+vmatRed   = VisualMaterial(color="Red")
+vmatGreen = VisualMaterial(color="Green")
+vmatBlue  = VisualMaterial(color="Blue")
+vmatGrey  = VisualMaterial(color="Grey", transparency=0.5)
 
 LxTable = 2.0
 LyTable = 2.0

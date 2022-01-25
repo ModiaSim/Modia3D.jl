@@ -9,8 +9,7 @@ include("$(ModiaLang.path)/models/Blocks.jl")
 include("$(ModiaLang.path)/models/Electric.jl")
 include("$(ModiaLang.path)/models/Translational.jl")
 
-import Modia3D
-using  Modia3D.ModiaInterface
+using Modia
 
 ControllerPrism = Model(
     # Interface
@@ -126,12 +125,12 @@ TestServo = Model(
     ]
 )
 
-servo = @instantiateModel(buildModia3D(TestServo), unitless=true, logCode=true, log=true)
+servo = @instantiateModel(buildModia3D(TestServo), unitless=true, logCode=false, log=false)
 
 stopTime = 4.0
 tolerance = 1e-6
 requiredFinalStates = [-269.9911219480055, 1594.1933857866297, 25436.042732813803]
-simulate!(servo, stopTime=stopTime, tolerance=tolerance, log=true, logStates=true, requiredFinalStates=requiredFinalStates)
+simulate!(servo, stopTime=stopTime, tolerance=tolerance, log=true, logStates=false, requiredFinalStates=requiredFinalStates)
 
 @usingModiaPlot
 plotVariables = [("ramp.y", "rev.s"); "rev.v"; "servo.ppi.PI.x"; "servo.ppi.refForce"]

@@ -8,7 +8,7 @@ include("$(ModiaLang.path)/models/Electric.jl")
 include("$(ModiaLang.path)/models/Rotational.jl")
 
 import Modia3D
-using  Modia3D.ModiaInterface
+using Modia
 using DifferentialEquations
 using MonteCarloMeasurements
 
@@ -49,7 +49,7 @@ stopTime = 10.0
 # requiredFinalStates = [-1.578178283450938, 0.061515170100766486]
 
 Modia3D.disableRenderer()
-simulate!(pendulumWithDamper, QBDF(autodiff=false), stopTime=stopTime, log=true, logStates=true, requiredFinalStates=missing)
+simulate!(pendulumWithDamper, QBDF(autodiff=false), stopTime=stopTime, log=true, logStates=false, requiredFinalStates=missing)
 Modia3D.reenableRenderer()
 
 @usingModiaPlot

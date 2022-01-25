@@ -13,7 +13,7 @@ get_eAxis(::Type{F}, axis::Int) where F <: Modia3D.VarFloatType = axis==  1 ? SV
                        axis== -1 ? SVector{3,F}( -1.0,  0.0,  0.0) :
                        axis== -2 ? SVector{3,F}(  0.0, -1.0,  0.0) :
                        axis== -3 ? SVector{3,F}(  0.0,  0.0, -1.0) :
-                       error("Modia3D.Prismatic: axis = ", axis, " but must be 1, 2, 3, -1, -2, or -3.")
+                       error("Modia3D.Composition.Prismatic: axis = ", axis, " but must be 1, 2, 3, -1, -2, or -3.")
 
 """
     joint = Prismatic(; obj1, obj2, path="", axis=1, s=0, v=0, canCollide=true)

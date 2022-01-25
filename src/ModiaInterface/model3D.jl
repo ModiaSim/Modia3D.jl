@@ -28,18 +28,18 @@ MassPropertiesFromShape()              = Par(; _constructor = :(Modia3D.Shapes.M
 MassPropertiesFromShapeAndMass(; mass) = Par(; _constructor = :(Modia3D.Shapes.MassPropertiesFromShapeAndMass{FloatType}), mass = mass)
 UniformGravityField(; kwargs...)       = Par(; _constructor = :(Modia3D.Composition.UniformGravityField), kwargs...)
 
-RefPath(; kwargs...)                 = Modia3D.ReferencePath(; kwargs...)
-ptpJointSpace(; kwargs...)           = Modia3D.ptpJointSpace(; kwargs...)
-scheduleReferenceMotion(; kwargs...) = Modia3D.scheduleReferenceMotion(; kwargs...)
-calculateRobotMovement(args...)      = Modia3D.calculateRobotMovement(args...)
-getRefPathPosition(args...)          = Modia3D.getRefPathPosition(args...)
-getRefPathInitPosition(args...)      = Modia3D.getRefPathInitPosition(args...)
+RefPath(; kwargs...)                 = Modia3D.PathPlanning.ReferencePath(; kwargs...)
+ptpJointSpace(; kwargs...)           = Modia3D.PathPlanning.ptpJointSpace(; kwargs...)
+scheduleReferenceMotion(; kwargs...) = Modia3D.PathPlanning.scheduleReferenceMotion(; kwargs...)
+calculateRobotMovement(args...)      = Modia3D.PathPlanning.calculateRobotMovement(args...)
+getRefPathPosition(args...)          = Modia3D.PathPlanning.getRefPathPosition(args...)
+getRefPathInitPosition(args...)      = Modia3D.PathPlanning.getRefPathInitPosition(args...)
 
 getVariables(args...)            = (args...,)
-multibodyResiduals!(args...)     = Modia3D.multibodyResiduals!(args...)
-setModiaJointVariables!(args...) = Modia3D.setModiaJointVariables!(args...)
+multibodyResiduals!(args...)     = Modia3D.Composition.multibodyResiduals!(args...)
+setModiaJointVariables!(args...) = Modia3D.Composition.setModiaJointVariables!(args...)
 
-Revolute(; obj1, obj2, axis=3, phi=Var(init=0.0), w=Var(init=0.0), canCollide=true) = Model(; _constructor = Par(value = :(Modia3D.Revolute{FloatType}), _path = true, ndof = 1),
+Revolute(; obj1, obj2, axis=3, phi=Var(init=0.0), w=Var(init=0.0), canCollide=true) = Model(; _constructor = Par(value = :(Modia3D.Composition.Revolute{FloatType}), _path = true, ndof = 1),
     obj1 = Par(value = obj1),
     obj2 = Par(value = obj2),
     axis = Par(value = axis),
@@ -53,7 +53,7 @@ Revolute(; obj1, obj2, axis=3, phi=Var(init=0.0), w=Var(init=0.0), canCollide=tr
         ]
 )
 
-RevoluteWithFlange(; obj1, obj2, axis=3, phi=Var(init=0.0), w=Var(init=0.0), canCollide=true) = Model(; _constructor = Par(value = :(Modia3D.Revolute{FloatType}), _path = true, ndof = 1),
+RevoluteWithFlange(; obj1, obj2, axis=3, phi=Var(init=0.0), w=Var(init=0.0), canCollide=true) = Model(; _constructor = Par(value = :(Modia3D.Composition.Revolute{FloatType}), _path = true, ndof = 1),
     obj1   = Par(value = obj1),
     obj2   = Par(value = obj2),
     axis   = Par(value = axis),
@@ -69,7 +69,7 @@ RevoluteWithFlange(; obj1, obj2, axis=3, phi=Var(init=0.0), w=Var(init=0.0), can
         ]
 )
 
-Prismatic(; obj1, obj2, axis=1, s=Var(init=0.0), v=Var(init=0.0), canCollide=true) = Model(; _constructor = Par(value = :(Modia3D.Prismatic{FloatType}), _path = true, ndof = 1),
+Prismatic(; obj1, obj2, axis=1, s=Var(init=0.0), v=Var(init=0.0), canCollide=true) = Model(; _constructor = Par(value = :(Modia3D.Composition.Prismatic{FloatType}), _path = true, ndof = 1),
     obj1 = Par(value = obj1),
     obj2 = Par(value = obj2),
     axis = Par(value = axis),
@@ -83,7 +83,7 @@ Prismatic(; obj1, obj2, axis=1, s=Var(init=0.0), v=Var(init=0.0), canCollide=tru
         ]
 )
 
-PrismaticWithFlange(; obj1, obj2, axis=1, s=Var(init=0.0), v=Var(init=0.0), canCollide=true) = Model(; _constructor = Par(value = :(Modia3D.Prismatic{FloatType}), _path = true, ndof = 1),
+PrismaticWithFlange(; obj1, obj2, axis=1, s=Var(init=0.0), v=Var(init=0.0), canCollide=true) = Model(; _constructor = Par(value = :(Modia3D.Composition.Prismatic{FloatType}), _path = true, ndof = 1),
     obj1   = Par(value = obj1),
     obj2   = Par(value = obj2),
     axis   = Par(value = axis),
@@ -163,7 +163,7 @@ end
 singularRem(ang) = abs(rem2pi(ang, RoundNearest)) - 1.5  # is negative/positive in valid/singular angle range
 J123or132(rot, isrot123) = isrot123 ? J123(rot) : J132(rot)
 
-FreeMotion(; obj1, obj2, r=Var(init=zeros(3)), rot=Var(init=zeros(3)), v=Var(init=zeros(3)), w=Var(init=zeros(3))) = Model(; _constructor = Par(value = :(Modia3D.FreeMotion{FloatType}), _path = true, ndof = 6),
+FreeMotion(; obj1, obj2, r=Var(init=zeros(3)), rot=Var(init=zeros(3)), v=Var(init=zeros(3)), w=Var(init=zeros(3))) = Model(; _constructor = Par(value = :(Modia3D.Composition.FreeMotion{FloatType}), _path = true, ndof = 6),
     obj1 = Par(value = obj1),
     obj2 = Par(value = obj2),
     r    = r,
