@@ -31,8 +31,6 @@ export setAngle!, connect
 export setDistance!
 
 
-export multibodyResiduals!, setModiaJointVariables!
-
 export distanceAndAngles, distance, planarRotationAngle
 export measFrameRotation, measFramePosition, measFrameDistance
 export measFrameRotVelocity, measFrameTransVelocity, measFrameDistVelocity
