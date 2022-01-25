@@ -1,8 +1,6 @@
 module BouncingEllipsoidSimulation
 
-using ModiaLang
-import Modia3D
-using  Modia3D.ModiaInterface
+using Modia
 
 BouncingEllipsoid = Model(
     boxHeigth = 0.1,

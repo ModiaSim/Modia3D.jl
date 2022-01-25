@@ -2,20 +2,18 @@ module BouncingSphereSimulation
 
 # Simulate bouncing sphere with CVODE_BDF, QBDF, Tsit5
 
-using ModiaLang
-import Modia3D
-using  Modia3D.ModiaInterface
+using Modia
 using  DifferentialEquations
 
 BouncingSphere = Model(
     boxHeigth = 0.1,
     groundMaterial = VisualMaterial(color="DarkGreen", transparency=0.5),
     gravField = UniformGravityField(g=9.81, n=[0, -1, 0]),
-    world = Object3D(feature=Scene(gravityField=:gravField, 
+    world = Object3D(feature=Scene(gravityField=:gravField,
                                    visualizeFrames=false,
                                    defaultFrameLength=0.2,
                                    visualizeBoundingBox = true,
-                                   enableContactDetection=true,                                
+                                   enableContactDetection=true,
                                    visualizeContactPoints=false)),
     worldFrame = Object3D(parent=:world, feature=Visual(shape=CoordinateSystem(length=0.5))),
     ground = Object3D(parent=:world,
@@ -39,20 +37,20 @@ bouncingSphere = @instantiateModel(buildModia3D(BouncingSphere), unitless=true, 
 
 stopTime = 2.2
 dtmax = 0.1
-tolerance = 1e-8 
+tolerance = 1e-8
 requiredFinalStates = [-0.4417983315849275, 0.0003869217525311367]
 simulate!(bouncingSphere, stopTime=stopTime, tolerance=tolerance, dtmax=dtmax, log=true, logStates=false, logEvents=false,
           requiredFinalStates_atol = 1e-7, requiredFinalStates=requiredFinalStates)
-          
-@usingModiaPlot          
+
+@usingModiaPlot
 plot(bouncingSphere, ["prism.s", "prism.v"], figure=1)
 
 #=
-simulate!(bouncingSphere, QBDF(autodiff=false), stopTime=stopTime, tolerance=tolerance, dtmax=dtmax, log=true, 
+simulate!(bouncingSphere, QBDF(autodiff=false), stopTime=stopTime, tolerance=tolerance, dtmax=dtmax, log=true,
           requiredFinalStates_atol = 1e-7, requiredFinalStates=requiredFinalStates)
 plot(bouncingSphere, ["prism.s", "prism.v"], figure=2)
 
-simulate!(bouncingSphere, Tsit5(), stopTime=stopTime, tolerance=tolerance, dtmax=dtmax, log=true, 
+simulate!(bouncingSphere, Tsit5(), stopTime=stopTime, tolerance=tolerance, dtmax=dtmax, log=true,
           merge = Map(world = Map(feature = Map(maximumContactDamping=1000))),   # Demonstrate how to change Modia3D data
           requiredFinalStates_atol = 1e-7, requiredFinalStates=requiredFinalStates)
 plot(bouncingSphere, ["prism.s", "prism.v"], figure=3)

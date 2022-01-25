@@ -6,12 +6,10 @@ with another ball on a table.
 """
 module TwoCollidingBalls
 
-using ModiaLang
-import Modia3D
-using  Modia3D.ModiaInterface
+using Modia
 
-vmatSolids = Modia3D.Shapes.VisualMaterial(color="Red"  , transparency=0.0)
-vmatTable  = Modia3D.Shapes.VisualMaterial(color="Green", transparency=0.1)
+vmatSolids = VisualMaterial(color="Red"  , transparency=0.0)
+vmatTable  = VisualMaterial(color="Green", transparency=0.1)
 
 LxTable  = 3.0
 LyTable  = 0.5

@@ -1,8 +1,6 @@
 module ZeroCrossingIssue
 
-using  ModiaLang
-import Modia3D
-using  Modia3D.ModiaInterface
+using Modia
 
 # The penetration depth is in the order of 1e-11. With a tolerance of 1e-8, the penetration depth
 # is not computed precisely enough, and computation time is excessive because the Jacobian is computed
@@ -33,7 +31,7 @@ zeroCrossing = @instantiateModel(buildModia3D(ZeroCrossing), unitless=true)
 stopTime = 0.01
 tolerance = 1e-8
 requiredFinalStates = missing
-simulate!(zeroCrossing, stopTime=stopTime, tolerance=tolerance, log=true, logEvents=true, logStates=true, requiredFinalStates=requiredFinalStates)
+simulate!(zeroCrossing, stopTime=stopTime, tolerance=tolerance, log=true, logEvents=true, logStates=false, requiredFinalStates=requiredFinalStates)
 
 @usingModiaPlot
 plot(zeroCrossing, ["joint.r"; "joint.v"], figure=1)
