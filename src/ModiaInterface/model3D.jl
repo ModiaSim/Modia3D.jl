@@ -30,10 +30,10 @@ UniformGravityField(; kwargs...)       = Par(; _constructor = :(Modia3D.Composit
 
 RefPath(; kwargs...)                 = Modia3D.ReferencePath(; kwargs...)
 ptpJointSpace(; kwargs...)           = Modia3D.PathPlanning.ptpJointSpace(; kwargs...)
-scheduleReferenceMotion(; kwargs...) = Modia3D.scheduleReferenceMotion(; kwargs...)
-calculateRobotMovement(args...)      = Modia3D.calculateRobotMovement(args...)
-getRefPathPosition(args...)          = Modia3D.getRefPathPosition(args...)
-getRefPathInitPosition(args...)      = Modia3D.getRefPathInitPosition(args...)
+scheduleReferenceMotion(; kwargs...) = Modia3D.PathPlanning.scheduleReferenceMotion(; kwargs...)
+calculateRobotMovement(args...)      = Modia3D.PathPlanning.calculateRobotMovement(args...)
+getRefPathPosition(args...)          = Modia3D.PathPlanning.getRefPathPosition(args...)
+getRefPathInitPosition(args...)      = Modia3D.PathPlanning.getRefPathInitPosition(args...)
 
 getVariables(args...)            = (args...,)
 multibodyResiduals!(args...)     = Modia3D.multibodyResiduals!(args...)
