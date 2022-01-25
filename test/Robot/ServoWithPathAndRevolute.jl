@@ -114,7 +114,7 @@ referencePath1 = Modia3D.ReferencePath(names = ["angle2"],
                                             v_max = [2.68512],
                                             a_max = [1.5])
 
-Modia3D.ptpJointSpace(referencePath = referencePath1, positions = [0.0; 0.3; 0.0])
+Modia3D.PathPlanning.ptpJointSpace(referencePath = referencePath1, positions = [0.0; 0.3; 0.0])
 
 @show referencePath1
 

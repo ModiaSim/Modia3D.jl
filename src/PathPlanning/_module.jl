@@ -15,7 +15,7 @@ module PathPlanning
 
 export PTP_path, pathEndTime, getPosition!, getPosition, getIndex, plotPath
 export ReferencePath, scheduleReferenceMotion, calculateRobotMovement, getRefPathPosition, getRefPathInitPosition
-export ptpJointSpace
+
 export ptpJointSpace!
 
 export getPathComponent

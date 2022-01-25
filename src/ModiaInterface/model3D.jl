@@ -29,7 +29,7 @@ MassPropertiesFromShapeAndMass(; mass) = Par(; _constructor = :(Modia3D.Shapes.M
 UniformGravityField(; kwargs...)       = Par(; _constructor = :(Modia3D.Composition.UniformGravityField), kwargs...)
 
 RefPath(; kwargs...)                 = Modia3D.ReferencePath(; kwargs...)
-ptpJointSpace(; kwargs...)           = Modia3D.ptpJointSpace(; kwargs...)
+ptpJointSpace(; kwargs...)           = Modia3D.PathPlanning.ptpJointSpace(; kwargs...)
 scheduleReferenceMotion(; kwargs...) = Modia3D.scheduleReferenceMotion(; kwargs...)
 calculateRobotMovement(args...)      = Modia3D.calculateRobotMovement(args...)
 getRefPathPosition(args...)          = Modia3D.getRefPathPosition(args...)

@@ -104,7 +104,7 @@ referencePath1 = Modia3D.ReferencePath(
     v_max =    [2.68512, 2.68512, 4.8879, 5.8997, 5.8997, 1.0],
     a_max =    [1.5, 1.5, 1.5, 1.5, 1.5, 0.5])
 #
-Modia3D.ptpJointSpace(referencePath = referencePath1, positions =
+Modia3D.PathPlanning.ptpJointSpace(referencePath = referencePath1, positions =
     [0.0 0.0 pi/2     0.0 0.0 0.0;
     0.0  0.3 pi/2-0.3 0.0 0.0 0.0;
     0.0  0.0 0.0      0.0 0.0 0.0])
