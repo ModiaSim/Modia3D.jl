@@ -18,7 +18,7 @@ body = Modia3D.Composition.Object3D(feature = Modia3D.Shapes.Solid(
 frame1 = Modia3D.Composition.Object3D(parent=body, translation=[-Lx/2, 0.0, 0.0])
 cyl = Modia3D.Composition.Object3D(parent=frame1, feature = Modia3D.Shapes.Visual(shape =
     Modia3D.Shapes.Cylinder(axis=3, diameter=Ly/2, length=1.2*Ly), visualMaterial=vmat2))
-rev = Modia3D.Revolute(obj1=world, obj2=frame1)
+rev = Modia3D.Composition.Revolute(obj1=world, obj2=frame1)
 
 # Visualize pendulum
 scene = Modia3D.Composition.Scene(visualizeFrames=true, defaultFrameLength=0.3*Lx)

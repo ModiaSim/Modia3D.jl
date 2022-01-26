@@ -9,8 +9,7 @@ include("$(ModiaLang.path)/models/Blocks.jl")
 include("$(ModiaLang.path)/models/Electric.jl")
 include("$(ModiaLang.path)/models/Rotational.jl")
 
-import Modia3D
-using  Modia3D.ModiaInterface
+using Modia
 
 const depthMax = 6
 const enableVisualization = false
@@ -91,8 +90,8 @@ function createMobile(depth)
     end
 end
 Mobile = Model(
-    world      = Object3D(feature=Scene(gravityField=UniformGravityField(g=9.81, n=[0, -1, 0]), 
-                                        enableContactDetection=false, 
+    world      = Object3D(feature=Scene(gravityField=UniformGravityField(g=9.81, n=[0, -1, 0]),
+                                        enableContactDetection=false,
                                         enableVisualization=enableVisualization)),
     worldFrame = Object3D(parent = :world, feature = Visual(shape = CoordinateSystem(length=rodLength))),
     top        = createMobile(depthMax),
@@ -100,7 +99,7 @@ Mobile = Model(
 )
 
 println("... @instantiateModel:")
-@time mobile = @instantiateModel(buildModia3D(Mobile), unitless=true, log=false, logDetails=false, logModel=false, logStateSelection=false, 
+@time mobile = @instantiateModel(buildModia3D(Mobile), unitless=true, log=false, logDetails=false, logModel=false, logStateSelection=false,
                                  logCode=false, logExecution=true, logTiming=false, evaluateParameters=true)
 
 const stopTime = 5.0

@@ -132,6 +132,9 @@ import .DLR_Visualization
 import .NoRenderer
 using .PathPlanning
 using .Interface
+
+using Reexport
+@reexport using .ModiaInterface
 #const connect = Composition.connect  # connect cannot be directly exported, due to a conflict with Base.connect
 const run     = Interface.run        # run cannot be directly exported, due to a conflict with Base.run
 
@@ -161,25 +164,12 @@ function reenableRenderer()
     return nothing
 end
 
+export PointGravityField, NoGravityField
 
-export Object3D
-
-export Sphere, Ellipsoid, Box, Cylinder, Capsule, Beam, Cone
-export Spring, GearWheel, CoordinateSystem, Grid, FileMesh, ModelicaShape
-
-export Solid, Visual
-export MassProperties
-export Fix
-export Revolute, Prismatic
-
-export UniformGravityField, PointGravityField, NoGravityField
-export VisualMaterial
-export Scene, SimulationModel
+export SimulationModel
 export print_ModelVariables
-
 export PTP_path, pathEndTime, getPosition!, getPosition, getIndex, plotPath
 
-export calculateRobotMovement
 
 export rereadContactPairMaterialFromJSON
 

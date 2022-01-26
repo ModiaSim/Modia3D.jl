@@ -2,6 +2,7 @@ module YouBotGripping
 
 using  ModiaLang
 import Modia3D
+using Modia
 using  Unitful
 
 # ModiaLang models
@@ -10,8 +11,6 @@ include("$(ModiaLang.path)/models/Electric.jl")
 include("$(ModiaLang.path)/models/Rotational.jl")
 include("$(ModiaLang.path)/models/Translational.jl")
 
-import Modia3D
-using  Modia3D.ModiaInterface
 
 # some constants
 simplifiedContact = true  # use boxes instead of meshes for finger contact
@@ -95,13 +94,13 @@ motorInertiaGripper = 0.1
 gearRatioGripper    = 1.0
 
 #### ----------- Path Planning ------------------
-referencePath1 = Modia3D.ReferencePath(
+referencePath1 = Modia3D.PathPlanning.ReferencePath(
     names =    ["angle1", "angle2", "angle3", "angle4", "angle5", "gripper"],
     position = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
     v_max =    [2.68512, 2.68512, 4.8879, 5.8997, 5.8997, 2.0],
     a_max =    [1.5, 1.5, 1.5, 1.5, 1.5, 0.5])
 
-Modia3D.ptpJointSpace(referencePath = referencePath1, positions =
+Modia3D.PathPlanning.ptpJointSpace(referencePath = referencePath1, positions =
     [0.0  0.0    0.0       0.0   0.0  0.0;
      pi   pi/4   pi/4      0.0   0.0  diameter+0.01;
      pi   pi/4   pi/4      1.04  0.0  diameter+0.01;

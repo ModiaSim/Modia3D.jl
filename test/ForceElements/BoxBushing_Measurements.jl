@@ -1,9 +1,6 @@
 module BoxBushingSimulation
 
-using ModiaLang
-
-import Modia3D
-using  Modia3D.ModiaInterface
+using Modia
 using Measurements
 
 const largeAngles = true

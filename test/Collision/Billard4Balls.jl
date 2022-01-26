@@ -1,12 +1,9 @@
 module Billard4Balls
 
-using ModiaLang
+using Modia
 
-import Modia3D
-using  Modia3D.ModiaInterface
-
-vmatBalls = Modia3D.Shapes.VisualMaterial(color="Red", transparency=0.0)
-vmatTable = Modia3D.Shapes.VisualMaterial(color="DarkGreen", transparency=0.5)
+vmatBalls = VisualMaterial(color="Red", transparency=0.0)
+vmatTable = VisualMaterial(color="DarkGreen", transparency=0.5)
 
 diameter = 0.06
 radius = diameter/2
