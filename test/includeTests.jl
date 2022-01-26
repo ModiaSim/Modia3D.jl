@@ -69,6 +69,7 @@ Test.@testset "Collision" begin
         include(joinpath("Collision", "Billard4Balls.jl"))
     end
     if testsExtend == completeTests
+        include(joinpath("Collision", "BouncingSphere2.jl")) # Use solver QBDF, Tsit5 with stopTime=2.5s; requiredFinalStates=[0.0, 0.0]   
         include(joinpath("Collision", "Billard16Balls.jl"))  # long computation time: CVODE_BDF: 1450 s. 
     end
 end
