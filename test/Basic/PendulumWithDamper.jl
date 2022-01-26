@@ -1,13 +1,15 @@
 module PendulumWithDamper
 
-using ModiaLang
+using Modia
+import ModiaLang
+
 
 # ModiaLang models
 include("$(ModiaLang.path)/models/Blocks.jl")
 include("$(ModiaLang.path)/models/Electric.jl")
 include("$(ModiaLang.path)/models/Rotational.jl")
 
-using Modia
+
 
 Pendulum = Model(
     m = 1.0,
