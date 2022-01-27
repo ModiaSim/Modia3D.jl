@@ -83,6 +83,7 @@ import JSON
 import Printf
 import ModiaLang
 import TimerOutputs
+import MonteCarloMeasurements
 
 include(joinpath("joints", "object3DMotion.jl"))
 include("object3D.jl")
