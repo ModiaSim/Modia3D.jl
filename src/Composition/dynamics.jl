@@ -4,12 +4,12 @@ function getJointsAndForceElementsAndObject3DsWithoutParents!(evaluatedParameter
                                                               forceElements::Vector{Modia3D.AbstractForceElement},
                                                               path::String)::Nothing where F <: Modia3D.VarFloatType
     for (key,value) in evaluatedParameters   # zip(keys(evaluatedParameters), evaluatedParameters)
-
+        #println("$path.$key = $value")
         if typeof(value) <: Object3D
             if value.parent === value
                 push!(object3DWithoutParents, value)
-            elseif typeof(value.feature) == Modia3D.Composition.Scene
-                error(value.path, ": Object3D has a parent and defines Scene!")
+            elseif typeof(value.feature) <: Modia3D.Composition.Scene
+                error("\n", value.path, " is an Object3D that has feature=Scene(..) and has a parent (= ", value.parent.path, ")!\n")
             end
 
         elseif typeof(value) <: Modia3D.AbstractJoint
@@ -19,7 +19,7 @@ function getJointsAndForceElementsAndObject3DsWithoutParents!(evaluatedParameter
             push!(forceElements, value)
 
         elseif typeof(value) <: OrderedDict
-            getJointsAndForceElementsAndObject3DsWithoutParents!(value, object3DWithoutParents, jointObjects, forceElements, path)
+            getJointsAndForceElementsAndObject3DsWithoutParents!(value, object3DWithoutParents, jointObjects, forceElements, path*"."*string(key))
         end
     end
     return nothing
