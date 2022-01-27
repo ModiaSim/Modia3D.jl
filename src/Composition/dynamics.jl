@@ -7,8 +7,12 @@ function getJointsAndForceElementsAndObject3DsWithoutParents!(evaluatedParameter
         #println("$path.$key = $value")
         if typeof(value) <: Object3D
             if value.parent === value
-                push!(object3DWithoutParents, value)
-            elseif typeof(value.feature) <: Modia3D.Composition.Scene
+                if typeof(value.feature) <: Scene
+                    push!(object3DWithoutParents, value)
+                else
+                    error("\n", value.path, " is an Object3D that has no parent, but no feature=Scene(..)!\n") 
+                end
+            elseif typeof(value.feature) <: Scene
                 error("\n", value.path, " is an Object3D that has feature=Scene(..) and has a parent (= ", value.parent.path, ")!\n")
             end
 
@@ -47,7 +51,7 @@ function checkMultibodySystemAndGetWorldAndJointsAndForceElements(instantiatedMo
     # Find root mbs of multibody system
     (mbsRoot, mbsPath) = ModiaLang.getIdParameter(instantiatedModel.evaluatedParameters, ParType, id)
     if isnothing(mbsRoot)
-        error(instantiatedModel.modelName, ": did not find _id = ", id, " in the evaluated parameters!")
+        error("\n", instantiatedModel.modelName, ": did not find _id = ", id, " in the evaluated parameters!")
     end
 
     object3DWithoutParents = Object3D{F}[]
@@ -57,14 +61,14 @@ function checkMultibodySystemAndGetWorldAndJointsAndForceElements(instantiatedMo
 
     if length(object3DWithoutParents) == 0
         error("\n", multiBodyName(instantiatedModel, mbsPath), ": There is either no Object3D or all of them have a parent!\n",
-              "(Note, there must be exactly one Object3D that has no parent.)")
+              "(Note, there must be exactly one Object3D that has no parent and feature=Scene(..).)")
     elseif length(object3DWithoutParents) > 1
         object3DNames = "   " * object3DWithoutParents[1].path
         for i = 2:length(object3DWithoutParents)
             object3DNames *= "\n   " * object3DWithoutParents[i].path
         end
-        error("\n", instantiatedModel.modelName, ": The following ", length(object3DWithoutParents), " Object3Ds have no parent\n",
-              "(note, there must be exactly one Object3D that has no parent):\n", object3DNames, "\n")
+        error("\n", instantiatedModel.modelName, ": The following ", length(object3DWithoutParents), " Object3Ds have no parents and feature=Scene(..)\n",
+              "(note, there must be exactly one Object3D that has no parent and feature=Scene(..)):\n", object3DNames, "\n")
     end
     return (object3DWithoutParents[1], jointObjects, forceElements)
 end
