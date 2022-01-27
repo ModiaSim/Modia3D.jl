@@ -1,4 +1,4 @@
-module BouncingEllipsoidSimulation
+module BouncingEllipsoidOnSphere
 
 using Modia
 
