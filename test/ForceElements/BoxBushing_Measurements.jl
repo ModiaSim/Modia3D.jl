@@ -1,4 +1,4 @@
-module BoxBushingSimulation
+module BoxBushing_Measurements
 
 using Modia
 using Measurements

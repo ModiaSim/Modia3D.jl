@@ -372,7 +372,7 @@ end
 
 
 
-function chooseAndBuildUpTree(world::Object3D, scene::Scene)
+function chooseAndBuildUpTree(world::Object3D{F}, scene::Scene{F}) where F <: Modia3D.VarFloatType
     # Build tree for optimized structure or standard structure
     # collision handling is only available for optimized structure
     if scene.options.useOptimizedStructure
@@ -402,11 +402,19 @@ function chooseAndBuildUpTree(world::Object3D, scene::Scene)
             error("Collision handling is only possible with the optimized structure. Please set useOptimizedStructure = true in Modia3D.Composition.Scene.")
         end
     end
-    if length(scene.allVisuElements) > 0
-        scene.visualize = scene.options.enableVisualization
-    else
+    # set visualize
+    if F <: MonteCarloMeasurements.StaticParticles ||
+    F <: MonteCarloMeasurements.Particles
+        @warn("For MonteCarloMeasurements visualization and animation export is not supported.")
         scene.visualize = false
         scene.exportAnimation = false
+    else
+        if length(scene.allVisuElements) > 0
+            scene.visualize = scene.options.enableVisualization
+        else
+            scene.visualize = false
+            scene.exportAnimation = false
+        end
     end
     makeTreeAvailable(scene)
     makeJointsAvailable(scene)

@@ -1,4 +1,4 @@
-module PendulumWithDamper
+module PendulumWithDamper_Measurements
 
 using ModiaLang
 

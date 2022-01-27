@@ -31,7 +31,7 @@ zeroCrossing = @instantiateModel(buildModia3D(ZeroCrossing), unitless=true)
 stopTime = 0.01
 tolerance = 1e-8
 requiredFinalStates = missing
-simulate!(zeroCrossing, stopTime=stopTime, tolerance=tolerance, log=true, logEvents=true, logStates=false, requiredFinalStates=requiredFinalStates)
+simulate!(zeroCrossing, stopTime=stopTime, tolerance=tolerance, log=true, logEvents=false, logStates=false, requiredFinalStates=requiredFinalStates)
 
 @usingModiaPlot
 plot(zeroCrossing, ["joint.r"; "joint.v"], figure=1)
