@@ -15,7 +15,7 @@ information. The following materia data is supported
 
 ## Visual material
 
-The mutable struct [`Modia3D.VisualMaterial`](@ref) defines
+The mutable struct [`Modia3D.Shapes.VisualMaterial`](@ref) defines
 various visual properties of a geometrical object, such as *color* or *transparency*.
 This data is used for visualization. Currently, there is no dictionary provided.
 

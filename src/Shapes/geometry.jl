@@ -221,10 +221,10 @@ The reference frame = Object3D frame is defined by the mesh data.
 - `convexPartition` defines if partitioning into convex sub meshes is active.
 
 # Notes
-- [Solid](@ref) features are supported only for [.obj files](https://en.wikipedia.org/wiki/Wavefront_.obj_file).
-- [Visual](@ref) features are supported for (3ds, dxf, obj, stl) - formats.
+- [Solid](@ref) features are supported for [MeshIO.jl](https://github.com/JuliaIO/MeshIO.jl) file formats including [obj](https://en.wikipedia.org/wiki/Wavefront_.obj_file) and [stl](https://en.wikipedia.org/wiki/STL_(file_format)).
+- [Visual](@ref) features are supported for SimVis file formats 3ds, dxf, obj and stl.
 - FileMesh is [not directly supported by animation export](https://github.com/ModiaSim/PrivateModia3D.jl/issues/77).
-  You have to convert your .obj - FileMesh into a .json format first and store it in the same folder as your obj file.
+  You have to convert your mesh file into the [three.js json object scene format](https://github.com/mrdoob/three.js/wiki/JSON-Object-Scene-format-4) first and store it in the same folder as your mesh file.
 """
 mutable struct FileMesh <: Modia3D.AbstractGeometry
     filename::AbstractString

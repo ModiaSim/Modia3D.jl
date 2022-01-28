@@ -9,7 +9,7 @@ NoGravityField
 
 ## UniformGravityField
 ```@docs
-UniformGravityField
+Modia3D.Composition.UniformGravityField
 ```
 
 ## PointGravityField
