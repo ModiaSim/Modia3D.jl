@@ -189,11 +189,11 @@ mutable struct Object3D{F <: Modia3D.VarFloatType} <: Modia3D.AbstractObject3D
         end
 
 
-        if typeof(feature) == Modia3D.Shapes.Visual && typeof(feature.shape) == Modia3D.Shapes.FileMesh && feature.shape.convexPartition
+        if typeof(feature) <: Modia3D.Shapes.Visual && typeof(feature.shape) <: Modia3D.Shapes.FileMesh && feature.shape.convexPartition
             createConvexPartition(obj, feature, feature.shape)
         end
 
-        if typeof(feature) <: Modia3D.Shapes.Solid && typeof(feature.shape) == Modia3D.Shapes.FileMesh && feature.shape.convexPartition
+        if typeof(feature) <: Modia3D.Shapes.Solid && typeof(feature.shape) <: Modia3D.Shapes.FileMesh && feature.shape.convexPartition
             createConvexPartition(obj, feature, feature.shape)
         end
 
@@ -314,7 +314,7 @@ end
 Object3D(args... ; kwargs...) = Object3D{Float64}(args... ; kwargs...)
 
 function setShapeKind(::Type{F}, feature) where F <: Modia3D.VarFloatType
-    if typeof(feature) <: Modia3D.Shapes.Solid || typeof(feature) == Modia3D.Shapes.Visual
+    if typeof(feature) <: Modia3D.Shapes.Solid || typeof(feature) <: Modia3D.Shapes.Visual
         shapeKind = Modia3D.getShapeKind(feature.shape)
         shape = feature.shape
 
