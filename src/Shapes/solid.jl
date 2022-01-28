@@ -94,7 +94,7 @@ struct Solid{F <: Modia3D.VarFloatType} <: Modia3D.AbstractObject3DFeature
         end
 
         if typeof(shape) == FileMesh
-            (shape.centroid, shape.longestEdge, shape.objPoints, shape.facesIndizes) = getObjInfos(shape.filename, shape.scaleFactor)
+            (shape.centroid, shape.longestEdge, shape.objPoints, shape.facesIndizes) = getMeshInfos(shape.filename, shape.scaleFactor)
             (shape.volume, shape.centroidAlgo, shape.inertia) = computeMassProperties(shape.objPoints, shape.facesIndizes; bodyCoords=false)
         end
 
@@ -107,7 +107,7 @@ Solid(args...; kwargs...) = Solid{Float64}(args...; kwargs...)
 
 function JSON.show_json(io::JSON.StructuralContext, s::JSON.CommonSerialization, solid::Solid)
    JSON.begin_object(io)
-      JSON.show_pair(io, s, "shape"            , solid.shape)
+      JSON.show_pair(io, s, "shape"          , solid.shape)
       JSON.show_pair(io, s, "massProperties" , solid.massProperties)
       JSON.show_pair(io, s, "material"       , solid.visualMaterial)
       JSON.show_pair(io, s, "contactMaterial", solid.contactMaterial)

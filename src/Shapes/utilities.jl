@@ -36,83 +36,64 @@ end
 
 
 # Utility functions for FileMesh.jl
-# getObjInfos(): read file and returns: centroid, longestEdge and all objPoints
-# Remark: at the moment it only works for .obj files
+# getMeshInfos(): read file and return centroid, longestEdge and mesh data
 #
 # VHACD(): decomposes a concave file mesh in convex sub parts
 #          see: https://github.com/kmammou/v-hacd
 
-function getObjInfos(filename::AbstractString, scaleFactor::SVector{3,Float64})
+function getMeshInfos(filename::AbstractString, scaleFactor::SVector{3,Float64})
     objPoints = Vector{SVector{3,Float64}}()
     facesIndizes = Vector{SVector{3,Int64}}()
     vertices = Vector{SVector{3,Float64}}()
     faces = Vector{SVector{3,Int64}}()
-    areTriangles::Bool = true
     centroid::SVector{3,Float64} = Modia3D.ZeroVector3D(Float64)
     longestEdge::Float64 = 0.0
-    if filename[end-3:end] == ".obj"
-        open(filename,"r") do file
-            i = 0
 
-            for line in eachline(file; keep=true)
-                if isequal(line[1],'v') && isequal(line[2],' ')
-                    i += 1
-                    tmp = rsplit(rstrip(line),' ')
-                    objPoint = [parse(Float64,tmp[end-2])*scaleFactor[1], parse(Float64,tmp[end-1])*scaleFactor[2], parse(Float64,tmp[end])*scaleFactor[3]]
-                    push!(objPoints, objPoint)
-                end
-                if isequal(line[1],'f') && isequal(line[2],' ')
-                    if areTriangles
-                        tmp = rsplit(rstrip(line),' ')
-                        if length(tmp) == 4
-                            faceIndizes = [parse(Int64,rsplit(tmp[2],"/")[1]),
-                                           parse(Int64,rsplit(tmp[3],"/")[1]),
-                                           parse(Int64,rsplit(tmp[4],"/")[1])]
-                            push!(facesIndizes, faceIndizes)
-                        else
-                            areTriangles = false
-            end; end; end; end
-
-            (vertices, faces) = cleanMesh(objPoints, facesIndizes)
-
-            if length(vertices) != 0
-                x_max::Float64 = 0.0
-                x_min::Float64 = 0.0
-                y_max::Float64 = 0.0
-                y_min::Float64 = 0.0
-                z_max::Float64 = 0.0
-                z_min::Float64 = 0.0
-                sum = Modia3D.ZeroVector3D(Float64)
-                for i in 1:length(vertices)
-                    if i == 1
-                        x_max = vertices[i][1]
-                        x_min = vertices[i][1]
-                        y_max = vertices[i][2]
-                        y_min = vertices[i][2]
-                        z_max = vertices[i][3]
-                        z_min = vertices[i][3]
-                    else
-                        (x_min, x_max) = check_MinMax(x_min, x_max, vertices[i][1])
-                        (y_min, y_max) = check_MinMax(y_min, y_max, vertices[i][2])
-                        (z_min, z_max) = check_MinMax(z_min, z_max, vertices[i][3])
-                    end
-                    sum += vertices[i]
-                end
-                centroid = sum / length(vertices)
-                longestEdge = max((x_max-x_min), (y_max-y_min), (z_max-z_min))
-            end
-            if !areTriangles
-                empty!(faces)
-            end
-        end
-        return (centroid, longestEdge, vertices, faces)
-    else
-        error("Only .obj files are supported for solid FileMesh.")
+    mesh = FileIO.load(filename, pointtype=MeshIO.Point3{Float64}, facetype=MeshIO.TriangleFace{MeshIO.OneIndex{Int64}})
+    for i in 1:length(MeshIO.coordinates(mesh))
+        objPoint = SVector{3,Float64}(MeshIO.coordinates(mesh)[i][1]*scaleFactor[1],
+                                      MeshIO.coordinates(mesh)[i][2]*scaleFactor[2],
+                                      MeshIO.coordinates(mesh)[i][3]*scaleFactor[3])
+        push!(objPoints, objPoint)
     end
+    for i in 1:length(MeshIO.faces(mesh))
+        push!(facesIndizes, MeshIO.faces(mesh)[i])
+    end
+
+    (vertices, faces) = cleanMesh(objPoints, facesIndizes)
+
+    if length(vertices) != 0
+        x_max::Float64 = 0.0
+        x_min::Float64 = 0.0
+        y_max::Float64 = 0.0
+        y_min::Float64 = 0.0
+        z_max::Float64 = 0.0
+        z_min::Float64 = 0.0
+        sum = Modia3D.ZeroVector3D(Float64)
+        for i in 1:length(vertices)
+            if i == 1
+                x_max = vertices[i][1]
+                x_min = vertices[i][1]
+                y_max = vertices[i][2]
+                y_min = vertices[i][2]
+                z_max = vertices[i][3]
+                z_min = vertices[i][3]
+            else
+                (x_min, x_max) = check_MinMax(x_min, x_max, vertices[i][1])
+                (y_min, y_max) = check_MinMax(y_min, y_max, vertices[i][2])
+                (z_min, z_max) = check_MinMax(z_min, z_max, vertices[i][3])
+            end
+            sum += vertices[i]
+        end
+        centroid = sum / length(vertices)
+        longestEdge = max((x_max-x_min), (y_max-y_min), (z_max-z_min))
+    end
+
+    return (centroid, longestEdge, vertices, faces)
 end
 
-getObjInfos(filename::AbstractString, scaleFactor::AbstractVector) =
-                            getObjInfos(filename, MVector{3,Float64}(scaleFactor))
+getMeshInfos(filename::AbstractString, scaleFactor::AbstractVector) =
+getMeshInfos(filename, SVector{3,Float64}(scaleFactor))
 
 
 # utility function for getObjInfos
