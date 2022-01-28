@@ -11,44 +11,52 @@ const Date = "2021-11-29"
 
 
 # Abstract types
-abstract type AbstractObject3DFeature end                                 # Data associated with one Object3D
-abstract type AbstractVisualElement  <: AbstractObject3DFeature     end   # Visual element associated with one Object3D
-abstract type AbstractShape       <: AbstractVisualElement end   # Geometry type
-abstract type AbstractGeometry    <: AbstractShape end   # Immutable shape type that  has a volume and optionally mass. Can be used in collisions.
+abstract type AbstractObject3DFeature                            end  # Data associated with one Object3D
+abstract type AbstractVisualElement   <: AbstractObject3DFeature end  # Visual element associated with one Object3D
+abstract type AbstractShape           <: AbstractVisualElement   end  # Geometry type
+abstract type AbstractGeometry        <: AbstractShape           end  # Immutable shape type that  has a volume and optionally mass. Can be used in collisions.
 
-abstract type AbstractContactMaterial   end   # Contact properties of a solid (e.g. spring constant)
-abstract type AbstractContactDetection  end   # Contact detection type
-abstract type AbstractGravityField      end   # Gravity field type
-abstract type AbstractRenderer          end   # Renderer type
-abstract type AbstractDLR_VisualizationRenderer <: AbstractRenderer end   # Community or Professional edition of DLR_Visualization renderer
-
-abstract type AbstractMassPropertiesInterface end
-abstract type AbstractMassProperties    end
-
-abstract type AbstractContactPairMaterial end # Constants needed to compute the contact response between two objects
-
-abstract type AbstractObject3D end
-abstract type AbstractTwoObject3DObject <: AbstractObject3D end  # Object related to two Object3Ds
+abstract type AbstractObject3D                                       end
+abstract type AbstractTwoObject3DObject <: AbstractObject3D          end  # Object related to two Object3Ds
 abstract type AbstractJoint             <: AbstractTwoObject3DObject end  # Constraint between two Object3Ds
-abstract type AbstractForceElement      <: AbstractObject3D end
+abstract type AbstractForceElement      <: AbstractObject3D          end
 
-abstract type AbstractScene end
+abstract type AbstractScene                   end
+abstract type AbstractMassProperties          end
+abstract type AbstractMassPropertiesInterface end
+abstract type AbstractGravityField            end  # Gravity field type
+abstract type AbstractContactMaterial         end  # Contact properties of a solid (e.g. spring constant)
+abstract type AbstractContactPairMaterial     end  # Constants needed to compute the contact response between two objects
+abstract type AbstractContactDetection        end  # Contact detection type
+
+abstract type AbstractRenderer                                      end  # Renderer type
+abstract type AbstractDLR_VisualizationRenderer <: AbstractRenderer end  # Community or Professional edition of DLR_Visualization renderer
+
 
 using StaticArrays
-
+using DoubleFloats
+using Reexport
 using MonteCarloMeasurements
+import Unitful
+
+
+# VarFloatType defines the supported float types for system parameters and variables
 const VarFloatType = Union{AbstractFloat, AbstractParticles}
 
+# MPRFloatType defines the float type of MPR calculations
+const MPRFloatType = Double64
+
+# Used renderer (actual value is defined with __init__() below)
+const renderer = Vector{AbstractRenderer}(undef,2)
 
 
 @inline cross(x::SVector{3,F}, y::SVector{3,F}) where F <: VarFloatType = @inbounds SVector{3,F}(x[2]*y[3]-x[3]*y[2],
-                                                                                           x[3]*y[1]-x[1]*y[3],
-                                                                                           x[1]*y[2]-x[2]*y[1])
-
+                                                                                                 x[3]*y[1]-x[1]*y[3],
+                                                                                                 x[1]*y[2]-x[2]*y[1])
 
 
 # Enumerations
-@enum Ternary      True False Inherited
+@enum Ternary  True False Inherited
 
 """
     @enum AnalysisType KinematicAnalysis QuasiStaticAnalysis DynamicAnalysis
@@ -62,17 +70,9 @@ and then this variable would not show up in the result, if `AnalysisType = Kinem
 
 Currently, only DynamicAnalysis is supported and used.
 """
-@enum AnalysisType KinematicAnalysis QuasiStaticAnalysis DynamicAnalysis
-@enum VariableAnalysisType AllAnalysis QuasiStaticAndDynamicAnalysis OnlyDynamicAnalysis NotUsedInAnalysis
+@enum AnalysisType  KinematicAnalysis QuasiStaticAnalysis DynamicAnalysis
+@enum VariableAnalysisType  AllAnalysis QuasiStaticAndDynamicAnalysis OnlyDynamicAnalysis NotUsedInAnalysis
 
-
-# Used renderer (actual value is defined with __init__() below)
-const renderer = Vector{AbstractRenderer}(undef,2)
-
-
-
-
-import Unitful
 
 numberType(value) = ModiaLang.baseType(eltype(value))
 
@@ -101,26 +101,18 @@ convertAndStripUnit(TargetType, requiredUnit, value) =
     numberType(value) <: Unitful.AbstractQuantity && unit.(value) != Unitful.NoUnits ?
             convert(TargetType, ustrip.( uconvert.(requiredUnit, value))) : convert(TargetType, value)
 
-# MPRFloatType is used to change betweeen Double64 and Float64 for mpr calculations
-using DoubleFloats
-const MPRFloatType = Double64
-
-
-
 
 # Include sub-modules
-include(joinpath("Frames"           , "_module.jl"))
-include(joinpath("Basics"           , "_module.jl"))
-include(joinpath("Shapes"         , "_module.jl"))
-include(joinpath("Composition"      , "_module.jl"))
-include(joinpath("AnimationExport"  , "_module.jl"))
-include(joinpath("PathPlanning"     , "_module.jl"))
-include(joinpath("renderer"         , "DLR_Visualization"  , "_module.jl"))
-include(joinpath("renderer"         , "NoRenderer"         , "_module.jl"))
-include(joinpath("contactDetection" , "ContactDetectionMPR", "_module.jl"))
-include(joinpath("Interface"        , "_module.jl"))
-include(joinpath("ModiaInterface"   , "_module.jl"))
-
+include(joinpath("Frames"          , "_module.jl"))
+include(joinpath("Basics"          , "_module.jl"))
+include(joinpath("Shapes"          , "_module.jl"))
+include(joinpath("Composition"     , "_module.jl"))
+include(joinpath("AnimationExport" , "_module.jl"))
+include(joinpath("PathPlanning"    , "_module.jl"))
+include(joinpath("renderer"        , "DLR_Visualization"  , "_module.jl"))
+include(joinpath("renderer"        , "NoRenderer"         , "_module.jl"))
+include(joinpath("contactDetection", "ContactDetectionMPR", "_module.jl"))
+include(joinpath("ModiaInterface"  , "_module.jl"))
 
 # Make symbols available that have been exported in sub-modules
 using  .Frames
@@ -130,13 +122,8 @@ using  .AnimationExport
 using  .Composition
 import .DLR_Visualization
 import .NoRenderer
-using .PathPlanning
-using .Interface
-
-using Reexport
+using  .PathPlanning
 @reexport using .ModiaInterface
-#const connect = Composition.connect  # connect cannot be directly exported, due to a conflict with Base.connect
-const run     = Interface.run        # run cannot be directly exported, due to a conflict with Base.run
 
 
 # Called implicitely at the first import/using of Modia3D (when loading Modia3D to the current Julia session)
@@ -164,12 +151,12 @@ function reenableRenderer()
     return nothing
 end
 
+
 export PointGravityField, NoGravityField
 
 export SimulationModel
 export print_ModelVariables
 export PTP_path, pathEndTime, getPosition!, getPosition, getIndex, plotPath
-
 
 export rereadContactPairMaterialFromJSON
 
