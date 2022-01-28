@@ -11,7 +11,7 @@ const title = "Short Modia3D (with SilentNoPlot)"
 @time Test.@testset verbose=true "$title" begin
     usePlotPackage("SilentNoPlot")
     Modia3D.disableRenderer()
-    @time include("includeTests.jl")
+    include("includeTests.jl")
     Modia3D.reenableRenderer()
     usePreviousPlotPackage()
 end
