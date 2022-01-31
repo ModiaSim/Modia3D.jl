@@ -75,14 +75,8 @@ Servo = Model(
         ]
 )
 
-arm_joint_1_obj = joinpath(Modia3D.path, "objects/robot_KUKA_YouBot/arm_joint_1.obj")
-
-m = 2
 axis = 3
 vmat1 = VisualMaterial(color="LightBlue", transparency=0.5)
-m1 = 1.390
-translation1 = [0.033, 0, 0]
-rotation1 = [180u"°", 0, 0]
 
 arm_joint_2_obj = joinpath(Modia3D.path, "objects/robot_KUKA_YouBot/arm_joint_2.obj")
 m2 = 1.318

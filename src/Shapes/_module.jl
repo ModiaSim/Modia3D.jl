@@ -27,12 +27,11 @@ Andrea Neumayr and Martin Otter, [DLR - Institute of System Dynamics and Control
 module Shapes
 
 using  StaticArrays
+import FileIO, MeshIO
+import JSON
 import Modia3D
 import Modia3D.Basics
 import Modia3D.Frames
-
-import JSON
-
 
 # Colors and material
 export rgb, defaultColor, colorPalette, visualMaterialPalette
@@ -41,30 +40,23 @@ export rgb, defaultColor, colorPalette, visualMaterialPalette
 export changeDimensionsBox
 export Screen, XY_Plane, XZ_Plane, YZ_Plane, Left, Right, Center
 
-
 # Concave properties
 export ConcaveProperties
 
 # Solid geometries
 export volume, centroid, bottomArea, topArea, longestEdge, lengthGeo, inertiaMatrix
-
 export supportPoint_Sphere, supportPoint_Ellipsoid, supportPoint_Box, supportPoint_Cylinder, supportPoint_Cone, supportPoint_Capsule, supportPoint_Beam, supportPoint_FileMesh
-
 export supportPoint_i_Box, supportPoint_i_Cylinder, supportPoint_i_Cone, supportPoint_i_Capsule,supportPoint_i_Beam, supportPoint_i_Ellipsoid, supportPoint_i_FileMesh
 
 # Solid materials
 export SolidMaterial
-
 export solidMaterial, solidMaterialPalette
-export regularize, resultantCoefficientOfRestitution, resultantDampingCoefficient
 
+# Collision
 export rereadContactPairMaterialFromJSON
-
-# Observer materials
-
 export contactPairMaterialPalette, ElasticContactPairMaterial, TwoNamesKey
-
 export NoContactPairMaterial, ObserverContactPairMaterial, ImpulseContactPairMaterial, WheelRailContactPairMaterial
+export regularize, resultantCoefficientOfRestitution, resultantDampingCoefficient
 
 export rotateAxis2x, rotateAxis2y, rotateAxis2z
 export getShapeKind
