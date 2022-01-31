@@ -45,19 +45,14 @@ end
 function getObjInfos(filename::AbstractString, scaleFactor::SVector{3,Float64})
     objPoints = Vector{SVector{3,Float64}}()
     facesIndizes = Vector{SVector{3,Int64}}()
+    vertices = Vector{SVector{3,Float64}}()
+    faces = Vector{SVector{3,Int64}}()
     areTriangles::Bool = true
     centroid::SVector{3,Float64} = Modia3D.ZeroVector3D(Float64)
     longestEdge::Float64 = 0.0
     if filename[end-3:end] == ".obj"
         open(filename,"r") do file
             i = 0
-            x_max::Float64 = 0.0
-            x_min::Float64 = 0.0
-            y_max::Float64 = 0.0
-            y_min::Float64 = 0.0
-            z_max::Float64 = 0.0
-            z_min::Float64 = 0.0
-            sum = Modia3D.ZeroVector3D(Float64)
 
             for line in eachline(file; keep=true)
                 if isequal(line[1],'v') && isequal(line[2],' ')
@@ -65,19 +60,6 @@ function getObjInfos(filename::AbstractString, scaleFactor::SVector{3,Float64})
                     tmp = rsplit(rstrip(line),' ')
                     objPoint = [parse(Float64,tmp[end-2])*scaleFactor[1], parse(Float64,tmp[end-1])*scaleFactor[2], parse(Float64,tmp[end])*scaleFactor[3]]
                     push!(objPoints, objPoint)
-                    if i == 1
-                        x_max = objPoints[i][1]
-                        x_min = objPoints[i][1]
-                        y_max = objPoints[i][2]
-                        y_min = objPoints[i][2]
-                        z_max = objPoints[i][3]
-                        z_min = objPoints[i][3]
-                    else
-                        (x_min, x_max) = check_MinMax(x_min, x_max, objPoints[i][1])
-                        (y_min, y_max) = check_MinMax(y_min, y_max, objPoints[i][2])
-                        (z_min, z_max) = check_MinMax(z_min, z_max, objPoints[i][3])
-                    end
-                    sum += objPoints[i]
                 end
                 if isequal(line[1],'f') && isequal(line[2],' ')
                     if areTriangles
@@ -91,17 +73,39 @@ function getObjInfos(filename::AbstractString, scaleFactor::SVector{3,Float64})
                             areTriangles = false
             end; end; end; end
 
-            if length(objPoints) != 0
-                centroid = sum / length(objPoints)
-            else
-                centroid = Modia3D.ZeroVector3D(Float64)
+            (vertices, faces) = cleanMesh(objPoints, facesIndizes)
+
+            if length(vertices) != 0
+                x_max::Float64 = 0.0
+                x_min::Float64 = 0.0
+                y_max::Float64 = 0.0
+                y_min::Float64 = 0.0
+                z_max::Float64 = 0.0
+                z_min::Float64 = 0.0
+                sum = Modia3D.ZeroVector3D(Float64)
+                for i in 1:length(vertices)
+                    if i == 1
+                        x_max = vertices[i][1]
+                        x_min = vertices[i][1]
+                        y_max = vertices[i][2]
+                        y_min = vertices[i][2]
+                        z_max = vertices[i][3]
+                        z_min = vertices[i][3]
+                    else
+                        (x_min, x_max) = check_MinMax(x_min, x_max, vertices[i][1])
+                        (y_min, y_max) = check_MinMax(y_min, y_max, vertices[i][2])
+                        (z_min, z_max) = check_MinMax(z_min, z_max, vertices[i][3])
+                    end
+                    sum += vertices[i]
+                end
+                centroid = sum / length(vertices)
+                longestEdge = max((x_max-x_min), (y_max-y_min), (z_max-z_min))
             end
             if !areTriangles
-                empty!(facesIndizes)
+                empty!(faces)
             end
-            longestEdge = max((x_max-x_min), (y_max-y_min), (z_max-z_min))
         end
-        return (centroid, longestEdge, objPoints, facesIndizes)
+        return (centroid, longestEdge, vertices, faces)
     else
         error("Only .obj files are supported for solid FileMesh.")
     end
@@ -120,6 +124,56 @@ function check_MinMax(act_min::Float64, act_max::Float64, value)
         act_max = value
     end
     return (act_min, act_max)
+end
+
+# mesh cleaning: remove duplicate vertices
+function cleanMesh(objPoints::Vector{SVector{3,Float64}}, facesIndizes::Vector{SVector{3,Int64}})
+    vertices = Vector{SVector{3,Float64}}()
+    faces = Vector{SVector{3,Int64}}()
+    indexMap = Vector{Int64}()
+
+    # generate cleaned vertex array
+    ixNew = 0
+    for ixOld in 1:length(objPoints)
+        ixFound = 0
+        for ixSearch in 1:ixNew
+            if vertices[ixSearch] == objPoints[ixOld]
+                ixFound = ixSearch
+                continue
+            end
+        end
+        if ixFound == 0
+            # no dupe -> add to vertex array and index map
+            push!(vertices, objPoints[ixOld])
+            ixNew += 1
+            push!(indexMap, ixNew)
+        else
+            # dupe -> add to index map
+            push!(indexMap, ixFound)
+        end
+    end
+
+    # generate updated face array
+    for ixFace in 1:length(facesIndizes)
+        if maximum(facesIndizes[ixFace]) <= length(indexMap)
+            face = [indexMap[facesIndizes[ixFace][1]], indexMap[facesIndizes[ixFace][2]], indexMap[facesIndizes[ixFace][3]]]
+            push!(faces, face)
+        else
+            @error("Mesh cleaning out of bounds error in face $ixFace.")
+        end
+    end
+
+    #= check for equivalence
+    for ixFace in 1:length(facesIndizes)
+        for iVertex in 1:3
+            if objPoints[facesIndizes[ixFace][iVertex]] != vertices[faces[ixFace][iVertex]]
+                @error("Mesh cleaning equivalence error in face $ixFace.")
+            end
+        end
+    end
+    println("Mesh cleaning: Reduce number of vertices $(length(objPoints)) -> $(length(vertices)).")
+    =#
+    return (vertices, faces)
 end
 
 
