@@ -430,7 +430,7 @@ youbot = @instantiateModel(youbotModel, unitless=true, logCode=false, log=false)
 stopTime = 5.0
 tolerance = 1e-6
 requiredFinalStates = [0.3869694762620852, -0.00016284579332436286, -0.3452201020492175, 0.1552469173651626, -3.113043191349105e-5, 2.1793956411694877e-7, 1.571152977734313, -0.0004995517150414122, -21.336335310527456, 0.002963502825491147, 0.000797194497061148, -6.23696067210322, -9.385745467902036e-8, 9.392005430790712e-8, -1.8339821528496337e-6, 1.8341922980593297e-6, -3.55466030115365e-6, 3.5551412047504128e-6, -2.181898762733607e-6, 2.1822614836920513e-6, 8.488750960773745e-9, -8.49016282190287e-9, -0.0007169581734036176, 0.22761805146348174, -0.01821028251779642, -0.008529123163974769, 2.9527353183447305e-5]
-simulate!(youbot, stopTime=stopTime, tolerance=tolerance, log=true, logStates=false, requiredFinalStates=requiredFinalStates)
+simulate!(youbot, stopTime=stopTime, tolerance=tolerance, requiredFinalStates_atol=0.001, log=true, logStates=false, requiredFinalStates=requiredFinalStates)
 
 @usingModiaPlot
 plot(youbot, ["free.rot"], figure=1)

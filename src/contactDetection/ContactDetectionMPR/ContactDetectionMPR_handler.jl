@@ -95,6 +95,7 @@ mutable struct ContactDetectionMPR_handler{T,F} <: Modia3D.AbstractContactDetect
 
     tol_rel::T
     niter_max::Int
+    contact_eps::F   # epsilon used for hysteresis of crossing functions for collision handling
 
     contactPairs::Composition.ContactPairs
 
@@ -107,7 +108,8 @@ mutable struct ContactDetectionMPR_handler{T,F} <: Modia3D.AbstractContactDetect
                                             niter_max = 100) where {T,F}
         @assert(tol_rel > 0.0)
         @assert(niter_max > 0)
-        new(false, Dict{PairID,ContactPair{F}}(), Dict{PairID,ContactPair{F}}(), F(42.0), tol_rel, niter_max)
+        contact_eps = F(max(1e-13, 10*tol_rel))
+        new(false, Dict{PairID,ContactPair{F}}(), Dict{PairID,ContactPair{F}}(), F(42.0), tol_rel, niter_max, contact_eps)
     end
 end
 ContactDetectionMPR_handler(; kwargs...) = ContactDetectionMPR_handler{Modia3D.MPRFloatType, Float64}(; kwargs...)

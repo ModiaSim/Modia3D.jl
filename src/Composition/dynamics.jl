@@ -176,7 +176,11 @@ function setModiaJointVariables!(id::Int, _leq_mode, instantiatedModel::ModiaLan
             if scene.visualize
                 TimerOutputs.@timeit instantiatedModel.timer "Modia3D_0 initializeVisualization" Modia3D.Composition.initializeVisualization(Modia3D.renderer[1], scene.allVisuElements)
                 if instantiatedModel.options.log
-                    println("        Modia3D: Number of visual shapes = ", length(scene.allVisuElements))
+                    println(    "        Modia3D: nVisualShapes = ", length(scene.allVisuElements))
+                    if scene.options.enableContactDetection
+                        println("                 mprTolerance  = ", scene.options.contactDetection.tol_rel)
+                        println("                 contact_eps   = ", scene.options.contactDetection.contact_eps)
+                    end
                 end
             end
         end
