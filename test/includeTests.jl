@@ -39,7 +39,7 @@ Test.@testset "Robot" begin
     include(joinpath("Robot", "ServoWithPathAndRevolute.jl"))
     if testsExtend >= normalTests
         include(joinpath("Robot", "YouBotWithSphere.jl"))
-        include(joinpath("Robot", "YouBotGripping.jl")     
+        include(joinpath("Robot", "YouBotGripping.jl"))     
         
         #if Sys.iswindows()
         #    )
@@ -60,19 +60,14 @@ Test.@testset "Collision" begin
     include(joinpath("Collision", "BouncingEllipsoidOnSphere.jl"))
     include(joinpath("Collision", "TwoCollidingBalls.jl"))
     include(joinpath("Collision", "TwoCollidingBoxes.jl"))
-    Test.@test_broken include(joinpath("Collision", "CollidingCylinders.jl"))  # bad results
+    include(joinpath("Collision", "CollidingCylinders.jl"))
     include(joinpath("Collision", "NewtonsCradle.jl"))
     Test.@test_throws LoadError include(joinpath("Collision", "InValidCollisionPairingError.jl"))  # test for undefined collision pair material
     if testsExtend >= normalTests
         include(joinpath("Collision", "BouncingSphere2.jl"))  # use solver QBDF, Tsit5 with stopTime=2.5s; requiredFinalStates=[0.0, 0.0]
         include(joinpath("Collision", "ZeroCrossingIssue.jl"))
-        if Sys.iswindows()
-            include(joinpath("Collision", "BouncingCones.jl"))
-            include(joinpath("Collision", "BouncingCapsules.jl"))
-        else
-            Test.@test_broken include(joinpath("Collision", "BouncingCones.jl"))  # bad results on linux
-            Test.@test_broken include(joinpath("Collision", "BouncingCapsules.jl"))  # bad results on linux
-        end
+        include(joinpath("Collision", "BouncingCones.jl"))
+        include(joinpath("Collision", "BouncingCapsules.jl"))
         include(joinpath("Collision", "BouncingBeams.jl"))
         include(joinpath("Collision", "CollidingSphereWithBunnies.jl"))
         include(joinpath("Collision", "Billard4Balls.jl"))
