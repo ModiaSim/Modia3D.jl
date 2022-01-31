@@ -49,7 +49,7 @@ Test.@testset "Robot" begin
     end
     if testsExtend == completeTests
         include(joinpath("Robot", "YouBotPingPong.jl"))  # long computation time
-        Test.@test_skip include(joinpath("Robot", "YouBotsGripping.jl"))  # long computation time
+        include(joinpath("Robot", "YouBotsGripping.jl"))  # long computation time
     end
 end
 
