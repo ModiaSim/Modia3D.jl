@@ -706,6 +706,18 @@ git-tree-sha1 = "0aca0097c38d75d8114844a6c2c048273bbdcfae"
 uuid = "961ee093-0014-501f-94e3-6117800e7a78"
 version = "8.3.2"
 
+[[Modia]]
+deps = ["DifferentialEquations", "Modia3D", "ModiaLang", "OrderedCollections", "Reexport", "Test", "Unitful"]
+git-tree-sha1 = "20bdc6337d380a6786146e0f05312ba8996321d2"
+uuid = "cb905087-75eb-5f27-8515-1ce0ec8e839e"
+version = "0.5.1"
+
+[[Modia3D]]
+deps = ["Colors", "DataFrames", "DoubleFloats", "FileIO", "JSON", "Libdl", "LinearAlgebra", "Measurements", "MeshIO", "Modia", "ModiaLang", "MonteCarloMeasurements", "OrderedCollections", "Printf", "Reexport", "StaticArrays", "Test", "TimerOutputs", "UUIDs", "Unitful"]
+path = "/home/hipp_ge/modia/dev/Modia3D"
+uuid = "07f2c1e0-90b0-56cf-bda7-b44b56e34eed"
+version = "0.5.2"
+
 [[ModiaBase]]
 deps = ["DataFrames", "DiffRules", "LinearAlgebra", "Measurements", "MonteCarloMeasurements", "OrderedCollections", "RecursiveFactorization", "TimerOutputs", "Unitful"]
 git-tree-sha1 = "f32b6d8af60426591cd83b80a94edc5358418e38"
