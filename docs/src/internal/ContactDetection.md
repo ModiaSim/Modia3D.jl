@@ -23,7 +23,25 @@ otherwise a zero crossing cannot be detected.
 
 The distance between two objects computed either in the narrow phase or in an approximate
 way in the broad phase (= distance between Axis Aligned Bounding Boxes) is called `distanceOrg`.
-If `distanceOrg < 0`, then the two objects are penetrating each other.
+If `distanceOrg < 0`, then the two objects are penetrating each other. The crossing functions are
+formulated with the help of a hysteresis defined as:
+
+```julia
+contact_eps = max(1e-13, 10*mprTolerance)
+```
+
+So it is in the order of ``10^{-13} m``, but at least a factor of 10 larger as the tolerance
+used for the distance computation with the MPR algorithm.
+
+If the two shapes are treated in contact, the distance actually used for the elastic
+response calculation is
+
+```
+distance = distanceOrg + contact_eps
+```
+
+This means that penetration is assumed to occur at `distanceOrg < -contact_eps`, in order
+that there is by sure penetration, although `distanceOrg` is computed with some error.
 
 Modia3D uses the dictionary `contactDict` to keep track of the
 contact situation. Every pair of objects is identified by a unique
@@ -31,51 +49,46 @@ Integer value called *PairID* that is used as key in `conctactDict`.
 A dictionary value is an instance of [`Modia3D.ContactPair`](@ref)
 
 At an **event instant** (including initialization), dictionary `contactDict` is emptied
-and all object pairs are stored newly in `contactDict` that have `distanceOrg <= 0`, so are
-either touching or penetrating.
+and all object pairs are stored newly in `contactDict` that have `distanceOrg < -2*contact_eps`, so are
+penetrating already a bit. Note, this is useful, for example in case of a gripper, where it is natural that two shapes
+have a distance of zero and no contact situation is present.
 
 During **continuous integration**, two zero crossing functions are used:
 
-* ``z_1(t)``: The maximum of `distanceOrg` ``- 10^{-16}`` of all object pairs that are in `contactDict`.
+* ``z_1(t)``: The maximum of `distanceOrg+contact_eps` of all object pairs that are in `contactDict`.
   ``z_1`` monitors if an object pair that has been in contact, looses contact.
-  Since `distanceOrg` values in `contactDict` are in the order of ``10^{-3} .. 10^{-6} ~m``
+  Since penetration depth is in the order of ``10^{-3} .. 10^{-6} ~m``
   and `eps(Float64)` ``\approx 10^{-16}``, a hysteresis epsilon must be larger as ``10^{-19} .. 10^{-24}``.
-  Actually, a hysteresis epsilon of ``10^{-16}`` is used. Note, that in `contactDict` all `distanceOrg` values
-  are zero or negative at event restart. It is therefore guaranteed that ``z_1 \le - 10^{-16}`` at event restart
+  Actually, a hysteresis epsilon of ``10^{-13}`` is used. Note, it is guaranteed that
+  ``z_1 \le`` `- contact_eps` at event restart
   (when no contact pair is present, a dummy value is used).
 
-* ``z_2(t)``: The minimum `distanceOrg` of all object pairs that are **not** in `contactDict`.
+* ``z_2(t)``: The minimum of `distanceOrg+3*contact_eps` of all object pairs that are **not** in `contactDict`.
   ``z_2`` monitors if two objects that have not been in contact to each other and start to penetrate each other.
-  At an event restart (including the start of the integration after the initialization), it is guaranteed
-  that all `distanceOrg` not in `contactDict` are positive (otherwise, they would be
-  in `contactDict`). Therefore, it is guaranteed that ``z_2 > 0`` at event restart (without a hysteresis epsilon).
-
-The distance between two objects is only computed up to a certain precision. Therefore, `distanceOrg` might be
-nearly zero but still positive, if two objects are placed initially in touching position.
-For this reason the actually used distance is `distanceOrg - 1e-16`,
-in order that the probability is larger that objects initially in touching position
-are treated to be in contact initially.
+  At an event restart (including the start of the integration after the initialization),
+  all contact pairs not in `contactDict` have ``z_2 > 0`` (otherwise, they would be
+  in `contactDict`). Therefore, it is guaranteed that ``z_2 > 0`` at event restart.
 
 To summarize, the following equations are actually used:
 
 ```
-distance = distanceOrg - 1e-16
-contact  = isEvent ? distance <= 0 : <contact from previous event>
-z[1]     = max(<distance that has contact=true>) - 1e-16
-z[2]     = min(<distance that has contact=false>)
+contact  = isEvent ? distanceOrg < -2*contact_eps : <contact from last event>
+distance = contact ? distanceOrg + contact_eps : distanceOrg + 3*contact_eps
+z[1]     = max(<distanceOrg+contact_eps that has contact=true>)
+z[2]     = min(<distanceOrg+3*contact_eps that has contact=false>)
 ```
 
 Typically, the `simulate!(..., log=true, ...)` produces the following output (here for a sphere boucing on ground):
 
 ```
- State event (zero-crossing) at time = 2.3924142776549155 s (due to z[2])
-   distance(ground,sphere) = -3.815173674537923e-18 became <= 0
-       contact normal = [0.0, 1.0, 0.0], contact position = [0.0, -0.1, 0.0], c_res = 1.1e11 d_res = 47.5
-   restart = Restart
+State event (zero-crossing) at time = 2.3850903177319287 s (due to z[2])
+    distance(ground,sphere) = -2.0001204970840633e-13 became <= 0
+    contact normal = [0.0, 1.0, 0.0], contact position = [0.0, -0.1, 0.0], c_res = 1.1e11 d_res = 22.0
+    restart = Restart
 
-State event (zero-crossing) at time = 2.3924413895015424 s (due to z[1])
-   distance(ground,sphere) = 1.0362163563391329e-16 became > 0
-   restart = Restart
+State event (zero-crossing) at time = 2.3851135168512942 s (due to z[1])
+    distance(ground,sphere) = 3.1358549064074168e-18 became > 0
+    restart = Restart
 ```
 
 Whenever the integrator requires the values of the zero crossing functions, the values of

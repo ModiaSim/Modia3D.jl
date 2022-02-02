@@ -32,7 +32,6 @@ collidingBoxes = Model(
 
 twoCollidingBoxes = @instantiateModel(buildModia3D(collidingBoxes), unitless=true, log=false, logStateSelection=false, logCode=false)
 
-
 stopTime = 3.0
 tolerance = 1e-6
 interval = 0.001
