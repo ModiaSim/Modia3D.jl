@@ -39,13 +39,7 @@ Test.@testset "Robot" begin
     include(joinpath("Robot", "ServoWithPathAndRevolute.jl"))
     if testsExtend >= normalTests
         include(joinpath("Robot", "YouBotWithSphere.jl"))
-        include(joinpath("Robot", "YouBotGripping.jl"))     
-        
-        #if Sys.iswindows()
-        #    )
-        #else
-        #    Test.@test_skip include(joinpath("Robot", "YouBotGripping.jl")) #  lu factorization error on linux
-        #end
+        include(joinpath("Robot", "YouBotGripping.jl"))
     end
     if testsExtend == completeTests
         include(joinpath("Robot", "YouBotPingPong.jl"))  # long computation time
