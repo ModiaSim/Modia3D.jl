@@ -313,9 +313,9 @@ uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 
 [[Distributions]]
 deps = ["ChainRulesCore", "DensityInterface", "FillArrays", "LinearAlgebra", "PDMats", "Printf", "QuadGK", "Random", "SparseArrays", "SpecialFunctions", "Statistics", "StatsBase", "StatsFuns", "Test"]
-git-tree-sha1 = "24d26ca2197c158304ab2329af074fbe14c988e4"
+git-tree-sha1 = "2e97190dfd4382499a4ac349e8d316491c9db341"
 uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
-version = "0.25.45"
+version = "0.25.46"
 
 [[DocStringExtensions]]
 deps = ["LibGit2"]
@@ -714,15 +714,15 @@ version = "0.7.8"
 
 [[ModiaLang]]
 deps = ["DataFrames", "DifferentialEquations", "FiniteDiff", "ForwardDiff", "InteractiveUtils", "JSON", "Measurements", "ModiaBase", "ModiaResult", "MonteCarloMeasurements", "OrderedCollections", "Reexport", "Sundials", "Test", "TimerOutputs", "Unitful"]
-git-tree-sha1 = "f876db8f8bd3742c01534da42a1d7a74e3e28b0a"
+git-tree-sha1 = "ecccf5b8c068dce57f8a1cc89d62f487a4acae1d"
 uuid = "34b37210-eaa3-4b48-8781-0b87bf559981"
-version = "0.8.5"
+version = "0.8.6"
 
 [[ModiaResult]]
 deps = ["DataFrames", "Measurements", "MonteCarloMeasurements", "OrderedCollections", "Pkg", "Tables", "Unitful"]
-git-tree-sha1 = "c18e1e86ecac6ba86a21bfbbf2160847670a3f1e"
+git-tree-sha1 = "ee6d91d6a41d4d43b741575761f0227c2322ab21"
 uuid = "16a87621-1533-42f6-8e19-4a825980cec2"
-version = "0.3.8"
+version = "0.3.9"
 
 [[MonteCarloMeasurements]]
 deps = ["Distributed", "Distributions", "LinearAlgebra", "MacroTools", "Random", "RecipesBase", "Requires", "SLEEFPirates", "StaticArrays", "Statistics", "StatsBase", "Test"]
