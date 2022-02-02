@@ -76,11 +76,11 @@ function selectContactPairs!(sim, scene::Composition.Scene{F}, ch::Composition.C
             simh.z[scene.zStartIndex] = F(-42.0)
         else
             (pair, key)  = findmax(ch.contactDict)
-            simh.z[scene.zStartIndex] = pair.distanceWithHysteresis - ch.contact_eps
+            simh.z[scene.zStartIndex] = pair.distanceWithHysteresis
         end
         # z[2] ... zero crossing function from no contact to contact
         # min. distance of inactive contact pairs
-        simh.z[1+scene.zStartIndex] = ch.noContactMinVal
+        simh.z[1+scene.zStartIndex] = ch.noContactMinVal #+ 2*ch.contact_eps
     end
     ch.distanceComputed = true
     return nothing
@@ -189,9 +189,15 @@ function storeDistancesForSolver!(world::Composition.Object3D{F}, pairID::Compos
       #  println("AABB not overlapping")
     end
 
-    distanceWithHysteresis = distanceOrg - ch.contact_eps   
-    contact                = hasEvent ? distanceWithHysteresis <= F(0) : hasContact
-
+    #distanceWithHysteresis = distanceOrg + ch.contact_eps   
+    #contact                = hasEvent ? distanceWithHysteresis <= F(0) : hasContact
+    
+    contact                = hasEvent ? distanceOrg < -2*ch.contact_eps : hasContact
+    distanceWithHysteresis = contact  ? distanceOrg + ch.contact_eps : distanceOrg + 3*ch.contact_eps
+    
+    #contact                = hasEvent ? distanceOrg < -ch.contact_eps : hasContact
+    #distanceWithHysteresis = contact  ? distanceOrg : distanceOrg + 2*ch.contact_eps
+    
     if hasEvent
         # At event instant
         pushCollisionPair!(ch, contact, distanceWithHysteresis, pairID,
