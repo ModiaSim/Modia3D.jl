@@ -16,7 +16,6 @@ BouncingSphere = Model(
                                    defaultFrameLength=0.2,
                                    visualizeBoundingBox = true,
                                    enableContactDetection=true,
-                                   maximumContactDamping=1e3,
                                    visualizeContactPoints=false)),
     worldFrame = Object3D(parent=:world, feature=Visual(shape=CoordinateSystem(length=0.5))),
     ground = Object3D(parent=:world,
