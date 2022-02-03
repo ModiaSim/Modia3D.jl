@@ -5,7 +5,7 @@ module Modia3D
 
 const path = dirname(dirname(@__FILE__))   # Absolute path of package directory
 const Version = "0.7.0"
-const Date = "2022-02-03"
+const Date = "2022-02-04"
 
 
 # println("\nImporting Modia3D Version $Version ($Date)")
@@ -39,6 +39,12 @@ using DoubleFloats
 using Reexport
 using MonteCarloMeasurements
 import Unitful
+
+
+@reexport using ModiaLang
+@reexport using ModiaLang.Unitful
+@reexport using ModiaLang.DifferentialEquations
+const modelsPath = joinpath(ModiaLang.path, "models")
 
 
 # VarFloatType defines the supported float types for system parameters and variables
