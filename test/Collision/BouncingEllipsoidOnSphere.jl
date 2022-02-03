@@ -1,6 +1,6 @@
 module BouncingEllipsoidOnSphere
 
-using Modia
+using Modia3D
 
 BouncingEllipsoid = Model(
     boxHeigth = 0.1,

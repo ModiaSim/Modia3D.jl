@@ -1,6 +1,6 @@
 module ShaftFreeMotionAdaptiveRotSequence
 
-using Modia
+using Modia3D
 
 Shaft = Model(
     Length = 1.0,

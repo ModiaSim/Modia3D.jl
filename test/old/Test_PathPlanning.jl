@@ -1,7 +1,7 @@
 module Test_PathPlanning
 
 import Modia3D
-using  ModiaLang
+# using  ModiaLang
 @usingModiaPlot
 
 const ptp_path = Modia3D.PTP_path(["angle1", "angle2", "angle3"],

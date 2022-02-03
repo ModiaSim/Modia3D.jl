@@ -1,6 +1,6 @@
 module BouncingSphereFreeMotion
 
-using Modia
+using Modia3D
 
 BouncingSphere = Model(
     boxHeigth = 0.05,

@@ -1,6 +1,6 @@
 module BouncingSphere_with_time
 
-using Modia
+using Modia3D
 
 @time begin BouncingSphere = Model(
         boxHeigth = 0.1,

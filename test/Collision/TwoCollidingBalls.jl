@@ -6,7 +6,7 @@ with another ball on a table.
 """
 module TwoCollidingBalls
 
-using Modia
+using Modia3D
 
 vmatSolids = VisualMaterial(color="Red"  , transparency=0.0)
 vmatTable  = VisualMaterial(color="Green", transparency=0.1)

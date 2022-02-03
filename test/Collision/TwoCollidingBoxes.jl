@@ -1,6 +1,6 @@
 module TwoCollidingBoxes
 
-using Modia
+using Modia3D
 
 vmat1 = VisualMaterial(color="Green", transparency=0.6)
 vmat2 = VisualMaterial(color="Red"  , transparency=0.6)

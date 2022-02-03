@@ -1,6 +1,6 @@
 module ZeroCrossingIssue
 
-using Modia
+using Modia3D
 
 # The penetration depth is in the order of 1e-11. With a tolerance of 1e-8, the penetration depth
 # is not computed precisely enough, and computation time is excessive because the Jacobian is computed

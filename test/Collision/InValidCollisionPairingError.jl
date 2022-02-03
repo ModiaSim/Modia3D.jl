@@ -1,6 +1,6 @@
 module InValidCollisionPairingError
 
-using Modia
+using Modia3D
 using Unitful
 using Test
 
