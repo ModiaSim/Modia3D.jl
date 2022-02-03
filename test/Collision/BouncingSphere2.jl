@@ -2,10 +2,7 @@ module BouncingSphere2
 
 # Simulate bouncing sphere with CVODE_BDF, QBDF, Tsit5
 
-using ModiaLang
-import Modia3D
-using  Modia3D.ModiaInterface
-using  DifferentialEquations
+using Modia
 
 BouncingSphere = Model(
     boxHeigth = 0.1,
