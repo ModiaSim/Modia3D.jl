@@ -4,7 +4,7 @@
 module Modia3D
 
 const path = dirname(dirname(@__FILE__))   # Absolute path of package directory
-const Version = "0.6.0"
+const Version = "0.7.0"
 const Date = "2022-02-03"
 
 
