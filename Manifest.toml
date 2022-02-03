@@ -313,9 +313,9 @@ uuid = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 
 [[Distributions]]
 deps = ["ChainRulesCore", "DensityInterface", "FillArrays", "LinearAlgebra", "PDMats", "Printf", "QuadGK", "Random", "SparseArrays", "SpecialFunctions", "Statistics", "StatsBase", "StatsFuns", "Test"]
-git-tree-sha1 = "24d26ca2197c158304ab2329af074fbe14c988e4"
+git-tree-sha1 = "2e97190dfd4382499a4ac349e8d316491c9db341"
 uuid = "31c24e10-a181-5473-b8eb-7969acd0382f"
-version = "0.25.45"
+version = "0.25.46"
 
 [[DocStringExtensions]]
 deps = ["LibGit2"]
@@ -714,15 +714,15 @@ version = "0.7.8"
 
 [[ModiaLang]]
 deps = ["DataFrames", "DifferentialEquations", "FiniteDiff", "ForwardDiff", "InteractiveUtils", "JSON", "Measurements", "ModiaBase", "ModiaResult", "MonteCarloMeasurements", "OrderedCollections", "Reexport", "Sundials", "Test", "TimerOutputs", "Unitful"]
-git-tree-sha1 = "f876db8f8bd3742c01534da42a1d7a74e3e28b0a"
+git-tree-sha1 = "ba0ee2f42988151af5371d53cf4429dccd6e9d4b"
 uuid = "34b37210-eaa3-4b48-8781-0b87bf559981"
-version = "0.8.5"
+version = "0.8.7"
 
 [[ModiaResult]]
 deps = ["DataFrames", "Measurements", "MonteCarloMeasurements", "OrderedCollections", "Pkg", "Tables", "Unitful"]
-git-tree-sha1 = "c18e1e86ecac6ba86a21bfbbf2160847670a3f1e"
+git-tree-sha1 = "2c8a7118daf30c135921fa12d9b9075963285300"
 uuid = "16a87621-1533-42f6-8e19-4a825980cec2"
-version = "0.3.8"
+version = "0.3.10"
 
 [[MonteCarloMeasurements]]
 deps = ["Distributed", "Distributions", "LinearAlgebra", "MacroTools", "Random", "RecipesBase", "Requires", "SLEEFPirates", "StaticArrays", "Statistics", "StatsBase", "Test"]
@@ -1226,9 +1226,9 @@ version = "0.5.21"
 
 [[Transducers]]
 deps = ["Adapt", "ArgCheck", "BangBang", "Baselet", "CompositionsBase", "DefineSingletons", "Distributed", "InitialValues", "Logging", "Markdown", "MicroCollections", "Requires", "Setfield", "SplittablesBase", "Tables"]
-git-tree-sha1 = "45279315fe060fce0fe57826986044e29f083a85"
+git-tree-sha1 = "6378ddbd95d1da05ecc67e4f6de205a0732cb6e7"
 uuid = "28d57a85-8fef-5791-bfe6-a80928e7c999"
-version = "0.4.70"
+version = "0.4.71"
 
 [[TreeViews]]
 deps = ["Test"]

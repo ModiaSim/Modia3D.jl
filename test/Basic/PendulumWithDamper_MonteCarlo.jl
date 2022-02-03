@@ -1,16 +1,12 @@
 module PendulumWithDamper
 
-using ModiaLang
-
-# ModiaLang models
-include("$(ModiaLang.path)/models/Blocks.jl")
-include("$(ModiaLang.path)/models/Electric.jl")
-include("$(ModiaLang.path)/models/Rotational.jl")
-
-import Modia3D
 using Modia
-using DifferentialEquations
-using MonteCarloMeasurements
+using Modia.Modia3D.MonteCarloMeasurements
+
+include("$(Modia.modelsPath)/Blocks.jl")
+include("$(Modia.modelsPath)/Electric.jl")
+include("$(Modia.modelsPath)/Rotational.jl")
+
 
 Pendulum = Model(
     m = 1.0,

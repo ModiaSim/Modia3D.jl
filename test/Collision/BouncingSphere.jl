@@ -3,7 +3,7 @@ module BouncingSphereSimulation
 # Simulate bouncing sphere with CVODE_BDF, QBDF, Tsit5
 
 using Modia
-using  DifferentialEquations
+
 
 BouncingSphere = Model(
     boxHeigth = 0.1,
