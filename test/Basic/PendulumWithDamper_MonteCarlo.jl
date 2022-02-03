@@ -1,7 +1,7 @@
 module PendulumWithDamper
 
 using Modia3D
-using Modia3D.Modia3D.MonteCarloMeasurements
+using Modia3D.MonteCarloMeasurements
 
 include("$(Modia3D.modelsPath)/Blocks.jl")
 include("$(Modia3D.modelsPath)/Electric.jl")
