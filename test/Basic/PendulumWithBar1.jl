@@ -46,7 +46,7 @@ PendulumWithBar = Model(
 
 pendulumWithBar = @instantiateModel(PendulumWithBar, unitless=true)
 
-import DifferentialEquations
+import Modia.DifferentialEquations
 algorithm = DifferentialEquations.Tsit5()
 stopTime = 10.0
 requiredFinalStates = [-1.578178763749515, 0.06153191687388868]
