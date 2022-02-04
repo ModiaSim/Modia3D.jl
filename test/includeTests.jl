@@ -38,7 +38,7 @@ Test.@testset "Robot" begin
     include(joinpath("Robot", "ServoWithRampAndRevolute.jl"))
     include(joinpath("Robot", "ServoWithPathAndRevolute.jl"))
     if testsExtend >= normalTests
-        include(joinpath("Robot", "YouBotWithSphere.jl"))
+        Test.@test_skip include(joinpath("Robot", "YouBotWithSphere.jl"))
         include(joinpath("Robot", "YouBotGripping.jl"))
     end
     if testsExtend == completeTests

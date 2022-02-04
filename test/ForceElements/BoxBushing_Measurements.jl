@@ -1,7 +1,7 @@
 module BoxBushing_Measurements
 
 using Modia3D
-using Measurements
+using Modia3D.Measurements
 
 const largeAngles = true
 if largeAngles

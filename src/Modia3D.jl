@@ -34,11 +34,13 @@ abstract type AbstractRenderer                                      end  # Rende
 abstract type AbstractDLR_VisualizationRenderer <: AbstractRenderer end  # Community or Professional edition of DLR_Visualization renderer
 
 
-using StaticArrays
-using DoubleFloats
-using Reexport
-using MonteCarloMeasurements
+using  StaticArrays
+using  DoubleFloats
+using  Reexport
+import MonteCarloMeasurements
+import Measurements
 import Unitful
+import ModiaLang
 
 
 @reexport using ModiaLang
@@ -48,7 +50,7 @@ const modelsPath = joinpath(ModiaLang.path, "models")
 
 
 # VarFloatType defines the supported float types for system parameters and variables
-const VarFloatType = Union{AbstractFloat, AbstractParticles}
+const VarFloatType = Union{AbstractFloat, MonteCarloMeasurements.AbstractParticles}
 
 # MPRFloatType defines the float type of MPR calculations
 const MPRFloatType = Double64
@@ -169,9 +171,7 @@ export rereadContactPairMaterialFromJSON
 
 # Add import clauses used in examples and test
 import StaticArrays
-import Unitful
 import LinearAlgebra
 import Test
-import ModiaLang
 
 end # module
