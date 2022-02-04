@@ -1,6 +1,5 @@
 module YouBotPingPong
 
-using Unitful
 using Modia3D
 
 include("$(Modia3D.modelsPath)/Blocks.jl")
