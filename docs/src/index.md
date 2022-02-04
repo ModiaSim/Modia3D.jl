@@ -48,6 +48,10 @@ Download and install the free DLR SimVis Community Edition, e.g. with [https://v
 
 ## Release Notes
 
+### Version 0.7.0
+- Modia3D is updated and restricted to Julia 1.7
+- cyclic dependencies with Modia package are removed
+
 ### Version 0.6.0
 - Modia3D supports `@instantiatedModel(FloatType = Float64, ...)` as default `FloatType`. Now, further FloatTypes, such as `Float32`, `DoubleFloats.Double64`, `Measurements.Measurement{Float64}`, `MonteCarloMeasurements.StaticParticles{Float64}` are supported. If FloatType is not Float64, the default integrator selected from DifferentialEquations.jl is utilized and no longer Sundials.CVODE_BDF (because CVODE_BDF is only supported for Float64). Since ModiaLang does not yet support integrators with analytic Jacobians, integrators with this feature cannot be used, e.g., this feature needs to be switched off with option `autodiff=false`, if necessary. Recommendation: use `QBDF(autodiff=false)` if FloatType is not Float64. Note, `Tsit5` usually does not work well for collisions, due to the stiff behavior in the contact area. Current limitations:
     - `FloatType = Float32`: usually fails when collisions occur
