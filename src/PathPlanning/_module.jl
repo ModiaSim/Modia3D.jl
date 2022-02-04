@@ -13,9 +13,6 @@ Andrea Neumayr and Martin Otter, [DLR - Institute of System Dynamics and Control
 """
 module PathPlanning
 
-export PTP_path, pathEndTime, getPosition!, getPosition, getIndex, plotPath
-
-
 export ptpJointSpace!
 
 export getPathComponent
