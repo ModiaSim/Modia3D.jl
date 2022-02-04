@@ -34,12 +34,13 @@ abstract type AbstractRenderer                                      end  # Rende
 abstract type AbstractDLR_VisualizationRenderer <: AbstractRenderer end  # Community or Professional edition of DLR_Visualization renderer
 
 
-using StaticArrays
-using DoubleFloats
-using Reexport
-using MonteCarloMeasurements
-using Measurements
+using  StaticArrays
+using  DoubleFloats
+using  Reexport
+import MonteCarloMeasurements
+import Measurements
 import Unitful
+import ModiaLang
 
 
 @reexport using ModiaLang
@@ -170,9 +171,7 @@ export rereadContactPairMaterialFromJSON
 
 # Add import clauses used in examples and test
 import StaticArrays
-import Unitful
 import LinearAlgebra
 import Test
-import ModiaLang
 
 end # module
