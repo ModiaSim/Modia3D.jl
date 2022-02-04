@@ -1,8 +1,6 @@
 module InValidCollisionPairingError
 
 using Modia3D
-using Unitful
-using Test
 
 vmatRed   = VisualMaterial(color="Red")
 vmatGreen = VisualMaterial(color="Green")
