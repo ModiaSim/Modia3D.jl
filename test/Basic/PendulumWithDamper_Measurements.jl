@@ -12,7 +12,8 @@ Pendulum = Model(
     g = 9.81,
     vmat1 = VisualMaterial(color="Sienna", transparency=0.5),
     vmat2 = VisualMaterial(color="Red"),
-    world = Object3D(feature=Scene(enableContactDetection=false)),
+    world = Object3D(feature=Scene(enableContactDetection=false,
+                                   animationFile="PendulumWithDamper_Measurements.json")),
     worldFrame = Object3D(parent=:world,
                           feature=Visual(shape=CoordinateSystem(length=0.5))),
 
@@ -28,7 +29,7 @@ Pendulum = Model(
 )
 
 PendulumWithDamp = Model(
-    pendulum = buildModia3D(Pendulum | Map(m=2.0 ± 1.0, rev=Map(phi=Var(init=1.0)))),
+    pendulum = buildModia3D(Pendulum | Map(m=2.0±1.0, rev=Map(phi=Var(init=1.0)))),
 
     damper = Damper | Map(d=0.5),
     fixed = Fixed,
@@ -46,6 +47,6 @@ requiredFinalStates = [-1.578178283450938, 0.061515170100766486]
 simulate!(pendulumWithDamper, stopTime=stopTime, log=true, logStates=false, requiredFinalStates=requiredFinalStates)
 
 @usingModiaPlot
-plot(pendulumWithDamper, ["pendulum.rev.flange.phi", "pendulum.rev.variables[1]"], figure=1)
+plot(pendulumWithDamper, ["pendulum.rev.flange.phi", "pendulum.rev.w"], figure=1)
 
 end
