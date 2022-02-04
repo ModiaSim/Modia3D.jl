@@ -6,6 +6,8 @@ end
 
 colorNum(red, green, blue) = ((red*256 + green)*256 + blue)
 
+FVal(val) = Modia3D.convertToFloat64(val)
+
 const coSysMaterialRed   = (; name="coordinateSystem.red", uuid=name2uuid("coordinateSystem.red"), type="MeshPhongMaterial", color=colorNum(255, 0, 0), opacity=1, transparent=false, shininess=0.5)
 const coSysMaterialGreen = (; name="coordinateSystem.green", uuid=name2uuid("coordinateSystem.green"), type="MeshPhongMaterial", color=colorNum(0, 255, 0), opacity=1, transparent=false, shininess=0.5)
 const coSysMaterialBlue  = (; name="coordinateSystem.blue", uuid=name2uuid("coordinateSystem.blue"), type="MeshPhongMaterial", color=colorNum(0, 0, 255), opacity=1, transparent=false, shininess=0.5)
@@ -16,7 +18,7 @@ function exportObject(object, elements, obj::Modia3D.Composition.Object3D, spher
     R_obj = Modia3D.NullRotation(Float64)
     name = Modia3D.fullName(obj)
     geometryName = name * ".geometry"
-    geometry = (; name=geometryName, uuid=name2uuid(geometryName), type="SphereBufferGeometry", radius=sphere.diameter/2, heightSegments=16, widthSegments=32)
+    geometry = (; name=geometryName, uuid=name2uuid(geometryName), type="SphereBufferGeometry", radius=0.5*FVal(sphere.diameter), heightSegments=16, widthSegments=32)
     material = printVisuMaterialToJSON(obj, obj.visualMaterial)
     objectInfo = getObjectInfo(name, geometry, material, initPos, initRot)
     printInfoToFile(object, elements, geometry, material, nothing, objectInfo)
@@ -26,11 +28,12 @@ end
 function exportObject(object, elements, obj::Modia3D.Composition.Object3D, ellipsoid::Modia3D.Shapes.Ellipsoid, initPos, initRot)
     r_obj = Modia3D.ZeroVector3D(Float64)
     R_obj = Modia3D.NullRotation(Float64)
+    lengthX = FVal(ellipsoid.lengthX)
     name = Modia3D.fullName(obj)
     geometryName = name * ".geometry"
-    geometry = (; name=geometryName, uuid=name2uuid(geometryName), type="SphereBufferGeometry", radius=ellipsoid.lengthX/2, heightSegments=16, widthSegments=32)
+    geometry = (; name=geometryName, uuid=name2uuid(geometryName), type="SphereBufferGeometry", radius=0.5*lengthX, heightSegments=16, widthSegments=32)
     material = printVisuMaterialToJSON(obj, obj.visualMaterial)
-    objectInfo = getObjectInfo(name, geometry, material, initPos, initRot, scale=[1.0, ellipsoid.lengthY/ellipsoid.lengthX, ellipsoid.lengthZ/ellipsoid.lengthX])
+    objectInfo = getObjectInfo(name, geometry, material, initPos, initRot, scale=[1.0, FVal(ellipsoid.lengthY)/lengthX, FVal(ellipsoid.lengthZ)/lengthX])
     printInfoToFile(object, elements, geometry, material, nothing, objectInfo)
     return (r_obj, R_obj)
 end
@@ -40,7 +43,7 @@ function exportObject(object, elements, obj::Modia3D.Composition.Object3D, box::
     R_obj = Modia3D.NullRotation(Float64)
     name = Modia3D.fullName(obj)
     geometryName = name * ".geometry"
-    geometry = (; name=geometryName, uuid=name2uuid(geometryName), type="BoxBufferGeometry", width=box.lengthX, height=box.lengthY, depth=box.lengthZ)
+    geometry = (; name=geometryName, uuid=name2uuid(geometryName), type="BoxBufferGeometry", width=FVal(box.lengthX), height=FVal(box.lengthY), depth=FVal(box.lengthZ))
     material = printVisuMaterialToJSON(obj, obj.visualMaterial)
     objectInfo = getObjectInfo(name, geometry, material, initPos, initRot)
     printInfoToFile(object, elements, geometry, material, nothing, objectInfo)
@@ -48,31 +51,34 @@ function exportObject(object, elements, obj::Modia3D.Composition.Object3D, box::
 end
 
 function exportObject(object, elements, obj::Modia3D.Composition.Object3D, cylinder::Modia3D.Shapes.Cylinder, initPos, initRot)
+    radius = 0.5*FVal(cylinder.diameter)
+    innerRadius = 0.5*FVal(cylinder.innerDiameter)
+    length = FVal(cylinder.length)
     name = Modia3D.fullName(obj)
     geometryName = name * ".geometry"
     material = printVisuMaterialToJSON(obj, obj.visualMaterial)
-    if cylinder.innerDiameter == 0.0
+    if innerRadius == 0.0
         r_obj = Modia3D.ZeroVector3D(Float64)
         R_obj = Shapes.rotateAxis2y(cylinder.axis, Modia3D.NullRotation(Float64))
         shape = nothing
-        geometry = (; name=geometryName, uuid=name2uuid(geometryName), type="CylinderBufferGeometry", radiusBottom=cylinder.diameter/2, radiusTop=cylinder.diameter/2, height=cylinder.length, radialSegments=32, heightSegments=1)
+        geometry = (; name=geometryName, uuid=name2uuid(geometryName), type="CylinderBufferGeometry", radiusBottom=radius, radiusTop=radius, height=length, radialSegments=32, heightSegments=1)
         objectInfo = getObjectInfo(name, geometry, material, initPos, initRot, R_obj=R_obj)
     else
         if cylinder.axis == 1
-            r_obj = @SVector[-cylinder.length/2, 0.0, 0.0]
+            r_obj = @SVector[-0.5*length, 0.0, 0.0]
         elseif cylinder.axis == 2
-            r_obj = @SVector[0.0, -cylinder.length/2, 0.0]
+            r_obj = @SVector[0.0, -0.5*length, 0.0]
         else
-            r_obj = @SVector[0.0, 0.0, -cylinder.length/2]
+            r_obj = @SVector[0.0, 0.0, -0.5*length]
         end
         R_obj = Shapes.rotateAxis2z(cylinder.axis, Modia3D.NullRotation(Float64))
-        innerCurves = [(; type="EllipseCurve", aX=0, aY=0, xRadius=cylinder.innerDiameter/2, yRadius=cylinder.innerDiameter/2, aStartAngle=0, aEndAngle=2*pi, aClockwise=false, aRotation=0)]
+        innerCurves = [(; type="EllipseCurve", aX=0, aY=0, xRadius=innerRadius, yRadius=innerRadius, aStartAngle=0, aEndAngle=2*pi, aClockwise=false, aRotation=0)]
         holes = [(; type="Path", curves=innerCurves, currentPoint=[0, 0])]
-        curves = [(; type="EllipseCurve", aX=0, aY=0, xRadius=cylinder.diameter/2, yRadius=cylinder.diameter/2, aStartAngle=0, aEndAngle=2*pi, aClockwise=false, aRotation=0)]
+        curves = [(; type="EllipseCurve", aX=0, aY=0, xRadius=radius, yRadius=radius, aStartAngle=0, aEndAngle=2*pi, aClockwise=false, aRotation=0)]
         shapeName = String(Modia3D.fullName(obj)) * ".shape"
         shapeUuid = name2uuid(shapeName)
         shape = (; name=shapeName, uuid=shapeUuid, type="Shape", curves=curves, holes=holes, currentPoint=[0, 0])
-        options = (; depth=cylinder.length, bevelEnabled=false)
+        options = (; depth=length, bevelEnabled=false)
         geometry = (; name=geometryName, uuid=name2uuid(geometryName), type="ExtrudeGeometry", shapes=[shapeUuid], options=options)
         objectInfo = getObjectInfo(name, geometry, material, initPos, initRot, r_obj=r_obj, R_obj=R_obj)
     end
@@ -81,17 +87,18 @@ function exportObject(object, elements, obj::Modia3D.Composition.Object3D, cylin
 end
 
 function exportObject(object, elements, obj::Modia3D.Composition.Object3D, cone::Modia3D.Shapes.Cone, initPos, initRot)
+    length = FVal(cone.length)
     if cone.axis == 1
-        r_obj = @SVector[cone.length/2, 0.0, 0.0]
+        r_obj = @SVector[0.5*length, 0.0, 0.0]
     elseif cone.axis == 2
-        r_obj = @SVector[0.0, cone.length/2, 0.0]
+        r_obj = @SVector[0.0, 0.5*length, 0.0]
     else
-        r_obj = @SVector[0.0, 0.0, cone.length/2]
+        r_obj = @SVector[0.0, 0.0, 0.5*length]
     end
     R_obj = Shapes.rotateAxis2y(cone.axis, Modia3D.NullRotation(Float64))
     name = Modia3D.fullName(obj)
     geometryName = name * ".geometry"
-    geometry = (; name=geometryName, uuid=name2uuid(geometryName), type="CylinderBufferGeometry", radiusBottom=cone.diameter/2, radiusTop=cone.topDiameter/2, height=cone.length, radialSegments=32, heightSegments=1)
+    geometry = (; name=geometryName, uuid=name2uuid(geometryName), type="CylinderBufferGeometry", radiusBottom=0.5*FVal(cone.diameter), radiusTop=0.5*FVal(cone.topDiameter), height=length, radialSegments=32, heightSegments=1)
     material = printVisuMaterialToJSON(obj, obj.visualMaterial)
     objectInfo = getObjectInfo(name, geometry, material, initPos, initRot, r_obj=r_obj, R_obj=R_obj)
     printInfoToFile(object, elements, geometry, material, nothing, objectInfo)
@@ -101,17 +108,19 @@ end
 function exportObject(object, elements, obj::Modia3D.Composition.Object3D, capsule::Modia3D.Shapes.Capsule, initPos, initRot)
     r_obj = Modia3D.ZeroVector3D(Float64)
     R_obj = Shapes.rotateAxis2y(capsule.axis, Modia3D.NullRotation(Float64))
+    radius = 0.5*FVal(capsule.diameter)
+    length = FVal(capsule.length)
     name = Modia3D.fullName(obj)
     geometryName = name * ".geometry"
     points = []
     for i in -9:0
         angle = i/9 * pi/2
-        point = (; x=capsule.diameter/2*cos(angle), y=-capsule.length/2+capsule.diameter/2*sin(angle))
+        point = (; x=radius*cos(angle), y=-0.5*length+radius*sin(angle))
         push!(points, point)
     end
     for i in 0:9
         angle = i/9 * pi/2
-        point = (; x=capsule.diameter/2*cos(angle), y=capsule.length/2+capsule.diameter/2*sin(angle))
+        point = (; x=radius*cos(angle), y=0.5*length+radius*sin(angle))
         push!(points, point)
     end
     geometry = (; name=geometryName, uuid=name2uuid(geometryName), type="LatheGeometry", points=points, phiStart=0, phiLength=2*pi, segments=32)
@@ -122,26 +131,29 @@ function exportObject(object, elements, obj::Modia3D.Composition.Object3D, capsu
 end
 
 function exportObject(object, elements, obj::Modia3D.Composition.Object3D, beam::Modia3D.Shapes.Beam, initPos, initRot)
+    length = FVal(beam.length)
+    width = FVal(beam.width)
+    thickness = FVal(beam.thickness)
     if beam.axis == 1
-        r_obj = @SVector[0.0, 0.0, -beam.thickness/2]
+        r_obj = @SVector[0.0, 0.0, -0.5*thickness]
     elseif beam.axis == 2
-        r_obj = @SVector[-beam.thickness/2, 0.0, 0.0]
+        r_obj = @SVector[-0.5*thickness, 0.0, 0.0]
     else
-        r_obj = @SVector[0.0, -beam.thickness/2, 0.0]
+        r_obj = @SVector[0.0, -0.5*thickness, 0.0]
     end
     R_obj = Shapes.rotateAxis2x(beam.axis, Modia3D.NullRotation(Float64))
     name = Modia3D.fullName(obj)
     geometryName = name * ".geometry"
     curves = [
-        (; type="LineCurve", v1=[-beam.length/2, -beam.width/2], v2=[beam.length/2, -beam.width/2]),
-        (; type="EllipseCurve", aX=beam.length/2, aY=0, xRadius=beam.width/2, yRadius=beam.width/2, aStartAngle=-pi/2, aEndAngle=pi/2, aClockwise=false, aRotation=0),
-        (; type="LineCurve", v1=[beam.length/2, beam.width/2], v2=[-beam.length/2, beam.width/2]),
-        (; type="EllipseCurve", aX=-beam.length/2, aY=0, xRadius=beam.width/2, yRadius=beam.width/2, aStartAngle=pi/2, aEndAngle=-pi/2, aClockwise=false, aRotation=0)
+        (; type="LineCurve", v1=[-0.5*length, -0.5*width], v2=[0.5*length, -0.5*width]),
+        (; type="EllipseCurve", aX=0.5*length, aY=0, xRadius=0.5*width, yRadius=0.5*width, aStartAngle=-pi/2, aEndAngle=pi/2, aClockwise=false, aRotation=0),
+        (; type="LineCurve", v1=[0.5*length, 0.5*width], v2=[-0.5*length, 0.5*width]),
+        (; type="EllipseCurve", aX=-0.5*length, aY=0, xRadius=0.5*width, yRadius=0.5*width, aStartAngle=pi/2, aEndAngle=-pi/2, aClockwise=false, aRotation=0)
     ]
     shapeName = name * ".shape"
     shapeUuid = name2uuid(shapeName)
     shape = (; name=shapeName, uuid=shapeUuid, type="Shape", curves=curves, holes=[], currentPoint=[0, 0])
-    options = (; depth=beam.thickness, bevelEnabled=false)
+    options = (; depth=thickness, bevelEnabled=false)
     geometry = (; name=geometryName, uuid=name2uuid(geometryName), type="ExtrudeGeometry", shapes=[shapeUuid], options=options)
     material = printVisuMaterialToJSON(obj, obj.visualMaterial)
     objectInfo = getObjectInfo(name, geometry, material, initPos, initRot, r_obj=r_obj, R_obj=R_obj)

@@ -10,7 +10,7 @@ function getJointsAndForceElementsAndObject3DsWithoutParents!(evaluatedParameter
                 if typeof(value.feature) <: Scene
                     push!(object3DWithoutParents, value)
                 else
-                    error("\n", value.path, " is an Object3D that has no parent, but no feature=Scene(..)!\n") 
+                    error("\n", value.path, " is an Object3D that has no parent, but no feature=Scene(..)!\n")
                 end
             elseif typeof(value.feature) <: Scene
                 error("\n", value.path, " is an Object3D that has feature=Scene(..) and has a parent (= ", value.parent.path, ")!\n")
@@ -404,8 +404,8 @@ function multibodyResiduals3!(sim::ModiaLang.SimulationModel{F}, scene, world, t
                         TimerOutputs.@timeit sim.timer "Modia3D_3 exportAnimation" begin
                             objectData = []
                             for obj in scene.allVisuElements
-                                pos = obj.r_abs
-                                ori = Modia3D.from_R(obj.R_abs)
+                                pos = Modia3D.convertToFloat64(obj.r_abs)
+                                ori = Modia3D.from_R(Modia3D.convertToFloat64(obj.R_abs))
                                 dat = animationData(pos, ori)
                                 push!(objectData, dat)
                             end
