@@ -50,7 +50,7 @@ const modelsPath = joinpath(ModiaLang.path, "models")
 
 
 # VarFloatType defines the supported float types for system parameters and variables
-const VarFloatType = Union{AbstractFloat, AbstractParticles}
+const VarFloatType = Union{AbstractFloat, MonteCarloMeasurements.AbstractParticles}
 
 # MPRFloatType defines the float type of MPR calculations
 const MPRFloatType = Double64
