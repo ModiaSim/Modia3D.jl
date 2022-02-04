@@ -38,6 +38,7 @@ using StaticArrays
 using DoubleFloats
 using Reexport
 using MonteCarloMeasurements
+using Measurements
 import Unitful
 
 
