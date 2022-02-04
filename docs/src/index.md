@@ -48,6 +48,11 @@ Download and install the free DLR SimVis Community Edition, e.g. with [https://v
 
 ## Release Notes
 
+### Version 0.7.1
+
+- Remove PathPlanning struct und functions (and instead use the functionality from ModiaLang 0.9.1). 
+- Reactivate test model test/old/Test_PathPlanning.jl
+
 ### Version 0.7.0
 - Modia3D is updated and restricted to Julia 1.7
 - cyclic dependencies with Modia package are removed

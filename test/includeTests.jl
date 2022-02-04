@@ -85,7 +85,7 @@ Test.@testset "old" begin
         include(joinpath("old", "Plot_SlidingFriction.jl"))  # direct PyPlot calls
     end
     include(joinpath("old", "test_Shapes.jl"))
-    Test.@test_skip include(joinpath("old", "Test_PathPlanning.jl")) # not working at the moment
+    include(joinpath("old", "Test_PathPlanning.jl"))
     include(joinpath("old", "test_Solids.jl"))
     include(joinpath("old", "Visualize_Beam.jl"))
 end
