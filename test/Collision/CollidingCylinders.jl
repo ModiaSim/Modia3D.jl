@@ -1,6 +1,5 @@
 module CollidingCylindersSimulation
 
-using Unitful
 using Modia3D
 
 vmatRed   = VisualMaterial(color="Red")
