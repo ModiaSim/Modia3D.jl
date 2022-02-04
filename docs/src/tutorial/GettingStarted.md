@@ -95,7 +95,6 @@ module Pendulum3
 
 using Modia3D
 
-# Modia equation-based models
 include("$(Modia3D.modelsPath)/AllModels.jl")
 
 Pendulum = Model(
