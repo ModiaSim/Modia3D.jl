@@ -20,7 +20,7 @@ export trailingPartOfName
 export nepsType, neps, sign_eps, radToDeg
 export getAndCheckFullLibraryPath, getEnvironmentVariable
 
-export normalizeVector, BoundingBox
+export normalizeVector, BoundingBox, convertToFloat64
 
 export readDictOfStructsFromJSON
 export listKeys
@@ -32,6 +32,8 @@ using  StaticArrays
 using  LinearAlgebra
 using  JSON
 using  Unitful
+import Measurements
+import MonteCarloMeasurements
 
 include("environment.jl")
 include("constantsAndFunctions.jl")

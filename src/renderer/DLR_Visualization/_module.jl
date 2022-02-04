@@ -18,8 +18,6 @@ import Modia3D
 import Modia3D.Basics
 import Modia3D.Shapes
 import Modia3D.Composition
-import Measurements
-import MonteCarloMeasurements
 
 using Libdl
 ISWINDOWS() = Sys.iswindows()
