@@ -1,7 +1,6 @@
 module BouncingCapsulesSimulation
 
 using Modia3D
-using  Unitful
 
 vmatRed   = VisualMaterial(color="Red")
 vmatGreen = VisualMaterial(color="Green")
