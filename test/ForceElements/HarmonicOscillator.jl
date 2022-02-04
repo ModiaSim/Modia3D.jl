@@ -1,6 +1,6 @@
 module HarmonicOscillator
 
-using Modia
+using Modia3D
 
 Oscillator = Model(
     Length = 0.1,

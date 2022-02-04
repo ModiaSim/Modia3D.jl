@@ -1,14 +1,11 @@
 module PendulumWithDamper_Measurements
 
-using ModiaLang
-
-# ModiaLang models
-include("$(ModiaLang.path)/models/Blocks.jl")
-include("$(ModiaLang.path)/models/Electric.jl")
-include("$(ModiaLang.path)/models/Rotational.jl")
-
-using Modia
+using Modia3D
 using Measurements
+
+include("$(Modia3D.modelsPath)/Blocks.jl")
+include("$(Modia3D.modelsPath)/Electric.jl")
+include("$(Modia3D.modelsPath)/Rotational.jl")
 
 Pendulum = Model(
     m = 1.0,

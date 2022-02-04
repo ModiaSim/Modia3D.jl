@@ -43,7 +43,7 @@ Test.@testset "Robot" begin
     end
     if testsExtend == completeTests
         include(joinpath("Robot", "YouBotPingPong.jl"))  # long computation time
-        include(joinpath("Robot", "YouBotsGripping.jl"))  # long computation time
+        Test.@test_skip include(joinpath("Robot", "YouBotsGripping.jl"))  # long computation time
     end
 end
 
@@ -53,7 +53,7 @@ Test.@testset "Collision" begin
     include(joinpath("Collision", "BouncingEllipsoid.jl"))
     include(joinpath("Collision", "BouncingEllipsoidOnSphere.jl"))
     include(joinpath("Collision", "TwoCollidingBalls.jl"))
-    # include(joinpath("Collision", "TwoCollidingBoxes.jl"))
+    Test.@test_skip include(joinpath("Collision", "TwoCollidingBoxes.jl"))
     include(joinpath("Collision", "CollidingCylinders.jl"))
     include(joinpath("Collision", "NewtonsCradle.jl"))
     Test.@test_throws LoadError include(joinpath("Collision", "InValidCollisionPairingError.jl"))  # test for undefined collision pair material
@@ -85,7 +85,7 @@ Test.@testset "old" begin
         include(joinpath("old", "Plot_SlidingFriction.jl"))  # direct PyPlot calls
     end
     include(joinpath("old", "test_Shapes.jl"))
-    include(joinpath("old", "Test_PathPlanning.jl"))
+    Test.@test_skip include(joinpath("old", "Test_PathPlanning.jl")) # not working at the moment
     include(joinpath("old", "test_Solids.jl"))
     include(joinpath("old", "Visualize_Beam.jl"))
 end

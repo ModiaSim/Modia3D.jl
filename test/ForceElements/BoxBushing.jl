@@ -1,6 +1,6 @@
 module BoxBushingSimulation
 
-using Modia
+using Modia3D
 
 const largeAngles = true
 if largeAngles

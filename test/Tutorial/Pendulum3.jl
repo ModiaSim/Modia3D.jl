@@ -1,8 +1,7 @@
 module Pendulum3
-using Modia
+using Modia3D
 
-# Modia equation-based models
-include("$(Modia.modelsPath)/AllModels.jl")
+include("$(Modia3D.modelsPath)/AllModels.jl")
 
 Pendulum = Model(
     world = Object3D(feature=Scene(animationFile="Pendulum3.json")),

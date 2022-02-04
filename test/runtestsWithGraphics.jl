@@ -1,6 +1,6 @@
 module RuntestsWithGraphics
 
-using  ModiaLang
+using Modia3D
 import Test
 
 @enum TestsExtend  shortTests normalTests completeTests

@@ -1,7 +1,6 @@
 module CollidingSphereWithBunnies
 
-using Modia
-import Modia3D
+using Modia3D
 
 filenameBunny = joinpath(Modia3D.path, "objects", "bunny", "bunny.obj")
 

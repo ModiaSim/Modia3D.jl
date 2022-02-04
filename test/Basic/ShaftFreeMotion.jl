@@ -1,6 +1,6 @@
 module ShaftFreeMotion
 
-using Modia
+using Modia3D
 
 Shaft = Model(
     Length = 1.0,

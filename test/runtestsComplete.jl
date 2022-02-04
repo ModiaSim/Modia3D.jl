@@ -1,7 +1,6 @@
 module RuntestsComplete
 
-using  ModiaLang
-import Modia3D
+using Modia3D
 import Test
 
 @enum TestsExtend  shortTests normalTests completeTests

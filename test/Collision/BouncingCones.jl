@@ -1,7 +1,6 @@
 module BouncingConesSimulation
 
-using Modia
-using  Unitful
+using Modia3D
 
 vmatRed   = VisualMaterial(color="Red")
 vmatGreen = VisualMaterial(color="Green")

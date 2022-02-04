@@ -1,15 +1,12 @@
 module ServoWithRampAndPrismatic
 
-using ModiaLang
-using Unitful
-import Modia3D
+using Modia3D
 
-# ModiaLang models
-include("$(ModiaLang.path)/models/Blocks.jl")
-include("$(ModiaLang.path)/models/Electric.jl")
-include("$(ModiaLang.path)/models/Translational.jl")
+include("$(Modia3D.modelsPath)/Blocks.jl")
+include("$(Modia3D.modelsPath)/Electric.jl")
+include("$(Modia3D.modelsPath)/Translational.jl")
 
-using Modia
+
 
 ControllerPrism = Model(
     # Interface

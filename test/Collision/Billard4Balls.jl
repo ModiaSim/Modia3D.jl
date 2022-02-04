@@ -1,6 +1,6 @@
 module Billard4Balls
 
-using Modia
+using Modia3D
 
 vmatBalls = VisualMaterial(color="Red", transparency=0.0)
 vmatTable = VisualMaterial(color="DarkGreen", transparency=0.5)

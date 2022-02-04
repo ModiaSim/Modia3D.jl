@@ -1,16 +1,12 @@
 module YouBotsGripping
 
-using  ModiaLang
-import Modia3D
-using  Unitful
+using  Modia3D
 
-# ModiaLang models
-include("$(ModiaLang.path)/models/Blocks.jl")
-include("$(ModiaLang.path)/models/Electric.jl")
-include("$(ModiaLang.path)/models/Rotational.jl")
-include("$(ModiaLang.path)/models/Translational.jl")
+include("$(Modia3D.modelsPath)/Blocks.jl")
+include("$(Modia3D.modelsPath)/Electric.jl")
+include("$(Modia3D.modelsPath)/Rotational.jl")
+include("$(Modia3D.modelsPath)/Translational.jl")
 
-using Modia
 
 # some constants
 simplifiedContact = true  # use boxes instead of meshes for finger contact

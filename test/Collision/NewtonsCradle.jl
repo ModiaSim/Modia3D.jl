@@ -20,7 +20,7 @@ M. Payr (2008): **[An Experimental and Theoretical Study of Perfect Multiple
                 Dissertation, ETH Zürich.
 """
 module NewtonsCradle
-using Modia
+using Modia3D
 
 vmatVisual = VisualMaterial(color="LightBlue", transparency=0.1)
 vmatSolids   = VisualMaterial(color="Red"      , transparency=0.0)
