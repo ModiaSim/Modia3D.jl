@@ -1,7 +1,7 @@
 name: Run tests
 
 env:
-  JULIA_NUM_THREADS: ${{ matrix.threads }}
+  JULIA_NUM_THREADS: 4
   
 on:
   - push
