@@ -47,9 +47,9 @@ Recursively traverse model and perform the following actions:
   - Return a vector of joint objects as `joints`.
   - Return a vector of all force element objects.
 """
-function checkMultibodySystemAndGetWorldAndJointsAndForceElements(instantiatedModel::ModiaLang.SimulationModel{F,ParType,EvaluatedParType,TimeType}, id::Int) where {F,ParType,EvaluatedParType,TimeType}
+function checkMultibodySystemAndGetWorldAndJointsAndForceElements(instantiatedModel::ModiaLang.SimulationModel{F,TimeType}, id::Int) where {F,TimeType}
     # Find root mbs of multibody system
-    (mbsRoot, mbsPath) = ModiaLang.getIdParameter(instantiatedModel.evaluatedParameters, ParType, id)
+    (mbsRoot, mbsPath) = ModiaLang.getIdParameter(instantiatedModel.evaluatedParameters, id)
     if isnothing(mbsRoot)
         error("\n", instantiatedModel.modelName, ": did not find _id = ", id, " in the evaluated parameters!")
     end

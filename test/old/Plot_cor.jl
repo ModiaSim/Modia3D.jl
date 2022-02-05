@@ -1,8 +1,7 @@
 module Plot_cor
 
-using  PyCall
-using  PyPlot
 import Modia3D
+import ModiaPlot_PyPlot: PyCall, PyPlot
 
 pyplot_rc = PyCall.PyDict(PyPlot.matplotlib."rcParams")
 pyplot_rc["font.size"] = 10.0
@@ -70,51 +69,51 @@ for i in 1:length(vreld)
 end
 
 #=
-figure(1)
-clf()
-plot(vrelc, cor_res0, vrelc, cor_res1, vrelc, cor_res2, vrelc, cor_res3, vrelc, cor_res4)
-grid(true)
-xlabel("\$\\dot{\\delta}^- \\; [m/s]\$")
-ylabel("\$cor_{reg}\$")
-legend(["\$cor = 1.0, v_{small}=0.01 \\; m/s\$",
-        "\$cor = 0.7, v_{small}=0.01 \\; m/s\$",
-        "\$cor = 0.3, v_{small}=0.01 \\; m/s\$",
-        "\$cor = 0.1, v_{small}=0.01 \\; m/s\$",
-        "\$cor = 0.0, v_{small}=0.01 \\; m/s\$"],loc="upper right")
+PyPlot.figure(1)
+PyPlot.clf()
+PyPlot.plot(vrelc, cor_res0, vrelc, cor_res1, vrelc, cor_res2, vrelc, cor_res3, vrelc, cor_res4)
+PyPlot.grid(true)
+PyPlot.xlabel("\$\\dot{\\delta}^- \\; [m/s]\$")
+PyPlot.ylabel("\$cor_{reg}\$")
+PyPlot.legend(["\$cor = 1.0, v_{small}=0.01 \\; m/s\$",
+               "\$cor = 0.7, v_{small}=0.01 \\; m/s\$",
+               "\$cor = 0.3, v_{small}=0.01 \\; m/s\$",
+               "\$cor = 0.1, v_{small}=0.01 \\; m/s\$",
+               "\$cor = 0.0, v_{small}=0.01 \\; m/s\$"],loc="upper right")
 =#
 
-figure(2)
-clf()
-plot(vrela, d_res0a, vrela, d_res1a, vrela, d_res2a, vrela, d_res3a, vrela, d_res4a)
-grid(true)
-xlabel("\$\\dot{\\delta}^- \\; [m/s]\$")
-ylabel("\$d \\; [Ns/m]\$")
-legend(["\$cor = 1.0, v_{small}=0.01 \\; m/s\$",
-        "\$cor = 0.7, v_{small}=0.01 \\; m/s\$",
-        "\$cor = 0.3, v_{small}=0.01 \\; m/s\$",
-        "\$cor = 0.1, v_{small}=0.01 \\; m/s\$",
-        "\$cor = 0.0, v_{small}=0.01 \\; m/s\$"],loc="upper right")
+PyPlot.figure(2)
+PyPlot.clf()
+PyPlot.plot(vrela, d_res0a, vrela, d_res1a, vrela, d_res2a, vrela, d_res3a, vrela, d_res4a)
+PyPlot.grid(true)
+PyPlot.xlabel("\$\\dot{\\delta}^- \\; [m/s]\$")
+PyPlot.ylabel("\$d \\; [Ns/m]\$")
+PyPlot.legend(["\$cor = 1.0, v_{small}=0.01 \\; m/s\$",
+               "\$cor = 0.7, v_{small}=0.01 \\; m/s\$",
+               "\$cor = 0.3, v_{small}=0.01 \\; m/s\$",
+               "\$cor = 0.1, v_{small}=0.01 \\; m/s\$",
+               "\$cor = 0.0, v_{small}=0.01 \\; m/s\$"],loc="upper right")
 
 #=
-figure(3)
-clf()
-plot(vrelb, d_res0b, vrelb, d_res1b, vrelb, d_res2b, vrelb, d_res3b, vrelb, d_res4b)
-grid(true)
-xlabel("\$\\dot{\\delta}^- \\; [m/s]\$")
-ylabel("\$d \\; [Ns/m]\$")
-legend(["\$cor = 1.0, v_{small}=0.01 \\; m/s\$",
-        "\$cor = 0.7, v_{small}=0.01 \\; m/s\$",
-        "\$cor = 0.3, v_{small}=0.01 \\; m/s\$",
-        "\$cor = 0.1, v_{small}=0.01 \\; m/s\$",
-        "\$cor = 0.0, v_{small}=0.01 \\; m/s\$"],loc="upper right")
+PyPlot.figure(3)
+PyPlot.clf()
+PyPlot.plot(vrelb, d_res0b, vrelb, d_res1b, vrelb, d_res2b, vrelb, d_res3b, vrelb, d_res4b)
+PyPlot.grid(true)
+PyPlot.xlabel("\$\\dot{\\delta}^- \\; [m/s]\$")
+PyPlot.ylabel("\$d \\; [Ns/m]\$")
+PyPlot.legend(["\$cor = 1.0, v_{small}=0.01 \\; m/s\$",
+               "\$cor = 0.7, v_{small}=0.01 \\; m/s\$",
+               "\$cor = 0.3, v_{small}=0.01 \\; m/s\$",
+               "\$cor = 0.1, v_{small}=0.01 \\; m/s\$",
+               "\$cor = 0.0, v_{small}=0.01 \\; m/s\$"],loc="upper right")
 =#
 
-figure(4)
-clf()
-plot(vreld, reg)
-grid(true)
-xlabel("\$v_{abs}\$")
-legend(["\$reg(v_{abs},0.1)\$"])
+PyPlot.figure(4)
+PyPlot.clf()
+PyPlot.plot(vreld, reg)
+PyPlot.grid(true)
+PyPlot.xlabel("\$v_{abs}\$")
+PyPlot.legend(["\$reg(v_{abs},0.1)\$"])
 
 println("... test/collision/Plot_cor.jl completed.")
 

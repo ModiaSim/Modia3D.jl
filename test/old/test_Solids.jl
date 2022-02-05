@@ -3,7 +3,8 @@ module TestSolid
 import Modia3D
 using  Modia3D.Test
 using  Modia3D.LinearAlgebra
-using StaticArrays
+using  Modia3D.StaticArrays
+
 EYE3() = @SMatrix[1.0  0.0  0.0;
                 0.0   1.0    0.0 ;
                 0.0   0.0    1.0]

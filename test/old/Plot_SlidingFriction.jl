@@ -1,7 +1,7 @@
 module Plot_SlidingFriction
 
-using PyCall
-using PyPlot
+import ModiaPlot_PyPlot: PyCall, PyPlot
+
 pyplot_rc = PyCall.PyDict(PyPlot.matplotlib."rcParams")
 pyplot_rc["font.size"] = 10.0
 
@@ -14,12 +14,12 @@ for i in 1:length(vrel)
     fr1[i] = vrel[i] / regularize(vrel[i], vsmall)
 end
 
-figure(1)
-clf()
-plot(vrel, fr1)
-grid(true)
-xlabel("\$|\\vec{v}_{rel,t}|\$")
-legend(["\$ |\\vec{v}_{rel,t}| / reg( |\\vec{v}_{rel,t}|, 0.01) \$"])
+PyPlot.figure(1)
+PyPlot.clf()
+PyPlot.plot(vrel, fr1)
+PyPlot.grid(true)
+PyPlot.xlabel("\$|\\vec{v}_{rel,t}|\$")
+PyPlot.legend(["\$ |\\vec{v}_{rel,t}| / reg( |\\vec{v}_{rel,t}|, 0.01) \$"])
 
 println("... test/collision/Plot_SlidingFriction.jl completed.")
 
