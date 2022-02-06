@@ -1,14 +1,10 @@
 module PendulumWithFixSimulation
 
-using ModiaLang
+using Modia3D
 
-# ModiaLang models
-include("$(ModiaLang.path)/models/Blocks.jl")
-include("$(ModiaLang.path)/models/Electric.jl")
-include("$(ModiaLang.path)/models/Rotational.jl")
-
-import Modia3D
-using  Modia3D.ModiaInterface
+include("$(Modia3D.modelsPath)/Blocks.jl")
+include("$(Modia3D.modelsPath)/Electric.jl")
+include("$(Modia3D.modelsPath)/Rotational.jl")
 
 Bar = Model(
     m  = 0.1,

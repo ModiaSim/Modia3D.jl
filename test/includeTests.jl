@@ -12,16 +12,24 @@ Test.@testset "Basic" begin
     include(joinpath("Basic", "BoxPlanarMotion.jl"))
     include(joinpath("Basic", "ShaftFreeMotion.jl"))
     include(joinpath("Basic", "ShaftFreeMotionAdaptiveRotSequence.jl"))
-    Test.@test_throws LoadError include(joinpath("Basic", "Object3DWithoutParentError.jl"))
+    Test.@test_throws LoadError include(joinpath("Basic", "Object3DWithoutParentError.jl"))  # test for too many objects without parent
     if testsExtend >= normalTests
         include(joinpath("Basic", "Mobile.jl"))
+    end
+    if testsExtend == completeTests
+        include(joinpath("Basic", "PendulumWithDamper_Measurements.jl"))
+        include(joinpath("Basic", "PendulumWithDamper_MonteCarlo.jl"))
     end
 end
 
 Test.@testset "Force Elements" begin
     include(joinpath("ForceElements", "HarmonicOscillator.jl"))
+    include(joinpath("ForceElements", "BoxBushing.jl"))
     include(joinpath("ForceElements", "BoxSpringDamperPtP.jl"))
     include(joinpath("ForceElements", "BoxNonLinearSpringDamperPtP.jl"))
+    if testsExtend == completeTests
+        include(joinpath("ForceElements", "BoxBushing_Measurements.jl"))
+    end
 end
 
 Test.@testset "Robot" begin
@@ -30,12 +38,12 @@ Test.@testset "Robot" begin
     include(joinpath("Robot", "ServoWithRampAndRevolute.jl"))
     include(joinpath("Robot", "ServoWithPathAndRevolute.jl"))
     if testsExtend >= normalTests
-        include(joinpath("Robot", "YouBotWithSphere.jl"))
+        Test.@test_skip include(joinpath("Robot", "YouBotWithSphere.jl"))
         include(joinpath("Robot", "YouBotGripping.jl"))
     end
     if testsExtend == completeTests
         include(joinpath("Robot", "YouBotPingPong.jl"))  # long computation time
-        include(joinpath("Robot", "YouBotsGripping.jl"))  # long computation time
+        Test.@test_skip include(joinpath("Robot", "YouBotsGripping.jl"))  # long computation time
     end
 end
 
@@ -43,12 +51,15 @@ Test.@testset "Collision" begin
     include(joinpath("Collision", "BouncingSphere.jl"))
     include(joinpath("Collision", "BouncingSphereFreeMotion.jl"))
     include(joinpath("Collision", "BouncingEllipsoid.jl"))
+    include(joinpath("Collision", "BouncingEllipsoidOnSphere.jl"))
     include(joinpath("Collision", "TwoCollidingBalls.jl"))
-    include(joinpath("Collision", "TwoCollidingBoxes.jl"))
+    Test.@test_skip include(joinpath("Collision", "TwoCollidingBoxes.jl"))
     include(joinpath("Collision", "CollidingCylinders.jl"))
     include(joinpath("Collision", "NewtonsCradle.jl"))
-    Test.@test_throws LoadError include(joinpath("Collision", "InValidCollisionPairingError.jl"))  # not defined collision pair material
+    Test.@test_throws LoadError include(joinpath("Collision", "InValidCollisionPairingError.jl"))  # test for undefined collision pair material
     if testsExtend >= normalTests
+        include(joinpath("Collision", "BouncingSphere2.jl"))  # use solver QBDF, Tsit5 with stopTime=2.5s; requiredFinalStates=[0.0, 0.0]
+        include(joinpath("Collision", "ZeroCrossingIssue.jl"))
         include(joinpath("Collision", "BouncingCones.jl"))
         include(joinpath("Collision", "BouncingCapsules.jl"))
         include(joinpath("Collision", "BouncingBeams.jl"))

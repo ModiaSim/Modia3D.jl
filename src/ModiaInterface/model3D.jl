@@ -1,44 +1,42 @@
 # ModiaLang interface to Modia3D
-Object3D(        ; kwargs...) = Par(; _constructor = :(Modia3D.Object3D), _path = true, kwargs...)
-Scene(           ; kwargs...) = Par(; _constructor = :(Modia3D.Scene)                 , kwargs...)
-Visual(          ; kwargs...) = Par(; _constructor = :(Modia3D.Visual)                , kwargs...)
-Solid(           ; kwargs...) = Par(; _constructor = :(Modia3D.Solid)                 , kwargs...)
-Box(             ; kwargs...) = Par(; _constructor = :(Modia3D.Box)                   , kwargs...)
-Beam(            ; kwargs...) = Par(; _constructor = :(Modia3D.Beam)                  , kwargs...)
-Cylinder(        ; kwargs...) = Par(; _constructor = :(Modia3D.Cylinder)              , kwargs...)
-Sphere(          ; kwargs...) = Par(; _constructor = :(Modia3D.Sphere)                , kwargs...)
-Ellipsoid(       ; kwargs...) = Par(; _constructor = :(Modia3D.Ellipsoid)             , kwargs...)
-Capsule(         ; kwargs...) = Par(; _constructor = :(Modia3D.Capsule)               , kwargs...)
-Cone(            ; kwargs...) = Par(; _constructor = :(Modia3D.Cone)                  , kwargs...)
-SpringShape(     ; kwargs...) = Par(; _constructor = :(Modia3D.Spring)                , kwargs...)
-GearWheel(       ; kwargs...) = Par(; _constructor = :(Modia3D.GearWheel)             , kwargs...)
-Grid(            ; kwargs...) = Par(; _constructor = :(Modia3D.Grid)                  , kwargs...)
-VisualMaterial(  ; kwargs...) = Par(; _constructor = :(Modia3D.VisualMaterial)        , kwargs...)
-MassProperties(  ; kwargs...) = Par(; _constructor = :(Modia3D.MassProperties)        , kwargs...)
-CoordinateSystem(; kwargs...) = Par(; _constructor = :(Modia3D.CoordinateSystem)      , kwargs...)
-FileMesh(        ; kwargs...) = Par(; _constructor = :(Modia3D.FileMesh)              , kwargs...)
-Font(            ; kwargs...) = Par(; _constructor = :(Modia3D.Font)                  , kwargs...)
-TextShape(       ; kwargs...) = Par(; _constructor = :(Modia3D.TextShape)             , kwargs...)
-ModelicaShape(   ; kwargs...) = Par(; _constructor = :(Modia3D.ModelicaShape)         , kwargs...)
-Fix(             ; kwargs...) = Par(; _constructor = :(Modia3D.Fix)                   , kwargs...)
-Bushing(         ; kwargs...) = Par(; _constructor = :(Modia3D.Bushing)               , kwargs...)
-SpringDamperPtP( ; kwargs...) = Par(; _constructor = :(Modia3D.SpringDamperPtP)       , kwargs...)
+Object3D(        ; kwargs...) = Par(; _constructor = :(Modia3D.Composition.Object3D{FloatType}), _path = true, kwargs...)
+Scene(           ; kwargs...) = Par(; _constructor = :(Modia3D.Composition.Scene{FloatType})                 , kwargs...)
+Visual(          ; kwargs...) = Par(; _constructor = :(Modia3D.Shapes.Visual)                           , kwargs...)
+Solid(           ; kwargs...) = Par(; _constructor = :(Modia3D.Shapes.Solid{FloatType})                 , kwargs...)
+Box(             ; kwargs...) = Par(; _constructor = :(Modia3D.Shapes.Box{FloatType})                   , kwargs...)
+Beam(            ; kwargs...) = Par(; _constructor = :(Modia3D.Shapes.Beam{FloatType})                  , kwargs...)
+Cylinder(        ; kwargs...) = Par(; _constructor = :(Modia3D.Shapes.Cylinder{FloatType})              , kwargs...)
+Sphere(          ; kwargs...) = Par(; _constructor = :(Modia3D.Shapes.Sphere{FloatType})                , kwargs...)
+Ellipsoid(       ; kwargs...) = Par(; _constructor = :(Modia3D.Shapes.Ellipsoid{FloatType})             , kwargs...)
+Capsule(         ; kwargs...) = Par(; _constructor = :(Modia3D.Shapes.Capsule{FloatType})               , kwargs...)
+Cone(            ; kwargs...) = Par(; _constructor = :(Modia3D.Shapes.Cone{FloatType})                  , kwargs...)
+SpringShape(     ; kwargs...) = Par(; _constructor = :(Modia3D.Shapes.Spring)                           , kwargs...)
+GearWheel(       ; kwargs...) = Par(; _constructor = :(Modia3D.Shapes.GearWheel)                        , kwargs...)
+Grid(            ; kwargs...) = Par(; _constructor = :(Modia3D.Shapes.Grid)                             , kwargs...)
+VisualMaterial(  ; kwargs...) = Par(; _constructor = :(Modia3D.Shapes.VisualMaterial)                   , kwargs...)
+MassProperties(  ; kwargs...) = Par(; _constructor = :(Modia3D.Shapes.MassProperties{FloatType})        , kwargs...)
+CoordinateSystem(; kwargs...) = Par(; _constructor = :(Modia3D.Shapes.CoordinateSystem)                 , kwargs...)
+FileMesh(        ; kwargs...) = Par(; _constructor = :(Modia3D.Shapes.FileMesh)                         , kwargs...)
+Font(            ; kwargs...) = Par(; _constructor = :(Modia3D.Shapes.Font)                             , kwargs...)
+TextShape(       ; kwargs...) = Par(; _constructor = :(Modia3D.Shapes.TextShape)                        , kwargs...)
+ModelicaShape(   ; kwargs...) = Par(; _constructor = :(Modia3D.Shapes.ModelicaShape)                    , kwargs...)
+Fix(             ; kwargs...) = Par(; _constructor = :(Modia3D.Composition.Fix{FloatType})                   , kwargs...)
+Bushing(         ; kwargs...) = Par(; _constructor = :(Modia3D.Composition.Bushing{FloatType})               , kwargs...)
+SpringDamperPtP( ; kwargs...) = Par(; _constructor = :(Modia3D.Composition.SpringDamperPtP{FloatType})       , kwargs...)
 
-MassPropertiesFromShape() = Par(; _constructor = :(Modia3D.MassPropertiesFromShape))
-MassPropertiesFromShapeAndMass(; mass) = Par(; _constructor = :(Modia3D.MassPropertiesFromShapeAndMass), mass = mass)
-UniformGravityField(; kwargs...) = Par(; _constructor = :(Modia3D.UniformGravityField), kwargs...)
+MassPropertiesFromShape()              = Par(; _constructor = :(Modia3D.Shapes.MassPropertiesFromShape{FloatType}))
+MassPropertiesFromShapeAndMass(; mass) = Par(; _constructor = :(Modia3D.Shapes.MassPropertiesFromShapeAndMass{FloatType}), mass = mass)
+UniformGravityField(; kwargs...)       = Par(; _constructor = :(Modia3D.Composition.UniformGravityField), kwargs...)
 
-RefPath(; kwargs...) = Modia3D.ReferencePath(; kwargs...)
+RefPath(; kwargs...)                 = Modia3D.PathPlanning.ReferencePath(; kwargs...)
+ptpJointSpace(; kwargs...)           = Modia3D.PathPlanning.ptpJointSpace(; kwargs...)
+scheduleReferenceMotion(; kwargs...) = Modia3D.PathPlanning.scheduleReferenceMotion(; kwargs...)
+calculateRobotMovement(args...)      = Modia3D.PathPlanning.calculateRobotMovement(args...)
+getRefPathPosition(args...)          = Modia3D.PathPlanning.getRefPathPosition(args...)
+getRefPathInitPosition(args...)      = Modia3D.PathPlanning.getRefPathInitPosition(args...)
 
-ptpJointSpace(; kwargs...) = Modia3D.ptpJointSpace(; kwargs...)
-scheduleReferenceMotion(; kwargs...) = Modia3D.scheduleReferenceMotion(; kwargs...)
 
-calculateRobotMovement(args...) = Modia3D.calculateRobotMovement(args...)
-getRefPathPosition(args...) = Modia3D.getRefPathPosition(args...)
-getRefPathInitPosition(args...) = Modia3D.getRefPathInitPosition(args...)
-
-    
-Revolute(; obj1, obj2, axis=3, phi=Var(init=0.0), w=Var(init=0.0), canCollide=true) = Model(; _constructor = Par(value = :(Modia3D.Revolute), _path = true, _jointType = :Revolute),
+Revolute(; obj1, obj2, axis=3, phi=Var(init=0.0), w=Var(init=0.0), canCollide=true) = Model(; _constructor = Par(value = :(Modia3D.Composition.Revolute{FloatType}), _path = true, _jointType = :Revolute),
     obj1 = Par(value = obj1),
     obj2 = Par(value = obj2),
     axis = Par(value = axis),
@@ -50,7 +48,7 @@ Revolute(; obj1, obj2, axis=3, phi=Var(init=0.0), w=Var(init=0.0), canCollide=tr
         ]
 )
 
-RevoluteWithFlange(; obj1, obj2, axis=3, phi=Var(init=0.0), w=Var(init=0.0), canCollide=true) = Model(; _constructor = Par(value = :(Modia3D.Revolute), _path = true, _jointType = :RevoluteWithFlange),
+RevoluteWithFlange(; obj1, obj2, axis=3, phi=Var(init=0.0), w=Var(init=0.0), canCollide=true) = Model(; _constructor = Par(value = :(Modia3D.Composition.Revolute{FloatType}), _path = true, _jointType = :RevoluteWithFlange),
     obj1   = Par(value = obj1),
     obj2   = Par(value = obj2),
     axis   = Par(value = axis),
@@ -64,7 +62,7 @@ RevoluteWithFlange(; obj1, obj2, axis=3, phi=Var(init=0.0), w=Var(init=0.0), can
         ]
 )
 
-Prismatic(; obj1, obj2, axis=1, s=Var(init=0.0), v=Var(init=0.0), canCollide=true) = Model(; _constructor = Par(value = :(Modia3D.Prismatic), _path = true, _jointType = :Prismatic),
+Prismatic(; obj1, obj2, axis=1, s=Var(init=0.0), v=Var(init=0.0), canCollide=true) = Model(; _constructor = Par(value = :(Modia3D.Composition.Prismatic{FloatType}), _path = true, _jointType = :Prismatic),
     obj1 = Par(value = obj1),
     obj2 = Par(value = obj2),
     axis = Par(value = axis),
@@ -76,7 +74,7 @@ Prismatic(; obj1, obj2, axis=1, s=Var(init=0.0), v=Var(init=0.0), canCollide=tru
         ]
 )
 
-PrismaticWithFlange(; obj1, obj2, axis=1, s=Var(init=0.0), v=Var(init=0.0), canCollide=true) = Model(; _constructor = Par(value = :(Modia3D.Prismatic), _path = true, _jointType = :PrismaticWithFlange),
+PrismaticWithFlange(; obj1, obj2, axis=1, s=Var(init=0.0), v=Var(init=0.0), canCollide=true) = Model(; _constructor = Par(value = :(Modia3D.Composition.Prismatic{FloatType}), _path = true, _jointType = :PrismaticWithFlange),
     obj1   = Par(value = obj1),
     obj2   = Par(value = obj2),
     axis   = Par(value = axis),
@@ -151,12 +149,10 @@ function change_rotSequenceInNextIteration!(rot::AbstractVector, isrot123::Bool,
     return next_isrot123
 end
 
-
 singularRem(ang) = abs(rem2pi(ang, RoundNearest)) - 1.5  # is negative/positive in valid/singular angle range
 J123or132(rot, isrot123) = isrot123 ? J123(rot) : J132(rot)
 
-
-FreeMotion(; obj1, obj2, r=Var(init=zeros(3)), rot=Var(init=zeros(3)), v=Var(init=zeros(3)), w=Var(init=zeros(3))) = Model(; _constructor = Par(value = :(Modia3D.FreeMotion), _path = true, ndof = 6),
+FreeMotion(; obj1, obj2, r=Var(init=zeros(3)), rot=Var(init=zeros(3)), v=Var(init=zeros(3)), w=Var(init=zeros(3))) = Model(; _constructor = Par(value = :(Modia3D.Composition.FreeMotion{FloatType}), _path = true, ndof = 6),
     obj1 = Par(value = obj1),
     obj2 = Par(value = obj2),
     r    = r,

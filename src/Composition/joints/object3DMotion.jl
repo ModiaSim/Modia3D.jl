@@ -5,11 +5,11 @@
 using Unitful
 
 # FixedJoint is used if an Object3D is rigidly fixed to its parent Object3D
-struct FixedJoint <: Modia3D.AbstractJoint
+struct FixedJoint{F <: Modia3D.VarFloatType} <: Modia3D.AbstractJoint
 end
 
 # FixedTranslationJoint is used if an Object3D is rigidly fixed to its parent Object3D without any rotation
-struct FixedTranslationJoint <: Modia3D.AbstractJoint
+struct FixedTranslationJoint{F <: Modia3D.VarFloatType} <: Modia3D.AbstractJoint
 end
 
 
@@ -23,7 +23,7 @@ with respect to `obj1::`[`Object3D`](@ref). The initial position is `r`
 (resolved in `obj2`) are the initial cartesian translational and rotational
 velocity vectors.
 """
-mutable struct FreeMotion <: Modia3D.AbstractJoint
+mutable struct FreeMotion{F <: Modia3D.VarFloatType} <: Modia3D.AbstractJoint
     path::String
 
     obj1::Modia3D.AbstractObject3D
@@ -31,27 +31,27 @@ mutable struct FreeMotion <: Modia3D.AbstractJoint
 
     ndof::Int
 
-    r::SVector{3,Float64}
-    rot::SVector{3,Float64}        # cardan angles
+    r::SVector{3,F}
+    rot::SVector{3,F}        # cardan angles
     isrot123::Bool                 # = true: rotation sequence x-y-z, otherwise x-z-y
 
-    v::SVector{3,Float64}
-    w::SVector{3,Float64}          # angular velocity vector
+    v::SVector{3,F}
+    w::SVector{3,F}          # angular velocity vector
 
-    a::SVector{3,Float64}
-    z::SVector{3,Float64}          # angular acceleration vector
+    a::SVector{3,F}
+    z::SVector{3,F}          # angular acceleration vector
 
-    residue_f::SVector{3,Float64}
-    residue_t::SVector{3,Float64}
+    residue_f::SVector{3,F}
+    residue_t::SVector{3,F}
 
-    function FreeMotion(; obj1::Modia3D.AbstractObject3D,
+    function FreeMotion{F}(; obj1::Modia3D.AbstractObject3D,
                           obj2::Modia3D.AbstractObject3D,
                           path::String = "",
-                          r::AbstractVector   = Modia3D.ZeroVector3D,
-                          rot::AbstractVector = Modia3D.ZeroVector3D,
-                          v::AbstractVector   = Modia3D.ZeroVector3D,
-                          w::AbstractVector   = Modia3D.ZeroVector3D,
-                          next_isrot123::Bool = true)  # dummy argument, is ignored
+                          r::AbstractVector   = Modia3D.ZeroVector3D(F),
+                          rot::AbstractVector = Modia3D.ZeroVector3D(F),
+                          v::AbstractVector   = Modia3D.ZeroVector3D(F),
+                          w::AbstractVector   = Modia3D.ZeroVector3D(F),
+                          next_isrot123::Bool = true) where F <: Modia3D.VarFloatType # dummy argument, is ignored
 
         #(parent,obj,cutJoint) = attach(obj1, obj2)
         #if cutJoint
@@ -64,16 +64,16 @@ mutable struct FreeMotion <: Modia3D.AbstractJoint
         #        "    obj2 has a root, but obj1 has not root. This is currently not supported (exchange obj1 and obj2)!")
         #end
 
-        r   = Modia3D.convertAndStripUnit(SVector{3,Float64}, u"m", r)
-        rot = Modia3D.convertAndStripUnit(SVector{3,Float64}, u"rad", rot)
-        v   = Modia3D.convertAndStripUnit(SVector{3,Float64}, u"m/s"  , v)
-        w   = Modia3D.convertAndStripUnit(SVector{3,Float64}, u"rad/s", w)
-        a   = Modia3D.ZeroVector3D
-        z   = Modia3D.ZeroVector3D
+        r   = Modia3D.convertAndStripUnit(SVector{3,F}, u"m", r)
+        rot = Modia3D.convertAndStripUnit(SVector{3,F}, u"rad", rot)
+        v   = Modia3D.convertAndStripUnit(SVector{3,F}, u"m/s"  , v)
+        w   = Modia3D.convertAndStripUnit(SVector{3,F}, u"rad/s", w)
+        a   = Modia3D.ZeroVector3D(F)
+        z   = Modia3D.ZeroVector3D(F)
         isrot123 = true    # next_isrot123 is ignored.
 
-        residue_f = Modia3D.ZeroVector3D
-        residue_t = Modia3D.ZeroVector3D
+        residue_f = Modia3D.ZeroVector3D(F)
+        residue_t = Modia3D.ZeroVector3D(F)
 
         obj2.joint      = new(path, obj1, obj2, 6, r, rot, isrot123, v, w, a, z, residue_f, residue_t)
         obj2.parent     = obj1

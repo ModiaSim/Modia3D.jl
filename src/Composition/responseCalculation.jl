@@ -22,10 +22,11 @@
 
 Return a response material object at contact start.
 """
-function contactStart(obj1::Object3D, obj2::Object3D, rContact::SVector{3,Float64},
-                      contactNormal::SVector{3,Float64}, elasticContactReductionFactor::Float64)
+function contactStart(obj1::Object3D{F}, obj2::Object3D{F}, rContact::SVector{3,F},
+                      contactNormal::SVector{3,F}, elasticContactReductionFactor::F,
+                      maximumContactDamping::F) where F <: Modia3D.VarFloatType
     material = Shapes.getContactPairMaterial(obj1, obj2)
-    return contactStart(material, obj1, obj2, rContact, contactNormal, elasticContactReductionFactor)
+    return contactStart(material, obj1, obj2, rContact, contactNormal, elasticContactReductionFactor, maximumContactDamping)
 end
 
 
@@ -35,8 +36,8 @@ end
 Return the relative velocity in normal direction `contactNormal` at
 contact point `rContact` of the two penetrating objects `obj1, obj2`.
 """
-function normalRelativeVelocityAtContact(obj1::Object3D, obj2::Object3D,
-                                         rContact::Frames.Vector3D, e_n::Frames.Vector3D)
+function normalRelativeVelocityAtContact(obj1::Object3D{F}, obj2::Object3D{F},
+                                         rContact::SVector{3,F}, e_n::SVector{3,F}) where F <: Modia3D.VarFloatType
   r_rel1 = rContact - obj1.r_abs
   r_rel2 = rContact - obj2.r_abs
   w1     = obj1.R_abs'*obj1.w

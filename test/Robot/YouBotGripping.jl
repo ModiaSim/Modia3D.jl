@@ -1,17 +1,12 @@
 module YouBotGripping
 
-using  ModiaLang
-import Modia3D
-using  Unitful
+using Modia3D
 
-# ModiaLang models
-include("$(ModiaLang.path)/models/Blocks.jl")
-include("$(ModiaLang.path)/models/Electric.jl")
-include("$(ModiaLang.path)/models/Rotational.jl")
-include("$(ModiaLang.path)/models/Translational.jl")
+include("$(Modia3D.modelsPath)/Blocks.jl")
+include("$(Modia3D.modelsPath)/Electric.jl")
+include("$(Modia3D.modelsPath)/Rotational.jl")
+include("$(Modia3D.modelsPath)/Translational.jl")
 
-import Modia3D
-using  Modia3D.ModiaInterface
 
 # some constants
 simplifiedContact = true  # use boxes instead of meshes for finger contact
@@ -47,7 +42,7 @@ gripper_left_finger_obj  = joinpath(Modia3D.path, "objects/robot_KUKA_YouBot/gri
 gripper_right_finger_obj = joinpath(Modia3D.path, "objects/robot_KUKA_YouBot/gripper_right_finger.obj")
 
 # Drive train data: motor inertias and gear ratios
-nullRot = nothing #SMatrix{3,3,Float64,9}(Matrix(1.0I, 3, 3))
+nullRot = nothing
 
 motorInertia1 = 0.0000135 + 0.000000409
 motorInertia2 = 0.0000135 + 0.000000409
@@ -62,22 +57,22 @@ gearRatio5    = 71.0
 
 m1=1.390
 translation1 =[0.033,0,0]
-rotation1 =Modia3D.rot1(180u"°")
+rotation1 = [180u"°", 0, 0]
 
 m2=1.318
 translation2=[0.155,0,0]
-rotation2=Modia3D.rot123(90u"°", 0.0, -90u"°")
+rotation2 = [90u"°", 0.0, -90u"°"]
 
 m3=0.821
 translation3=[0,0.135,0]
-rotation3=Modia3D.rot3(-90u"°")
+rotation3 = [0, 0, -90u"°"]
 
 m4=0.769
 translation4=[0,0.11316,0]
 
 m5=0.687
 translation5=[0,0,0.05716]
-rotation5=Modia3D.rot1(-90u"°")
+rotation5 = [-90u"°", 0, 0]
 
 ### ----------------- Servo Model -----------------------
 # parameters for Link
@@ -95,13 +90,13 @@ motorInertiaGripper = 0.1
 gearRatioGripper    = 1.0
 
 #### ----------- Path Planning ------------------
-referencePath1 = Modia3D.ReferencePath(
+referencePath1 = Modia3D.PathPlanning.ReferencePath(
     names =    ["angle1", "angle2", "angle3", "angle4", "angle5", "gripper"],
     position = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
     v_max =    [2.68512, 2.68512, 4.8879, 5.8997, 5.8997, 2.0],
     a_max =    [1.5, 1.5, 1.5, 1.5, 1.5, 0.5])
 
-Modia3D.ptpJointSpace(referencePath = referencePath1, positions =
+Modia3D.PathPlanning.ptpJointSpace(referencePath = referencePath1, positions =
     [0.0  0.0    0.0       0.0   0.0  0.0;
      pi   pi/4   pi/4      0.0   0.0  diameter+0.01;
      pi   pi/4   pi/4      1.04  0.0  diameter+0.01;
@@ -415,7 +410,7 @@ Link = Model(
 )
 
 Gripper = Model(
-    obj1 = Object3D(parent=:(link5.obj2), rotation=Modia3D.rot3(-180u"°")),
+    obj1 = Object3D(parent=:(link5.obj2), rotation = [0, 0, -180u"°"]),
     gripper_base_frame = Object3D(parent=:obj1, feature=Solid(shape=
         FileMesh(filename = gripper_base_frame_obj), massProperties=MassPropertiesFromShapeAndMass(mass=0.199))),
     gripper_left_finger_a = Object3D(),
@@ -488,9 +483,9 @@ YouBot = Model(
 
 Scenario = Model(
     gravField = UniformGravityField(g=9.81, n=[0,0,-1]),
-    world = Object3D(feature=Scene(gravityField=:gravField, visualizeFrames=false, nominalLength=tableX,
+    world = Object3D(feature=Scene(gravityField=:gravField,mprTolerance = 1.0e-13, visualizeFrames=false, nominalLength=tableX,
     animationFile="YouBotGripping.json",
-    enableContactDetection=true, elasticContactReductionFactor=1e-3)),
+    enableContactDetection=true, maximumContactDamping=1000, elasticContactReductionFactor=1e-3)),
 #   worldFrame = Object3D(parent=:world, feature=Visual(shape=CoordinateSystem(length=0.2))),
 
     table = Table,
@@ -499,7 +494,7 @@ Scenario = Model(
     sphere = Object3D(
         feature=Solid(shape=Sphere(diameter=diameter), visualMaterial=vmatGrey, solidMaterial="DryWood", collision=true)),
 
-    sphereJoint = FreeMotion(obj1=:world, obj2=:sphere, r=Var(init=[-0.799, 0.0, 0.1792])),
+    sphereJoint = FreeMotion(obj1=:world, obj2=:sphere, r=Var(init=[-0.799, 0.005, 0.1842])),  # 0.1792
 
     youbot1 = YouBot,
 )
@@ -520,13 +515,13 @@ youbotModel = buildModia3D(Scenario) | modelParameters
 youbot = @instantiateModel(youbotModel, unitless=true, logCode=false, log=false)
 
 stopTime = 14.0
-tolerance = 1e-6
+tolerance = 1e-5
 if simplifiedContact
-    requiredFinalStates = [-0.0033893963354342826, -0.005096954762027042, 0.38499191688168316, -1.445830218278958e-8, -2.7694145227833314e-8, -7.258566222266568e-13, 0.36864138584111816, -0.9931096002408847, 3.4546855331645943, -5.08129867112521e-7, 6.65198823908264e-7, -7.189333025824487e-7, -8.485351612092523e-7, 8.489451437830829e-7, -1.048206504157684e-5, 1.048341761384057e-5, -2.3863801845061742e-5, 2.3866297886359383e-5, -1.4665670255696616e-5, 1.4668022798963407e-5, 1.4943381828981332e-7, -1.4944863129434576e-7, -0.0064830265810847665, 0.16152090176322154, -0.1177121839079235, -0.05195318968695996, 0.0005198281051871344, -0.014745897597333173, 0.02969913219796793, 0.00030080034901011366]
+    requiredFinalStates = [-0.0034351234016326967, -0.005096438607421972, 0.3849919166786696, 3.7229476165027234e-9, 1.3643680751630356e-12, -8.773513748073357e-12, 0.0007801023786739114, -1.0295269969841694, 3.1423881978880415, 8.226252288034842e-12, -1.3249736451599036e-7, -1.1589254631531364e-11, -8.486904800510932e-7, 8.498125796982337e-7, -1.0481970538614587e-5, 1.0487147314270069e-5, -2.3853976413064467e-5, 2.3390184409166785e-5, -1.4665554655810717e-5, 1.4674378011837178e-5, 1.494217786661545e-7, -1.494826954306272e-7, -0.006484081235183565, 0.1615223363461487, -0.11771015565151635, -0.051952238911059184, 0.0005197823054442761, -0.014728137528941643, 0.02969949577720149, 0.0003004151601044065]
 else
     requiredFinalStates = [0.0009285649671864051, -0.00510121706010873, 0.38499183731994097, 1.3815799549216646e-8, -3.013883724849587e-8, -1.3548815880513574e-12, 0.3728261933992865, -0.996577976084585, 3.458983136911289, -5.493765692434776e-7, -2.9787026664428377e-7, -9.903133313245147e-7, -8.815312501299099e-7, 8.819099920244317e-7, -1.048429764456881e-5, 1.0485482464956499e-5, -2.38693150412509e-5, 2.3877893868562615e-5, -1.4676089351824731e-5, 1.467815727005773e-5, 1.5116246063921994e-7, -1.5117524141251032e-7, -0.00673525336167914, 0.1615038110919147, -0.1177385926739786, -0.05198945600575353, 0.0005258421886067691, -0.01468148168734971, 0.029700446414509994, 0.000299495164936174]
 end
-simulate!(youbot, stopTime=stopTime, tolerance=tolerance, log=true, logStates=true, requiredFinalStates=requiredFinalStates)
+simulate!(youbot, stopTime=stopTime, tolerance=tolerance, useRecursiveFactorizationUptoSize=500, requiredFinalStates_atol=0.001, log=true, logStates=false, logEvents=false, requiredFinalStates=requiredFinalStates)
 
 @usingModiaPlot
 plot(youbot, ["sphereJoint.r"], figure=1)

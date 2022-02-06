@@ -1,14 +1,10 @@
 module DoublePendulumWithDampers
 
-using ModiaLang
+using Modia3D
 
-# ModiaLang models
-include("$(ModiaLang.path)/models/Blocks.jl")
-include("$(ModiaLang.path)/models/Electric.jl")
-include("$(ModiaLang.path)/models/Rotational.jl")
-
-import Modia3D
-using  Modia3D.ModiaInterface
+include("$(Modia3D.modelsPath)/Blocks.jl")
+include("$(Modia3D.modelsPath)/Electric.jl")
+include("$(Modia3D.modelsPath)/Rotational.jl")
 
 Bar = Model(
     Lx = 0.1,
@@ -56,7 +52,7 @@ doublePendulum = @instantiateModel(buildModia3D(DoublePendulum), unitless=true)
 stopTime = 10.0
 tolerance = 1.0e-8
 requiredFinalStates = [-0.9608496178685947, 1.0258202272580021, -6.0828664801544345, -0.11676963250128454]
-simulate!(doublePendulum, stopTime=stopTime, tolerance=tolerance, log=true, logStates=true, requiredFinalStates=requiredFinalStates)
+simulate!(doublePendulum, stopTime=stopTime, tolerance=tolerance, log=true, logStates=false, requiredFinalStates=requiredFinalStates)
 
 @usingModiaPlot
 plot(doublePendulum, [("rev1.phi", "rev2.phi"), ("rev1.w", "rev2.w")])

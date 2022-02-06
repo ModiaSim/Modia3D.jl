@@ -1,9 +1,6 @@
 module HarmonicOscillator
 
-using ModiaLang
-
-import Modia3D
-using  Modia3D.ModiaInterface
+using Modia3D
 
 Oscillator = Model(
     Length = 0.1,
@@ -19,7 +16,7 @@ Oscillator = Model(
                                         massProperties=MassProperties(; mass=:Mass, Ixx=0.1, Iyy=0.1, Izz=0.1),
                                         visualMaterial=:(visualMaterial))),
     joint = Prismatic(obj1=:world, obj2=:oscillator, axis=3, s=Var(init=0.0), v=Var(init=0.0)),
-    force = Bushing(obj1=:world, obj2=:oscillator, nominalForce=:[0.0, 0.0, nomForce], stiffness=:[0.0, 0.0, Stiffness], damping=:[0.0, 0.0, Damping])
+    force = Bushing(obj1=:world, obj2=:oscillator, nominalForce=:[0.0, 0.0, nomForce], springForceLaw=:[0.0, 0.0, Stiffness], damperForceLaw=:[0.0, 0.0, Damping])
 )
 
 oscillator = @instantiateModel(buildModia3D(Oscillator), aliasReduction=false, unitless=true)

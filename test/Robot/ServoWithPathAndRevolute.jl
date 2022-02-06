@@ -1,15 +1,10 @@
 module ServoWithPathAndRevolute
 
-using ModiaLang
-import Modia3D
+using Modia3D
 
-# ModiaLang models
-include("$(ModiaLang.path)/models/Blocks.jl")
-include("$(ModiaLang.path)/models/Electric.jl")
-include("$(ModiaLang.path)/models/Rotational.jl")
-
-import Modia3D
-using  Modia3D.ModiaInterface
+include("$(Modia3D.modelsPath)/Blocks.jl")
+include("$(Modia3D.modelsPath)/Electric.jl")
+include("$(Modia3D.modelsPath)/Rotational.jl")
 
 Controller = Model(
     # Interface
@@ -76,19 +71,13 @@ Servo = Model(
         ]
 )
 
-arm_joint_1_obj = joinpath(Modia3D.path, "objects/robot_KUKA_YouBot/arm_joint_1.obj")
-
-m = 2
 axis = 3
 vmat1 = VisualMaterial(color="LightBlue", transparency=0.5)
-m1 = 1.390
-translation1 = [0.033, 0, 0]
-rotation1 =Modia3D.rot1(180u"°")
 
 arm_joint_2_obj = joinpath(Modia3D.path, "objects/robot_KUKA_YouBot/arm_joint_2.obj")
 m2 = 1.318
 translation2 = [0.155, 0, 0]
-rotation2=Modia3D.rot123(90u"°", 0.0, -90u"°")
+rotation2= [90u"°", 0.0, -90u"°"]
 
 k1 = 50.0
 k2 = 0.1
@@ -109,14 +98,13 @@ servoParameters = Map(
                       )
                   )
 
-referencePath1 = Modia3D.ReferencePath(names = ["angle2"],
+referencePath1 = Modia3D.PathPlanning.ReferencePath(names = ["angle2"],
                                             position = [0.0],
                                             v_max = [2.68512],
                                             a_max = [1.5])
 
-Modia3D.ptpJointSpace(referencePath = referencePath1, positions = [0.0; 0.3; 0.0])
+Modia3D.PathPlanning.ptpJointSpace(referencePath = referencePath1, positions = [0.0; 0.3; 0.0])
 
-@show referencePath1
 
 getReferencePath() = referencePath1
 
@@ -142,12 +130,12 @@ TestServo = Model(
     ]
 )
 
-servo = @instantiateModel(buildModia3D(TestServo), unitless=true, logCode=true, log=false)
+servo = @instantiateModel(buildModia3D(TestServo), unitless=true, logCode=false, log=false)
 
 stopTime = 4.0
 tolerance = 1e-6
 requiredFinalStates = [2.1923247415673457e-7, -2.1923342072392868e-7, -0.06934863003447111]
-simulate!(servo, stopTime=stopTime, tolerance=tolerance, log=true, logStates=true, logEvents=true, requiredFinalStates=requiredFinalStates)
+simulate!(servo, stopTime=stopTime, tolerance=tolerance, log=true, logStates=false, logEvents=false, requiredFinalStates=requiredFinalStates)
 
 @usingModiaPlot
 plotVariables = [("servo.refLoadAngle", "rev.phi"); "servo.ppi.gainOuter.u"; "rev.w"; "servo.ppi.PI.x"; "servo.ppi.refTorque"]

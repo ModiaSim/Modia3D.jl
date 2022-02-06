@@ -10,8 +10,8 @@ Structuring of objects moving in 3D. Most important constructors
 | Function                                    | dof | Description |
 |:--------------------------------------------|:----:|:---------------------------------------------|
 | [`Object3D`](@ref)`(...)`                  | 0,6 | Return a reference Object3D, if a parent is given fixed/moving w.r.t. `parent`|
-| [`Modia3D.Revolute`](@ref)`(obj1,obj2;..)`  | 1 | Return a revolute joint |
-| [`Modia3D.Prismatic`](@ref)`(obj1,obj2;..)` | 1 | Return a prismatic joint |
+| [`Modia3D.Composition.Revolute`](@ref)`(obj1,obj2;..)`  | 1 | Return a revolute joint |
+| [`Modia3D.Composition.Prismatic`](@ref)`(obj1,obj2;..)` | 1 | Return a prismatic joint |
 
 
 
@@ -24,15 +24,12 @@ export MultibodyData
 
 export initialize, initAnalysis!, performAnalysis!, closeAnalysis!, visualize!, visualizeWorld!
 export updatePosition!, update!
-export Object3D
 export RotationVariables, RCardan123
 export WStartVariables, WCartesian, WCardan123
-export SimulationModel, Model
 export printObject3DAndAllChildren, writeObject3DAndAllChildrenOnJsonFile
-export Fix, FixTranslation
-export Revolute, setAngle!, connect
-export Prismatic, setDistance!
-export FreeMotion
+export FixTranslation
+export setAngle!, connect
+export setDistance!
 
 export initJoints!, setJointStates1!, setJointAccelerations1!
 export getJointResiduals_leq_mode_0!, getJointResiduals_all!
@@ -51,9 +48,8 @@ export applyFrameTorquePair!, applyFrameForcePair!, applyFrameForceTorquePair!
 
 export deleteMaterialLastContactDictContactEnd
 
-export NoGravityField, UniformGravityField, PointGravityField, gravityAcceleration
+export NoGravityField, PointGravityField, gravityAcceleration
 export G, EarthMass, EarthRadius
-export Scene
 export upwardsDirection, cameraPosition
 export animationData, animationStep
 
@@ -95,6 +91,7 @@ import JSON
 import Printf
 import ModiaLang
 import TimerOutputs
+import MonteCarloMeasurements
 
 include(joinpath("joints", "object3DMotion.jl"))
 include("object3D.jl")

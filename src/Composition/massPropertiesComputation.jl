@@ -13,7 +13,7 @@
 # otherwise dummy mass properties must be assigned, before computing common properties.
 # The initial common mass properties are stored separatelly.
 # This information is used for computing common mass for dynamically changing structures.
-function initializeMassComputation!(scene::Scene)
+function initializeMassComputation!(scene::Scene{F}) where F <: Modia3D.VarFloatType
     if scene.initMassComp != true
         superObjs = scene.superObjs
         buffer    = scene.buffer
@@ -29,9 +29,9 @@ function initializeMassComputation!(scene::Scene)
             else # root obj's feature has no mass properties, but common mass super object do
                 if length(superObjs[i].superObjMass.superObj) > 0
                     rootSuperObj.hasMass = true
-                    rootSuperObj.m       = 0.0
-                    rootSuperObj.r_CM    = Modia3D.ZeroVector3D
-                    rootSuperObj.I_CM    = SMatrix{3,3,Float64,9}(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+                    rootSuperObj.m       = F(0.0)
+                    rootSuperObj.r_CM    = Modia3D.ZeroVector3D(F)
+                    rootSuperObj.I_CM    = SMatrix{3,3,F,9}(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
                     addMassPropertiesOfAllSuperObjChildsToRootSuperObj!(rootSuperObj, superObjs[i].superObjMass.superObj)
                 end
             end
@@ -44,7 +44,7 @@ end
 # It sums up common mass, inertia tensor and center of mass.
 # The results are stored twice in actual root of super object:
 #       massProperties: container for actual values
-function addMassPropertiesOfAllSuperObjChildsToRootSuperObj!(rootSuperObj::Object3D, actualMassSuperObject::Vector{Object3D})
+function addMassPropertiesOfAllSuperObjChildsToRootSuperObj!(rootSuperObj::Object3D, actualMassSuperObject::Vector{Object3D{F}}) where F <: Modia3D.VarFloatType
     if length(actualMassSuperObject) > 0
         for i=1:length(actualMassSuperObject)
             obj = actualMassSuperObject[i]
@@ -54,6 +54,7 @@ function addMassPropertiesOfAllSuperObjChildsToRootSuperObj!(rootSuperObj::Objec
     else
         rootSuperObj.hasMass = false
     end
+    return nothing
 #  println(Modia3D.fullName(rootSuperObj), " m ", rootSuperObj.massProperties.m )
 #  println(Modia3D.fullName(rootSuperObj), " rCM ", rootSuperObj.massProperties.rCM )
 #  println(Modia3D.fullName(rootSuperObj), " I ", rootSuperObj.massProperties.I )
@@ -72,7 +73,7 @@ end
 # Substracting: substract mass properties of a child from its parents mass properties
 
 # function computeInertiaTensorForTwoBodies!(massPropParent, massPropObj, obj; add=true)
-function addOrSubtractMassPropertiesOfChildToRoot!(obj_root, obj_child; add=true)::Nothing
+function addOrSubtractMassPropertiesOfChildToRoot!(obj_root::Object3D{F}, obj_child::Object3D{F}; add=true)::Nothing where F <: Modia3D.VarFloatType
     massProperties_child = obj_child.feature.massProperties
 
     R_child   = obj_child.R_rel
@@ -91,7 +92,7 @@ function addOrSubtractMassPropertiesOfChildToRoot!(obj_root, obj_child; add=true
     # I_child_steiner: I_child needs to be transformed to parents coordinate system
     # I_root_steiner: I_root needs to be transformed to parents coordinate system
     #                 (no need of rotation matrices)
-    I_child_steiner = Modia3D.NullRotation * I_child * Modia3D.NullRotation' +
+    I_child_steiner = Modia3D.NullRotation(F) * I_child * Modia3D.NullRotation(F)' +
                     m_child * Modia3D.skew(rCM_child_new)' * Modia3D.skew(rCM_child_new)
     I_root_steiner = I_root +
                     m_root * Modia3D.skew(rCM_root)' * Modia3D.skew(rCM_root)
@@ -131,7 +132,7 @@ function addOrSubtractMassPropertiesOfChildToRoot!(obj_root, obj_child; add=true
         if m != 0.0
             rCM = (m_root * rCM_root - m_child * rCM_child_new)/m
         else
-            rCM = Modia3D.ZeroVector3D
+            rCM = Modia3D.ZeroVector3D(F)
         end
 
         # I: substract the sum of I_child_steiner and new mass multiplied with skew matrices of

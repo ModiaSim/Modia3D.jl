@@ -1,16 +1,10 @@
 module YouBotPingPong
 
-using ModiaLang
-using Unitful
-import Modia3D
+using Modia3D
 
-# ModiaLang models
-include("$(ModiaLang.path)/models/Blocks.jl")
-include("$(ModiaLang.path)/models/Electric.jl")
-include("$(ModiaLang.path)/models/Rotational.jl")
-
-import Modia3D
-using  Modia3D.ModiaInterface
+include("$(Modia3D.modelsPath)/Blocks.jl")
+include("$(Modia3D.modelsPath)/Electric.jl")
+include("$(Modia3D.modelsPath)/Rotational.jl")
 
 # some constants
 
@@ -49,7 +43,7 @@ gripper_left_finger_obj  = joinpath(Modia3D.path, "objects/robot_KUKA_YouBot/gri
 gripper_right_finger_obj = joinpath(Modia3D.path, "objects/robot_KUKA_YouBot/gripper_right_finger.obj")
 
 # Drive train data: motor inertias and gear ratios
-nullRot = nothing #SMatrix{3,3,Float64,9}(Matrix(1.0I, 3, 3))
+nullRot = nothing
 
 motorInertia1 = 0.0000135 + 0.000000409
 motorInertia2 = 0.0000135 + 0.000000409
@@ -64,22 +58,22 @@ gearRatio5    = 71.0
 
 m1=1.390
 translation1 =[0.033,0,0]
-rotation1 =Modia3D.rot1(180u"°")
+rotation1 = [180u"°", 0, 0]
 
 m2=1.318
 translation2=[0.155,0,0]
-rotation2=Modia3D.rot123(90u"°", 0.0, -90u"°")
+rotation2 = [90u"°", 0.0, -90u"°"]
 
 m3=0.821
 translation3=[0,0.135,0]
-rotation3=Modia3D.rot3(-90u"°")
+rotation3 = [0, 0, -90u"°"]
 
 m4=0.769
 translation4=[0,0.11316,0]
 
 m5=0.687
 translation5=[0,0,0.05716]
-rotation5=Modia3D.rot1(-90u"°")
+rotation5 = [-90u"°", 0, 0]
 
 ### ----------------- Servo Model -----------------------
 # parameters for Link
@@ -98,13 +92,13 @@ motorInertiaGripper = 0.0
 gearRatioGripper    = 1.0
 
 #### ----------- Path Planning ------------------
-referencePath1 = Modia3D.ReferencePath(
+referencePath1 = Modia3D.PathPlanning.ReferencePath(
     names = ["angle1", "angle2", "angle3", "angle4", "angle5", "gripper"],
     position = [0.0,     0.0,     pi/2,   0.0,    0.0,   0.0],
     v_max =    [2.68512, 2.68512, 4.8879, 5.8997, 5.8997, 1.0],
     a_max =    [1.5, 1.5, 1.5, 1.5, 1.5, 0.5])
 #
-Modia3D.ptpJointSpace(referencePath = referencePath1, positions =
+Modia3D.PathPlanning.ptpJointSpace(referencePath = referencePath1, positions =
     [0.0 0.0 pi/2     0.0 0.0 0.0;
     0.0  0.3 pi/2-0.3 0.0 0.0 0.0;
     0.0  0.0 0.0      0.0 0.0 0.0])
@@ -337,7 +331,7 @@ Link = Model(
     featureBody = featureBody1,
     # featureVisual = featureVisual1,
     trans = [0,0,0],
-    rota = Par(value = :(nullRot)), #rotation1, #Modia3D.rot1(180u"°"),
+    rota = Par(value = :(nullRot)),
 
     obj1 = Object3D(parent=:parent1, rotation=:rota), # feature=:featureVisual,
     body = Object3D(feature = :featureBody),
@@ -345,7 +339,7 @@ Link = Model(
 )
 
 Gripper = Model(
-    obj1 = Object3D(parent=:(link5.obj2), rotation=Modia3D.rot3(-180u"°")),
+    obj1 = Object3D(parent=:(link5.obj2), rotation=[0, 0, -180u"°"]),
     gripper_base_frame = Object3D(parent=:obj1, feature=Solid(shape=
         FileMesh(filename = gripper_base_frame_obj), massProperties=MassPropertiesFromShapeAndMass(mass=0.199), visualMaterial=vmat1)),
     gripper_left_finger_a = Object3D(parent=:gripper_base_frame),
@@ -409,8 +403,7 @@ YouBot = Model(
 
 Setup = Model(
     gravField = UniformGravityField(g=9.81, n=[0,0,-1]),
-    world = Object3D(feature=Scene(gravityField = :gravField, visualizeFrames=false,
-        defaultFrameLength=0.1, enableContactDetection=true, elasticContactReductionFactor=1e-4, animationFile="YouBotPingPong.json")),
+    world = Object3D(feature=Scene(gravityField = :gravField, visualizeFrames=false, defaultFrameLength=0.1, enableContactDetection=true, elasticContactReductionFactor=1e-4, animationFile="YouBotPingPong.json")),
 
     # worldFrame = Object3D(parent=:world, feature=Visual(shape=CoordinateSystem(length = 0.5))),
 
@@ -450,7 +443,7 @@ modelParameters = Map(
 
     youbot2 = Map(
         base = Map(
-            rota = Par(value = :(Modia3D.rot3(180u"°"))),
+            rota = Par(value = :[0, 0, 180u"°"]),
             trans = [2*xPosTable,0.0,0.0],
         ),
         servo1 = servoParameters1,
@@ -462,7 +455,7 @@ modelParameters = Map(
 
     youbot3 = Map(
         base = Map(
-            rota = Par(value = :(Modia3D.rot3(270u"°"))),
+            rota = Par(value = :[0, 0, 270u"°"]),
             trans = [xPosTable,xPosTable,0.0],
         ),
         servo1 = servoParameters1,
@@ -483,7 +476,7 @@ modelParameters = Map(
 stopTime = 5.0
 testTime = 2.6
 tolerance = 1e-6
-requiredFinalStates = [-0.032300771660657694, -0.09776355157608471, 0.02989486034548256, 0.0011936992776297414, -0.011989637576076287, 2.099730022663762e-6, 5.577214816036132, -0.1534225536631406, -3.21532234704311, -0.4788140661491195, -0.07211642268204188, -0.04304635380310547, -0.012699935790518379, -0.03485828664647874, 0.02989849118303316, -2.275491232405937e-9, -5.041402883273956e-9, -1.7398209953480762e-7, 2.563123055232681, 0.7445788546836765, 5.335313622529376, 2.7461632864541012e-9, 9.278780813150458e-8, 1.1701034876520994e-7, 0.02785869529463159, 0.07754234294775672, 0.029896332394685653, -8.128663695157891e-10, -6.03488193174259e-11, -8.194016417083457e-8, 3.299194401806199, -0.4488199388008023, 1.3333662358671825, 2.0876984002408836e-8, 5.0792452717284365e-9, -3.777196092825187e-9, -1.1073409369332207e-6, -1.5708163206493583e-6, 0.0043187679918921945, -0.05498125983659931, 0.018341522653238178, -0.23292171797074548, -2.5341171028613137e-5, 9.563725041475825e-6, 9.861867102762459e-8, -3.757424280959238e-8, -0.008202375463342989, 0.08428049560475342, -0.1986368654427638, -0.08581273410509312, 0.0003301828544531399, -1.1072500271224385e-6, -1.570907229785427e-6, 0.004318767967438113, -0.05498125981214347, 0.018341522645547594, -0.232921717963052, -2.5341188032203926e-5, 9.563742047263623e-6, 9.861938248651026e-8, -3.7574954279350363e-8, -0.008201680543548364, 0.08428030868855851, -0.19863690311168553, -0.08581279325228972, 0.0003301853295862967, -1.107507112926896e-6, -1.5706501456569102e-6, 0.004318768038688511, -0.05498125988339801, 0.01834152265864114, -0.23292171797615294, -2.534116207069802e-5, 9.563716080674608e-6, 9.862462181048238e-8, -3.7580193571310476e-8, -0.008203645720271581, 0.08428085329966532, -0.19863683899027065, -0.08581270295083859, 0.0003302035572851636]
-simulate!(youbot, stopTime=testTime, tolerance=tolerance, log=true, logStates=false, requiredFinalStates=requiredFinalStates)
+requiredFinalStates = [-0.03239255644018638, -0.09767849342047412, 0.02989481464915169, 0.0011795615435453862, -0.011934450436855273, 2.092851195901243e-6, 5.573559981078709, -0.1523773444680175, -3.2154896652639477, -0.47665114555445465, -0.07148612909024138, -0.04243595028961019, -0.012653439092352375, -0.03500692461312922, 0.029898429358529013, -4.558557620835332e-13, -3.64831730055929e-13, -1.7840675615947704e-7, 2.5695074329331744, 0.7472127203156712, 5.330878252821063, -7.362001595491794e-12, 8.80817207416072e-12, 1.2441683782770404e-11, 0.027840660713497625, 0.0776644597852956, 0.029896365774662606, -1.1215385376356071e-15, -4.2113081005778845e-16, -8.37374284268898e-8, 3.2940449217264263, -0.4496845598010663, 1.3305032460469435, 3.1278299575841403e-14, -1.6233513255429844e-15, -9.470924924909265e-15, -1.107361310794216e-6, -1.570598769906252e-6, 0.0043187679407914095, -0.05498125959641161, 0.01834152256900372, -0.23292171741004775, -2.5341224221140437e-5, 9.5640655645215e-6, 9.861886776735331e-8, -3.757556222640568e-8, -0.008202500827641623, 0.08428013393653147, -0.19863723148272677, -0.08581289912502128, 0.0003301834603508176, -1.1072707906848754e-6, -1.5706892893845911e-6, 0.004318767916976311, -0.0549812595725954, 0.018341522562747892, -0.23292171740378906, -2.534123663387377e-5, 9.564077979272747e-6, 9.861958477573962e-8, -3.757627924446208e-8, -0.008201808887165237, 0.08427995190366813, -0.1986372621227437, -0.08581294230174022, 0.00033018595479517016, -1.1075279390319749e-6, -1.5704321427089902e-6, 0.004318767988158904, -0.054981259643781755, 0.01834152257583017, -0.23292171741687884, -2.5341210693795998e-5, 9.564052034012827e-6, 9.862481295816804e-8, -3.758150739526383e-8, -0.008203774541958236, 0.08428049599655832, -0.1986371980564985, -0.0858128520748264, 0.0003302041437324833]
+simulate!(youbot, stopTime=testTime, tolerance=tolerance, requiredFinalStates_atol=0.001, log=true, logStates=false, requiredFinalStates=requiredFinalStates)
 
 end

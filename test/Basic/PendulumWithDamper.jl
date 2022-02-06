@@ -1,14 +1,12 @@
 module PendulumWithDamper
 
-using ModiaLang
+using Modia3D
 
-# ModiaLang models
-include("$(ModiaLang.path)/models/Blocks.jl")
-include("$(ModiaLang.path)/models/Electric.jl")
-include("$(ModiaLang.path)/models/Rotational.jl")
+include("$(Modia3D.modelsPath)/Blocks.jl")
+include("$(Modia3D.modelsPath)/Electric.jl")
+include("$(Modia3D.modelsPath)/Rotational.jl")
 
-import Modia3D
-using  Modia3D.ModiaInterface
+
 
 Pendulum = Model(
     m = 1.0,
@@ -41,11 +39,11 @@ PendulumWithDamp = Model(
 
 #@showModel PendulumWithDamp
 
-pendulumWithDamper = @instantiateModel(PendulumWithDamp, unitless=true, log=false, logStateSelection=false, logCode=true)
+pendulumWithDamper = @instantiateModel(PendulumWithDamp, unitless=true, log=false, logStateSelection=false, logCode=false, FloatType = Float32)
 
 stopTime = 10.0
 requiredFinalStates = [-1.578178283450938, 0.061515170100766486]
-simulate!(pendulumWithDamper, stopTime=stopTime, log=true, logStates=true, requiredFinalStates=requiredFinalStates)
+simulate!(pendulumWithDamper, stopTime=stopTime, log=true, logStates=false, requiredFinalStates=requiredFinalStates)
 
 @usingModiaPlot
 plot(pendulumWithDamper, "pendulum.rev.flange.phi", figure=1)

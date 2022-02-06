@@ -10,7 +10,8 @@ penetration depth and the relative motion of the objects in contact.
 It is planned to optionally also support impulsive response calculation
 in the future.
 
-The following is already published in [^4].
+This section is based on [^4] with some minor improvements as used in the current
+version of Modia3D.
 
 The current approach has several **limitations** that a user must know,
 in order that a simulation is successful:
@@ -34,7 +35,8 @@ in order that a simulation is successful:
   For this reason, all geometrical objects are slightly modified in various ways
   for the collision handling. Most important, all geometries are *smoothed* with a
   small sphere (e.g. with radius = 1mm) that is moved over all surfaces.
-
+  Basically, this also means that if two objects are in contact, one of them should be a
+  Sphere or an Ellipsoid.
 
 
 ## Material constants
@@ -79,12 +81,19 @@ but simulation speed is significantly improved.
 
 ## Response calculation
 
-When two 3D objects penetrate each other with a penetration depth $\delta > 0$
-then a *contact force* and a *contact torque* is computed from the elastic contact materials
-of the two objects in the following way
+Assume two shapes penetrate each other as shown in the following figure:
+
+![contact](../../resources/images/contact_vectors.png)
+
+The intuition is that there is a contact area with a certain pressure distribution in normal and a stress distribution in tangential
+direction and that the response characteristics provides an approximation of the resultant contact normal force ``\vec{f}_n``,
+resultant tangential force ``\vec{f}_t``, and resultant contact torque ``\vec{\tau}.``
+The MPR algorithm calculates an approximation of the contact point, of the signed distance ``\delta``
+and of a unit vector ``\vec{e}_n`` that is orthogonal to the contacting surfaces.
+When penetration occurs, $\delta \ge 0$, and the contact response is computed from the elastic contact materials
+of the two objects in the following way, for more details see [^4]
 (the contact force law in normal direction is based on [^1], [^3],
 the remaining force law on [^2] with some extensions and corrections):
-
 
 ```math
 \begin{align}
@@ -118,9 +127,9 @@ where
                two objects (see below).
 - ``n_{geo}``: Exponent in ``f_n`` that is determined from the geometries of the
                two objects (see below).
-- ``d(cor_{reg},\dot{\delta}^-)``: Damping coefficient in normal direction as a function of
-         ``cor_{reg}`` and ``\dot{\delta}^-`` (see below).
-- ``cor_{reg}``: Regularized coefficient of restitution between objects 1 and 2, see below.
+- ``d(cor_{cur},\dot{\delta}^-)``: Damping coefficient in normal direction as a function of
+         ``cor_{cur}`` and ``\dot{\delta}^-`` (see below).
+- ``cor_{cur}``: Current coefficient of restitution between objects 1 and 2, see below.
 - ``\dot{\delta}^-``: Value of ``\dot{\delta}`` when contact starts (``\dot{\delta}^- \ge 0``).
 - ``\mu_k``: Kinetic/sliding friction force coefficient between objects 1 and 2.
 - ``\mu_r``: Rotational rolling resistance torque coefficient between objects 1 and 2.
@@ -128,9 +137,12 @@ where
                     two objects (see below).
 - ``k_{red}``: Elastic contact reduction factor.
 
-The ``\max(..)`` operator in equation (1) is provided, in order
+The ``\max(..)`` operator in equation (1) is conceptually provided, in order
 to guarantee that ``f_n`` is always a compressive and never a pulling force because
-this would be unphysical.
+this would be unphysical. In the actual implementation no ``max(..)`` function is used, because
+an event is triggered when ``\delta`` drops below zero (so no penetration anymore) and after the
+event no force/torque is applied anymore (meaning that ``f_n`` is only evaluated for about
+``\delta > - 10^{-19} .. - 10^{-24} ~m`` (this depends on the contact situation and the contact materials)).
 
 In special cases (for example sphere rolling on a plane), the rotational coefficient of friction ``\mu_{r,res}``
 can be interpreted as *rolling resistance coefficient*.
@@ -196,43 +208,35 @@ For a comparision of the different formulations see [^1], [^3].
 
 Whenever the coefficient of restitution ``cor > 0``, then an object 2 jumping on an object 1 will
 mathematically never come to rest, although this is unphysical. To fix this, the value of a
-coefficient of restitution is reduced when the velocity at contact start becomes small.
-Furthermore, the coefficient of restitution is restricted to not become smaller as a minimum value
-``cor_{min} = 0.001`` in order to avoid a division by zero when computing the damping coefficient.
-The following regularization function is used:
+coefficient of restitution is set to zero at contact start when the normal velocity at this time instant
+is smaller as ``v_{small}``:
 
 ```math
-cor_{reg} = cor_{lim} + (cor_{min} - cor_{lim}) \cdot e^{log(0.01) |\dot{\delta}^-|/v_{small}}; \;\;
-            cor_{lim} = \max(cor_{min}, cor)
+cor_{cur} = \text{if}~ |\dot{\delta}^-| > v_{small} ~\text{then}~ cor ~\text{else}~ 0
 ```
-
-Examples of this characteristics are shown in the next figure:
-
-![Regularized coefficient of restitution](../../resources/images/plot_cor.svg)
-
 
 The damping coefficient ``d`` is basically computed with the formulation from [^1]
 because a response calculation with impulses gives similar results for some experiments
-as shown in [^3]. However, (a) instead of the coefficient of restitution, the regularized form
-from above is used, (b) ``|\dot{\delta}^-|`` is regularized to avoid a division by zero,
-and (c) the damping coefficient is limited to ``d_{max} = 1000`` to avoid an unphysical
-strong creeping effect for collisions with small ``cor_{reg}`` values:
+as shown in [^3]. However, (a) instead of ``cor``, the current coefficient of restitution ``cor_{cur}``
+is used and (b) the damping coefficient is limited to ``d_{max}`` (this parameter is set via `maximumContactDamping`
+in object `Scene` and has a default value of ``1000 ~Ns/m``) to avoid an unphysical
+strong creeping effect for collisions with small ``cor_{cur}`` values:
 
 ```math
-d(cor_{reg},\dot{\delta}^-) = \min(1000, \frac{8(1-cor_{reg})}{\left(5 \cdot cor_{reg} \cdot reg(|\dot{\delta}^-|, v_{small}) \right)})
+d(cor_{cur},\dot{\delta}^-) = \min(d_{max}, \frac{8(1-cor_{cur})}{5 \cdot cor_{cur} \cdot \dot{\delta}^-})
 ```
 
-Examples of this characteristics are shown in the next two figures:
+Note, if ``cor_{cur} = 0``, then ``d = min(d_{max}, 8/0) = d_{max}``.
 
-![Damping coefficient 1](../../resources/images/plot_damping1.svg)
 
-![Damping coefficient 2](../../resources/images/plot_damping2.svg)
+Examples of this characteristics are shown in the next figure:
 
+![Damping coefficient](../../resources/images/plot_damping1.svg)
 
 In the next figure the simulation of a bouncing ball is shown where the response
 calculation is performed (a) with an impulse and (b) with the compliant force law above.
-In both cases the regularized coefficient of restitution ``cor_{reg}`` is going to zero
-when ``|\dot{\delta}^-|`` becomes small. As can be seen, both formulations lead to
+In both cases the coefficient of restitution ``cor`` is zero
+when ``|\dot{\delta}^-| < 0.01``. As can be seen, both formulations lead to
 similar responses:
 
 ![Bouncing ball](../../resources/images/plot_bouncingBall.svg)

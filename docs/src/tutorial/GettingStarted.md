@@ -13,7 +13,7 @@ In the following example a simple pendulum is defined. This example is a copy of
 ```julia
 module Pendulum1
 
-using Modia
+using Modia3D
 
 Pendulum = Model(
     world     = Object3D(feature=Scene()),
@@ -52,7 +52,7 @@ The Object3Ds of the first example are extended with [Visual](@ref) and [Solid](
 ```julia
 module Pendulum2
 
-using Modia
+using Modia3D
 
 Pendulum = Model(
     world = Object3D(feature=Scene(animationFile="Pendulum2.json")),
@@ -93,10 +93,9 @@ The pendulum model from the previous section is extended with a damper that is d
 ```julia
 module Pendulum3
 
-using Modia
+using Modia3D
 
-# Modia equation-based models
-include("$(Modia.modelsPath)/AllModels.jl")
+include("$(Modia3D.modelsPath)/AllModels.jl")
 
 Pendulum = Model(
     world = Object3D(feature=Scene(animationFile="Pendulum3.json")),

@@ -1,14 +1,11 @@
 module InValidCollisionPairingError
 
-using  ModiaLang
-import Modia3D
-using  Modia3D.ModiaInterface
-using  Unitful
+using Modia3D
 
-vmatRed   = Modia3D.VisualMaterial(color="Red")
-vmatGreen = Modia3D.VisualMaterial(color="Green")
-vmatBlue  = Modia3D.VisualMaterial(color="Blue")
-vmatGrey  = Modia3D.VisualMaterial(color="Grey", transparency=0.5)
+vmatRed   = VisualMaterial(color="Red")
+vmatGreen = VisualMaterial(color="Green")
+vmatBlue  = VisualMaterial(color="Blue")
+vmatGrey  = VisualMaterial(color="Grey", transparency=0.5)
 
 BouncingCones = Model(
     boxHeigth = 0.1,
@@ -67,11 +64,10 @@ bouncingCones = @instantiateModel(buildModia3D(BouncingCones), unitless=true, lo
 
 stopTime = 1.3
 tolerance = 1e-8
+simulate!(bouncingCones, stopTime=stopTime, tolerance=tolerance)
 
-simulate!(bouncingCones, stopTime=stopTime, tolerance=tolerance, log=true, logStates=true, logEvents=true)
-
-@usingModiaPlot
-plot(bouncingCones, [("jointX.r", "jointY.r", "jointZ.r") ("jointX.rot", "jointY.rot", "jointZ.rot")
-                     ("jointX.v", "jointY.v", "jointZ.v") ("jointX.w", "jointY.w", "jointZ.w")], figure=1)
+#@usingModiaPlot
+#plot(bouncingCones, [("jointX.r", "jointY.r", "jointZ.r") ("jointX.rot", "jointY.rot", "jointZ.rot")
+#                     ("jointX.v", "jointY.v", "jointZ.v") ("jointX.w", "jointY.w", "jointZ.w")], figure=1)
 
 end

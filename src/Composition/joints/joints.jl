@@ -33,7 +33,7 @@ end
 
 
 # Utility function that should not be directly called (only to be called from attach(..)
-function attachAndReverseParents(newParent::Object3D, obj::Object3D)::Nothing
+function attachAndReverseParents(newParent::Object3D{F}, obj::Object3D{F})::Nothing where F <: Modia3D.VarFloatType
    @assert(!(newParent ≡ obj))
 
    # Save elements of obj
@@ -52,15 +52,15 @@ function attachAndReverseParents(newParent::Object3D, obj::Object3D)::Nothing
       parent_r_rel = parent.r_rel
       parent_R_rel = parent.R_rel
 
-      if r_rel ≡ Modia3D.ZeroVector3D
-         parent.r_rel = Modia3D.ZeroVector3D
+      if r_rel ≡ Modia3D.ZeroVector3D(F)
+         parent.r_rel = Modia3D.ZeroVector3D(F)
          parent.r_abs = obj1.r_abs
       else
          parent.r_rel = -R_rel*r_rel
       end
 
-      if R_rel ≡ Modia3D.NullRotation
-         parent.R_rel = Modia3D.NullRotation
+      if R_rel ≡ Modia3D.NullRotation(F)
+         parent.R_rel = Modia3D.NullRotation(F)
          parent.R_abs = obj1.R_abs
       else
          parent.R_rel = R_rel'
@@ -122,59 +122,8 @@ function attach(obj1::Object3D, obj2::Object3D)
    end
 end
 
-#=
-function connect(obj1::Object3D, obj2::Object3D;
-                 r::AbstractVector = Modia3D.ZeroVector3D,
-                 R::Union{Frames.RotationMatrix,Nothing} = nothing,
-                 q::Union{Frames.Quaternion,Nothing} = nothing,
-                 fixed::Bool = true)::Nothing
-   if !isnothing(R) && !isnothing(q)
-      error("Modia3D.connect(...): either R or q must be nothing but both have a value.")
-   end
-   if !isnothing(R)
-      Modia3D.assertRotationMatrix(R)
-   elseif !isnothing(q)
-      Modia3D.assertQuaternion(q)
-   end
 
-
-   (parentObject3D, obj, cutJoint) = attach(obj1, obj2)
-  # println("... connect, fixed = ", fixed, ", obj1=",Modia3D.fullName(obj1), ", obj2 = ", Modia3D.fullName(obj2), ", obj = ", Modia3D.fullName(obj))
-
-
-   if cutJoint
-      error("Error from Modia3D.Composition.connect(", obj1.name, ",", obj2.name, "):\n",
-            "Not yet supported to rigidly connect two objs that have the same root.")
-   end
-
-   r_rel = SVector{3,Float64}(r)
-   R_rel = !isnothing(R) ? R                   :
-   !isnothing(q) ? Modia3D.from_q(q) : Modia3D.NullRotation
-
-   obj.r_rel = obj===obj2 ? r_rel : -R_rel*r_rel
-   obj.R_rel = obj===obj2 ? R_rel :  R_rel'
-
-   #r_abs = parent.r_abs + r_rel
-   #R_abs = R_rel*parent.R_abs
-
-
-   if fixed
-      obj.joint = fixedJoint
-   else
-      obj1.hasChildJoint = true
-      q_start = !isnothing(R) ? Modia3D.from_R(R) :
-      !isnothing(q) ? q                   : Modia3D.NullQuaternion
-      q_start = obj===obj2 ? q_start : Modia3D.inverseRotation(q_start)
-
-      obj.joint = FreeMotion(obj, r_start = obj.r_rel, q_start = q_start)
-   end
-   return nothing
-end
-=#
-
-
-
-function updatePosition!(obj::Object3D)::Nothing
+function updatePosition!(obj::Object3D{F})::Nothing where F <: Modia3D.VarFloatType
    stack = Object3D[]
    # Push initial children on stack
    append!(stack, obj.children)
@@ -185,13 +134,13 @@ function updatePosition!(obj::Object3D)::Nothing
 
       parent = obj.parent
 
-      if obj.r_rel ≡ Modia3D.ZeroVector3D
+      if obj.r_rel ≡ Modia3D.ZeroVector3D(F)
          obj.r_abs = parent.r_abs
       else
          obj.r_abs = parent.r_abs + parent.R_abs'*obj.r_rel
       end
 
-      if obj.R_rel ≡ Modia3D.NullRotation
+      if obj.R_rel ≡ Modia3D.NullRotation(F)
          obj.R_abs = parent.R_abs
       else
          obj.R_abs = obj.R_rel*parent.R_abs
@@ -250,7 +199,7 @@ end
 """
     w = wfromrot123(rot123::AbstractVector, derrot123::AbstractVector)
 
-Return relative rotational velocity Vector3D `w` from frame `1` to frame `2` resolved in frame `2`.
+Return relative rotational velocity SVector{3,F} `w` from frame `1` to frame `2` resolved in frame `2`.
 
 `rot123` are the Cardan angles (rotation sequence x-y-z) of rotation from frame `1` to frame `2`.
 `derrot123` are the time derivatives of `rot123`.
@@ -268,19 +217,19 @@ function wfromrot123(rot123::AbstractVector, derrot123::AbstractVector)
 end
 
 # Next function only for backwards compatibility (do not use for new model)
-computeKinematics!(scene::Scene, joint::Modia3D.AbstractJoint, obj::Object3D, analysis::Modia3D.AnalysisType, time::Float64)::Nothing =
-    computeKinematics!(scene, [obj], time)
+computeKinematics!(scene::Scene, joint::Modia3D.AbstractJoint, obj::Object3D, analysis::Modia3D.AnalysisType, time)::Nothing =
+    computeKinematics!(scene, [obj], Float64(time) )
 
 
 """
-    computeKinematics!(scene::Scene, tree::Vector{Object3D}, time)
+    computeKinematics!(scene::Scene, tree::Vector{Object3D{F}}, time)
 
 Compute position, velocity, acceleration variables of the Object3Ds that are connected
 in form of a tree. Variable `tree` contains the Object3Ds in a traversal order (e.g. pre-order traversal).
 `tree[1]` is the root object. It is assumed that the kinematic
 variables of tree[1].parent have a meaningful value.
 """
-function computeKinematics!(scene::Scene, tree::Vector{Object3D}, time)::Nothing
+function computeKinematics!(scene::Scene, tree::Vector{Object3D{F}}, time)::Nothing where F <: Modia3D.VarFloatType
     for obj in tree
         parent    = obj.parent
         jointKind = obj.jointKind
@@ -376,12 +325,12 @@ end
 
 
 """
-    computeKinematics_for_leq_mode_pos!(scene::Scene, tree::Vector{Object3D}, time)
+    computeKinematics_for_leq_mode_pos!(scene::Scene, tree::Vector{Object3D{F}}, time)
 
 Compute accelerations that are only a function of qdd, but not of q and qd.
 of the Object3Ds that are connected in form of a tree.
 """
-function computeKinematics_for_leq_mode_pos!(scene::Scene, tree::Vector{Object3D}, time)::Nothing
+function computeKinematics_for_leq_mode_pos!(scene::Scene, tree::Vector{Object3D{F}}, time)::Nothing where F <: Modia3D.VarFloatType
     for obj in tree
         parent    = obj.parent
         jointKind = obj.jointKind
@@ -431,14 +380,14 @@ end
 
 
 """
-    computeForcesTorquesAndResiduals!(scene::Scene, tree::Vector{Object3D}, time)
+    computeForcesTorquesAndResiduals!(scene::Scene, tree::Vector{Object3D{F}}, time)
 
 Compute forces/torques and residuals in a backward recursion from tree[end] to tree[1].
 Variable `tree` contains the Object3Ds in a traversal order (e.g. pre-order traversal).
 It is assumed that all force/torque variables are initialized (e.g. to zero), including
 tree[1].parent.
 """
-function computeForcesTorquesAndResiduals!(scene::Scene, tree::Vector{Object3D}, time)::Nothing
+function computeForcesTorquesAndResiduals!(scene::Scene, tree::Vector{Object3D{F}}, time)::Nothing where F <: Modia3D.VarFloatType
     for i = length(tree):-1:1
         obj       = tree[i]
         parent    = obj.parent
@@ -546,12 +495,12 @@ end
 
 
 """
-    getJointResiduals_leq_mode_0!(scene::Scene, objects::Vector{Object3D}, residuals, cache_h; cacheWithJointForces=false)
+    getJointResiduals_leq_mode_0!(scene::Scene, objects::Vector{Object3D{F}}, residuals, cache_h; cacheWithJointForces=false)
 
 Copy specific variables into their objects for leq_mode = 0.
 If cacheWithJointForces=true, include generalized joint forces in cache; = false, do not include them in cache.
 """
-function getJointResiduals_leq_mode_0!(scene::Scene, objects::Vector{Object3D}, residuals, cache_h; cacheWithJointForces=false)::Nothing
+function getJointResiduals_leq_mode_0!(scene::Scene, objects::Vector{Object3D{F}}, residuals, cache_h; cacheWithJointForces=false)::Nothing where F <: Modia3D.VarFloatType
     j = 1
     for (i,obj) in enumerate(objects)
         jointKind = obj.jointKind
@@ -586,11 +535,11 @@ end
 
 
 """
-    getJointResiduals_all!(scene::Scene, objects::Vector{Object3D}, residuals)
+    getJointResiduals_all!(scene::Scene, objects::Vector{Object3D{F}}, residuals)
 
 Copy specific variables into their objects
 """
-function getJointResiduals_all!(scene::Scene, objects::Vector{Object3D}, residuals)::Nothing
+function getJointResiduals_all!(scene::Scene, objects::Vector{Object3D{F}}, residuals)::Nothing where F <: Modia3D.VarFloatType
     j = 1
     for (i,obj) in enumerate(objects)
         jointKind = obj.jointKind
@@ -619,7 +568,7 @@ end
 
 
 # For backwards compatibility (do not use for new models)
-function setAngle!(revolute::Revolute, phi::Float64)
+function setAngle!(revolute::Revolute, phi::F) where F <: Modia3D.VarFloatType
    obj          = revolute.obj2
    revolute.phi = phi
    obj.R_rel    = Frames.rotAxis(revolute.posAxis, revolute.posMovement, phi)
@@ -629,7 +578,7 @@ end
 
 
 # For backwards compatibility (do not use for new models)
-function setDistance!(prismatic::Prismatic, s::Float64)
+function setDistance!(prismatic::Prismatic, s::F) where F <: Modia3D.VarFloatType
    obj         = prismatic.obj2
    prismatic.s = s
    obj.r_rel   = prismatic.eAxis*s

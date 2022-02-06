@@ -2,7 +2,6 @@
 # Copyright 2017-2018, DLR Institute of System Dynamics and Control
 
 using LinearAlgebra
-EYE3() = Matrix(1.0I,3,3)
 
 # returns true, if AABB's are touching
 AABB_touching(aabb1::Basics.BoundingBox, aabb2::Basics.BoundingBox) = aabb1.x_max >= aabb2.x_min && aabb1.x_min <= aabb2.x_max &&
@@ -12,7 +11,7 @@ AABB_touching(aabb1::Basics.BoundingBox, aabb2::Basics.BoundingBox) = aabb1.x_ma
 
 
 function Composition.initializeContactDetection!(world::Composition.Object3D, scene::Composition.Scene)::Nothing
-    if typeof(scene.options.contactDetection) == Modia3D.ContactDetectionMPR_handler{Modia3D.MPRFloatType}
+    if typeof(scene.options.contactDetection) <: Modia3D.ContactDetectionMPR_handler
         ch = scene.options.contactDetection
         ch.contactPairs = Composition.ContactPairs(world, scene, ch.visualizeContactPoints,
             ch.visualizeSupportPoints, ch.defaultContactSphereDiameter)
@@ -39,9 +38,9 @@ end
 # the nz shape pairs with the smallest distances and orders them
 # according to their distances in O(n_n log(n_z)) operations.
 # This function is called after initialization and after state events.
-function Composition.selectContactPairsWithEvent!(sim, scene::Composition.Scene, ch::Composition.ContactDetectionMPR_handler, world::Composition.Object3D)
+function Composition.selectContactPairsWithEvent!(sim, scene::Composition.Scene{F}, ch::Composition.ContactDetectionMPR_handler, world::Composition.Object3D) where F <: Modia3D.VarFloatType
     empty!(ch.contactDict)
-    ch.noContactMinVal =  42.0
+    ch.noContactMinVal =  F(42.0)
     selectContactPairs!(sim,scene,ch,world,true)
     ch.contactPairs.nzContact = length(ch.contactDict)
     return nothing
@@ -56,14 +55,14 @@ end
 # This function is called for contact detection during simulation.
 # It also checks if the contact pairs (contact == true), from a previous call of selectContactPairsWithEvent!(...)
 # are still true.
-function Composition.selectContactPairsNoEvent!(sim, scene::Composition.Scene, ch::Composition.ContactDetectionMPR_handler, world::Composition.Object3D)
-    ch.noContactMinVal =  42.0
+function Composition.selectContactPairsNoEvent!(sim, scene::Composition.Scene{F}, ch::Composition.ContactDetectionMPR_handler, world::Composition.Object3D) where F <: Modia3D.VarFloatType
+    ch.noContactMinVal = F(42.0)
     selectContactPairs!(sim,scene,ch,world,false)
     return nothing
 end
 
 
-function selectContactPairs!(sim, scene::Composition.Scene, ch::Composition.ContactDetectionMPR_handler, world::Composition.Object3D, hasEvent::Bool)
+function selectContactPairs!(sim, scene::Composition.Scene{F}, ch::Composition.ContactDetectionMPR_handler, world::Composition.Object3D, hasEvent::Bool) where F <: Modia3D.VarFloatType
     if !ch.distanceComputed
         computeDistances(scene, ch, world, false, hasEvent)
     end
@@ -74,10 +73,10 @@ function selectContactPairs!(sim, scene::Composition.Scene, ch::Composition.Cont
         # z[1] ... zero crossing function from contact to no contact
         # max. distance (= min. penetration) of active contact pairs
         if isempty(ch.contactDict)
-            simh.z[scene.zStartIndex] = -42.0
+            simh.z[scene.zStartIndex] = F(-42.0)
         else
             (pair, key)  = findmax(ch.contactDict)
-            simh.z[scene.zStartIndex] = pair.distanceWithHysteresis
+            simh.z[scene.zStartIndex] = pair.distanceWithHysteresis - ch.contact_eps
         end
         # z[2] ... zero crossing function from no contact to contact
         # min. distance of inactive contact pairs
@@ -105,10 +104,11 @@ function Composition.getDistances!(scene::Composition.Scene, ch::Composition.Con
 end
 
 
-function computeDistances(scene::Composition.Scene, ch::Composition.ContactDetectionMPR_handler, world::Composition.Object3D, phase2::Bool, hasEvent::Bool=true)
+function computeDistances(scene::Composition.Scene{F}, ch::Composition.ContactDetectionMPR_handler, world::Composition.Object3D, phase2::Bool, hasEvent::Bool=true) where F <: Modia3D.VarFloatType
     noCPairs  = scene.noCPairs
     superObjs = scene.superObjs
     AABB = scene.AABB
+
     if length(superObjs) > 1
         k = 0
         @inbounds for i = 1:length(superObjs)
@@ -117,7 +117,7 @@ function computeDistances(scene::Composition.Scene, ch::Composition.ContactDetec
                 k = k +1
                 obj = superObj[j]
                 AABB[i][j] = Modia3D.boundingBox!(obj,
-                    AABB[i][j]; tight=false, scaleFactor=0.01)
+                    AABB[i][j]; tight=false, scaleFactor=F(0.01) )
                 if scene.options.visualizeBoundingBox
                     updateVisualBoundingBox!(world.AABBVisu[k], AABB[i][j])
                 end
@@ -154,15 +154,11 @@ function computeDistances(scene::Composition.Scene, ch::Composition.ContactDetec
 end
 
 
-const zEps  = 1.e-8
-const zEps2 = 2*zEps
-
-
 function pushCollisionPair!(ch, contact, distanceWithHysteresis, pairID, contactPoint1,
-    contactPoint2, contactNormal, actObj, nextObj, hasevent, supportPointsDefined, support1A, support2A,
-    support3A, support1B, support2B, support3B)::Nothing
+    contactPoint2, contactNormal, actObj::Composition.Object3D{F}, nextObj::Composition.Object3D{F}, hasevent, supportPointsDefined, support1A, support2A,
+    support3A, support1B, support2B, support3B)::Nothing where F <: Modia3D.VarFloatType
     if contact
-        push!(ch.contactDict, pairID => Modia3D.ContactPair(contactPoint1,contactPoint2,
+        push!(ch.contactDict, pairID => Modia3D.ContactPair{F}(contactPoint1,contactPoint2,
             contactNormal, actObj, nextObj, distanceWithHysteresis, supportPointsDefined,
             support1A, support2A, support3A, support1B, support2B, support3B))
     else
@@ -173,8 +169,8 @@ function pushCollisionPair!(ch, contact, distanceWithHysteresis, pairID, contact
 end
 
 
-function storeDistancesForSolver!(world::Composition.Object3D, pairID::Composition.PairID,
-    ch::Composition.ContactDetectionMPR_handler, actObj::Composition.Object3D, nextObj::Composition.Object3D, actAABB::Basics.BoundingBox, nextAABB::Basics.BoundingBox, phase2::Bool, hasEvent::Bool)
+function storeDistancesForSolver!(world::Composition.Object3D{F}, pairID::Composition.PairID,
+    ch::Composition.ContactDetectionMPR_handler, actObj::Composition.Object3D{F}, nextObj::Composition.Object3D{F}, actAABB::Basics.BoundingBox{F}, nextAABB::Basics.BoundingBox{F}, phase2::Bool, hasEvent::Bool) where F <: Modia3D.VarFloatType
 
     # If object pairs are already in contact, always perform narrow phase!!
     hasContact = haskey(ch.contactDict, pairID)
@@ -193,10 +189,8 @@ function storeDistancesForSolver!(world::Composition.Object3D, pairID::Compositi
       #  println("AABB not overlapping")
     end
 
-
-    contact                = hasEvent ? distanceOrg < -zEps : hasContact
-    distanceWithHysteresis = contact  ? distanceOrg : distanceOrg + zEps2
-    #  println("mpr dist: ", distanceWithHysteresis, " ", Modia3D.fullName(actObj), " ", Modia3D.fullName(nextObj))
+    distanceWithHysteresis = distanceOrg - ch.contact_eps
+    contact                = hasEvent ? distanceWithHysteresis <= F(0) : hasContact
 
     if hasEvent
         # At event instant
@@ -233,39 +227,39 @@ function storeDistancesForSolver!(world::Composition.Object3D, pairID::Compositi
 end
 
 
-function computeDistanceBetweenAABB(actAABB::Basics.BoundingBox, nextAABB::Basics.BoundingBox)
+function computeDistanceBetweenAABB(actAABB::Basics.BoundingBox{F}, nextAABB::Basics.BoundingBox{F}) where F <: Modia3D.VarFloatType
     xd = computeDistanceOneAxisAABB(actAABB.x_min, actAABB.x_max, nextAABB.x_min, nextAABB.x_max)
     yd = computeDistanceOneAxisAABB(actAABB.y_min, actAABB.y_max, nextAABB.y_min, nextAABB.y_max)
     zd = computeDistanceOneAxisAABB(actAABB.z_min, actAABB.z_max, nextAABB.z_min, nextAABB.z_max)
     distance = sqrt(xd^2 + yd^2 + zd^2)
-    return (distance, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, false, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D, Modia3D.ZeroVector3D)
+    return (distance, Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), false, Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F))
 end
 
 
-function computeDistanceOneAxisAABB(A_min, A_max, B_min, B_max)
+function computeDistanceOneAxisAABB(A_min::F, A_max::F, B_min::F, B_max::F) where F <: Modia3D.VarFloatType
     if A_max < B_min
         return B_min - A_max
     elseif A_min > B_max
         return A_min - B_max
     else
-        return 0.0
+        return F(0.0)
 end; end
 
 
-function Composition.closeContactDetection!(ch::Composition.ContactDetectionMPR_handler)
+function Composition.closeContactDetection!(ch::Composition.ContactDetectionMPR_handler{T,F}) where {T,F}
     empty!(ch.lastContactDict)
     empty!(ch.contactDict)
-    ch.noContactMinVal =  42.0
+    ch.noContactMinVal =  F(42.0)
 end
 
 
-function updateVisualBoundingBox!(obj::Composition.Object3D, aabb::Basics.BoundingBox)
-    box::Shapes.Box = obj.shape
+function updateVisualBoundingBox!(obj::Composition.Object3D{F}, aabb::Basics.BoundingBox{F}) where F <: Modia3D.VarFloatType
+    box::Shapes.Box{F} = obj.shape
     box.lengthX = abs(aabb.x_max - aabb.x_min)
     box.lengthY = abs(aabb.y_max - aabb.y_min)
     box.lengthZ = abs(aabb.z_max - aabb.z_min)
 
-    obj.r_abs = SVector((aabb.x_max + aabb.x_min)/2.0,
-                        (aabb.y_max + aabb.y_min)/2.0,
-                        (aabb.z_max + aabb.z_min)/2.0)
+    obj.r_abs = SVector{3,F}((aabb.x_max + aabb.x_min)/2,
+                        (aabb.y_max + aabb.y_min)/2,
+                        (aabb.z_max + aabb.z_min)/2)
 end

@@ -4,45 +4,65 @@
 module Modia3D
 
 const path = dirname(dirname(@__FILE__))   # Absolute path of package directory
-const Version = "0.6.0"
-const Date = "2021-12-06"
+const Version = "0.9.0"
+const Date = "2022-02-08"
 
 # println("\nImporting Modia3D Version $Version ($Date)")
 
 
 # Abstract types
-abstract type AbstractObject3DFeature end                                 # Data associated with one Object3D
-abstract type AbstractVisualElement  <: AbstractObject3DFeature     end   # Visual element associated with one Object3D
-abstract type AbstractShape       <: AbstractVisualElement end   # Geometry type
-abstract type AbstractGeometry    <: AbstractShape end   # Immutable shape type that  has a volume and optionally mass. Can be used in collisions.
+abstract type AbstractObject3DFeature                            end  # Data associated with one Object3D
+abstract type AbstractVisualElement   <: AbstractObject3DFeature end  # Visual element associated with one Object3D
+abstract type AbstractShape           <: AbstractVisualElement   end  # Geometry type
+abstract type AbstractGeometry        <: AbstractShape           end  # Immutable shape type that  has a volume and optionally mass. Can be used in collisions.
 
-abstract type AbstractContactMaterial   end   # Contact properties of a solid (e.g. spring constant)
-abstract type AbstractContactDetection  end   # Contact detection type
-abstract type AbstractGravityField      end   # Gravity field type
-abstract type AbstractRenderer          end   # Renderer type
-abstract type AbstractDLR_VisualizationRenderer <: AbstractRenderer end   # Community or Professional edition of DLR_Visualization renderer
-
-abstract type AbstractMassPropertiesInterface end
-abstract type AbstractMassProperties    end
-
-abstract type AbstractContactPairMaterial end # Constants needed to compute the contact response between two objects
-
-abstract type AbstractObject3D end
-abstract type AbstractTwoObject3DObject <: AbstractObject3D end  # Object related to two Object3Ds
+abstract type AbstractObject3D                                       end
+abstract type AbstractTwoObject3DObject <: AbstractObject3D          end  # Object related to two Object3Ds
 abstract type AbstractJoint             <: AbstractTwoObject3DObject end  # Constraint between two Object3Ds
-abstract type AbstractForceElement      <: AbstractObject3D end
+abstract type AbstractForceElement      <: AbstractObject3D          end
 
-abstract type AbstractScene end
+abstract type AbstractScene                   end
+abstract type AbstractMassProperties          end
+abstract type AbstractMassPropertiesInterface end
+abstract type AbstractGravityField            end  # Gravity field type
+abstract type AbstractContactMaterial         end  # Contact properties of a solid (e.g. spring constant)
+abstract type AbstractContactPairMaterial     end  # Constants needed to compute the contact response between two objects
+abstract type AbstractContactDetection        end  # Contact detection type
 
-using StaticArrays
-@inline cross(x::SVector{3,Float64}, y::SVector{3,Float64}) = @inbounds SVector{3,Float64}(x[2]*y[3]-x[3]*y[2],
-                                                                                           x[3]*y[1]-x[1]*y[3],
-                                                                                           x[1]*y[2]-x[2]*y[1])
+abstract type AbstractRenderer                                      end  # Renderer type
+abstract type AbstractDLR_VisualizationRenderer <: AbstractRenderer end  # Community or Professional edition of DLR_Visualization renderer
 
+
+using  StaticArrays
+using  DoubleFloats
+using  Reexport
+import MonteCarloMeasurements
+import Measurements
+import Unitful
+import ModiaLang
+
+
+@reexport using ModiaLang
+const modelsPath = joinpath(ModiaLang.path, "models")
+
+
+# VarFloatType defines the supported float types for system parameters and variables
+const VarFloatType = Union{AbstractFloat, MonteCarloMeasurements.AbstractParticles}
+
+# MPRFloatType defines the float type of MPR calculations
+const MPRFloatType = Double64
+
+# Used renderer (actual value is defined with __init__() below)
+const renderer = Vector{AbstractRenderer}(undef,2)
+
+
+@inline cross(x::SVector{3,F}, y::SVector{3,F}) where F <: VarFloatType = @inbounds SVector{3,F}(x[2]*y[3]-x[3]*y[2],
+                                                                                                 x[3]*y[1]-x[1]*y[3],
+                                                                                                 x[1]*y[2]-x[2]*y[1])
 
 
 # Enumerations
-@enum Ternary      True False Inherited
+@enum Ternary  True False Inherited
 
 """
     @enum AnalysisType KinematicAnalysis QuasiStaticAnalysis DynamicAnalysis
@@ -56,17 +76,9 @@ and then this variable would not show up in the result, if `AnalysisType = Kinem
 
 Currently, only DynamicAnalysis is supported and used.
 """
-@enum AnalysisType KinematicAnalysis QuasiStaticAnalysis DynamicAnalysis
-@enum VariableAnalysisType AllAnalysis QuasiStaticAndDynamicAnalysis OnlyDynamicAnalysis NotUsedInAnalysis
+@enum AnalysisType  KinematicAnalysis QuasiStaticAnalysis DynamicAnalysis
+@enum VariableAnalysisType  AllAnalysis QuasiStaticAndDynamicAnalysis OnlyDynamicAnalysis NotUsedInAnalysis
 
-
-# Used renderer (actual value is defined with __init__() below)
-const renderer = Vector{AbstractRenderer}(undef,2)
-
-
-
-
-import Unitful
 
 numberType(value) = ModiaLang.baseType(eltype(value))
 
@@ -95,24 +107,17 @@ convertAndStripUnit(TargetType, requiredUnit, value) =
     numberType(value) <: Unitful.AbstractQuantity && Unitful.unit.(value) != Unitful.NoUnits ?
             convert(TargetType, Unitful.ustrip.( Unitful.uconvert.(requiredUnit, value))) : convert(TargetType, value)
 
-
-# MPRFloatType is used to change betweeen Double64 and Float64 for mpr calculations
-using DoubleFloats
-const MPRFloatType = Double64
-
 # Include sub-modules
-include(joinpath("Frames"           , "_module.jl"))
-include(joinpath("Basics"           , "_module.jl"))
-include(joinpath("Shapes"         , "_module.jl"))
-include(joinpath("Composition"      , "_module.jl"))
-include(joinpath("AnimationExport"  , "_module.jl"))
-include(joinpath("PathPlanning"     , "_module.jl"))
-include(joinpath("renderer"         , "DLR_Visualization"  , "_module.jl"))
-include(joinpath("renderer"         , "NoRenderer"         , "_module.jl"))
-include(joinpath("contactDetection" , "ContactDetectionMPR", "_module.jl"))
-include(joinpath("Interface"        , "_module.jl"))
-include(joinpath("ModiaInterface"   , "_module.jl"))
-
+include(joinpath("Frames"          , "_module.jl"))
+include(joinpath("Basics"          , "_module.jl"))
+include(joinpath("Shapes"          , "_module.jl"))
+include(joinpath("Composition"     , "_module.jl"))
+include(joinpath("AnimationExport" , "_module.jl"))
+include(joinpath("PathPlanning"    , "_module.jl"))
+include(joinpath("renderer"        , "DLR_Visualization"  , "_module.jl"))
+include(joinpath("renderer"        , "NoRenderer"         , "_module.jl"))
+include(joinpath("contactDetection", "ContactDetectionMPR", "_module.jl"))
+include(joinpath("ModiaInterface"  , "_module.jl"))
 
 # Make symbols available that have been exported in sub-modules
 using  .Frames
@@ -122,10 +127,8 @@ using  .AnimationExport
 using  .Composition
 import .DLR_Visualization
 import .NoRenderer
-using .PathPlanning
-using .Interface
-#const connect = Composition.connect  # connect cannot be directly exported, due to a conflict with Base.connect
-const run     = Interface.run        # run cannot be directly exported, due to a conflict with Base.run
+using  .PathPlanning
+@reexport using .ModiaInterface
 
 
 # Called implicitely at the first import/using of Modia3D (when loading Modia3D to the current Julia session)
@@ -154,30 +157,15 @@ function reenableRenderer()
 end
 
 
-export Object3D
+export PointGravityField, NoGravityField
 
-export Sphere, Ellipsoid, Box, Cylinder, Capsule, Beam, Cone
-export Spring, GearWheel, CoordinateSystem, Grid, FileMesh, ModelicaShape
-
-export Solid, Visual
-export MassProperties
-export Fix
-export Revolute, Prismatic
-
-export UniformGravityField, PointGravityField, NoGravityField
-export VisualMaterial
-export Scene, SimulationModel
 export print_ModelVariables
 
-export PTP_path, pathEndTime, getPosition!, getPosition, getIndex, plotPath
-
-export calculateRobotMovement
+export rereadContactPairMaterialFromJSON
 
 # Add import clauses used in examples and test
 import StaticArrays
-import Unitful
 import LinearAlgebra
 import Test
-import ModiaLang
 
 end # module

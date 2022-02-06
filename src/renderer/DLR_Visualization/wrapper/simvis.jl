@@ -26,8 +26,8 @@ function SimVis_freeObjectID(simVis::SimVis_Renderer, obj::Ptr{Nothing})
    ccall(simVis.freeObjectID, Nothing,(Ptr{Nothing},), obj)
 end
 
-function SimVis_setTime(simVis::SimVis_Renderer, time::Float64)
-   ccall(simVis.setTime, Nothing,(Cdouble,), time)
+function SimVis_setTime(simVis::SimVis_Renderer, time)
+   ccall(simVis.setTime, Nothing,(Cdouble,), Float64(time) )
 end
 
 function SimVis_setBaseObject(simVis::SimVis_Renderer,

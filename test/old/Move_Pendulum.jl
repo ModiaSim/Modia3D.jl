@@ -3,25 +3,25 @@ module Move_Pendulum
 import Modia3D
 
 # Properties
-vmat1 = Modia3D.VisualMaterial(color="LightBlue", transparency=0.5)
-vmat2 = Modia3D.VisualMaterial(color="Red")
+vmat1 = Modia3D.Shapes.VisualMaterial(color="LightBlue", transparency=0.5)
+vmat2 = Modia3D.Shapes.VisualMaterial(color="Red")
 Lx = 1.6
 Ly = 0.2*Lx
 Lz = 0.2*Lx
 m  = 1.0
 
 # Pendulum
-world = Modia3D.Object3D(feature = Modia3D.Visual(shape =
-    Modia3D.CoordinateSystem(length=0.5*Lx)))
-body = Modia3D.Object3D(feature = Modia3D.Solid(
-    shape = Modia3D.Beam(axis=1, length=Lx, width=Ly, thickness=Lz), massProperties=Modia3D.MassProperties(mass=m), visualMaterial=vmat1))
-frame1 = Modia3D.Object3D(parent=body, translation=[-Lx/2, 0.0, 0.0])
-cyl = Modia3D.Object3D(parent=frame1, feature = Modia3D.Visual(shape =
-    Modia3D.Cylinder(axis=3, diameter=Ly/2, length=1.2*Ly), visualMaterial=vmat2))
-rev = Modia3D.Revolute(obj1=world, obj2=frame1)
+world = Modia3D.Composition.Object3D(feature = Modia3D.Shapes.Visual(shape =
+    Modia3D.Shapes.CoordinateSystem(length=0.5*Lx)))
+body = Modia3D.Composition.Object3D(feature = Modia3D.Shapes.Solid(
+    shape = Modia3D.Shapes.Beam(axis=1, length=Lx, width=Ly, thickness=Lz), massProperties=Modia3D.Shapes.MassProperties(mass=m), visualMaterial=vmat1))
+frame1 = Modia3D.Composition.Object3D(parent=body, translation=[-Lx/2, 0.0, 0.0])
+cyl = Modia3D.Composition.Object3D(parent=frame1, feature = Modia3D.Shapes.Visual(shape =
+    Modia3D.Shapes.Cylinder(axis=3, diameter=Ly/2, length=1.2*Ly), visualMaterial=vmat2))
+rev = Modia3D.Composition.Revolute(obj1=world, obj2=frame1)
 
 # Visualize pendulum
-scene = Modia3D.Scene(visualizeFrames=true, defaultFrameLength=0.3*Lx)
+scene = Modia3D.Composition.Scene(visualizeFrames=true, defaultFrameLength=0.3*Lx)
 Modia3D.initAnalysis!(world, scene)
 
 tStart = 0.0

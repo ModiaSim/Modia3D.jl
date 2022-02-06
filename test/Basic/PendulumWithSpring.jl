@@ -1,15 +1,10 @@
 module PendulumWithSpring
 
-using ModiaLang
-using Unitful
+using Modia3D
 
-# ModiaLang models
-include("$(ModiaLang.path)/models/Blocks.jl")
-include("$(ModiaLang.path)/models/Electric.jl")
-include("$(ModiaLang.path)/models/Rotational.jl")
-
-import Modia3D
-using  Modia3D.ModiaInterface
+include("$(Modia3D.modelsPath)/Blocks.jl")
+include("$(Modia3D.modelsPath)/Electric.jl")
+include("$(Modia3D.modelsPath)/Rotational.jl")
 
 simulationModel = nothing
 get_simulationModel() = simulationModel
@@ -37,7 +32,7 @@ pendulumWithSpring = @instantiateModel(PendulumWithSpr, aliasReduction=false, un
 
 stopTime = 1.0
 requiredFinalStates = [-0.1166492890518372, -15.325157691194002]
-simulate!(pendulumWithSpring, stopTime=stopTime, log=true, logStates=true, requiredFinalStates=requiredFinalStates)
+simulate!(pendulumWithSpring, stopTime=stopTime, log=true, logStates=false, requiredFinalStates=requiredFinalStates)
 
 @usingModiaPlot
 plot(pendulumWithSpring, "pendulum.rev.flange.phi", figure=1)

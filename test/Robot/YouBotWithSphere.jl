@@ -1,16 +1,10 @@
 module YouBotWithSphere
 
-using ModiaLang
-using Unitful
-import Modia3D
+using Modia3D
 
-# ModiaLang models
-include("$(ModiaLang.path)/models/Blocks.jl")
-include("$(ModiaLang.path)/models/Electric.jl")
-include("$(ModiaLang.path)/models/Rotational.jl")
-
-import Modia3D
-using  Modia3D.ModiaInterface
+include("$(Modia3D.modelsPath)/Blocks.jl")
+include("$(Modia3D.modelsPath)/Electric.jl")
+include("$(Modia3D.modelsPath)/Rotational.jl")
 
 # some constants
 
@@ -49,7 +43,7 @@ gripper_left_finger_obj  = joinpath(Modia3D.path, "objects/robot_KUKA_YouBot/gri
 gripper_right_finger_obj = joinpath(Modia3D.path, "objects/robot_KUKA_YouBot/gripper_right_finger.obj")
 
 # Drive train data: motor inertias and gear ratios
-nullRot = nothing #SMatrix{3,3,Float64,9}(Matrix(1.0I, 3, 3))
+nullRot = nothing
 
 motorInertia1 = 0.0000135 + 0.000000409
 motorInertia2 = 0.0000135 + 0.000000409
@@ -64,22 +58,22 @@ gearRatio5    = 71.0
 
 m1=1.390
 translation1 =[0.033,0,0]
-rotation1 =Modia3D.rot1(180u"°")
+rotation1 = [180u"°", 0, 0]
 
 m2=1.318
 translation2=[0.155,0,0]
-rotation2=Modia3D.rot123(90u"°", 0.0, -90u"°")
+rotation2 = [90u"°", 0.0, -90u"°"]
 
 m3=0.821
 translation3=[0,0.135,0]
-rotation3=Modia3D.rot3(-90u"°")
+rotation3 = [0, 0, -90u"°"]
 
 m4=0.769
 translation4=[0,0.11316,0]
 
 m5=0.687
 translation5=[0,0,0.05716]
-rotation5=Modia3D.rot1(-90u"°")
+rotation5 = [-90u"°", 0, 0]
 
 ### ----------------- Servo Model -----------------------
 # parameters for Link
@@ -98,13 +92,13 @@ motorInertiaGripper = 0.0
 gearRatioGripper    = 1.0
 
 #### ----------- Path Planning ------------------
-referencePath1 = Modia3D.ReferencePath(
+referencePath1 = Modia3D.PathPlanning.ReferencePath(
     names = ["angle1", "angle2", "angle3", "angle4", "angle5", "gripper"],
     position = [0.0,     0.0,     pi/2,   0.0,    0.0,   0.0],
     v_max =    [2.68512, 2.68512, 4.8879, 5.8997, 5.8997, 1.0],
     a_max =    [1.5, 1.5, 1.5, 1.5, 1.5, 0.5])
 #
-Modia3D.ptpJointSpace(referencePath = referencePath1, positions =
+Modia3D.PathPlanning.ptpJointSpace(referencePath = referencePath1, positions =
     [0.0 0.0 pi/2     0.0 0.0 0.0;
     0.0  0.3 pi/2-0.3 0.0 0.0 0.0;
     0.0  0.0 0.0      0.0 0.0 0.0])
@@ -179,7 +173,7 @@ Servo = Model(
 
 Ground = Model(
     ground = Object3D(parent=:world,
-        translation=[0.5, 0.0, -0.005], feature = Solid(shape =Box(lengthX=2.5, lengthY=2.0, lengthZ=0.01), collisionSmoothingRadius=0.001, solidMaterial="DryWood", visualMaterial=vmat4, collision=true))
+        translation=[0.5, 0.0, -0.05], feature = Solid(shape =Box(lengthX=2.5, lengthY=2.0, lengthZ=0.1), collisionSmoothingRadius=0.001, solidMaterial="DryWood", visualMaterial=vmat4, collision=true))
 )
 
 Table = Model(
@@ -332,7 +326,7 @@ Link = Model(
     #initRefPos = Par(value = :(0.0)),
     #index = 1,
     trans = [0,0,0],
-    rota = Par(value = :(nullRot)), #rotation1, #Modia3D.rot1(180u"°"),
+    rota = Par(value = :(nullRot)),
 
     obj1 = Object3D(parent=:parent1, rotation=:rota, feature=:featureVisual),    #, visualizeFrame=false),
     body = Object3D(feature = :featureBody),
@@ -340,7 +334,7 @@ Link = Model(
 )
 
 Gripper = Model(
-    obj1 = Object3D(parent=:(link5.obj2), rotation=Modia3D.rot3(-180u"°")),
+    obj1 = Object3D(parent=:(link5.obj2), rotation=[0, 0, -180u"°"]),
     gripper_base_frame = Object3D(parent=:obj1, feature=Solid(shape=
         FileMesh(filename = gripper_base_frame_obj), massProperties=MassPropertiesFromShapeAndMass(mass=0.199), visualMaterial=vmat1)),
     gripper_left_finger_a = Object3D(parent=:gripper_base_frame),
@@ -357,9 +351,9 @@ Gripper = Model(
 
 YouBot = Model(
     gravField = UniformGravityField(g=9.81, n=[0,0,-1]),
-    world = Object3D(feature=Scene(gravityField = :gravField, visualizeFrames=false,
-    defaultFrameLength=0.1, enableContactDetection=true, elasticContactReductionFactor=1e-4)),
-
+        world = Object3D(feature=Scene(gravityField = :gravField, mprTolerance=1.0e-18,
+                visualizeFrames=false, defaultFrameLength=0.1,
+                enableContactDetection=true, elasticContactReductionFactor=1e-4)),
     base = Base,
     table = Table,
     ground = Ground,
@@ -430,8 +424,8 @@ youbot = @instantiateModel(youbotModel, unitless=true, logCode=false, log=false)
 
 stopTime = 5.0
 tolerance = 1e-6
-requiredFinalStates = [0.5193537637443382, -0.00014620403190263837, -0.3452197601381744, 0.24389499144876015, -2.61707557353202e-5, 9.138175086356761e-8, 1.5711570542895037, -0.00012975080236810933, -26.728944081206805, 0.004096901654603484, -0.00011590306577238007, -9.798531538293224, -9.38328422293869e-8, 9.389543923301749e-8, -1.8339143521277865e-6, 1.8341244885504516e-6, -3.554504768813606e-6, 3.554985652233493e-6, -2.1817977469044572e-6, 2.182160452324344e-6, 8.488376474459234e-9, -8.489788275075988e-9, -0.000716770056313758, 0.22761856966370303, -0.018209520510203175, -0.008528771785063172, 2.952605056036118e-5]
-simulate!(youbot, stopTime=stopTime, tolerance=tolerance, log=true, logStates=false, requiredFinalStates=requiredFinalStates)
+requiredFinalStates = [0.38482227754776066, -0.00016295742025519802, -0.3452201051898588, 0.15367592851859116, -3.115109032187419e-5, 2.1716034934731783e-7, 1.5711777547062007, -0.0004593817729326798, -21.251802606456394, 0.00288490325758245, 0.0008119903827950956, -6.173843836576349, -9.385893877103843e-8, 9.392153905515826e-8, -1.834001085206641e-6, 1.834211232702938e-6, -3.5547016886714106e-6, 3.5551825975198027e-6, -2.1819178782680093e-6, 2.1822806030382832e-6, 8.488825444774014e-9, -8.49023732072194e-9, -0.0007169695126938622, 0.22761790676242252, -0.01821048529038104, -0.008529189653392576, 2.9527612260696888e-5]
+simulate!(youbot, stopTime=stopTime, tolerance=tolerance, requiredFinalStates_atol=0.1, log=true, logStates=true, requiredFinalStates=requiredFinalStates)
 
 @usingModiaPlot
 plot(youbot, ["free.rot"], figure=1)

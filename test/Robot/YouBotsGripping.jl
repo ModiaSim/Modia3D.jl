@@ -1,17 +1,12 @@
 module YouBotsGripping
 
-using  ModiaLang
-import Modia3D
-using  Unitful
+using  Modia3D
 
-# ModiaLang models
-include("$(ModiaLang.path)/models/Blocks.jl")
-include("$(ModiaLang.path)/models/Electric.jl")
-include("$(ModiaLang.path)/models/Rotational.jl")
-include("$(ModiaLang.path)/models/Translational.jl")
+include("$(Modia3D.modelsPath)/Blocks.jl")
+include("$(Modia3D.modelsPath)/Electric.jl")
+include("$(Modia3D.modelsPath)/Rotational.jl")
+include("$(Modia3D.modelsPath)/Translational.jl")
 
-import Modia3D
-using  Modia3D.ModiaInterface
 
 # some constants
 simplifiedContact = true  # use boxes instead of meshes for finger contact
@@ -47,7 +42,7 @@ gripper_left_finger_obj  = joinpath(Modia3D.path, "objects/robot_KUKA_YouBot/gri
 gripper_right_finger_obj = joinpath(Modia3D.path, "objects/robot_KUKA_YouBot/gripper_right_finger.obj")
 
 # Drive train data: motor inertias and gear ratios
-nullRot = nothing #SMatrix{3,3,Float64,9}(Matrix(1.0I, 3, 3))
+nullRot = nothing
 
 motorInertia1 = 0.0000135 + 0.000000409
 motorInertia2 = 0.0000135 + 0.000000409
@@ -62,22 +57,22 @@ gearRatio5    = 71.0
 
 m1=1.390
 translation1 =[0.033,0,0]
-rotation1 =Modia3D.rot1(180u"°")
+rotation1 = [180u"°", 0, 0]
 
 m2=1.318
 translation2=[0.155,0,0]
-rotation2=Modia3D.rot123(90u"°", 0.0, -90u"°")
+rotation2 = [90u"°", 0.0, -90u"°"]
 
 m3=0.821
 translation3=[0,0.135,0]
-rotation3=Modia3D.rot3(-90u"°")
+rotation3 = [0, 0, -90u"°"]
 
 m4=0.769
-translation4=[0,0.11316,0]
+translation4 = [0,0.11316,0]
 
 m5=0.687
 translation5=[0,0,0.05716]
-rotation5=Modia3D.rot1(-90u"°")
+rotation5 = [-90u"°", 0, 0]
 
 ### ----------------- Servo Model -----------------------
 # parameters for Link
@@ -95,23 +90,23 @@ motorInertiaGripper = 0.1
 gearRatioGripper    = 1.0
 
 #### ----------- Path Planning ------------------
-referencePath1 = Modia3D.ReferencePath(
+referencePath1 = Modia3D.PathPlanning.ReferencePath(
     names =    ["bot1angle1", "bot1angle2", "bot1angle3", "bot1angle4", "bot1angle5", "bot1gripper", "bot2angle1", "bot2angle2", "bot2angle3", "bot2angle4", "bot2angle5", "bot2gripper"],
     position = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
     v_max =    [2.68512, 2.68512, 4.8879, 5.8997, 5.8997, 2.0, 2.68512, 2.68512, 4.8879, 5.8997, 5.8997, 2.0],
     a_max =    [1.5, 1.5, 1.5, 1.5, 1.5, 0.5, 1.5, 1.5, 1.5, 1.5, 1.5, 0.5])
 
-Modia3D.ptpJointSpace(referencePath = referencePath1, positions =[
-        0.0  0.0    0.0       0.0    0.0  0.0             0.0  0.0    0.0       0.0   0.0  0.0;
-        pi   pi/4   pi/4      0.0    0.0  diameter+0.01   0.0  0.0    0.0       0.0   0.0  0.0;
-        pi   pi/4   pi/4      1.057  0.0  diameter+0.01   0.0  0.0    0.0       0.0   0.0  0.0;
-        pi   pi/4   pi/4      1.057  0.0  diameter-0.002  0.0  0.0    0.0       0.0   0.0  0.0;
-        pi   pi/4   pi/4      0.0    0.0  diameter-0.002  0.0  0.0    0.0       0.0   0.0  0.0;
-        0.0  0.0    pi/2-0.2  0.0    0.0  diameter-0.002  0.0  0.0    0.0       0.0   0.0  0.0;
-        0.0  0.2    pi/2-0.2  0.0    0.0  diameter-0.002  0.0  0.0    0.0       0.0   0.0  0.0;
-        0.0  0.2    pi/2-0.2  0.0    0.0  diameter+0.01   0.0  0.0    0.0       0.0   0.0  0.0;
-        0.0  0.0    pi/2      0.0    0.0  diameter+0.01   0.0  0.0    0.0       0.0   0.0  0.0;
-        0.0  0.0    0.0       0.0    0.0  0.001           0.0  0.0    0.0       0.0   0.0  0.0
+Modia3D.PathPlanning.ptpJointSpace(referencePath = referencePath1, positions =[
+        0.0  0.0    0.0       0.0    0.0  diameter        0.0  0.0    0.0       0.0   0.0  diameter;
+        pi   pi/4   pi/4      0.0    0.0  diameter+0.01   0.0  0.0    0.0       0.0   0.0  diameter;
+        pi   pi/4   pi/4      1.057  0.0  diameter+0.01   0.0  0.0    0.0       0.0   0.0  diameter;
+        pi   pi/4   pi/4      1.057  0.0  diameter-0.002  0.0  0.0    0.0       0.0   0.0  diameter;
+        pi   pi/4   pi/4      0.0    0.0  diameter-0.002  0.0  0.0    0.0       0.0   0.0  diameter;
+        0.0  0.0    pi/2-0.2  0.0    0.0  diameter-0.002  0.0  0.0    0.0       0.0   0.0  diameter;
+        0.0  0.2    pi/2-0.2  0.0    0.0  diameter-0.002  0.0  0.0    0.0       0.0   0.0  diameter;
+        0.0  0.2    pi/2-0.2  0.0    0.0  diameter+0.01   0.0  0.0    0.0       0.0   0.0  diameter;
+        0.0  0.0    pi/2      0.0    0.0  diameter+0.01   0.0  0.0    0.0       0.0   0.0  diameter;
+        0.0  0.0    0.0       0.0    0.0  0.001           0.0  0.0    0.0       0.0   0.0  diameter
         0.0  0.0    0.0       0.0    0.0  0.001           0.0  0.0    pi/2      0.0   0.0  diameter+0.01
         0.0  0.0    0.0       0.0    0.0  0.001           0.0  0.3    pi/2-0.3  0.0   0.0  diameter+0.01
         0.0  0.0    0.0       0.0    0.0  0.001           0.0  0.3    pi/2-0.3  0.0   0.0  diameter-0.002
@@ -120,7 +115,7 @@ Modia3D.ptpJointSpace(referencePath = referencePath1, positions =[
         0.0  0.0    0.0       0.0    0.0  0.001           pi   pi/4   pi/4      1.0   0.0  diameter-0.002
         0.0  0.0    0.0       0.0    0.0  0.001           pi   pi/4   pi/4      1.0   0.0  diameter+0.01
         0.0  0.0    0.0       0.0    0.0  0.001           pi   pi/4   pi/4      0.0   0.0  diameter+0.01
-        0.0  0.0    0.0       0.0    0.0  0.001           0.0  0.0    0.0       0.0   0.0  0.001
+        0.0  0.0    0.0       0.0    0.0  0.001           0.0  0.0    0.0       0.0   0.0  0.01
     ])
 
 getReferencePath() = referencePath1
@@ -427,7 +422,7 @@ Link = Model(
 )
 
 Gripper = Model(
-    obj1 = Object3D(parent=:(link5.obj2), rotation=Modia3D.rot3(-180u"°")),
+    obj1 = Object3D(parent=:(link5.obj2), rotation=[0, 0, -180u"°"]),
     gripper_base_frame = Object3D(parent=:obj1, feature=Solid(shape=
         FileMesh(filename = gripper_base_frame_obj), massProperties=MassPropertiesFromShapeAndMass(mass=0.199))),
     gripper_left_finger_a = Object3D(),
@@ -505,8 +500,9 @@ YouBot2 = YouBot(pathIndexOffset=6)
 Scenario = Model(
     gravField = UniformGravityField(g=9.81, n=[0,0,-1]),
     world = Object3D(feature=Scene(gravityField=:gravField, visualizeFrames=false, nominalLength=tableX,
+    #mprTolerance = 1.0e-14,
         animationFile="YouBotsGripping.json",
-        enableContactDetection=true, elasticContactReductionFactor=1e-3)),
+        enableContactDetection=true, maximumContactDamping=1000, elasticContactReductionFactor=1e-3)),
 #   worldFrame = Object3D(parent=:world, feature=Visual(shape=CoordinateSystem(length=0.2))),
 
     table = Table,
@@ -555,13 +551,13 @@ youbotModel = buildModia3D(Scenario) | modelParameters
 youbot = @instantiateModel(youbotModel, unitless=true, logCode=false, log=false)
 
 stopTime = 28.0
-tolerance = 1e-6
+tolerance = 1e-8
 if simplifiedContact
-    requiredFinalStates = [0.005096798572634927, 0.7904208792775387, 0.18419401975519176, -4.3006962962862887e-8, 5.4420074839254244e-8, 2.5617642017116372e-12, -1.4050487315532205, 1.0491498321581578, 0.3562064805020956, 2.3231001742729985e-7, -3.5384146012997773e-7, -2.41301319984383e-6, -5.035238836618702e-13, 5.037740559360095e-13, -6.423564575536616e-12, 6.424385979928496e-12, -1.4666529107060238e-11, 1.4668415028642223e-11, -9.012231565021411e-12, 9.013660839220848e-12, 9.032058844908219e-14, -9.032628457531957e-14, -3.846985487101555e-9, 0.24163532322207057, -0.0007949230984179443, -0.0009396161972028238, 3.14205108761611e-10, -1.037427434317907e-8, 0.000999999788328581, 2.1162393266388108e-10, 4.760966984099741e-7, -4.7585931443052686e-7, -4.541747754819243e-6, 4.542275462831385e-6, -8.52920186981953e-6, 8.530381089362783e-6, -5.0535822582814115e-6, 5.054443591943805e-6, 3.5345121975063227e-8, -3.5348563654240265e-8, 0.0036404873795592746, 0.20692220253284932, -0.04258215498619998, -0.018517943162263698, 0.00012295347178476954, -0.0014252182810739129, 0.0009709205705321613, 2.90730335075866e-5]
+    requiredFinalStates = [0.0050970563093600185, 0.7904171467114361, 0.18419404937867392, 2.393788651848772e-16, -6.60105171954181e-16, 1.2165769047688873e-15, -1.3931781018563674, 1.0554901307106912, 0.34665729852039384, 4.694865375626716e-15, 4.406914681604384e-17, 2.6270127919716575e-14, -9.49048910851836e-13, 9.495203075907745e-13, -1.2103782852618098e-11, 1.2105330654214361e-11, -2.763585539198143e-11, 2.763940900957682e-11, -1.698187102643751e-11, 1.698456419693423e-11, 1.7018852180265773e-13, -1.7019925497030893e-13, -7.25085347784918e-9, 0.24163527980814672, -0.0007949866397794349, -0.0009396439190923297, 5.920477698032304e-10, -1.9542049225560082e-8, 0.0009999996012739637, 3.9863659366878754e-10, 8.969089868430469e-7, -8.963371363880495e-7, -8.557720162290223e-6, 8.55874276252574e-6, -1.6071234819970295e-5, 1.607348052490815e-5, -9.522484127851861e-6, 9.524102182656985e-6, 6.905344698797933e-8, -6.90610756842933e-8, 0.006858260583843995, 0.17622760666462461, -0.07953299831187123, -0.034062552250614664, 0.0002402097624760365, -0.002703882057494803, 0.009944831368185077, 5.515617885070206e-5]
 else
     requiredFinalStates = [0.005098596727514149, 0.7904159015385256, 0.1791342195707778, -1.1808457144007462e-10, -1.88763357133662e-9, 8.608177052460935e-14, -1.5627420768515174, 1.1910702824997361, 0.5304431666324095, 2.4640818942197007e-8, -1.4491090645065959e-8, 6.037552152197727e-8, -5.269643935234176e-13, 5.272139874305713e-13, -6.420034932436889e-12, 6.420854829588564e-12, -1.4631919047149923e-11, 1.463380141274083e-11, -8.989367532219111e-12, 8.990793910036479e-12, 7.01557712829279e-14, -7.016147036815077e-14, -4.026169255817747e-9, 0.24163532324903933, -0.0007949229288464374, -0.000939616117669137, 2.4405169933839243e-10, -1.0329058212887232e-8, 0.000999999789251148, 2.107015735905466e-10, 4.7377460108628524e-7, -4.7353745252266476e-7, -4.541835528743539e-6, 4.542363196555878e-6, -8.529395514275828e-6, 8.530574712207511e-6, -5.054073275334597e-6, 5.054934647304243e-6, 3.5472140130848604e-8, -3.547558188477468e-8, 0.0036227372301417533, 0.20692153169511313, -0.04258310367908495, -0.018519651281104485, 0.0001233953677379415, -0.0014214723892361516, 0.0009709969998011199, 2.8996621358862662e-5]
 end
-simulate!(youbot, stopTime=stopTime, tolerance=tolerance, log=true, logStates=true, requiredFinalStates=requiredFinalStates)
+simulate!(youbot, stopTime=stopTime, tolerance=tolerance, requiredFinalStates_atol=0.002, log=true, logStates=false, requiredFinalStates=requiredFinalStates)
 
 #=
 simulate!(youbot, stopTime=0.1, tolerance=tolerance, log=false)

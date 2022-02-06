@@ -33,12 +33,12 @@ end
 # (see file ...\Composition\responseCalculation\elasticCollisionResponse.jl)
 # further, at an event simulation status is updated, contact material is replaced
 # and the actual contactDict is stored
-function dealWithContacts!(sim, scene, ch, world, time, file)
+function dealWithContacts!(sim, scene::Scene{F}, ch, world, time, file) where F <: Modia3D.VarFloatType
   simh = sim.eventHandler
   for (pairID, pair) in ch.contactDict
     obj1 = pair.obj1
     obj2 = pair.obj2
-    rContact      = (pair.contactPoint1 + pair.contactPoint2)/2.0
+    rContact      = (pair.contactPoint1 + pair.contactPoint2)/F(2.0)
     contactNormal = pair.contactNormal
     if ModiaLang.isEvent(sim)
       # println("$(sim.time): ", obj1.path, " ", obj2.path)
@@ -77,7 +77,8 @@ function getMaterialContactStart(scene, ch, simh, pair, pairID, obj1, obj2, rCon
     # determine contact pair material
     if scene.options.enableContactDetection
       pair.contactPairMaterial = contactStart(obj1, obj2, rContact, contactNormal,
-                                            scene.options.elasticContactReductionFactor)
+                                              scene.options.elasticContactReductionFactor,
+                                              scene.options.maximumContactDamping)
     end
     simh.restart = max(simh.restart, ModiaLang.Restart)
     simh.newEventIteration = false
@@ -92,9 +93,9 @@ function logEvents(simh, pair, obj1, obj2, rContact, contactNormal)
     name1 = Modia3D.fullName(obj1)
     name2 = Modia3D.fullName(obj2)
     n     = contactNormal
-    println("        distance(", name1, ",", name2, ") = ", pair.distanceWithHysteresis, " became < 0")
+    println("        distance(", name1, ",", name2, ") = ", pair.distanceWithHysteresis, " became <= 0")
 
-    @inbounds println("            contact normal = [", round(n[1], sigdigits=3), ", ", round(n[2], sigdigits=3), ", ", round(n[3], sigdigits=3), "], contact position = [", round(rContact[1], sigdigits=3), ", ", round(rContact[2], sigdigits=3), ", ", round(rContact[3], sigdigits=3),"], c_res = ", round(pair.contactPairMaterial.c_res, sigdigits=3) , " d_res = ", round(pair.contactPairMaterial.d_res, sigdigits=3), "\n")
+    @inbounds println("            contact normal = [", round(n[1], sigdigits=3), ", ", round(n[2], sigdigits=3), ", ", round(n[3], sigdigits=3), "], contact position = [", round(rContact[1], sigdigits=3), ", ", round(rContact[2], sigdigits=3), ", ", round(rContact[3], sigdigits=3),"], c_res = ", round(pair.contactPairMaterial.c_res, sigdigits=3) , " d_res = ", round(pair.contactPairMaterial.d_res, sigdigits=3))
 end; end
 
 # each contact shape pair which was in lastContactDict but isn't in actual contactDict
@@ -115,7 +116,7 @@ function deleteMaterialLastContactDictContactEnd(scene, ch, simh)
       end
       name1 = Modia3D.fullName(pair.obj1)
       name2 = Modia3D.fullName(pair.obj2)
-      println("        distance(", name1, ",", name2, ")  became > 0")
+      println("        distance(", name1, ",", name2, ") = ", pair.distanceWithHysteresis, " became > 0")
   end; end
 
   # delete lastContactDict and save contactDict in lastContactDict
@@ -130,7 +131,7 @@ end; end
 # visualizeSupportPoints is true
 # if a contact point and/or support point is nothing the point is transparent and therefore invisible
 # otherwise its visualized as a sphere
-function visualizeContactAndSupportPoints(ch, world)
+function visualizeContactAndSupportPoints(ch, world::Composition.Object3D{F}) where F <: Modia3D.VarFloatType
     contactDictCollect = collect(ch.contactDict)
     lengthDict = length(ch.contactDict)
 
@@ -143,8 +144,8 @@ function visualizeContactAndSupportPoints(ch, world)
                 point2 = contactDictCollect[i][2].contactPoint2
             else
                 transparency = 1.0
-                point1 = Modia3D.ZeroVector3D
-                point2 = Modia3D.ZeroVector3D
+                point1 = Modia3D.ZeroVector3D(F)
+                point2 = Modia3D.ZeroVector3D(F)
             end
             setVisualizationContactProperties!(world.contactVisuObj1[i], transparency, point1)
             setVisualizationContactProperties!(world.contactVisuObj2[i], transparency, point2)
@@ -168,12 +169,12 @@ function visualizeContactAndSupportPoints(ch, world)
                 support3B = contactDictCollect[i][2].support3B
             else
                 transparency = 1.0
-                support1A = Modia3D.ZeroVector3D
-                support2A = Modia3D.ZeroVector3D
-                support3A = Modia3D.ZeroVector3D
-                support1B = Modia3D.ZeroVector3D
-                support2B = Modia3D.ZeroVector3D
-                support3B = Modia3D.ZeroVector3D
+                support1A = Modia3D.ZeroVector3D(F)
+                support2A = Modia3D.ZeroVector3D(F)
+                support3A = Modia3D.ZeroVector3D(F)
+                support1B = Modia3D.ZeroVector3D(F)
+                support2B = Modia3D.ZeroVector3D(F)
+                support3B = Modia3D.ZeroVector3D(F)
             end
             setVisualizationContactProperties!(world.supportVisuObj1A[i], transparency, support1A)
             setVisualizationContactProperties!(world.supportVisuObj2A[i], transparency, support2A)
@@ -192,7 +193,7 @@ end
 printWarnContSupPoints(nVisualContSupPoints) = @warn("If all contact points and/or support points should be visualized please set nVisualContSupPoints = $nVisualContSupPoints in Scene.")
 
 # the sphere is visible and its absolute position is updated (this point was computed by the mpr algorithm)
-function setVisualizationContactProperties!(obj::Composition.Object3D, transparency::Float64, point::SVector{3,Float64})
+function setVisualizationContactProperties!(obj::Composition.Object3D{F}, transparency::Float64, point::SVector{3,F}) where F <: Modia3D.VarFloatType
     obj.r_abs = point
     obj.feature.visualMaterial.transparency = transparency
 end

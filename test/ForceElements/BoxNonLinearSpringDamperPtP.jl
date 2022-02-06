@@ -1,11 +1,8 @@
 module BoxNonLinearSpringDamperPtP
 
-using ModiaLang
+using Modia3D
 
-import Modia3D
-using  Modia3D.ModiaInterface
-
-interpolatedForceLaws = false
+const interpolatedForceLaws = false
 l0 = 0.1
 f0 = 5.0
 fc(x) = sign(x) * 100.0 * abs(x)^1.2

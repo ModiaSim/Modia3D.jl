@@ -9,8 +9,8 @@
 
 #-------------------------------------- Default Renderer -------------------------------
 
-initializeVisualization(renderer::Modia3D.AbstractRenderer, allVisuElements::Vector{Object3D}) = error("No renderer defined.")
-visualize!(renderer::Modia3D.AbstractRenderer, time::Float64) = error("No renderer defined.")
+initializeVisualization(renderer::Modia3D.AbstractRenderer, allVisuElements::Vector{Object3D{F}}) where F <: Modia3D.VarFloatType = error("No renderer defined.")
+visualize!(renderer::Modia3D.AbstractRenderer, time) = error("No renderer defined.")
 closeVisualization(renderer::Modia3D.AbstractRenderer)        = error("No renderer defined.")
 
 
@@ -26,7 +26,7 @@ struct NoGravityField <: Modia3D.AbstractGravityField
    gvec::SVector{3,Float64} # [m/s^2] Vector of gravity acceleration
    NoGravityField() = new(SVector{3,Float64}(0.0, 0.0, 0.0))
 end
-gravityAcceleration(grav::NoGravityField, r_abs::SVector{3,Float64})::SVector{3,Float64} = grav.gvec
+gravityAcceleration(grav::NoGravityField, r_abs::SVector{3,F}) where F <: Modia3D.VarFloatType = SVector{3,F}(grav.gvec)
 
 
 """
@@ -44,7 +44,7 @@ direction `n`.
 ```julia
 import Modia3D
 
-grav = Modia3D.UniformGravityField()
+grav = Modia3D.Composition.UniformGravityField()
    r = Modia3D.EarthRadius
    g = gravityAcceleration(grav,r)  # g is independent of r
 ```
@@ -57,7 +57,7 @@ struct UniformGravityField <: Modia3D.AbstractGravityField
       new(g*normalize(n))
    end
 end
-gravityAcceleration(grav::UniformGravityField, r_abs::SVector{3,Float64})::SVector{3,Float64} = grav.gvec
+gravityAcceleration(grav::UniformGravityField, r_abs::SVector{3,F}) where F <: Modia3D.VarFloatType = SVector{3,F}(grav.gvec)
 
 
 const G           = 6.67408e-11  # [m3/(kg.s2)]  Newtonian constant of gravitation (https://en.wikipedia.org/wiki/Gravitational_constant)
@@ -96,7 +96,7 @@ struct PointGravityField <: Modia3D.AbstractGravityField
       new(mue)
    end
 end
-gravityAcceleration(grav::PointGravityField, r_abs::SVector{3,Float64})::SVector{3,Float64} = -(grav.mue/dot(r_abs,r_abs))*normalize(r_abs)
+gravityAcceleration(grav::PointGravityField, r_abs::SVector{3,F}) where F <: Modia3D.VarFloatType = SVector{3,F}(-(grav.mue/dot(r_abs,r_abs))*normalize(r_abs))
 
 
 """
@@ -193,7 +193,7 @@ end
 
 
 #-------------------------------------- Global SceneOptions -------------------------------
-struct SceneOptions
+struct SceneOptions{F <: Modia3D.VarFloatType}
     # Gravity field
     gravityField::Modia3D.AbstractGravityField
 
@@ -203,7 +203,8 @@ struct SceneOptions
     ### Contact detection ###
     enableContactDetection::Bool            # = true, if contact detection is enabled
     contactDetection::Modia3D.AbstractContactDetection
-    elasticContactReductionFactor::Float64  # c_res_used = c_res * elasticContactReductionFactor (> 0)
+    elasticContactReductionFactor::F  # c_res_used = c_res * elasticContactReductionFactor (> 0)
+    maximumContactDamping::F
     gap::Float64
 
 
@@ -226,11 +227,12 @@ struct SceneOptions
     lightLongitude::Float64               # Longitude angle of light position (0 = -y/-z/-x direction)
     lightLatitude::Float64                # Latitude angle of light position (0 = horizontal)
 
-    function SceneOptions(;gravityField    = UniformGravityField(),
+    function SceneOptions{F}(;gravityField    = UniformGravityField(),
             useOptimizedStructure         = true,
             enableContactDetection        = true,
             contactDetection              = ContactDetectionMPR_handler(),
-            elasticContactReductionFactor = 1.0,
+            elasticContactReductionFactor = F(1.0),
+            maximumContactDamping         = F(2000),
             gap                           = 0.001,
             enableVisualization           = true,
             animationFile                 = nothing,
@@ -247,7 +249,7 @@ struct SceneOptions
             cameraLatitude                = 15/180*pi,
             lightDistance                 = 10.0*nominalLength,
             lightLongitude                = 60/180*pi,
-            lightLatitude                 = 45/180*pi)
+            lightLatitude                 = 45/180*pi) where F <: Modia3D.VarFloatType
         @assert(gap > 0.0)
         @assert(nominalLength > 0.0)
         @assert(defaultFrameLength > 0.0)
@@ -255,12 +257,15 @@ struct SceneOptions
         @assert(defaultContactSphereDiameter > 0.0)
         @assert(cameraDistance > 0.0)
         @assert(lightDistance > 0.0)
-
+        if elasticContactReductionFactor > F(1.1) || elasticContactReductionFactor < F(0)
+            error("elasticContactReductionFactor (= elasticContactReductionFactor) has to be in the range 0 .. 1.0")
+        end
         sceneOptions = new(gravityField,
             useOptimizedStructure,
             enableContactDetection,
             contactDetection,
             elasticContactReductionFactor,
+            maximumContactDamping,
             gap,
             enableVisualization,
             animationFile,
@@ -308,8 +313,9 @@ Defines global properties of the system, such as the gravity field. Exactly one 
 | `gravityField`                  | [`UniformGravityField`](@ref)`()`       |
 | `useOptimizedStructure`         | true                                    |
 | `enableContactDetection`        | true                                    |
-| `mprTolerance`                   | 1.0e-20                                 |
-| `elasticContactReductionFactor` | 1.0                                     |
+| `mprTolerance`                  | 1.0e-20                                 |
+| `elasticContactReductionFactor` | 1.0     (<= 1.0 required)               |
+| `maximumContactDamping`         | 2000.0                                  |
 | `enableVisualization`           | true                                    |
 | `animationFile`                 | nothing                                 |
 | `visualizeFrames`               | false                                   |
@@ -343,6 +349,8 @@ Defines global properties of the system, such as the gravity field. Exactly one 
 - `elasticContactReductionFactor::Float64`: (> 0.0)
   - ``usedContactCompliance = contactCompliance * elasticContactReductionFactor``
 
+- `maximumContactDamping`: Maximum damping factor for elastic contacts
+
 - `enableVisualization::Bool`: = true, to enable online animation with DLR SimVis. If SimVis is not installed, this flag has no effect.
 
 - `animationFile::String`: only if a valid path and name of the animation file is set (it must be a .json file) a json file is exported
@@ -375,11 +383,11 @@ Defines global properties of the system, such as the gravity field. Exactly one 
 
 - `lightLatitude::Float64`: latitude angle of light position (0 = horizontal)
 """
-mutable struct Scene <: Modia3D.AbstractScene
+mutable struct Scene{F <: Modia3D.VarFloatType} <: Modia3D.AbstractScene
     name::String                              # model name
     autoCoordsys::Shapes.CoordinateSystem     # Coordinate system that is automatically included (e.g. due to visualizeFrames=true)
-    stack::Vector{Object3D}                   # Stack to traverse objs
-    buffer::Vector{Object3D}                  # stores all roots of a super obj
+    stack::Vector{Object3D{F}}                   # Stack to traverse objs
+    buffer::Vector{Object3D{F}}                  # stores all roots of a super obj
 
     options::SceneOptions                     # Global options defined for the scene
 
@@ -393,19 +401,19 @@ mutable struct Scene <: Modia3D.AbstractScene
     analysis::Modia3D.AnalysisType            # Type of analysis
     superObjs::Vector{SuperObjsRow}           # super objects
 
-    treeAccVelo::Vector{Object3D}
-    tree::Vector{Object3D}                    # Spanning tree of the frames in depth-first order (without world)
-    treeForComputation::Vector{Object3D}      # Tree that is used for the computation
+    treeAccVelo::Vector{Object3D{F}}
+    tree::Vector{Object3D{F}}                    # Spanning tree of the frames in depth-first order (without world)
+    treeForComputation::Vector{Object3D{F}}      # Tree that is used for the computation
                                               # treeForComputation = options.useOptimizedStructure ? treeAccVelo : tree
 
     #cutJoints::Vector{Modia3D.AbstractJoint}  # Vector of all cut-joints
-    allVisuElements::Vector{Object3D}         # all Object3Ds that should be visualized (for communiating with SimVis)
-    updateVisuElements::Vector{Object3D}      # all Object3Ds that are visibly only e.g. visualization frames (must be updated first)
-    allCollisionElements::Vector{Object3D}    # all Object3Ds, which are allowed to collide (no order, no super objects)
+    allVisuElements::Vector{Object3D{F}}         # all Object3Ds that should be visualized (for communiating with SimVis)
+    updateVisuElements::Vector{Object3D{F}}      # all Object3Ds that are visibly only e.g. visualization frames (must be updated first)
+    allCollisionElements::Vector{Object3D{F}}    # all Object3Ds, which are allowed to collide (no order, no super objects)
     noCPairs::Vector{Vector{Int64}}           # Indices of frames (with respect to collSuperObjs) that can't collide in general (e.g. objects are connected via joints)
     noCPairsHelp::Dict{Modia3D.AbstractJoint,Vector{Int64}}
     allowedToMove::Vector{Union{Bool,Nothing}}
-    AABB::Vector{Vector{Basics.BoundingBox}}  # Bounding boxes of elements that can collide
+    AABB::Vector{Vector{Basics.BoundingBox{F}}}  # Bounding boxes of elements that can collide
     zStartIndex::Int                          # start index of collision zero crossing functions
     forceElements::Vector{Modia3D.AbstractForceElement}
     exportAnimation::Bool                     # animation file export is enabled
@@ -413,16 +421,17 @@ mutable struct Scene <: Modia3D.AbstractScene
     outputCounter::Int64                      # animation/visualization output step counter
 
     # Data specific to a particular joint type
-    revolute::Vector{Revolute}
-    prismatic::Vector{Prismatic}
-    freeMotion::Vector{FreeMotion}
+    revolute::Vector{Revolute{F}}
+    prismatic::Vector{Prismatic{F}}
+    freeMotion::Vector{FreeMotion{F}}
 
 
-    function Scene(;gravityField          = UniformGravityField(),
+    function Scene{F}(;gravityField          = UniformGravityField(),
             useOptimizedStructure         = true,
             enableContactDetection        = true,
             mprTolerance                  = 1.0e-20,
-            elasticContactReductionFactor = 1.0,
+            elasticContactReductionFactor = F(1.0),
+            maximumContactDamping         = F(2000),
             gap                           = 0.001,
             enableVisualization           = true,
             animationFile                 = nothing,
@@ -439,16 +448,17 @@ mutable struct Scene <: Modia3D.AbstractScene
             cameraLatitude                = 15/180*pi,
             lightDistance                 = 10.0*nominalLength,
             lightLongitude                = 60/180*pi,
-            lightLatitude                 = 45/180*pi)
+            lightLatitude                 = 45/180*pi) where F <: Modia3D.VarFloatType
 
-        sceneOptions = SceneOptions(gravityField = gravityField,
+        sceneOptions = SceneOptions{F}(gravityField = gravityField,
             useOptimizedStructure         = useOptimizedStructure,
-            contactDetection              = ContactDetectionMPR_handler(tol_rel = mprTolerance),
+            contactDetection              = ContactDetectionMPR_handler{Modia3D.MPRFloatType, F}(tol_rel = mprTolerance),
             nVisualContSupPoints          = nVisualContSupPoints,
             gap                           = gap,
             enableContactDetection        = enableContactDetection,
             defaultContactSphereDiameter  = defaultContactSphereDiameter,
             elasticContactReductionFactor = elasticContactReductionFactor,
+            maximumContactDamping         = maximumContactDamping,
             nominalLength                 = nominalLength,
             defaultFrameLength            = defaultFrameLength,
             enableVisualization           = enableVisualization,
@@ -476,8 +486,8 @@ mutable struct Scene <: Modia3D.AbstractScene
 
         new("Scene",
             Shapes.CoordinateSystem(length=sceneOptions.defaultFrameLength),
-            Vector{Object3D}[],
-            Vector{Object3D}[],
+            Vector{Object3D{F}}[],
+            Vector{Object3D{F}}[],
             sceneOptions,
             false,
             false,
@@ -486,23 +496,25 @@ mutable struct Scene <: Modia3D.AbstractScene
             false,
             Modia3D.KinematicAnalysis,
             Vector{SuperObjsRow}[],
-            Vector{Object3D}[],
-            Vector{Object3D}[],
-            Vector{Object3D}[],
-            Vector{Object3D}[],
-            Vector{Object3D}[],
-            Vector{Object3D}[],
+            Vector{Object3D{F}}[],
+            Vector{Object3D{F}}[],
+            Vector{Object3D{F}}[],
+            Vector{Object3D{F}}[],
+            Vector{Object3D{F}}[],
+            Vector{Object3D{F}}[],
             Vector{Vector{Int64}}[],
             Dict{Modia3D.AbstractJoint,Vector{Int64}}(),
             Vector{Union{Bool}}[],
-            Vector{Vector{Basics.BoundingBox}}[],
+            Vector{Vector{Basics.BoundingBox{F}}}[],
             1,
             Vector{Modia3D.AbstractForceElement}[],
             exportAnimation,
             Vector{animationStep}[],
             0,
-            Revolute[],
-            Prismatic[],
-            FreeMotion[])
+            Revolute{F}[],
+            Prismatic{F}[],
+            FreeMotion{F}[])
     end
 end
+
+Scene(; kwargs...) = Scene{Float64}(; kwargs...)

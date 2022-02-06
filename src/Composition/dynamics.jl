@@ -1,14 +1,19 @@
 function getJointsAndForceElementsAndObject3DsWithoutParents!(evaluatedParameters,
-                                                              object3DWithoutParents::Vector{Object3D},
-                                                              jointObjects::Vector{Object3D},
+                                                              object3DWithoutParents::Vector{Object3D{F}},
+                                                              jointObjects::Vector{Object3D{F}},
                                                               forceElements::Vector{Modia3D.AbstractForceElement},
-                                                              path::String)::Nothing
+                                                              path::String)::Nothing where F <: Modia3D.VarFloatType
     for (key,value) in evaluatedParameters   # zip(keys(evaluatedParameters), evaluatedParameters)
-        if typeof(value) == Object3D
+        #println("$path.$key = $value")
+        if typeof(value) <: Object3D
             if value.parent === value
-                push!(object3DWithoutParents, value)
-            elseif typeof(value.feature) == Modia3D.Composition.Scene
-                error(value.path, ": Object3D has a parent and defines Scene!")
+                if typeof(value.feature) <: Scene
+                    push!(object3DWithoutParents, value)
+                else
+                    error("\n", value.path, " is an Object3D that has no parent, but no feature=Scene(..)!\n")
+                end
+            elseif typeof(value.feature) <: Scene
+                error("\n", value.path, " is an Object3D that has feature=Scene(..) and has a parent (= ", value.parent.path, ")!\n")
             end
 
         elseif typeof(value) <: Modia3D.AbstractJoint
@@ -18,7 +23,7 @@ function getJointsAndForceElementsAndObject3DsWithoutParents!(evaluatedParameter
             push!(forceElements, value)
 
         elseif typeof(value) <: OrderedDict
-            getJointsAndForceElementsAndObject3DsWithoutParents!(value, object3DWithoutParents, jointObjects, forceElements, path)
+            getJointsAndForceElementsAndObject3DsWithoutParents!(value, object3DWithoutParents, jointObjects, forceElements, path*"."*string(key))
         end
     end
     return nothing
@@ -42,28 +47,28 @@ Recursively traverse model and perform the following actions:
   - Return a vector of joint objects as `joints`.
   - Return a vector of all force element objects.
 """
-function checkMultibodySystemAndGetWorldAndJointsAndForceElements(instantiatedModel::ModiaLang.SimulationModel{FloatType,ParType,EvaluatedParType,TimeType}, id::Int) where {FloatType,ParType,EvaluatedParType,TimeType}
+function checkMultibodySystemAndGetWorldAndJointsAndForceElements(instantiatedModel::ModiaLang.SimulationModel{F,TimeType}, id::Int) where {F,TimeType}
     # Find root mbs of multibody system
-    (mbsRoot, mbsPath) = ModiaLang.getIdParameter(instantiatedModel.evaluatedParameters, ParType, id)
+    (mbsRoot, mbsPath) = ModiaLang.getIdParameter(instantiatedModel.evaluatedParameters, id)
     if isnothing(mbsRoot)
-        error(instantiatedModel.modelName, ": did not find _id = ", id, " in the evaluated parameters!")
+        error("\n", instantiatedModel.modelName, ": did not find _id = ", id, " in the evaluated parameters!")
     end
 
-    object3DWithoutParents = Object3D[]
-    jointObjects = Object3D[]
+    object3DWithoutParents = Object3D{F}[]
+    jointObjects = Object3D{F}[]
     forceElements = Modia3D.AbstractForceElement[]
     getJointsAndForceElementsAndObject3DsWithoutParents!(mbsRoot, object3DWithoutParents, jointObjects, forceElements, mbsPath)
 
     if length(object3DWithoutParents) == 0
         error("\n", multiBodyName(instantiatedModel, mbsPath), ": There is either no Object3D or all of them have a parent!\n",
-              "(Note, there must be exactly one Object3D that has no parent.)")
+              "(Note, there must be exactly one Object3D that has no parent and feature=Scene(..).)")
     elseif length(object3DWithoutParents) > 1
         object3DNames = "   " * object3DWithoutParents[1].path
         for i = 2:length(object3DWithoutParents)
             object3DNames *= "\n   " * object3DWithoutParents[i].path
         end
-        error("\n", instantiatedModel.modelName, ": The following ", length(object3DWithoutParents), " Object3Ds have no parent\n",
-              "(note, there must be exactly one Object3D that has no parent):\n", object3DNames, "\n")
+        error("\n", instantiatedModel.modelName, ": The following ", length(object3DWithoutParents), " Object3Ds have no parents and feature=Scene(..)\n",
+              "(note, there must be exactly one Object3D that has no parent and feature=Scene(..)):\n", object3DNames, "\n")
     end
     return (object3DWithoutParents[1], jointObjects, forceElements)
 end
@@ -73,10 +78,10 @@ end
 function initAnalysis2!(world)
     # use Scene(..) of world object
     Modia3D.Composition.EmptyObject3DFeature
-    if typeof(world.feature) <: Modia3D.Scene
+    if typeof(world.feature) <: Modia3D.Composition.Scene
         scene = world.feature
     else
-        scene = Modia3D.Scene()
+        scene = Modia3D.Composition.Scene()
     end
     scene.analysis = Modia3D.DynamicAnalysis
 
@@ -95,12 +100,12 @@ end
 
 Initialize joints.
 """
-function initJoints!(id::Int, instantiatedModel::ModiaLang.SimulationModel{FloatType,ParType,EvaluatedParType,TimeType}, 
-                     nqdd::Int, time)::MultibodyData{FloatType,ParType,EvaluatedParType,TimeType} where {FloatType,ParType,EvaluatedParType,TimeType}
+function initJoints!(id::Int, instantiatedModel::ModiaLang.SimulationModel{FloatType,TimeType}, 
+                     nqdd::Int, time)::MultibodyData{FloatType,TimeType} where {FloatType,TimeType}
      TimerOutputs.@timeit instantiatedModel.timer "Modia3D_0 initJoint!" begin
         separateObjects = instantiatedModel.separateObjects  # is emptied for every new simulate! call
         if haskey(separateObjects, id)
-            mbs::MultibodyData{FloatType,ParType,EvaluatedParType,TimeType} = separateObjects[id]
+            mbs::MultibodyData{FloatType,TimeType} = separateObjects[id]
             mbs.time = time
         else
             # Search in parameters and retrieve the name of the object with the required id
@@ -125,13 +130,17 @@ function initJoints!(id::Int, instantiatedModel::ModiaLang.SimulationModel{Float
                 nz = 0
                 zStartIndex = 0
             end
-            mbs = MultibodyData{FloatType,ParType,EvaluatedParType,TimeType}(instantiatedModel, nqdd, world, scene, jointObjects, zStartIndex, nz, residuals, cache_h, time)                     
+            mbs = MultibodyData{FloatType,TimeType}(instantiatedModel, nqdd, world, scene, jointObjects, zStartIndex, nz, residuals, cache_h, time)                     
             separateObjects[id] = mbs
                                            
             if scene.visualize
                 TimerOutputs.@timeit instantiatedModel.timer "Modia3D_0 initializeVisualization" Modia3D.Composition.initializeVisualization(Modia3D.renderer[1], scene.allVisuElements)
                 if instantiatedModel.options.log
-                    println("        Modia3D: Number of visual shapes = ", length(scene.allVisuElements))
+                    println(    "        Modia3D: nVisualShapes = ", length(scene.allVisuElements))
+                    if scene.options.enableContactDetection
+                        println("                 mprTolerance  = ", scene.options.contactDetection.tol_rel)
+                        println("                 contact_eps   = ", scene.options.contactDetection.contact_eps)
+                    end
                 end
             end
         end
@@ -175,7 +184,7 @@ function getJointResiduals_method2!(mbs::MultibodyData{FloatType}, _leq_mode; ca
             getJointResiduals_all!(scene, jointObjects1, residuals)
             residuals .+= cache_h
         else
-            residuals .= convert(FloatType, 0)
+            residuals .= convert(F, 0)
         end
     end
     return residuals
@@ -303,7 +312,7 @@ For Modia3D:
                    return res := res + cache_h
 =#
 
-function multibodyResiduals3!(sim, scene, world, time, storeResults, isTerminal, leq_mode)
+function multibodyResiduals3!(sim::ModiaLang.SimulationModel{F}, scene, world, time, storeResults, isTerminal, leq_mode) where F <: Modia3D.VarFloatType
     tree            = scene.treeForComputation
     forceElements   = scene.forceElements
     visualize       = scene.visualize   # && sim.model.visualiz
@@ -330,8 +339,8 @@ function multibodyResiduals3!(sim, scene, world, time, storeResults, isTerminal,
     end
 
     # Initialize force/torque of world-frame
-    world.f = Modia3D.ZeroVector3D
-    world.t = Modia3D.ZeroVector3D
+    world.f = Modia3D.ZeroVector3D(F)
+    world.t = Modia3D.ZeroVector3D(F)
 
     # Computation depending on leq_mode (the mode of the LinearEquationsIterator)
     if leq_mode == 0 || leq_mode == -1
@@ -355,8 +364,8 @@ function multibodyResiduals3!(sim, scene, world, time, storeResults, isTerminal,
                     obj.f = -obj.m*( obj.R_abs*(obj.a0 - grav) + cross(obj.z, obj.r_CM) + cross(w, cross(w, obj.r_CM)))
                     obj.t = -(obj.I_CM*obj.z + cross(w, obj.I_CM*w)) + cross(obj.r_CM, obj.f)
                 else
-                    obj.f = Modia3D.ZeroVector3D
-                    obj.t = Modia3D.ZeroVector3D
+                    obj.f = Modia3D.ZeroVector3D(F)
+                    obj.t = Modia3D.ZeroVector3D(F)
                 end
             end # end forward recursion
 
@@ -389,8 +398,8 @@ function multibodyResiduals3!(sim, scene, world, time, storeResults, isTerminal,
                     obj.f = -obj.m*( obj.R_abs*obj.a0 + cross(obj.z, obj.r_CM) )
                     obj.t = -obj.I_CM*obj.z + cross(obj.r_CM, obj.f)
                 else
-                    obj.f = Modia3D.ZeroVector3D
-                    obj.t = Modia3D.ZeroVector3D
+                    obj.f = Modia3D.ZeroVector3D(F)
+                    obj.t = Modia3D.ZeroVector3D(F)
                 end
             end # end forward recursion
 
@@ -413,9 +422,9 @@ function multibodyResiduals3!(sim, scene, world, time, storeResults, isTerminal,
                         if scene.options.useOptimizedStructure
                             for obj in scene.updateVisuElements
                                 parent = obj.parent
-                                obj.r_abs = obj.r_rel ≡ Modia3D.ZeroVector3D ? parent.r_abs : parent.r_abs + parent.R_abs'*obj.r_rel
-                                obj.R_abs = obj.R_rel ≡ Modia3D.NullRotation ? parent.R_abs : obj.R_rel*parent.R_abs
-                                
+                                obj.r_abs = obj.r_rel ≡ Modia3D.ZeroVector3D(F) ? parent.r_abs : parent.r_abs + parent.R_abs'*obj.r_rel
+                                obj.R_abs = obj.R_rel ≡ Modia3D.NullRotation(F) ? parent.R_abs : obj.R_rel*parent.R_abs
+
                                 # is executed only if an internal Object3D called
                                 if length( obj.visualizationFrame ) == 1
                                     obj.visualizationFrame[1].r_abs = obj.r_abs
@@ -435,8 +444,8 @@ function multibodyResiduals3!(sim, scene, world, time, storeResults, isTerminal,
                         TimerOutputs.@timeit sim.timer "Modia3D_3 exportAnimation" begin
                             objectData = []
                             for obj in scene.allVisuElements
-                                pos = obj.r_abs
-                                ori = Modia3D.from_R(obj.R_abs)
+                                pos = Modia3D.convertToFloat64(obj.r_abs)
+                                ori = Modia3D.from_R(Modia3D.convertToFloat64(obj.R_abs))
                                 dat = animationData(pos, ori)
                                 push!(objectData, dat)
                             end

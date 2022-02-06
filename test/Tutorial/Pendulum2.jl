@@ -1,6 +1,5 @@
 module Pendulum2
-
-using Modia
+using Modia3D
 
 Pendulum = Model(
     world = Object3D(feature=Scene(animationFile="Pendulum2.json")),

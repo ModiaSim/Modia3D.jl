@@ -25,33 +25,33 @@ Return a `force` acting as point-to-point parallel spring-damper between
     dependent of its deflection velocity. Positive values represent
     expansion.
 """
-mutable struct SpringDamperPtP <: Modia3D.AbstractForceElement
+mutable struct SpringDamperPtP{F <: Modia3D.VarFloatType} <: Modia3D.AbstractForceElement
 
-    obj1::Object3D
-    obj2::Object3D
+    obj1::Object3D{F}
+    obj2::Object3D{F}
 
-    nominalLength::Float64
-    nominalForce::Float64
+    nominalLength::F
+    nominalForce::F
     springForceFunction::Function
     damperForceFunction::Function
 
-    function SpringDamperPtP(; obj1::Object3D,
-                               obj2::Object3D,
-                               nominalLength::Real = 0.0,
-                               nominalForce::Real = 0.0,
-                               springForceLaw::Union{Real, Function} = 0.0,
-                               damperForceLaw::Union{Real, Function} = 0.0 )
+    function SpringDamperPtP{F}(; obj1::Object3D{F},
+                                  obj2::Object3D{F},
+                                  nominalLength::Real = F(0.0),
+                                  nominalForce::Real = F(0.0),
+                                  springForceLaw::Union{Real, Function} = F(0.0),
+                                  damperForceLaw::Union{Real, Function} = F(0.0) ) where F <: Modia3D.VarFloatType
 
-        nomLength = Modia3D.convertAndStripUnit(Float64, u"m", nominalLength)
-        nomForce  = Modia3D.convertAndStripUnit(Float64, u"N", nominalForce)
+        nomLength = Modia3D.convertAndStripUnit(F, u"m", nominalLength)
+        nomForce  = Modia3D.convertAndStripUnit(F, u"N", nominalForce)
         irand = rand(Int)
         if (!isa(springForceLaw, Function))
-            stiffness = Modia3D.convertAndStripUnit(Float64, u"N/m", springForceLaw)
+            stiffness = Modia3D.convertAndStripUnit(F, u"N/m", springForceLaw)
             fsymb = Symbol("fc", "_", irand)  # todo: replace irand by force.path
             springForceLaw = eval(:($fsymb(pos) = $stiffness * pos))
         end
         if (!isa(damperForceLaw, Function))
-            damping = Modia3D.convertAndStripUnit(Float64, u"N*s/m", damperForceLaw)
+            damping = Modia3D.convertAndStripUnit(F, u"N*s/m", damperForceLaw)
             fsymb = Symbol("fd", "_", irand)  # todo: replace irand by force.path
             damperForceLaw = eval(:(fd(vel) = $damping * vel))
         end
@@ -59,15 +59,16 @@ mutable struct SpringDamperPtP <: Modia3D.AbstractForceElement
         return new(obj1, obj2, nomLength, nomForce, springForceLaw, damperForceLaw)
     end
 end
+SpringDamperPtP(; kwargs...) = SpringDamperPtP{Float64}(; kwargs...)
 
 
-function initializeForceElement(force::SpringDamperPtP)
+function initializeForceElement(force::SpringDamperPtP{F}) where F <: Modia3D.VarFloatType
     force.obj1.hasForceElement = true
     force.obj2.hasForceElement = true
     return nothing
 end
 
-function evaluateForceElement(force::SpringDamperPtP)
+function evaluateForceElement(force::SpringDamperPtP{F}) where F <: Modia3D.VarFloatType
     (pos, norm) = measFrameDistance(force.obj2; frameOrig=force.obj1)
     vel = measFrameDistVelocity(force.obj2; frameOrig=force.obj1)
 
@@ -79,6 +80,6 @@ function evaluateForceElement(force::SpringDamperPtP)
     applyFrameForcePair!(force.obj2, force.obj1, f12; frameCoord=force.obj1)
 end
 
-function terminateForceElement(force::SpringDamperPtP)
+function terminateForceElement(force::SpringDamperPtP{F}) where F <: Modia3D.VarFloatType
     return nothing
 end

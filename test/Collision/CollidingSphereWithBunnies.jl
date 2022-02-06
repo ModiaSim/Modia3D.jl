@@ -1,8 +1,6 @@
 module CollidingSphereWithBunnies
 
-using  ModiaLang
-import Modia3D
-using  Modia3D.ModiaInterface
+using Modia3D
 
 filenameBunny = joinpath(Modia3D.path, "objects", "bunny", "bunny.obj")
 
@@ -14,7 +12,7 @@ massAndGeoSphere = MassPropertiesFromShape()
 # Objects3D
 ConvexPartitions = Model(
     gravField = UniformGravityField(g=9.81, n=[0, -1, 0]),
-    world = Object3D(feature=Scene(gravityField=:gravField)),
+    world = Object3D(feature=Scene(gravityField=:gravField, mprTolerance = 1.0e-13)),
 
     sphere = Object3D(feature=Solid(shape=Sphere(diameter=0.2),
                       visualMaterial=mat1, solidMaterial="Steel",
@@ -34,8 +32,8 @@ stopTime = 1.3
 if Sys.iswindows()
     requiredFinalStates = [1.6852436731117506, -1.9602009870847892, 1.5537079430670875, 4.576280426855566, -3.6359538989543787, -1.8281828479408744, 16.048751238499957, 0.11284016337050634, 8.101268624505751, 28.746819815200922, 8.39876218585158, 37.19093884427305]
 else
-    requiredFinalStates = [1.6853549405539088, -1.9603839264641005, 1.5512239899411384, 4.577225786420592, -3.6364005190730575, -1.841958211129179, 16.04685907044025, 0.10996251002097332, 8.10149898250639, 28.66624352831703, 8.399969490696167, 37.24515015558254]
+    requiredFinalStates = [1.6863191515678857, -1.959326139586727, 1.5524868091473853, 4.582527752958374, -3.630808257742642, -1.8352059702486623, 16.048770476114274, 0.11319234251167573, 8.101743640120217, 28.75572277458283, 8.390512432007, 37.189873260046895]
 end
-@time simulate!(convexPartitions, stopTime=stopTime, log=false, logStates=false, logEvents=true, requiredFinalStates=requiredFinalStates)
+simulate!(convexPartitions, stopTime=stopTime, log=true, logStates=false, logEvents=false, requiredFinalStates=requiredFinalStates)
 
 end

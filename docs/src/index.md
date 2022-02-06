@@ -31,15 +31,6 @@ Download and install the free DLR SimVis Community Edition, e.g. with [https://v
    * Make sure that the SimVis executable under this directory has execution rights. For example in Linux with command: `chmod ug+x <path-to-library>/Visualization/Extras/SimVis/linux/SimVis`
 
 
-## Release Notes
-
-### Version 0.5.0
-
-- Largely redesigned.
-- Integrated into Modia.
-- Not backwards compatible to previous versions.
-
-
 ## Publications
 
 |  | Paper or Talk | Conference | DOI or YouTube |
@@ -53,6 +44,94 @@ Download and install the free DLR SimVis Community Edition, e.g. with [https://v
 | [6] |*[Modia – Modeling Multidomain Engineering Systems with Julia](https://www.youtube.com/watch?v=N94si3rOl1g)*|[JuliaCon 2021, July](https://juliacon.org/2021/)|[YouTube](https://www.youtube.com/watch?v=N94si3rOl1g)|
 | [7a] |*[Modia – Equation Based Modeling and Domain Specific Algorithms](https://doi.org/10.3384/ecp2118173)*|[14th International Modelica Conference 2021, September](http://www.modelica.org/)| [10.3384/ecp2118173](https://doi.org/10.3384/ecp2118173) |
 | [7b] |*[Modia – Equation Based Modeling and Domain Specific Algorithms](https://doi.org/10.3384/ecp2118173)*|[14th International Modelica Conference 2021, September](http://www.modelica.org/)| YouTube comming soon |
+
+
+## Release Notes
+
+### Version 0.8.0
+
+- Require ModiaLang 0.10.0 (e.g. require DifferentialEquations 7)
+- Support animation export for FloatType = Measurements.XXX (animation is performed for the nominal value).
+- Remove PathPlanning struct und functions (and instead use the functionality from ModiaLang 0.9.1). 
+- Reactivate test model test/old/Test_PathPlanning.jl
+- Remove unused files: .codecov.yml, .travis.yml, appveyor.yml
+- Fix import/using of some tests.
+
+### Version 0.7.0
+- Modia3D is updated and restricted to Julia 1.7
+- cyclic dependencies with Modia package are removed
+
+### Version 0.6.0
+- Modia3D supports `@instantiatedModel(FloatType = Float64, ...)` as default `FloatType`. Now, further FloatTypes, such as `Float32`, `DoubleFloats.Double64`, `Measurements.Measurement{Float64}`, `MonteCarloMeasurements.StaticParticles{Float64}` are supported. If FloatType is not Float64, the default integrator selected from DifferentialEquations.jl is utilized and no longer Sundials.CVODE_BDF (because CVODE_BDF is only supported for Float64). Since ModiaLang does not yet support integrators with analytic Jacobians, integrators with this feature cannot be used, e.g., this feature needs to be switched off with option `autodiff=false`, if necessary. Recommendation: use `QBDF(autodiff=false)` if FloatType is not Float64. Note, `Tsit5` usually does not work well for collisions, due to the stiff behavior in the contact area. Current limitations:
+    - `FloatType = Float32`: usually fails when collisions occur
+    - `FloatType = Measurements.xxx`, or `MonteCarloMeasurements.xxx` fail if events occur (e.g. collision handling, switching between different sequences of rotation angles)
+    - `FloatType = Measurements.xxx`: Animation is performed for the nominal values (plots show nominal values and the area of the variances)
+    - `FloatType = MonteCarloMeasurements.yyy`: Animation is automatically switched off with a warning message (due to severe performance issues that will be fixed in the future)
+- Object3D: use vectors instead of matrices for rotation
+- Scene
+    - `maximumContactDamping = 2000.0`: The maximum damping used in the elastice response calculation (previously, this was set to the literal value of 1000 and could not be changed). This value is, for example, used if the normal contact velocity at contact start is small.
+- Shape `FileMesh` is reading mesh-files with [MeshIO.jl](https://github.com/JuliaIO/MeshIO.jl) and no longer with an own parser. As a result, more input formats are supported, in particular also STL and OBJ with non-triangles. Furthermore, duplicate vertices in FileMesh are removed after reading a file. This reduces the computational effort of collision support point calculation.
+- Collision handling slightly improved, e.g., if colliding shapes get in contact with a small normal contact velocity at contact start, the colliding shapes are quickly fixed relative to each other (previously, a lot of events occured in this phase).
+- Updated documentation and some bugs fixed
+- Internal
+    - Changed most structs to parameterized structs with type parameter `F` (short for `FloatType`)
+    - Changed some remaining vectors and matrices to SVector and SMatrix, respectively, to improve efficiency
+    - Cleanup of Modia3D and of Modia (e.g. removed duplicate definition of ModiaInterface in Modia.jl)
+    - Event handling slightly changed, in particular the large contact hysteresis in the order of 1e-8 was reduced to 1e-13, after ModiaLang was using the new option RightRootFind of DifferentialEquations.jl. As a result, unnecessary events (signaled via `restart = NoRestart`) should no longer occur
+    - Elastic response calculation simplified and improved. In particular, if the normal contact velocity at contact start is below `vsmall` (default = 0.01 m/s), coefficient of restitution is set to zero and no longer to 0.001. As a result, colliding shapes are quickly fixed relative to each other
+    - Bug fixed: In some rare situations, it was not correctly checked that a multibody system has exactly one Object3D without parent and with feature=Scene (and no other Object3D has feature=Scene)
+
+
+### Version 0.5.2
+- version number and date updated
+
+### Version 0.5.1
+
+- Collision handling - MPR algorithm improved to enhance speed and robustness
+    - collision pairing material
+        - at initialization: a warning is given if a collision pairing material is not defined
+    - improve support points computation of
+        - FileMesh: use `SVectors` and better computation of support points
+        - Capsule: a Capsule is already smooth therefore collisionSmoothingRadius is removed
+    - MPR algorithm
+        - `Double64` from DoubleFloats.jl package is used for mpr algorithm to increase accuracy
+        - amount of iteration steps is increased if more are needed for phase 2 and phase 3
+        - if it's not possible to quit with the predefined mprTolerance the iteration quits with the best possible tolerance instead
+        - collisions between ellipsoids and other shapes are treated like collisions between spheres and other shapes
+    - store information like centroid in Object3D
+    - remove some type instabilities
+- FreeMotion joint
+    - enable adaptive rotation sequence
+    - add test model
+- Enable ForceElements
+    - add infrastructure
+    - add Bushing and SpringDamperPtP
+    - add test models and documentation
+- Animation export (three.js JSON object scene)
+    - fix initial orientation
+    - enable visualization of bounding boxes (AABB)
+    - enable Beam support
+    - enable Capsule support
+    - enable inner cylinder radius support (pipe)
+    - enable CoordinateSystem support
+    - enable Grid support
+- Visualization with DLR Visualization Library
+    - add visual shape kind ModelicaShape
+    - remove some type instabilities
+- improve testing
+    - enable short and complete test runs
+    - add planar motion test
+- update documentation and installation guide
+- clean up: remove unused code snippets
+
+
+### Version 0.5.0
+
+- Largely redesigned.
+- Integrated into Modia.
+- Not backwards compatible to previous versions.
+
+
 
 
 

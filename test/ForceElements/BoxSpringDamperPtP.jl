@@ -1,9 +1,6 @@
 module BoxSpringDamperPtP
 
-using ModiaLang
-
-import Modia3D
-using  Modia3D.ModiaInterface
+using Modia3D
 
 SpringDamper = Model(
     Length = 0.1,

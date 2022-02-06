@@ -50,7 +50,7 @@ function addIndicesOfCutJointsToSuperObj(scene::Scene)
 end
 
 
-function createAABB_noCPairs(scene::Scene, superObjsRow::SuperObjsRow)
+function createAABB_noCPairs(scene::Scene{F}, superObjsRow::SuperObjsRow) where F <: Modia3D.VarFloatType
     if length(superObjsRow.superObjCollision.superObj) > 0 && !isempty(superObjsRow.noCPair)
         push!(scene.noCPairs, superObjsRow.noCPair)
     else
@@ -58,7 +58,7 @@ function createAABB_noCPairs(scene::Scene, superObjsRow::SuperObjsRow)
     end
 
     if length(superObjsRow.superObjCollision.superObj) > 0
-        AABBrow = [Basics.BoundingBox() for i = 1:length(superObjsRow.superObjCollision.superObj)]
+        AABBrow = [Basics.BoundingBox{F}() for i = 1:length(superObjsRow.superObjCollision.superObj)]
         push!(scene.AABB, AABBrow)
     else
         push!(scene.AABB, [])
@@ -170,7 +170,7 @@ end
 #     these elements form together a super object
 #   elements which are directly connected with a joint can't collide
 #     these elements are excluded from the collision list
-function build_superObjs!(scene::Scene, world::Object3D)::Nothing
+function build_superObjs!(scene::Scene{F}, world::Object3D)::Nothing where F <: Modia3D.VarFloatType
     if !scene.initSuperObj
     stack = scene.stack
     buffer = scene.buffer
@@ -190,8 +190,8 @@ function build_superObjs!(scene::Scene, world::Object3D)::Nothing
     hasMoreCollisionSuperObj = false
 
     while actPos <= nPos
-        superObjsRow = SuperObjsRow()
-        AABBrow      = Vector{Basics.BoundingBox}[]
+        superObjsRow = SuperObjsRow{F}()
+        AABBrow      = Vector{Basics.BoundingBox{F}}[]
         rootSuperObj = buffer[actPos]
 
         fillVisuElements!(scene, rootSuperObj, world)
@@ -327,7 +327,7 @@ function makeTreeAvailable(scene::Scene)
 end
 
 
-function makeJointsAvailable(scene::Scene)
+function makeJointsAvailable(scene::Scene{F}) where F <: Modia3D.VarFloatType
     tree = scene.treeForComputation
     empty!(scene.revolute)
     empty!(scene.prismatic)
@@ -337,7 +337,7 @@ function makeJointsAvailable(scene::Scene)
         jointKind = obj.jointKind
 
         if jointKind == FixKind
-            if obj.R_rel === Modia3D.NullRotation
+            if obj.R_rel === Modia3D.NullRotation(F)
                 obj.jointKind = FixTranslationKind
             end
 
@@ -372,7 +372,7 @@ end
 
 
 
-function chooseAndBuildUpTree(world::Object3D, scene::Scene)
+function chooseAndBuildUpTree(world::Object3D{F}, scene::Scene{F}) where F <: Modia3D.VarFloatType
     # Build tree for optimized structure or standard structure
     # collision handling is only available for optimized structure
     if scene.options.useOptimizedStructure
@@ -399,14 +399,22 @@ function chooseAndBuildUpTree(world::Object3D, scene::Scene)
     else
         build_tree!(scene, world)
         if scene.options.enableContactDetection
-            error("Collision handling is only possible with the optimized structure. Please set useOptimizedStructure = true in Modia3D.Scene.")
+            error("Collision handling is only possible with the optimized structure. Please set useOptimizedStructure = true in Modia3D.Composition.Scene.")
         end
     end
-    if length(scene.allVisuElements) > 0
-        scene.visualize = scene.options.enableVisualization
-    else
+    # set visualize
+    if F <: MonteCarloMeasurements.StaticParticles ||
+    F <: MonteCarloMeasurements.Particles
+        @warn("For MonteCarloMeasurements visualization and animation export is not supported.")
         scene.visualize = false
         scene.exportAnimation = false
+    else
+        if length(scene.allVisuElements) > 0
+            scene.visualize = scene.options.enableVisualization
+        else
+            scene.visualize = false
+            scene.exportAnimation = false
+        end
     end
     makeTreeAvailable(scene)
     makeJointsAvailable(scene)
@@ -431,7 +439,7 @@ function errorMessageCollision(functionName::String)
 end
 
 
-function visualize!(scene::Scene, time::Float64)
+function visualize!(scene::Scene, time)
     if scene.visualize
         visualize!(Modia3D.renderer[1], time)
     end

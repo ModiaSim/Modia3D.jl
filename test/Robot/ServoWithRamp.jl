@@ -1,12 +1,10 @@
 module ServoWithRamp
 
-using ModiaLang
-using Unitful
+using Modia3D
 
-# ModiaLang models
-include("$(ModiaLang.path)/models/Blocks.jl")
-include("$(ModiaLang.path)/models/Electric.jl")
-include("$(ModiaLang.path)/models/Rotational.jl")
+include("$(Modia3D.modelsPath)/Blocks.jl")
+include("$(Modia3D.modelsPath)/Electric.jl")
+include("$(Modia3D.modelsPath)/Rotational.jl")
 
 Controller = Model(
     # Interface
@@ -105,7 +103,7 @@ testServo = @instantiateModel(TestServo, unitless=true, logCode=false, log=false
 stopTime = 4.0
 tolerance = 1e-6
 requiredFinalStates = [-0.004445925511355035, 2.9499994183801284, 5.816286501116783e-7]
-simulate!(testServo, stopTime=stopTime, tolerance=tolerance, log=true,logStates=true, requiredFinalStates=requiredFinalStates)
+simulate!(testServo, stopTime=stopTime, tolerance=tolerance, log=true,logStates=false, requiredFinalStates=requiredFinalStates)
 
 @usingModiaPlot
 plotVariables = [("ramp.y", "load.phi"); "load.w"; "servo.ppi.PI.x"; "servo.ppi.refTorque"]

@@ -9,7 +9,7 @@ The example in `"$(Modia3D.path)/test/Tutorial/BouncingSphere.jl"` defines a sph
 ```
 module BouncingSphere3D
 
-using Modia
+using Modia3D
 
 BouncingSphere = Model(
     boxHeigth = 0.1,

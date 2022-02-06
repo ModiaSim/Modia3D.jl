@@ -1,8 +1,6 @@
 module BouncingEllipsoidSimulation
 
-using ModiaLang
-import Modia3D
-using  Modia3D.ModiaInterface
+using Modia3D
 
 BouncingEllipsoid = Model(
     boxHeigth = 0.1,
@@ -29,13 +27,11 @@ BouncingEllipsoid = Model(
 
 bouncingEllipsoid = @instantiateModel(buildModia3D(BouncingEllipsoid), unitless=true, log=false, logStateSelection=false, logCode=false)
 
-#@show bouncingEllipsoid.parameterExpressions
-#@show bouncingEllipsoid.parameters
 
-stopTime = 2.5
+stopTime = 2.0
 tolerance = 1e-8
-requiredFinalStates = [-0.8720220901260356, -2.706225861204731, 2.1494619380602984, -0.6654182338218089, -7.480644002905684, 0.8158622722948691, 19.6901637595772, -0.5127178856804271, 0.5844275371325878, 7.417393481447869, -0.15143390608966664, -0.19610822193495095]
-simulate!(bouncingEllipsoid, stopTime=stopTime, tolerance=tolerance, log=true, logStates=true, logEvents=true, requiredFinalStates=requiredFinalStates)
+requiredFinalStates = [-0.4545597005152044, 0.05683453468299216, 1.1778521103823525, -0.1092425125321821, -0.3622646259841156, 0.28841460521917095, 8.7681878487027, -1.30949181179306, -2.334787231141352, -0.08949785426141968, -1.1664892577220993, -5.628568253333571]
+simulate!(bouncingEllipsoid, stopTime=stopTime, tolerance=tolerance, log=true, requiredFinalStates=requiredFinalStates)
 
 @usingModiaPlot
 plot(bouncingEllipsoid, ["free.r" "free.rot"; "free.v" "free.w"], figure=1)

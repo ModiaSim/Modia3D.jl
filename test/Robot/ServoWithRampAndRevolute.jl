@@ -1,16 +1,12 @@
 module ServoWithRampAndRevolute
 
-using ModiaLang
-using Unitful
-import Modia3D
+using Modia3D
 
-# ModiaLang models
-include("$(ModiaLang.path)/models/Blocks.jl")
-include("$(ModiaLang.path)/models/Electric.jl")
-include("$(ModiaLang.path)/models/Rotational.jl")
+include("$(Modia3D.modelsPath)/Blocks.jl")
+include("$(Modia3D.modelsPath)/Electric.jl")
+include("$(Modia3D.modelsPath)/Rotational.jl")
 
-import Modia3D
-using  Modia3D.ModiaInterface
+
 
 Controller = Model(
     # Interface
@@ -84,7 +80,7 @@ axis = 3
 vmat1 = VisualMaterial(color="LightBlue", transparency=0.5)
 m1=1.390
 translation1 =[0.033,0,0]
-rotation1 =Modia3D.rot1(180u"°")
+rotation1 = [180u"°", 0, 0]
 
 k1=50.0
 k2=0.1
@@ -121,12 +117,12 @@ TestServo = Model(
         ]
 )
 
-servo = @instantiateModel(buildModia3D(TestServo), unitless=true, logCode=true, log=true)
+servo = @instantiateModel(buildModia3D(TestServo), unitless=true, logCode=false, log=false)
 
 stopTime = 4.0
 tolerance = 1e-6
 requiredFinalStates = [2.949999509178657, 4.908194611512363e-7, 0.02159751818019237]
-simulate!(servo, stopTime=stopTime, tolerance=tolerance, log=true, logStates=true, requiredFinalStates=requiredFinalStates)
+simulate!(servo, stopTime=stopTime, tolerance=tolerance, log=true, logStates=false, requiredFinalStates=requiredFinalStates)
 
 @usingModiaPlot
 plotVariables = [("ramp.y", "rev.phi"); "rev.w"; "servo.ppi.PI.x"]

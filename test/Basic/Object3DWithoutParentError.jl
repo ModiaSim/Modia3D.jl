@@ -2,15 +2,12 @@ module Object3DWithoutParentError
 
 # Should give an error because of two Object3Ds without parent
 
-using ModiaLang
+using Modia3D
+using Modia3D.Test
 
-# ModiaLang models
-include("$(ModiaLang.path)/models/Blocks.jl")
-include("$(ModiaLang.path)/models/Electric.jl")
-include("$(ModiaLang.path)/models/Rotational.jl")
-
-import Modia3D
-using  Modia3D.ModiaInterface
+include("$(Modia3D.modelsPath)/Blocks.jl")
+include("$(Modia3D.modelsPath)/Electric.jl")
+include("$(Modia3D.modelsPath)/Rotational.jl")
 
 Bar = Model(
     m  = 0.1,
@@ -24,7 +21,7 @@ Bar = Model(
                                     visualMaterial=:(vmat1))),
 	frame1 = Object3D(parent=:frame0,
                       translation=:[-Lx/2, 0.0, 0.0],
-                      feature=Visual(shape=Cylinder(axis=3, diameter=:Ly/2, length=1.2*:Lz),
+                      feature=Visual(shape=Cylinder(axis=3, diameter=:(Ly/2), length=:(1.2*Lz)),
                                      visualMaterial=:(vmat2))),
     frame2 = Object3D()  # has no parent
 )
@@ -52,7 +49,7 @@ pendulumWithBar = @instantiateModel(PendulumWithBar, unitless=true)
 
 stopTime = 10.0
 requiredFinalStates = [-1.5781788131493184, 0.06153205563040136]
-simulate!(pendulumWithBar, stopTime=stopTime, log=true, logStates=true, requiredFinalStates=requiredFinalStates)
+simulate!(pendulumWithBar, stopTime=stopTime, requiredFinalStates=requiredFinalStates)
 
 @usingModiaPlot
 plot(pendulumWithBar, "pendulum.rev.flange.phi", figure=1)
