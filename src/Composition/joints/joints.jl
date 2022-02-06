@@ -5,27 +5,25 @@
 #   Modia3D.Composition (Modia3D/Composition/_module.jl)
 #
 
-import ModiaBase
-
-mutable struct MultibodyData{FloatType,ParType,EvaluatedParType,TimeType}
-    instantiatedModel::ModiaLang.SimulationModel{FloatType,ParType,EvaluatedParType,TimeType}
+mutable struct MultibodyData{FloatType <: Modia3D.VarFloatType, TimeType}
+    instantiatedModel::ModiaLang.SimulationModel{FloatType,TimeType}
     
-    nqdd::Int                        # Length of qdd vector
-    world::Object3D                  # Pointer to world object
-    scene::Scene                     # Pointer to scene
-    jointObjects1::Vector{Object3D}  # References to Object3Ds that have a joint with one degree of freedom
-    zStartIndex::Int                 # eventHandler.z[zStartIndex] is first index of crossing function
-                                     # (or zero, if enableContactDetection=false)
-    nz::Int                          # Number of used zero crossing functions
-    residuals::Vector{FloatType}     # Residuals - length(residuals) = nqdd
-    cache_h::Vector{FloatType}       # Cached vector: = h(q,qd,gravity,contact-forces)
+    nqdd::Int                                   # Length of qdd vector
+    world::Object3D{FloatType}                  # Pointer to world object
+    scene::Scene                                # Pointer to scene
+    jointObjects1::Vector{Object3D{FloatType}}  # References to Object3Ds that have a joint with one degree of freedom
+    zStartIndex::Int                            # eventHandler.z[zStartIndex] is first index of crossing function
+                                                # (or zero, if enableContactDetection=false)
+    nz::Int                                     # Number of used zero crossing functions
+    residuals::Vector{FloatType}                # Residuals - length(residuals) = nqdd
+    cache_h::Vector{FloatType}                  # Cached vector: = h(q,qd,gravity,contact-forces)
 
     time::TimeType
     
     # for multibodyAccelerations
     leq::Vector{ModiaBase.LinearEquations{FloatType}}
     
-    MultibodyData{FloatType,ParType,EvaluatedParType,TimeType}(instantiatedModel, nqdd, world, scene, jointObjects1, zStartIndex, nz, residuals, cache_h, time) where {FloatType,ParType,EvaluatedParType,TimeType} =
+    MultibodyData{FloatType,TimeType}(instantiatedModel, nqdd, world, scene, jointObjects1, zStartIndex, nz, residuals, cache_h, time) where {FloatType,TimeType} =
         new(instantiatedModel, nqdd, world, scene, jointObjects1, zStartIndex, nz, residuals, cache_h, 
             Modia3D.convertAndStripUnit(TimeType, u"s", time), ModiaBase.LinearEquations{FloatType}[])
 end
@@ -500,7 +498,7 @@ end
 Copy specific variables into their objects for leq_mode = 0.
 If cacheWithJointForces=true, include generalized joint forces in cache; = false, do not include them in cache.
 """
-function getJointResiduals_leq_mode_0!(scene::Scene, objects::Vector{Object3D{F}}, residuals, cache_h; cacheWithJointForces=false)::Nothing where F <: Modia3D.VarFloatType
+function getJointResiduals_leq_mode_0!(scene::Scene{F}, objects::Vector{Object3D{F}}, residuals::Vector{F}, cache_h::Vector{F}; cacheWithJointForces=false)::Nothing where F <: Modia3D.VarFloatType
     j = 1
     for (i,obj) in enumerate(objects)
         jointKind = obj.jointKind

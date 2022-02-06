@@ -90,6 +90,7 @@ import Modia3D.Shapes
 import JSON
 import Printf
 import ModiaLang
+import ModiaLang: ModiaBase
 import TimerOutputs
 import MonteCarloMeasurements
 
