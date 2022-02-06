@@ -100,12 +100,12 @@ end
 
 Initialize joints.
 """
-function initJoints!(id::Int, instantiatedModel::ModiaLang.SimulationModel{FloatType,TimeType}, 
-                     nqdd::Int, time)::MultibodyData{FloatType,TimeType} where {FloatType,TimeType}
+function initJoints!(id::Int, instantiatedModel::ModiaLang.SimulationModel{F,TimeType}, 
+                     nqdd::Int, time)::MultibodyData{F,TimeType} where {F,TimeType}
      TimerOutputs.@timeit instantiatedModel.timer "Modia3D_0 initJoint!" begin
         separateObjects = instantiatedModel.separateObjects  # is emptied for every new simulate! call
         if haskey(separateObjects, id)
-            mbs::MultibodyData{FloatType,TimeType} = separateObjects[id]
+            mbs::MultibodyData{F,TimeType} = separateObjects[id]
             mbs.time = time
         else
             # Search in parameters and retrieve the name of the object with the required id
@@ -119,8 +119,8 @@ function initJoints!(id::Int, instantiatedModel::ModiaLang.SimulationModel{Float
             
             # Construct MultibodyData
             scene = initAnalysis2!(world)
-            residuals = zeros(FloatType,nqdd)
-            cache_h   = zeros(FloatType,nqdd)
+            residuals = zeros(F,nqdd)
+            cache_h   = zeros(F,nqdd)
             scene.forceElements = forceElements            
             if scene.options.enableContactDetection
                 nz = 2
@@ -130,7 +130,7 @@ function initJoints!(id::Int, instantiatedModel::ModiaLang.SimulationModel{Float
                 nz = 0
                 zStartIndex = 0
             end
-            mbs = MultibodyData{FloatType,TimeType}(instantiatedModel, nqdd, world, scene, jointObjects, zStartIndex, nz, residuals, cache_h, time)                     
+            mbs = MultibodyData{F,TimeType}(instantiatedModel, nqdd, world, scene, jointObjects, zStartIndex, nz, residuals, cache_h, time)                     
             separateObjects[id] = mbs
                                            
             if scene.visualize
@@ -157,7 +157,7 @@ Return joint residuals vector computed with buildModia3D(model; method=2).
 It is assumed that setJointAccelerations1!(..) was called before to store the
 joint accelerations in mbs.
 """
-function getJointResiduals_method2!(mbs::MultibodyData{FloatType}, _leq_mode; cacheWithJointForces=false)::Vector{FloatType} where {FloatType}
+function getJointResiduals_method2!(mbs::MultibodyData{F}, _leq_mode; cacheWithJointForces=false)::Vector{F} where {F}
      TimerOutputs.@timeit mbs.instantiatedModel.timer "Modia3D getJointResiduals_method2!" begin
         #setJointAcc1!(mbs, args...)
      
@@ -198,7 +198,7 @@ end
 Return joint accelerations vector computed with buildModia3D(model; method=3).
 args... are the joint forces of 1D joints
 """
-function getJointResiduals_method3!(mbs::MultibodyData{FloatType}, args::Vararg{FloatType,N})::Vector{FloatType} where {FloatType,N}
+function getJointResiduals_method3!(mbs::MultibodyData{F}, args::Vararg{F,N})::Vector{F} where {F,N}
     # Store generalized forces in joints
     scene   = mbs.scene
     objects = mbs.jointObjects1
@@ -234,7 +234,7 @@ function getJointResiduals_method3!(mbs::MultibodyData{FloatType}, args::Vararg{
             push!(x_names, name)
         end
         x_lengths = fill(1,length(objects))
-        leq = ModiaBase.LinearEquations{FloatType}(x_names, x_lengths, length(objects), false)
+        leq = ModiaBase.LinearEquations{F}(x_names, x_lengths, length(objects), false)
         push!(mbs.leq, leq)
         push!(mbs.instantiatedModel.linearEquations, leq)  # Stored it also in instantiatedModel, in order to support DAE-mode
     else
