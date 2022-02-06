@@ -4,9 +4,8 @@
 module Modia3D
 
 const path = dirname(dirname(@__FILE__))   # Absolute path of package directory
-const Version = "0.8.0"
-const Date = "2022-02-07"
-
+const Version = "0.9.0"
+const Date = "2022-02-08"
 
 # println("\nImporting Modia3D Version $Version ($Date)")
 
@@ -105,9 +104,8 @@ convertAndStripUnit(Float32, 10.0)             # = 10.0f0
 ```
 """
 convertAndStripUnit(TargetType, requiredUnit, value) =
-    numberType(value) <: Unitful.AbstractQuantity && unit.(value) != Unitful.NoUnits ?
-            convert(TargetType, ustrip.( uconvert.(requiredUnit, value))) : convert(TargetType, value)
-
+    numberType(value) <: Unitful.AbstractQuantity && Unitful.unit.(value) != Unitful.NoUnits ?
+            convert(TargetType, Unitful.ustrip.( Unitful.uconvert.(requiredUnit, value))) : convert(TargetType, value)
 
 # Include sub-modules
 include(joinpath("Frames"          , "_module.jl"))

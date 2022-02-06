@@ -35,11 +35,8 @@ calculateRobotMovement(args...)      = Modia3D.PathPlanning.calculateRobotMoveme
 getRefPathPosition(args...)          = Modia3D.PathPlanning.getRefPathPosition(args...)
 getRefPathInitPosition(args...)      = Modia3D.PathPlanning.getRefPathInitPosition(args...)
 
-getVariables(args...)            = (args...,)
-multibodyResiduals!(args...)     = Modia3D.Composition.multibodyResiduals!(args...)
-setModiaJointVariables!(args...) = Modia3D.Composition.setModiaJointVariables!(args...)
 
-Revolute(; obj1, obj2, axis=3, phi=Var(init=0.0), w=Var(init=0.0), canCollide=true) = Model(; _constructor = Par(value = :(Modia3D.Composition.Revolute{FloatType}), _path = true, ndof = 1),
+Revolute(; obj1, obj2, axis=3, phi=Var(init=0.0), w=Var(init=0.0), canCollide=true) = Model(; _constructor = Par(value = :(Modia3D.Composition.Revolute{FloatType}), _path = true, _jointType = :Revolute),
     obj1 = Par(value = obj1),
     obj2 = Par(value = obj2),
     axis = Par(value = axis),
@@ -47,13 +44,11 @@ Revolute(; obj1, obj2, axis=3, phi=Var(init=0.0), w=Var(init=0.0), canCollide=tr
     phi  = phi,
     w    = w,
     equations = :[
-        w   = der(phi)
-        qdd = der(w)   # standardized name for the generalized joint accelerations
-        variables = getVariables(phi, w, 0.0) # standardized name for the generalized joint position, velocity, force
+        w = der(phi)
         ]
 )
 
-RevoluteWithFlange(; obj1, obj2, axis=3, phi=Var(init=0.0), w=Var(init=0.0), canCollide=true) = Model(; _constructor = Par(value = :(Modia3D.Composition.Revolute{FloatType}), _path = true, ndof = 1),
+RevoluteWithFlange(; obj1, obj2, axis=3, phi=Var(init=0.0), w=Var(init=0.0), canCollide=true) = Model(; _constructor = Par(value = :(Modia3D.Composition.Revolute{FloatType}), _path = true, _jointType = :RevoluteWithFlange),
     obj1   = Par(value = obj1),
     obj2   = Par(value = obj2),
     axis   = Par(value = axis),
@@ -64,12 +59,10 @@ RevoluteWithFlange(; obj1, obj2, axis=3, phi=Var(init=0.0), w=Var(init=0.0), can
     equations = :[
         phi = flange.phi
         w   = der(phi)
-        qdd = der(w)   # standardized name for the generalized joint accelerations
-        variables = getVariables(phi, w, flange.tau) # standardized name for the generalized joint position, velocity, force
         ]
 )
 
-Prismatic(; obj1, obj2, axis=1, s=Var(init=0.0), v=Var(init=0.0), canCollide=true) = Model(; _constructor = Par(value = :(Modia3D.Composition.Prismatic{FloatType}), _path = true, ndof = 1),
+Prismatic(; obj1, obj2, axis=1, s=Var(init=0.0), v=Var(init=0.0), canCollide=true) = Model(; _constructor = Par(value = :(Modia3D.Composition.Prismatic{FloatType}), _path = true, _jointType = :Prismatic),
     obj1 = Par(value = obj1),
     obj2 = Par(value = obj2),
     axis = Par(value = axis),
@@ -77,13 +70,11 @@ Prismatic(; obj1, obj2, axis=1, s=Var(init=0.0), v=Var(init=0.0), canCollide=tru
     s    = s,
     v    = v,
     equations = :[
-        v   = der(s)
-        qdd = der(v)   # standardized name for the generalized joint accelerations
-        variables = getVariables(s, v, 0.0) # standardized name for the generalized joint position, velocity, force
+        v = der(s)
         ]
 )
 
-PrismaticWithFlange(; obj1, obj2, axis=1, s=Var(init=0.0), v=Var(init=0.0), canCollide=true) = Model(; _constructor = Par(value = :(Modia3D.Composition.Prismatic{FloatType}), _path = true, ndof = 1),
+PrismaticWithFlange(; obj1, obj2, axis=1, s=Var(init=0.0), v=Var(init=0.0), canCollide=true) = Model(; _constructor = Par(value = :(Modia3D.Composition.Prismatic{FloatType}), _path = true, _jointType = :PrismaticWithFlange),
     obj1   = Par(value = obj1),
     obj2   = Par(value = obj2),
     axis   = Par(value = axis),
@@ -92,10 +83,8 @@ PrismaticWithFlange(; obj1, obj2, axis=1, s=Var(init=0.0), v=Var(init=0.0), canC
     s      = s,
     v      = v,
     equations = :[
-        s   = flange.s
-        v   = der(s)
-        qdd = der(v)   # standardized name for the generalized joint accelerations
-        variables = getVariables(s, v, flange.f) # standardized name for the generalized joint position, velocity, force
+        s = flange.s
+        v = der(s)
         ]
 )
 
@@ -181,9 +170,5 @@ FreeMotion(; obj1, obj2, r=Var(init=zeros(3)), rot=Var(init=zeros(3)), v=Var(ini
         rot2_singularity = positive(singularRem(rot[2]))
         next_isrot123 = if rot2_singularity; change_rotSequenceInNextIteration!(rot, isrot123, instantiatedModel, _x, _rotName) else isrot123 end
         der(rot) = J123or132(rot,isrot123) * w
-
-        der(v) = qdd[1:3]
-        der(w) = qdd[4:6]
-        variables = getVariables(r, rot, v, w, isrot123)
         ]
 )

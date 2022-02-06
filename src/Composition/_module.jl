@@ -20,6 +20,8 @@ Andrea Neumayr and Martin Otter, [DLR - Institute of System Dynamics and Control
 """
 module Composition
 
+export MultibodyData
+
 export initialize, initAnalysis!, performAnalysis!, closeAnalysis!, visualize!, visualizeWorld!
 export updatePosition!, update!
 export RotationVariables, RCardan123
@@ -29,6 +31,13 @@ export FixTranslation
 export setAngle!, connect
 export setDistance!
 
+export initJoints!, setJointStates1!, setJointAccelerations1!
+export getJointResiduals_leq_mode_0!, getJointResiduals_all!
+export getJointResiduals_method2!, getJointResiduals_method3!
+
+export Bushing, SpringDamperPtP
+
+export multibodyResiduals!, setModiaJointVariables!
 
 export distanceAndAngles, distance, planarRotationAngle
 export measFrameRotation, measFramePosition, measFrameDistance

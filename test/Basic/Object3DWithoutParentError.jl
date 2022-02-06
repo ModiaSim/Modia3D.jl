@@ -51,7 +51,7 @@ stopTime = 10.0
 requiredFinalStates = [-1.5781788131493184, 0.06153205563040136]
 simulate!(pendulumWithBar, stopTime=stopTime, requiredFinalStates=requiredFinalStates)
 
-#@usingModiaPlot
-#plot(pendulumWithBar, ["pendulum.rev.flange.phi", "pendulum.rev.variables[1]"], figure=1)
+@usingModiaPlot
+plot(pendulumWithBar, "pendulum.rev.flange.phi", figure=1)
 
 end

@@ -315,7 +315,7 @@ Defines global properties of the system, such as the gravity field. Exactly one 
 | `enableContactDetection`        | true                                    |
 | `mprTolerance`                  | 1.0e-20                                 |
 | `elasticContactReductionFactor` | 1.0     (<= 1.0 required)               |
-| `maximumContactDamping`         | 1000.0                                  |
+| `maximumContactDamping`         | 2000.0                                  |
 | `enableVisualization`           | true                                    |
 | `animationFile`                 | nothing                                 |
 | `visualizeFrames`               | false                                   |
