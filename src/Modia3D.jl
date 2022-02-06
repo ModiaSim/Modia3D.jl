@@ -4,8 +4,8 @@
 module Modia3D
 
 const path = dirname(dirname(@__FILE__))   # Absolute path of package directory
-const Version = "0.7.0"
-const Date = "2022-02-04"
+const Version = "0.8.0"
+const Date = "2022-02-07"
 
 
 # println("\nImporting Modia3D Version $Version ($Date)")
@@ -44,8 +44,6 @@ import ModiaLang
 
 
 @reexport using ModiaLang
-@reexport using ModiaLang.Unitful
-@reexport using ModiaLang.DifferentialEquations
 const modelsPath = joinpath(ModiaLang.path, "models")
 
 
@@ -163,9 +161,7 @@ end
 
 export PointGravityField, NoGravityField
 
-export SimulationModel
 export print_ModelVariables
-export PTP_path, pathEndTime, getPosition!, getPosition, getIndex, plotPath
 
 export rereadContactPairMaterialFromJSON
 

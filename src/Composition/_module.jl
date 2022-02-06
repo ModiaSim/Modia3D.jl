@@ -24,7 +24,6 @@ export initialize, initAnalysis!, performAnalysis!, closeAnalysis!, visualize!, 
 export updatePosition!, update!
 export RotationVariables, RCardan123
 export WStartVariables, WCartesian, WCardan123
-export SimulationModel, Model
 export printObject3DAndAllChildren, writeObject3DAndAllChildrenOnJsonFile
 export FixTranslation
 export setAngle!, connect

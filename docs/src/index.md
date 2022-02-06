@@ -48,10 +48,14 @@ Download and install the free DLR SimVis Community Edition, e.g. with [https://v
 
 ## Release Notes
 
-### Version 0.7.1
+### Version 0.8.0
 
+- Require ModiaLang 0.10.0 (e.g. require DifferentialEquations 7)
+- Support animation export for FloatType = Measurements.XXX (animation is performed for the nominal value).
 - Remove PathPlanning struct und functions (and instead use the functionality from ModiaLang 0.9.1). 
 - Reactivate test model test/old/Test_PathPlanning.jl
+- Remove unused files: .codecov.yml, .travis.yml, appveyor.yml
+- Fix import/using of some tests.
 
 ### Version 0.7.0
 - Modia3D is updated and restricted to Julia 1.7

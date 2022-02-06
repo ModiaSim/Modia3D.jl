@@ -3,7 +3,7 @@ module Object3DWithoutParentError
 # Should give an error because of two Object3Ds without parent
 
 using Modia3D
-using Test
+using Modia3D.Test
 
 include("$(Modia3D.modelsPath)/Blocks.jl")
 include("$(Modia3D.modelsPath)/Electric.jl")
