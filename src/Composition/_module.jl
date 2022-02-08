@@ -35,8 +35,6 @@ export initJoints!, setJointStates1!, setJointAccelerations1!
 export getJointResiduals_leq_mode_0!, getJointResiduals_all!
 export getJointResiduals_method2!, getJointResiduals_method3!
 
-export Bushing, SpringDamperPtP
-
 export multibodyResiduals!, setModiaJointVariables!
 
 export distanceAndAngles, distance, planarRotationAngle
