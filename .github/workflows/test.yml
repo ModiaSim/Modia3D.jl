@@ -3,7 +3,7 @@ name: Run tests
 env:
   JULIA_NUM_THREADS: 4
 on:
-  push:
+  pull_request:
     branches:
       - main
 jobs:
