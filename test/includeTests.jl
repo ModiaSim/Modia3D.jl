@@ -61,7 +61,7 @@ Test.@testset "Collision" begin
         include(joinpath("Collision", "BouncingSphere2.jl"))  # use solver QBDF, Tsit5 with stopTime=2.5s; requiredFinalStates=[0.0, 0.0]
         include(joinpath("Collision", "ZeroCrossingIssue.jl"))
         Test.@test_skip include(joinpath("Collision", "BouncingCones.jl")) # troubles with smoothingSphereRadius
-        include(joinpath("Collision", "BouncingCapsules.jl"))
+        Test.@test_skip include(joinpath("Collision", "BouncingCapsules.jl")) # troubles with contactSphereRadius
         include(joinpath("Collision", "BouncingBeams.jl"))
         include(joinpath("Collision", "CollidingSphereWithBunnies.jl"))
         include(joinpath("Collision", "Billard4Balls.jl"))
