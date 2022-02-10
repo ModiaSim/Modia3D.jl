@@ -36,28 +36,24 @@ function resultantDampingCoefficient(cor, abs_vreln, vsmall, maximumContactDampi
     return d_res
 end
 
-
 function elasticContactPairCoefficients(obj1::Object3D, obj2::Object3D)
-  if typeof(obj1.feature.shape) <: Modia3D.Shapes.Sphere && typeof(obj2.feature.shape) <: Modia3D.Shapes.Sphere
-    r1 = obj1.feature.shape.diameter*0.5
-    r2 = obj2.feature.shape.diameter*0.5
-    mu_r_geo = r1*r2/(r1 + r2)
+    solid1::Shapes.Solid = obj1.feature
+    solid2::Shapes.Solid = obj2.feature
+
+    if (solid1.isFlat && solid2.isFlat) || (!solid1.isFlat && !solid2.isFlat)
+        r1 = solid1.contactSphereRadius
+        r2 = solid2.contactSphereRadius
+        mu_r_geo = r1*r2/(r1 + r2)
+    elseif !solid1.isFlat && solid2.isFlat
+        mu_r_geo = solid1.contactSphereRadius
+    elseif solid1.isFlat && !solid2.isFlat
+        mu_r_geo = solid2.contactSphereRadius
+    end
+
     n_geo = 1.5
     c_geo = 4/3*sqrt(mu_r_geo)
-  elseif typeof(obj1.feature.shape) <: Modia3D.Shapes.Sphere && typeof(obj2.feature.shape) != Modia3D.Shapes.Sphere
-    mu_r_geo = obj1.feature.shape.diameter*0.5
-    n_geo = 1.5
-    c_geo = 4/3*sqrt(mu_r_geo)
-  elseif typeof(obj1.feature.shape) != Modia3D.Shapes.Sphere && typeof(obj2.feature.shape) <: Modia3D.Shapes.Sphere
-    mu_r_geo = obj2.feature.shape.diameter*0.5
-    n_geo = 1.5
-    c_geo = 4/3*sqrt(mu_r_geo)
-  else
-    mu_r_geo = 1.0
-    n_geo = 1.0
-    c_geo = 1.0
-  end
-  return (c_geo, n_geo, mu_r_geo)
+
+    return (c_geo, n_geo, mu_r_geo)
 end
 
 
@@ -86,28 +82,28 @@ function contactStart(matPair::Shapes.ElasticContactPairMaterial,
     nu1   = mat1.PoissonsRatio
     nu2   = mat2.PoissonsRatio
     if E1 <= 0.0 || E2 <= 0.0 || nu1 <= 0.0 || nu1 >= 1.0 ||
-       nu2 <= 0.0 || nu2 >= 1.0 || elasticContactReductionFactor <= 0.0
-      responseMaterial = nothing
+        nu2 <= 0.0 || nu2 >= 1.0 || elasticContactReductionFactor <= 0.0
+        responseMaterial = nothing
     else
-      @assert(E1 > 0.0)
-      @assert(E2 > 0.0)
-      @assert(nu1 > 0.0 && nu1 < 1.0)
-      @assert(nu2 > 0.0 && nu2 < 1.0)
-      @assert(elasticContactReductionFactor > 0.0)
-      c1 = E1/(1 - nu1^2)
-      c2 = E2/(1 - nu2^2)
-      c_res = elasticContactReductionFactor*c1*c2/(c1 + c2)
+        @assert(E1 > 0.0)
+        @assert(E2 > 0.0)
+        @assert(nu1 > 0.0 && nu1 < 1.0)
+        @assert(nu2 > 0.0 && nu2 < 1.0)
+        @assert(elasticContactReductionFactor > 0.0)
+        c1 = E1/(1 - nu1^2)
+        c2 = E2/(1 - nu2^2)
+        c_res = elasticContactReductionFactor*c1*c2/(c1 + c2)
 
-      # Compute damping constant
-      delta_dot_start = normalRelativeVelocityAtContact(obj1, obj2, rContact, contactNormal)
-      d_res = Modia3D.resultantDampingCoefficient(matPair.coefficientOfRestitution, abs(delta_dot_start), matPair.vsmall, maximumContactDamping)
+        # Compute damping constant
+        delta_dot_start = normalRelativeVelocityAtContact(obj1, obj2, rContact, contactNormal)
+        d_res = Modia3D.resultantDampingCoefficient(matPair.coefficientOfRestitution, abs(delta_dot_start), matPair.vsmall, maximumContactDamping)
 
-      # Determine other coefficients
-      (c_geo, n_geo, mu_r_geo) = elasticContactPairCoefficients(obj1,obj2)
-      responseMaterial = ElasticContactPairResponseMaterial(c_res, c_geo, n_geo, d_res,
-                              matPair.slidingFrictionCoefficient,
-                              matPair.rotationalResistanceCoefficient, mu_r_geo,
-                              matPair.vsmall, matPair.wsmall)
+        # Determine other coefficients
+        (c_geo, n_geo, mu_r_geo) = elasticContactPairCoefficients(obj1,obj2)
+        responseMaterial = ElasticContactPairResponseMaterial(c_res, c_geo, n_geo, d_res,
+                                matPair.slidingFrictionCoefficient,
+                                matPair.rotationalResistanceCoefficient, mu_r_geo,
+                                matPair.vsmall, matPair.wsmall)
     end
     return responseMaterial
 end
@@ -164,9 +160,9 @@ function responseCalculation(material::ElasticContactPairResponseMaterial, obj1:
     delta     = -s
 
     if c_geo != 1.0 && n_geo != 1.0
-      delta_comp = delta * sqrt(abs(delta))
+        delta_comp = delta * sqrt(abs(delta))
     else
-      delta_comp = delta
+        delta_comp = delta
     end
     #fn = -max(F(0.0), c_res * c_geo * delta_comp * (1 - d_res*delta_dot) )
     fn = -c_res * c_geo * delta_comp * (1 - d_res*delta_dot)

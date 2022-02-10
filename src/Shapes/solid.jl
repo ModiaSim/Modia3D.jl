@@ -59,6 +59,8 @@ struct Solid{F <: Modia3D.VarFloatType} <: Modia3D.AbstractObject3DFeature
     contactMaterial::Union{String,Modia3D.AbstractContactMaterial,Nothing}
     collisionSmoothingRadius::F
     visualMaterial::Union{Shapes.VisualMaterial,Nothing}
+    isFlat::Bool
+    contactSphereRadius::F
 
     function Solid{F}(;
         shape::Union{Modia3D.AbstractGeometry,Nothing} = nothing,
@@ -68,7 +70,8 @@ struct Solid{F <: Modia3D.VarFloatType} <: Modia3D.AbstractObject3DFeature
         contactMaterial::AbstractString = "",
         collisionSmoothingRadius=F(0.001),
         visualMaterial::Union{Shapes.VisualMaterial,AbstractString,Nothing} = Shapes.VisualMaterial(),
-        visualMaterialConvexDecomposition::Union{Shapes.VisualMaterial,AbstractString,Nothing} = Shapes.VisualMaterial()) where F <: Modia3D.VarFloatType
+        visualMaterialConvexDecomposition::Union{Shapes.VisualMaterial,AbstractString,Nothing} = Shapes.VisualMaterial(),
+        contactSphereRadius::Union{Nothing, F} = nothing) where F <: Modia3D.VarFloatType
 
         if collision && isnothing(shape)
             error("For collision/gripping simulations, a shape must be defined.")
@@ -94,12 +97,13 @@ struct Solid{F <: Modia3D.VarFloatType} <: Modia3D.AbstractObject3DFeature
         end
 
         if typeof(shape) == FileMesh
-            (shape.centroid, shape.longestEdge, shape.objPoints, shape.facesIndizes) = getMeshInfos(shape.filename, shape.scaleFactor)
+            (shape.centroid, shape.shortestEdge, shape.longestEdge, shape.objPoints, shape.facesIndizes) = getMeshInfos(shape.filename, shape.scaleFactor)
             (shape.volume, shape.centroidAlgo, shape.inertia) = computeMassProperties(shape.objPoints, shape.facesIndizes; bodyCoords=false)
         end
 
         massProperties = createMassProperties(F, massProperties, shape, solidMaterial)
-        new(shape, solidMaterial, massProperties, collision, contactMaterial, setCollisionSmoothingRadius(shape, F(collisionSmoothingRadius)), visualMaterial)
+        (isFlat, contactSphereRadius) = setContactSphereRadius(shape, contactSphereRadius, F)
+        new(shape, solidMaterial, massProperties, collision, contactMaterial, setCollisionSmoothingRadius(shape, F(collisionSmoothingRadius)), visualMaterial, isFlat, contactSphereRadius)
     end
 end
 Solid(args...; kwargs...) = Solid{Float64}(args...; kwargs...)

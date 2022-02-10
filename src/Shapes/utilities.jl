@@ -36,7 +36,7 @@ end
 
 
 # Utility functions for FileMesh.jl
-# getMeshInfos(): read file and return centroid, longestEdge and mesh data
+# getMeshInfos(): read file and return centroid, shortestEdge, longestEdge and mesh data
 #
 # VHACD(): decomposes a concave file mesh in convex sub parts
 #          see: https://github.com/kmammou/v-hacd
@@ -47,6 +47,7 @@ function getMeshInfos(filename::AbstractString, scaleFactor::SVector{3,Float64})
     vertices = Vector{SVector{3,Float64}}()
     faces = Vector{SVector{3,Int64}}()
     centroid::SVector{3,Float64} = Modia3D.ZeroVector3D(Float64)
+    shortestEdge::Float64 = 0.0
     longestEdge::Float64 = 0.0
 
     mesh = FileIO.load(filename, pointtype=MeshIO.Point3{Float64}, facetype=MeshIO.TriangleFace{MeshIO.OneIndex{Int64}})
@@ -86,10 +87,11 @@ function getMeshInfos(filename::AbstractString, scaleFactor::SVector{3,Float64})
             sum += vertices[i]
         end
         centroid = sum / length(vertices)
+        shortestEdge = min((x_max-x_min), (y_max-y_min), (z_max-z_min))
         longestEdge = max((x_max-x_min), (y_max-y_min), (z_max-z_min))
     end
 
-    return (centroid, longestEdge, vertices, faces)
+    return (centroid, shortestEdge, longestEdge, vertices, faces)
 end
 
 getMeshInfos(filename::AbstractString, scaleFactor::AbstractVector) =
