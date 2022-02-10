@@ -33,7 +33,7 @@ Generate a [Solid](@ref) with physical behavior of a rigid body with mass, visua
     If undefined `solidMaterial` is used as contact material. Only contact material combinations defined in
     palettes/contactPairMaterials.json can be used.
 
-- `collisionSmoothingRadius`: Defines a collision smoothing radius for surface edges.
+- `collisionSmoothingRadius`: Defines a collision smoothing radius for surface edges, its default value is `0.001`. It takes the minimum value of your collision smoothing radius and 10% of the smallest shape length, like `min(collisionSmoothingRadius, 0.1 min(shape dimensions))`. If it is set to `0.0` no `collisionSmoothingRadius` is used. A `collisionSmoothingRadius` is used for `Box`, `Cylinder`, `Cone`, and `Beam`.
 
 - `visualMaterial`: Defines the material of the solid used for visualization. A pre-defined [Visual material](@ref)
     from palettes/visualMaterials.json (e.g. `"RedTransparent"`) or a user-defined [Visual material](@ref) (e.g.
@@ -66,7 +66,7 @@ struct Solid{F <: Modia3D.VarFloatType} <: Modia3D.AbstractObject3DFeature
         massProperties::Union{Modia3D.AbstractMassProperties, Number, AbstractString, SolidMaterial, Nothing} = nothing,
         collision::Bool = false,
         contactMaterial::AbstractString = "",
-        collisionSmoothingRadius=F(0.0),
+        collisionSmoothingRadius=F(0.001),
         visualMaterial::Union{Shapes.VisualMaterial,AbstractString,Nothing} = Shapes.VisualMaterial(),
         visualMaterialConvexDecomposition::Union{Shapes.VisualMaterial,AbstractString,Nothing} = Shapes.VisualMaterial()) where F <: Modia3D.VarFloatType
 

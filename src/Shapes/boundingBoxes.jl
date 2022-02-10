@@ -21,16 +21,16 @@ that is the most extreme in direction of unit vector `e`.
             r_abs + R_abs'*supportPoint_abs_Box(shape, R_abs*e, collisionSmoothingRadius) + e*collisionSmoothingRadius
 #
 @inline supportPoint_Cylinder( shape::Cylinder, r_abs::SVector{3,T}, R_abs::SMatrix{3,3,T,9}, e::SVector{3,T}, collisionSmoothingRadius::T) where {T} =
-            r_abs + R_abs'*supportPoint_abs_Cylinder(shape, R_abs*e) + e*collisionSmoothingRadius
+            r_abs + R_abs'*supportPoint_abs_Cylinder(shape, R_abs*e, collisionSmoothingRadius) + e*collisionSmoothingRadius
 
 @inline supportPoint_Cone(shape::Cone, r_abs::SVector{3,T}, R_abs::SMatrix{3,3,T,9}, e::SVector{3,T}, collisionSmoothingRadius::T) where {T} =
-            r_abs + R_abs'*supportPoint_abs_Cone(shape, R_abs*e) + e*collisionSmoothingRadius
+            r_abs + R_abs'*supportPoint_abs_Cone(shape, R_abs*e, collisionSmoothingRadius) + e*collisionSmoothingRadius
 
 @inline supportPoint_Capsule(shape::Capsule, r_abs::SVector{3,T}, R_abs::SMatrix{3,3,T,9}, e::SVector{3,T}) where {T} =
             r_abs + R_abs'*supportPoint_abs_Capsule(shape, R_abs*e)
 
 @inline supportPoint_Beam(shape::Beam, r_abs::SVector{3,T}, R_abs::SMatrix{3,3,T,9}, e::SVector{3,T}, collisionSmoothingRadius::T) where {T} =
-            r_abs + R_abs'*supportPoint_abs_Beam(shape, R_abs*e) + e*collisionSmoothingRadius
+            r_abs + R_abs'*supportPoint_abs_Beam(shape, R_abs*e, collisionSmoothingRadius) + e*collisionSmoothingRadius
 
 @inline supportPoint_Sphere(shape::Sphere, r_abs::SVector{3,T}, R_abs::SMatrix{3,3,T,9}, e::SVector{3,T}) where {T} =
             r_abs + (shape.diameter/2)*e
@@ -61,21 +61,21 @@ end
 # [Gino v.d. Bergen, p. 135]
 @inline function supportPoint_abs_Box(shape::Box, e_abs::SVector{3,T},  collisionSmoothingRadius::T) where {T}
     @inbounds begin
-        halfLengthX = T(0.5*shape.lengthX)
-        halfLengthY = T(0.5*shape.lengthY)
-        halfLengthZ = T(0.5*shape.lengthZ)
+        halfLengthX = T(0.5*shape.lengthX) - collisionSmoothingRadius
+        halfLengthY = T(0.5*shape.lengthY) - collisionSmoothingRadius
+        halfLengthZ = T(0.5*shape.lengthZ) - collisionSmoothingRadius
         return SVector{3,T}(
-            Basics.sign_eps(e_abs[1])*(halfLengthX-collisionSmoothingRadius),
-            Basics.sign_eps(e_abs[2])*(halfLengthY-collisionSmoothingRadius),
-            Basics.sign_eps(e_abs[3])*(halfLengthZ-collisionSmoothingRadius) )
+            Basics.sign_eps(e_abs[1])*(halfLengthX),
+            Basics.sign_eps(e_abs[2])*(halfLengthY),
+            Basics.sign_eps(e_abs[3])*(halfLengthZ) )
     end
 end
 
 # [Gino v.d. Bergen, p. 136, XenoCollide, p. 168, 169]
-@inline function supportPoint_abs_Cylinder(shape::Cylinder, e_abs::SVector{3,T}) where {T}
+@inline function supportPoint_abs_Cylinder(shape::Cylinder, e_abs::SVector{3,T}, collisionSmoothingRadius::T) where {T}
     @inbounds begin
-        halfLength = T(0.5*shape.length)
-        halfDiameter = T(0.5*shape.diameter)
+        halfLength = T(0.5*shape.length) - collisionSmoothingRadius
+        halfDiameter = T(0.5*shape.diameter) - collisionSmoothingRadius
         if shape.axis == 1
             enorm = norm(SVector(e_abs[2], e_abs[3]))
             if enorm <= Modia3D.nepsType(T)
@@ -118,17 +118,30 @@ end
 
 # for cone: [Gino v.d. Bergen, p. 136]]
 # for frustum of a cone: A. Neumayr, G. Hippmann
-@inline function supportPoint_abs_Cone(shape::Cone, e_abs::SVector{3,T}) where {T}
+@inline function supportPoint_abs_Cone(shape::Cone, e_abs::SVector{3,T}, collisionSmoothingRadius::T) where {T}
     @inbounds begin
-        baseRadius = T(0.5*shape.diameter)
         rightCone = T(shape.topDiameter) == T(0.0)
-        shapeLength = T(shape.length)
+        R = T(0.5*shape.diameter)
+        H = T(shape.length)
+        r = collisionSmoothingRadius
+
+        Rright = (R*H-R*r-r*sqrt(H^2 + R^2))/H
+        Hright = Rright/(R/H)
+
         if rightCone
+            baseRadius  = Rright
+            shapeLength = Hright
             sin_phi = T(baseRadius/sqrt(baseRadius^2 + shapeLength^2))  # sin of base angle
         else
-            topRadius = T(0.5*shape.topDiameter)
-            diffRadius = T(baseRadius - topRadius)
-            sin_phi = T(diffRadius/sqrt(diffRadius^2 + shapeLength^2))  # sin of base angle
+            Rt = T(0.5*shape.topDiameter)
+            Hcone = H - 2*r
+            diffRadius = R - Rt
+            Rcone = diffRadius*Hcone/H
+            topRadius = Rt - Rright + Rcone
+            @assert(topRadius > 0.0)
+            shapeLength = Hcone
+            baseRadius = topRadius + Rcone
+            sin_phi = T(Rcone/sqrt(Rcone^2 + shapeLength^2))  # sin of base angle
         end
         if shape.axis == 1
             value = e_abs[1] / norm(SVector(e_abs[1], e_abs[2], e_abs[3]))
@@ -198,11 +211,11 @@ end
 end
 
 # G. Hippmann: Outer half circles of beam
-@inline function supportPoint_abs_Beam(shape::Beam, e_abs::SVector{3,T}) where {T}
+@inline function supportPoint_abs_Beam(shape::Beam, e_abs::SVector{3,T}, collisionSmoothingRadius::T) where {T}
     @inbounds begin
-        halfLength = T(0.5*shape.length)
-        halfWidth  = T(0.5*shape.width)
-        halfThickness = T(0.5*shape.thickness)
+        halfLength = T(0.5*shape.length) - collisionSmoothingRadius
+        halfWidth  = T(0.5*shape.width) - collisionSmoothingRadius
+        halfThickness = T(0.5*shape.thickness) - collisionSmoothingRadius
         if shape.axis == 1
             enorm = norm(SVector(e_abs[1], e_abs[2]))
             if enorm <= Modia3D.nepsType(T)
@@ -266,16 +279,16 @@ Returns the *Axis Aligned Bounding Box* of solid `shape` in argument `AABB`.
                r_absi + R_absi'*supportPoint_abs_Box(shape, isign*R_absi, collisionSmoothingRadius) + isign*collisionSmoothingRadius
 
 @inline supportPoint_i_Cylinder(shape::Cylinder{F}, r_absi::F, R_absi::SVector{3,F}, isign::Int, collisionSmoothingRadius) where F <: Modia3D.VarFloatType =
-               r_absi + R_absi'*supportPoint_abs_Cylinder(shape, isign*R_absi) + isign*collisionSmoothingRadius
+               r_absi + R_absi'*supportPoint_abs_Cylinder(shape, isign*R_absi, collisionSmoothingRadius) + isign*collisionSmoothingRadius
 
 @inline supportPoint_i_Cone(shape::Cone{F}, r_absi::F, R_absi::SVector{3,F}, isign::Int, collisionSmoothingRadius) where F <: Modia3D.VarFloatType =
-               r_absi + R_absi'*supportPoint_abs_Cone(shape, isign*R_absi) + isign*collisionSmoothingRadius
+               r_absi + R_absi'*supportPoint_abs_Cone(shape, isign*R_absi, collisionSmoothingRadius) + isign*collisionSmoothingRadius
 
 @inline supportPoint_i_Capsule(shape::Capsule{F}, r_absi::F, R_absi::SVector{3,F}, isign::Int) where F <: Modia3D.VarFloatType =
                r_absi + R_absi'*supportPoint_abs_Capsule(shape, isign*R_absi)
 #
 @inline supportPoint_i_Beam(shape::Beam{F}, r_absi::F, R_absi::SVector{3,F}, isign::Int, collisionSmoothingRadius) where F <: Modia3D.VarFloatType =
-               r_absi + R_absi'*supportPoint_abs_Beam(shape, isign*R_absi) + isign*collisionSmoothingRadius
+               r_absi + R_absi'*supportPoint_abs_Beam(shape, isign*R_absi, collisionSmoothingRadius) + isign*collisionSmoothingRadius
 
 @inline supportPoint_i_Ellipsoid(shape::Ellipsoid{F}, r_absi::F, R_absi::SVector{3,F}, isign::Int) where F <: Modia3D.VarFloatType =
                r_absi + dot(R_absi, supportPoint_abs_Ellipsoid(shape, isign*R_absi))
