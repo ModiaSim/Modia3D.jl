@@ -50,6 +50,8 @@ Generate a [Solid](@ref) with physical behavior of a rigid body with mass, visua
 | [Beam](@ref)              | `min(length, width, thickness)/2` |
 | [FileMesh](@ref)          | `shortestEdge` |
 
+For flat shapes, [Box](@ref) and [Beam](@ref), no `contactSphereRadius` is taken.  For Herz' pressure it is needed only if two flat shapes are colliding.
+
 - `visualMaterial`: Defines the material of the solid used for visualization. A pre-defined [Visual material](@ref)
     from palettes/visualMaterials.json (e.g. `"RedTransparent"`) or a user-defined [Visual material](@ref) (e.g.
     `VisualMaterial(color="DeepSkyBlue4", transparency=0.75)`) can be used.
