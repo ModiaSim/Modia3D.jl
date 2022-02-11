@@ -48,7 +48,7 @@ Generate a [Solid](@ref) with physical behavior of a rigid body with mass, visua
 | [Cone](@ref)              | `(diameter + topDiameter)/4` |
 | [Capsule](@ref)           | `diameter/2` |
 | [Beam](@ref)              | `min(length, width, thickness)/2` |
-| [FileMesh](@ref)          | `shortestEdge` |
+| [FileMesh](@ref)          | `shortestEdge/2` |
 
 For flat shapes, [Box](@ref) and [Beam](@ref), no `contactSphereRadius` is taken.  For Herz' pressure it is needed only if two flat shapes are colliding.
 
