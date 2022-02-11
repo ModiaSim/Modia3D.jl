@@ -159,11 +159,8 @@ function responseCalculation(material::ElasticContactPairResponseMaterial, obj1:
     e_t_reg   = v_t/Modia3D.regularize(norm(v_t),vsmall)
     delta     = -s
 
-    if c_geo != 1.0 && n_geo != 1.0
-        delta_comp = delta * sqrt(abs(delta))
-    else
-        delta_comp = delta
-    end
+    delta_comp = delta * sqrt(abs(delta))
+
     #fn = -max(F(0.0), c_res * c_geo * delta_comp * (1 - d_res*delta_dot) )
     fn = -c_res * c_geo * delta_comp * (1 - d_res*delta_dot)
     ft = -mu_k*fn*e_t_reg
