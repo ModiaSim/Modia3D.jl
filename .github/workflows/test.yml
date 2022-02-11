@@ -4,7 +4,10 @@ env:
   JULIA_NUM_THREADS: 4
   
 on:
-  - push
+  pull_request:
+    branches:
+      - main
+
 jobs:
   test:
     name: Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }} - ${{ github.event_name }}

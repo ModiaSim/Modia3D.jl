@@ -6,21 +6,26 @@ appendSymbol(path         , name::Symbol) = :( $path.$name )
 derSymbol(path::Nothing, name::Symbol) = :(der($name))
 derSymbol(path         , name::Symbol) = :(der($path.$name))
 
-"""
-    buildModia3D(model)
+nextMbsName(mbsi,i) = (Symbol("_mbs"*string(i+1)), mbsi, i+1)
 
-Generate the following type of code:
+
+"""
+    buildModia3D(model; method = :ComputeJointForces)
+
+Generate and return the following type of code:
 
 ```
 model | Model(_id = rand(Int),
-              start = Map(_qdd = zeros(1)),
-              mbs_equations = :[
-                 zeros(1) = multibodyResiduals(_id, _leq_mode, instantiatedModel, _qdd, rev.variables)
-                 rev.qdd = _qdd[1]])
+              equations = :[...])
 ```
+
+# Arguments
+
+- `model`: Modia model
+- `method`: Code generation method. Possible values: `:ComputeJointForces`,`:ComputeJointAccelerations`.
 """
-function buildModia3D(model; method::Int=2) 
-    @assert(method>=2 && method <=3)
+function buildModia3D(model; method = :ComputeJointForces)   # :ComputeJointAccelerations, :ComputeJointAccelerationsOn
+    @assert(method == :ComputeJointForces)
     jointInfo = []
     getJointInfo!(model, jointInfo, nothing)
 
@@ -29,30 +34,47 @@ function buildModia3D(model; method::Int=2)
         args = nothing
         error("No joints present ->  so no states")
     end
-    
+
     @show method
-    
+
     #=
                   _mbs1 = Modia3D.initJoints!(_id, instantiatedModel, $ndofTotal, time)
-                  _mbs2 = Modia3D.setJointStates1!(_mbs1, $(jointStates1...))  
-                  
+                  _mbs2a = Modia3D.setJointStates1!(         _mbs1 , $(jointStates1...))
+                  _mbs2b = Modia3D.setJointStates6!(         _mbs2a, $(jointStates6...))
+                  _mbs2c = Modia3D.setJointStates6_isrot123!(_mbs2b, $(jointStates6_isrot123...))
+
        method==2: # f := M(q)*qdd + h(q,qd)
-                  _mbs3 = Modia3D.setJointAccelerations1!(_mbs2, $(jointAcc1...))
-                  $(jointForces1...) = implicitDependency(Modia3D.getJointResiduals_method2!(_mbs3, _leq_mode), $(jointAcc1...))
-      
-       method==3: # qdd := M(q)\(h(q,qd)-f)                          
+                  _mbs3a = Modia3D.setJointAccelerations1!(_mbs2c, $(jointAcc1...))
+                  _mbs3b = Modia3D.setJointAccelerations6!(_mbs2c, $(jointAcc6...))
+                  $(jointForces...) = implicitDependency(Modia3D.getJointResiduals_method2!(_mbs3b, _leq_mode), $(jointAcc1...), $(jointAcc6...))
+
+       method==3: # qdd := M(q)\(h(q,qd)-f)
                   _qdd  = Modia3D.getJointResiduals_method3!(_mbs2, $(jointForces1...))
                   _qdd[1] = ...
-                  _qdd[2] = ...      
-   =#                   
- 
+                  _qdd[2] = ...
+
+
+                         equations = :[_mbs1 = Modia3D.initJoints!(_id, instantiatedModel, $ndofTotal, time)
+                                      _mbs2 = Modia3D.setJointStates1!(_mbs1, $(jointStates1...))
+                                      _mbs3 = Modia3D.setJointAccelerations1!(_mbs2, $(jointAcc1...))
+                                      (dummy,) = implicitDependency(Modia3D.getJointResiduals_method2!(_mbs3, _leq_mode), $(jointAcc1...))
+                                     ]
+                        )
+
+
+   =#
+
     ndofTotal = 0
-    jointStates1     = Expr[]
-    jointForces1     = []
-    zeroJointForces1 = Expr[]
-    jointAcc1        = []
-    zerosTuple       = Expr(:tuple)
-    i = 1
+    jointStates1 = Expr[]
+    jointForces1 = []
+    jointAcc1    = []
+
+    jointStates6 = Expr[]
+    jointForces6 = []
+    jointAcc6    = []
+    jointStates6_isrot123 = Expr[]
+    
+    i=1
     for joint in jointInfo
         path      = joint.path
         jointType = joint.jointType
@@ -66,13 +88,14 @@ function buildModia3D(model; method::Int=2)
             else
                 push!(jointForces1, 0.0 )
             end
-            if method == 3
+            if method == :ComputeJointForces
+                push!(jointAcc1, derSymbol(path, :w))
+            elseif method == :ComputeJointAccelerations
                 der_w = derSymbol(path, :w)
                 push!(jointAcc1, :( $der_w = _qdd[$i]) )
-            else
-                push!(jointAcc1, derSymbol(path, :w))              
-            end    
-            i += 1
+                i += 1
+            end
+
 
         elseif jointType == :Prismatic || jointType == :PrismaticWithFlange
             ndofTotal += 1
@@ -83,55 +106,102 @@ function buildModia3D(model; method::Int=2)
             else
                 push!(jointForces1, :(0.0))
             end
-            if method == 3
+            if method == :ComputeJointForces
+                push!(jointAcc1, derSymbol(path, :v))
+            elseif method == :ComputeJointAccelerations
                 der_v = derSymbol(path, :v)
                 push!(jointAcc1, :( $der_v = _qdd[$i]) )
-            else
-                push!(jointAcc1, derSymbol(path, :v))            
+                i += 1
             end
-            i += 1
+
+        elseif jointType == :FreeMotion
+            ndofTotal += 6
+            push!(jointStates6, appendSymbol(path, :r))
+            push!(jointStates6, appendSymbol(path, :rot))
+            push!(jointStates6, appendSymbol(path, :v))
+            push!(jointStates6, appendSymbol(path, :w))
+            push!(jointStates6_isrot123, appendSymbol(path, :isrot123))
+            push!(jointForces6, :(0.0))
+            push!(jointForces6, :(0.0))
+
+            if method == :ComputeJointForces
+                push!(jointAcc6, derSymbol(path, :v))
+                push!(jointAcc6, derSymbol(path, :w))
+            elseif method == :ComputeJointAccelerations
+                der_v = derSymbol(path, :v)
+                der_w = derSymbol(path, :w)
+                push!(jointAcc6, :( $der_v = _qdd[$i]) )
+                push!(jointAcc6, :( $der_v = _qdd[$i+1]) )
+                i += 2
+            end
 
         else
-            error("Joint type $jointType in submodel with path $path is not known.")
+            error("\nJoint type $jointType in submodel with path $path is not known.")
         end
-        push!(zerosTuple.args, 0)
     end
 
-    if method==2 
+    i=1
+    mbsi = :_mbs1
+    mbs_equations = [ :($mbsi = Modia3D.initJoints!(_id, instantiatedModel, $ndofTotal, time)) ]
+    
+    if length(jointStates1) > 0
+        (mbsi, mbsi_old, i) = nextMbsName(mbsi, i)
+        push!(mbs_equations, :( $mbsi = Modia3D.setJointStates1!($mbsi_old, $(jointStates1...)) ))
+    end
+    if length(jointStates6) > 0
+        (mbsi, mbsi_old, i) = nextMbsName(mbsi, i)
+        push!(mbs_equations, :( $mbsi = Modia3D.setJointStates6!($mbsi_old, $(jointStates6...)) ))
+        (mbsi, mbsi_old, i) = nextMbsName(mbsi, i)
+        push!(mbs_equations, :( $mbsi = Modia3D.setJointStates6_isrot123!($mbsi_old, $(jointStates6_isrot123...)) ))
+    end
+
+
+    if method == :ComputeJointForces
+        if length(jointAcc1) > 0
+            (mbsi, mbsi_old, i) = nextMbsName(mbsi, i)
+            push!(mbs_equations, :( $mbsi = Modia3D.setJointAccelerations1!($mbsi_old, $(jointAcc1...)) ))
+        end
+        if length(jointAcc6) > 0
+            (mbsi, mbsi_old, i) = nextMbsName(mbsi, i)
+            push!(mbs_equations, :( $mbsi = Modia3D.setJointAccelerations6!($mbsi_old, $(jointAcc6...)) ))
+        end
+        #push!(mbs_equations, :( (dummy,) = implicitDependency(Modia3D.getJointResiduals_method2!($mbsi, _leq_mode), $(jointAcc1...), $(jointAcc6...)) ))
+        push!(mbs_equations, :( ($(jointForces1...), $(jointForces6...)) = implicitDependency(Modia3D.getJointResiduals_method2!($mbsi, _leq_mode), $(jointAcc1...), $(jointAcc6...)) ))
+
         mbsCode = Model(_id = rand(Int),
-                        equations = :[_mbs1 = Modia3D.initJoints!(_id, instantiatedModel, $ndofTotal, time)
-                                      _mbs2 = Modia3D.setJointStates1!(_mbs1, $(jointStates1...))  
-                                      _mbs3 = Modia3D.setJointAccelerations1!(_mbs2, $(jointAcc1...))
-                                      (dummy,) = implicitDependency(Modia3D.getJointResiduals_method2!(_mbs3, _leq_mode), $(jointAcc1...))
-                                     ]
-                        )
-                        
+                        equations = :[$(mbs_equations...)])
+
        #forces = mbsCode[:equations].args[4].args[1].args
        #@show forces
        #dump(forces)
-       mbsCode[:equations].args[4].args[1].args = jointForces1
+       #jointForces = :( $(jointForces1...), $(jointForces6...) )
+       # @show jointForces
+       #push!(jointForces, jointForces1)
+       #push!(jointForces, jointForces6)      
+       #mbsCode[:equations].args[length(mbs_equations)].args[1].args = jointForces
        #@show mbsCode
-       
-    elseif method==3 
+
+
+    elseif method == :ComputeJointAccelerations
         mbsCode = Model(_id = rand(Int),
                         _qdd = Var(start = zeros(ndofTotal)),
                         equations = :[_mbs1 = Modia3D.initJoints!(_id, instantiatedModel, $ndofTotal, time)
-                                      _mbs2 = Modia3D.setJointStates1!(_mbs1, $(jointStates1...))                            
+                                      _mbs2 = Modia3D.setJointStates1!(_mbs1, $(jointStates1...))
                                       _qdd = Modia3D.getJointResiduals_method3!(_mbs2, $(jointForces1...))
                                       $(jointAcc1...)
                                      ]
                         )
-                        
+
        #acc = mbsCode[:equations].args[3].args[1].args
        #@show acc
        #dump(acc)
        #mbsCode[:equations].args[3].args[1].args = jointAcc1
        #@show mbsCode
-       
+
     else
         @error "Error should not occur (method = $method)"
     end
-
+    #error("\n!!! Stop to check code generation")
     return mbsCode | model
 end
 
@@ -153,7 +223,7 @@ function getJointInfo!(model, jointInfo, path)::Nothing
         end
     end
 
-    for (key,value) in model # zip(keys(model), model)
+    for (key,value) in model
         if typeof(value) <: OrderedDict
             getJointInfo!(value, jointInfo, appendSymbol(path, key))
         end

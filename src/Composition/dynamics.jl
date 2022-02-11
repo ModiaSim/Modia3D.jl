@@ -1,9 +1,10 @@
 function getJointsAndForceElementsAndObject3DsWithoutParents!(evaluatedParameters,
                                                               object3DWithoutParents::Vector{Object3D{F}},
-                                                              jointObjects::Vector{Object3D{F}},
+                                                              jointObjects1::Vector{Object3D{F}},
+                                                              jointObjects6::Vector{Object3D{F}},
                                                               forceElements::Vector{Modia3D.AbstractForceElement},
                                                               path::String)::Nothing where F <: Modia3D.VarFloatType
-    for (key,value) in evaluatedParameters   # zip(keys(evaluatedParameters), evaluatedParameters)
+    for (key,value) in evaluatedParameters
         #println("$path.$key = $value")
         if typeof(value) <: Object3D
             if value.parent === value
@@ -16,14 +17,17 @@ function getJointsAndForceElementsAndObject3DsWithoutParents!(evaluatedParameter
                 error("\n", value.path, " is an Object3D that has feature=Scene(..) and has a parent (= ", value.parent.path, ")!\n")
             end
 
-        elseif typeof(value) <: Modia3D.AbstractJoint
-            push!(jointObjects, value.obj2)
+        elseif typeof(value) <: Modia3D.Composition.Revolute || typeof(value) <: Modia3D.Composition.Prismatic
+            push!(jointObjects1, value.obj2)
+
+        elseif typeof(value) <: Modia3D.Composition.FreeMotion
+            push!(jointObjects6, value.obj2)
 
         elseif typeof(value) <: Modia3D.AbstractForceElement
             push!(forceElements, value)
 
         elseif typeof(value) <: OrderedDict
-            getJointsAndForceElementsAndObject3DsWithoutParents!(value, object3DWithoutParents, jointObjects, forceElements, path*"."*string(key))
+            getJointsAndForceElementsAndObject3DsWithoutParents!(value, object3DWithoutParents, jointObjects1, jointObjects6, forceElements, path*"."*string(key))
         end
     end
     return nothing
@@ -55,9 +59,10 @@ function checkMultibodySystemAndGetWorldAndJointsAndForceElements(instantiatedMo
     end
 
     object3DWithoutParents = Object3D{F}[]
-    jointObjects = Object3D{F}[]
+    jointObjects1 = Object3D{F}[]
+    jointObjects6 = Object3D{F}[]
     forceElements = Modia3D.AbstractForceElement[]
-    getJointsAndForceElementsAndObject3DsWithoutParents!(mbsRoot, object3DWithoutParents, jointObjects, forceElements, mbsPath)
+    getJointsAndForceElementsAndObject3DsWithoutParents!(mbsRoot, object3DWithoutParents, jointObjects1, jointObjects6, forceElements, mbsPath)
 
     if length(object3DWithoutParents) == 0
         error("\n", multiBodyName(instantiatedModel, mbsPath), ": There is either no Object3D or all of them have a parent!\n",
@@ -70,14 +75,13 @@ function checkMultibodySystemAndGetWorldAndJointsAndForceElements(instantiatedMo
         error("\n", instantiatedModel.modelName, ": The following ", length(object3DWithoutParents), " Object3Ds have no parents and feature=Scene(..)\n",
               "(note, there must be exactly one Object3D that has no parent and feature=Scene(..)):\n", object3DNames, "\n")
     end
-    return (object3DWithoutParents[1], jointObjects, forceElements)
+    return (object3DWithoutParents[1], jointObjects1, jointObjects6, forceElements)
 end
 
 
 
 function initAnalysis2!(world)
     # use Scene(..) of world object
-    Modia3D.Composition.EmptyObject3DFeature
     if typeof(world.feature) <: Modia3D.Composition.Scene
         scene = world.feature
     else
@@ -100,7 +104,7 @@ end
 
 Initialize joints.
 """
-function initJoints!(id::Int, instantiatedModel::ModiaLang.SimulationModel{F,TimeType}, 
+function initJoints!(id::Int, instantiatedModel::ModiaLang.SimulationModel{F,TimeType},
                      nqdd::Int, time)::MultibodyData{F,TimeType} where {F,TimeType}
      TimerOutputs.@timeit instantiatedModel.timer "Modia3D_0 initJoint!" begin
         separateObjects = instantiatedModel.separateObjects  # is emptied for every new simulate! call
@@ -110,29 +114,29 @@ function initJoints!(id::Int, instantiatedModel::ModiaLang.SimulationModel{F,Tim
         else
             # Search in parameters and retrieve the name of the object with the required id
             # Instantiate the Modia3D system
-            (world, jointObjects, forceElements) = checkMultibodySystemAndGetWorldAndJointsAndForceElements(instantiatedModel, id)
+            (world, jointObjects1, jointObjects6, forceElements) = checkMultibodySystemAndGetWorldAndJointsAndForceElements(instantiatedModel, id)
 
             # Initialize force elements
             for force in forceElements
                 initializeForceElement(force)
             end
-            
+
             # Construct MultibodyData
             scene = initAnalysis2!(world)
             residuals = zeros(F,nqdd)
             cache_h   = zeros(F,nqdd)
-            scene.forceElements = forceElements            
+            scene.forceElements = forceElements
             if scene.options.enableContactDetection
                 nz = 2
                 zStartIndex = ModiaLang.addZeroCrossings(instantiatedModel, nz)
-                scene.zStartIndex = zStartIndex                
+                scene.zStartIndex = zStartIndex
             else
                 nz = 0
                 zStartIndex = 0
             end
-            mbs = MultibodyData{F,TimeType}(instantiatedModel, nqdd, world, scene, jointObjects, zStartIndex, nz, residuals, cache_h, time)                     
+            mbs = MultibodyData{F,TimeType}(instantiatedModel, nqdd, world, scene, jointObjects1, jointObjects6, zStartIndex, nz, residuals, cache_h, time)
             separateObjects[id] = mbs
-                                           
+
             if scene.visualize
                 TimerOutputs.@timeit instantiatedModel.timer "Modia3D_0 initializeVisualization" Modia3D.Composition.initializeVisualization(Modia3D.renderer[1], scene.allVisuElements)
                 if instantiatedModel.options.log
@@ -152,49 +156,43 @@ end
 
 """
     getJointResiduals_method2!(mbs, _leq_mode)
-    
+
 Return joint residuals vector computed with buildModia3D(model; method=2).
 It is assumed that setJointAccelerations1!(..) was called before to store the
 joint accelerations in mbs.
 """
 function getJointResiduals_method2!(mbs::MultibodyData{F}, _leq_mode; cacheWithJointForces=false)::Vector{F} where {F}
      TimerOutputs.@timeit mbs.instantiatedModel.timer "Modia3D getJointResiduals_method2!" begin
-        #setJointAcc1!(mbs, args...)
-     
-        scene             = mbs.scene
         instantiatedModel = mbs.instantiatedModel
-        jointObjects1     = mbs.jointObjects1
-        residuals         = mbs.residuals
-        cache_h           = mbs.cache_h
 
         # Compute residuals
         leq_mode::Int = isnothing(_leq_mode) ? -2 : _leq_mode.mode
-       
+
         # Method with improved efficiency
         # println("time = ", mbs.time, ", isTerminal = ", ModiaLang.isTerminal(instantiatedModel), ", leq_mode = ", leq_mode)
-        multibodyResiduals3!(instantiatedModel, scene, mbs.world, mbs.time, instantiatedModel.storeResult,
+        multibodyResiduals3!(instantiatedModel, mbs.scene, mbs.world, mbs.time, instantiatedModel.storeResult,
                              ModiaLang.isTerminal(instantiatedModel) && leq_mode == -2, leq_mode)
 
         # Copy the joint residuals in to the residuals vector
         if leq_mode == -1
-            getJointResiduals_all!(scene, jointObjects1, residuals)
+            getJointResiduals_all!(mbs)
         elseif leq_mode == 0
-            getJointResiduals_leq_mode_0!(scene, jointObjects1, residuals, cache_h, cacheWithJointForces=cacheWithJointForces=false)
+            getJointResiduals_leq_mode_0!(mbs, cacheWithJointForces=false)
         elseif leq_mode > 0
-            getJointResiduals_all!(scene, jointObjects1, residuals)
-            residuals .+= cache_h
+            getJointResiduals_all!(mbs)
+            mbs.residuals .+= mbs.cache_h
         else
-            residuals .= convert(F, 0)
+            mbs.residuals .= convert(F, 0)
         end
     end
-    return residuals
+    return mbs.residuals
 end
 
 
 
 """
     getJointResiduals_method3!(mbs, args...)
-    
+
 Return joint accelerations vector computed with buildModia3D(model; method=3).
 args... are the joint forces of 1D joints
 """
@@ -202,8 +200,8 @@ function getJointResiduals_method3!(mbs::MultibodyData{F}, args::Vararg{F,N})::V
     # Store generalized forces in joints
     scene   = mbs.scene
     objects = mbs.jointObjects1
-    @assert(length(args) == length(objects)) 
-    
+    @assert(length(args) == length(objects))
+
     for (i,obj) in enumerate(objects)
         jointKind = obj.jointKind
 
@@ -219,9 +217,9 @@ function getJointResiduals_method3!(mbs::MultibodyData{F}, args::Vararg{F,N})::V
            error("Bug in Modia3D.getJointResiduals_method3!: jointKind = $jointKind is not allowed")
         end
     end
-    
-    
-    # Solve residual = M(q)*qdd + h(q,qd) - u 
+
+
+    # Solve residual = M(q)*qdd + h(q,qd) - u
     if length(mbs.leq) == 0
         # Allocate memory for the linear equation system
         x_names = String[]
@@ -247,20 +245,20 @@ function getJointResiduals_method3!(mbs::MultibodyData{F}, args::Vararg{F,N})::V
         a = leq.x
         for (i,obj) in enumerate(objects)
             jointKind = obj.jointKind
-        
+
             if jointKind == RevoluteKind
                 revolute   = scene.revolute[obj.jointIndex]
                 revolute.a = a[i]
-        
+
             elseif jointKind == PrismaticKind
                 prismatic   = scene.prismatic[obj.jointIndex]
                 prismatic.a = a[i]
-        
+
             else
                 error("Bug in Modia3D.getJointResiduals_method3!: jointKind = $jointKind is not allowed")
             end
         end
-        
+
         # Compute and copy the residuals
         leq.residuals .= Modia3D.getJointResiduals_method2!(mbs, leq; cacheWithJointForces=true)
     end
@@ -312,7 +310,7 @@ For Modia3D:
                    return res := res + cache_h
 =#
 
-function multibodyResiduals3!(sim::ModiaLang.SimulationModel{F}, scene, world, time, storeResults, isTerminal, leq_mode) where F <: Modia3D.VarFloatType
+function multibodyResiduals3!(sim::ModiaLang.SimulationModel{F}, scene::Modia3D.Composition.Scene{F}, world::Modia3D.Composition.Object3D{F}, time, storeResults, isTerminal, leq_mode) where F <: Modia3D.VarFloatType
     tree            = scene.treeForComputation
     forceElements   = scene.forceElements
     visualize       = scene.visualize   # && sim.model.visualiz

@@ -7,11 +7,12 @@
 
 mutable struct MultibodyData{F <: Modia3D.VarFloatType, TimeType}
     instantiatedModel::ModiaLang.SimulationModel{F,TimeType}
-    
+
     nqdd::Int                           # Length of qdd vector
     world::Object3D{F}                  # Pointer to world object
-    scene::Scene                        # Pointer to scene
+    scene::Scene{F}                     # Pointer to scene
     jointObjects1::Vector{Object3D{F}}  # References to Object3Ds that have a joint with one degree of freedom
+    jointObjects6::Vector{Object3D{F}}  # References to Object3Ds that have a joint with six degree of freedoms
     zStartIndex::Int                    # eventHandler.z[zStartIndex] is first index of crossing function
                                         # (or zero, if enableContactDetection=false)
     nz::Int                             # Number of used zero crossing functions
@@ -19,12 +20,11 @@ mutable struct MultibodyData{F <: Modia3D.VarFloatType, TimeType}
     cache_h::Vector{F}                  # Cached vector: = h(q,qd,gravity,contact-forces)
 
     time::TimeType
-    
+
     # for multibodyAccelerations
     leq::Vector{ModiaBase.LinearEquations{F}}
-    
-    MultibodyData{F,TimeType}(instantiatedModel, nqdd, world, scene, jointObjects1, zStartIndex, nz, residuals, cache_h, time) where {F,TimeType} =
-        new(instantiatedModel, nqdd, world, scene, jointObjects1, zStartIndex, nz, residuals, cache_h, 
+    MultibodyData{F,TimeType}(instantiatedModel, nqdd, world, scene, jointObjects1, jointObjects6, zStartIndex, nz, residuals, cache_h, time) where {F,TimeType} =
+        new(instantiatedModel, nqdd, world, scene, jointObjects1, jointObjects6, zStartIndex, nz, residuals, cache_h,
             Modia3D.convertAndStripUnit(TimeType, u"s", time), ModiaBase.LinearEquations{F}[])
 end
 
@@ -214,21 +214,22 @@ function wfromrot123(rot123::AbstractVector, derrot123::AbstractVector)
 
 end
 
+
 # Next function only for backwards compatibility (do not use for new model)
-computeKinematics!(scene::Scene, joint::Modia3D.AbstractJoint, obj::Object3D, analysis::Modia3D.AnalysisType, time)::Nothing =
-    computeKinematics!(scene, [obj], Float64(time) )
+#computeKinematics!(scene::Scene, joint::Modia3D.AbstractJoint, obj::Object3D, analysis::Modia3D.AnalysisType, time)::Nothing =
+#    computeKinematics!(scene, [obj], Float64(time) )
 
 
 """
-    computeKinematics!(scene::Scene, tree::Vector{Object3D{F}}, time)
+    computeKinematics!(scene::Scene{F}, tree::Vector{Object3D{F}}, time) where F <: Modia3D.VarFloatType
 
 Compute position, velocity, acceleration variables of the Object3Ds that are connected
 in form of a tree. Variable `tree` contains the Object3Ds in a traversal order (e.g. pre-order traversal).
 `tree[1]` is the root object. It is assumed that the kinematic
 variables of tree[1].parent have a meaningful value.
 """
-function computeKinematics!(scene::Scene, tree::Vector{Object3D{F}}, time)::Nothing where F <: Modia3D.VarFloatType
-    for obj in tree
+function computeKinematics!(scene::Scene{F}, tree::Vector{Object3D{F}}, time)::Nothing where F <: Modia3D.VarFloatType
+    @inbounds for obj in tree
         parent    = obj.parent
         jointKind = obj.jointKind
 
@@ -328,8 +329,8 @@ end
 Compute accelerations that are only a function of qdd, but not of q and qd.
 of the Object3Ds that are connected in form of a tree.
 """
-function computeKinematics_for_leq_mode_pos!(scene::Scene, tree::Vector{Object3D{F}}, time)::Nothing where F <: Modia3D.VarFloatType
-    for obj in tree
+function computeKinematics_for_leq_mode_pos!(scene::Scene{F}, tree::Vector{Object3D{F}}, time)::Nothing where F <: Modia3D.VarFloatType
+    @inbounds for obj in tree
         parent    = obj.parent
         jointKind = obj.jointKind
 
@@ -385,8 +386,8 @@ Variable `tree` contains the Object3Ds in a traversal order (e.g. pre-order trav
 It is assumed that all force/torque variables are initialized (e.g. to zero), including
 tree[1].parent.
 """
-function computeForcesTorquesAndResiduals!(scene::Scene, tree::Vector{Object3D{F}}, time)::Nothing where F <: Modia3D.VarFloatType
-    for i = length(tree):-1:1
+function computeForcesTorquesAndResiduals!(scene::Scene{F}, tree::Vector{Object3D{F}}, time)::Nothing where F <: Modia3D.VarFloatType
+    @inbounds for i = length(tree):-1:1
         obj       = tree[i]
         parent    = obj.parent
         jointKind = obj.jointKind
@@ -429,17 +430,17 @@ end
 
 
 """
-    setJointStates1!(mbs, args)
+    setJointStates1!(mbs::MultibodyData{F}, args::Vararg{F,NJOINTS_TIMES_2}) where {F,NJOINTS_TIMES_2}
 
 Copy generalized joint variables (q,qd) with one degree-of-freedom into the corresponding Object3Ds.
 """
-function setJointStates1!(mbs::MultibodyData{F}, args::Vararg{F,NDOF2})::MultibodyData{F} where {F,NDOF2}
+function setJointStates1!(mbs::MultibodyData{F}, args::Vararg{F,NJOINTS_TIMES_2})::MultibodyData{F} where {F,NJOINTS_TIMES_2}
     scene   = mbs.scene
     objects = mbs.jointObjects1
-    @assert(NDOF2 == 2*length(objects))   
+    @assert(NJOINTS_TIMES_2 == 2*length(objects))
     j = 1
-    
-    @inbounds for (i,obj) in enumerate(objects)
+
+    @inbounds for obj in objects
         jointKind = obj.jointKind
 
         if jointKind == RevoluteKind
@@ -455,7 +456,7 @@ function setJointStates1!(mbs::MultibodyData{F}, args::Vararg{F,NDOF2})::Multibo
             j += 2
 
         else
-           error("Bug in Modia3D.setJointStates1!: jointKind = $jointKind is not allowed")
+           error("Bug in Modia3D/src/Composition/joints/joints.jl (setJointState1!): jointKind = $jointKind is not allowed")
         end
     end
     return mbs
@@ -464,16 +465,16 @@ end
 
 
 """
-    setJointAccelerations1(mbs, args...)
-    
-Copy joint accelerations args... of 1 dof joints into mbs
+    setJointAccelerations1!(mbs::MultibodyData{F}, args::Vararg{F,NJOINTS}) where {F,NJOINTS}
+
+Copy joint accelerations args... of 1 dof joints into mbs.
 """
-function setJointAccelerations1!(mbs::MultibodyData{F}, args::Vararg{F,N}) where {F,N}
+function setJointAccelerations1!(mbs::MultibodyData{Float64}, args::Vararg{Float64,NJOINTS}) where {NJOINTS}
     scene   = mbs.scene
     objects = mbs.jointObjects1
-    @assert(length(args) == length(objects)) 
-    
-    for (i,obj) in enumerate(objects)
+    @assert(NJOINTS == length(objects))
+
+    @inbounds for (i,obj) in enumerate(objects)
         jointKind = obj.jointKind
 
         if jointKind == RevoluteKind
@@ -485,7 +486,7 @@ function setJointAccelerations1!(mbs::MultibodyData{F}, args::Vararg{F,N}) where
             prismatic.a = args[i]
 
         else
-           error("Bug in Modia3D.setAccelerations1!: jointKind = $jointKind is not allowed")
+           error("Bug in Modia3D/src/Composition/joints/joints.jl (setJointAccelerations1!): jointKind = $jointKind is not allowed")
         end
     end
     return mbs
@@ -493,72 +494,142 @@ end
 
 
 """
-    getJointResiduals_leq_mode_0!(scene::Scene, objects::Vector{Object3D{F}}, residuals, cache_h; cacheWithJointForces=false)
+    setJointStates6!(mbs::MultibodyData{F}, args::Vararg{SVector{3,F},NJOINTS_TIMES_4}) where {F,NJOINTS_TIMES_4}
 
-Copy specific variables into their objects for leq_mode = 0.
+Copy generalized joint variables (q,qd) with six degrees-of-freedom into the corresponding Object3Ds.
+"""
+function setJointStates6!(mbs::MultibodyData{F}, args::Vararg{SVector{3,F},NJOINTS_TIMES_4})::MultibodyData{F} where {F,NJOINTS_TIMES_4}
+    scene   = mbs.scene
+    objects = mbs.jointObjects6
+    @assert(NJOINTS_TIMES_4 == 4*length(objects))
+    j = 1
+
+    @inbounds for obj in objects
+        jointKind = obj.jointKind
+        freeMotion     = scene.freeMotion[obj.jointIndex]
+        freeMotion.r   = args[j]
+        freeMotion.rot = args[j+1]
+        freeMotion.v   = args[j+2]
+        freeMotion.w   = args[j+3]
+        j += 4
+    end
+    return mbs
+end
+
+
+
+"""
+    setJointStates6_isrot123!(mbs::MultibodyData{F}, args::Vararg{Bool,NJOINTS})
+
+Copy isrot123 of generalized joint variables with six degrees-of-freedom into the corresponding Object3Ds.
+"""
+function setJointStates6_isrot123!(mbs::MultibodyData{F}, args::Vararg{Bool,NJOINTS})::MultibodyData{F} where {F,NJOINTS}
+    scene   = mbs.scene
+    objects = mbs.jointObjects6
+    @assert(NJOINTS == length(objects))
+
+    @inbounds for (i,obj) in enumerate(objects)
+        freeMotion          = scene.freeMotion[obj.jointIndex]
+        freeMotion.isrot123 = args[i]
+    end
+    return mbs
+end
+
+
+
+
+"""
+    setJointAccelerations6!(mbs, args...)
+
+Copy joint accelerations args... of 6 dof joints into mbs
+"""
+function setJointAccelerations6!(mbs::MultibodyData{F}, args::Vararg{SVector{3,F},NJOINTS_TIMES_2}) where {F,NJOINTS_TIMES_2}
+    scene   = mbs.scene
+    objects = mbs.jointObjects6
+    @assert(NJOINTS_TIMES_2 == 2*length(objects))
+    j = 1
+
+    @inbounds for obj in objects
+        freeMotion   = scene.freeMotion[obj.jointIndex]
+        freeMotion.a = args[j]
+        freeMotion.z = args[j+1]
+        j += 2
+    end
+    return mbs
+end
+
+
+
+"""
+    getJointResiduals_leq_mode_0!(mbs::MultibodyData{F}; cacheWithJointForces=false) where F <: Modia3D.VarFloatType
+
+Copy jointObjects residues into mbs.residuals and mbs.cache_h vectors for leq_mode = 0.
 If cacheWithJointForces=true, include generalized joint forces in cache; = false, do not include them in cache.
 """
-function getJointResiduals_leq_mode_0!(scene::Scene{F}, objects::Vector{Object3D{F}}, residuals::Vector{F}, cache_h::Vector{F}; cacheWithJointForces=false)::Nothing where F <: Modia3D.VarFloatType
-    j = 1
-    for (i,obj) in enumerate(objects)
+function getJointResiduals_leq_mode_0!(mbs::MultibodyData{F}; cacheWithJointForces=false)::Nothing where F <: Modia3D.VarFloatType
+    scene     = mbs.scene
+    cache_h   = mbs.cache_h
+    residuals = mbs.residuals
+    empty!(cache_h)
+    empty!(residuals)
+
+    @inbounds for obj in mbs.jointObjects1
         jointKind = obj.jointKind
 
         if jointKind == RevoluteKind
-            revolute     = scene.revolute[obj.jointIndex]
-            cache_h[  j] = cacheWithJointForces ? revolute.residue + revolute.tau : revolute.residue
-            residuals[j] = revolute.residue
-            j += 1
+            revolute = scene.revolute[obj.jointIndex]
+            ModiaBase.appendVariable!(cache_h  , cacheWithJointForces ? revolute.residue + revolute.tau : revolute.residue)
+            ModiaBase.appendVariable!(residuals, revolute.residue)
 
         elseif jointKind == PrismaticKind
-            prismatic    = scene.prismatic[obj.jointIndex]
-            cache_h[  j] = cacheWithJointForces ? prismatic.residue + prismatic.f : prismatic.residue
-            residuals[j] = prismatic.residue
-            j += 1
-
-        elseif jointKind == AbsoluteFreeMotionKind || jointKind == FreeMotionKind
-            freeMotion         = scene.freeMotion[obj.jointIndex]
-            cache_h[  j+0:j+2] = freeMotion.residue_f
-            cache_h[  j+3:j+5] = freeMotion.residue_t
-
-            residuals[j+0:j+2] = freeMotion.residue_f
-            residuals[j+3:j+5] = freeMotion.residue_t
-            j += 6
+            prismatic = scene.prismatic[obj.jointIndex]
+            ModiaBase.appendVariable!(cache_h  , cacheWithJointForces ? prismatic.residue + prismatic.f : prismatic.residue)
+            ModiaBase.appendVariable!(residuals, prismatic.residue)
 
         else
-           error("Bug in Modia3D/src/Composition/joints/joints.jl (getJointResiduals_for_leq_mode_0!): jointKind = $jointKind is not known")
+           error("Bug in Modia3D/src/Composition/joints/joints.jl (getJointResiduals_for_leq_mode_0!): jointKind = $jointKind is not allowed here")
         end
+    end
+
+    @inbounds for obj in mbs.jointObjects6
+        freeMotion = scene.freeMotion[obj.jointIndex]
+        ModiaBase.appendVariable!(cache_h  , freeMotion.residue_f)
+        ModiaBase.appendVariable!(cache_h  , freeMotion.residue_t)
+        ModiaBase.appendVariable!(residuals, freeMotion.residue_f)
+        ModiaBase.appendVariable!(residuals, freeMotion.residue_t)
     end
     return nothing
 end
 
 
 """
-    getJointResiduals_all!(scene::Scene, objects::Vector{Object3D{F}}, residuals)
+    getJointResiduals_all!(mbs::MultibodyData{F}) where F <: Modia3D.VarFloatType
 
-Copy specific variables into their objects
+Copy jointObjects residues into residuals vector.
 """
-function getJointResiduals_all!(scene::Scene, objects::Vector{Object3D{F}}, residuals)::Nothing where F <: Modia3D.VarFloatType
-    j = 1
-    for (i,obj) in enumerate(objects)
+function getJointResiduals_all!(mbs::MultibodyData{F})::Nothing where F <: Modia3D.VarFloatType
+    scene     = mbs.scene
+    residuals = mbs.residuals
+    empty!(residuals)
+
+    @inbounds for obj in mbs.jointObjects1
         jointKind = obj.jointKind
 
         if jointKind == RevoluteKind
-            residuals[j] = scene.revolute[obj.jointIndex].residue
-            j += 1
+            ModiaBase.appendVariable!(residuals, scene.revolute[obj.jointIndex].residue)
 
         elseif jointKind == PrismaticKind
-            residuals[j] = scene.prismatic[obj.jointIndex].residue
-            j += 1
-
-        elseif jointKind == AbsoluteFreeMotionKind || jointKind == FreeMotionKind
-            freeMotion         = scene.freeMotion[obj.jointIndex]
-            residuals[j+0:j+2] = freeMotion.residue_f
-            residuals[j+3:j+5] = freeMotion.residue_t
-            j += 6
+            ModiaBase.appendVariable!(residuals, scene.prismatic[obj.jointIndex].residue)
 
         else
-           error("Bug in Modia3D/src/Composition/joints/joints.jl (getJointResiduals_for_leq_mode_0!): jointKind = $jointKind is not known")
+           error("Bug in Modia3D/src/Composition/joints/joints.jl (getJointResiduals_for_leq_mode_0!): jointKind = $jointKind is not allowed here.")
         end
+    end
+
+    @inbounds for obj in mbs.jointObjects6
+        freeMotion = scene.freeMotion[obj.jointIndex]
+        ModiaBase.appendVariable!(residuals, freeMotion.residue_f)
+        ModiaBase.appendVariable!(residuals, freeMotion.residue_t)
     end
     return nothing
 end
