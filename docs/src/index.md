@@ -48,12 +48,21 @@ Download and install the free DLR SimVis Community Edition, e.g. with [https://v
 
 ## Release Notes
 
+### Version 0.8.1
+
+- `collisionSmoothingRadius`: edges are smoothed with `collisionSmoothingRadius`
+    - its default value is `0.001`, if it is set to `0.0` no smoothing takes place
+    - the edges of Box, Cylinder, Cone, and Beam are smoothened with `collisionSmoothingRadius`
+- For using Herz' pressure `contactSphereRadius` is introduced for each shape
+    - it can be user set
+    - otherwise, it is calculated from shape geometry
+
 ### Version 0.8.0
 
 - Require ModiaLang 0.10.0 (e.g. require DifferentialEquations 7)
-- Support animation export for FloatType = Measurements.XXX (animation is performed for the nominal value).
-- Remove PathPlanning struct und functions (and instead use the functionality from ModiaLang 0.9.1). 
-- Reactivate test model test/old/Test_PathPlanning.jl
+- Support animation export for `FloatType = Measurements.XXX` (animation is performed for the nominal value).
+- Remove PathPlanning struct und functions (and instead use the functionality from ModiaLang 0.9.1).
+- Reactivate test model `test/old/Test_PathPlanning.jl`
 - Remove unused files: .codecov.yml, .travis.yml, appveyor.yml
 - Fix import/using of some tests.
 

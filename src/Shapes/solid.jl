@@ -4,7 +4,8 @@
             massProperties = nothing,
             collision = false,
             contactMaterial = "",
-            collisionSmoothingRadius = 0.0,
+            collisionSmoothingRadius = 0.001,
+            contactSphereRadius = nothing,
             visualMaterial = VisualMaterial())
 
 Generate a [Solid](@ref) with physical behavior of a rigid body with mass, visualization and collision properties.
@@ -35,6 +36,22 @@ Generate a [Solid](@ref) with physical behavior of a rigid body with mass, visua
 
 - `collisionSmoothingRadius`: Defines a collision smoothing radius for surface edges, its default value is `0.001`. It takes the minimum value of your collision smoothing radius and 10% of the smallest shape length, like `min(collisionSmoothingRadius, 0.1 min(shape dimensions))`. If it is set to `0.0` no `collisionSmoothingRadius` is used. A `collisionSmoothingRadius` is used for `Box`, `Cylinder`, `Cone`, and `Beam`.
 
+- `contactSphereRadius`: for each shape a `contactSphereRadius` is defined. So that Herz' pressure is used in [Response calculation](@ref) not only for spheres. You can define your own `contactSphereRadius`, otherwise it is computed from shape geometry (sketched in the following table).
+
+
+| Shape                     | `contactSphereRadius` from shape |
+|:--------------------------|:---------------------------------|
+| [Sphere](@ref)            | `diameter/2` |
+| [Ellipsoid](@ref)         | `min(lengthX, lengthY, lengthZ)/2` |
+| [Box](@ref)               | `min(lengthX, lengthY, lengthZ)/2` |
+| [Cylinder](@ref)          | `min(diameter, length)/2` |
+| [Cone](@ref)              | `(diameter + topDiameter)/4` |
+| [Capsule](@ref)           | `diameter/2` |
+| [Beam](@ref)              | `min(length, width, thickness)/2` |
+| [FileMesh](@ref)          | `shortestEdge/2` |
+
+For flat shapes, [Box](@ref) and [Beam](@ref), no `contactSphereRadius` is taken.  For Herz' pressure it is needed only if two flat shapes are colliding.
+
 - `visualMaterial`: Defines the material of the solid used for visualization. A pre-defined [Visual material](@ref)
     from palettes/visualMaterials.json (e.g. `"RedTransparent"`) or a user-defined [Visual material](@ref) (e.g.
     `VisualMaterial(color="DeepSkyBlue4", transparency=0.75)`) can be used.
@@ -59,6 +76,8 @@ struct Solid{F <: Modia3D.VarFloatType} <: Modia3D.AbstractObject3DFeature
     contactMaterial::Union{String,Modia3D.AbstractContactMaterial,Nothing}
     collisionSmoothingRadius::F
     visualMaterial::Union{Shapes.VisualMaterial,Nothing}
+    isFlat::Bool
+    contactSphereRadius::F
 
     function Solid{F}(;
         shape::Union{Modia3D.AbstractGeometry,Nothing} = nothing,
@@ -68,7 +87,8 @@ struct Solid{F <: Modia3D.VarFloatType} <: Modia3D.AbstractObject3DFeature
         contactMaterial::AbstractString = "",
         collisionSmoothingRadius=F(0.001),
         visualMaterial::Union{Shapes.VisualMaterial,AbstractString,Nothing} = Shapes.VisualMaterial(),
-        visualMaterialConvexDecomposition::Union{Shapes.VisualMaterial,AbstractString,Nothing} = Shapes.VisualMaterial()) where F <: Modia3D.VarFloatType
+        visualMaterialConvexDecomposition::Union{Shapes.VisualMaterial,AbstractString,Nothing} = Shapes.VisualMaterial(),
+        contactSphereRadius::Union{Nothing, F} = nothing) where F <: Modia3D.VarFloatType
 
         if collision && isnothing(shape)
             error("For collision/gripping simulations, a shape must be defined.")
@@ -94,12 +114,13 @@ struct Solid{F <: Modia3D.VarFloatType} <: Modia3D.AbstractObject3DFeature
         end
 
         if typeof(shape) == FileMesh
-            (shape.centroid, shape.longestEdge, shape.objPoints, shape.facesIndizes) = getMeshInfos(shape.filename, shape.scaleFactor)
+            (shape.centroid, shape.shortestEdge, shape.longestEdge, shape.objPoints, shape.facesIndizes) = getMeshInfos(shape.filename, shape.scaleFactor)
             (shape.volume, shape.centroidAlgo, shape.inertia) = computeMassProperties(shape.objPoints, shape.facesIndizes; bodyCoords=false)
         end
 
         massProperties = createMassProperties(F, massProperties, shape, solidMaterial)
-        new(shape, solidMaterial, massProperties, collision, contactMaterial, setCollisionSmoothingRadius(shape, F(collisionSmoothingRadius)), visualMaterial)
+        (isFlat, contactSphereRadius) = setContactSphereRadius(shape, contactSphereRadius, F)
+        new(shape, solidMaterial, massProperties, collision, contactMaterial, setCollisionSmoothingRadius(shape, F(collisionSmoothingRadius)), visualMaterial, isFlat, contactSphereRadius)
     end
 end
 Solid(args...; kwargs...) = Solid{Float64}(args...; kwargs...)
