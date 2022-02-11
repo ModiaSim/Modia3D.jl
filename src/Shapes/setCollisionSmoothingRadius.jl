@@ -38,11 +38,11 @@ setContactSphereRadius(shape::Sphere{F}, contactSphereRadius::Nothing, ::Type{F}
 setContactSphereRadius(shape::Sphere{F}, contactSphereRadius::F, ::Type{F}) where F <: Modia3D.VarFloatType = (false, contactSphereRadius)
 
 
-setContactSphereRadius(shape::Ellipsoid{F}, contactSphereRadius::Nothing, ::Type{F}) where F <: Modia3D.VarFloatType = (false, min(shape.lengthX, shape.lengthY, shape.lengthZ)*F(0.5) )
+setContactSphereRadius(shape::Ellipsoid{F}, contactSphereRadius::Nothing, ::Type{F}) where F <: Modia3D.VarFloatType = (false, F(min(shape.lengthX, shape.lengthY, shape.lengthZ)*0.5) )
 setContactSphereRadius(shape::Ellipsoid{F}, contactSphereRadius::F, ::Type{F}) where F <: Modia3D.VarFloatType = (false, contactSphereRadius )
 
 
-setContactSphereRadius(shape::Cylinder{F}, contactSphereRadius::Nothing, ::Type{F}) where F <: Modia3D.VarFloatType = (false, min(shape.diameter, shape.length)*F(0.5) )
+setContactSphereRadius(shape::Cylinder{F}, contactSphereRadius::Nothing, ::Type{F}) where F <: Modia3D.VarFloatType = (false, F(min(shape.diameter, shape.length)*0.5) )
 setContactSphereRadius(shape::Cylinder{F}, contactSphereRadius::F, ::Type{F}) where F <: Modia3D.VarFloatType = (false, contactSphereRadius )
 
 
@@ -62,5 +62,5 @@ setContactSphereRadius(shape::Beam{F}, contactSphereRadius::Nothing, ::Type{F}) 
 setContactSphereRadius(shape::Beam{F}, contactSphereRadius::F, ::Type{F}) where F <: Modia3D.VarFloatType = (true, contactSphereRadius )
 
 
-setContactSphereRadius(shape::FileMesh, contactSphereRadius::Nothing, ::Type{F}) where F <: Modia3D.VarFloatType = (false, shape.shortestEdge * 0.5 )
+setContactSphereRadius(shape::FileMesh, contactSphereRadius::Nothing, ::Type{F}) where F <: Modia3D.VarFloatType = (false, F(shape.shortestEdge * 0.5) )
 setContactSphereRadius(shape::FileMesh, contactSphereRadius::F, ::Type{F}) where F <: Modia3D.VarFloatType = (false, contactSphereRadius )
