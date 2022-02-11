@@ -4,7 +4,8 @@
             massProperties = nothing,
             collision = false,
             contactMaterial = "",
-            collisionSmoothingRadius = 0.0,
+            collisionSmoothingRadius = 0.001,
+            contactSphereRadius = nothing,
             visualMaterial = VisualMaterial())
 
 Generate a [Solid](@ref) with physical behavior of a rigid body with mass, visualization and collision properties.
@@ -34,6 +35,20 @@ Generate a [Solid](@ref) with physical behavior of a rigid body with mass, visua
     palettes/contactPairMaterials.json can be used.
 
 - `collisionSmoothingRadius`: Defines a collision smoothing radius for surface edges, its default value is `0.001`. It takes the minimum value of your collision smoothing radius and 10% of the smallest shape length, like `min(collisionSmoothingRadius, 0.1 min(shape dimensions))`. If it is set to `0.0` no `collisionSmoothingRadius` is used. A `collisionSmoothingRadius` is used for `Box`, `Cylinder`, `Cone`, and `Beam`.
+
+- `contactSphereRadius`: for each shape a `contactSphereRadius` is defined. So that Herz' pressure is used in [Response calculation](@ref) not only for spheres. You can define your own `contactSphereRadius`, otherwise it is computed from shape geometry (sketched in the following table).
+
+
+| Shape                     | `contactSphereRadius` from shape |
+|:--------------------------|:---------------------------------|
+| [Sphere](@ref)            | `diameter/2` |
+| [Ellipsoid](@ref)         | `min(lengthX, lengthY, lengthZ)/2` |
+| [Box](@ref)               | `min(lengthX, lengthY, lengthZ)/2` |
+| [Cylinder](@ref)          | `min(diameter, length)/2` |
+| [Cone](@ref)              | `(diameter + topDiameter)/4` |
+| [Capsule](@ref)           | `diameter/2` |
+| [Beam](@ref)              | `min(length, width, thickness)/2` |
+| [FileMesh](@ref)          | `shortestEdge` |
 
 - `visualMaterial`: Defines the material of the solid used for visualization. A pre-defined [Visual material](@ref)
     from palettes/visualMaterials.json (e.g. `"RedTransparent"`) or a user-defined [Visual material](@ref) (e.g.
