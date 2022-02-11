@@ -40,14 +40,14 @@ function elasticContactPairCoefficients(obj1::Object3D, obj2::Object3D)
     solid1::Shapes.Solid = obj1.feature
     solid2::Shapes.Solid = obj2.feature
 
-    if (solid1.isFlat && solid2.isFlat) || (!solid1.isFlat && !solid2.isFlat)
-        r1 = solid1.contactSphereRadius
-        r2 = solid2.contactSphereRadius
-        mu_r_geo = r1*r2/(r1 + r2)
-    elseif !solid1.isFlat && solid2.isFlat
+    if !solid1.isFlat && solid2.isFlat
         mu_r_geo = solid1.contactSphereRadius
     elseif solid1.isFlat && !solid2.isFlat
         mu_r_geo = solid2.contactSphereRadius
+    else # (solid1.isFlat && solid2.isFlat) || (!solid1.isFlat && !solid2.isFlat)
+        r1 = solid1.contactSphereRadius
+        r2 = solid2.contactSphereRadius
+        mu_r_geo = r1*r2/(r1 + r2)
     end
 
     n_geo = 1.5
