@@ -1,4 +1,4 @@
-module BouncingConesSimulation
+module BouncingFrustumsSimulation
 
 using Modia3D
 
@@ -7,7 +7,7 @@ vmatGreen = VisualMaterial(color="Green")
 vmatBlue  = VisualMaterial(color="Blue")
 vmatGrey  = VisualMaterial(color="Grey", transparency=0.5)
 
-BouncingCones = Model(
+BouncingFrustums = Model(
     boxHeigth = 0.1,
     gravField = UniformGravityField(g=9.81, n=[0, 0, -1]),
     world = Object3D(feature=Scene(gravityField=:gravField,
@@ -15,8 +15,7 @@ BouncingCones = Model(
                                    defaultFrameLength=0.2,
                                    visualizeBoundingBox = true,
                                    enableContactDetection=true,
-                                   visualizeContactPoints=false,
-                                   animationFile="BouncingCones.json")),
+                                   visualizeContactPoints=false)),
     worldFrame = Object3D(parent=:world, feature=Visual(shape=CoordinateSystem(length=0.5))),
     ground = Object3D(parent=:world,
                       translation=:[0.0, 0.0, -boxHeigth/2],
@@ -28,7 +27,7 @@ BouncingCones = Model(
                       translation=:[-1.0, -0.5, 1.0],
                       rotation=:[-90*u"°", 0.0, -90*u"°"],
                       feature=Visual(shape=CoordinateSystem(length=0.5))),
-    coneX = Object3D(feature=Solid(shape=Cone(axis=1, diameter=0.4, length=1.0),
+    coneX = Object3D(feature=Solid(shape=Cone(axis=1, diameter=0.4, length=1.0, topDiameter=0.3),
                                    visualMaterial=vmatRed,
                                    solidMaterial="DryWood",
                                    collision=true)),
@@ -40,7 +39,7 @@ BouncingCones = Model(
                       translation=:[0.0, -0.5, 1.0],
                       rotation=:[90*u"°", 90*u"°", 0.0],
                       feature=Visual(shape=CoordinateSystem(length=0.5))),
-    coneY = Object3D(feature=Solid(shape=Cone(axis=2, diameter=0.4, length=1.0),
+    coneY = Object3D(feature=Solid(shape=Cone(axis=2, diameter=0.4, length=1.0, topDiameter=0.3),
                                    visualMaterial=vmatGreen,
                                    solidMaterial="DryWood",
                                    collision=true)),
@@ -51,7 +50,7 @@ BouncingCones = Model(
     frameZ = Object3D(parent=:world,
                       translation=:[1.0, -0.5, 1.0],
                       feature=Visual(shape=CoordinateSystem(length=0.5))),
-    coneZ = Object3D(feature=Solid(shape=Cone(axis=3, diameter=0.4, length=1.0),
+    coneZ = Object3D(feature=Solid(shape=Cone(axis=3, diameter=0.4, length=1.0, topDiameter=0.3),
                                    visualMaterial=vmatBlue,
                                    solidMaterial="DryWood",
                                    collision=true)),
@@ -61,15 +60,15 @@ BouncingCones = Model(
                         v=Var(init=[1.0, 0.0, 0.0]))
 )
 
-bouncingCones = @instantiateModel(buildModia3D(BouncingCones), unitless=true, log=false, logStateSelection=false, logCode=false)
+bouncingFrustums = @instantiateModel(buildModia3D(BouncingFrustums), unitless=true, log=false, logStateSelection=false, logCode=false)
 
 stopTime = 1.2
 tolerance = 1e-8
-requiredFinalStates = [-0.7999312016374764, 1.0550588860480428, 0.8921254770510955, -0.1896960061863984, 0.8841404598824826, 0.43402607612744604, 1.3606906655246873, 1.1282714887339953, 2.052883317050297, 4.6497266384364115, 0.052126888408507835, 1.009893100393836, 0.8916594826499894, -0.8000400934802586, 1.0551915122440447, 0.43363393980540194, -0.19001673923281473, 0.8846394848571297, 2.735874415024229, -0.2906589834171084, -1.476919610003813, 1.010451091809992, 4.65340945904709, 0.051874592801066474, 1.0551437465113622, 0.8923792400352838, -0.8001536268911364, 0.8848687234167343, 0.4342006445471319, -0.19173561019070964, -1.7767415342672759, -0.2277632915908899, 2.6985438395240826, 0.05325010071392679, 1.012579595034664, 4.656827261542965]
-simulate!(bouncingCones, stopTime=stopTime, tolerance=tolerance, log=true, logStates=false, logEvents=false, requiredFinalStates=requiredFinalStates)
+requiredFinalStates = missing
+simulate!(bouncingFrustums, stopTime=stopTime, tolerance=tolerance, log=true, logStates=false, logEvents=false, requiredFinalStates=requiredFinalStates)
 
 @usingModiaPlot
-plot(bouncingCones, [("jointX.r", "jointY.r", "jointZ.r") ("jointX.rot", "jointY.rot", "jointZ.rot")
-                     ("jointX.v", "jointY.v", "jointZ.v") ("jointX.w", "jointY.w", "jointZ.w")], figure=1)
+plot(bouncingFrustums, [("jointX.r", "jointY.r", "jointZ.r") ("jointX.rot", "jointY.rot", "jointZ.rot")
+                        ("jointX.v", "jointY.v", "jointZ.v") ("jointX.w", "jointY.w", "jointZ.w")], figure=1)
 
 end
