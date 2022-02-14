@@ -120,90 +120,94 @@ end
 # for frustum of a cone: A. Neumayr, G. Hippmann
 @inline function supportPoint_abs_Cone(shape::Cone, e_abs::SVector{3,T}, collisionSmoothingRadius::T) where {T}
     @inbounds begin
+        baseRadius = T(0.5*shape.diameter)
+        shapeLength = T(shape.length)
         rightCone = T(shape.topDiameter) == T(0.0)
-        R = T(0.5*shape.diameter)
-        H = T(shape.length)
-        r = collisionSmoothingRadius
-
-        Rright = (R*H-R*r-r*sqrt(H^2 + R^2))/H
-        Hright = Rright/(R/H)
-
         if rightCone
-            baseRadius  = Rright
-            shapeLength = Hright
-            sin_phi = T(baseRadius/sqrt(baseRadius^2 + shapeLength^2))  # sin of base angle
+            slantHeight = T(sqrt(baseRadius^2 + shapeLength^2))
+            sin_phi = T(baseRadius/slantHeight)  # sin of base angle
         else
-            Rt = T(0.5*shape.topDiameter)
-            Hcone = H - 2*r
-            diffRadius = R - Rt
-            Rcone = diffRadius*Hcone/H
-            topRadius = Rt - Rright + Rcone
-            @assert(topRadius > 0.0)
-            shapeLength = Hcone
-            baseRadius = topRadius + Rcone
-            sin_phi = T(Rcone/sqrt(Rcone^2 + shapeLength^2))  # sin of base angle
+            topRadius = T(0.5*shape.topDiameter)
+            diffRadius = T(baseRadius - topRadius)
+            slantHeight = T(sqrt(diffRadius^2 + shapeLength^2))
+            sin_phi = T(diffRadius/slantHeight)  # sin of base angle
         end
         if shape.axis == 1
             value = e_abs[1] / norm(SVector(e_abs[1], e_abs[2], e_abs[3]))
             if value >= sin_phi
                 if rightCone
-                    return SVector(shapeLength, 0.0, 0.0)  # apex is support point
+                    hPos = T(shapeLength - collisionSmoothingRadius*slantHeight/baseRadius)  # shapeLength - r/sin(phi)
+                    return SVector(hPos, 0.0, 0.0)  # apex is support point
                 else  # frustum of a cone
+                    hPos = T(shapeLength - collisionSmoothingRadius)
                     enorm = norm(SVector(e_abs[2], e_abs[3]))
                     if enorm > Modia3D.nepsType(T)
-                        return SVector(shapeLength, 0.0, 0.0) + SVector(0.0, topRadius*e_abs[2], topRadius*e_abs[3]) / enorm  # point on top circle is support point
+                        topRadius = T(topRadius - collisionSmoothingRadius*(slantHeight - baseRadius)/shapeLength)  # topRadius - r*(1/cos(phi) - tan(phi))
+                        return SVector(hPos, 0.0, 0.0) + SVector(0.0, topRadius*e_abs[2], topRadius*e_abs[3]) / enorm  # point on top circle is support point
                     else
-                        return SVector(shapeLength, 0.0, 0.0)  # top circle center is support point
+                        return SVector(hPos, 0.0, 0.0)  # top circle center is support point
                     end
                 end
             else
+                hPos = collisionSmoothingRadius
                 enorm = norm(SVector(e_abs[2], e_abs[3]))
                 if enorm > Modia3D.nepsType(T)
-                    return SVector(0.0, baseRadius*e_abs[2], baseRadius*e_abs[3]) / enorm  # point on base circle is support point
+                    baseRadius = T(baseRadius - collisionSmoothingRadius*(slantHeight + baseRadius)/shapeLength)  # topRadius - r*(1/cos(phi) + tan(phi))
+                    return SVector(hPos, baseRadius*e_abs[2], baseRadius*e_abs[3]) / enorm  # point on base circle is support point
                 else
-                    return SVector{3,T}(0.0, 0.0, 0.0)  # base circle center is support point
+                    return SVector{3,T}(hPos, 0.0, 0.0)  # base circle center is support point
                 end
             end
         elseif shape.axis == 2
             value = e_abs[2] / norm(SVector(e_abs[1], e_abs[2], e_abs[3]))
             if value >= sin_phi
                 if rightCone
-                    return SVector(0.0, shapeLength, 0.0)  # apex is support point
+                    hPos = T(shapeLength - collisionSmoothingRadius*slantHeight/baseRadius)  # shapeLength - r/sin(phi)
+                    return SVector(0.0, hPos, 0.0)  # apex is support point
                 else  # frustum of a cone
+                    hPos = T(shapeLength - collisionSmoothingRadius)
                     enorm = norm(SVector(e_abs[3], e_abs[1]))
                     if enorm > Modia3D.nepsType(T)
-                        return SVector(0.0, shapeLength, 0.0) + SVector(topRadius*e_abs[1], 0.0, topRadius*e_abs[3]) / enorm  # point on top circle is support point
+                        topRadius = T(topRadius - collisionSmoothingRadius*(slantHeight - baseRadius)/shapeLength)  # topRadius - r*(1/cos(phi) - tan(phi))
+                        return SVector(0.0, hPos, 0.0) + SVector(topRadius*e_abs[1], 0.0, topRadius*e_abs[3]) / enorm  # point on top circle is support point
                     else
-                        return SVector(0.0, shapeLength, 0.0)  # top circle center is support point
+                        return SVector(0.0, hPos, 0.0)  # top circle center is support point
                     end
                 end
             else
+                hPos = collisionSmoothingRadius
                 enorm = norm(SVector(e_abs[3], e_abs[1]))
                 if enorm > Modia3D.nepsType(T)
-                    return SVector(baseRadius*e_abs[1], 0.0, baseRadius*e_abs[3]) / enorm  # point on base circle is support point
+                    baseRadius = T(baseRadius - collisionSmoothingRadius*(slantHeight + baseRadius)/shapeLength)  # topRadius - r*(1/cos(phi) + tan(phi))
+                    return SVector(baseRadius*e_abs[1], hPos, baseRadius*e_abs[3]) / enorm  # point on base circle is support point
                 else
-                    return SVector{3,T}(0.0, 0.0, 0.0)  # base circle center is support point
+                    return SVector{3,T}(0.0, hPos, 0.0)  # base circle center is support point
                 end
             end
         else
             value = e_abs[3] / norm(SVector(e_abs[1], e_abs[2], e_abs[3]))
             if value >= sin_phi
                 if rightCone
-                    return SVector(0.0, 0.0, shapeLength)  # apex is support point
+                    hPos = T(shapeLength - collisionSmoothingRadius*slantHeight/baseRadius)  # shapeLength - r/sin(phi)
+                    return SVector(0.0, 0.0, hPos)  # apex is support point
                 else  # frustum of a cone
+                    hPos = T(shapeLength - collisionSmoothingRadius)
                     enorm = norm(SVector(e_abs[1], e_abs[2]))
                     if enorm > Modia3D.nepsType(T)
-                        return SVector(0.0, 0.0, shapeLength) + SVector(topRadius*e_abs[1], topRadius*e_abs[2], 0.0) / enorm  # point on top circle is support point
+                        topRadius = T(topRadius - collisionSmoothingRadius*(slantHeight - baseRadius)/shapeLength)  # topRadius - r*(1/cos(phi) - tan(phi))
+                        return SVector(0.0, 0.0, hPos) + SVector(topRadius*e_abs[1], topRadius*e_abs[2], 0.0) / enorm  # point on top circle is support point
                     else
-                        return SVector(0.0, 0.0, shapeLength)  # top circle center is support point
+                        return SVector(0.0, 0.0, hPos)  # top circle center is support point
                     end
                 end
             else
+                hPos = collisionSmoothingRadius
                 enorm = norm(SVector(e_abs[1], e_abs[2]))
                 if enorm > Modia3D.nepsType(T)
-                    return SVector(baseRadius*e_abs[1], baseRadius*e_abs[2], 0.0) / enorm  # point on base circle is support point
+                    baseRadius = T(baseRadius - collisionSmoothingRadius*(slantHeight + baseRadius)/shapeLength)  # topRadius - r*(1/cos(phi) + tan(phi))
+                    return SVector(baseRadius*e_abs[1], baseRadius*e_abs[2], hPos) / enorm  # point on base circle is support point
                 else
-                    return SVector{3,T}(0.0, 0.0, 0.0)  # base circle center is support point
+                    return SVector{3,T}(0.0, 0.0, hPos)  # base circle center is support point
                 end
             end
         end

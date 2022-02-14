@@ -38,12 +38,12 @@ Test.@testset "Robot" begin
     include(joinpath("Robot", "ServoWithRampAndRevolute.jl"))
     include(joinpath("Robot", "ServoWithPathAndRevolute.jl"))
     if testsExtend >= normalTests
-        Test.@test_skip include(joinpath("Robot", "YouBotWithSphere.jl"))
+        Test.@test_skip include(joinpath("Robot", "YouBotWithSphere.jl"))  # works on Linux
         include(joinpath("Robot", "YouBotGripping.jl"))
     end
     if testsExtend == completeTests
         include(joinpath("Robot", "YouBotPingPong.jl"))  # long computation time
-        Test.@test_skip include(joinpath("Robot", "YouBotsGripping.jl"))  # long computation time
+        Test.@test_skip include(joinpath("Robot", "YouBotsGripping.jl"))  # long computation time  error on Linux: [CVODES ERROR]  CVode At t = 3.24097 and h = 3.25115e-08, the error test failed repeatedly or with |h| = hmin.
     end
 end
 
@@ -53,14 +53,15 @@ Test.@testset "Collision" begin
     include(joinpath("Collision", "BouncingEllipsoid.jl"))
     include(joinpath("Collision", "BouncingEllipsoidOnSphere.jl"))
     include(joinpath("Collision", "TwoCollidingBalls.jl"))
-    Test.@test_skip include(joinpath("Collision", "TwoCollidingBoxes.jl"))
+    Test.@test_skip include(joinpath("Collision", "TwoCollidingBoxes.jl"))  # works on Linux
     include(joinpath("Collision", "CollidingCylinders.jl"))
     include(joinpath("Collision", "NewtonsCradle.jl"))
     Test.@test_throws LoadError include(joinpath("Collision", "InValidCollisionPairingError.jl"))  # test for undefined collision pair material
     if testsExtend >= normalTests
         include(joinpath("Collision", "BouncingSphere2.jl"))  # use solver QBDF, Tsit5 with stopTime=2.5s; requiredFinalStates=[0.0, 0.0]
         include(joinpath("Collision", "ZeroCrossingIssue.jl"))
-        Test.@test_skip include(joinpath("Collision", "BouncingCones.jl")) # troubles with smoothingSphereRadius
+        include(joinpath("Collision", "BouncingCones.jl"))
+        include(joinpath("Collision", "BouncingFrustums.jl"))
         include(joinpath("Collision", "BouncingCapsules.jl"))
         include(joinpath("Collision", "BouncingBeams.jl"))
         include(joinpath("Collision", "CollidingSphereWithBunnies.jl"))
