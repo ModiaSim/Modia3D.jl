@@ -60,6 +60,7 @@ Test.@testset "Collision" begin
     if testsExtend >= normalTests
         include(joinpath("Collision", "BouncingSphere2.jl"))  # use solver QBDF, Tsit5 with stopTime=2.5s; requiredFinalStates=[0.0, 0.0]
         include(joinpath("Collision", "ZeroCrossingIssue.jl"))
+        include(joinpath("Collision", "Rattleback.jl"))
         include(joinpath("Collision", "BouncingCones.jl"))
         include(joinpath("Collision", "BouncingFrustums.jl"))
         include(joinpath("Collision", "BouncingCapsules.jl"))
