@@ -1,7 +1,8 @@
 function getJointsAndForceElementsAndObject3DsWithoutParents!(evaluatedParameters,
                                                               object3DWithoutParents::Vector{Object3D{F}},
-                                                              jointObjects1::Vector{Object3D{F}},
-                                                              jointObjects6::Vector{Object3D{F}},
+                                                              revoluteObjects::Vector{Object3D{F}},
+                                                              prismaticObjects::Vector{Object3D{F}},                                                              
+                                                              freeMotionObjects::Vector{Object3D{F}},
                                                               forceElements::Vector{Modia3D.AbstractForceElement},
                                                               path::String)::Nothing where F <: Modia3D.VarFloatType
     for (key,value) in evaluatedParameters
@@ -17,17 +18,21 @@ function getJointsAndForceElementsAndObject3DsWithoutParents!(evaluatedParameter
                 error("\n", value.path, " is an Object3D that has feature=Scene(..) and has a parent (= ", value.parent.path, ")!\n")
             end
 
-        elseif typeof(value) <: Modia3D.Composition.Revolute || typeof(value) <: Modia3D.Composition.Prismatic
-            push!(jointObjects1, value.obj2)
+        elseif typeof(value) <: Modia3D.Composition.Revolute 
+            push!(revoluteObjects, value.obj2)
+            
+        elseif typeof(value) <: Modia3D.Composition.Prismatic
+            push!(prismaticObjects, value.obj2)
 
         elseif typeof(value) <: Modia3D.Composition.FreeMotion
-            push!(jointObjects6, value.obj2)
+            push!(freeMotionObjects, value.obj2)
 
         elseif typeof(value) <: Modia3D.AbstractForceElement
             push!(forceElements, value)
 
         elseif typeof(value) <: OrderedDict
-            getJointsAndForceElementsAndObject3DsWithoutParents!(value, object3DWithoutParents, jointObjects1, jointObjects6, forceElements, path*"."*string(key))
+            getJointsAndForceElementsAndObject3DsWithoutParents!(value, object3DWithoutParents, revoluteObjects, prismaticObjects, 
+                                                                 freeMotionObjects, forceElements, path*"."*string(key))
         end
     end
     return nothing
@@ -57,12 +62,14 @@ function checkMultibodySystemAndGetWorldAndJointsAndForceElements(instantiatedMo
     if isnothing(mbsRoot)
         error("\n", instantiatedModel.modelName, ": did not find _id = ", id, " in the evaluated parameters!")
     end
-
+                                                                 
     object3DWithoutParents = Object3D{F}[]
-    jointObjects1 = Object3D{F}[]
-    jointObjects6 = Object3D{F}[]
-    forceElements = Modia3D.AbstractForceElement[]
-    getJointsAndForceElementsAndObject3DsWithoutParents!(mbsRoot, object3DWithoutParents, jointObjects1, jointObjects6, forceElements, mbsPath)
+    revoluteObjects   = Object3D{F}[]
+    prismaticObjects  = Object3D{F}[]
+    freeMotionObjects = Object3D{F}[]
+    forceElements     = Modia3D.AbstractForceElement[]
+    getJointsAndForceElementsAndObject3DsWithoutParents!(mbsRoot, object3DWithoutParents, revoluteObjects, prismaticObjects, 
+                                                                 freeMotionObjects, forceElements, mbsPath)
 
     if length(object3DWithoutParents) == 0
         error("\n", multiBodyName(instantiatedModel, mbsPath), ": There is either no Object3D or all of them have a parent!\n",
@@ -75,7 +82,7 @@ function checkMultibodySystemAndGetWorldAndJointsAndForceElements(instantiatedMo
         error("\n", instantiatedModel.modelName, ": The following ", length(object3DWithoutParents), " Object3Ds have no parents and feature=Scene(..)\n",
               "(note, there must be exactly one Object3D that has no parent and feature=Scene(..)):\n", object3DNames, "\n")
     end
-    return (object3DWithoutParents[1], jointObjects1, jointObjects6, forceElements)
+    return (object3DWithoutParents[1], revoluteObjects, prismaticObjects, freeMotionObjects, forceElements)
 end
 
 
@@ -114,7 +121,7 @@ function initJoints!(id::Int, instantiatedModel::ModiaLang.SimulationModel{F,Tim
         else
             # Search in parameters and retrieve the name of the object with the required id
             # Instantiate the Modia3D system
-            (world, jointObjects1, jointObjects6, forceElements) = checkMultibodySystemAndGetWorldAndJointsAndForceElements(instantiatedModel, id)
+            (world, revoluteObjects, prismaticObjects, freeMotionObjects, forceElements) = checkMultibodySystemAndGetWorldAndJointsAndForceElements(instantiatedModel, id)
 
             # Initialize force elements
             for force in forceElements
@@ -123,8 +130,6 @@ function initJoints!(id::Int, instantiatedModel::ModiaLang.SimulationModel{F,Tim
 
             # Construct MultibodyData
             scene = initAnalysis2!(world)
-            residuals = zeros(F,nqdd)
-            cache_h   = zeros(F,nqdd)
             scene.forceElements = forceElements
             if scene.options.enableContactDetection
                 nz = 2
@@ -134,7 +139,7 @@ function initJoints!(id::Int, instantiatedModel::ModiaLang.SimulationModel{F,Tim
                 nz = 0
                 zStartIndex = 0
             end
-            mbs = MultibodyData{F,TimeType}(instantiatedModel, nqdd, world, scene, jointObjects1, jointObjects6, zStartIndex, nz, residuals, cache_h, time)
+            mbs = MultibodyData{F,TimeType}(instantiatedModel, nqdd, world, scene, revoluteObjects, prismaticObjects, freeMotionObjects, zStartIndex, nz, time)
             separateObjects[id] = mbs
 
             if scene.visualize
@@ -153,43 +158,7 @@ function initJoints!(id::Int, instantiatedModel::ModiaLang.SimulationModel{F,Tim
 end
 
 
-
-"""
-    getJointResiduals_method2!(mbs, _leq_mode)
-
-Return joint residuals vector computed with buildModia3D(model; method=2).
-It is assumed that setJointAccelerations1!(..) was called before to store the
-joint accelerations in mbs.
-"""
-function getJointResiduals_method2!(mbs::MultibodyData{F}, _leq_mode; cacheWithJointForces=false)::Vector{F} where {F}
-     TimerOutputs.@timeit mbs.instantiatedModel.timer "Modia3D getJointResiduals_method2!" begin
-        instantiatedModel = mbs.instantiatedModel
-
-        # Compute residuals
-        leq_mode::Int = isnothing(_leq_mode) ? -2 : _leq_mode.mode
-
-        # Method with improved efficiency
-        # println("time = ", mbs.time, ", isTerminal = ", ModiaLang.isTerminal(instantiatedModel), ", leq_mode = ", leq_mode)
-        multibodyResiduals3!(instantiatedModel, mbs.scene, mbs.world, mbs.time, instantiatedModel.storeResult,
-                             ModiaLang.isTerminal(instantiatedModel) && leq_mode == -2, leq_mode)
-
-        # Copy the joint residuals in to the residuals vector
-        if leq_mode == -1
-            getJointResiduals_all!(mbs)
-        elseif leq_mode == 0
-            getJointResiduals_leq_mode_0!(mbs, cacheWithJointForces=false)
-        elseif leq_mode > 0
-            getJointResiduals_all!(mbs)
-            mbs.residuals .+= mbs.cache_h
-        else
-            mbs.residuals .= convert(F, 0)
-        end
-    end
-    return mbs.residuals
-end
-
-
-
+#=
 """
     getJointResiduals_method3!(mbs, args...)
 
@@ -266,201 +235,250 @@ function getJointResiduals_method3!(mbs::MultibodyData{F}, args::Vararg{F,N})::V
     # Return the joint accelerations
     return leq.x
 end
-
-
-
-
-#= Efficiency improvement, by computing only terms that are needed in the respective phase
-   of ModiaBase/src/EquationAndStateInfo.jl - Base.iterate(iterator::LinearEquationsIterator, ...)
-
- nf: Number of degrees of freedom
-  q: Generalized joint coordinates of the tree joints
-  u: Generalized joint forces of the tree joints
-res: Residuals
-e_i: i-th unit vector of length(q)
-
-qd  = der(q)
-qdd = der(qd)
-res = M(q)*qdd + h(q,qd,gravity,contact forces) - u(q,qd,qdd)
-
-multibodyResidual(..., qdd, ...) is called inside the LinearEquationsIterator to solve a linear equation system:
-
-    res := A*x - b
-
-that is called in the following way:
-
-    leq_mode = 0        : Return "res := -b"        or "res :=            h(q,qd,gravity,contact forces) - u(q,qd,qdd=0)"
-    leq_mode = i (1..nf): Return "res := A*e_i - b" or "res := M(q)*e_i + h(q,qd,gravity,contact forces) - u(q,qd,qdd=e_i)"
-    leq_mode = -1       : Return "res := A*x - b"   or "res := 0.0"   # since residual is not used, it need not be computed.
-
-For Modia3D:
-    cache_h = h(q,qd,gravity,contact forces)
-
-    leq_mode =  0: Compute only terms that depend on q, qd, gravity and contact forces.
-                   All position and velocity terms, such as Rrel and Rabs are computed
-                   and stored in Object3D.
-                   res := h(q,qd,gravity) - u(q,qd,qdd)   # qdd = 0
-                   cache_h := res + u
-                   return res
-
-    leq_mode =  i: res := M(q)*qdd - u(q,qd,qdd)         # qdd = e_i
-                   return res := res + cache_h
-
-    leq_mode = -1: res := M(q)*qdd - u(q,qd,qdd)         # qdd = A\b
-                   return res := res + cache_h
 =#
 
-function multibodyResiduals3!(sim::ModiaLang.SimulationModel{F}, scene::Modia3D.Composition.Scene{F}, world::Modia3D.Composition.Object3D{F}, time, storeResults, isTerminal, leq_mode) where F <: Modia3D.VarFloatType
-    tree            = scene.treeForComputation
-    forceElements   = scene.forceElements
-    visualize       = scene.visualize   # && sim.model.visualiz
-    exportAnimation = scene.exportAnimation
+   #= Efficiency improvement, by computing only terms that are needed in the respective phase
+    of ModiaBase/src/EquationAndStateInfo.jl - Base.iterate(iterator::LinearEquationsIterator, ...)
+    
+    nf: Number of degrees of freedom
+    q: Generalized joint coordinates of the tree joints
+    res: Residuals
+    e_i: i-th unit vector of length(q)
+    
+    qd  = der(q)
+    qdd = der(qd)
+    res = M(q)*qdd + h(q,qd,gravity,contact forces)
+    
+    computeGeneralizedForces!(..., qdd, ...) is called inside the LinearEquationsIterator to solve a linear equation system:
+    
+        res := A*x - b
+    
+    that is called in the following way:
+    
+        leq_mode = 0        : Return "res := -b"        or "res :=            h(q,qd,gravity,contact forces)"
+        leq_mode = i (1..nf): Return "res := A*e_i - b" or "res := M(q)*e_i + h(q,qd,gravity,contact forces)"
+        leq_mode = -1       : Return "res := A*x - b"   or "res := 0.0"   # since residual is not used, it need not be computed.
+    
+    For Modia3D:
+        cache_h = h(q,qd,gravity,contact forces)
+    
+        leq_mode =  0: Compute only terms that depend on q, qd, gravity and contact forces.
+                    All position and velocity terms, such as Rrel and Rabs are computed
+                    and stored in Object3D.
+                    res := h(q,qd,gravity)   # qdd = 0
+                    cache_h := res
+                    return res
+    
+        leq_mode =  i: res := M(q)*qdd         # qdd = e_i
+                    return res := res + cache_h
+    =#
 
-    if isTerminal  #if Modia.isTerminalOfAllSegments(sim)
-        TimerOutputs.@timeit sim.timer "Modia3D_4 isTerminal" begin
-            for force in forceElements
-                terminateForceElement(force)
-            end
-            if exportAnimation
-                Modia3D.exportAnimation(scene)
-            end
-            if visualize
-                #println("... time = $time: visualization is closed")
-                closeVisualization(Modia3D.renderer[1])
-            end
-        end
-        #if scene.collide
-        #    closeContactDetection!(m.assembly)
-        #end
-        # Do not return, since otherwise the linear system of equations cannot be solved -> error
-        #return nothing
-    end
 
-    # Initialize force/torque of world-frame
-    world.f = Modia3D.ZeroVector3D(F)
-    world.t = Modia3D.ZeroVector3D(F)
 
-    # Computation depending on leq_mode (the mode of the LinearEquationsIterator)
-    if leq_mode == 0 || leq_mode == -1
-        TimerOutputs.@timeit sim.timer "Modia3D_1" begin
-            # Compute only terms that depend on q, qd, gravity and contact forces.
-            # All position and velocity terms, such as Rrel and Rabs are computed
-            # and stored in Object3D.
-            #   res := h(q,qd,gravity) - u(q,qd,qdd)   # qdd = 0
-            #   cache_h := res + u
-            #   return res
+"""
+    mbs = computeGeneralizedForces!(mbs::MultibodyData, _leq)
 
-            # Compute kinematics
-            TimerOutputs.@timeit sim.timer "Modia3D_1 computeKinematics!" computeKinematics!(scene, tree, time)
+Given the states of the joints (provided via functions setStatesXXX(..)), compute
+the generalized forces of the joints. The function returns mbs. The generalized forces
+can be accessed afterwards via functions getGenForcesXXX
 
-            # Compute mass/inertia forces in a forward recursion and initializes forces/torques
-            for obj in tree
-                if obj.hasMass
-                    # Compute inertia forces / torques
-                    w     = obj.w
-                    grav  = gravityAcceleration(scene.options.gravityField, obj.r_abs)
-                    obj.f = -obj.m*( obj.R_abs*(obj.a0 - grav) + cross(obj.z, obj.r_CM) + cross(w, cross(w, obj.r_CM)))
-                    obj.t = -(obj.I_CM*obj.z + cross(w, obj.I_CM*w)) + cross(obj.r_CM, obj.f)
-                else
-                    obj.f = Modia3D.ZeroVector3D(F)
-                    obj.t = Modia3D.ZeroVector3D(F)
+A typical computation sequence is:
+
+```
+# Called outside of the linear equation system
+mbs1 = setStatesRevolute!(mbs , <...>)
+mbs2 = setStatesPrismatic!(mbs1, <...>)
+mbs3 = setStatesFreeMotion!(mbs2, <...>)
+mbs4 = setStatesFreeMotion_isrot123!(mbs3, <...>)
+
+tau1 = <...>
+tau2 = <...>
+f1   = <...>
+f2   = <...>
+<...>
+
+# Called inside the linear equation system, after transforming getGenForces into residual form
+while LinearEquationsIteration(_leq, <...>)
+    <...>
+    mbs5 = setAccelerationsRevolute!(mbs4, <...>)
+    mbs6 = setAccelerationsPrismatic!(mbs5, <...>)
+    mbs7 = setAccelerationsFreeMotion!(mbs6, <...>) 
+    mbs8 = computeGeneralizedForces!(mbs7, _leq)
+    
+    # The following equations are transformed into residual form
+    # (tau1, tau2, <...>) = getGenForcesRevolute(mbs8, Val(<number_of_revolute_joints>))
+    # (f1, f2, <...>) = getGenForcesPrismatic(mbs8, Val(<number_of_prismatic_joints>))
+    # (0,0, <..>) = getGenForcesFreeMotion(mbs8, Val(<number_of_freeMotion_joints>))
+    appendVariable(_leq.residuals, getGenForcesRevolute(mbs8, Val(<number_of_revolute_joints>)) .- (tau1, tau2, <...>))
+    appendVariable(_leq.residuals, getGenForcesPrismatic(mbs8, Val(<number_of_revolute_joints>)) .- (f1, f2, <...>))
+    appendVariable(_leq.residuals, getGenForcesFreeMotion(mbs8, Val(<number_of_freeMotion_joints>)))        
+end
+```
+"""
+function computeGeneralizedForces!(mbs::MultibodyData{F}, _leq)::MultibodyData{F} where {F}
+    instantiatedModel = mbs.instantiatedModel  
+    TimerOutputs.@timeit mbs.instantiatedModel.timer "Modia3D computeGeneralizedForces!" begin
+        storeResult   = instantiatedModel.storeResult
+        isTerminal    = ModiaLang.isTerminal(instantiatedModel) && leq_mode == -2
+        leq_mode::Int = isnothing(_leq) ? -2 : _leq_mode.mode    
+                                
+        scene = mbs.scene
+        world = mbs.world
+        time  = mbs.time
+        
+        tree            = scene.treeForComputation
+        forceElements   = scene.forceElements
+        visualize       = scene.visualize   # && sim.model.visualiz
+        exportAnimation = scene.exportAnimation
+    
+        if isTerminal  #if Modia.isTerminalOfAllSegments(sim)
+            TimerOutputs.@timeit sim.timer "Modia3D_4 isTerminal" begin
+                for force in forceElements
+                    terminateForceElement(force)
                 end
-            end # end forward recursion
-
-            # Evaluate force elements
-            for force in forceElements
-                evaluateForceElement(force)
-            end
-
-            # Compute contact forces/torques
-            if scene.collide
-                computeContactForcesAndTorques(sim, scene, world, time, nothing)
-            end
-
-            # Backward recursion (Compute forces/torques and residues)
-            TimerOutputs.@timeit sim.timer "Modia3D_1 computeForcesAndResiduals" computeForcesTorquesAndResiduals!(scene, tree, time)
-        end
-        return nothing
-
-    elseif leq_mode > 0
-        TimerOutputs.@timeit sim.timer "Modia3D_2" begin
-            # Compute   res := M(q)*e_i - u(q,qd,qdd=e_i)
-            #           res := res + cache_h
-
-            # Compute kinematics
-            TimerOutputs.@timeit sim.timer "Modia3D_2 computeKinematics!" computeKinematics_for_leq_mode_pos!(scene, tree, time)
-
-            for obj in tree
-                if obj.hasMass
-                    # Compute inertia forces / torques
-                    obj.f = -obj.m*( obj.R_abs*obj.a0 + cross(obj.z, obj.r_CM) )
-                    obj.t = -obj.I_CM*obj.z + cross(obj.r_CM, obj.f)
-                else
-                    obj.f = Modia3D.ZeroVector3D(F)
-                    obj.t = Modia3D.ZeroVector3D(F)
+                if exportAnimation
+                    Modia3D.exportAnimation(scene)
                 end
-            end # end forward recursion
-
-            # Compute forces/torques and residues in a backward recursion
-            TimerOutputs.@timeit sim.timer "Modia3D_2 computeForcesAndResiduals" computeForcesTorquesAndResiduals!(scene, tree,time)
+                if visualize
+                    #println("... time = $time: visualization is closed")
+                    closeVisualization(Modia3D.renderer[1])
+                end
+            end
+            #if scene.collide
+            #    closeContactDetection!(m.assembly)
+            #end
+            # Do not return, since otherwise the linear system of equations cannot be solved -> error
+            #return nothing
         end
-        return nothing
+    
+        # Initialize force/torque of world-frame
+        world.f = Modia3D.ZeroVector3D(F)
+        world.t = Modia3D.ZeroVector3D(F)
+    
+        # Computation depending on leq_mode (the mode of the LinearEquationsIterator)
+        if leq_mode == 0 || leq_mode == -1 
+            # Compute all variables as functions of q,qd.
+            TimerOutputs.@timeit sim.timer "Modia3D_1" begin
+                # Compute kinematics
+                TimerOutputs.@timeit sim.timer "Modia3D_1 computePositionsVelocitiesAccelerations!" computePositionsVelocitiesAccelerations!(scene, tree, time)
+    
+                # Compute mass/inertia forces in a forward recursion and initializes forces/torques
+                for obj in tree
+                    if obj.hasMass
+                        # Compute inertia forces / torques
+                        w     = obj.w
+                        grav  = gravityAcceleration(scene.options.gravityField, obj.r_abs)
+                        obj.f = -obj.m*( obj.R_abs*(obj.a0 - grav) + cross(obj.z, obj.r_CM) + cross(w, cross(w, obj.r_CM)))
+                        obj.t = -(obj.I_CM*obj.z + cross(w, obj.I_CM*w)) + cross(obj.r_CM, obj.f)
+                    else
+                        obj.f = Modia3D.ZeroVector3D(F)
+                        obj.t = Modia3D.ZeroVector3D(F)
+                    end
+                end # end forward recursion
+    
+                # Evaluate force elements
+                for force in forceElements
+                    evaluateForceElement(force)
+                end
+    
+                # Compute contact forces/torques
+                if scene.collide
+                    computeContactForcesAndTorques(sim, scene, world, time, nothing)
+                end
+    
+                # Compute forces/torques and residues in a backward recursion
+                TimerOutputs.@timeit sim.timer "Modia3D_1 computeObject3DForcesTorquesAndGenForces!" computeObject3DForcesTorquesAndGenForces!(scene, tree, time)
+                
+                # Store GenForces in cache
+                if leq_mode == 0  # qdd = 0 (!)
+                    mbs.revoluteCache_h   .= mbs.revoluteGenForces
+                    mbs.prismaticCache_h  .= mbs.prismaticGenForces
+                    mbs.freeMotionCache_h .= mbs.freeMotionGenForces
+                end
+            end
 
-    elseif leq_mode == -2
-        TimerOutputs.@timeit sim.timer "Modia3D_3" begin
-            if storeResults && !isTerminal && (visualize || exportAnimation)
-                if abs(sim.options.startTime + scene.outputCounter*sim.options.interval - time) < 1.0e-6*(abs(time) + 1.0)
-                    # Visualize at a communication point
-                    scene.outputCounter += 1
-                    #if sim.options.log
-                    #    println("time = $time")
-                    #end
-                    # Compute positions of frames that are only used for visualization
-                    TimerOutputs.@timeit sim.timer "Modia3D_3 visualize!" begin
-                        if scene.options.useOptimizedStructure
-                            for obj in scene.updateVisuElements
-                                parent = obj.parent
-                                obj.r_abs = obj.r_rel ≡ Modia3D.ZeroVector3D(F) ? parent.r_abs : parent.r_abs + parent.R_abs'*obj.r_rel
-                                obj.R_abs = obj.R_rel ≡ Modia3D.NullRotation(F) ? parent.R_abs : obj.R_rel*parent.R_abs
-
-                                # is executed only if an internal Object3D called
-                                if length( obj.visualizationFrame ) == 1
-                                    obj.visualizationFrame[1].r_abs = obj.r_abs
-                                    obj.visualizationFrame[1].R_abs = obj.R_abs
-                                end
-                                for mesh in obj.fileMeshConvexShapes
-                                    mesh.r_abs = obj.r_abs
-                                    mesh.R_abs = obj.R_abs
+        elseif leq_mode > 0
+            # Compute only acceleration terms (all variables as functions of q,qd have been already computed)
+            TimerOutputs.@timeit sim.timer "Modia3D_2" begin
+                # Compute   res := M(q)*e_i + h(q,qd)
+                #           res := res + cache_h
+    
+                # Compute kinematics
+                TimerOutputs.@timeit sim.timer "Modia3D_2 computeAccelerations!" computeAccelerations!(scene, tree, time)
+    
+                for obj in tree
+                    if obj.hasMass
+                        # Compute inertia forces / torques
+                        obj.f = -obj.m*( obj.R_abs*obj.a0 + cross(obj.z, obj.r_CM) )
+                        obj.t = -obj.I_CM*obj.z + cross(obj.r_CM, obj.f)
+                    else
+                        obj.f = Modia3D.ZeroVector3D(F)
+                        obj.t = Modia3D.ZeroVector3D(F)
+                    end
+                end # end forward recursion
+    
+                # Compute forces/torques and residues in a backward recursion (h(q,qd,...) = 0)
+                TimerOutputs.@timeit sim.timer "Modia3D_2 computeObject3DForcesTorquesAndGenForces!" computeObject3DForcesTorquesAndGenForces!(scene, tree,time)
+                
+                # Add GenForces from cache (computed with qdd=0)
+                mbs.revoluteGenForces   += mbs.revoluteCache_h
+                mbs.prismaticGenForces  += mbs.prismaticCache_h
+                mbs.freeMotionGenForces += mbs.freeMotionCache_h                
+            end
+    
+        elseif leq_mode == -2
+            # Compute only terms needed at a communication point (currently: Only visualization + export animation)      
+            TimerOutputs.@timeit sim.timer "Modia3D_3" begin
+                if storeResult && !isTerminal && (visualize || exportAnimation)
+                    if abs(sim.options.startTime + scene.outputCounter*sim.options.interval - time) < 1.0e-6*(abs(time) + 1.0)
+                        # Visualize at a communication point
+                        scene.outputCounter += 1
+                        #if sim.options.log
+                        #    println("time = $time")
+                        #end
+                        # Compute positions of frames that are only used for visualization
+                        TimerOutputs.@timeit sim.timer "Modia3D_3 visualize!" begin
+                            if scene.options.useOptimizedStructure
+                                for obj in scene.updateVisuElements
+                                    parent = obj.parent
+                                    obj.r_abs = obj.r_rel ≡ Modia3D.ZeroVector3D(F) ? parent.r_abs : parent.r_abs + parent.R_abs'*obj.r_rel
+                                    obj.R_abs = obj.R_rel ≡ Modia3D.NullRotation(F) ? parent.R_abs : obj.R_rel*parent.R_abs
+    
+                                    # is executed only if an internal Object3D called
+                                    if length( obj.visualizationFrame ) == 1
+                                        obj.visualizationFrame[1].r_abs = obj.r_abs
+                                        obj.visualizationFrame[1].R_abs = obj.R_abs
+                                    end
+                                    for mesh in obj.fileMeshConvexShapes
+                                        mesh.r_abs = obj.r_abs
+                                        mesh.R_abs = obj.R_abs
+                                    end
                                 end
                             end
-                        end
-                        if visualize
-                            Modia3D.visualize!(Modia3D.renderer[1], time)
-                        end
-                    end
-                    if exportAnimation
-                        TimerOutputs.@timeit sim.timer "Modia3D_3 exportAnimation" begin
-                            objectData = []
-                            for obj in scene.allVisuElements
-                                pos = Modia3D.convertToFloat64(obj.r_abs)
-                                ori = Modia3D.from_R(Modia3D.convertToFloat64(obj.R_abs))
-                                dat = animationData(pos, ori)
-                                push!(objectData, dat)
+                            if visualize
+                                Modia3D.visualize!(Modia3D.renderer[1], time)
                             end
-                            aniStep = animationStep(time, objectData)
-                            push!(scene.animation, aniStep)
+                        end
+                        if exportAnimation
+                            TimerOutputs.@timeit sim.timer "Modia3D_3 exportAnimation" begin
+                                objectData = []
+                                for obj in scene.allVisuElements
+                                    pos = Modia3D.convertToFloat64(obj.r_abs)
+                                    ori = Modia3D.from_R(Modia3D.convertToFloat64(obj.R_abs))
+                                    dat = animationData(pos, ori)
+                                    push!(objectData, dat)
+                                end
+                                aniStep = animationStep(time, objectData)
+                                push!(scene.animation, aniStep)
+                            end
                         end
                     end
                 end
             end
+    
+        else
+            error("Bug in dynamics.jl (computeGeneralizedForces!): leq_mode = $leq_mode (must be >= -1)")
         end
-
-    else
-        error("Bug in dynamics.jl: leq_mode = $leq_mode (must be >= -1)")
     end
-
-    # Copy variables to residues
-    #Modia3D.copy_variables_to_residue!(var, _x, _derx, _r)
-    #end # from open
-    return nothing
+    return mbs
 end

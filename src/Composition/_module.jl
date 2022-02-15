@@ -31,12 +31,13 @@ export FixTranslation
 export setAngle!, connect
 export setDistance!
 
-export initJoints!, setJointStates1!, setJointAccelerations1!
-export setJointStates6!, setJointStates6_isrot123!, setJointAccelerations6!
-export getJointResiduals_leq_mode_0!, getJointResiduals_all!
-export getJointResiduals_method2!, getJointResiduals_method3!
+export initJoints!
+export setStatesRevolute!  , setAccelerationsRevolute!  , getGenForcesRevolute
+export setStatesPrismatic! , setAccelerationsPrismatic! , getGenForcesPrismatic
+export setStatesFreeMotion!, setAccelerationsFreeMotion!, getGenForcesFreeMotion
+export setStatesFreeMotion_isrot123!
 
-export multibodyResiduals!, setModiaJointVariables!
+export computeGeneralizedForces!
 
 export distanceAndAngles, distance, planarRotationAngle
 export measFrameRotation, measFramePosition, measFrameDistance

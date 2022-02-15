@@ -43,8 +43,6 @@ mutable struct Prismatic{F <: Modia3D.VarFloatType} <: Modia3D.AbstractJoint
     s::F
     v::F
     a::F
-    f::F
-    residue::F
 
     function Prismatic{F}(; obj1::Object3D{F},
                          obj2::Object3D{F},

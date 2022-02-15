@@ -34,8 +34,6 @@ mutable struct Revolute{F <: Modia3D.VarFloatType} <: Modia3D.AbstractJoint
     phi::F
     w::F
     a::F
-    tau::F
-    residue::F
 
     function Revolute{F}(; obj1::Object3D{F},
                         obj2::Object3D{F},
