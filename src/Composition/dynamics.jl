@@ -42,34 +42,23 @@ multiBodyName(instantiatedModel, mbsPath) = mbsPath == "" ? instantiatedModel.mo
                                                             instantiatedModel.modelName * "." * mbsPath
 
 """
-    (world, jointObjects, forceElements) = checkMultibodySystemAndGetWorldAndJointsAndForceElements(instantiatedModel, id)
+    (world, jointObjects, forceElements) = checkMultibodySystemAndGetWorldAndJointsAndForceElements(mbsRoot)
 
-Recursively traverse model and perform the following actions:
+Recursively traverse model mbsRoot and perform the following actions:
 
-- Search for an OrderedDict that has `key = :_id, value = id`
-  (identifies the root of the multibody system).
-- Search from the root of the multibody system and perform the following actions:
-  - Check that from all Object3Ds exactly one of them has no parent.
-    Return this parent as `world`.
-  - Check that only `world` has potentially a `feature` entry that
-    is a SceneOption.
-  - Return a vector of joint objects as `joints`.
-  - Return a vector of all force element objects.
+- Check that from all Object3Ds exactly one of them has no parent and `feature = SceneOptions(..)`.
+  Return this parent as `world`.
+- Check that only `world` has a `feature` entry that is a SceneOption.
+- Return (world, revoluteObjects, prismaticObjects, freeMotionObjects, forceElements)
 """
-function checkMultibodySystemAndGetWorldAndJointsAndForceElements(instantiatedModel::ModiaLang.SimulationModel{F,TimeType}, id::Int) where {F,TimeType}
-    # Find root mbs of multibody system
-    (mbsRoot, mbsPath) = ModiaLang.getIdParameter(instantiatedModel.evaluatedParameters, id)
-    if isnothing(mbsRoot)
-        error("\n", instantiatedModel.modelName, ": did not find _id = ", id, " in the evaluated parameters!")
-    end
-                                                                 
-    object3DWithoutParents = Object3D{F}[]
-    revoluteObjects   = Object3D{F}[]
-    prismaticObjects  = Object3D{F}[]
-    freeMotionObjects = Object3D{F}[]
+function checkMultibodySystemAndGetWorldAndJointsAndForceElements(mbsRoot, mbsPath::String, FloatType::Type)                                                               
+    object3DWithoutParents = Object3D{FloatType}[]
+    revoluteObjects   = Object3D{FloatType}[]
+    prismaticObjects  = Object3D{FloatType}[]
+    freeMotionObjects = Object3D{FloatType}[]
     forceElements     = Modia3D.AbstractForceElement[]
     getJointsAndForceElementsAndObject3DsWithoutParents!(mbsRoot, object3DWithoutParents, revoluteObjects, prismaticObjects, 
-                                                                 freeMotionObjects, forceElements, mbsPath)
+                                                         freeMotionObjects, forceElements, mbsPath)
 
     if length(object3DWithoutParents) == 0
         error("\n", multiBodyName(instantiatedModel, mbsPath), ": There is either no Object3D or all of them have a parent!\n",
@@ -82,7 +71,8 @@ function checkMultibodySystemAndGetWorldAndJointsAndForceElements(instantiatedMo
         error("\n", instantiatedModel.modelName, ": The following ", length(object3DWithoutParents), " Object3Ds have no parents and feature=Scene(..)\n",
               "(note, there must be exactly one Object3D that has no parent and feature=Scene(..)):\n", object3DNames, "\n")
     end
-    return (object3DWithoutParents[1], revoluteObjects, prismaticObjects, freeMotionObjects, forceElements)
+    world = object3DWithoutParents[1]
+    return (world, revoluteObjects, prismaticObjects, freeMotionObjects, forceElements)
 end
 
 
@@ -107,21 +97,18 @@ end
 
 
 """
-    mbs = initJoints!(_id, instantiatedModel, ndof, time)
+    mbs = openModel3D!(instantiatedModel, modelPath::String, ndof::Int, time)
 
-Initialize joints.
+Open Model3D.
 """
-function initJoints!(id::Int, instantiatedModel::ModiaLang.SimulationModel{F,TimeType},
-                     nqdd::Int, time)::MultibodyData{F,TimeType} where {F,TimeType}
+function openModel3D!(instantiatedModel::ModiaLang.SimulationModel{F,TimeType}, modelPath::String, 
+                      nqdd::Int, time)::MultibodyData{F,TimeType} where {F,TimeType}
      TimerOutputs.@timeit instantiatedModel.timer "Modia3D_0 initJoint!" begin
-        separateObjects = instantiatedModel.separateObjects  # is emptied for every new simulate! call
-        if haskey(separateObjects, id)
-            mbs::MultibodyData{F,TimeType} = separateObjects[id]
-            mbs.time = time
-        else
-            # Search in parameters and retrieve the name of the object with the required id
+        mbsBuild::MultibodyBuild{F,TimeType} = instantiatedModel.buildDict[modelPath]
+        if ModiaLang.isFirstInitialOfAllSegments(instantiatedModel)
             # Instantiate the Modia3D system
-            (world, revoluteObjects, prismaticObjects, freeMotionObjects, forceElements) = checkMultibodySystemAndGetWorldAndJointsAndForceElements(instantiatedModel, id)
+            mbsRoot = ModiaLang.getModelFromSplittedPath(instantiatedModel.evaluatedParameters, mbsBuild.Model3DSplittedPath)
+            (world, revoluteObjects, prismaticObjects, freeMotionObjects, forceElements) = checkMultibodySystemAndGetWorldAndJointsAndForceElements(mbsRoot, modelPath, F)
 
             # Initialize force elements
             for force in forceElements
@@ -139,8 +126,7 @@ function initJoints!(id::Int, instantiatedModel::ModiaLang.SimulationModel{F,Tim
                 nz = 0
                 zStartIndex = 0
             end
-            mbs = MultibodyData{F,TimeType}(instantiatedModel, nqdd, world, scene, revoluteObjects, prismaticObjects, freeMotionObjects, zStartIndex, nz, time)
-            separateObjects[id] = mbs
+            mbsBuild.mbs = MultibodyData{F,TimeType}(instantiatedModel, nqdd, world, scene, revoluteObjects, prismaticObjects, freeMotionObjects, zStartIndex, nz, time)
 
             if scene.visualize
                 TimerOutputs.@timeit instantiatedModel.timer "Modia3D_0 initializeVisualization" Modia3D.Composition.initializeVisualization(Modia3D.renderer[1], scene.allVisuElements)
@@ -153,6 +139,8 @@ function initJoints!(id::Int, instantiatedModel::ModiaLang.SimulationModel{F,Tim
                 end
             end
         end
+        mbs = mbsBuild.mbs
+        mbs.time = time
     end
     return mbs
 end
@@ -317,10 +305,11 @@ end
 """
 function computeGeneralizedForces!(mbs::MultibodyData{F}, _leq)::MultibodyData{F} where {F}
     instantiatedModel = mbs.instantiatedModel  
-    TimerOutputs.@timeit mbs.instantiatedModel.timer "Modia3D computeGeneralizedForces!" begin
+    TimerOutputs.@timeit instantiatedModel.timer "Modia3D computeGeneralizedForces!" begin
         storeResult   = instantiatedModel.storeResult
+        leq_mode::Int = isnothing(_leq) ? -2 : _leq.mode         
         isTerminal    = ModiaLang.isTerminal(instantiatedModel) && leq_mode == -2
-        leq_mode::Int = isnothing(_leq) ? -2 : _leq_mode.mode    
+   
                                 
         scene = mbs.scene
         world = mbs.world
@@ -332,7 +321,7 @@ function computeGeneralizedForces!(mbs::MultibodyData{F}, _leq)::MultibodyData{F
         exportAnimation = scene.exportAnimation
     
         if isTerminal  #if Modia.isTerminalOfAllSegments(sim)
-            TimerOutputs.@timeit sim.timer "Modia3D_4 isTerminal" begin
+            TimerOutputs.@timeit instantiatedModel.timer "Modia3D_4 isTerminal" begin
                 for force in forceElements
                     terminateForceElement(force)
                 end
@@ -358,9 +347,9 @@ function computeGeneralizedForces!(mbs::MultibodyData{F}, _leq)::MultibodyData{F
         # Computation depending on leq_mode (the mode of the LinearEquationsIterator)
         if leq_mode == 0 || leq_mode == -1 
             # Compute all variables as functions of q,qd.
-            TimerOutputs.@timeit sim.timer "Modia3D_1" begin
+            TimerOutputs.@timeit instantiatedModel.timer "Modia3D_1" begin
                 # Compute kinematics
-                TimerOutputs.@timeit sim.timer "Modia3D_1 computePositionsVelocitiesAccelerations!" computePositionsVelocitiesAccelerations!(scene, tree, time)
+                TimerOutputs.@timeit instantiatedModel.timer "Modia3D_1 computePositionsVelocitiesAccelerations!" computePositionsVelocitiesAccelerations!(scene, tree, time)
     
                 # Compute mass/inertia forces in a forward recursion and initializes forces/torques
                 for obj in tree
@@ -383,11 +372,11 @@ function computeGeneralizedForces!(mbs::MultibodyData{F}, _leq)::MultibodyData{F
     
                 # Compute contact forces/torques
                 if scene.collide
-                    computeContactForcesAndTorques(sim, scene, world, time, nothing)
+                    computeContactForcesAndTorques(instantiatedModel, scene, world, time, nothing)
                 end
     
                 # Compute forces/torques and residues in a backward recursion
-                TimerOutputs.@timeit sim.timer "Modia3D_1 computeObject3DForcesTorquesAndGenForces!" computeObject3DForcesTorquesAndGenForces!(scene, tree, time)
+                TimerOutputs.@timeit instantiatedModel.timer "Modia3D_1 computeObject3DForcesTorquesAndGenForces!" computeObject3DForcesTorquesAndGenForces!(mbs, tree, time)
                 
                 # Store GenForces in cache
                 if leq_mode == 0  # qdd = 0 (!)
@@ -399,13 +388,14 @@ function computeGeneralizedForces!(mbs::MultibodyData{F}, _leq)::MultibodyData{F
 
         elseif leq_mode > 0
             # Compute only acceleration terms (all variables as functions of q,qd have been already computed)
-            TimerOutputs.@timeit sim.timer "Modia3D_2" begin
+            TimerOutputs.@timeit instantiatedModel.timer "Modia3D_2" begin
                 # Compute   res := M(q)*e_i + h(q,qd)
                 #           res := res + cache_h
     
                 # Compute kinematics
-                TimerOutputs.@timeit sim.timer "Modia3D_2 computeAccelerations!" computeAccelerations!(scene, tree, time)
+                TimerOutputs.@timeit instantiatedModel.timer "Modia3D_2 computeAccelerations!" computeAccelerations!(scene, tree, time)
     
+                TimerOutputs.@timeit instantiatedModel.timer "Modia3D_2 obj in tree" begin
                 for obj in tree
                     if obj.hasMass
                         # Compute inertia forces / torques
@@ -416,28 +406,30 @@ function computeGeneralizedForces!(mbs::MultibodyData{F}, _leq)::MultibodyData{F
                         obj.t = Modia3D.ZeroVector3D(F)
                     end
                 end # end forward recursion
-    
+    end
                 # Compute forces/torques and residues in a backward recursion (h(q,qd,...) = 0)
-                TimerOutputs.@timeit sim.timer "Modia3D_2 computeObject3DForcesTorquesAndGenForces!" computeObject3DForcesTorquesAndGenForces!(scene, tree,time)
+                TimerOutputs.@timeit instantiatedModel.timer "Modia3D_2 computeObject3DForcesTorquesAndGenForces!" computeObject3DForcesTorquesAndGenForces!(mbs, tree,time)
                 
                 # Add GenForces from cache (computed with qdd=0)
-                mbs.revoluteGenForces   += mbs.revoluteCache_h
-                mbs.prismaticGenForces  += mbs.prismaticCache_h
-                mbs.freeMotionGenForces += mbs.freeMotionCache_h                
+                TimerOutputs.@timeit instantiatedModel.timer "Modia3D_2 cache" begin
+                mbs.revoluteGenForces   .+= mbs.revoluteCache_h
+                mbs.prismaticGenForces  .+= mbs.prismaticCache_h
+                mbs.freeMotionGenForces .+= mbs.freeMotionCache_h
+end                
             end
     
         elseif leq_mode == -2
             # Compute only terms needed at a communication point (currently: Only visualization + export animation)      
-            TimerOutputs.@timeit sim.timer "Modia3D_3" begin
+            TimerOutputs.@timeit instantiatedModel.timer "Modia3D_3" begin
                 if storeResult && !isTerminal && (visualize || exportAnimation)
-                    if abs(sim.options.startTime + scene.outputCounter*sim.options.interval - time) < 1.0e-6*(abs(time) + 1.0)
+                    if abs(instantiatedModel.options.startTime + scene.outputCounter*instantiatedModel.options.interval - time) < 1.0e-6*(abs(time) + 1.0)
                         # Visualize at a communication point
                         scene.outputCounter += 1
                         #if sim.options.log
                         #    println("time = $time")
                         #end
                         # Compute positions of frames that are only used for visualization
-                        TimerOutputs.@timeit sim.timer "Modia3D_3 visualize!" begin
+                        TimerOutputs.@timeit instantiatedModel.timer "Modia3D_3 visualize!" begin
                             if scene.options.useOptimizedStructure
                                 for obj in scene.updateVisuElements
                                     parent = obj.parent
@@ -460,7 +452,7 @@ function computeGeneralizedForces!(mbs::MultibodyData{F}, _leq)::MultibodyData{F
                             end
                         end
                         if exportAnimation
-                            TimerOutputs.@timeit sim.timer "Modia3D_3 exportAnimation" begin
+                            TimerOutputs.@timeit instantiatedModel.timer "Modia3D_3 exportAnimation" begin
                                 objectData = []
                                 for obj in scene.allVisuElements
                                     pos = Modia3D.convertToFloat64(obj.r_abs)

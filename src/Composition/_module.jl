@@ -31,7 +31,7 @@ export FixTranslation
 export setAngle!, connect
 export setDistance!
 
-export initJoints!
+export openModel3D!
 export setStatesRevolute!  , setAccelerationsRevolute!  , getGenForcesRevolute
 export setStatesPrismatic! , setAccelerationsPrismatic! , getGenForcesPrismatic
 export setStatesFreeMotion!, setAccelerationsFreeMotion!, getGenForcesFreeMotion

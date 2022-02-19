@@ -42,6 +42,17 @@ mutable struct MultibodyData{F <: Modia3D.VarFloatType, TimeType}
                              zStartIndex, nz, Modia3D.convertAndStripUnit(TimeType, u"s", time), ModiaBase.LinearEquations{F}[])
 end
 
+mutable struct MultibodyBuild{F <: Modia3D.VarFloatType, TimeType}
+    Model3DPath::String                  # Path of the Model3D(..) command used to define the system, e.g. "a.b.c"
+    Model3DSplittedPath::Vector{Symbol}  # Splitted Model3DPath, e.g. [:a, :b, :c]
+    revolutePaths::Vector{String}        # Paths to the Revolute joints in the order of argument args of setStatesRevolute!(..., args...)
+    prismaticPaths::Vector{String}       # Paths to the Prismatic joints in the order of argument args of setStatesPrismatic!(..., args...)
+    freeMotionPaths::Vector{String}      # Paths to the FreeMotion joints in the order of argument args of setStatesFreeMotion!(..., args...)
+    mbs::Union{MultibodyData{F,TimeType}, Nothing}
+    
+    MultibodyBuild{F,TimeType}(Model3DPath::String, Model3DSplittedPath::Vector{Symbol}, revolutePaths, prismaticPaths, freeMotionPaths) where {F,TimeType} =
+                              new(Model3DPath, Model3DSplittedPath, revolutePaths, prismaticPaths, freeMotionPaths, nothing)    
+end
 
 
 # Utility function that should not be directly called (only to be called from attach(..)
@@ -446,7 +457,6 @@ function computeObject3DForcesTorquesAndGenForces!(mbs::MultibodyData{F}, tree::
             error("Bug in Modia3D/src/Composition/joints/joints.jl (computeGeneralizedForces!): jointKind = $jointKind is not known.")
         end
     end
-    @assert(length(freeMotionGenForces) == lenFreeMotionGenForces)
     return nothing
 end
 
@@ -530,7 +540,7 @@ end
 
 Copy accelerations of revolute joints into mbs.
 """
-@inline function setAccelerationsRevolute!(mbs::MultibodyData{Float64}, args::Vararg{Float64,NJOINTS}) where {NJOINTS}
+@inline function setAccelerationsRevolute!(mbs::MultibodyData{F}, args::Vararg{F,NJOINTS}) where {F,NJOINTS}
     @assert(NJOINTS == length(mbs.revoluteObjects))
     scene = mbs.scene
     @inbounds for (i,obj) in enumerate(mbs.revoluteObjects)
@@ -545,7 +555,7 @@ end
 
 Copy accelerations of prismatic joints into mbs.
 """
-@inline function setAccelerationsPrismatic!(mbs::MultibodyData{Float64}, args::Vararg{Float64,NJOINTS}) where {NJOINTS}
+@inline function setAccelerationsPrismatic!(mbs::MultibodyData{F}, args::Vararg{F,NJOINTS}) where {F,NJOINTS}
     @assert(NJOINTS == length(mbs.prismaticObjects))
     scene = mbs.scene
     @inbounds for (i,obj) in enumerate(mbs.prismaticObjects)
@@ -579,7 +589,7 @@ end
 
 Return generalized forces of revolute joints as NTuple.
 """
-@inline getGenForcesRevolute(mbs::MultibodyData{F}, ::Val{N}) where {F <: Modia3D.VarFloatType,N} = ntuple(i->mbs.revoluteGenForces, Val(N))
+@inline getGenForcesRevolute(mbs::MultibodyData{F}, ::Val{N}) where {F <: Modia3D.VarFloatType,N} = ntuple(i->mbs.revoluteGenForces[i], Val(N))
 
 
 """
@@ -587,7 +597,7 @@ Return generalized forces of revolute joints as NTuple.
 
 Return generalized forces of prismatic joints as NTuple.
 """
-@inline getGenForcesPrismatic(mbs::MultibodyData{F}, ::Val{N}) where {F <: Modia3D.VarFloatType,N} = ntuple(i->mbs.prismaticGenForces, Val(N))
+@inline getGenForcesPrismatic(mbs::MultibodyData{F}, ::Val{N}) where {F <: Modia3D.VarFloatType,N} = ntuple(i->mbs.prismaticGenForces[i], Val(N))
 
 
 """
@@ -595,7 +605,7 @@ Return generalized forces of prismatic joints as NTuple.
 
 Return generalized forces of free motion joints as NTuple.
 """
-@inline getGenForcesFreeMotion(mbs::MultibodyData{F}, ::Val{N}) where {F <: Modia3D.VarFloatType,N} = ntuple(i->mbs.freeMotionGenForces, Val(N))
+@inline getGenForcesFreeMotion(mbs::MultibodyData{F}, ::Val{N}) where {F <: Modia3D.VarFloatType,N} = ntuple(i->mbs.freeMotionGenForces[i], Val(N))
 
 
 

@@ -77,7 +77,7 @@ mutable struct Prismatic{F <: Modia3D.VarFloatType} <: Modia3D.AbstractJoint
         posAxis     = abs(axis)
         posMovement = axis > 0
 
-        obj.joint      = new(path, parent, obj, posAxis, posMovement, eAxis, 1, canCollide, s, v, F(0.0), F(0.0), F(0.0) )
+        obj.joint      = new(path, parent, obj, posAxis, posMovement, eAxis, 1, canCollide, s, v, F(0.0) )
         obj.jointKind  = PrismaticKind
         obj.jointIndex = 0
         obj.ndof       = 1
