@@ -22,7 +22,7 @@ Bar = Model(
                                      visualMaterial=:(vmat2)))
 )
 
-Pendulum = Model(
+Pendulum = Model3D(
     m = 1.0,
     Lx = 0.1,
     world = Object3D(feature=Scene() ),
@@ -33,7 +33,7 @@ Pendulum = Model(
 )
 
 PendulumWithBar = Model(
-    pendulum = buildModia3D(Pendulum | Map(Lx=1.0, m=2.0, rev=Map(phi=Var(init=1.0)))),
+    pendulum = Pendulum | Map(Lx=1.0, m=2.0, rev=Map(phi=Var(init=1.0))),
 
     damper = Damper | Map(d=0.5),
     fixed = Fixed,
@@ -41,7 +41,7 @@ PendulumWithBar = Model(
                 (damper.flange_a, fixed.flange)]
 )
 
-pendulumWithBar = @instantiateModel(PendulumWithBar, unitless=true)
+pendulumWithBar = @instantiateModel(PendulumWithBar, logCode=true, unitless=true)
 
 algorithm = Tsit5()
 stopTime = 10.0
