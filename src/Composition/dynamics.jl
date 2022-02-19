@@ -395,7 +395,6 @@ function computeGeneralizedForces!(mbs::MultibodyData{F}, _leq)::MultibodyData{F
                 # Compute kinematics
                 TimerOutputs.@timeit instantiatedModel.timer "Modia3D_2 computeAccelerations!" computeAccelerations!(scene, tree, time)
     
-                TimerOutputs.@timeit instantiatedModel.timer "Modia3D_2 obj in tree" begin
                 for obj in tree
                     if obj.hasMass
                         # Compute inertia forces / torques
@@ -406,16 +405,14 @@ function computeGeneralizedForces!(mbs::MultibodyData{F}, _leq)::MultibodyData{F
                         obj.t = Modia3D.ZeroVector3D(F)
                     end
                 end # end forward recursion
-    end
+
                 # Compute forces/torques and residues in a backward recursion (h(q,qd,...) = 0)
                 TimerOutputs.@timeit instantiatedModel.timer "Modia3D_2 computeObject3DForcesTorquesAndGenForces!" computeObject3DForcesTorquesAndGenForces!(mbs, tree,time)
                 
                 # Add GenForces from cache (computed with qdd=0)
-                TimerOutputs.@timeit instantiatedModel.timer "Modia3D_2 cache" begin
                 mbs.revoluteGenForces   .+= mbs.revoluteCache_h
                 mbs.prismaticGenForces  .+= mbs.prismaticCache_h
-                mbs.freeMotionGenForces .+= mbs.freeMotionCache_h
-end                
+                mbs.freeMotionGenForces .+= mbs.freeMotionCache_h             
             end
     
         elseif leq_mode == -2
