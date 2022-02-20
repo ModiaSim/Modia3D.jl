@@ -559,7 +559,7 @@ Copy accelerations of prismatic joints into mbs.
     @assert(NJOINTS == length(mbs.prismaticObjects))
     scene = mbs.scene
     @inbounds for (i,obj) in enumerate(mbs.prismaticObjects)
-        scene.prismatic[obj.jointIndex] = args[i]
+        scene.prismatic[obj.jointIndex].a = args[i]
     end
     return mbs
 end

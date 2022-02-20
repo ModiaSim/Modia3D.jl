@@ -25,6 +25,7 @@ import OrderedCollections
 import Modia3D
 import Modia3D.Composition
 using  ModiaLang
+using  StaticArrays
 
 
 # ModiaLang models

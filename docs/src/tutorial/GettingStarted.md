@@ -15,14 +15,14 @@ module Pendulum1
 
 using Modia3D
 
-Pendulum = Model(
+Pendulum = Model3D(
     world     = Object3D(feature=Scene()),
     body      = Object3D(feature=Solid(massProperties=MassProperties(mass=1.0))),
     bodyFrame = Object3D(parent=:body, translation=[-0.5, 0.0, 0.0]),
     rev       = Revolute(obj1=:world, obj2=:bodyFrame)
 )
 
-pendulum = @instantiateModel(buildModia3D(Pendulum), unitless=true)
+pendulum = @instantiateModel(Pendulum, unitless=true)
 simulate!(pendulum, stopTime=3.0)
 
 @usingModiaPlot     # use the plot package defined by ENV["MODIA_PLOT"]
@@ -38,7 +38,7 @@ julia> include("$(Modia3D.path)/test/Tutorial/Pendulum1.jl")
 
 The `world` [Object3D](@ref) has feature [Scene](@ref) and is therefore the inertial system. The `body` Object3D is a [Solid](@ref) and defines the pendulum as a mass point with `mass = 1.0`. The `bodyFrame` Object3D defines a coordinate system on the `body` that is translated along the x-axis. A revolute joint connects `world` with `bodyFrame`.
 
-With command `buildModia3D(Pendulum)`, the model definition is inspected and a few lines of code included, in order that joint variables are communicated between the Modia equations and the Modia3D multibody program. Keyword `unitless=true` defines that code generation is performed without units (because Modia3D does not yet fully support units in all components).
+With command `Model3D(..)`, a few lines of code are included, in order that joint variables are communicated between the Modia equations and the Modia3D multibody program. Keyword `unitless=true` defines that code generation is performed without units (because Modia3D does not yet fully support units in all components).
 
 The commands above generate an instance of the model, simulate it and generate the following plot:
 
@@ -54,7 +54,7 @@ module Pendulum2
 
 using Modia3D
 
-Pendulum = Model(
+Pendulum = Model3D(
     world = Object3D(feature=Scene(animationFile="Pendulum2.json")),
     obj1  = Object3D(feature=Solid(shape=Beam(axis=1, length=1.0, width=0.2, thickness=0.2),
                 solidMaterial="Steel", visualMaterial=VisualMaterial(color="Blue"))),
@@ -63,7 +63,7 @@ Pendulum = Model(
     rev   = Revolute(obj1=:world, obj2=:obj2)
 )
 
-pendulum = @instantiateModel(buildModia3D(Pendulum), unitless=true)
+pendulum = @instantiateModel(Pendulum, unitless=true)
 simulate!(pendulum, stopTime=3.0)
 
 @usingModiaPlot
@@ -97,7 +97,7 @@ using Modia3D
 
 include("$(Modia3D.modelsPath)/AllModels.jl")
 
-Pendulum = Model(
+Pendulum = Model3D(
     world = Object3D(feature=Scene(animationFile="Pendulum3.json")),
     obj1  = Object3D(feature=Solid(shape=Beam(axis=1, length=1.0, width=0.2, thickness=0.2),
                 solidMaterial="Steel", visualMaterial=VisualMaterial(color="Blue"))),
@@ -111,7 +111,7 @@ Pendulum = Model(
                 (damper.flange_a, fixed.flange)]
 )
 
-pendulum = @instantiateModel(buildModia3D(Pendulum), unitless=true)
+pendulum = @instantiateModel(Pendulum, unitless=true)
 simulate!(pendulum, stopTime=3.0)
 
 @usingModiaPlot

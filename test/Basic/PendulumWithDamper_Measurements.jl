@@ -7,7 +7,7 @@ include("$(Modia3D.modelsPath)/Blocks.jl")
 include("$(Modia3D.modelsPath)/Electric.jl")
 include("$(Modia3D.modelsPath)/Rotational.jl")
 
-Pendulum = Model(
+Pendulum = Model3D(
     m = 1.0,
     g = 9.81,
     vmat1 = VisualMaterial(color="Sienna", transparency=0.5),
@@ -29,7 +29,7 @@ Pendulum = Model(
 )
 
 PendulumWithDamp = Model(
-    pendulum = buildModia3D(Pendulum | Map(m=2.0±1.0, rev=Map(phi=Var(init=1.0)))),
+    pendulum = Pendulum | Map(m=2.0±1.0, rev=Map(phi=Var(init=1.0))),
 
     damper = Damper | Map(d=0.5),
     fixed = Fixed,

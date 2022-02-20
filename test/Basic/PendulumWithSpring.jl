@@ -9,7 +9,7 @@ include("$(Modia3D.modelsPath)/Rotational.jl")
 simulationModel = nothing
 get_simulationModel() = simulationModel
 
-Pendulum = Model(
+Pendulum = Model3D(
     m = 1.0,
     g = 9.81,
 
@@ -19,7 +19,7 @@ Pendulum = Model(
 )
 
 PendulumWithSpr = Model(
-    pendulum = buildModia3D(Pendulum | Map(Lx=0.5, m=2, rev=Map(phi=Var(init=1.0)))),
+    pendulum = Pendulum | Map(Lx=0.5, m=2, rev=Map(phi=Var(init=1.0))),
     spring   = Spring | Map(c=100.0u"N*m/rad"),
 	support  = Fixed,
 
@@ -28,7 +28,7 @@ PendulumWithSpr = Model(
                ]
 )
 
-pendulumWithSpring = @instantiateModel(PendulumWithSpr, aliasReduction=false, unitless=true, log=false, logStateSelection=false, logCode=false)
+pendulumWithSpring = @instantiateModel(PendulumWithSpr, unitless=true, log=false, logStateSelection=false, logCode=false)
 
 stopTime = 1.0
 requiredFinalStates = [-0.1166492890518372, -15.325157691194002]

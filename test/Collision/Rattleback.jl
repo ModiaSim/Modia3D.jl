@@ -12,7 +12,7 @@ massProps = MassProperties(; mass=mass, centerOfMass=centerOfMass,
                              Ixx=inertiaTensor[1,1], Iyy=inertiaTensor[2,2], Izz=inertiaTensor[3,3],
                              Ixy=inertiaTensor[1,2], Iyz=inertiaTensor[2,3], Ixz=inertiaTensor[3,1])
 
-Rattleback = Model(
+Rattleback = Model3D(
     world = Object3D(feature=Scene(gravityField=UniformGravityField(g=9.81, n=[0, 0, -1]),
                                    nominalLength=0.1,
                                    enableContactDetection=true)),
@@ -28,10 +28,10 @@ Rattleback = Model(
                                        visualMaterial=VisualMaterial(color="Blue"),
                                        solidMaterial="DryWood",
                                        collision=true)),
-    joint = FreeMotion(obj1=:world, obj2=:ellipsoid, r=Var(init=[0.0, 0.0, 0.01]), w=Var(init=[0.0, 0.1, 5.0]))
+    joint = FreeMotion(obj1=:world, obj2=:ellipsoid, r=Var(init=ModiaBase.SVector{3,Float64}(0.0, 0.0, 0.01)), w=Var(init=ModiaBase.SVector{3,Float64}(0.0, 0.1, 5.0)))
 )
 
-rattleback = @instantiateModel(buildModia3D(Rattleback), unitless=true)
+rattleback = @instantiateModel(Rattleback, unitless=true)
 
 stopTime = 6.0
 tolerance = 1e-8

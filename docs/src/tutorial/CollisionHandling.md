@@ -11,7 +11,7 @@ module BouncingSphere3D
 
 using Modia3D
 
-BouncingSphere = Model(
+BouncingSphere = Model3D(
     boxHeigth = 0.1,
     world      = Object3D(feature=Scene(enableContactDetection = true,
                     animationFile = "BouncingSphere.json")),
@@ -28,7 +28,7 @@ BouncingSphere = Model(
     free       = FreeMotion(obj1=:world, obj2=:sphere, r=Var(init=[0.0, 1.0, 0.0]))
 )
 
-bouncingSphere = @instantiateModel(buildModia3D(BouncingSphere), unitless=true)
+bouncingSphere = @instantiateModel(BouncingSphere, unitless=true)
 simulate!(bouncingSphere, stopTime=2.2, dtmax=0.1)
 
 @usingModiaPlot

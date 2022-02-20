@@ -82,7 +82,7 @@ Ball = Model(
                                   collision=true))
 )
 
-Billard = Model(
+Billard = Model3D(
     world = Object3D(feature=Scene(gravityField=UniformGravityField(g=9.81, n=[0, 0, -1]), mprTolerance = 1.0e-18,
                                    enableContactDetection=true, # maximumContactDamping=1000.0,
                                    nominalLength=0.15*TableX)), # animationFile="Billard16Balls.json"
@@ -90,72 +90,72 @@ Billard = Model(
     cushion = Cushion,
     ball0 = Ball,
     joint0 = FreeMotion(obj1=:world, obj2=:(ball0.ball),
-                        r=Var(init=[-0.8, -0.1, diameter/2]),
-                        v=Var(init=[3.0, 0.1, 0.0]),
-                        rot=Var(init=[pi/2, 0.0, 0.0])),
+                        r=Var(init=ModiaBase.SVector{3,Float64}(-0.8, -0.1, diameter/2)),
+                        v=Var(init=ModiaBase.SVector{3,Float64}(3.0, 0.1, 0.0)),
+                        rot=Var(init=ModiaBase.SVector{3,Float64}(pi/2, 0.0, 0.0))),
     ball1 = Ball,
     joint1 = FreeMotion(obj1=:world, obj2=:(ball1.ball),
-                        r=Var(init=[TableX/6, 0.0, diameter/2]),
-                        rot=Var(init=[pi/2, 0.0, 0.0])),
+                        r=Var(init=ModiaBase.SVector{3,Float64}(TableX/6, 0.0, diameter/2)),
+                        rot=Var(init=ModiaBase.SVector{3,Float64}(pi/2, 0.0, 0.0))),
     ball2 = Ball,
     joint2 = FreeMotion(obj1=:world, obj2=:(ball2.ball),
-                        r=Var(init=[TableX/6+1*distance_balls+dist, 1/2*(diameter+dist), diameter/2]),
-                        rot=Var(init=[pi/2, 0.0, 0.0])),
+                        r=Var(init=ModiaBase.SVector{3,Float64}(TableX/6+1*distance_balls+dist, 1/2*(diameter+dist), diameter/2)),
+                        rot=Var(init=ModiaBase.SVector{3,Float64}(pi/2, 0.0, 0.0))),
     ball3 = Ball,
     joint3 = FreeMotion(obj1=:world, obj2=:(ball3.ball),
-                        r=Var(init=[TableX/6+1*distance_balls+dist, -1/2*(diameter+dist), diameter/2]),
-                        rot=Var(init=[pi/2, 0.0, 0.0])),
+                        r=Var(init=ModiaBase.SVector{3,Float64}(TableX/6+1*distance_balls+dist, -1/2*(diameter+dist), diameter/2)),
+                        rot=Var(init=ModiaBase.SVector{3,Float64}(pi/2, 0.0, 0.0))),
     ball4 = Ball,
     joint4 = FreeMotion(obj1=:world, obj2=:(ball4.ball),
-                        r=Var(init=[TableX/6+2*(distance_balls+dist), (diameter+dist), diameter/2]),
-                        rot=Var(init=[pi/2, 0.0, 0.0])),
+                        r=Var(init=ModiaBase.SVector{3,Float64}(TableX/6+2*(distance_balls+dist), (diameter+dist), diameter/2)),
+                        rot=Var(init=ModiaBase.SVector{3,Float64}(pi/2, 0.0, 0.0))),
     ball5 = Ball,
     joint5 = FreeMotion(obj1=:world, obj2=:(ball5.ball),
-                        r=Var(init=[TableX/6+2*(distance_balls+dist), 0.0, diameter/2]),
-                        rot=Var(init=[pi/2, 0.0, 0.0])),
+                        r=Var(init=ModiaBase.SVector{3,Float64}(TableX/6+2*(distance_balls+dist), 0.0, diameter/2)),
+                        rot=Var(init=ModiaBase.SVector{3,Float64}(pi/2, 0.0, 0.0))),
     ball6 = Ball,
     joint6 = FreeMotion(obj1=:world, obj2=:(ball6.ball),
-                        r=Var(init=[TableX/6+2*(distance_balls+dist), -(diameter+dist), diameter/2]),
-                        rot=Var(init=[pi/2, 0.0, 0.0])),
+                        r=Var(init=ModiaBase.SVector{3,Float64}(TableX/6+2*(distance_balls+dist), -(diameter+dist), diameter/2)),
+                        rot=Var(init=ModiaBase.SVector{3,Float64}(pi/2, 0.0, 0.0))),
     ball7 = Ball,
     joint7 = FreeMotion(obj1=:world, obj2=:(ball7.ball),
-                        r=Var(init=[TableX/6+3*(distance_balls+dist), 3/2*(diameter+dist), diameter/2]),
-                        rot=Var(init=[pi/2, 0.0, 0.0])),
+                        r=Var(init=ModiaBase.SVector{3,Float64}(TableX/6+3*(distance_balls+dist), 3/2*(diameter+dist), diameter/2)),
+                        rot=Var(init=ModiaBase.SVector{3,Float64}(pi/2, 0.0, 0.0))),
     ball8 = Ball,
     joint8 = FreeMotion(obj1=:world, obj2=:(ball8.ball),
-                        r=Var(init=[TableX/6+3*(distance_balls+dist), 1/2*(diameter+dist), diameter/2]),
-                        rot=Var(init=[pi/2, 0.0, 0.0])),
+                        r=Var(init=ModiaBase.SVector{3,Float64}(TableX/6+3*(distance_balls+dist), 1/2*(diameter+dist), diameter/2)),
+                        rot=Var(init=ModiaBase.SVector{3,Float64}(pi/2, 0.0, 0.0))),
     ball9 = Ball,
     joint9 = FreeMotion(obj1=:world, obj2=:(ball9.ball),
-                        r=Var(init=[TableX/6+3*(distance_balls+dist), -1/2*(diameter+dist), diameter/2]),
-                        rot=Var(init=[pi/2, 0.0, 0.0])),
+                        r=Var(init=ModiaBase.SVector{3,Float64}(TableX/6+3*(distance_balls+dist), -1/2*(diameter+dist), diameter/2)),
+                        rot=Var(init=ModiaBase.SVector{3,Float64}(pi/2, 0.0, 0.0))),
     ball10 = Ball,
     joint10 = FreeMotion(obj1=:world, obj2=:(ball10.ball),
-                         r=Var(init=[TableX/6+3*(distance_balls+dist), -3/2*(diameter+dist), diameter/2]),
-                         rot=Var(init=[pi/2, 0.0, 0.0])),
+                         r=Var(init=ModiaBase.SVector{3,Float64}(TableX/6+3*(distance_balls+dist), -3/2*(diameter+dist), diameter/2)),
+                         rot=Var(init=ModiaBase.SVector{3,Float64}(pi/2, 0.0, 0.0))),
     ball11 = Ball,
     joint11 = FreeMotion(obj1=:world, obj2=:(ball11.ball),
-                         r=Var(init=[TableX/6+4*(distance_balls+dist), 2*(diameter+dist), diameter/2]),
-                         rot=Var(init=[pi/2, 0.0, 0.0])),
+                         r=Var(init=ModiaBase.SVector{3,Float64}(TableX/6+4*(distance_balls+dist), 2*(diameter+dist), diameter/2)),
+                         rot=Var(init=ModiaBase.SVector{3,Float64}(pi/2, 0.0, 0.0))),
     ball12 = Ball,
     joint12 = FreeMotion(obj1=:world, obj2=:(ball12.ball),
-                         r=Var(init=[TableX/6+4*(distance_balls+dist), (diameter+dist), diameter/2]),
-                         rot=Var(init=[pi/2, 0.0, 0.0])),
+                         r=Var(init=ModiaBase.SVector{3,Float64}(TableX/6+4*(distance_balls+dist), (diameter+dist), diameter/2)),
+                         rot=Var(init=ModiaBase.SVector{3,Float64}(pi/2, 0.0, 0.0))),
     ball13 = Ball,
     joint13 = FreeMotion(obj1=:world, obj2=:(ball13.ball),
-                         r=Var(init=[TableX/6+4*(distance_balls+dist), 0.0, diameter/2]),
-                         rot=Var(init=[pi/2, 0.0, 0.0])),
+                         r=Var(init=ModiaBase.SVector{3,Float64}(TableX/6+4*(distance_balls+dist), 0.0, diameter/2)),
+                         rot=Var(init=ModiaBase.SVector{3,Float64}(pi/2, 0.0, 0.0))),
     ball14 = Ball,
     joint14 = FreeMotion(obj1=:world, obj2=:(ball14.ball),
-                         r=Var(init=[TableX/6+4*(distance_balls+dist), -(diameter+dist), diameter/2]),
-                         rot=Var(init=[pi/2, 0.0, 0.0])),
+                         r=Var(init=ModiaBase.SVector{3,Float64}(TableX/6+4*(distance_balls+dist), -(diameter+dist), diameter/2)),
+                         rot=Var(init=ModiaBase.SVector{3,Float64}(pi/2, 0.0, 0.0))),
     ball15 = Ball,
     joint15 = FreeMotion(obj1=:world, obj2=:(ball15.ball),
-                         r=Var(init=[TableX/6+4*(distance_balls+dist), -2*(diameter+dist), diameter/2]),
-                         rot=Var(init=[pi/2, 0.0, 0.0]))
+                         r=Var(init=ModiaBase.SVector{3,Float64}(TableX/6+4*(distance_balls+dist), -2*(diameter+dist), diameter/2)),
+                         rot=Var(init=ModiaBase.SVector{3,Float64}(pi/2, 0.0, 0.0)))
 )
 
-billard = @instantiateModel(buildModia3D(Billard), unitless=true, log=false, logStateSelection=false, logCode=false)
+billard = @instantiateModel(Billard, unitless=true, log=false, logStateSelection=false, logCode=false)
 
 stopTime = 5.0
 testTime = 1.5
@@ -169,6 +169,6 @@ simulate!(billard, stopTime=testTime, tolerance=tolerance, interval=interval, lo
 
 @usingModiaPlot
 plot(billard, ["joint0.r" "joint0.rot"; "joint0.v" "joint0.w"], figure=1)
-#plot(billard, ["joint0.r[1]" "joint0.r[2]" "joint0.r[3]";
-#               "joint0.v[1]" "joint0.v[2]" "joint0.v[3]"], figure=2)
+#plot(billard, ["joint0.r[1)" "joint0.r[2)" "joint0.r[3)";
+#               "joint0.v[1)" "joint0.v[2)" "joint0.v[3)"], figure=2)
 end

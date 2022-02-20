@@ -17,7 +17,7 @@ if (interpolatedForceLaws)
     fd(v) = LinearInterpolation(xd, yd)(v)
 end
 
-SpringDamper = Model(
+SpringDamper = Model3D(
     Length = 0.1,
     Mass = 1.0,
     IMoment = 0.1,
@@ -35,7 +35,7 @@ SpringDamper = Model(
     force = SpringDamperPtP(obj1=:world, obj2=:boxCornerFrame, nominalLength=l0, nominalForce=f0, springForceLaw=fc, damperForceLaw=fd)
 )
 
-springDamper = @instantiateModel(buildModia3D(SpringDamper), aliasReduction=false, unitless=true)
+springDamper = @instantiateModel(SpringDamper, unitless=true)
 
 stopTime = 5.0
 dtmax = 0.1

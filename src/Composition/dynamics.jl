@@ -370,7 +370,6 @@ function computeGeneralizedForces!(mbs::MultibodyData{F}, _leq)::MultibodyData{F
         exportAnimation = scene.exportAnimation
     
         if isTerminal  #if Modia.isTerminalOfAllSegments(sim)
-            println("... isTerminal = true")
             TimerOutputs.@timeit instantiatedModel.timer "Modia3D_4 isTerminal" begin
                 for force in forceElements
                     terminateForceElement(force)

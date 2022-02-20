@@ -23,7 +23,7 @@ massAndGeo = MassPropertiesFromShapeAndMass(mass=4.5)
 geomAndSolidMat = MassPropertiesFromShape()
 
 # Objects3D
-AllShapes = Model(
+AllShapes = Model3D(
     gravField = UniformGravityField(g=9.81, n=[0, 0, -1]),
     world = Object3D(feature=Scene(gravityField=:gravField)),
     worldFrame = Object3D(parent=:world, feature=Visual(shape=CoordinateSystem(length=0.7))),
@@ -34,7 +34,7 @@ AllShapes = Model(
 
     solidEllipsoid = Object3D(feature=Solid(shape=
         Ellipsoid(lengthX=0.6, lengthY=0.9, lengthZ=0.3), visualMaterial=vmatBlue, solidMaterial="DryWood")),
-    jointEllipsoid = FreeMotion(obj1=:world, obj2=:solidEllipsoid, r=Var(init=[-6.0, 0.0, 0.0])),
+    jointEllipsoid = FreeMotion(obj1=:world, obj2=:solidEllipsoid, r=Var(init=ModiaBase.SVector{3,Float32}(-6.0, 0.0, 0.0))),
 
     solidBox = Object3D(feature=Solid(shape=
         Box(lengthX=0.9, lengthY=0.5, lengthZ=0.3), visualMaterial=vmatBlue, solidMaterial="Steel")),
@@ -149,7 +149,7 @@ AllShapes = Model(
         ModelicaShape(type=11, lengthX=0.4, lengthY=0.5, lengthZ=0.3), visualMaterial=vmatYellow), translation=[2.0, 0.0, -1.0])
 )
 
-allShapes = @instantiateModel(buildModia3D(AllShapes), unitless=true, log=false, logStateSelection=false, logCode=false, FloatType=Float32)
+allShapes = @instantiateModel(AllShapes, unitless=true, log=false, logStateSelection=false, logCode=false, FloatType=Float32)
 
 
 

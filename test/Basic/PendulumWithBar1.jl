@@ -41,7 +41,7 @@ PendulumWithBar = Model(
                 (damper.flange_a, fixed.flange)]
 )
 
-pendulumWithBar = @instantiateModel(PendulumWithBar, logCode=true, unitless=true)
+pendulumWithBar = @instantiateModel(PendulumWithBar, unitless=true)
 
 algorithm = Tsit5()
 stopTime = 10.0

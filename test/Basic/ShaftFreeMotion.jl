@@ -25,7 +25,7 @@ model = Model3D(
 )
 #@showModel model
 
-shaft = @instantiateModel(model, aliasReduction=false, unitless=true, log=false, logStateSelection=false, logCode=false)
+shaft = @instantiateModel(model, unitless=true, log=false, logStateSelection=false, logCode=false)
 
 #@showModel shaft.p[1]
 

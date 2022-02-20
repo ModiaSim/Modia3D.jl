@@ -50,7 +50,7 @@ Pendulum = Model(
                                     contactMaterial="BilliardBall", collision=true)),
 )
 
-Cradle = Model(
+Cradle = Model3D(
     gravField = UniformGravityField(g=9.81, n=[0, 0,-1]),
     world = Object3D(feature=Scene(gravityField=:gravField,
                                    nominalLength=Ly,
@@ -81,7 +81,7 @@ Cradle = Model(
     rev5 = Revolute(obj1=:frame5, obj2=:(pendulum5.frame1), axis=1, canCollide=true)
 )
 
-newtonsCradle = @instantiateModel(buildModia3D(Cradle), unitless=true, log=false, logStateSelection=false, logCode=false)
+newtonsCradle = @instantiateModel(Cradle, unitless=true, log=false, logStateSelection=false, logCode=false)
 
 stopTime = 5.0
 tolerance = 1e-8

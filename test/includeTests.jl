@@ -38,7 +38,7 @@ Test.@testset "Robot" begin
     include(joinpath("Robot", "ServoWithRampAndRevolute.jl"))
     include(joinpath("Robot", "ServoWithPathAndRevolute.jl"))
     if testsExtend >= normalTests
-        Test.@test_skip include(joinpath("Robot", "YouBotWithSphere.jl"))  # works on Linux
+        include(joinpath("Robot", "YouBotWithSphere.jl"))
         include(joinpath("Robot", "YouBotGripping.jl"))
     end
     if testsExtend == completeTests
@@ -53,8 +53,8 @@ Test.@testset "Collision" begin
     include(joinpath("Collision", "BouncingEllipsoid.jl"))
     include(joinpath("Collision", "BouncingEllipsoidOnSphere.jl"))
     include(joinpath("Collision", "TwoCollidingBalls.jl"))
-    Test.@test_skip include(joinpath("Collision", "TwoCollidingBoxes.jl"))  # works on Linux
-    include(joinpath("Collision", "CollidingCylinders.jl"))
+    include(joinpath("Collision", "TwoCollidingBoxes.jl"))
+    Test.@test_skip include(joinpath("Collision", "CollidingCylinders.jl"))  # windows: cylinder in the middle has a different behaviour
     include(joinpath("Collision", "NewtonsCradle.jl"))
     Test.@test_throws LoadError include(joinpath("Collision", "InValidCollisionPairingError.jl"))  # test for undefined collision pair material
     if testsExtend >= normalTests

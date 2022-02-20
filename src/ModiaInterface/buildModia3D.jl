@@ -1,7 +1,8 @@
 using OrderedCollections
 
-appendSymbol(path::Nothing, name::Symbol) = name
-appendSymbol(path         , name::Symbol) = :( $path.$name )
+appendSymbol(path::Nothing, name::Union{Symbol,Expr}) = name
+appendSymbol(path         , name::Union{Symbol,Expr}) = :( $path.$name )
+appendSymbol(path::String , name::Union{Symbol,Expr}) = path == "" ? string(name) : path*"."*string(name)
 
 derSymbol(path::Nothing, name::Symbol) = :(der($name))
 derSymbol(path         , name::Symbol) = :(der($path.$name))
@@ -106,7 +107,7 @@ function buildModia3D!(model::AbstractDict, FloatType::Type, TimeType::Type,
         if jointType == :Revolute || jointType == :RevoluteWithFlange
             ndofTotal += 1
             NRevolute += 1
-            revoluteIndices[modelPathAsString*"."*string(path)] = NRevolute
+            revoluteIndices[appendSymbol(modelPathAsString,path)] = NRevolute
             push!(jointStatesRevolute, appendSymbol(path, :phi))
             push!(jointStatesRevolute, appendSymbol(path, :w))
             if jointType == :RevoluteWithFlange
@@ -125,7 +126,7 @@ function buildModia3D!(model::AbstractDict, FloatType::Type, TimeType::Type,
         elseif jointType == :Prismatic || jointType == :PrismaticWithFlange
             ndofTotal  += 1
             NPrismatic += 1
-            prismaticIndices[modelPathAsString*"."*string(path)] = NPrismatic            
+            prismaticIndices[appendSymbol(modelPathAsString,path)] = NPrismatic            
             push!(jointStatesPrismatic, appendSymbol(path, :s))
             push!(jointStatesPrismatic, appendSymbol(path, :v))
             if jointType == :PrismaticWithFlange
@@ -144,7 +145,7 @@ function buildModia3D!(model::AbstractDict, FloatType::Type, TimeType::Type,
         elseif jointType == :FreeMotion
             ndofTotal += 6
             NFreeMotion += 1
-            freeMotionIndices[modelPathAsString*"."*string(path)] = NFreeMotion           
+            freeMotionIndices[appendSymbol(modelPathAsString,path)] = NFreeMotion           
             push!(jointStatesFreeMotion, appendSymbol(path, :r))
             push!(jointStatesFreeMotion, appendSymbol(path, :v))
             push!(jointStatesFreeMotion, appendSymbol(path, :rot))            

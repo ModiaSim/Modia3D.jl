@@ -6,7 +6,7 @@ using Modia3D
 # is not computed precisely enough, and computation time is excessive because the Jacobian is computed
 # very often. This is fixed by setting elasticContactReductionFactor=1e-5.
 
-ZeroCrossing = Model(
+ZeroCrossing = Model3D(
     world = Object3D(feature=Scene(gravityField=UniformGravityField(g=9.81, n=[0, 0, -1]),
                                    nominalLength=0.1,
                                    enableContactDetection=true,
@@ -23,10 +23,10 @@ ZeroCrossing = Model(
                                        visualMaterial=VisualMaterial(color="Blue"),
                                        solidMaterial="DryWood",
                                        collision=true)),
-    joint = FreeMotion(obj1=:world, obj2=:ellipsoid, r=Var(init=[0.01, 0.01, 0.01]), w=Var(init=[0.0, 0.0, 0.0]))
+    joint = FreeMotion(obj1=:world, obj2=:ellipsoid, r=Var(init=ModiaBase.SVector{3,Float64}(0.01, 0.01, 0.01)), w=Var(init=ModiaBase.SVector{3,Float64}(0.0, 0.0, 0.0)))
 )
 
-zeroCrossing = @instantiateModel(buildModia3D(ZeroCrossing), unitless=true)
+zeroCrossing = @instantiateModel(ZeroCrossing, unitless=true)
 
 stopTime = 0.01
 tolerance = 1e-8

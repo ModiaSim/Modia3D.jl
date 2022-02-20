@@ -5,7 +5,7 @@ module BouncingSphereSimulation
 using Modia3D
 
 
-BouncingSphere = Model(
+BouncingSphere = Model3D(
     boxHeigth = 0.1,
     groundMaterial = VisualMaterial(color="DarkGreen", transparency=0.5),
     gravField = UniformGravityField(g=9.81, n=[0, -1, 0]),
@@ -30,7 +30,7 @@ BouncingSphere = Model(
     prism = Prismatic(obj1=:world, obj2=:sphere, axis=2, s=Var(init=1.0))
 )
 
-bouncingSphere = @instantiateModel(buildModia3D(BouncingSphere), unitless=true, log=false, logStateSelection=false, logCode=false, FloatType = Float64)
+bouncingSphere = @instantiateModel(BouncingSphere, unitless=true, log=false, logStateSelection=false, logCode=false, FloatType = Float64)
 
 #@show bouncingSphere.parameterExpressions
 #@show bouncingSphere.parameters

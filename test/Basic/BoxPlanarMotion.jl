@@ -2,7 +2,7 @@ module BoxPlanarMotionSimulation
 
 using Modia3D
 
-BoxPlanarMotion = Model(
+BoxPlanarMotion = Model3D(
     world = Object3D(feature=Scene(gravityField=UniformGravityField(g=1.0, n=[0, -1, 0]))),
     worldFrame = Object3D(parent=:world,
                           feature=Visual(shape=CoordinateSystem(length=0.2))),
@@ -16,12 +16,10 @@ BoxPlanarMotion = Model(
     revolute_z  = Revolute( obj1=:transy, obj2=:box   , axis=3, phi=Var(init= 0.0), w=Var(init=3.0))
 )
 
-boxPlanarMotion = buildModia3D(BoxPlanarMotion)
-
-model = @instantiateModel(boxPlanarMotion, aliasReduction=false, unitless=true, log=false, logStateSelection=false, logCode=false)
+model = @instantiateModel(BoxPlanarMotion, unitless=true, log=false, logStateSelection=false, logCode=false)
 
 stopTime = 4.0
-requiredFinalStates = [3.0, 1.0, -1.0, -2.0, 12.0, 3.0]
+requiredFinalStates = [1.0, 3.0, -2.0, -1.0, 3.0, 12.0]
 simulate!(model, stopTime=stopTime, log=true, logStates=true, requiredFinalStates=requiredFinalStates)
 
 @usingModiaPlot

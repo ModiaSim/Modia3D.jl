@@ -2,7 +2,7 @@ module ShaftFreeMotionAdaptiveRotSequence
 
 using Modia3D
 
-Shaft = Model(
+Shaft = Model3D(
     Length = 1.0,
     Diameter = 0.2,
     visualMaterial = VisualMaterial(color="IndianRed1", transparency=0.5),
@@ -13,14 +13,14 @@ Shaft = Model(
                                    massProperties=MassProperties(; mass=84.7154, Ixx=7.2711, Iyy=7.2711, Izz=0.4230),
                                    visualMaterial=:(visualMaterial))),
     shaftFrame = Object3D(parent=:shaft, feature=Visual(shape=CoordinateSystem(length=0.4))),
-    free = FreeMotion(obj1=:world, obj2=:shaft, v   = Var(init = [0.0, 0.1, 0.0]),
-                                                rot = Var(start = [deg2rad(30), deg2rad(90), deg2rad(10)]),
-                                                w   = Var(init = [-2.0, 0.0, 0.0]))
+    free = FreeMotion(obj1=:world, obj2=:shaft, v   = Var(init  = ModiaBase.SVector{3,Float64}(0.0, 0.1, 0.0)),
+                                                rot = Var(start = ModiaBase.SVector{3,Float64}(deg2rad(30), deg2rad(90), deg2rad(10))),
+                                                w   = Var(init  = ModiaBase.SVector{3,Float64}(-2.0, 0.0, 0.0)))
 )
 
 #@showModel model
 
-shaft = @instantiateModel(buildModia3D(Shaft), aliasReduction=false, unitless=true, log=false, logStateSelection=false, logCode=false)
+shaft = @instantiateModel(Shaft, unitless=true, log=false, logStateSelection=false, logCode=false)
 
 #@showModel shaft.p[1]
 

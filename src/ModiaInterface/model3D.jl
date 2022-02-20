@@ -94,14 +94,10 @@ PrismaticWithFlange(; obj1, obj2, axis=1, s=Var(init=0.0), v=Var(init=0.0), canC
 
 Return joint rot. kinematics matrix `J` for Cardan angles `rot123` (rotation sequence x-y-z).
 """
-function J123(rot123::AbstractVector)
-
+function J123(rot123::SVector{3,F})::SMatrix{3,3,F,9} where {F}
     (sbe, cbe) = sincos(rot123[2])
     (sga, cga) = sincos(rot123[3])
-    return [     cga     -sga  0.0 ;
-             cbe*sga  cbe*cga  0.0 ;
-            -sbe*cga  sbe*sga  cbe ] / cbe
-
+    return SMatrix{3,3,F,9}(cga/cbe, sga, -sbe*cga/cbe, -sga/cbe, cga, sbe*sga/cbe, F(0.0), F(0.0), F(1.0))
 end
 
 """
@@ -109,14 +105,10 @@ end
 
 Return joint rot. kinematics matrix `J` for Cardan angles `rot132` (rotation sequence x-z-y).
 """
-function J132(rot132::AbstractVector)
-
+function J132(rot132::SVector{3,F})::SMatrix{3,3,F,9} where {F}
     (sga, cga) = sincos(rot132[2])
     (sbe, cbe) = sincos(rot132[3])
-    return [ cbe      0.0  sbe     ;
-            -sbe*cga  0.0  cbe*cga ;
-             cbe*sga  cga  sbe*sga ] / cga
-
+    return SMatrix{3,3,F,9}(cbe/cga, -sbe, cbe*sga/cga, F(0.0), F(0.0), F(1.0), sbe/cga, cbe, sbe*sga/cga)
 end
 
 

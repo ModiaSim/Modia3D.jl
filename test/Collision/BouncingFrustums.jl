@@ -7,7 +7,7 @@ vmatGreen = VisualMaterial(color="Green")
 vmatBlue  = VisualMaterial(color="Blue")
 vmatGrey  = VisualMaterial(color="Grey", transparency=0.5)
 
-BouncingFrustums = Model(
+BouncingFrustums = Model3D(
     boxHeigth = 0.1,
     gravField = UniformGravityField(g=9.81, n=[0, 0, -1]),
     world = Object3D(feature=Scene(gravityField=:gravField,
@@ -32,9 +32,9 @@ BouncingFrustums = Model(
                                    solidMaterial="DryWood",
                                    collision=true)),
     jointX = FreeMotion(obj1=:frameX, obj2=:coneX,
-                        r=Var(init=[0.0, 0.0, 0.0]),
-                        rot=Var(init=[0.0, -60*u"°", 0.0]),
-                        v=Var(init=[0.0, 1.0, 0.0])),
+                        r=Var(init=ModiaBase.SVector{3,Float64}(0.0, 0.0, 0.0)),
+                        rot=Var(init=ModiaBase.SVector{3,Float64}(0.0, -60*u"°", 0.0)),
+                        v=Var(init=ModiaBase.SVector{3,Float64}(0.0, 1.0, 0.0))),
     frameY = Object3D(parent=:world,
                       translation=:[0.0, -0.5, 1.0],
                       rotation=:[90*u"°", 90*u"°", 0.0],
@@ -44,9 +44,9 @@ BouncingFrustums = Model(
                                    solidMaterial="DryWood",
                                    collision=true)),
     jointY = FreeMotion(obj1=:frameY, obj2=:coneY,
-                        r=Var(init=[0.0, 0.0, 0.0]),
-                        rot=Var(init=[0.0, 0.0, -60*u"°"]),
-                        v=Var(init=[0.0, 0.0, 1.0])),
+                        r=Var(init=ModiaBase.SVector{3,Float64}(0.0, 0.0, 0.0)),
+                        rot=Var(init=ModiaBase.SVector{3,Float64}(0.0, 0.0, -60*u"°")),
+                        v=Var(init=ModiaBase.SVector{3,Float64}(0.0, 0.0, 1.0))),
     frameZ = Object3D(parent=:world,
                       translation=:[1.0, -0.5, 1.0],
                       feature=Visual(shape=CoordinateSystem(length=0.5))),
@@ -55,12 +55,12 @@ BouncingFrustums = Model(
                                    solidMaterial="DryWood",
                                    collision=true)),
     jointZ = FreeMotion(obj1=:frameZ, obj2=:coneZ,
-                        r=Var(init=[0.0, 0.0, 0.0]),
-                        rot=Var(init=[-60*u"°", 0.0, 0.0]),
-                        v=Var(init=[1.0, 0.0, 0.0]))
+                        r=Var(init=ModiaBase.SVector{3,Float64}(0.0, 0.0, 0.0)),
+                        rot=Var(init=ModiaBase.SVector{3,Float64}(-60*u"°", 0.0, 0.0)),
+                        v=Var(init=ModiaBase.SVector{3,Float64}(1.0, 0.0, 0.0)))
 )
 
-bouncingFrustums = @instantiateModel(buildModia3D(BouncingFrustums), unitless=true, log=false, logStateSelection=false, logCode=false)
+bouncingFrustums = @instantiateModel(BouncingFrustums, unitless=true, log=false, logStateSelection=false, logCode=false)
 
 stopTime = 1.2
 tolerance = 1e-8

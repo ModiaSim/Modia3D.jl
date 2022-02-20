@@ -10,14 +10,14 @@ mat1 = "Red"
 massAndGeoSphere = MassPropertiesFromShape()
 
 # Objects3D
-ConvexPartitions = Model(
+ConvexPartitions = Model3D(
     gravField = UniformGravityField(g=9.81, n=[0, -1, 0]),
     world = Object3D(feature=Scene(gravityField=:gravField, mprTolerance = 1.0e-13)),
 
     sphere = Object3D(feature=Solid(shape=Sphere(diameter=0.2),
                       visualMaterial=mat1, solidMaterial="Steel",
                       massProperties=massAndGeoSphere, collision=true)),
-    free = FreeMotion(obj1=:world, obj2=:sphere, r=Var(init=[0.0, 2.0, 0.0])),
+    free = FreeMotion(obj1=:world, obj2=:sphere, r=Var(init=ModiaBase.SVector{3,Float64}(0.0, 2.0, 0.0))),
 
     bunnySolid = Object3D(parent=:world, feature=Solid(shape =
         FileMesh(filename=filenameBunny, scale=[0.1, 0.1, 0.1]), solidMaterial="Steel", collision=true )),
@@ -26,7 +26,7 @@ ConvexPartitions = Model(
         FileMesh(filename=filenameBunny, scale=[0.1, 0.1, 0.1], convexPartition=true), solidMaterial="Steel", collision=true)),
 )
 
-convexPartitions = @instantiateModel(buildModia3D(ConvexPartitions), unitless=true, log=false, logStateSelection=false, logCode=false)
+convexPartitions = @instantiateModel(ConvexPartitions, unitless=true, log=false, logStateSelection=false, logCode=false)
 
 stopTime = 1.3
 if Sys.iswindows()
