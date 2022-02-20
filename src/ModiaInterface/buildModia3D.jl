@@ -95,6 +95,8 @@ function buildModia3D!(model::AbstractDict, FloatType::Type, TimeType::Type,
     jointAccelerationsFreeMotion2  = []
     jointStatesFreeMotion_isrot123 = Expr[]
     freeMotionIndices              = OrderedCollections.OrderedDict{String,Int}()
+
+    modelPathAsString = isnothing(modelPath) ? "" : string(modelPath)
     
     i=1
     for joint in jointInfo
@@ -104,7 +106,7 @@ function buildModia3D!(model::AbstractDict, FloatType::Type, TimeType::Type,
         if jointType == :Revolute || jointType == :RevoluteWithFlange
             ndofTotal += 1
             NRevolute += 1
-            revoluteIndices[string(path)] = NRevolute
+            revoluteIndices[modelPathAsString*"."*string(path)] = NRevolute
             push!(jointStatesRevolute, appendSymbol(path, :phi))
             push!(jointStatesRevolute, appendSymbol(path, :w))
             if jointType == :RevoluteWithFlange
@@ -123,7 +125,7 @@ function buildModia3D!(model::AbstractDict, FloatType::Type, TimeType::Type,
         elseif jointType == :Prismatic || jointType == :PrismaticWithFlange
             ndofTotal  += 1
             NPrismatic += 1
-            prismaticIndices[string(path)] = NPrismatic            
+            prismaticIndices[modelPathAsString*"."*string(path)] = NPrismatic            
             push!(jointStatesPrismatic, appendSymbol(path, :s))
             push!(jointStatesPrismatic, appendSymbol(path, :v))
             if jointType == :PrismaticWithFlange
@@ -142,7 +144,7 @@ function buildModia3D!(model::AbstractDict, FloatType::Type, TimeType::Type,
         elseif jointType == :FreeMotion
             ndofTotal += 6
             NFreeMotion += 1
-            freeMotionIndices[string(path)] = NFreeMotion           
+            freeMotionIndices[modelPathAsString*"."*string(path)] = NFreeMotion           
             push!(jointStatesFreeMotion, appendSymbol(path, :r))
             push!(jointStatesFreeMotion, appendSymbol(path, :v))
             push!(jointStatesFreeMotion, appendSymbol(path, :rot))            
@@ -169,7 +171,6 @@ function buildModia3D!(model::AbstractDict, FloatType::Type, TimeType::Type,
 
     i=1
     mbsi = :_mbs1
-    modelPathAsString = isnothing(modelPath) ? "" : string(modelPath)
     mbs_equations = [ :($mbsi = Modia3D.openModel3D!(instantiatedModel, $modelPathAsString, $ndofTotal, time)) ]
     mbs_variables = Model()
     mbs_variables[mbsi] = Var(hideResult=true)
