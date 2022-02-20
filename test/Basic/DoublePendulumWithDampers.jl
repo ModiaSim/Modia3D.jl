@@ -23,7 +23,7 @@ Bar = Model(
                       translation=:[ Lx/2, 0.0, 0.0])
 )
 
-DoublePendulum = Model(
+DoublePendulum = Model3D(
     Lx = 1.0,
     world = Object3D(feature=Scene()),
     worldFrame = Object3D(parent=:world,
@@ -43,11 +43,7 @@ DoublePendulum = Model(
                 (damper2.flange_a, fixed2.flange)]
 )
 
-doublePendulum = @instantiateModel(buildModia3D(DoublePendulum), unitless=true)
-
-#@showModel doublePendulum.parameterExpressions
-#@showModel doublePendulum.parameters
-#@show doublePendulum.equationInfo
+doublePendulum = @instantiateModel(DoublePendulum, unitless=true)
 
 stopTime = 10.0
 tolerance = 1.0e-8
