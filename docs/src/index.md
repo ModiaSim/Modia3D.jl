@@ -48,6 +48,11 @@ Download and install the free DLR SimVis Community Edition, e.g. with [https://v
 
 ## Release Notes
 
+### Version 0.8.2
+
+- Fix Cone contact detection
+- Add rattleback test (Modia3D/test/Collisions/Rattleback.jl)
+
 ### Version 0.8.1
 
 - `collisionSmoothingRadius`: edges are smoothed with `collisionSmoothingRadius`
