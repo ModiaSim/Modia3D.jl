@@ -1,4 +1,4 @@
-module PendulumWithDamper
+module PendulumWithDamper_MonteCarloMeasurements
 
 using Modia3D
 using Modia3D.MonteCarloMeasurements
@@ -6,7 +6,6 @@ using Modia3D.MonteCarloMeasurements
 include("$(Modia3D.modelsPath)/Blocks.jl")
 include("$(Modia3D.modelsPath)/Electric.jl")
 include("$(Modia3D.modelsPath)/Rotational.jl")
-
 
 Pendulum = Model(
     m = 1.0,
@@ -16,7 +15,6 @@ Pendulum = Model(
     world = Object3D(feature=Scene(enableContactDetection=false)),
     worldFrame = Object3D(parent=:world,
                           feature=Visual(shape=CoordinateSystem(length=0.5))),
-
     frame0 = Object3D(feature=Solid(shape=Beam(axis=1, length=1.0, width=0.2, thickness=0.2),
                                     massProperties=MassProperties(mass=:m),
                                     visualMaterial=:(vmat1))),
@@ -37,14 +35,12 @@ PendulumWithDamp = Model(
                 (damper.flange_a, fixed.flange)]
 )
 
-#@showModel PendulumWithDamp
 unsafe_comparisons(:reduction)
 pendulumWithDamper = @instantiateModel(PendulumWithDamp, unitless=true, log=false, logStateSelection=false, logCode=false, FloatType =MonteCarloMeasurements.StaticParticles{Float64,100})
 
 stopTime = 10.0
-# requiredFinalStates = [-1.578178283450938, 0.061515170100766486]
-
-simulate!(pendulumWithDamper, QBDF(autodiff=false), stopTime=stopTime, log=true, logStates=false, requiredFinalStates=missing)
+requiredFinalStates = missing
+simulate!(pendulumWithDamper, QBDF(autodiff=false), stopTime=stopTime, log=true, logStates=false, requiredFinalStates=requiredFinalStates)
 
 @usingModiaPlot
 plot(pendulumWithDamper, ["pendulum.rev.flange.phi", "pendulum.rev.variables[1]"], figure=1)

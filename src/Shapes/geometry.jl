@@ -235,6 +235,7 @@ mutable struct FileMesh <: Modia3D.AbstractGeometry
 
     # for solids only
     centroid::SVector{3,Float64}
+    shortestEdge::Float64
     longestEdge::Float64
     objPoints::Vector{SVector{3,Float64}}
     facesIndizes::Vector{SVector{3,Int64}}
