@@ -43,15 +43,15 @@ mutable struct MultibodyData{F <: Modia3D.VarFloatType, TimeType}
 end
 
 mutable struct MultibodyBuild{F <: Modia3D.VarFloatType, TimeType}
-    Model3DPath::String                  # Path of the Model3D(..) command used to define the system, e.g. "a.b.c"
-    Model3DSplittedPath::Vector{Symbol}  # Splitted Model3DPath, e.g. [:a, :b, :c]
-    revolutePaths::Vector{String}        # Paths to the Revolute joints in the order of argument args of setStatesRevolute!(..., args...)
-    prismaticPaths::Vector{String}       # Paths to the Prismatic joints in the order of argument args of setStatesPrismatic!(..., args...)
-    freeMotionPaths::Vector{String}      # Paths to the FreeMotion joints in the order of argument args of setStatesFreeMotion!(..., args...)
-    mbs::Union{MultibodyData{F,TimeType}, Nothing}
+    Model3DPath::String                         # Path of the Model3D(..) command used to define the system, e.g. "a.b.c"
+    Model3DSplittedPath::Vector{Symbol}         # Splitted Model3DPath, e.g. [:a, :b, :c]
+    revoluteIndices::OrderedDict{String,Int}    # obj.jointIndex = revoluteIndices["a.b.c"] (= order of arguments in setStatesRevolute!(..., args...))
+    prismaticIndices::OrderedDict{String,Int}   # obj.jointIndex = prismaticIndices["a.b.c"] (= order of arguments in setStatesPrismatic!(..., args...))
+    freeMotionIndices::OrderedDict{String,Int}  # obj.jointIndex = freeMotionIndices["a.b.c"] (= order of arguments in setStatesFreeMotion!(..., args...))
+    mbs::Union{MultibodyData{F,TimeType}, Nothing}  
     
-    MultibodyBuild{F,TimeType}(Model3DPath::String, Model3DSplittedPath::Vector{Symbol}, revolutePaths, prismaticPaths, freeMotionPaths) where {F,TimeType} =
-                              new(Model3DPath, Model3DSplittedPath, revolutePaths, prismaticPaths, freeMotionPaths, nothing)    
+    MultibodyBuild{F,TimeType}(Model3DPath::String, Model3DSplittedPath::Vector{Symbol}, revoluteIndices, prismaticIndices, freeMotionIndices) where {F,TimeType} =
+                              new(Model3DPath, Model3DSplittedPath, revoluteIndices, prismaticIndices, freeMotionIndices, nothing)    
 end
 
 
@@ -511,8 +511,8 @@ Copy states of the free motion joints into the corresponding Object3Ds.
     @inbounds for obj in mbs.freeMotionObjects
         freeMotion     = scene.freeMotion[obj.jointIndex]
         freeMotion.r   = args[j]
-        freeMotion.rot = args[j+1]
-        freeMotion.v   = args[j+2]
+        freeMotion.v   = args[j+1]
+        freeMotion.rot = args[j+2]        
         freeMotion.w   = args[j+3]
         j += 4
     end

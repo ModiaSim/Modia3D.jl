@@ -82,7 +82,7 @@ function initAnalysis2!(world)
     if typeof(world.feature) <: Modia3D.Composition.Scene
         scene = world.feature
     else
-        scene = Modia3D.Composition.Scene()
+        error("Internal error of Modia3D: typeof(world.feature) = ", typeof(world.feature), ", but must be Modia3D.Composition.Scene")
     end
     scene.analysis = Modia3D.DynamicAnalysis
 
@@ -96,6 +96,51 @@ function initAnalysis2!(world)
 end
 
 
+function makeJointsAvailable(scene::Scene{F}, mbsBuild::MultibodyBuild{F,TimeType}) where {F <: Modia3D.VarFloatType,TimeType}
+    tree = scene.treeForComputation
+
+    scene.revolute   = Vector{Revolute{F}}(  undef, length(mbsBuild.revoluteIndices))
+    scene.prismatic  = Vector{Prismatic{F}}( undef, length(mbsBuild.prismaticIndices))
+    scene.freeMotion = Vector{FreeMotion{F}}(undef, length(mbsBuild.freeMotionIndices))
+    
+    for obj in tree
+        jointKind = obj.jointKind
+
+        if jointKind == FixKind
+            if obj.R_rel === Modia3D.NullRotation(F)
+                obj.jointKind = FixTranslationKind
+            end
+
+        elseif jointKind == FixTranslationKind
+            continue
+
+        elseif jointKind == RevoluteKind
+            obj.jointIndex = mbsBuild.revoluteIndices[obj.joint.path]
+            scene.revolute[obj.jointIndex] = obj.joint
+            
+        elseif jointKind == PrismaticKind
+            obj.jointIndex = mbsBuild.prismaticIndices[obj.joint.path]
+            scene.prismatic[obj.jointIndex] = obj.joint
+
+        elseif jointKind == FreeMotionKind
+            obj.jointIndex = mbsBuild.freeMotionIndices[obj.joint.path]
+            scene.freeMotion[obj.jointIndex] = obj.joint
+
+            if hasNoParent(obj.parent)
+                obj.jointKind = AbsoluteFreeMotionKind
+            end
+
+        elseif jointKind == AbsoluteFreeMotionKind
+            obj.jointIndex = mbsBuild.freeMotionIndices[obj.joint.path]
+            scene.freeMotion[obj.jointIndex] = obj.joint
+
+        else
+            error("Bug in Modia3D/src/Composition/handler.jl: jointKind = $jointKind is not known:\njoint = ", obj.joint)
+        end
+    end
+end
+
+
 """
     mbs = openModel3D!(instantiatedModel, modelPath::String, ndof::Int, time)
 
@@ -103,45 +148,49 @@ Open Model3D.
 """
 function openModel3D!(instantiatedModel::ModiaLang.SimulationModel{F,TimeType}, modelPath::String, 
                       nqdd::Int, time)::MultibodyData{F,TimeType} where {F,TimeType}
-     TimerOutputs.@timeit instantiatedModel.timer "Modia3D_0 initJoint!" begin
-        mbsBuild::MultibodyBuild{F,TimeType} = instantiatedModel.buildDict[modelPath]
-        if ModiaLang.isFirstInitialOfAllSegments(instantiatedModel)
-            # Instantiate the Modia3D system
-            mbsRoot = ModiaLang.getModelFromSplittedPath(instantiatedModel.evaluatedParameters, mbsBuild.Model3DSplittedPath)
-            (world, revoluteObjects, prismaticObjects, freeMotionObjects, forceElements) = checkMultibodySystemAndGetWorldAndJointsAndForceElements(mbsRoot, modelPath, F)
+    mbsBuild::MultibodyBuild{F,TimeType} = instantiatedModel.buildDict[modelPath]
+    if ModiaLang.isFirstInitialOfAllSegments(instantiatedModel)
+        # Instantiate the Modia3D system
+        mbsRoot = ModiaLang.getModelFromSplittedPath(instantiatedModel.evaluatedParameters, mbsBuild.Model3DSplittedPath)
+        (world, revoluteObjects, prismaticObjects, freeMotionObjects, forceElements) = checkMultibodySystemAndGetWorldAndJointsAndForceElements(mbsRoot, modelPath, F)
 
-            # Initialize force elements
-            for force in forceElements
-                initializeForceElement(force)
-            end
+        # Initialize force elements
+        for force in forceElements
+            initializeForceElement(force)
+        end
 
-            # Construct MultibodyData
-            scene = initAnalysis2!(world)
-            scene.forceElements = forceElements
-            if scene.options.enableContactDetection
-                nz = 2
-                zStartIndex = ModiaLang.addZeroCrossings(instantiatedModel, nz)
-                scene.zStartIndex = zStartIndex
-            else
-                nz = 0
-                zStartIndex = 0
-            end
-            mbsBuild.mbs = MultibodyData{F,TimeType}(instantiatedModel, nqdd, world, scene, revoluteObjects, prismaticObjects, freeMotionObjects, zStartIndex, nz, time)
-
-            if scene.visualize
-                TimerOutputs.@timeit instantiatedModel.timer "Modia3D_0 initializeVisualization" Modia3D.Composition.initializeVisualization(Modia3D.renderer[1], scene.allVisuElements)
-                if instantiatedModel.options.log
-                    println(    "        Modia3D: nVisualShapes = ", length(scene.allVisuElements))
-                    if scene.options.enableContactDetection
-                        println("                 mprTolerance  = ", scene.options.contactDetection.tol_rel)
-                        println("                 contact_eps   = ", scene.options.contactDetection.contact_eps)
-                    end
+        # Construct MultibodyData
+        scene = initAnalysis2!(world)
+        scene.forceElements = forceElements
+        if scene.options.enableContactDetection && scene.collide
+            nz = 2
+            zStartIndex = ModiaLang.addZeroCrossings(instantiatedModel, nz)
+            scene.zStartIndex = zStartIndex
+        else
+            nz = 0
+            zStartIndex = 0
+        end
+        mbsBuild.mbs = MultibodyData{F,TimeType}(instantiatedModel, nqdd, world, scene, revoluteObjects, prismaticObjects, freeMotionObjects, zStartIndex, nz, time)
+        makeJointsAvailable(scene, mbsBuild)
+        
+        if scene.visualize
+            TimerOutputs.@timeit instantiatedModel.timer "Modia3D_0 initializeVisualization" Modia3D.Composition.initializeVisualization(Modia3D.renderer[1], scene.allVisuElements)
+            if instantiatedModel.options.log
+                println(    "        Modia3D: nVisualShapes = ", length(scene.allVisuElements))
+                if scene.options.enableContactDetection
+                    println("                 mprTolerance  = ", scene.options.contactDetection.tol_rel)
+                    println("                 contact_eps   = ", scene.options.contactDetection.contact_eps)
                 end
             end
         end
-        mbs = mbsBuild.mbs
-        mbs.time = time
     end
+    
+    if isnothing(mbsBuild.mbs)
+        error("Error in Model3D.openModel3D!: ModiaLang.isFirstInitialOfAllSegments was never true!!!")
+    end
+    
+    mbs = mbsBuild.mbs
+    mbs.time = time
     return mbs
 end
 
@@ -321,6 +370,7 @@ function computeGeneralizedForces!(mbs::MultibodyData{F}, _leq)::MultibodyData{F
         exportAnimation = scene.exportAnimation
     
         if isTerminal  #if Modia.isTerminalOfAllSegments(sim)
+            println("... isTerminal = true")
             TimerOutputs.@timeit instantiatedModel.timer "Modia3D_4 isTerminal" begin
                 for force in forceElements
                     terminateForceElement(force)
