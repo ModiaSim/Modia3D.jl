@@ -169,6 +169,6 @@ simulate!(billard, stopTime=testTime, tolerance=tolerance, interval=interval, lo
 
 @usingModiaPlot
 plot(billard, ["joint0.r" "joint0.rot"; "joint0.v" "joint0.w"], figure=1)
-#plot(billard, ["joint0.r[1)" "joint0.r[2)" "joint0.r[3)";
-#               "joint0.v[1)" "joint0.v[2)" "joint0.v[3)"], figure=2)
+#plot(billard, ["joint0.r[1]" "joint0.r[2]" "joint0.r[3]";
+#               "joint0.v[1]" "joint0.v[2]" "joint0.v[3]"], figure=2)
 end

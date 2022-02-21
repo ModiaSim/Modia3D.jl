@@ -37,7 +37,8 @@ tolerance = 1e-6
 interval = 0.001
 requiredFinalStates = [-8.657430783400523, 1.311823798979111e-5, 1.9101646652128834, -12.06565031388969, 1.060893587277513e-5, 1.3537002915036265, 1.5708365835208564, -8.409599774801432e-6, 5.808051018355625, -0.00017413228174145693, 4.0965706583202726e-5, 4.180685839091236]
 
-simulate!(twoCollidingBoxes, stopTime=stopTime, tolerance=tolerance, interval=interval, log=true, logStates=false, logEvents=false, requiredFinalStates=requiredFinalStates)
+simulate!(twoCollidingBoxes, stopTime=stopTime, tolerance=tolerance, interval=interval, log=true, logStates=false, logEvents=false, 
+         requiredFinalStates_rtol = 0.01, requiredFinalStates_atol = 0.01, requiredFinalStates=requiredFinalStates)
 
 @usingModiaPlot
 plot(twoCollidingBoxes, ["movingBoxJoint.r" "movingBoxJoint.rot"; "movingBoxJoint.v" "movingBoxJoint.w"], figure=1)
