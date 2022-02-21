@@ -38,7 +38,7 @@ stopTime = 2.7
 tolerance = 1e-8
 requiredFinalStates = [0.29302652789657424, -1.2392524758992525, -0.13171402091799628, 0.11357140027502943, -4.417276610857313, -0.8729857092038694, 2.3810648360145152, -0.426312211044484 , 0.13656197405807574, -7.335181005993924, 0.812877179123953, 4.870682494334355]
 simulate!(bouncingSphere, stopTime=stopTime, tolerance=tolerance, log=true, logStates=false, logEvents=false,
-          requiredFinalStates_rtol = 0.01, requiredFinalStates_atol = 0.01, requiredFinalStates=requiredFinalStates)
+          requiredFinalStates_rtol = 0.2, requiredFinalStates_atol = 0.2, requiredFinalStates=requiredFinalStates)
 
 @usingModiaPlot
 plot(bouncingSphere, ["free.r" "free.rot"; "free.v" "free.w"], figure=1)
