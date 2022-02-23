@@ -2,7 +2,7 @@ module HarmonicOscillator
 
 using Modia3D
 
-Oscillator = Model(
+Oscillator = Model3D(
     Length = 0.1,
     Mass = 1.0,
     nomForce = 0.5,
@@ -19,7 +19,7 @@ Oscillator = Model(
     force = Bushing(obj1=:world, obj2=:oscillator, nominalForce=:[0.0, 0.0, nomForce], springForceLaw=:[0.0, 0.0, Stiffness], damperForceLaw=:[0.0, 0.0, Damping])
 )
 
-oscillator = @instantiateModel(buildModia3D(Oscillator), aliasReduction=false, unitless=true)
+oscillator = @instantiateModel(Oscillator, unitless=true)
 
 stopTime = 5.0
 dtmax = 0.1

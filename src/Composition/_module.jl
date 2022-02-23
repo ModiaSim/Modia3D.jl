@@ -20,6 +20,8 @@ Andrea Neumayr and Martin Otter, [DLR - Institute of System Dynamics and Control
 """
 module Composition
 
+export MultibodyData
+
 export initialize, initAnalysis!, performAnalysis!, closeAnalysis!, visualize!, visualizeWorld!
 export updatePosition!, update!
 export RotationVariables, RCardan123
@@ -29,6 +31,13 @@ export FixTranslation
 export setAngle!, connect
 export setDistance!
 
+export openModel3D!
+export setStatesRevolute!  , setAccelerationsRevolute!  , getGenForcesRevolute
+export setStatesPrismatic! , setAccelerationsPrismatic! , getGenForcesPrismatic
+export setStatesFreeMotion!, setAccelerationsFreeMotion!, getGenForcesFreeMotion
+export setStatesFreeMotion_isrot123!
+
+export computeGeneralizedForces!
 
 export distanceAndAngles, distance, planarRotationAngle
 export measFrameRotation, measFramePosition, measFrameDistance
@@ -81,6 +90,7 @@ import Modia3D.Shapes
 import JSON
 import Printf
 import ModiaLang
+import ModiaLang: ModiaBase
 import TimerOutputs
 import MonteCarloMeasurements
 

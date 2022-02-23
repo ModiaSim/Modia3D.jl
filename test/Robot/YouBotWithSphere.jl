@@ -349,7 +349,7 @@ Gripper = Model(
     #                                d=d, k1=k1, k2=k2, T2=T2, gearRatio=gearRatio, referencePath=referencePath,  ref_index=6)
 )
 
-YouBot = Model(
+YouBot = Model3D(
     gravField = UniformGravityField(g=9.81, n=[0,0,-1]),
         world = Object3D(feature=Scene(gravityField = :gravField, mprTolerance=1.0e-18,
                 visualizeFrames=false, defaultFrameLength=0.1,
@@ -361,7 +361,7 @@ YouBot = Model(
     sphere = Object3D(
         feature=Solid(shape=Sphere(diameter=diameter), visualMaterial=vmat2, solidMaterial="DryWood", collision=true)),
 
-    free = FreeMotion(obj1=:(table.plate), obj2=:sphere, r=Var(init=[-tableX/2+diameter/2, 0.0, diameter/2+tableZ/2]), rot=Var(init=[pi/2, 0.0, 0.0])),
+    free = FreeMotion(obj1=:(table.plate), obj2=:sphere, r=Var(init=ModiaBase.SVector{3,Float64}(-tableX/2+diameter/2, 0.0, diameter/2+tableZ/2)), rot=Var(init=ModiaBase.SVector{3,Float64}(pi/2, 0.0, 0.0))),
 
     arm_base_frame = Object3D(parent=:(base.base_frame),
         translation=[0.143, 0.0, 0.046],
@@ -418,14 +418,14 @@ modelParameters = Map(
     servo5 = servoParameters5,
 )
 
-youbotModel = buildModia3D(YouBot) | modelParameters
+youbotModel = YouBot | modelParameters
 
 youbot = @instantiateModel(youbotModel, unitless=true, logCode=false, log=false)
 
 stopTime = 5.0
 tolerance = 1e-6
 requiredFinalStates = [0.38482227754776066, -0.00016295742025519802, -0.3452201051898588, 0.15367592851859116, -3.115109032187419e-5, 2.1716034934731783e-7, 1.5711777547062007, -0.0004593817729326798, -21.251802606456394, 0.00288490325758245, 0.0008119903827950956, -6.173843836576349, -9.385893877103843e-8, 9.392153905515826e-8, -1.834001085206641e-6, 1.834211232702938e-6, -3.5547016886714106e-6, 3.5551825975198027e-6, -2.1819178782680093e-6, 2.1822806030382832e-6, 8.488825444774014e-9, -8.49023732072194e-9, -0.0007169695126938622, 0.22761790676242252, -0.01821048529038104, -0.008529189653392576, 2.9527612260696888e-5]
-simulate!(youbot, stopTime=stopTime, tolerance=tolerance, requiredFinalStates_atol=0.1, log=true, logStates=true, requiredFinalStates=requiredFinalStates)
+simulate!(youbot, stopTime=stopTime, tolerance=tolerance, requiredFinalStates_rtol=0.1, requiredFinalStates_atol=0.1, log=true, logStates=true, requiredFinalStates=requiredFinalStates)
 
 @usingModiaPlot
 plot(youbot, ["free.rot"], figure=1)

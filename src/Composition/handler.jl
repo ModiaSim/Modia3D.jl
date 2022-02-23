@@ -327,51 +327,6 @@ function makeTreeAvailable(scene::Scene)
 end
 
 
-function makeJointsAvailable(scene::Scene{F}) where F <: Modia3D.VarFloatType
-    tree = scene.treeForComputation
-    empty!(scene.revolute)
-    empty!(scene.prismatic)
-    empty!(scene.freeMotion)
-
-    for obj in tree
-        jointKind = obj.jointKind
-
-        if jointKind == FixKind
-            if obj.R_rel === Modia3D.NullRotation(F)
-                obj.jointKind = FixTranslationKind
-            end
-
-        elseif jointKind == FixTranslationKind
-            continue
-
-        elseif jointKind == RevoluteKind
-            push!(scene.revolute, obj.joint)
-            obj.jointIndex = length(scene.revolute)
-
-        elseif jointKind == PrismaticKind
-            push!(scene.prismatic, obj.joint)
-            obj.jointIndex = length(scene.prismatic)
-
-        elseif jointKind == FreeMotionKind
-            push!(scene.freeMotion, obj.joint)
-            obj.jointIndex = length(scene.freeMotion)
-
-            if hasNoParent(obj.parent)
-                obj.jointKind = AbsoluteFreeMotionKind
-            end
-
-        elseif jointKind == AbsoluteFreeMotionKind
-            push!(scene.freeMotion, obj.joint)
-            obj.jointIndex = length(scene.freeMotion)
-
-        else
-            error("Bug in Modia3D/src/Composition/handler.jl: jointKind = $jointKind is not known:\njoint = ", obj.joint)
-        end
-    end
-end
-
-
-
 function chooseAndBuildUpTree(world::Object3D{F}, scene::Scene{F}) where F <: Modia3D.VarFloatType
     # Build tree for optimized structure or standard structure
     # collision handling is only available for optimized structure
@@ -417,7 +372,6 @@ function chooseAndBuildUpTree(world::Object3D{F}, scene::Scene{F}) where F <: Mo
         end
     end
     makeTreeAvailable(scene)
-    makeJointsAvailable(scene)
     scene.initAnalysis = true
     return nothing
 end

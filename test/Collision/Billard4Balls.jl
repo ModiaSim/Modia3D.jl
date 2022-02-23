@@ -81,31 +81,31 @@ Ball = Model(
                                   collision=true))
 )
 
-Billard = Model(
+Billard = Model3D(
     world = Object3D(feature=Scene(gravityField=UniformGravityField(g=9.81, n=[0, 0, -1]),
                                           enableContactDetection=true)),
     table = Table,
     cushion = Cushion,
     ball0 = Ball,
     joint0 = FreeMotion(obj1=:world, obj2=:(ball0.ball),
-                        r=Var(init=[-0.8, -0.1, diameter/2]),
-                        v=Var(init=[3.0, 0.1, 0.0]),
-                        rot=Var(init=[pi/2, 0.0, 0.0])),
+                        r=Var(init=ModiaBase.SVector{3,Float64}(-0.8, -0.1, diameter/2)),
+                        v=Var(init=ModiaBase.SVector{3,Float64}(3.0, 0.1, 0.0)),
+                        rot=Var(init=ModiaBase.SVector{3,Float64}(pi/2, 0.0, 0.0))),
     ball1 = Ball,
     joint1 = FreeMotion(obj1=:world, obj2=:(ball1.ball),
-                        r=Var(init=[TableX/6, 0.0, diameter/2]),
-                        rot=Var(init=[pi/2, 0.0, 0.0])),
+                        r=Var(init=ModiaBase.SVector{3,Float64}(TableX/6, 0.0, diameter/2)),
+                        rot=Var(init=ModiaBase.SVector{3,Float64}(pi/2, 0.0, 0.0))),
     ball2 = Ball,
     joint2 = FreeMotion(obj1=:world, obj2=:(ball2.ball),
-                        r=Var(init=[TableX/6+1*distance_balls+dist, 1/2*(diameter+dist), diameter/2]),
-                        rot=Var(init=[pi/2, 0.0, 0.0])),
+                        r=Var(init=ModiaBase.SVector{3,Float64}(TableX/6+1*distance_balls+dist, 1/2*(diameter+dist), diameter/2)),
+                        rot=Var(init=ModiaBase.SVector{3,Float64}(pi/2, 0.0, 0.0))),
     ball3 = Ball,
     joint3 = FreeMotion(obj1=:world, obj2=:(ball3.ball),
-                        r=Var(init=[TableX/6+1*distance_balls+dist, -1/2*(diameter+dist), diameter/2]),
-                        rot=Var(init=[pi/2, 0.0, 0.0]))
+                        r=Var(init=ModiaBase.SVector{3,Float64}(TableX/6+1*distance_balls+dist, -1/2*(diameter+dist), diameter/2)),
+                        rot=Var(init=ModiaBase.SVector{3,Float64}(pi/2, 0.0, 0.0)))
 )
 
-billard = @instantiateModel(buildModia3D(Billard), unitless=true, log=false, logStateSelection=false, logCode=false)
+billard = @instantiateModel(Billard, unitless=true, log=false, logStateSelection=false, logCode=false)
 
 stopTime = 5.0
 testTime = 2.5

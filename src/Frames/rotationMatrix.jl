@@ -11,9 +11,10 @@
 """
 Constant rotation matrix that defines no rotation from frame 1 to frame 2.
 """
-NullRotation(::Type{F}) where F <: Modia3D.VarFloatType = SMatrix{3,3,F,9}(Matrix(F(1.0)I, 3, 3))
-
-
+#NullRotation(::Type{F}) where F <: Modia3D.VarFloatType = SMatrix{3,3,F,9}(Matrix(F(1.0)I, 3, 3))
+NullRotation(::Type{F}) where F <: Modia3D.VarFloatType = @SMatrix [F(1.0) F(0.0) F(0.0);
+                                                                    F(0.0) F(1.0) F(0.0);
+                                                                    F(0.0) F(0.0) F(1.0)]
 
 """
     Modia3D.assertRotationMatrix(R::AbstractMatrix)
@@ -34,9 +35,9 @@ Return rotation matrix R that rotates with angle `angle` along the x-axis of fra
 """
 @inline function rot1(angle::F) where F <: Modia3D.VarFloatType
    (s,c) = sincos(angle)
-   R = SMatrix{3,3,F,9}([1.0  0.0  0.0;
-                 0.0   c    s ;
-                 0.0  -s    c ])
+   R = @SMatrix [F(1.0)  F(0.0)  F(0.0);
+                 F(0.0)     c      s ;
+                 F(0.0)    -s      c ]
 end
 
 
@@ -47,9 +48,9 @@ Return rotation matrix R that rotates with angle `angle` in [radian] along the y
 """
 @inline function rot2(angle::F) where F <: Modia3D.VarFloatType
    (s,c) = sincos(angle)
-   R = SMatrix{3,3,F,9}([ c  0.0 -s ;
-                 0.0 1.0 0.0;
-                  s  0.0  c ])
+   R = @SMatrix [   c    F(0.0)   -s ;
+                 F(0.0)  F(1.0)  F(0.0);
+                    s    F(0.0)    c ]
 end
 
 
@@ -60,9 +61,9 @@ Return rotation matrix R that rotates with angle `angle` in [radian] along the z
 """
 @inline function rot3(angle::F) where F <: Modia3D.VarFloatType
    (s,c) = sincos(angle)
-   R = SMatrix{3,3,F,9}([ c   s  0.0;
-                        -s    c  0.0;
-                         0.0 0.0 1.0])
+   R = @SMatrix [   c      s    F(0.0);
+                   -s      c    F(0.0);
+                 F(0.0) F(0.0)  F(1.0)]
 end
 
 
@@ -96,7 +97,7 @@ This function assumes that `norm(e) == 1`.
 """
 @inline function rot_e(e::SVector{3,F},angle::F) where F
     (s,c) = sincos(angle)
-    return SMatrix{3,3,F,9}(e*e' + (NullRotation(F) - e*e')*c - skew(e)*s)
+    return e*e' + (NullRotation(F) - e*e')*c - skew(e)*s
 end
 rot_e(e::AbstractVector, angle::F) where F = rot_e( SVector{3,F}(e), F(angle) )
 
@@ -134,10 +135,10 @@ isapprox(R1,R3)   # returns true
 """
 function rot_nxy(nx::SVector{3,F}, ny::SVector{3,F}) where F <: Modia3D.VarFloatType
   abs_nx  = norm(nx)
-  e1      = abs_nx < 1e-10 ?  SVector{3,F}(1.0, 0.0, 0.0) : nx/abs_nx
+  e1      = abs_nx < F(1e-10) ?  SVector{3,F}(1.0, 0.0, 0.0) : nx/abs_nx
   n3_aux  = cross(e1, ny)
-  e2_aux  = dot(n3_aux,n3_aux) > 1e-6 ? ny : ( abs(e1[1]) > 1e-6 ? SVector{3,F}(0.0,1.0,0.0)
-                                                                 : SVector{3,F}(1.0,0.0,0.0))
+  e2_aux  = dot(n3_aux,n3_aux) > F(1e-6) ? ny : ( abs(e1[1]) > F(1e-6) ? SVector{3,F}(0.0,1.0,0.0)
+                                                                       : SVector{3,F}(1.0,0.0,0.0))
   n3_aux2 = cross(e1, e2_aux)
   e3      = normalize(n3_aux2)
   R       = SMatrix{3,3,F,9}(vcat(e1', cross(e3,e1)', e3'))
@@ -153,8 +154,8 @@ Transform vector v2 (v resolved in frame 2) to vector v1 (v resolved in frame 1)
 given either SMatrix ` R` or
 quaternion `q` (to rotate a frame 1 into a frame 2).
 """
-resolve1(R::SMatrix{3,3,F,9}, v2::SVector{3,F}) where F <: Modia3D.VarFloatType = SVector{3,F}(R'*v2)
-resolve1(R::SMatrix{3,3,F,9}, v2::AbstractVector) where F <: Modia3D.VarFloatType = SVector{3,F}(R'*SVector{3,F}(v2))
+resolve1(R::SMatrix{3,3,F,9}, v2::SVector{3,F})   where F <: Modia3D.VarFloatType = R'*v2
+resolve1(R::SMatrix{3,3,F,9}, v2::AbstractVector) where F <: Modia3D.VarFloatType = R'*SVector{3,F}(v2)
 
 
 
@@ -165,8 +166,8 @@ Transform vector v1 (v resolved in frame 1) to vector v2 (v resolved in frame 2)
 given either SMatrix ` R` or
 quaternion `q` (to rotate a frame 1 into a frame 2).
 """
-resolve2(R::SMatrix{3,3,F,9}, v1::SVector{3,F}) where F <: Modia3D.VarFloatType = SVector{3,F}(R*v1)
-resolve2(R::SMatrix{3,3,F,9}, v1::AbstractVector) where F <: Modia3D.VarFloatType = SVector{3,F}(R*SVector{3,F}(v1))
+resolve2(R::SMatrix{3,3,F,9}, v1::SVector{3,F})   where F <: Modia3D.VarFloatType = R*v1
+resolve2(R::SMatrix{3,3,F,9}, v1::AbstractVector) where F <: Modia3D.VarFloatType = R*SVector{3,F}(v1)
 
 
 """
@@ -178,7 +179,7 @@ defining the rotation from frame 0 to frame 2 from rotation matrix `R1` or quate
 rotation from frame 0 to frame 1 and the relative rotation matrix `R_rel` or the
 relative quaternion `q_rel` that define the rotation from frame 1 to frame 2.
 """
-absoluteRotation(R1::SMatrix{3,3,F,9}, R_rel::SMatrix{3,3,F,9}) where F <: Modia3D.VarFloatType = SMatrix{3,3,F,9}(R_rel*R1)
+absoluteRotation(R1::SMatrix{3,3,F,9}, R_rel::SMatrix{3,3,F,9}) where F <: Modia3D.VarFloatType = R_rel*R1
 
 
 
@@ -192,7 +193,7 @@ from absolute rotation matrix `R1` or absolute quaternion `q1` that define the
 rotation from frame 0 to frame 1 and the absolute rotation matrix `R2` or the
 absolute quaternion `q2` that define the rotation from frame 0 to frame 2.
 """
-relativeRotation(R1::SMatrix{3,3,F,9}, R2::SMatrix{3,3,F,9}) where F <: Modia3D.VarFloatType = SMatrix{3,3,F,9}(R2*R1')
+relativeRotation(R1::SMatrix{3,3,F,9}, R2::SMatrix{3,3,F,9}) where F <: Modia3D.VarFloatType = R2*R1'
 
 
 """
@@ -204,7 +205,7 @@ quaternion `q_inv` defining the rotation from frame 1 to frame 0
 from rotation matrix `R` or quaternion `q` that define the
 rotation from frame 0 to frame 1.
 """
-inverseRotation(R::SMatrix{3,3,F,9}) where F <: Modia3D.VarFloatType = SMatrix{3,3,F,9}(R')
+inverseRotation(R::SMatrix{3,3,F,9}) where F <: Modia3D.VarFloatType = R'
 
 
 """
@@ -234,12 +235,12 @@ angle2 = planarRotationAngle(e, v1, v2)
 isapprox(angle1, angle2)
 ```
 """
-@inline function planarRotationAngle(e::AbstractVector, v1::AbstractVector, v2::AbstractVector; angle_guess::Number=0.0)::Number
+@inline function planarRotationAngle(e::SVector{3,F}, v1::SVector{3,F}, v2::SVector{3,F}; angle_guess::F=F(0.0))::F where F <: Modia3D.VarFloatType
    angle1 = atan( dot(-cross(e,v1), v2), dot(v1,v2) - dot(e,v1)*dot(e,v2) )
-   pi2    = 2*pi
+   pi2    = 2*F(pi)
    return angle1 + pi2*round(Int, (pi+angle_guess-angle1)/(pi2), RoundDown)
 end
-
+planarRotationAngle(e::AbstractVector, v1::AbstractVector, v2::AbstractVector; angle_guess=0.0) = planarRotationAngle(SVector{3,F}(e), SVector{3,F}(v1), SVector{3,F}(v2), F(angle_guess))
 
 #=
 Derivation of algorithm for planarRotationAngle:

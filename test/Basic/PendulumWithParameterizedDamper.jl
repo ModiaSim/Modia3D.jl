@@ -9,7 +9,7 @@ include("$(Modia3D.modelsPath)/Rotational.jl")
 simulationModel = nothing
 get_simulationModel() = simulationModel
 
-Pendulum = Model(
+Pendulum = Model3D(
     m = 1.0,
     Lx = 0.1,
     Ly = Par(value=:(0.2*Lx)),
@@ -31,7 +31,7 @@ Pendulum = Model(
 )
 
 PendulumWithDamper = Model(
-    pendulum = buildModia3D(Pendulum | Map(Lx=1.0, m=2.0, rev=Map(phi=Var(init=1.0)))),
+    pendulum = Pendulum | Map(Lx=1.0, m=2.0, rev=Map(phi=Var(init=1.0))),
 
     damper = Damper | Map(d=0.5),
     fixed = Fixed,
@@ -41,7 +41,7 @@ PendulumWithDamper = Model(
 
 #@showModel PendulumWithDamper
 
-simulationModel = @instantiateModel(PendulumWithDamper, aliasReduction=false, unitless=true, log=false, logStateSelection=false, logCode=false)
+simulationModel = @instantiateModel(PendulumWithDamper, unitless=true, log=false, logStateSelection=false, logCode=false)
 
 #@showModel simulationModel.p[1]
 
@@ -50,6 +50,6 @@ requiredFinalStates = [-1.578178283450938, 0.061515170100766486]
 simulate!(simulationModel, stopTime=stopTime, log=true, logStates=false, requiredFinalStates=requiredFinalStates)
 
 @usingModiaPlot
-plot(simulationModel, ["pendulum.rev.flange.phi", "pendulum.rev.variables[1]"], figure=1)
+plot(simulationModel, "pendulum.rev.flange.phi", figure=1)
 
 end

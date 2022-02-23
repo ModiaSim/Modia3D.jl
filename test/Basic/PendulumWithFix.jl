@@ -23,7 +23,7 @@ Bar = Model(
     frame2 = Object3D(parent=:frame0, translation=:[Lx/2, 0.0, 0.0])
 )
 
-Pendulum = Model(
+Pendulum = Model3D(
     m = 1.0,
     Lx = 0.1,
     world = Object3D(feature=Scene() ),
@@ -42,7 +42,7 @@ Pendulum = Model(
 )
 
 PendulumWithFix = Model(
-    pendulum = buildModia3D(Pendulum | Map(Lx=1.0, m=2.0, rev=Map(phi=Var(init=1.0)))),
+    pendulum = Pendulum | Map(Lx=1.0, m=2.0, rev=Map(phi=Var(init=1.0))),
 
     damper = Damper | Map(d=100.0),
     fixed = Fixed,
@@ -57,6 +57,6 @@ requiredFinalStates = [-1.6164397926928633, 0.4670955914743122]
 simulate!(pendulumWithFix, stopTime=stopTime, log=true, logStates=true, requiredFinalStates=requiredFinalStates)
 
 @usingModiaPlot
-plot(pendulumWithFix, ["pendulum.rev.flange.phi", "pendulum.rev.variables[1]"], figure=1)
+plot(pendulumWithFix, "pendulum.rev.flange.phi", figure=1)
 
 end

@@ -315,7 +315,7 @@ Defines global properties of the system, such as the gravity field. Exactly one 
 | `enableContactDetection`        | true                                    |
 | `mprTolerance`                  | 1.0e-20                                 |
 | `elasticContactReductionFactor` | 1.0     (<= 1.0 required)               |
-| `maximumContactDamping`         | 1000.0                                  |
+| `maximumContactDamping`         | 2000.0                                  |
 | `enableVisualization`           | true                                    |
 | `animationFile`                 | nothing                                 |
 | `visualizeFrames`               | false                                   |
@@ -389,7 +389,7 @@ mutable struct Scene{F <: Modia3D.VarFloatType} <: Modia3D.AbstractScene
     stack::Vector{Object3D{F}}                   # Stack to traverse objs
     buffer::Vector{Object3D{F}}                  # stores all roots of a super obj
 
-    options::SceneOptions                     # Global options defined for the scene
+    options::SceneOptions{F}                  # Global options defined for the scene
 
     visualize::Bool                           # = true, if visualization elements available
     collide::Bool                             # = true, if elements for contact detection available

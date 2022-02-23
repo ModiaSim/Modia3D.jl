@@ -497,7 +497,7 @@ YouBot(;pathIndexOffset) = Model(
 YouBot1 = YouBot(pathIndexOffset=0)
 YouBot2 = YouBot(pathIndexOffset=6)
 
-Scenario = Model(
+Scenario = Model3D(
     gravField = UniformGravityField(g=9.81, n=[0,0,-1]),
     world = Object3D(feature=Scene(gravityField=:gravField, visualizeFrames=false, nominalLength=tableX,
     #mprTolerance = 1.0e-14,
@@ -511,7 +511,7 @@ Scenario = Model(
     sphere = Object3D(
         feature=Solid(shape=Sphere(diameter=diameter), visualMaterial=vmatGrey, solidMaterial="DryWood", collision=true)),
 
-    sphereJoint = FreeMotion(obj1=:world, obj2=:sphere, r=Var(init=[-0.78, 0.0, 0.1792])),
+    sphereJoint = FreeMotion(obj1=:world, obj2=:sphere, r=Var(init=ModiaBase.SVector{3,Float64}(-0.78, 0.0, 0.1792))),
 
     youbot1 = YouBot1,
     youbot2 = YouBot2
@@ -546,7 +546,7 @@ modelParameters = Map(
 )
 
 
-youbotModel = buildModia3D(Scenario) | modelParameters
+youbotModel = Scenario | modelParameters
 
 youbot = @instantiateModel(youbotModel, unitless=true, logCode=false, log=false)
 

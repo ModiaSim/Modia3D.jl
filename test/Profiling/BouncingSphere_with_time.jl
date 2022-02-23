@@ -2,7 +2,7 @@ module BouncingSphere_with_time
 
 using Modia3D
 
-@time begin BouncingSphere = Model(
+@time begin BouncingSphere = Model3D(
         boxHeigth = 0.1,
         groundMaterial = VisualMaterial(color="DarkGreen", transparency=0.5),
         gravField = UniformGravityField(g=9.81, n=[0, -1, 0]),
@@ -28,7 +28,7 @@ using Modia3D
     )
 end
 
-@time bouncingSphere = @instantiateModel(buildModia3D(BouncingSphere), unitless=true, log=false, logStateSelection=false, logCode=false)
+@time bouncingSphere = @instantiateModel(BouncingSphere, unitless=true, log=false, logStateSelection=false, logCode=false)
 
 stopTime = 2.2
 dtmax = 0.1

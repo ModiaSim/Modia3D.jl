@@ -2,7 +2,7 @@ module BouncingSphereFreeMotion
 
 using Modia3D
 
-BouncingSphere = Model(
+BouncingSphere = Model3D(
     boxHeigth = 0.05,
     groundMaterial = VisualMaterial(color="DarkGreen", transparency=0.5),
     sphereMaterial = VisualMaterial(color="Red"),
@@ -26,18 +26,19 @@ BouncingSphere = Model(
     sphere = Object3D(feature=Solid(shape=Sphere(diameter=0.2),
                                     visualMaterial=:sphereMaterial, solidMaterial="Steel",
                                     collision=true)),
-    free = FreeMotion(obj1=:world, obj2=:sphere, r=Var(init=[0.0, 1.0, 0.0]), w=Var(init=[10.0, 0.0, -5.0]))
+    free = FreeMotion(obj1=:world, obj2=:sphere, r=Var(init=ModiaBase.SVector{3,Float64}(0.0, 1.0, 0.0)), w=Var(init=ModiaBase.SVector{3,Float64}(10.0, 0.0, -5.0)))
 )
 
-bouncingSphere = @instantiateModel(buildModia3D(BouncingSphere), unitless=true, log=false, logStateSelection=false, logCode=false)
+bouncingSphere = @instantiateModel(BouncingSphere, unitless=true, log=false, logStateSelection=false, logCode=false)
 
 #@show bouncingSphere.parameterExpressions
 #@show bouncingSphere.parameters
 
 stopTime = 2.7
 tolerance = 1e-8
-requiredFinalStates = [0.2928626679013819, -1.2390290395267338, -0.13258715541593444, 0.11348996353195476, -4.416792946189694, -0.8737172686120329, 2.3698887011888883, -0.4268753151838882, 0.13821686028698238, -7.340575649199023, 0.8115619044908716, 4.87584854460288]
-simulate!(bouncingSphere, stopTime=stopTime, tolerance=tolerance, log=true, logStates=false, logEvents=false, requiredFinalStates=requiredFinalStates)
+requiredFinalStates = [0.29302652789657424, -1.2392524758992525, -0.13171402091799628, 0.11357140027502943, -4.417276610857313, -0.8729857092038694, 2.3810648360145152, -0.426312211044484 , 0.13656197405807574, -7.335181005993924, 0.812877179123953, 4.870682494334355]
+simulate!(bouncingSphere, stopTime=stopTime, tolerance=tolerance, log=true, logStates=false, logEvents=false,
+          requiredFinalStates_rtol = 0.2, requiredFinalStates_atol = 0.2, requiredFinalStates=requiredFinalStates)
 
 @usingModiaPlot
 plot(bouncingSphere, ["free.r" "free.rot"; "free.v" "free.w"], figure=1)

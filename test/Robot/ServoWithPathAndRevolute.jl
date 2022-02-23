@@ -108,7 +108,7 @@ Modia3D.PathPlanning.ptpJointSpace(referencePath = referencePath1, positions = [
 
 getReferencePath() = referencePath1
 
-TestServo = Model(
+TestServo = Model3D(
     world = Object3D(feature=Scene()),
     body  = Object3D(feature=Solid(shape=FileMesh(filename=arm_joint_2_obj),
                                    massProperties=MassPropertiesFromShapeAndMass(mass=m2),
@@ -130,7 +130,7 @@ TestServo = Model(
     ]
 )
 
-servo = @instantiateModel(buildModia3D(TestServo), unitless=true, logCode=false, log=false)
+servo = @instantiateModel(TestServo, unitless=true, logCode=false, log=false)
 
 stopTime = 4.0
 tolerance = 1e-6

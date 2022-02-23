@@ -34,8 +34,6 @@ mutable struct Revolute{F <: Modia3D.VarFloatType} <: Modia3D.AbstractJoint
     phi::F
     w::F
     a::F
-    tau::F
-    residue::F
 
     function Revolute{F}(; obj1::Object3D{F},
                         obj2::Object3D{F},
@@ -68,7 +66,7 @@ mutable struct Revolute{F <: Modia3D.VarFloatType} <: Modia3D.AbstractJoint
         posAxis     = abs(axis)
         posMovement = axis > 0
 
-        obj.joint = new(path, parent, obj, posAxis, posMovement, 1, canCollide, phi, w, F(0.0), F(0.0), F(0.0) )
+        obj.joint = new(path, parent, obj, posAxis, posMovement, 1, canCollide, phi, w, F(0.0))
         obj.jointKind  = RevoluteKind
         obj.jointIndex = 0
         obj.ndof       = 1

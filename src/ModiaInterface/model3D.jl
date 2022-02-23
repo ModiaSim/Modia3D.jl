@@ -1,4 +1,5 @@
 # ModiaLang interface to Modia3D
+Model3D(         ; kwargs...) = Model(; _buildFunction = :(Modia3D.buildModia3D!), kwargs...)
 Object3D(        ; kwargs...) = Par(; _constructor = :(Modia3D.Composition.Object3D{FloatType}), _path = true, kwargs...)
 Scene(           ; kwargs...) = Par(; _constructor = :(Modia3D.Composition.Scene{FloatType})                 , kwargs...)
 Visual(          ; kwargs...) = Par(; _constructor = :(Modia3D.Shapes.Visual)                           , kwargs...)
@@ -35,11 +36,8 @@ calculateRobotMovement(args...)      = Modia3D.PathPlanning.calculateRobotMoveme
 getRefPathPosition(args...)          = Modia3D.PathPlanning.getRefPathPosition(args...)
 getRefPathInitPosition(args...)      = Modia3D.PathPlanning.getRefPathInitPosition(args...)
 
-getVariables(args...)            = (args...,)
-multibodyResiduals!(args...)     = Modia3D.Composition.multibodyResiduals!(args...)
-setModiaJointVariables!(args...) = Modia3D.Composition.setModiaJointVariables!(args...)
 
-Revolute(; obj1, obj2, axis=3, phi=Var(init=0.0), w=Var(init=0.0), canCollide=true) = Model(; _constructor = Par(value = :(Modia3D.Composition.Revolute{FloatType}), _path = true, ndof = 1),
+Revolute(; obj1, obj2, axis=3, phi=Var(init=0.0), w=Var(init=0.0), canCollide=true) = Model(; _constructor = Par(value = :(Modia3D.Composition.Revolute{FloatType}), _path = true, _jointType = :Revolute),
     obj1 = Par(value = obj1),
     obj2 = Par(value = obj2),
     axis = Par(value = axis),
@@ -47,13 +45,11 @@ Revolute(; obj1, obj2, axis=3, phi=Var(init=0.0), w=Var(init=0.0), canCollide=tr
     phi  = phi,
     w    = w,
     equations = :[
-        w   = der(phi)
-        qdd = der(w)   # standardized name for the generalized joint accelerations
-        variables = getVariables(phi, w, 0.0) # standardized name for the generalized joint position, velocity, force
+        w = der(phi)
         ]
 )
 
-RevoluteWithFlange(; obj1, obj2, axis=3, phi=Var(init=0.0), w=Var(init=0.0), canCollide=true) = Model(; _constructor = Par(value = :(Modia3D.Composition.Revolute{FloatType}), _path = true, ndof = 1),
+RevoluteWithFlange(; obj1, obj2, axis=3, phi=Var(init=0.0), w=Var(init=0.0), canCollide=true) = Model(; _constructor = Par(value = :(Modia3D.Composition.Revolute{FloatType}), _path = true, _jointType = :RevoluteWithFlange),
     obj1   = Par(value = obj1),
     obj2   = Par(value = obj2),
     axis   = Par(value = axis),
@@ -64,12 +60,10 @@ RevoluteWithFlange(; obj1, obj2, axis=3, phi=Var(init=0.0), w=Var(init=0.0), can
     equations = :[
         phi = flange.phi
         w   = der(phi)
-        qdd = der(w)   # standardized name for the generalized joint accelerations
-        variables = getVariables(phi, w, flange.tau) # standardized name for the generalized joint position, velocity, force
         ]
 )
 
-Prismatic(; obj1, obj2, axis=1, s=Var(init=0.0), v=Var(init=0.0), canCollide=true) = Model(; _constructor = Par(value = :(Modia3D.Composition.Prismatic{FloatType}), _path = true, ndof = 1),
+Prismatic(; obj1, obj2, axis=1, s=Var(init=0.0), v=Var(init=0.0), canCollide=true) = Model(; _constructor = Par(value = :(Modia3D.Composition.Prismatic{FloatType}), _path = true, _jointType = :Prismatic),
     obj1 = Par(value = obj1),
     obj2 = Par(value = obj2),
     axis = Par(value = axis),
@@ -77,13 +71,11 @@ Prismatic(; obj1, obj2, axis=1, s=Var(init=0.0), v=Var(init=0.0), canCollide=tru
     s    = s,
     v    = v,
     equations = :[
-        v   = der(s)
-        qdd = der(v)   # standardized name for the generalized joint accelerations
-        variables = getVariables(s, v, 0.0) # standardized name for the generalized joint position, velocity, force
+        v = der(s)
         ]
 )
 
-PrismaticWithFlange(; obj1, obj2, axis=1, s=Var(init=0.0), v=Var(init=0.0), canCollide=true) = Model(; _constructor = Par(value = :(Modia3D.Composition.Prismatic{FloatType}), _path = true, ndof = 1),
+PrismaticWithFlange(; obj1, obj2, axis=1, s=Var(init=0.0), v=Var(init=0.0), canCollide=true) = Model(; _constructor = Par(value = :(Modia3D.Composition.Prismatic{FloatType}), _path = true, _jointType = :PrismaticWithFlange),
     obj1   = Par(value = obj1),
     obj2   = Par(value = obj2),
     axis   = Par(value = axis),
@@ -92,10 +84,8 @@ PrismaticWithFlange(; obj1, obj2, axis=1, s=Var(init=0.0), v=Var(init=0.0), canC
     s      = s,
     v      = v,
     equations = :[
-        s   = flange.s
-        v   = der(s)
-        qdd = der(v)   # standardized name for the generalized joint accelerations
-        variables = getVariables(s, v, flange.f) # standardized name for the generalized joint position, velocity, force
+        s = flange.s
+        v = der(s)
         ]
 )
 
@@ -104,14 +94,10 @@ PrismaticWithFlange(; obj1, obj2, axis=1, s=Var(init=0.0), v=Var(init=0.0), canC
 
 Return joint rot. kinematics matrix `J` for Cardan angles `rot123` (rotation sequence x-y-z).
 """
-function J123(rot123::AbstractVector)
-
+function J123(rot123::SVector{3,F})::SMatrix{3,3,F,9} where {F}
     (sbe, cbe) = sincos(rot123[2])
     (sga, cga) = sincos(rot123[3])
-    return [     cga     -sga  0.0 ;
-             cbe*sga  cbe*cga  0.0 ;
-            -sbe*cga  sbe*sga  cbe ] / cbe
-
+    return SMatrix{3,3,F,9}(cga/cbe, sga, -sbe*cga/cbe, -sga/cbe, cga, sbe*sga/cbe, F(0.0), F(0.0), F(1.0))
 end
 
 """
@@ -119,14 +105,10 @@ end
 
 Return joint rot. kinematics matrix `J` for Cardan angles `rot132` (rotation sequence x-z-y).
 """
-function J132(rot132::AbstractVector)
-
+function J132(rot132::SVector{3,F})::SMatrix{3,3,F,9} where {F}
     (sga, cga) = sincos(rot132[2])
     (sbe, cbe) = sincos(rot132[3])
-    return [ cbe      0.0  sbe     ;
-            -sbe*cga  0.0  cbe*cga ;
-             cbe*sga  cga  sbe*sga ] / cga
-
+    return SMatrix{3,3,F,9}(cbe/cga, -sbe, cbe*sga/cga, F(0.0), F(0.0), F(1.0), sbe/cga, cbe, sbe*sga/cga)
 end
 
 
@@ -163,7 +145,7 @@ end
 singularRem(ang) = abs(rem2pi(ang, RoundNearest)) - 1.5  # is negative/positive in valid/singular angle range
 J123or132(rot, isrot123) = isrot123 ? J123(rot) : J132(rot)
 
-FreeMotion(; obj1, obj2, r=Var(init=zeros(3)), rot=Var(init=zeros(3)), v=Var(init=zeros(3)), w=Var(init=zeros(3))) = Model(; _constructor = Par(value = :(Modia3D.Composition.FreeMotion{FloatType}), _path = true, ndof = 6),
+FreeMotion(; obj1, obj2, r=Var(init=ModiaBase.SVector{3,Float64}(zeros(3))), rot=Var(init=ModiaBase.SVector{3,Float64}(zeros(3))), v=Var(init=ModiaBase.SVector{3,Float64}(zeros(3))), w=Var(init=ModiaBase.SVector{3,Float64}(zeros(3)))) = Model(; _constructor = Par(value = :(Modia3D.Composition.FreeMotion{FloatType}), _path = true, _jointType = :FreeMotion),
     obj1 = Par(value = obj1),
     obj2 = Par(value = obj2),
     r    = r,
@@ -181,9 +163,5 @@ FreeMotion(; obj1, obj2, r=Var(init=zeros(3)), rot=Var(init=zeros(3)), v=Var(ini
         rot2_singularity = positive(singularRem(rot[2]))
         next_isrot123 = if rot2_singularity; change_rotSequenceInNextIteration!(rot, isrot123, instantiatedModel, _x, _rotName) else isrot123 end
         der(rot) = J123or132(rot,isrot123) * w
-
-        der(v) = qdd[1:3]
-        der(w) = qdd[4:6]
-        variables = getVariables(r, rot, v, w, isrot123)
         ]
 )

@@ -14,7 +14,7 @@ The simplest technique is to put `@time` in front of the statement that should b
 
 module BouncingSphereSimulation_time
 
-@time begin BouncingSphere = Model(
+@time begin BouncingSphere = Model3D(
     ...
     )
 end
@@ -30,7 +30,7 @@ This gives the following output:
 ```julia
   0.000116 seconds (199 allocations: 12.344 KiB)
 
-Instantiating model Main.BouncingSphereSimulation.buildModia3D(BouncingSphere)
+Instantiating model Main.BouncingSphereSimulation.BouncingSphere
   1.106054 seconds (2.40 M allocations: 150.386 MiB, 3.92% gc time, 62.47% compilation time)
   0.322050 seconds (579.29 k allocations: 32.774 MiB, 5.81% compilation time)
   0.077613 seconds (1.74 k allocations: 97.844 KiB)
@@ -91,7 +91,7 @@ function `getDerivatives!(..)` is called twice to force compilation of this func
 The `logTiming=true` flag generates the following output in this case:
 
 ```
-Instantiating model Main.MobileWithLogTiming.buildModia3D(Mobile)
+Instantiating model Main.MobileWithLogTiming.Mobile
 
 Execute getDerivatives
 First executions of getDerivatives
@@ -101,9 +101,9 @@ First executions of getDerivatives
 ... first simulation:
   8.341341 seconds (37.34 M allocations: 2.236 GiB, 3.36% gc time)
 ... second simulation:
-... Simulate model buildModia3D(Mobile)
+... Simulate model Mobile
       Initialization at time = 0.0 s
-      Termination of buildModia3D(Mobile) at time = 5.0 s
+      Termination of Mobile at time = 5.0 s
         cpuTime         = 11.7 s
         allocated       = 2290.0 MiB
         algorithm       = CVODE_BDF
@@ -123,7 +123,7 @@ First executions of getDerivatives
         nStateEvents    = 0
         nRestartEvents  = 0
 
-... Timings for simulation of buildModia3D(Mobile):
+... Timings for simulation of Mobile:
  ──────────────────────────────────────────────────────────────────────────────────────────────
                                                        Time                   Allocations
                                                ──────────────────────   ───────────────────────

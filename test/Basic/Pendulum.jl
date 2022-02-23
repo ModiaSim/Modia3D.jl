@@ -1,5 +1,8 @@
-module Pendulum1
-using Modia3D
+module PendulumModule
+
+using ModiaLang
+import Modia3D
+using  Modia3D.ModiaInterface
 
 Pendulum = Model3D(
     world     = Object3D(feature=Scene()),
@@ -8,10 +11,11 @@ Pendulum = Model3D(
     rev       = Revolute(obj1=:world, obj2=:bodyFrame)
 )
 
-pendulum = @instantiateModel(Pendulum, unitless=true)
-simulate!(pendulum, stopTime=3.0)
+pendulum = @instantiateModel(Pendulum, unitless=true, log=false, logDetails=false, logCode=true, logStateSelection=false, logCalculations=false)
+simulate!(pendulum, stopTime=3.0, log=true)
 
-@usingModiaPlot     # use the plot package defined by ENV["MODIA_PLOT"]
+@usingModiaPlot
 plot(pendulum, "rev.phi")
+
 
 end

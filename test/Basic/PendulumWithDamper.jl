@@ -1,4 +1,4 @@
-module PendulumWithDamper
+module PendulumWithDamperModule
 
 using Modia3D
 
@@ -8,7 +8,7 @@ include("$(Modia3D.modelsPath)/Rotational.jl")
 
 
 
-Pendulum = Model(
+Pendulum = Model3D(
     m = 1.0,
     g = 9.81,
     vmat1 = VisualMaterial(color="Sienna", transparency=0.5),
@@ -28,9 +28,8 @@ Pendulum = Model(
     rev    = RevoluteWithFlange(obj1=:world, obj2=:frame1)
 )
 
-PendulumWithDamp = Model(
-    pendulum = buildModia3D(Pendulum | Map(m=2.0, rev=Map(phi=Var(init=1.0)))),
-
+PendulumWithDamper = Model(
+    pendulum = Pendulum | Map(m=2.0, rev=Map(phi=Var(init=1.0))),
     damper = Damper | Map(d=0.5),
     fixed = Fixed,
     connect = :[(damper.flange_b, pendulum.rev.flange),
@@ -39,13 +38,13 @@ PendulumWithDamp = Model(
 
 #@showModel PendulumWithDamp
 
-pendulumWithDamper = @instantiateModel(PendulumWithDamp, unitless=true, log=false, logStateSelection=false, logCode=false, FloatType = Float32)
+pendulumWithDamper = @instantiateModel(PendulumWithDamper, unitless=true, log=false, logStateSelection=false, logCode=false, FloatType = Float32)
 
 stopTime = 10.0
 requiredFinalStates = [-1.578178283450938, 0.061515170100766486]
 simulate!(pendulumWithDamper, stopTime=stopTime, log=true, logStates=false, requiredFinalStates=requiredFinalStates)
 
 @usingModiaPlot
-plot(pendulumWithDamper, ["pendulum.rev.flange.phi", "pendulum.rev.variables[1]"], figure=1)
+plot(pendulumWithDamper, "pendulum.rev.flange.phi", figure=1)
 
 end

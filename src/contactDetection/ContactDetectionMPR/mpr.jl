@@ -474,5 +474,4 @@ function mpr(ch::Composition.ContactDetectionMPR_handler{T,F}, shapeA::Compositi
     end
     return (F(distance), SVector{3,F}(contactPoint1), SVector{3,F}(contactPoint2), SVector{3,F}(normal), supportPointsDefined,
     SVector{3,F}(support1A), SVector{3,F}(support1B), SVector{3,F}(support2A), SVector{3,F}(support2B), SVector{3,F}(support3A), SVector{3,F}(support3B) )
-
 end

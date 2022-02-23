@@ -86,7 +86,7 @@ function createMobile(depth)
         )
     end
 end
-Mobile = Model(
+Mobile = Model3D(
     world      = Object3D(feature=Scene(gravityField=UniformGravityField(g=9.81, n=[0, -1, 0]),
                                         enableContactDetection=false,
                                         enableVisualization=enableVisualization)),
@@ -96,7 +96,7 @@ Mobile = Model(
 )
 
 println("... @instantiateModel:")
-@time mobile = @instantiateModel(buildModia3D(Mobile), unitless=true, log=false, logDetails=false, logModel=false, logStateSelection=false,
+@time mobile = @instantiateModel(Mobile, unitless=true, log=false, logDetails=false, logModel=false, logStateSelection=false,
                                  logCode=false, logExecution=true, logTiming=false, evaluateParameters=true)
 
 const stopTime = 5.0

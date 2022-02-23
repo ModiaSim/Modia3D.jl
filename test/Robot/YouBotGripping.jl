@@ -481,7 +481,7 @@ YouBot = Model(
         ]
 )
 
-Scenario = Model(
+Scenario = Model3D(
     gravField = UniformGravityField(g=9.81, n=[0,0,-1]),
     world = Object3D(feature=Scene(gravityField=:gravField,mprTolerance = 1.0e-13, visualizeFrames=false, nominalLength=tableX,
     animationFile="YouBotGripping.json",
@@ -494,7 +494,7 @@ Scenario = Model(
     sphere = Object3D(
         feature=Solid(shape=Sphere(diameter=diameter), visualMaterial=vmatGrey, solidMaterial="DryWood", collision=true)),
 
-    sphereJoint = FreeMotion(obj1=:world, obj2=:sphere, r=Var(init=[-0.799, 0.005, 0.1842])),  # 0.1792
+    sphereJoint = FreeMotion(obj1=:world, obj2=:sphere, r=Var(init=ModiaBase.SVector{3,Float64}(-0.799, 0.005, 0.1842))),  # 0.1792
 
     youbot1 = YouBot,
 )
@@ -510,7 +510,7 @@ modelParameters = Map(
     )
 )
 
-youbotModel = buildModia3D(Scenario) | modelParameters
+youbotModel = Scenario | modelParameters
 
 youbot = @instantiateModel(youbotModel, unitless=true, logCode=false, log=false)
 

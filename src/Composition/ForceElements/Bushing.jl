@@ -119,7 +119,7 @@ Bushing(; kwargs...) = Bushing{Float64}(; kwargs...)
 
 
 # Compute deformation angles from rotation matrix
-function anglesFromRotation(largeAngles::Bool, R12::SMatrix{3,3,F}, w12::SVector{3,F}) where F <: Modia3D.VarFloatType
+function anglesFromRotation(largeAngles::Bool, R12::SMatrix{3,3,F,9}, w12::SVector{3,F})::Tuple{SVector{3,F},SVector{3,F},SMatrix{2,2,F,4}} where F <: Modia3D.VarFloatType
     if largeAngles
         sbe = clamp(R12[3,1], F(-1.0), F(1.0))
         cbe = sqrt(F(1.0) - sbe*sbe)
@@ -132,10 +132,10 @@ function anglesFromRotation(largeAngles::Bool, R12::SMatrix{3,3,F}, w12::SVector
             ald = w12[1] + (sal*w12[2] - cal*w12[3])*sbe/cbe
             bed = cal*w12[2] + sal*w12[3]
             gad = (-sal*w12[2] + cal*w12[3])/cbe
-            return (SVector{3,F}(al, be, ga), SVector{3,F}(ald, bed, gad), SMatrix{2,2,F}(sal, cal, sbe, cbe))
+            return (SVector{3,F}(al, be, ga), SVector{3,F}(ald, bed, gad), SMatrix{2,2,F,4}(sal, cal, sbe, cbe))
         else
             @error("Gimbal lock of Bushing transformation.")
-            return (SVector{3,F}(0.0, 0.0, 0.0), SVector{3,F}(0.0, 0.0, 0.0), SMatrix{2,2,F}(0.0, 0.0, 0.0, 0.0))
+            return (SVector{3,F}(0.0, 0.0, 0.0), SVector{3,F}(0.0, 0.0, 0.0), SMatrix{2,2,F,4}(0.0, 0.0, 0.0, 0.0))
         end
     else
         al = R12[2,3]
@@ -147,12 +147,12 @@ function anglesFromRotation(largeAngles::Bool, R12::SMatrix{3,3,F}, w12::SVector
         if (max(abs(al), abs(be), abs(ga)) > 0.174)
             @warn("Bushing angle exceeds 10 deg.")
         end
-        return (SVector{3,F}(al, be, ga), SVector{3,F}(ald, bed, gad), SMatrix{2,2,F}(0.0, 0.0, 0.0, 0.0))
+        return (SVector{3,F}(al, be, ga), SVector{3,F}(ald, bed, gad), SMatrix{2,2,F,4}(0.0, 0.0, 0.0, 0.0))
     end
 end
 
 # Compute torque vector from force law moments
-function torqueFromMoments(largeAngles::Bool, moments::SVector{3,F}, sico::SMatrix{2,2,F}) where F <: Modia3D.VarFloatType
+function torqueFromMoments(largeAngles::Bool, moments::SVector{3,F}, sico::SMatrix{2,2,F,4})::SVector{3,F} where F <: Modia3D.VarFloatType
     if largeAngles
         tx = moments[1] + sico[1,2]*moments[3]
         ty = sico[2,1]*moments[2] - sico[1,1]*sico[2,2]*moments[3]
@@ -164,13 +164,13 @@ function torqueFromMoments(largeAngles::Bool, moments::SVector{3,F}, sico::SMatr
 end
 
 
-function initializeForceElement(force::Bushing{F}) where F <: Modia3D.VarFloatType
+function initializeForceElement(force::Bushing{F})::Nothing where F <: Modia3D.VarFloatType
     force.obj1.hasForceElement = true
     force.obj2.hasForceElement = true
     return nothing
 end
 
-function evaluateForceElement(force::Bushing{F}) where F <: Modia3D.VarFloatType
+function evaluateForceElement(force::Bushing{F})::Nothing where F <: Modia3D.VarFloatType
     R12 = measFrameRotation(force.obj2; frameOrig=force.obj1)
     r12 = measFramePosition(force.obj2; frameOrig=force.obj1, frameCoord=force.obj1)
     w12 = measFrameRotVelocity(force.obj2; frameOrig=force.obj1, frameCoord=force.obj1)
@@ -190,6 +190,6 @@ function evaluateForceElement(force::Bushing{F}) where F <: Modia3D.VarFloatType
     return nothing
 end
 
-function terminateForceElement(force::Bushing{F}) where F <: Modia3D.VarFloatType
+function terminateForceElement(force::Bushing{F})::Nothing where F <: Modia3D.VarFloatType
     return nothing
 end

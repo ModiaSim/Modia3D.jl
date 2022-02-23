@@ -17,7 +17,7 @@ Bar = Model(
                                        visualMaterial=VisualMaterial(color="Red")))
 )
 
-Pendulum = Model(
+Pendulum = Model3D(
     Lx = 1.0,
     world = Object3D(feature=Scene() ),
     worldFrame = Object3D(parent=:world,
@@ -33,7 +33,7 @@ Pendulum = Model(
 
 #@showModel Pendulum
 
-pendulum = @instantiateModel(buildModia3D(Pendulum), unitless=true)
+pendulum = @instantiateModel(Pendulum, unitless=true)
 
 #@showModel pendulum.parameterExpressions
 #@showModel pendulum.parameters

@@ -2,7 +2,7 @@ module BouncingEllipsoidSimulation
 
 using Modia3D
 
-BouncingEllipsoid = Model(
+BouncingEllipsoid = Model3D(
     boxHeigth = 0.1,
     gravField = UniformGravityField(g=9.81, n=[0, -1, 0]),
     world = Object3D(feature=Scene(gravityField=:gravField,
@@ -22,10 +22,10 @@ BouncingEllipsoid = Model(
                                        visualMaterial=VisualMaterial(color="Blue"),
                                        solidMaterial="Steel",
                                        collision=true)),
-    free = FreeMotion(obj1=:world, obj2=:ellipsoid, r=Var(init=[0.0, 1.0, 0.0]), w=Var(init=[5.0, 0.0, -2.0]))
+    free = FreeMotion(obj1=:world, obj2=:ellipsoid, r=Var(init=ModiaBase.SVector{3,Float64}(0.0, 1.0, 0.0)), w=Var(init=ModiaBase.SVector{3,Float64}(5.0, 0.0, -2.0)))
 )
 
-bouncingEllipsoid = @instantiateModel(buildModia3D(BouncingEllipsoid), unitless=true, log=false, logStateSelection=false, logCode=false)
+bouncingEllipsoid = @instantiateModel(BouncingEllipsoid, unitless=true, log=false, logStateSelection=false, logCode=false)
 
 
 stopTime = 2.0

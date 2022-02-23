@@ -101,7 +101,7 @@ servoParameters = Map(
                       )
                   )
 
-TestServo = Model(
+TestServo = Model3D(
     world = Object3D(feature=Scene()),
     body  = Object3D(feature = Solid(
             shape = FileMesh(filename = arm_joint_1_obj), massProperties = MassPropertiesFromShapeAndMass(mass=m1), visualMaterial=vmat1)),
@@ -117,7 +117,7 @@ TestServo = Model(
         ]
 )
 
-servo = @instantiateModel(buildModia3D(TestServo), unitless=true, logCode=false, log=false)
+servo = @instantiateModel(TestServo, unitless=true, logCode=false, log=false)
 
 stopTime = 4.0
 tolerance = 1e-6

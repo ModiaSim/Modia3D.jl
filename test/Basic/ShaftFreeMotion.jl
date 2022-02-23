@@ -15,15 +15,17 @@ Shaft = Model(
     free = FreeMotion(obj1=:world, obj2=:shaft)
 )
 
-model = Model(
-    shaft = buildModia3D(Shaft | Map(Length=1.0, Diameter=0.2, free = Map(v   = Var(init = [0.0, 0.1, 0.6]),
-                                                                          rot = Var(init = [deg2rad(30), deg2rad(20), deg2rad(10)]),
-                                                                          w   = Var(init = [1.0, 2.0, 3.0]))))
+model = Model3D(
+    shaft = Shaft | Map(Length=1.0, Diameter=0.2, free = Map(v = Var(init = ModiaBase.SVector{3,Float64}([0.0, 0.1, 0.6])),
+                                                                     rot = Var(init = ModiaBase.SVector{3,Float64}([deg2rad(30), deg2rad(20), deg2rad(10)])),
+                                                                     w   = Var(init = ModiaBase.SVector{3,Float64}([1.0, 2.0, 3.0]))
+                                                                    )
+                       )
+                        
 )
-
 #@showModel model
 
-shaft = @instantiateModel(model, aliasReduction=false, unitless=true, log=false, logStateSelection=false, logCode=false)
+shaft = @instantiateModel(model, unitless=true, log=false, logStateSelection=false, logCode=false)
 
 #@showModel shaft.p[1]
 

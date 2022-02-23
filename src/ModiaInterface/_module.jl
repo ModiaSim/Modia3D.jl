@@ -1,5 +1,6 @@
 module ModiaInterface
 
+export Model3D
 export Object3D, Scene, Visual, Solid
 export Box, Beam, Cylinder, Sphere, Ellipsoid
 export Cone, Capsule, GearWheel, Grid, SpringShape
@@ -12,17 +13,20 @@ export UniformGravityField
 export RefPath, ptpJointSpace, scheduleReferenceMotion
 export calculateRobotMovement
 export getRefPathPosition, getRefPathInitPosition, getVariables
-export multibodyResiduals!, setModiaJointVariables!
 export Fix
 export Revolute, RevoluteWithFlange
 export Prismatic, PrismaticWithFlange
 export J123, J132, J123or132, singularRem, FreeMotion, change_rotSequenceInNextIteration!
 export Bushing, SpringDamperPtP
 
-export buildModia3D
+export buildModia3D!
 
+import OrderedCollections
 import Modia3D
-using ModiaLang
+import Modia3D.Composition
+using  ModiaLang
+using  StaticArrays
+
 
 # ModiaLang models
 include("$(ModiaLang.path)/models/Blocks.jl")

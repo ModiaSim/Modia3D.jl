@@ -48,6 +48,24 @@ Download and install the free DLR SimVis Community Edition, e.g. with [https://v
 
 ## Release Notes
 
+### Version 0.9.0
+
+Non-backwards compatible changes
+
+- Operator `buildModia3D(..)` is removed. Instead, the new constructor `Model3D(..)` must be used at the top level of a
+  Modia3D definition. It is now possible to define several, independent multibody systems 
+  (currently, only one of them can have animation and animation export).
+- If init/start vectors are defined (e.g. initial state of a FreeMotion joint), they must be defined as SVector{3,Float64}(..).
+  Otherwise, errors occur during compilation. 
+
+Other changes
+
+- All test models changed, due to the non-backwards compatible change.
+- Code generation changed significantly, in order that the interface to Modia3D functions is type stable.
+  As a result, simulation is more efficient and much less memory is allocated during simulation.
+- Efficiency improvements for collisions (less memory is allocated during simulation + faster simulation).
+
+
 ### Version 0.8.2
 
 - Fix Cone contact detection
