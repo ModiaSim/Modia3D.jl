@@ -29,6 +29,8 @@ mutable struct MultibodyData{F <: Modia3D.VarFloatType, TimeType}
     nz::Int                                   # Number of used zero crossing functions
     time::TimeType                            # Current time
 
+    freeMotionResiduals::Vector{F}  
+    
     # for multibodyAccelerations
     leq::Vector{ModiaBase.LinearEquations{F}}
 
@@ -39,7 +41,9 @@ mutable struct MultibodyData{F <: Modia3D.VarFloatType, TimeType}
                              revoluteObjects, prismaticObjects, freeMotionObjects,
                              zeros(F, length(revoluteObjects)), zeros(F, length(prismaticObjects)), zeros(SVector{3,F}, 2*length(freeMotionObjects)),
                              zeros(F, length(revoluteObjects)), zeros(F, length(prismaticObjects)), zeros(SVector{3,F}, 2*length(freeMotionObjects)), 
-                             zStartIndex, nz, Modia3D.convertAndStripUnit(TimeType, u"s", time), ModiaBase.LinearEquations{F}[])
+                             zStartIndex, nz, Modia3D.convertAndStripUnit(TimeType, u"s", time), 
+                             zeros(F, 2*3*length(freeMotionObjects)),
+                             ModiaBase.LinearEquations{F}[])
 end
 
 mutable struct MultibodyBuild{F <: Modia3D.VarFloatType, TimeType}
@@ -466,8 +470,8 @@ end
 
 Copy states of the revolute joints into the corresponding Object3Ds.
 """
-@inline function setStatesRevolute!(mbs::MultibodyData{F}, args::Vararg{F,NJOINTS_TIMES_2})::MultibodyData{F} where {F,NJOINTS_TIMES_2}
-    @assert(NJOINTS_TIMES_2 == 2*length(mbs.revoluteObjects))
+function setStatesRevolute!(mbs::MultibodyData{F,TimeType}, args::Vararg{F})::MultibodyData{F,TimeType} where {F,TimeType}
+    @assert(length(args) == 2*length(mbs.revoluteObjects))
     scene = mbs.scene
     j = 1
     @inbounds for obj in mbs.revoluteObjects
@@ -485,8 +489,8 @@ end
 
 Copy states of the prismatic joints into the corresponding Object3Ds.
 """
-@inline function setStatesPrismatic!(mbs::MultibodyData{F}, args::Vararg{F,NJOINTS_TIMES_2})::MultibodyData{F} where {F,NJOINTS_TIMES_2}
-    @assert(NJOINTS_TIMES_2 == 2*length(mbs.prismaticObjects))
+function setStatesPrismatic!(mbs::MultibodyData{F,TimeType}, args::Vararg{F})::MultibodyData{F,TimeType} where {F,TimeType}
+    @assert(length(args) == 2*length(mbs.prismaticObjects))
     scene = mbs.scene
     j = 1
     @inbounds for obj in mbs.prismaticObjects
@@ -504,8 +508,8 @@ end
 
 Copy states of the free motion joints into the corresponding Object3Ds.
 """
-@inline function setStatesFreeMotion!(mbs::MultibodyData{F}, args::Vararg{SVector{3,F},NJOINTS_TIMES_4})::MultibodyData{F} where {F,NJOINTS_TIMES_4}
-    @assert(NJOINTS_TIMES_4 == 4*length(mbs.freeMotionObjects))
+function setStatesFreeMotion!(mbs::MultibodyData{F,TimeType}, args::Vararg{SVector{3,F}})::MultibodyData{F,TimeType} where {F,TimeType}
+    @assert(length(args) == 4*length(mbs.freeMotionObjects))
     scene = mbs.scene
     j = 1
     @inbounds for obj in mbs.freeMotionObjects
@@ -525,8 +529,8 @@ end
 
 Copy isrot123 of the free motion joints into the corresponding Object3Ds.
 """
-@inline function setStatesFreeMotion_isrot123!(mbs::MultibodyData{F}, args::Vararg{Bool,NJOINTS})::MultibodyData{F} where {F,NJOINTS}
-    @assert(NJOINTS == length(mbs.freeMotionObjects))
+function setStatesFreeMotion_isrot123!(mbs::MultibodyData{F,TimeType}, args::Vararg{Bool})::MultibodyData{F,TimeType} where {F,TimeType}
+    @assert(length(args) == length(mbs.freeMotionObjects))
     scene = mbs.scene
     @inbounds for (i,obj) in enumerate(mbs.freeMotionObjects)
         scene.freeMotion[obj.jointIndex].isrot123 = args[i]
@@ -540,8 +544,8 @@ end
 
 Copy accelerations of revolute joints into mbs.
 """
-@inline function setAccelerationsRevolute!(mbs::MultibodyData{F}, args::Vararg{F,NJOINTS}) where {F,NJOINTS}
-    @assert(NJOINTS == length(mbs.revoluteObjects))
+function setAccelerationsRevolute!(mbs::MultibodyData{F,TimeType}, args::Vararg{F}) where {F,TimeType}
+    @assert(length(args) == length(mbs.revoluteObjects))
     scene = mbs.scene
     @inbounds for (i,obj) in enumerate(mbs.revoluteObjects)
         scene.revolute[obj.jointIndex].a = args[i]
@@ -555,8 +559,8 @@ end
 
 Copy accelerations of prismatic joints into mbs.
 """
-@inline function setAccelerationsPrismatic!(mbs::MultibodyData{F}, args::Vararg{F,NJOINTS}) where {F,NJOINTS}
-    @assert(NJOINTS == length(mbs.prismaticObjects))
+function setAccelerationsPrismatic!(mbs::MultibodyData{F,TimeType}, args::Vararg{F}) where {F,TimeType}
+    @assert(length(args) == length(mbs.prismaticObjects))
     scene = mbs.scene
     @inbounds for (i,obj) in enumerate(mbs.prismaticObjects)
         scene.prismatic[obj.jointIndex].a = args[i]
@@ -570,8 +574,8 @@ end
 
 Copy accelerations of free motion joints into mbs
 """
-@inline function setAccelerationsFreeMotion!(mbs::MultibodyData{F}, args::Vararg{SVector{3,F},NJOINTS_TIMES_2}) where {F,NJOINTS_TIMES_2}
-    @assert(NJOINTS_TIMES_2 == 2*length(mbs.freeMotionObjects))
+function setAccelerationsFreeMotion!(mbs::MultibodyData{F,TimeType}, args::Vararg{SVector{3,F}}) where {F,TimeType}
+    @assert(length(args) == 2*length(mbs.freeMotionObjects))
     scene = mbs.scene
     j = 1
     @inbounds for obj in mbs.freeMotionObjects
@@ -583,13 +587,13 @@ Copy accelerations of free motion joints into mbs
     return mbs
 end
 
-
 """
     (tau1,tau2,<...>) = getGenForcesRevolute(mbs::MultibodyData{F}, ::Val{N}) where {F <: Modia3D.VarFloatType,N}
 
 Return generalized forces of revolute joints as NTuple.
 """
-@inline getGenForcesRevolute(mbs::MultibodyData{F}, ::Val{N}) where {F <: Modia3D.VarFloatType,N} = ntuple(i->mbs.revoluteGenForces[i], Val(N))
+#getGenForcesRevolute(mbs::MultibodyData{F,TimeType}) where {F,TimeType} = mbs.revoluteGenForces
+getGenForcesRevolute(mbs::MultibodyData{F,TimeType}, ::Val{N}) where {F,TimeType,N} = ntuple(i->mbs.revoluteGenForces[i], Val(N))
 
 
 """
@@ -597,18 +601,27 @@ Return generalized forces of revolute joints as NTuple.
 
 Return generalized forces of prismatic joints as NTuple.
 """
-@inline getGenForcesPrismatic(mbs::MultibodyData{F}, ::Val{N}) where {F <: Modia3D.VarFloatType,N} = ntuple(i->mbs.prismaticGenForces[i], Val(N))
+#getGenForcesPrismatic(mbs::MultibodyData{F,TimeType}) where {F,TimeType} = mbs.prismaticGenForces
+getGenForcesPrismatic(mbs::MultibodyData{F,TimeType}, ::Val{N}) where {F,TimeType,N} = ntuple(i->mbs.prismaticGenForces[i], Val(N))
 
 
 """
-    (genf1,gent1,genf2,gent2,<...>) = getGenForcesFreeMotion(mbs::MultibodyData{F}, ::Val{N}) where {F <: Modia3D.VarFloatType,N}
+    residuals = getGenForcesFreeMotion(mbs::MultibodyData{F}, ::Val{N}) where {F <: Modia3D.VarFloatType,N}
 
-Return generalized forces of free motion joints as NTuple.
+Return generalized forces of free motion joints as Vector to be used for residuals vector.
 """
-@inline getGenForcesFreeMotion(mbs::MultibodyData{F}, ::Val{N}) where {F <: Modia3D.VarFloatType,N} = ntuple(i->mbs.freeMotionGenForces[i], Val(N))
-
-
-
+function getGenForcesFreeMotion(mbs::MultibodyData{F,TimeType})::Vector{F} where {F,TimeType}
+    res = mbs.freeMotionResiduals
+    j = 1
+    @assert(length(res) == 3*length(mbs.freeMotionGenForces))
+    @inbounds for vec in mbs.freeMotionGenForces
+        res[j]   = vec[1]
+        res[j+1] = vec[2]
+        res[j+2] = vec[3]
+        j += 3
+    end
+    return res
+end
 
 
 # For backwards compatibility (do not use for new models)

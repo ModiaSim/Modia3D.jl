@@ -352,7 +352,7 @@ while LinearEquationsIteration(_leq, <...>)
 end
 ```
 """
-function computeGeneralizedForces!(mbs::MultibodyData{F}, _leq)::MultibodyData{F} where {F}
+function computeGeneralizedForces!(mbs::MultibodyData{F,TimeType}, _leq)::MultibodyData{F,TimeType} where {F,TimeType}
     instantiatedModel = mbs.instantiatedModel  
     TimerOutputs.@timeit instantiatedModel.timer "Modia3D computeGeneralizedForces!" begin
         storeResult   = instantiatedModel.storeResult

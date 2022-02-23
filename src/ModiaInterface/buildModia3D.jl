@@ -225,7 +225,7 @@ function buildModia3D!(model::AbstractDict, FloatType::Type, TimeType::Type,
             end
             if length(jointAccelerationsFreeMotion2) > 0
                 NFreeMotion2 = 2*NFreeMotion
-                push!(mbs_equations, :( ($(jointForcesFreeMotion2...), ) = implicitDependency(Modia3D.getGenForcesFreeMotion($mbsi, Val($NFreeMotion2)), $(jointAccelerationsFreeMotion2...)) ))
+                push!(mbs_equations, :( ($(jointForcesFreeMotion2...), ) = implicitDependency(Modia3D.getGenForcesFreeMotion($mbsi), $(jointAccelerationsFreeMotion2...)) ))
                 mbs_variables[mbsi] = Var(hideResult=true)                    
             end
 
