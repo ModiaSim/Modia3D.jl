@@ -4,7 +4,7 @@
 
 # Collision detection algorithm based on the MPR algorithm
 
-mutable struct SupportPoint{T}
+struct SupportPoint{T}
     p::SVector{3,T}    # support point
     n::SVector{3,T}    # support normal unit vector
     a::SVector{3,T}    # point on shapeA
@@ -22,7 +22,7 @@ function getSupportPoint(shapeA::Modia3D.Composition.Object3D, shapeB::Compositi
 end
 
 
-function barycentric(r1::SupportPoint,r2::SupportPoint,r3::SupportPoint,r4::SupportPoint)
+function barycentric(r1::SupportPoint{T}, r2::SupportPoint{T}, r3::SupportPoint{T}, r4::SupportPoint{T}) where {T}
     r21 = r2.p - r1.p
     r31 = r3.p - r1.p
     r41 = r4.p - r1.p
@@ -42,8 +42,9 @@ function barycentric(r1::SupportPoint,r2::SupportPoint,r3::SupportPoint,r4::Supp
     b21 = dot(n31,r41) / dot(n31,r21)
     b31 = dot(n21,r41) / dot(n21,r31)
 
-    r4.a = r1.a + b21*(r2.a - r1.a) + b31*(r3.a - r1.a)
-    r4.b = r1.b + b21*(r2.b - r1.b) + b31*(r3.b - r1.b)
+    a = r1.a + b21*(r2.a - r1.a) + b31*(r3.a - r1.a)
+    b = r1.b + b21*(r2.b - r1.b) + b31*(r3.b - r1.b)
+    r4 = SupportPoint{T}(r4.p, r4.n, a, b)
 
 
     ### only works if r4.n goes through zero
@@ -74,6 +75,8 @@ end
 
 function checkIfShapesArePlanar(r0::SupportPoint,r1::SupportPoint,r2::SupportPoint,n2::SVector{3,T},
                                 shapeA::Composition.Object3D,shapeB::Composition.Object3D) where {T}
+    r3 = SupportPoint{T}
+
     # r3 is in the direction of plane normal that contains triangle r0-r1-r2
     n3 = cross(r1.p-r0.p, r2.p-r0.p)
     neps = Modia3D.nepsType(T)
@@ -161,6 +164,7 @@ end
 # construction of r4
 function constructR4(r0::SupportPoint,r1::SupportPoint,r2::SupportPoint,r3::SupportPoint,
                      shapeA::Composition.Object3D,shapeB::Composition.Object3D, scale::T) where {T}
+    r4 = SupportPoint{T}
     n4 = cross(r2.p-r1.p, r3.p-r1.p)
     neps = Modia3D.nepsType(T)
     if norm(n4) <= neps
@@ -210,13 +214,13 @@ end
 scaleVector(scale, ri) = ri.*scale
 
 
-function skalarization(r0::SupportPoint, r1::SupportPoint, r2::SupportPoint, r3::SupportPoint)
+function skalarization(r0::SupportPoint{T}, r1::SupportPoint{T}, r2::SupportPoint{T}, r3::SupportPoint{T}) where {T}
     x = maximum([abs.(r0.p) abs.(r1.p) abs.(r2.p) abs.(r3.p)])
     scale = 1/x
-    r0.p = scaleVector(scale, r0.p)
-    r1.p = scaleVector(scale, r1.p)
-    r2.p = scaleVector(scale, r2.p)
-    r3.p = scaleVector(scale, r3.p)
+    r0 = SupportPoint{T}(scaleVector(scale, r0.p), r0.n, r0.a, r0.b)
+    r1 = SupportPoint{T}(scaleVector(scale, r1.p), r1.n, r1.a, r1.b)
+    r2 = SupportPoint{T}(scaleVector(scale, r2.p), r2.n, r2.a, r2.b)
+    r3 = SupportPoint{T}(scaleVector(scale, r3.p), r3.n, r3.a, r3.b)
     return (r0, r1, r2, r3, scale)
 end
 
@@ -226,12 +230,12 @@ function finalTC2(r1::SupportPoint, r2::SupportPoint, r3::SupportPoint, r4::Supp
         # error("shapeA = ", shapeA, " shapeB = ", shapeB)
     #end
     distance = -dot(r4.n, r4.p)
-    barycentric(r1,r2,r3,r4)
+    r4 = barycentric(r1, r2, r3, r4)
     return distance, r1, r2, r3, r4
 end
 
 
-function finalTC3(r0::SupportPoint, r1::SupportPoint, r2::SupportPoint, r3::SupportPoint, r4::SupportPoint)
+function finalTC3(r0::SupportPoint{T}, r1::SupportPoint{T}, r2::SupportPoint{T}, r3::SupportPoint{T}, r4::SupportPoint{T}) where {T}
     #println("TC 3")
 
     #doesRayIntersectPortal(r1.p,r2.p,r3.p, r4.p)
@@ -241,8 +245,10 @@ function finalTC3(r0::SupportPoint, r1::SupportPoint, r2::SupportPoint, r3::Supp
     #if !analyzeFinalPortal(r1.p, r2.p, r3.p, r4.p)
         # error("shapeA = ", shapeA, " shapeB = ", shapeB)
     #end
-    (r4.p, distance) = signedDistanceToPortal(r0.p,r1.p,r2.p,r3.p)
-    barycentric(r1,r2,r3,r4)
+
+    (r4p, distance) = signedDistanceToPortal(r0.p, r1.p, r2.p, r3.p)
+    r4 = SupportPoint{T}(r4p, r4.n, r4.a, r4.b)
+    r4 = barycentric(r1, r2, r3, r4)
     return distance, r1, r2, r3, r4
 end
 
@@ -361,6 +367,9 @@ function mprGeneral(ch::Composition.ContactDetectionMPR_handler{T,F}, shapeA::Co
     tol_rel = ch.tol_rel
     niter_max = ch.niter_max
     neps = Modia3D.nepsType(T)
+    r0 = SupportPoint{T}
+    r1 = SupportPoint{T}
+    r2 = SupportPoint{T}
 
     ###########      Phase 1, Minkowski Portal Refinement      ###################
     # Construction of r0 and initial portal triangle points r1, r2, r3

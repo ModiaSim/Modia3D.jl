@@ -6,29 +6,29 @@ function supportPoint(obj::Composition.Object3D{F}, e::SVector{3,T})::SVector{3,
     obj_R_abs = SMatrix{3,3,T,9}(obj.R_abs)
 
     if shapeKind == Modia3D.SphereKind
-        #sphere::Modia3D.Shapes.Sphere = obj.shape
-        return Modia3D.supportPoint_Sphere(obj.shape, obj_r_abs, obj_R_abs, e)
+        sphere::Modia3D.Shapes.Sphere{F} = obj.shape
+        return Modia3D.supportPoint_Sphere(sphere, obj_r_abs, obj_R_abs, e)
     elseif shapeKind == Modia3D.EllipsoidKind
-        #ellipsoid::Modia3D.Shapes.Ellipsoid = obj.shape
-        return Modia3D.supportPoint_Ellipsoid(obj.shape, obj_r_abs, obj_R_abs, e)
+        ellipsoid::Modia3D.Shapes.Ellipsoid{F} = obj.shape
+        return Modia3D.supportPoint_Ellipsoid(ellipsoid, obj_r_abs, obj_R_abs, e)
     elseif shapeKind == Modia3D.BoxKind
-        #box::Modia3D.Shapes.Box = obj.shape
-        return Modia3D.supportPoint_Box(obj.shape, obj_r_abs, obj_R_abs, e, collisionSmoothingRadius)
+        box::Modia3D.Shapes.Box{F} = obj.shape
+        return Modia3D.supportPoint_Box(box, obj_r_abs, obj_R_abs, e, collisionSmoothingRadius)
     elseif shapeKind == Modia3D.CylinderKind
-        #cylinder::Modia3D.Shapes.Cylinder = obj.shape
-        return Modia3D.supportPoint_Cylinder(obj.shape, obj_r_abs, obj_R_abs, e, collisionSmoothingRadius)
+        cylinder::Modia3D.Shapes.Cylinder{F} = obj.shape
+        return Modia3D.supportPoint_Cylinder(cylinder, obj_r_abs, obj_R_abs, e, collisionSmoothingRadius)
     elseif shapeKind == Modia3D.ConeKind
-        #cone::Modia3D.Shapes.Cone = obj.shape
-        return Modia3D.supportPoint_Cone(obj.shape, obj_r_abs, obj_R_abs, e, collisionSmoothingRadius)
+        cone::Modia3D.Shapes.Cone{F} = obj.shape
+        return Modia3D.supportPoint_Cone(cone, obj_r_abs, obj_R_abs, e, collisionSmoothingRadius)
     elseif shapeKind == Modia3D.CapsuleKind
-        #capsule::Modia3D.Shapes.Capsule = obj.shape
-        return Modia3D.supportPoint_Capsule(obj.shape, obj_r_abs, obj_R_abs, e)
+        capsule::Modia3D.Shapes.Capsule{F} = obj.shape
+        return Modia3D.supportPoint_Capsule(capsule, obj_r_abs, obj_R_abs, e)
     elseif shapeKind == Modia3D.BeamKind
-        #beam::Modia3D.Shapes.Beam = obj.shape
-        return Modia3D.supportPoint_Beam(obj.shape, obj_r_abs, obj_R_abs, e, collisionSmoothingRadius)
+        beam::Modia3D.Shapes.Beam{F} = obj.shape
+        return Modia3D.supportPoint_Beam(beam, obj_r_abs, obj_R_abs, e, collisionSmoothingRadius)
     elseif shapeKind == Modia3D.FileMeshKind
-        #fileMesh::Modia3D.Shapes.FileMesh = obj.shape
-        return Modia3D.supportPoint_FileMesh(obj.shape, obj_r_abs, obj_R_abs, e)
+        fileMesh::Modia3D.Shapes.FileMesh = obj.shape
+        return Modia3D.supportPoint_FileMesh(fileMesh, obj_r_abs, obj_R_abs, e)
     else
         error("not supported shape for support points")
     end
