@@ -3,25 +3,25 @@
 
 using Modia3D
 
-Pendulum = Model(
+Pendulum = Model3D(
     world     = Object3D(feature=Scene()),
     body      = Object3D(feature=Solid(massProperties=MassProperties(mass=1.0))),
     bodyFrame = Object3D(parent=:body, translation=[-0.5, 0.0, 0.0]),
     rev       = Revolute(obj1=:world, obj2=:bodyFrame)
 )
 
-pendulum = @instantiateModel(buildModia3D(Pendulum), unitless=true)
+pendulum = @instantiateModel(Pendulum, unitless=true)
 simulate!(pendulum, stopTime=3.0)
 
 @usingModiaPlot     # use the plot package defined by ENV[&quot;MODIA_PLOT&quot;]
 plot(pendulum, &quot;rev.phi&quot;)
 
 end</code></pre><p>or execute it in the Julia <code>REPL</code></p><pre><code class="language-julia hljs">julia&gt; import Modia3D  # is only required for &#39;$(Modia3D.path)&#39; in the include command
-julia&gt; include(&quot;$(Modia3D.path)/test/Tutorial/Pendulum1.jl&quot;)</code></pre><p>The <code>world</code> <a href="../Components/Object3D.html#Object3D">Object3D</a> has feature <a href="../Components/Object3D.html#Scene">Scene</a> and is therefore the inertial system. The <code>body</code> Object3D is a <a href="../Components/Object3D.html#Solid">Solid</a> and defines the pendulum as a mass point with <code>mass = 1.0</code>. The <code>bodyFrame</code> Object3D defines a coordinate system on the <code>body</code> that is translated along the x-axis. A revolute joint connects <code>world</code> with <code>bodyFrame</code>.</p><p>With command <code>buildModia3D(Pendulum)</code>, the model definition is inspected and a few lines of code included, in order that joint variables are communicated between the Modia equations and the Modia3D multibody program. Keyword <code>unitless=true</code> defines that code generation is performed without units (because Modia3D does not yet fully support units in all components).</p><p>The commands above generate an instance of the model, simulate it and generate the following plot:</p><p><img src="../../resources/images/Tutorial/Pendulum1.png" alt="Tutorial-Pendulum1"/></p><h2 id=".-Pendulum-with-Animation"><a class="docs-heading-anchor" href="#.-Pendulum-with-Animation">2. Pendulum with Animation</a><a id=".-Pendulum-with-Animation-1"></a><a class="docs-heading-anchor-permalink" href="#.-Pendulum-with-Animation" title="Permalink"></a></h2><p>The Object3Ds of the first example are extended with <a href="../Components/Object3D.html#Visual">Visual</a> and <a href="../Components/Object3D.html#Solid">Solid</a> features in order that the pendulum parts are visualized and exported for offline animation by defining <code>animationFile = &quot;Pendulum2.json&quot;</code> in <a href="../Components/Object3D.html#Scene">Scene</a>. The first Object3D <code>obj1</code> is defined as a solid <a href="../Components/Shapes.html#Beam">Beam</a> with <code>&quot;Blue&quot;</code>color and its <a href="../Components/Materials.html#Solid-material">Solid material</a> is made of <code>&quot;Steel&quot;</code>. Mass, center of mass and inertia tensor are computed from Steel density and from the <a href="../Components/Shapes.html#Beam">Beam</a> shape. The second Object3D <code>obj2</code> is a visual red <a href="../Components/Shapes.html#Cylinder">Cylinder</a> that is used to visualize the axis of the revolute joint. Please, see example: <code>$(Modia3D.path)/test/Tutorial/Pendulum2.jl</code></p><pre><code class="language-julia hljs">module Pendulum2
+julia&gt; include(&quot;$(Modia3D.path)/test/Tutorial/Pendulum1.jl&quot;)</code></pre><p>The <code>world</code> <a href="../Components/Object3D.html#Object3D">Object3D</a> has feature <a href="../Components/Object3D.html#Scene">Scene</a> and is therefore the inertial system. The <code>body</code> Object3D is a <a href="../Components/Object3D.html#Solid">Solid</a> and defines the pendulum as a mass point with <code>mass = 1.0</code>. The <code>bodyFrame</code> Object3D defines a coordinate system on the <code>body</code> that is translated along the x-axis. A revolute joint connects <code>world</code> with <code>bodyFrame</code>.</p><p>With command <code>Model3D(..)</code>, a few lines of code are included, in order that joint variables are communicated between the Modia equations and the Modia3D multibody program. Keyword <code>unitless=true</code> defines that code generation is performed without units (because Modia3D does not yet fully support units in all components).</p><p>The commands above generate an instance of the model, simulate it and generate the following plot:</p><p><img src="../../resources/images/Tutorial/Pendulum1.png" alt="Tutorial-Pendulum1"/></p><h2 id=".-Pendulum-with-Animation"><a class="docs-heading-anchor" href="#.-Pendulum-with-Animation">2. Pendulum with Animation</a><a id=".-Pendulum-with-Animation-1"></a><a class="docs-heading-anchor-permalink" href="#.-Pendulum-with-Animation" title="Permalink"></a></h2><p>The Object3Ds of the first example are extended with <a href="../Components/Object3D.html#Visual">Visual</a> and <a href="../Components/Object3D.html#Solid">Solid</a> features in order that the pendulum parts are visualized and exported for offline animation by defining <code>animationFile = &quot;Pendulum2.json&quot;</code> in <a href="../Components/Object3D.html#Scene">Scene</a>. The first Object3D <code>obj1</code> is defined as a solid <a href="../Components/Shapes.html#Beam">Beam</a> with <code>&quot;Blue&quot;</code>color and its <a href="../Components/Materials.html#Solid-material">Solid material</a> is made of <code>&quot;Steel&quot;</code>. Mass, center of mass and inertia tensor are computed from Steel density and from the <a href="../Components/Shapes.html#Beam">Beam</a> shape. The second Object3D <code>obj2</code> is a visual red <a href="../Components/Shapes.html#Cylinder">Cylinder</a> that is used to visualize the axis of the revolute joint. Please, see example: <code>$(Modia3D.path)/test/Tutorial/Pendulum2.jl</code></p><pre><code class="language-julia hljs">module Pendulum2
 
 using Modia3D
 
-Pendulum = Model(
+Pendulum = Model3D(
     world = Object3D(feature=Scene(animationFile=&quot;Pendulum2.json&quot;)),
     obj1  = Object3D(feature=Solid(shape=Beam(axis=1, length=1.0, width=0.2, thickness=0.2),
                 solidMaterial=&quot;Steel&quot;, visualMaterial=VisualMaterial(color=&quot;Blue&quot;))),
@@ -30,7 +30,7 @@ Pendulum = Model(
     rev   = Revolute(obj1=:world, obj2=:obj2)
 )
 
-pendulum = @instantiateModel(buildModia3D(Pendulum), unitless=true)
+pendulum = @instantiateModel(Pendulum, unitless=true)
 simulate!(pendulum, stopTime=3.0)
 
 @usingModiaPlot
@@ -43,7 +43,7 @@ using Modia3D
 
 include(&quot;$(Modia3D.modelsPath)/AllModels.jl&quot;)
 
-Pendulum = Model(
+Pendulum = Model3D(
     world = Object3D(feature=Scene(animationFile=&quot;Pendulum3.json&quot;)),
     obj1  = Object3D(feature=Solid(shape=Beam(axis=1, length=1.0, width=0.2, thickness=0.2),
                 solidMaterial=&quot;Steel&quot;, visualMaterial=VisualMaterial(color=&quot;Blue&quot;))),
@@ -57,7 +57,7 @@ Pendulum = Model(
                 (damper.flange_a, fixed.flange)]
 )
 
-pendulum = @instantiateModel(buildModia3D(Pendulum), unitless=true)
+pendulum = @instantiateModel(Pendulum, unitless=true)
 simulate!(pendulum, stopTime=3.0)
 
 @usingModiaPlot
@@ -68,4 +68,4 @@ julia&gt; include(&quot;$(Modia3D.path)/test/Tutorial/Pendulum3.jl&quot;)</code>
 julia&gt; include(&quot;$(Modia3D.path)/test/Tutorial/Pendulum1.jl&quot;)
 julia&gt; include(&quot;$(Modia3D.path)/test/Tutorial/Pendulum2.jl&quot;)
 julia&gt; include(&quot;$(Modia3D.path)/test/Tutorial/Pendulum3.jl&quot;)
-julia&gt; include(&quot;$(Modia3D.path)/test/Tutorial/BouncingSphere.jl&quot;)</code></pre><p>To run all tests without graphics, execute:</p><pre><code class="language-julia hljs">julia&gt; include(&quot;$(Modia3D.path)/test/runtests.jl&quot;)</code></pre><p>To run all tests with visualization and plots, execute:</p><pre><code class="language-julia hljs">julia&gt; include(&quot;$(Modia3D.path)/test/runtestsWithGraphics.jl&quot;)</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="Tutorial.html">« Modia3D Tutorial</a><a class="docs-footer-nextpage" href="HierarchicalModels.html">Hierarchical models »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.12 on <span class="colophon-date" title="Friday 11 February 2022 15:17">Friday 11 February 2022</span>. Using Julia version 1.7.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+julia&gt; include(&quot;$(Modia3D.path)/test/Tutorial/BouncingSphere.jl&quot;)</code></pre><p>To run all tests without graphics, execute:</p><pre><code class="language-julia hljs">julia&gt; include(&quot;$(Modia3D.path)/test/runtests.jl&quot;)</code></pre><p>To run all tests with visualization and plots, execute:</p><pre><code class="language-julia hljs">julia&gt; include(&quot;$(Modia3D.path)/test/runtestsWithGraphics.jl&quot;)</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="Tutorial.html">« Modia3D Tutorial</a><a class="docs-footer-nextpage" href="HierarchicalModels.html">Hierarchical models »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.12 on <span class="colophon-date" title="Wednesday 23 February 2022 14:26">Wednesday 23 February 2022</span>. Using Julia version 1.7.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
