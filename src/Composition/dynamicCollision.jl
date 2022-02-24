@@ -34,32 +34,40 @@ end
 # further, at an event simulation status is updated, contact material is replaced
 # and the actual contactDict is stored
 function dealWithContacts!(sim, scene::Scene{F}, ch, world, time, file) where F <: Modia3D.VarFloatType
-  simh = sim.eventHandler
-  for (pairID, pair) in ch.contactDict
-    obj1 = pair.obj1
-    obj2 = pair.obj2
-    rContact      = (pair.contactPoint1 + pair.contactPoint2)/F(2.0)
-    contactNormal = pair.contactNormal
-    if ModiaLang.isEvent(sim)
-      # println("$(sim.time): ", obj1.path, " ", obj2.path)
-      getMaterialContactStart(scene, ch, simh, pair, pairID, obj1, obj2, rContact, contactNormal)
-      visualizeContactAndSupportPoints(ch, world)
+    simh = sim.eventHandler
+    f1::SVector{3,F}=Modia3D.ZeroVector3D(F)
+    f2::SVector{3,F}=Modia3D.ZeroVector3D(F)
+    t1::SVector{3,F}=Modia3D.ZeroVector3D(F)
+    t2::SVector{3,F}=Modia3D.ZeroVector3D(F)
+
+    for (pairID, pair) in ch.contactDict
+        obj1 = pair.obj1
+        obj2 = pair.obj2
+        rContact      = (pair.contactPoint1 + pair.contactPoint2)/F(2.0)
+        contactNormal = pair.contactNormal
+        if ModiaLang.isEvent(sim)
+            # println("$(sim.time): ", obj1.path, " ", obj2.path)
+            getMaterialContactStart(scene, ch, simh, pair, pairID, obj1, obj2, rContact, contactNormal)
+            visualizeContactAndSupportPoints(ch, world)
+        end
+        if scene.options.enableContactDetection
+            (f1,f2,t1,t2) = responseCalculation(pair.contactPairMaterial, obj1, obj2,
+                            rContact, contactNormal,
+                            pair.distanceWithHysteresis, time, file, sim)
+
+            # Transform forces/torques in local part frames
+            obj1.f += obj1.R_abs*f1
+            obj1.t += obj1.R_abs*t1
+            obj2.f += obj2.R_abs*f2
+            obj2.t += obj2.R_abs*t2
+        end
     end
-    if scene.options.enableContactDetection
-      (f1,f2,t1,t2) = responseCalculation(pair.contactPairMaterial, obj1, obj2,
-                                          rContact, contactNormal,
-                                          pair.distanceWithHysteresis, time, file, sim)
 
-      # Transform forces/torques in local part frames
-      obj1.f += obj1.R_abs*f1
-      obj1.t += obj1.R_abs*t1
-      obj2.f += obj2.R_abs*f2
-      obj2.t += obj2.R_abs*t2
-  end; end
-
-  if ModiaLang.isEvent(sim)
-    deleteMaterialLastContactDictContactEnd(scene, ch, simh)
-end; end
+    if ModiaLang.isEvent(sim)
+        deleteMaterialLastContactDictContactEnd(scene, ch, simh)
+    end
+    return nothing
+end
 
 
 
@@ -68,35 +76,38 @@ end; end
 # if the actual shape pair was in contact at the last step as well, the already assigned contact material is taken
 # otherwise, contact material between these two shapes is choosen and simulation status is set
 function getMaterialContactStart(scene, ch, simh, pair, pairID, obj1, obj2, rContact, contactNormal)
-  if haskey(ch.lastContactDict, pairID)
-    # use material (reference) from previous event
-    if scene.options.enableContactDetection
-      pair.contactPairMaterial = ch.lastContactDict[pairID].contactPairMaterial    # improve later (should avoid to inquire pairID twice)
-    end
-  else
-    # determine contact pair material
-    if scene.options.enableContactDetection
-      pair.contactPairMaterial = contactStart(obj1, obj2, rContact, contactNormal,
-                                              scene.options.elasticContactReductionFactor,
-                                              scene.options.maximumContactDamping)
-    end
-    simh.restart = max(simh.restart, ModiaLang.Restart)
-    simh.newEventIteration = false
-    if scene.options.enableContactDetection
-      logEvents(simh, pair, obj1, obj2, rContact, contactNormal)
-    end
+    if haskey(ch.lastContactDict, pairID)
+        # use material (reference) from previous event
+        if scene.options.enableContactDetection
+        pair.contactPairMaterial = ch.lastContactDict[pairID].contactPairMaterial    # improve later (should avoid to inquire pairID twice)
+        end
+    else
+        # determine contact pair material
+        if scene.options.enableContactDetection
+            pair.contactPairMaterial = contactStart(obj1, obj2, rContact, contactNormal,
+                scene.options.elasticContactReductionFactor,
+                scene.options.maximumContactDamping)
+        end
+        simh.restart = max(simh.restart, ModiaLang.Restart)
+        simh.newEventIteration = false
+        if scene.options.enableContactDetection
+            logEvents(simh, pair, obj1, obj2, rContact, contactNormal)
+        end
+        return nothing
 end; end
 
 # important feature is stored at an event
 function logEvents(simh, pair, obj1, obj2, rContact, contactNormal)
-  if simh.logEvents
-    name1 = Modia3D.fullName(obj1)
-    name2 = Modia3D.fullName(obj2)
-    n     = contactNormal
-    println("        distance(", name1, ",", name2, ") = ", pair.distanceWithHysteresis, " became <= 0")
+    if simh.logEvents
+        name1 = Modia3D.fullName(obj1)
+        name2 = Modia3D.fullName(obj2)
+        n     = contactNormal
+        println("        distance(", name1, ",", name2, ") = ", pair.distanceWithHysteresis, " became <= 0")
 
-    @inbounds println("            contact normal = [", round(n[1], sigdigits=3), ", ", round(n[2], sigdigits=3), ", ", round(n[3], sigdigits=3), "], contact position = [", round(rContact[1], sigdigits=3), ", ", round(rContact[2], sigdigits=3), ", ", round(rContact[3], sigdigits=3),"], c_res = ", round(pair.contactPairMaterial.c_res, sigdigits=3) , " d_res = ", round(pair.contactPairMaterial.d_res, sigdigits=3))
-end; end
+        @inbounds println("            contact normal = [", round(n[1], sigdigits=3), ", ", round(n[2], sigdigits=3), ", ", round(n[3], sigdigits=3), "], contact position = [", round(rContact[1], sigdigits=3), ", ", round(rContact[2], sigdigits=3), ", ", round(rContact[3], sigdigits=3),"], c_res = ", round(pair.contactPairMaterial.c_res, sigdigits=3) , " d_res = ", round(pair.contactPairMaterial.d_res, sigdigits=3))
+    end
+    return nothing
+end
 
 # each contact shape pair which was in lastContactDict but isn't in actual contactDict
 # (= shape pair was in contact at last step but isn't at the actual step)
@@ -104,26 +115,29 @@ end; end
 # and simulation status is set.
 # lastContactDict is deleted and filled with feature of the actual contactDict
 function deleteMaterialLastContactDictContactEnd(scene, ch, simh)
-  for (pairID, pair) in ch.lastContactDict
-    if !haskey(ch.contactDict, pairID)
-      if scene.options.enableContactDetection
-        contactEnd(pair.contactPairMaterial, pair.obj1, pair.obj2)
-      end
-      simh.restart = max(simh.restart, ModiaLang.Restart)
-      simh.newEventIteration = false
-      if !simh.logEvents    # ModiaLang.isLogEvents(simh.logger)
-        break
-      end
-      name1 = Modia3D.fullName(pair.obj1)
-      name2 = Modia3D.fullName(pair.obj2)
-      println("        distance(", name1, ",", name2, ") = ", pair.distanceWithHysteresis, " became > 0")
-  end; end
+    for (pairID, pair) in ch.lastContactDict
+        if !haskey(ch.contactDict, pairID)
+            if scene.options.enableContactDetection
+                contactEnd(pair.contactPairMaterial, pair.obj1, pair.obj2)
+            end
+            simh.restart = max(simh.restart, ModiaLang.Restart)
+            simh.newEventIteration = false
+            if !simh.logEvents    # ModiaLang.isLogEvents(simh.logger)
+                break
+            end
+            name1 = Modia3D.fullName(pair.obj1)
+            name2 = Modia3D.fullName(pair.obj2)
+            println("        distance(", name1, ",", name2, ") = ", pair.distanceWithHysteresis, " became > 0")
+        end
+    end
 
-  # delete lastContactDict and save contactDict in lastContactDict
-  empty!(ch.lastContactDict)
-  for (pairID, pair) in ch.contactDict
-    push!(ch.lastContactDict, pairID => pair)
-end; end
+    # delete lastContactDict and save contactDict in lastContactDict
+    empty!(ch.lastContactDict)
+    for (pairID, pair) in ch.contactDict
+        push!(ch.lastContactDict, pairID => pair)
+    end
+    return nothing
+end
 
 
 ### ------- visualizing contact and support points -----------------------------
@@ -188,6 +202,7 @@ function visualizeContactAndSupportPoints(ch, world::Composition.Object3D{F}) wh
             printWarnContSupPoints(nVisualContSupPoints)
         end
     end
+    return nothing
 end
 
 printWarnContSupPoints(nVisualContSupPoints) = @warn("If all contact points and/or support points should be visualized please set nVisualContSupPoints = $nVisualContSupPoints in Scene.")
@@ -196,4 +211,5 @@ printWarnContSupPoints(nVisualContSupPoints) = @warn("If all contact points and/
 function setVisualizationContactProperties!(obj::Composition.Object3D{F}, transparency::Float64, point::SVector{3,F}) where F <: Modia3D.VarFloatType
     obj.r_abs = point
     obj.feature.visualMaterial.transparency = transparency
+    return nothing
 end
