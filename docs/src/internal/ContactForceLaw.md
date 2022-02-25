@@ -237,7 +237,7 @@ The damping coefficient ``d`` is basically computed with the formulation from [^
 because a response calculation with impulses gives similar results for some experiments
 as shown in [^3]. However, (a) instead of ``cor``, the current coefficient of restitution ``cor_{cur}``
 is used and (b) the damping coefficient is limited to ``d_{max}`` (this parameter is set via `maximumContactDamping`
-in object `Scene` and has a default value of ``1000 ~Ns/m``) to avoid an unphysical
+in object `Scene` and has a default value of ``2000 ~Ns/m``) to avoid an unphysical
 strong creeping effect for collisions with small ``cor_{cur}`` values:
 
 ```math
