@@ -10,7 +10,7 @@ penetration depth and the relative motion of the objects in contact.
 It is planned to optionally also support impulsive response calculation
 in the future.
 
-This section is based on [^4] with some minor improvements as used in the current
+This section is based on [^4] with some improvements as used in the current
 version of Modia3D.
 
 The current approach has several **limitations** that a user must know,
