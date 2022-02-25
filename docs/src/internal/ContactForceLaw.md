@@ -150,14 +150,14 @@ can be interpreted as *rolling resistance coefficient*.
 Coefficients ``c_{geo}, n_{geo}, \mu_{r,geo}`` depend on the geometries of the objects
 that are in contact. The coefficients are computed approximately based on the contact theory
 of Hertz [^5], [^6]: Here, it is assumed that each of the contacting surfaces can be described by a
-quadratic polynomial in two variables that is basically defined by its principal curvatures 
-along two perpendicular directions at the point of contact. A characteristic feature is that 
+quadratic polynomial in two variables that is basically defined by its principal curvatures
+along two perpendicular directions at the point of contact. A characteristic feature is that
 the contact volume increases nonlinearly with the penetration depth, so ``n_{geo} > 1`` (provided
 the two contacting surfaces are not completely flat), and therefore the normal contact force
 changes nonlinearly with the penetration depth. In the general case, elliptical integrals
 have to be solved, as well as a nonlinear algebraic equation system to compute the normal
-contact force as function of the penetration depth and the principal curvatures at the contact point. 
-An approximate *analytical* model is proposed in [^7]. 
+contact force as function of the penetration depth and the principal curvatures at the contact point.
+An approximate *analytical* model is proposed in [^7].
 
 In order that a numerical integration algorithm with step-size control
 works reasonably, the contact force needs to be continuous and continuously differentiable with
@@ -168,12 +168,37 @@ surfaces should also be continuous and continuously differentiable, which is usu
 Since the determination of the principal curvatures of shapes is in general
 complicated and the shapes have often areas with discontinuous curvatures, only a very rough approximation
 is used in Modia3D: *The contact area of a shape is approximated by a quadratic polynomial
-with constant mean principal curvature in all directions and on all points on the shape*. 
-In other words, a sphere with constant sphere radius ``r_{contact}`` is associated with every shape that
-is used to compute coefficients ``c_{geo}, n_{geo}, \mu_{r,geo}``. A default value for ``r_{contact}``
-is determined based on the available data of the shape (see [shape data](https://modiasim.github.io/Modia3D.jl/stable/Components/Shapes.html)):
+with constant mean principal curvature in all directions and on all points on the shape*.
+In other words, a sphere with constant sphere radius ``r_{contact}`` is associated with every shape that is used to compute coefficients ``c_{geo}, n_{geo}, \mu_{r,geo}``.
+A default value for ``r_{contact}`` is determined based on the available data of the shape (see [Shapes](@ref)):
 
-xxx
+The default values for each shape are:
+
+| Shape           | $r_{contact}$                   | isFlat |
+|:----------------|:--------------------------------|:-------|
+|[Sphere](@ref)   | diameter/2                      | false  |
+|[Ellipsoid](@ref)| min(lengthX, lengthY, lengthZ)/2| false  |
+|[Box](@ref)      | min(lengthX, lengthY, lengthZ)/2| true   |
+|[Cylinder](@ref) | min(diameter, length)/2         | false  |
+|[Cone](@ref)     | (diameter + topDiameter)/4      | false  |
+|[Capsule](@ref)  | diameter/2                      | false  |
+|[Beam](@ref)     | min(length, width, thickness)/2 | true   |
+|[FileMesh](@ref) | shortestEdge/2                  | false  |
+
+It is possible to define a user specific `contactSphereRadius` in [Solid](@ref).
+For flat shapes, [Box](@ref) and [Beam](@ref), no `contactSphereRadius` is taken.  For Herz' pressure it is needed only if two flat shapes are colliding.
+
+
+| isFlat | isFlat           | $\mu_{r,geo}$           |
+|:-------|:-----------------|:------------------------|
+|true    | true             | $\frac{r1 r2}{r1 + r2}$ |
+|false   | false            | $\frac{r1 r2}{r1 + r2}$ |
+|true    | false            | $r1$                    |
+|false   | true             | $r2$                    |
+
+
+$n_{geo} = 1.5$
+$c_{geo} = \frac{4}{3} \sqrt(\mu_{r,geo})$
 
 
 
@@ -288,6 +313,6 @@ similar responses:
 [^6]: Johnson K.L. (1985):
       Contact Mechanics. Cambridge University Press.
 
-[^7]: Antoine J-F., Visa C., and Sauvey C. (2006): 
+[^7]: Antoine J-F., Visa C., and Sauvey C. (2006):
       [Approximate Analytical Model for Hertzian Elliptical Contact Problems](https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.1055.4455&rep=rep1&type=pdf).
       Transactions of the ASME, Vol. 128. pp. 660-664.
