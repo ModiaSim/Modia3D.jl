@@ -148,15 +148,33 @@ In special cases (for example sphere rolling on a plane), the rotational coeffic
 can be interpreted as *rolling resistance coefficient*.
 
 Coefficients ``c_{geo}, n_{geo}, \mu_{r,geo}`` depend on the geometries of the objects
-that are in contact. Only for spheres meaning values are provided based on Hertz' pressure,
-because currently the collision handling in Modia3D does no provide enough information for other
-geometries (``r_i`` is the radius of sphere ``i``):
+that are in contact. The coefficients are computed approximately based on the contact theory
+of Hertz [^5], [^6]: Here, it is assumed that each of the contacting surfaces can be described by a
+quadratic polynomial in two variables that is basically defined by its principal curvatures 
+along two perpendicular directions at the point of contact. A characteristic feature is that 
+the contact volume increases nonlinearly with the penetration depth, so ``n_{geo} > 1`` (provided
+the two contacting surfaces are not completely flat), and therefore the normal contact force
+changes nonlinearly with the penetration depth. In the general case, elliptical integrals
+have to be solved, as well as a nonlinear algebraic equation system to compute the normal
+contact force as function of the penetration depth and the principal curvatures at the contact point. 
+An approximate *analytical* model is proposed in [^7]. 
 
-| Object 1    | Object 2  | ``c_{geo}``                              | ``n_{geo}`` | ``\mu_{r,geo}``     |
-|:----------- |:--------- |:---------------------------------------- |:------------|:------------------- |
-| Sphere      | Sphere    | ``\frac{4}{3} \sqrt{1/(1/r_1+1/r_2)}``   | ``1.5``     | ``1/(1/r_1+1/r_2)`` |
-| Sphere      | no Sphere | ``\frac{4}{3} \sqrt{r_1}``               | ``1.5``     | ``r_1``             |
-| no Sphere   | no Sphere | ``1``                                    | ``1.0``     | ``1.0``             |
+In order that a numerical integration algorithm with step-size control
+works reasonably, the contact force needs to be continuous and continuously differentiable with
+respect to the penetration depth. This in turn means that the principal curvatures of the contacting
+surfaces should also be continuous and continuously differentiable, which is usually not the case
+(besides exceptional cases, such as a Sphere or an Ellipsoid).
+
+Since the determination of the principal curvatures of shapes is in general
+complicated and the shapes have often areas with discontinuous curvatures, only a very rough approximation
+is used in Modia3D: *The contact area of a shape is approximated by a quadratic polynomial
+with constant mean principal curvature in all directions and on all points on the shape*. 
+In other words, a sphere with constant sphere radius ``r_{contact}`` is associated with every shape that
+is used to compute coefficients ``c_{geo}, n_{geo}, \mu_{r,geo}``. A default value for ``r_{contact}``
+is determined based on the available data of the shape (see [shape data](https://modiasim.github.io/Modia3D.jl/stable/Components/Shapes.html)):
+
+xxx
+
 
 
 ## Regularized unit vectors
@@ -262,3 +280,14 @@ similar responses:
 [^4]: Andrea Neumayr, Martin Otter (2019):
       [Collision Handling with Elastic Response Calculation and Zero-Crossing Functions](https://doi.org/10.1145/3365984.3365986).
       Proceedings of the 9th International Workshop on Equation-Based Object-Oriented Modeling Languages and Tools. EOOLT’19. ACM, pp. 57–65.
+
+[^5]: Hertz H. (1881):
+      [Über die Berührung fester elastischer Körper](https://home.uni-leipzig.de/pwm/web/download/Hertz1881.pdf).
+      Journal für die reine und angewandte Mathematik 92, S. 156-171.
+
+[^6]: Johnson K.L. (1985):
+      Contact Mechanics. Cambridge University Press.
+
+[^7]: Antoine J-F., Visa C., and Sauvey C. (2006): 
+      [Approximate Analytical Model for Hertzian Elliptical Contact Problems](https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.1055.4455&rep=rep1&type=pdf).
+      Transactions of the ASME, Vol. 128. pp. 660-664.
