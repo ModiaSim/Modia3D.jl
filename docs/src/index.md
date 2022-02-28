@@ -48,6 +48,12 @@ Download and install the free DLR SimVis Community Edition, e.g. with [https://v
 
 ## Release Notes
 
+### Version 0.9.1
+
+- Require ModiaLang 0.11.3 (avoids unnecessary double instantiation of Model3D models).
+- Reduce memory allocation of force elements.
+- Update docu for contact force law (docs/src/internal/ContactForceLaw.md).
+
 ### Version 0.9.0
 
 Non-backwards compatible changes
