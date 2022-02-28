@@ -10,7 +10,7 @@ penetration depth and the relative motion of the objects in contact.
 It is planned to optionally also support impulsive response calculation
 in the future.
 
-This section is based on [^4] with some minor improvements as used in the current
+This section is based on [^4] with some improvements as used in the current
 version of Modia3D.
 
 The current approach has several **limitations** that a user must know,
@@ -148,15 +148,58 @@ In special cases (for example sphere rolling on a plane), the rotational coeffic
 can be interpreted as *rolling resistance coefficient*.
 
 Coefficients ``c_{geo}, n_{geo}, \mu_{r,geo}`` depend on the geometries of the objects
-that are in contact. Only for spheres meaning values are provided based on Hertz' pressure,
-because currently the collision handling in Modia3D does no provide enough information for other
-geometries (``r_i`` is the radius of sphere ``i``):
+that are in contact. The coefficients are computed approximately based on the contact theory
+of Hertz [^5], [^6]: Here, it is assumed that each of the contacting surfaces can be described by a
+quadratic polynomial in two variables that is basically defined by its principal curvatures
+along two perpendicular directions at the point of contact. A characteristic feature is that
+the contact volume increases nonlinearly with the penetration depth, so ``n_{geo} > 1`` (provided
+the two contacting surfaces are not completely flat), and therefore the normal contact force
+changes nonlinearly with the penetration depth. In the general case, elliptical integrals
+have to be solved, as well as a nonlinear algebraic equation system to compute the normal
+contact force as function of the penetration depth and the principal curvatures at the contact point.
+An approximate *analytical* model is proposed in [^7].
 
-| Object 1    | Object 2  | ``c_{geo}``                              | ``n_{geo}`` | ``\mu_{r,geo}``     |
-|:----------- |:--------- |:---------------------------------------- |:------------|:------------------- |
-| Sphere      | Sphere    | ``\frac{4}{3} \sqrt{1/(1/r_1+1/r_2)}``   | ``1.5``     | ``1/(1/r_1+1/r_2)`` |
-| Sphere      | no Sphere | ``\frac{4}{3} \sqrt{r_1}``               | ``1.5``     | ``r_1``             |
-| no Sphere   | no Sphere | ``1``                                    | ``1.0``     | ``1.0``             |
+In order that a numerical integration algorithm with step-size control
+works reasonably, the contact force needs to be continuous and continuously differentiable with
+respect to the penetration depth. This in turn means that the principal curvatures of the contacting
+surfaces should also be continuous and continuously differentiable, which is usually not the case
+(besides exceptional cases, such as a Sphere or an Ellipsoid).
+
+Since the determination of the principal curvatures of shapes is in general
+complicated and the shapes have often areas with discontinuous curvatures, only a very rough approximation
+is used in Modia3D: *The contact area of a shape is approximated by a quadratic polynomial
+with constant mean principal curvature in all directions and on all points on the shape*.
+In other words, a sphere with constant sphere radius ``r_{contact}`` is associated with every shape that is used to compute coefficients ``c_{geo}, n_{geo}, \mu_{r,geo}``.
+A default value for ``r_{contact}`` is determined based on the available data of the shape (see [Shapes](@ref)).
+If a user specific `contactSphereRadius` is defined in [Solid](@ref), it is taken instead of the default value.
+
+The default $r_{contact}$ values for each shape are:
+
+| Shape           | $r_{contact}$                   | isFlat |
+|:----------------|:--------------------------------|:-------|
+|[Sphere](@ref)   | diameter/2                      | false  |
+|[Ellipsoid](@ref)| min(lengthX, lengthY, lengthZ)/2| false  |
+|[Box](@ref)      | min(lengthX, lengthY, lengthZ)/2| true   |
+|[Cylinder](@ref) | min(diameter, length)/2         | false  |
+|[Cone](@ref)     | (diameter + topDiameter)/4      | false  |
+|[Capsule](@ref)  | diameter/2                      | false  |
+|[Beam](@ref)     | min(length, width, thickness)/2 | true   |
+|[FileMesh](@ref) | shortestEdge/2                  | false  |
+
+For flat shapes, [Box](@ref) and [Beam](@ref), no $r_{contact}$ is taken.  For Herz' pressure it is needed only if two flat shapes are colliding ($r_i$ is the contact sphere radius $r_{contact}$ of shape $i$):).
+
+
+| isFlat | isFlat           | $\mu_{r,geo}$           |
+|:-------|:-----------------|:------------------------|
+|false   | false            | $\frac{r1 r2}{r1 + r2}$ |
+|false   | true             | $r1$                    |
+|true    | false            | $r2$                    |
+|true    | true             | $\frac{r1 r2}{r1 + r2}$ |
+
+
+$n_{geo} = 1.5$
+$c_{geo} = \frac{4}{3} \sqrt(\mu_{r,geo})$
+
 
 
 ## Regularized unit vectors
@@ -219,7 +262,7 @@ The damping coefficient ``d`` is basically computed with the formulation from [^
 because a response calculation with impulses gives similar results for some experiments
 as shown in [^3]. However, (a) instead of ``cor``, the current coefficient of restitution ``cor_{cur}``
 is used and (b) the damping coefficient is limited to ``d_{max}`` (this parameter is set via `maximumContactDamping`
-in object `Scene` and has a default value of ``1000 ~Ns/m``) to avoid an unphysical
+in object `Scene` and has a default value of ``2000 ~Ns/m``) to avoid an unphysical
 strong creeping effect for collisions with small ``cor_{cur}`` values:
 
 ```math
@@ -262,3 +305,14 @@ similar responses:
 [^4]: Andrea Neumayr, Martin Otter (2019):
       [Collision Handling with Elastic Response Calculation and Zero-Crossing Functions](https://doi.org/10.1145/3365984.3365986).
       Proceedings of the 9th International Workshop on Equation-Based Object-Oriented Modeling Languages and Tools. EOOLT’19. ACM, pp. 57–65.
+
+[^5]: Hertz H. (1881):
+      [Über die Berührung fester elastischer Körper](https://home.uni-leipzig.de/pwm/web/download/Hertz1881.pdf).
+      Journal für die reine und angewandte Mathematik 92, S. 156-171.
+
+[^6]: Johnson K.L. (1985):
+      Contact Mechanics. Cambridge University Press.
+
+[^7]: Antoine J-F., Visa C., and Sauvey C. (2006):
+      [Approximate Analytical Model for Hertzian Elliptical Contact Problems](https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.1055.4455&rep=rep1&type=pdf).
+      Transactions of the ASME, Vol. 128. pp. 660-664.
