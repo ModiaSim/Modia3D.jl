@@ -170,9 +170,10 @@ complicated and the shapes have often areas with discontinuous curvatures, only 
 is used in Modia3D: *The contact area of a shape is approximated by a quadratic polynomial
 with constant mean principal curvature in all directions and on all points on the shape*.
 In other words, a sphere with constant sphere radius ``r_{contact}`` is associated with every shape that is used to compute coefficients ``c_{geo}, n_{geo}, \mu_{r,geo}``.
-A default value for ``r_{contact}`` is determined based on the available data of the shape (see [Shapes](@ref)):
+A default value for ``r_{contact}`` is determined based on the available data of the shape (see [Shapes](@ref)).
+If a user specific `contactSphereRadius` is defined in [Solid](@ref), it is taken instead of the default value.
 
-The default values for each shape are:
+The default $r_{contact}$ values for each shape are:
 
 | Shape           | $r_{contact}$                   | isFlat |
 |:----------------|:--------------------------------|:-------|
@@ -185,16 +186,15 @@ The default values for each shape are:
 |[Beam](@ref)     | min(length, width, thickness)/2 | true   |
 |[FileMesh](@ref) | shortestEdge/2                  | false  |
 
-It is possible to define a user specific `contactSphereRadius` in [Solid](@ref).
-For flat shapes, [Box](@ref) and [Beam](@ref), no `contactSphereRadius` is taken.  For Herz' pressure it is needed only if two flat shapes are colliding.
+For flat shapes, [Box](@ref) and [Beam](@ref), no $r_{contact}$ is taken.  For Herz' pressure it is needed only if two flat shapes are colliding ($r_i$ is the contact sphere radius $r_{contact}$ of shape $i$):).
 
 
 | isFlat | isFlat           | $\mu_{r,geo}$           |
 |:-------|:-----------------|:------------------------|
-|true    | true             | $\frac{r1 r2}{r1 + r2}$ |
 |false   | false            | $\frac{r1 r2}{r1 + r2}$ |
-|true    | false            | $r1$                    |
-|false   | true             | $r2$                    |
+|false   | true             | $r1$                    |
+|true    | false            | $r2$                    |
+|true    | true             | $\frac{r1 r2}{r1 + r2}$ |
 
 
 $n_{geo} = 1.5$
