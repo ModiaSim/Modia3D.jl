@@ -23,7 +23,7 @@ import Modia3D.Basics
 import Modia3D.Composition
 import Modia3D.Shapes
 
-using ModiaLang
+using Modia
 
 using Unitful
 using StaticArrays

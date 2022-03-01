@@ -246,7 +246,7 @@ function buildModia3D!(model::AbstractDict, FloatType::Type, TimeType::Type,
     end
     
     # Store info in buildDict
-    buildDict[modelPathAsString] = Modia3D.Composition.MultibodyBuild{FloatType,TimeType}(modelPathAsString, ModiaLang.splitPath(modelPath), revoluteIndices, prismaticIndices, freeMotionIndices)
+    buildDict[modelPathAsString] = Modia3D.Composition.MultibodyBuild{FloatType,TimeType}(modelPathAsString, Modia.splitPath(modelPath), revoluteIndices, prismaticIndices, freeMotionIndices)
     return mbsCode
 end
 

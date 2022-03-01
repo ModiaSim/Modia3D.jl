@@ -413,17 +413,17 @@ Setup = Model3D(
     sphere1 = Object3D(
         feature=Solid(shape=Sphere(diameter=diameter), visualMaterial=vmat2, solidMaterial="BilliardBall", collision=true)),
 
-    free1 = FreeMotion(obj1=:(table.plate), obj2=:sphere1, r=Var(init=ModiaBase.SVector{3,Float64}(-tableX/2+diameter/2+0.001, 0.0002, diameter/2+tableZ/2)), rot=Var(init=ModiaBase.SVector{3,Float64}(pi/2, 0.0, 0.0))),
+    free1 = FreeMotion(obj1=:(table.plate), obj2=:sphere1, r=Var(init=Modia.SVector{3,Float64}(-tableX/2+diameter/2+0.001, 0.0002, diameter/2+tableZ/2)), rot=Var(init=Modia.SVector{3,Float64}(pi/2, 0.0, 0.0))),
 
     sphere2 = Object3D(
         feature=Solid(shape=Sphere(diameter=diameter), visualMaterial=vmat2, solidMaterial="BilliardBall", collision=true)),
 
-    free2 = FreeMotion(obj1=:(table.plate), obj2=:sphere2, r=Var(init=ModiaBase.SVector{3,Float64}(tableX/2-diameter/2-0.0001, -0.003, diameter/2+tableZ/2)), rot=Var(init=ModiaBase.SVector{3,Float64}(pi/2, 0.0, 0.0))),
+    free2 = FreeMotion(obj1=:(table.plate), obj2=:sphere2, r=Var(init=Modia.SVector{3,Float64}(tableX/2-diameter/2-0.0001, -0.003, diameter/2+tableZ/2)), rot=Var(init=Modia.SVector{3,Float64}(pi/2, 0.0, 0.0))),
 
     sphere3 = Object3D(
         feature=Solid(shape=Sphere(diameter=diameter), visualMaterial=vmat2, solidMaterial="BilliardBall", collision=true)),
 
-    free3 = FreeMotion(obj1=:(table.plate), obj2=:sphere3, r=Var(init=ModiaBase.SVector{3,Float64}(-0.01, tableX/2-diameter/2-0.002, diameter/2+tableZ/2)), rot=Var(init=ModiaBase.SVector{3,Float64}(pi/2, 0.0, 0.0))),
+    free3 = FreeMotion(obj1=:(table.plate), obj2=:sphere3, r=Var(init=Modia.SVector{3,Float64}(-0.01, tableX/2-diameter/2-0.002, diameter/2+tableZ/2)), rot=Var(init=Modia.SVector{3,Float64}(pi/2, 0.0, 0.0))),
 
     youbot1 = YouBot,
     youbot2 = YouBot,

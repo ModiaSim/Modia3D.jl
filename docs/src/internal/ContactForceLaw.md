@@ -186,20 +186,25 @@ The default $r_{contact}$ values for each shape are:
 |[Beam](@ref)     | min(length, width, thickness)/2 | true   |
 |[FileMesh](@ref) | shortestEdge/2                  | false  |
 
-For flat shapes, [Box](@ref) and [Beam](@ref), no $r_{contact}$ is taken.  For Herz' pressure it is needed only if two flat shapes are colliding ($r_i$ is the contact sphere radius $r_{contact}$ of shape $i$):).
+For flat shapes, [Box](@ref) and [Beam](@ref), $r_{contact}$ is only used,
+if two flat shapes are in contact with each other ($r_i$ is the contact sphere radius $r_{contact}$ of shape $i$):).
 
+| isFlat | isFlat           | $\mu_{r,geo}$               |
+|:-------|:-----------------|:----------------------------|
+|false   | false            | $\frac{r_1 r_2}{r_1 + r_2}$ |
+|false   | true             | $r_1$                       |
+|true    | false            | $r_2$                       |
+|true    | true             | $\frac{r_1 r_2}{r_1 + r_2}$ |
 
-| isFlat | isFlat           | $\mu_{r,geo}$           |
-|:-------|:-----------------|:------------------------|
-|false   | false            | $\frac{r1 r2}{r1 + r2}$ |
-|false   | true             | $r1$                    |
-|true    | false            | $r2$                    |
-|true    | true             | $\frac{r1 r2}{r1 + r2}$ |
+The factors $n_{geo}, c_{geo}$ in the definition of $f_n$ are computed with the
+equations for Hertz pressure:
 
-
-$n_{geo} = 1.5$
-$c_{geo} = \frac{4}{3} \sqrt(\mu_{r,geo})$
-
+```math
+\begin{align}
+$n_{geo} &= 1.5$
+$c_{geo} &= \frac{4}{3} \sqrt(\mu_{r,geo})$
+\end{align}
+```
 
 
 ## Regularized unit vectors

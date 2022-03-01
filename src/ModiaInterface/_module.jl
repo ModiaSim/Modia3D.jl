@@ -24,15 +24,15 @@ export buildModia3D!
 import OrderedCollections
 import Modia3D
 import Modia3D.Composition
-using  ModiaLang
+using  Modia
 using  StaticArrays
 
 
-# ModiaLang models
-include("$(ModiaLang.path)/models/Blocks.jl")
-include("$(ModiaLang.path)/models/Electric.jl")
-include("$(ModiaLang.path)/models/Rotational.jl")
-include("$(ModiaLang.path)/models/Translational.jl")
+# Modia models
+include("$(Modia.path)/models/Blocks.jl")
+include("$(Modia.path)/models/Electric.jl")
+include("$(Modia.path)/models/Rotational.jl")
+include("$(Modia.path)/models/Translational.jl")
 
 include("buildModia3D.jl")
 include("model3D.jl")

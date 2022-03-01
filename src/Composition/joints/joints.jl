@@ -6,7 +6,7 @@
 #
 
 mutable struct MultibodyData{F <: Modia3D.VarFloatType, TimeType}
-    instantiatedModel::ModiaLang.SimulationModel{F,TimeType}
+    instantiatedModel::Modia.SimulationModel{F,TimeType}
 
     nqdd::Int                                 # Length of qdd vector
     world::Object3D{F}                        # Pointer to world object
@@ -32,7 +32,7 @@ mutable struct MultibodyData{F <: Modia3D.VarFloatType, TimeType}
     freeMotionResiduals::Vector{F}  
     
     # for multibodyAccelerations
-    leq::Vector{ModiaBase.LinearEquations{F}}
+    leq::Vector{Modia.LinearEquations{F}}
 
     MultibodyData{F,TimeType}(instantiatedModel, nqdd, world, scene, 
                               revoluteObjects, prismaticObjects, freeMotionObjects,
@@ -43,7 +43,7 @@ mutable struct MultibodyData{F <: Modia3D.VarFloatType, TimeType}
                              zeros(F, length(revoluteObjects)), zeros(F, length(prismaticObjects)), zeros(SVector{3,F}, 2*length(freeMotionObjects)), 
                              zStartIndex, nz, Modia3D.convertAndStripUnit(TimeType, u"s", time), 
                              zeros(F, 2*3*length(freeMotionObjects)),
-                             ModiaBase.LinearEquations{F}[])
+                             Modia.LinearEquations{F}[])
 end
 
 mutable struct MultibodyBuild{F <: Modia3D.VarFloatType, TimeType}

@@ -4,9 +4,9 @@ using Modia3D
 
 const largeAngles = true
 if largeAngles
-    startAngles = ModiaBase.SVector{3,Float64}(0.8, 0.4, 0.2)
+    startAngles = Modia.SVector{3,Float64}(0.8, 0.4, 0.2)
 else
-    startAngles = ModiaBase.SVector{3,Float64}(0.12, 0.06, 0.03)
+    startAngles = Modia.SVector{3,Float64}(0.12, 0.06, 0.03)
 end
 fc(p) = 50.0 * p
 fd(v) = 2.0 * v
@@ -24,7 +24,7 @@ BoxBushing = Model3D(
     box = Object3D(feature=Solid(shape=Box(lengthX=:Length, lengthY=:Length, lengthZ=:Length),
                                  massProperties=MassProperties(; mass=:Mass, Ixx=:IMoment, Iyy=:IMoment, Izz=:IMoment),
                                  visualMaterial=:(visualMaterial))),
-    joint = FreeMotion(obj1=:world, obj2=:box, r=Var(init=ModiaBase.SVector{3,Float64}(0.2, 0.1, 0.05)), rot=Var(init=startAngles)),
+    joint = FreeMotion(obj1=:world, obj2=:box, r=Var(init=Modia.SVector{3,Float64}(0.2, 0.1, 0.05)), rot=Var(init=startAngles)),
     force = Bushing(obj1=:world, obj2=:box,
                     springForceLaw=[fc, 100.0, 200.0], damperForceLaw=[1.0, fd, 4.0],
                     rotSpringForceLaw=[5.0, 10.0, mc], rotDamperForceLaw=[0.1, md, 0.4], largeAngles=largeAngles)

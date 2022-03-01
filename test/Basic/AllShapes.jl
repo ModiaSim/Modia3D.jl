@@ -34,7 +34,7 @@ AllShapes = Model3D(
 
     solidEllipsoid = Object3D(feature=Solid(shape=
         Ellipsoid(lengthX=0.6, lengthY=0.9, lengthZ=0.3), visualMaterial=vmatBlue, solidMaterial="DryWood")),
-    jointEllipsoid = FreeMotion(obj1=:world, obj2=:solidEllipsoid, r=Var(init=ModiaBase.SVector{3,Float32}(-6.0, 0.0, 0.0))),
+    jointEllipsoid = FreeMotion(obj1=:world, obj2=:solidEllipsoid, r=Var(init=Modia.SVector{3,Float32}(-6.0, 0.0, 0.0))),
 
     solidBox = Object3D(feature=Solid(shape=
         Box(lengthX=0.9, lengthY=0.5, lengthZ=0.3), visualMaterial=vmatBlue, solidMaterial="Steel")),

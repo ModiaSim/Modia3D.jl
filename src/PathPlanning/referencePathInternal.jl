@@ -19,7 +19,7 @@ mutable struct ReferencePath
     refMotion::Vector{ArbitraryMotion} # stores explicit robot functions
 
     # both are updated in calculateRobotMovement
-    instantiatedModel::ModiaLang.SimulationModel     # SimulationModel of model
+    instantiatedModel::Modia.SimulationModel     # SimulationModel of model
     # scene::Composition.Scene                       # scene
 
     function ReferencePath(names::AbstractVector;
@@ -42,7 +42,7 @@ getRefPathInitPosition(; referencePath, index) = referencePath.initPos[index]
 ## -------------------- utility functions ------------------------
 function setAttributesReferencePath!(ref::ReferencePath, waitingPeriod::Float64)
     ref.nextEventTime = waitingPeriod
-    ModiaLang.setNextEvent!(ref.instantiatedModel, ref.nextEventTime)
+    Modia.setNextEvent!(ref.instantiatedModel, ref.nextEventTime)
 end
 
 
@@ -60,7 +60,7 @@ function ptpJointSpace!(ref::ReferencePath, positions::Matrix{Float64}, dummy1, 
     end
     ref.ptpPath = PTP_path(ref.names,
     positions = [transpose(ref.position); positions],
-    startTime = ModiaLang.getTime(ref.instantiatedModel),
+    startTime = Modia.getTime(ref.instantiatedModel),
     v_max     = ref.v_max,
     a_max     = ref.a_max)
     setAttributesReferencePath!(ref, pathEndTime(ref.ptpPath))

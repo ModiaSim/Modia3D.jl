@@ -42,10 +42,10 @@ calculateRobotMovement(; referencePath, instantiatedModel) = calculateRobotMovem
 
 function calculateRobotMovement(referencePath, instantiatedModel)
     referencePath.instantiatedModel = instantiatedModel
-    if ModiaLang.isEvent(instantiatedModel)
-        if ModiaLang.getTime(instantiatedModel) < referencePath.nextEventTime
+    if Modia.isEvent(instantiatedModel)
+        if Modia.getTime(instantiatedModel) < referencePath.nextEventTime
             # Reschedule next time event
-            ModiaLang.setNextEvent!(instantiatedModel, referencePath.nextEventTime)
+            Modia.setNextEvent!(instantiatedModel, referencePath.nextEventTime)
         else
             # At the current event instant a new command has to be processed
             # Execute next command in referenceMotion
@@ -55,12 +55,12 @@ function calculateRobotMovement(referencePath, instantiatedModel)
     end; end; end
 
     # only if a ptp path is defined getPosition! can be executed
-    t = ModiaLang.getTime(instantiatedModel)
+    t = Modia.getTime(instantiatedModel)
     #if t >= 0.1 && t <= 0.2
     #    println("... time = ", t, ", ptpPath = ", referencePath.ptpPath)
     #end
     if !isnothing(referencePath.ptpPath)
-        getPosition!(referencePath.ptpPath, ModiaLang.getTime(instantiatedModel),
+        getPosition!(referencePath.ptpPath, Modia.getTime(instantiatedModel),
             referencePath.position,
             referencePath.velocity,
             referencePath.acceleration)

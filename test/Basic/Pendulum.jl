@@ -1,6 +1,6 @@
 module PendulumModule
 
-using ModiaLang
+using Modia
 import Modia3D
 using  Modia3D.ModiaInterface
 

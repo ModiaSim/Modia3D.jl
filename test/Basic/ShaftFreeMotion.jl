@@ -16,9 +16,9 @@ Shaft = Model(
 )
 
 model = Model3D(
-    shaft = Shaft | Map(Length=1.0, Diameter=0.2, free = Map(v = Var(init = ModiaBase.SVector{3,Float64}([0.0, 0.1, 0.6])),
-                                                                     rot = Var(init = ModiaBase.SVector{3,Float64}([deg2rad(30), deg2rad(20), deg2rad(10)])),
-                                                                     w   = Var(init = ModiaBase.SVector{3,Float64}([1.0, 2.0, 3.0]))
+    shaft = Shaft | Map(Length=1.0, Diameter=0.2, free = Map(v = Var(init = Modia.SVector{3,Float64}([0.0, 0.1, 0.6])),
+                                                                     rot = Var(init = Modia.SVector{3,Float64}([deg2rad(30), deg2rad(20), deg2rad(10)])),
+                                                                     w   = Var(init = Modia.SVector{3,Float64}([1.0, 2.0, 3.0]))
                                                                     )
                        )
                         

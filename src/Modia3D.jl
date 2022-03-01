@@ -4,8 +4,8 @@
 module Modia3D
 
 const path = dirname(dirname(@__FILE__))   # Absolute path of package directory
-const Version = "0.9.1"
-const Date = "2022-02-28"
+const Version = "0.10.0"
+const Date = "2022-03-01"
 
 println("\nImporting Modia3D Version $Version ($Date)")
 
@@ -39,11 +39,11 @@ using  Reexport
 import MonteCarloMeasurements
 import Measurements
 import Unitful
-import ModiaLang
+import Modia
 
 
-@reexport using ModiaLang
-const modelsPath = joinpath(ModiaLang.path, "models")
+@reexport using Modia
+const modelsPath = joinpath(Modia.path, "models")
 
 
 # VarFloatType defines the supported float types for system parameters and variables
@@ -80,7 +80,7 @@ Currently, only DynamicAnalysis is supported and used.
 @enum VariableAnalysisType  AllAnalysis QuasiStaticAndDynamicAnalysis OnlyDynamicAnalysis NotUsedInAnalysis
 
 
-numberType(value) = ModiaLang.baseType(eltype(value))
+numberType(value) = Modia.baseType(eltype(value))
 
 """
     convertAndStripUnit(TargetType, requiredUnit, value)

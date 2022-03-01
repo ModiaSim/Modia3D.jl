@@ -26,7 +26,7 @@ BouncingSphere = Model3D(
     sphere = Object3D(feature=Solid(shape=Sphere(diameter=0.2),
                                     visualMaterial=:sphereMaterial, solidMaterial="Steel",
                                     collision=true)),
-    free = FreeMotion(obj1=:world, obj2=:sphere, r=Var(init=ModiaBase.SVector{3,Float64}(0.0, 1.0, 0.0)), w=Var(init=ModiaBase.SVector{3,Float64}(10.0, 0.0, -5.0)))
+    free = FreeMotion(obj1=:world, obj2=:sphere, r=Var(init=Modia.SVector{3,Float64}(0.0, 1.0, 0.0)), w=Var(init=Modia.SVector{3,Float64}(10.0, 0.0, -5.0)))
 )
 
 bouncingSphere = @instantiateModel(BouncingSphere, unitless=true, log=false, logStateSelection=false, logCode=false)

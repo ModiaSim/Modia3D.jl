@@ -22,7 +22,7 @@ BouncingEllipsoid = Model3D(
                                        visualMaterial=VisualMaterial(color="Blue"),
                                        solidMaterial="Steel",
                                        collision=true)),
-    free = FreeMotion(obj1=:world, obj2=:ellipsoid, r=Var(init=ModiaBase.SVector{3,Float64}(0.0, 1.0, 0.0)), w=Var(init=ModiaBase.SVector{3,Float64}(5.0, 0.0, -2.0)))
+    free = FreeMotion(obj1=:world, obj2=:ellipsoid, r=Var(init=Modia.SVector{3,Float64}(0.0, 1.0, 0.0)), w=Var(init=Modia.SVector{3,Float64}(5.0, 0.0, -2.0)))
 )
 
 bouncingEllipsoid = @instantiateModel(BouncingEllipsoid, unitless=true, log=false, logStateSelection=false, logCode=false)

@@ -33,17 +33,17 @@ collidingBalls = Model3D(
                                    visualMaterial=vmatSolids,
                                    collision=true)),
     joint1 = FreeMotion(obj1=:world, obj2=:ball1,
-                        r=Var(init=ModiaBase.SVector{3,Float64}(-1.3, 0.0, diameter/2)),
-                        v=Var(init=ModiaBase.SVector{3,Float64}(3.0, 0.0, 0.0)),
-                        rot=Var(init=ModiaBase.SVector{3,Float64}(pi/2, 0.0, 0.0))),
+                        r=Var(init=Modia.SVector{3,Float64}(-1.3, 0.0, diameter/2)),
+                        v=Var(init=Modia.SVector{3,Float64}(3.0, 0.0, 0.0)),
+                        rot=Var(init=Modia.SVector{3,Float64}(pi/2, 0.0, 0.0))),
 
     ball2 = Object3D(feature=Solid(shape=Sphere(diameter=diameter),
                                    solidMaterial="BilliardBall",
                                    visualMaterial=vmatSolids,
                                    collision=true)),
     joint2 = FreeMotion(obj1=:world, obj2=:ball2,
-                        r=Var(init=ModiaBase.SVector{3,Float64}(0.0, 0.0, diameter/2)),
-                        rot=Var(init=ModiaBase.SVector{3,Float64}(pi/2, 0.0, 0.0)))
+                        r=Var(init=Modia.SVector{3,Float64}(0.0, 0.0, diameter/2)),
+                        rot=Var(init=Modia.SVector{3,Float64}(pi/2, 0.0, 0.0)))
 )
 
 twoCollidingBalls = @instantiateModel(collidingBalls, unitless=true, log=false, logStateSelection=false, logCode=false)

@@ -26,8 +26,8 @@ collidingBoxes = Model3D(
                                        collision=true,
                                        collisionSmoothingRadius=0.001)),
     movingBoxJoint = FreeMotion(obj1=:world, obj2=:movingBox,
-                                r=Var(init=ModiaBase.SVector{3,Float64}(0.0, 0.0, 0.0)),
-                                rot=Var(init=ModiaBase.SVector{3,Float64}(pi/2, 0.0, 0.0)))
+                                r=Var(init=Modia.SVector{3,Float64}(0.0, 0.0, 0.0)),
+                                rot=Var(init=Modia.SVector{3,Float64}(pi/2, 0.0, 0.0)))
 )
 
 twoCollidingBoxes = @instantiateModel(collidingBoxes, unitless=true, log=false, logStateSelection=false, logCode=false)
