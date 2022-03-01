@@ -1,9 +1,9 @@
-# Modia3D
+# Modia3D.jl
 
 [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://ModiaSim.github.io/Modia3D.jl/stable)
 [![The MIT License](https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](https://github.com/ModiaSim/Modia3D.jl/blob/master/LICENSE.md)
 
-[Modia3D](https://github.com/ModiaSim/Modia3D.jl) is a Julia package that integrates a multibody program and 3D shapes for visualization and collision handling into the [Modia Modeling Language](https://github.com/ModiaSim/ModiaLang.jl). It is then, for example, possible to model the 3D mechanical part of a robot with Modia3D and the electrical motors and gearboxes that are driving the joints with the Modia language. Collision handling with elastic response calculation is performed for shapes that are defined with a contact material and have a convex geometry or are approximated by the convex hull of a concave geometry. For more details, see the [Modia3D Tutorial](https://modiasim.github.io/Modia3D.jl/stable/tutorial/Tutorial.html).
+[Modia3D](https://github.com/ModiaSim/Modia3D.jl) is a Julia package that adds a multibody program and 3D shapes for visualization and collision handling to the [Modia Modeling Language](https://github.com/ModiaSim/Modia.jl). It is then, for example, possible to model the 3D mechanical part of a robot with Modia3D and the electrical motors and gearboxes that are driving the joints with the Modia language. Collision handling with elastic response calculation is performed for shapes that are defined with a contact material and have a convex geometry or are approximated by the convex hull of a concave geometry. For more details, see the [Modia3D Tutorial](https://modiasim.github.io/Modia3D.jl/stable/tutorial/Tutorial.html).
 
 Modia3D supports currently tree-structured multibody systems, but does not (yet) support kinematic loops.
 
@@ -16,22 +16,43 @@ Example videos:
 
 ## Installation
 
-Modia3D is included in [Modia](https://github.com/ModiaSim/Modia.jl) and is available, when Modia was installed. Please, follow the [extensive installation guide](https://github.com/ModiaSim/Modia3D.jl/wiki/Full-Installation-Guide-for-Julia,-Modia3D,-Modia) or the [lightweight installation guide](https://github.com/ModiaSim/Modia3D.jl/wiki/Lightweight-Installation-Guide:-Julia-Modia3D) for Modia3D.
-
-A standalone Modia3D version is installed with
+Modia3D requires Julia 1.7 or later and is installed with
 
 ```julia
-julia> ]add ModiaLang, Modia3D
+julia> ]add Modia3D
 ```
 
-Modia3D animation can be exported in [three.js JSON Object Scene format](https://github.com/mrdoob/three.js/wiki/JSON-Object-Scene-format-4) and then imported in the open source web app [three.js editor](https://threejs.org/editor/) and use all the features of three.js, for example to export in the widely used glb format (the binary version of the [glTF](https://www.khronos.org/gltf/) format) and use any glb viewer (for example 3D-Viewer of Windows 10).
+It is advised to also install Modia and at least one Modia plot package (for details see [Installation of Modia](https://modiasim.github.io/Modia.jl/stable/#Installation)).
 
-Additionally, Modia3D uses the (free) community or the (commercial) professional version of the [DLR Visualization Library](https://visualization.ltx.de/) for 3D simulations. It provides online animation (during simulation) and the generation of mpg4-videos. If you don't use the DLR Visualization Library result animation is switched of.
-Download and install the free DLR SimVis Community Edition, e.g. with [https://visualization.ltx.de/](https://visualization.ltx.de/) .
+Note, Modia3D reexports the following definitions 
 
-* Set an environment variable or add it to the [startup.jl file](https://github.com/ModiaSim/Modia3D.jl/wiki/Template-for-startup.jl). Please, read also the [installation guide](https://github.com/ModiaSim/Modia3D.jl/wiki/Full-Installation-Guide-for-Julia,-Modia3D,-Modia).
-   * `ENV["DLR_VISUALIZATION"] = "<path-to-library>/Visualization/Extras/SimVis"`
-   * Make sure that the SimVis executable under this directory has execution rights. For example in Linux with command: `chmod ug+x <path-to-library>/Visualization/Extras/SimVis/linux/SimVis`
+- `using Modia`
+- `using Unitful`
+- `using DifferentialEquations`
+- and exports functions `CVODE_BDF` and `IDA` of [Sundials.jl](https://github.com/SciML/Sundials.jl).
+
+As a result, it is usually sufficient to have `using Modia3D` in a model to utilize the relevant 
+functionalities of these packages.
+
+Modia3D has various *3D animation features*:
+
+- With `world = Object3D(feature=Scene(animationFile="filename.json"))` the animation produced during a simulation run
+  is exported in [three.js JSON Object Scene format](https://github.com/mrdoob/three.js/wiki/JSON-Object-Scene-format-4).
+  The generated file can be imported into the open source web app [three.js editor](https://threejs.org/editor/) and 
+  use all the features of three.js, for example to export in the widely used glb format (the binary version of the [glTF](https://www.khronos.org/gltf/) format) 
+  and use any glb viewer (for example 3D-Viewer of Windows).
+
+- With the default option `world = Object3D(feature=Scene(enableVisualization=true))` the 
+  [DLR Visualization Library](https://www.systemcontrolinnovationlab.de/the-dlr-visualization-library/)
+  (see the many examples from various research and industrial projects) is used, if installed, for 
+  online animation (during simulation), replays (after simulation), and the generation of mpg4-videos.
+  This library is available as *(free) Community Edition* and as *(commercial) Professional Edition*
+  ([Web page to request download of DLR Visualization Library](https://visualization.ltx.de/)).
+  After download, make the library available in the following way:
+  - Set Julia environment variable `ENV["DLR_VISUALIZATION"] = "<path-to-library>/Visualization/Extras/SimVis"` 
+    or add it to the [Julia startup.jl file](https://github.com/ModiaSim/Modia3D.jl/wiki/Template-for-startup.jl). 
+    *Make sure that the SimVis executable under this directory has execution rights.*
+    For example in Linux with command: `chmod ug+x <path-to-library>/Visualization/Extras/SimVis/linux/SimVis`
 
 
 ## Main Developers and License

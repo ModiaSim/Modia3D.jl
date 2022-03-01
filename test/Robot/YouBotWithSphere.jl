@@ -361,7 +361,7 @@ YouBot = Model3D(
     sphere = Object3D(
         feature=Solid(shape=Sphere(diameter=diameter), visualMaterial=vmat2, solidMaterial="DryWood", collision=true)),
 
-    free = FreeMotion(obj1=:(table.plate), obj2=:sphere, r=Var(init=ModiaBase.SVector{3,Float64}(-tableX/2+diameter/2, 0.0, diameter/2+tableZ/2)), rot=Var(init=ModiaBase.SVector{3,Float64}(pi/2, 0.0, 0.0))),
+    free = FreeMotion(obj1=:(table.plate), obj2=:sphere, r=Var(init=Modia.SVector{3,Float64}(-tableX/2+diameter/2, 0.0, diameter/2+tableZ/2)), rot=Var(init=Modia.SVector{3,Float64}(pi/2, 0.0, 0.0))),
 
     arm_base_frame = Object3D(parent=:(base.base_frame),
         translation=[0.143, 0.0, 0.046],

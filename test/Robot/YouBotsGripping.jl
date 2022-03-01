@@ -511,7 +511,7 @@ Scenario = Model3D(
     sphere = Object3D(
         feature=Solid(shape=Sphere(diameter=diameter), visualMaterial=vmatGrey, solidMaterial="DryWood", collision=true)),
 
-    sphereJoint = FreeMotion(obj1=:world, obj2=:sphere, r=Var(init=ModiaBase.SVector{3,Float64}(-0.78, 0.0, 0.1792))),
+    sphereJoint = FreeMotion(obj1=:world, obj2=:sphere, r=Var(init=Modia.SVector{3,Float64}(-0.78, 0.0, 0.1792))),
 
     youbot1 = YouBot1,
     youbot2 = YouBot2

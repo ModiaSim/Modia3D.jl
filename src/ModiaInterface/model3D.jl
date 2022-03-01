@@ -1,4 +1,4 @@
-# ModiaLang interface to Modia3D
+# Modia interface to Modia3D
 Model3D(         ; kwargs...) = Model(; _buildFunction = :(Modia3D.buildModia3D!), kwargs...)
 Object3D(        ; kwargs...) = Par(; _constructor = :(Modia3D.Composition.Object3D{FloatType}), _path = true, kwargs...)
 Scene(           ; kwargs...) = Par(; _constructor = :(Modia3D.Composition.Scene{FloatType})                 , kwargs...)
@@ -145,7 +145,7 @@ end
 singularRem(ang) = abs(rem2pi(ang, RoundNearest)) - 1.5  # is negative/positive in valid/singular angle range
 J123or132(rot, isrot123) = isrot123 ? J123(rot) : J132(rot)
 
-FreeMotion(; obj1, obj2, r=Var(init=ModiaBase.SVector{3,Float64}(zeros(3))), rot=Var(init=ModiaBase.SVector{3,Float64}(zeros(3))), v=Var(init=ModiaBase.SVector{3,Float64}(zeros(3))), w=Var(init=ModiaBase.SVector{3,Float64}(zeros(3)))) = Model(; _constructor = Par(value = :(Modia3D.Composition.FreeMotion{FloatType}), _path = true, _jointType = :FreeMotion),
+FreeMotion(; obj1, obj2, r=Var(init=Modia.SVector{3,Float64}(zeros(3))), rot=Var(init=Modia.SVector{3,Float64}(zeros(3))), v=Var(init=Modia.SVector{3,Float64}(zeros(3))), w=Var(init=Modia.SVector{3,Float64}(zeros(3)))) = Model(; _constructor = Par(value = :(Modia3D.Composition.FreeMotion{FloatType}), _path = true, _jointType = :FreeMotion),
     obj1 = Par(value = obj1),
     obj2 = Par(value = obj2),
     r    = r,

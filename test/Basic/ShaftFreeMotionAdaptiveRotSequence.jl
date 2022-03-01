@@ -13,9 +13,9 @@ Shaft = Model3D(
                                    massProperties=MassProperties(; mass=84.7154, Ixx=7.2711, Iyy=7.2711, Izz=0.4230),
                                    visualMaterial=:(visualMaterial))),
     shaftFrame = Object3D(parent=:shaft, feature=Visual(shape=CoordinateSystem(length=0.4))),
-    free = FreeMotion(obj1=:world, obj2=:shaft, v   = Var(init  = ModiaBase.SVector{3,Float64}(0.0, 0.1, 0.0)),
-                                                rot = Var(start = ModiaBase.SVector{3,Float64}(deg2rad(30), deg2rad(90), deg2rad(10))),
-                                                w   = Var(init  = ModiaBase.SVector{3,Float64}(-2.0, 0.0, 0.0)))
+    free = FreeMotion(obj1=:world, obj2=:shaft, v   = Var(init  = Modia.SVector{3,Float64}(0.0, 0.1, 0.0)),
+                                                rot = Var(start = Modia.SVector{3,Float64}(deg2rad(30), deg2rad(90), deg2rad(10))),
+                                                w   = Var(init  = Modia.SVector{3,Float64}(-2.0, 0.0, 0.0)))
 )
 
 #@showModel model

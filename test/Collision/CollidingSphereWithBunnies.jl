@@ -17,7 +17,7 @@ ConvexPartitions = Model3D(
     sphere = Object3D(feature=Solid(shape=Sphere(diameter=0.2),
                       visualMaterial=mat1, solidMaterial="Steel",
                       massProperties=massAndGeoSphere, collision=true)),
-    free = FreeMotion(obj1=:world, obj2=:sphere, r=Var(init=ModiaBase.SVector{3,Float64}(0.0, 2.0, 0.0))),
+    free = FreeMotion(obj1=:world, obj2=:sphere, r=Var(init=Modia.SVector{3,Float64}(0.0, 2.0, 0.0))),
 
     bunnySolid = Object3D(parent=:world, feature=Solid(shape =
         FileMesh(filename=filenameBunny, scale=[0.1, 0.1, 0.1]), solidMaterial="Steel", collision=true )),

@@ -101,7 +101,7 @@ mutable struct Object3D{F <: Modia3D.VarFloatType} <: Modia3D.AbstractObject3D
 
     # Mass properties.
     #   The root of each super object has potentially hasMass=true. All other Object3Ds have hasMass=false.
-    #   The initial (fixed) mass properties defined in the ModiaLang model are stored in feature.
+    #   The initial (fixed) mass properties defined in the Modia model are stored in feature.
     hasMass::Bool                 # = false, if m and I_CM are zero. = true, otherwise.
     m::F                    # Mass in [kg]
     r_CM::SVector{3,F}      # Position vector from Object3D to Center of Mass resolved in Object3D in [m]
@@ -490,7 +490,7 @@ end
 
 
 # Inquire properties of a Object3D
-fullName(             obj::Object3D{F}) where F <: Modia3D.VarFloatType = obj.path # ModiaLang.SimulationModel.modelName + Object3D.path (wird ca. 98x verwendet)
+fullName(             obj::Object3D{F}) where F <: Modia3D.VarFloatType = obj.path # Modia.SimulationModel.modelName + Object3D.path (wird ca. 98x verwendet)
 instanceName(         obj::Object3D{F}) where F <: Modia3D.VarFloatType = obj.path
 fullName(obj) = error("fullName not implemented for ", typeof(obj))
 instanceName(obj) = error("instanceName not implemented for ", typeof(obj))

@@ -16,7 +16,7 @@ responseCalculation(material::Shapes.NoContactPairMaterial, obj1::Object3D{F}, o
 (Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F))
 
 function responseCalculation(material::Shapes.ObserverContactPairMaterial, obj1::Object3D{F}, obj2::Object3D{F}, rContact::SVector{3,F}, e_n::SVector{3,F}, s::F, time, file, sim) where F <: Modia3D.VarFloatType
-  if material.printAlarm && ModiaLang.isEvent(sim)
+  if material.printAlarm && Modia.isEvent(sim)
     println("At time event ", time, " two observer objects ", Modia3D.fullName(obj1), " and ", Modia3D.fullName(obj2), " are colliding.")
   end
   return (Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F))

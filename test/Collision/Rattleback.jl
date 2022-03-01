@@ -28,7 +28,7 @@ Rattleback = Model3D(
                                        visualMaterial=VisualMaterial(color="Blue"),
                                        solidMaterial="DryWood",
                                        collision=true)),
-    joint = FreeMotion(obj1=:world, obj2=:ellipsoid, r=Var(init=ModiaBase.SVector{3,Float64}(0.0, 0.0, 0.01)), w=Var(init=ModiaBase.SVector{3,Float64}(0.0, 0.1, 5.0)))
+    joint = FreeMotion(obj1=:world, obj2=:ellipsoid, r=Var(init=Modia.SVector{3,Float64}(0.0, 0.0, 0.01)), w=Var(init=Modia.SVector{3,Float64}(0.0, 0.1, 5.0)))
 )
 
 rattleback = @instantiateModel(Rattleback, unitless=true)

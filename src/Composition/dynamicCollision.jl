@@ -4,15 +4,15 @@
 # between objs with mpr algorithm, and use them as zero-crossing functions
 # (see file ...\ContactDetectionMPR\handler.jl)
 # after computing all distances between colliding shapes response calculations are done
-function computeContactForcesAndTorques(sim::ModiaLang.SimulationModel, scene, world, time, file)
+function computeContactForcesAndTorques(sim::Modia.SimulationModel, scene, world, time, file)
   ch = scene.options.contactDetection
   # Compute signed distances of all contact shapes during zero-crossing computation
     #try
         setComputationFlag(ch)
-        if ModiaLang.isEvent(sim)             # with Event
+        if Modia.isEvent(sim)             # with Event
             # handle event
             TimerOutputs.@timeit sim.timer "Modia3D_1 selectContactPairsWithEvent!"  selectContactPairsWithEvent!(sim, scene, ch, world)
-        elseif ModiaLang.isZeroCrossing(sim)  # no Event
+        elseif Modia.isZeroCrossing(sim)  # no Event
             # compute zero crossings
             TimerOutputs.@timeit sim.timer "Modia3D_1 selectContactPairsNoEvent!" selectContactPairsNoEvent!(sim, scene, ch, world)
         else
@@ -45,7 +45,7 @@ function dealWithContacts!(sim, scene::Scene{F}, ch, world, time, file) where F 
         obj2 = pair.obj2
         rContact      = (pair.contactPoint1 + pair.contactPoint2)/F(2.0)
         contactNormal = pair.contactNormal
-        if ModiaLang.isEvent(sim)
+        if Modia.isEvent(sim)
             # println("$(sim.time): ", obj1.path, " ", obj2.path)
             getMaterialContactStart(scene, ch, simh, pair, pairID, obj1, obj2, rContact, contactNormal)
             visualizeContactAndSupportPoints(ch, world)
@@ -63,7 +63,7 @@ function dealWithContacts!(sim, scene::Scene{F}, ch, world, time, file) where F 
         end
     end
 
-    if ModiaLang.isEvent(sim)
+    if Modia.isEvent(sim)
         deleteMaterialLastContactDictContactEnd(scene, ch, simh)
     end
     return nothing
@@ -88,7 +88,7 @@ function getMaterialContactStart(scene, ch, simh, pair, pairID, obj1, obj2, rCon
                 scene.options.elasticContactReductionFactor,
                 scene.options.maximumContactDamping)
         end
-        simh.restart = max(simh.restart, ModiaLang.Restart)
+        simh.restart = max(simh.restart, Modia.Restart)
         simh.newEventIteration = false
         if scene.options.enableContactDetection
             logEvents(simh, pair, obj1, obj2, rContact, contactNormal)
@@ -120,9 +120,9 @@ function deleteMaterialLastContactDictContactEnd(scene, ch, simh)
             if scene.options.enableContactDetection
                 contactEnd(pair.contactPairMaterial, pair.obj1, pair.obj2)
             end
-            simh.restart = max(simh.restart, ModiaLang.Restart)
+            simh.restart = max(simh.restart, Modia.Restart)
             simh.newEventIteration = false
-            if !simh.logEvents    # ModiaLang.isLogEvents(simh.logger)
+            if !simh.logEvents    # Modia.isLogEvents(simh.logger)
                 break
             end
             name1 = Modia3D.fullName(pair.obj1)

@@ -146,12 +146,12 @@ end
 
 Open Model3D.
 """
-function openModel3D!(instantiatedModel::ModiaLang.SimulationModel{F,TimeType}, modelPath::String, 
+function openModel3D!(instantiatedModel::Modia.SimulationModel{F,TimeType}, modelPath::String, 
                       nqdd::Int, time)::MultibodyData{F,TimeType} where {F,TimeType}
     mbsBuild::MultibodyBuild{F,TimeType} = instantiatedModel.buildDict[modelPath]
-    if ModiaLang.isFirstInitialOfAllSegments(instantiatedModel)
+    if Modia.isFirstInitialOfAllSegments(instantiatedModel)
         # Instantiate the Modia3D system
-        mbsRoot = ModiaLang.getModelFromSplittedPath(instantiatedModel.evaluatedParameters, mbsBuild.Model3DSplittedPath)
+        mbsRoot = Modia.getModelFromSplittedPath(instantiatedModel.evaluatedParameters, mbsBuild.Model3DSplittedPath)
         (world, revoluteObjects, prismaticObjects, freeMotionObjects, forceElements) = checkMultibodySystemAndGetWorldAndJointsAndForceElements(mbsRoot, modelPath, F)
 
         # Initialize force elements
@@ -164,7 +164,7 @@ function openModel3D!(instantiatedModel::ModiaLang.SimulationModel{F,TimeType}, 
         scene.forceElements = forceElements
         if scene.options.enableContactDetection && scene.collide
             nz = 2
-            zStartIndex = ModiaLang.addZeroCrossings(instantiatedModel, nz)
+            zStartIndex = Modia.addZeroCrossings(instantiatedModel, nz)
             scene.zStartIndex = zStartIndex
         else
             nz = 0
@@ -186,7 +186,7 @@ function openModel3D!(instantiatedModel::ModiaLang.SimulationModel{F,TimeType}, 
     end
     
     if isnothing(mbsBuild.mbs)
-        error("Error in Model3D.openModel3D!: ModiaLang.isFirstInitialOfAllSegments was never true!!!")
+        error("Error in Model3D.openModel3D!: Modia.isFirstInitialOfAllSegments was never true!!!")
     end
     
     mbs = mbsBuild.mbs
@@ -238,7 +238,7 @@ function getJointResiduals_method3!(mbs::MultibodyData{F}, args::Vararg{F,N})::V
             push!(x_names, name)
         end
         x_lengths = fill(1,length(objects))
-        leq = ModiaBase.LinearEquations{F}(x_names, x_lengths, length(objects), false)
+        leq = Modia.LinearEquations{F}(x_names, x_lengths, length(objects), false)
         push!(mbs.leq, leq)
         push!(mbs.instantiatedModel.linearEquations, leq)  # Stored it also in instantiatedModel, in order to support DAE-mode
     else
@@ -246,7 +246,7 @@ function getJointResiduals_method3!(mbs::MultibodyData{F}, args::Vararg{F,N})::V
     end
     leq.mode = -3
     m = mbs.instantiatedModel
-    while ModiaBase.LinearEquationsIteration(leq, m.isInitial, m.solve_leq, m.storeResult, m.time, m.timer)
+    while Modia.LinearEquationsIteration(leq, m.isInitial, m.solve_leq, m.storeResult, m.time, m.timer)
         # Store generalized accelerations in the joints
         a = leq.x
         for (i,obj) in enumerate(objects)
@@ -275,7 +275,7 @@ end
 =#
 
    #= Efficiency improvement, by computing only terms that are needed in the respective phase
-    of ModiaBase/src/EquationAndStateInfo.jl - Base.iterate(iterator::LinearEquationsIterator, ...)
+    of Modia/src/EquationAndStateInfo.jl - Base.iterate(iterator::LinearEquationsIterator, ...)
     
     nf: Number of degrees of freedom
     q: Generalized joint coordinates of the tree joints
@@ -357,7 +357,7 @@ function computeGeneralizedForces!(mbs::MultibodyData{F,TimeType}, _leq)::Multib
     TimerOutputs.@timeit instantiatedModel.timer "Modia3D computeGeneralizedForces!" begin
         storeResult   = instantiatedModel.storeResult
         leq_mode::Int = isnothing(_leq) ? -2 : _leq.mode         
-        isTerminal    = ModiaLang.isTerminal(instantiatedModel) && leq_mode == -2
+        isTerminal    = Modia.isTerminal(instantiatedModel) && leq_mode == -2
    
                                 
         scene = mbs.scene
