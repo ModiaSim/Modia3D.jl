@@ -87,28 +87,28 @@ function addOrSubtractMassPropertiesOfChildToRoot!(obj_root::Object3D{F}, obj_ch
     I_root    = obj_root.I_CM
 
     # transform childs center of mass to parents coordinate system
-    rCM_child_new = r_child + R_child' * rCM_child
+    rCM_child_new::SVector{3,F} = r_child + R_child' * rCM_child
 
     # I_child_steiner: I_child needs to be transformed to parents coordinate system
     # I_root_steiner: I_root needs to be transformed to parents coordinate system
     #                 (no need of rotation matrices)
-    I_child_steiner = Modia3D.NullRotation(F) * I_child * Modia3D.NullRotation(F)' +
+    I_child_steiner::SMatrix{3,3,F,9} = Modia3D.NullRotation(F) * I_child * Modia3D.NullRotation(F)' +
                     m_child * Modia3D.skew(rCM_child_new)' * Modia3D.skew(rCM_child_new)
-    I_root_steiner = I_root +
+    I_root_steiner::SMatrix{3,3,F,9}  = I_root +
                     m_root * Modia3D.skew(rCM_root)' * Modia3D.skew(rCM_root)
 
     if add
         # ----------- adding mass properties (parent + child) ----------------------
         # common mass (parent + child)
-        m = m_root + m_child
+        m = F(m_root + m_child)
 
         # common center of mass (parent + child)
         @assert(m > 0.0)
-        rCM = (m_root * rCM_root + m_child * rCM_child_new)/m
+        rCM::SVector{3,F} = (m_root * rCM_root + m_child * rCM_child_new)/m
 
         # I: substract new common mass multiplied with skew matrices of
         #    center of mass from the sum of I_root_steiner and I_child_steiner
-        I = I_root_steiner + I_child_steiner - m * Modia3D.skew(rCM)' * Modia3D.skew(rCM)
+        I::SMatrix{3,3,F,9} = I_root_steiner + I_child_steiner - m * Modia3D.skew(rCM)' * Modia3D.skew(rCM)
 
         # Assign to obj_root
         obj_root.m    = m
