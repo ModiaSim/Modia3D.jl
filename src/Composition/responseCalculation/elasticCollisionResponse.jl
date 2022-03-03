@@ -36,22 +36,22 @@ function resultantDampingCoefficient(cor, abs_vreln, vsmall, maximumContactDampi
     return d_res
 end
 
-function elasticContactPairCoefficients(obj1::Object3D, obj2::Object3D)
-    solid1::Shapes.Solid = obj1.feature
-    solid2::Shapes.Solid = obj2.feature
-
+function elasticContactPairCoefficients(obj1::Object3D{F}, obj2::Object3D{F}) where F <: Modia3D.VarFloatType
+    solid1::Shapes.Solid{F} = obj1.feature
+    solid2::Shapes.Solid{F} = obj2.feature
+    mu_r_geo::F = F(0.0)
     if !solid1.isFlat && solid2.isFlat
         mu_r_geo = solid1.contactSphereRadius
     elseif solid1.isFlat && !solid2.isFlat
         mu_r_geo = solid2.contactSphereRadius
     else # (solid1.isFlat && solid2.isFlat) || (!solid1.isFlat && !solid2.isFlat)
-        r1 = solid1.contactSphereRadius
-        r2 = solid2.contactSphereRadius
+        r1::F = solid1.contactSphereRadius
+        r2::F = solid2.contactSphereRadius
         mu_r_geo = r1*r2/(r1 + r2)
     end
 
-    n_geo = 1.5
-    c_geo = 4/3*sqrt(mu_r_geo)
+    n_geo = F(1.5)
+    c_geo = F(4/3*sqrt(mu_r_geo))
 
     return (c_geo, n_geo, mu_r_geo)
 end

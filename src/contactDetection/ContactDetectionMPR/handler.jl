@@ -10,9 +10,9 @@ AABB_touching(aabb1::Basics.BoundingBox, aabb2::Basics.BoundingBox) = aabb1.x_ma
 
 
 
-function Composition.initializeContactDetection!(world::Composition.Object3D, scene::Composition.Scene)::Nothing
+function Composition.initializeContactDetection!(world::Composition.Object3D{F}, scene::Composition.Scene{F})::Nothing where F <: Modia3D.VarFloatType
     if typeof(scene.options.contactDetection) <: Modia3D.ContactDetectionMPR_handler
-        ch = scene.options.contactDetection
+        ch::Modia3D.ContactDetectionMPR_handler = scene.options.contactDetection
         ch.contactPairs = Composition.ContactPairs(world, scene, ch.visualizeContactPoints,
             ch.visualizeSupportPoints, ch.defaultContactSphereDiameter)
         if ch.contactPairs.nz == 0
@@ -20,11 +20,12 @@ function Composition.initializeContactDetection!(world::Composition.Object3D, sc
             scene.collide = false
                 @warn "... From Modia3D collision handler: Collision handling switched off, since no contacts can take place (nz=0).\n" *
                     "... You might need to set canCollide=true at joints.\n"
-            return
+            return nothing
         end
         @assert(ch.contactPairs.ne > 0)
         @assert(ch.contactPairs.nz > 0)
     end
+    return nothing
 end
 
 
