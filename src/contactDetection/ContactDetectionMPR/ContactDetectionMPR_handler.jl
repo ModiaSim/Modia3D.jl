@@ -36,6 +36,7 @@ mutable struct ContactPair{F <: Modia3D.VarFloatType}
     support2B::SVector{3,F}
     support3B::SVector{3,F}
 
+    pairKind::Shapes.PairMaterialKind
     contactPairMaterial::Union{Modia3D.AbstractContactPairMaterial,Nothing}  # only if contact = true, otherwise not defined
 
     ContactPair{F}(contactPoint1::SVector{3,F}, contactPoint2::SVector{3,F},

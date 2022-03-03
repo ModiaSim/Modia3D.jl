@@ -33,27 +33,53 @@ end
 # (see file ...\Composition\responseCalculation\elasticCollisionResponse.jl)
 # further, at an event simulation status is updated, contact material is replaced
 # and the actual contactDict is stored
-function dealWithContacts!(sim, scene::Scene{F}, ch, world, time, file) where F <: Modia3D.VarFloatType
-    simh = sim.eventHandler
+function dealWithContacts!(sim::Modia.SimulationModel, scene::Scene{F}, ch::Composition.ContactDetectionMPR_handler, world::Composition.Object3D{F}, time::Float64, file::Nothing)::Nothing where F <: Modia3D.VarFloatType
+
+    simh::Modia.EventHandler = sim.eventHandler
     f1::SVector{3,F}=Modia3D.ZeroVector3D(F)
     f2::SVector{3,F}=Modia3D.ZeroVector3D(F)
     t1::SVector{3,F}=Modia3D.ZeroVector3D(F)
     t2::SVector{3,F}=Modia3D.ZeroVector3D(F)
 
     for (pairID, pair) in ch.contactDict
-        obj1 = pair.obj1
-        obj2 = pair.obj2
-        rContact      = (pair.contactPoint1 + pair.contactPoint2)/F(2.0)
-        contactNormal = pair.contactNormal
+        obj1::Composition.Object3D{F} = pair.obj1
+        obj2::Composition.Object3D{F} = pair.obj2
+        rContact::SVector{3,F} = (pair.contactPoint1 + pair.contactPoint2)/F(2.0)
+        contactNormal::SVector{3,F} = pair.contactNormal
         if Modia.isEvent(sim)
             # println("$(sim.time): ", obj1.path, " ", obj2.path)
             getMaterialContactStart(scene, ch, simh, pair, pairID, obj1, obj2, rContact, contactNormal)
             visualizeContactAndSupportPoints(ch, world)
         end
         if scene.options.enableContactDetection
-            (f1,f2,t1,t2) = responseCalculation(pair.contactPairMaterial, obj1, obj2,
+            if pair.pairKind == Modia3D.NoContactPairKind
+                noContactPairMaterial::Shapes.NoContactPairMaterial = pair.contactPairMaterial
+                (f1,f2,t1,t2) = responseCalculation(noContactPairMaterial, obj1, obj2,
                             rContact, contactNormal,
                             pair.distanceWithHysteresis, time, file, sim)
+            elseif pair.pairKind == Modia3D.ElasticContactPairKind
+                elasticContactPairMaterial::Composition.ElasticContactPairResponseMaterial = pair.contactPairMaterial
+                (f1,f2,t1,t2) = responseCalculation(elasticContactPairMaterial, obj1, obj2,
+                    rContact, contactNormal,
+                    pair.distanceWithHysteresis, time, file, sim)
+            elseif pair.pairKind == Modia3D.ObserverContactPairKind
+                observerContactPairMaterial::Shapes.ObserverContactPairMaterial = pair.contactPairMaterial
+                (f1,f2,t1,t2) = responseCalculation(observerContactPairMaterial, obj1, obj2,
+                rContact, contactNormal,
+                pair.distanceWithHysteresis, time, file, sim)
+            elseif pair.pairKind == Modia3D.ImpulseContactPairKind
+                impulseContactPairMaterial::Shapes.ImpulseContactPairMaterial = pair.contactPairMaterial
+                (f1,f2,t1,t2) = responseCalculation(impulseContactPairMaterial, obj1, obj2,
+                rContact, contactNormal,
+                pair.distanceWithHysteresis, time, file, sim)
+            elseif pair.pairKind == Modia3D.WheelRailContactPairKind
+                wheelRailContactPairMaterial::Shapes.WheelRailContactPairMaterial = pair.contactPairMaterial
+                (f1,f2,t1,t2) = responseCalculation(wheelRailContactPairMaterial, obj1, obj2,
+                rContact, contactNormal,
+                pair.distanceWithHysteresis, time, file, sim)
+            else
+                error("not supported contact pair material")
+            end
 
             # Transform forces/torques in local part frames
             obj1.f += obj1.R_abs*f1
@@ -70,7 +96,6 @@ function dealWithContacts!(sim, scene::Scene{F}, ch, world, time, file) where F 
 end
 
 
-
 # mainly its for assigning contact materials.
 # therefore, lastContactDict stores information of shape pairs in contact at last step
 # if the actual shape pair was in contact at the last step as well, the already assigned contact material is taken
@@ -79,12 +104,13 @@ function getMaterialContactStart(scene, ch, simh, pair, pairID, obj1, obj2, rCon
     if haskey(ch.lastContactDict, pairID)
         # use material (reference) from previous event
         if scene.options.enableContactDetection
-        pair.contactPairMaterial = ch.lastContactDict[pairID].contactPairMaterial    # improve later (should avoid to inquire pairID twice)
+            pair.contactPairMaterial = ch.lastContactDict[pairID].contactPairMaterial    # improve later (should avoid to inquire pairID twice)
+            pair.pairKind = ch.lastContactDict[pairID].pairKind
         end
     else
         # determine contact pair material
         if scene.options.enableContactDetection
-            pair.contactPairMaterial = contactStart(obj1, obj2, rContact, contactNormal,
+            (pair.contactPairMaterial, pair.pairKind) = contactStart(obj1, obj2, rContact, contactNormal,
                 scene.options.elasticContactReductionFactor,
                 scene.options.maximumContactDamping)
         end

@@ -105,7 +105,7 @@ function contactStart(matPair::Shapes.ElasticContactPairMaterial,
                                 matPair.rotationalResistanceCoefficient, mu_r_geo,
                                 matPair.vsmall, matPair.wsmall)
     end
-    return responseMaterial
+    return (responseMaterial, Shapes.ElasticContactPairKind)
 end
 
 
