@@ -44,7 +44,7 @@ end
 # It sums up common mass, inertia tensor and center of mass.
 # The results are stored twice in actual root of super object:
 #       massProperties: container for actual values
-function addMassPropertiesOfAllSuperObjChildsToRootSuperObj!(rootSuperObj::Object3D, actualMassSuperObject::Vector{Object3D{F}}) where F <: Modia3D.VarFloatType
+function addMassPropertiesOfAllSuperObjChildsToRootSuperObj!(rootSuperObj::Object3D{F}, actualMassSuperObject::Vector{Object3D{F}}) where F <: Modia3D.VarFloatType
     if length(actualMassSuperObject) > 0
         for i=1:length(actualMassSuperObject)
             obj = actualMassSuperObject[i]
@@ -75,41 +75,41 @@ end
 # function computeInertiaTensorForTwoBodies!(massPropParent, massPropObj, obj; add=true)
 function addOrSubtractMassPropertiesOfChildToRoot!(obj_root::Object3D{F}, obj_child::Object3D{F}; add=true)::Nothing where F <: Modia3D.VarFloatType
     solid::Shapes.Solid{F} = obj_child.feature
-    massProperties_child = solid.massProperties
+    massProperties_child::Shapes.MassProperties{F} = solid.massProperties
 
-    R_child::SMatrix{3,3,F,9}= obj_child.R_rel
-    r_child::SVector{3,F}    = obj_child.r_rel
-    m_child::F               = massProperties_child.m
-    rCM_child::SVector{3,F}  = massProperties_child.rCM
-    I_child::SMatrix{3,3,F,9}= massProperties_child.I
+    R_child   = obj_child.R_rel
+    r_child   = obj_child.r_rel
+    m_child::F                = massProperties_child.m
+    rCM_child::SVector{3,F}   = massProperties_child.rCM
+    I_child::SMatrix{3,3,F,9} = massProperties_child.I
 
-    m_root::F               = obj_root.m
-    rCM_root::SVector{3,F}  = obj_root.r_CM
-    I_root::SMatrix{3,3,F,9}= obj_root.I_CM
+    m_root    = obj_root.m
+    rCM_root  = obj_root.r_CM
+    I_root    = obj_root.I_CM
 
     # transform childs center of mass to parents coordinate system
-    rCM_child_new::SVector{3,F} = SVector{3,F}(r_child + R_child' * rCM_child)
+    rCM_child_new = r_child + R_child' * rCM_child
 
     # I_child_steiner: I_child needs to be transformed to parents coordinate system
     # I_root_steiner: I_root needs to be transformed to parents coordinate system
     #                 (no need of rotation matrices)
-    I_child_steiner::SMatrix{3,3,F,9} = SMatrix{3,3,F,9}(Modia3D.NullRotation(F) * I_child * Modia3D.NullRotation(F)' +
-                    m_child * Modia3D.skew(rCM_child_new)' * Modia3D.skew(rCM_child_new) )
-    I_root_steiner::SMatrix{3,3,F,9}  = SMatrix{3,3,F,9}(I_root +
-                    m_root * Modia3D.skew(rCM_root)' * Modia3D.skew(rCM_root) )
+    I_child_steiner = Modia3D.NullRotation(F) * I_child * Modia3D.NullRotation(F)' +
+                    m_child * Modia3D.skew(rCM_child_new)' * Modia3D.skew(rCM_child_new)
+    I_root_steiner  = I_root +
+                    m_root * Modia3D.skew(rCM_root)' * Modia3D.skew(rCM_root)
 
     if add
         # ----------- adding mass properties (parent + child) ----------------------
         # common mass (parent + child)
-        m = F(m_root + m_child)
+        m = m_root + m_child
 
         # common center of mass (parent + child)
         @assert(m > 0.0)
-        rCM::SVector{3,F} = SVector{3,F}((m_root * rCM_root + m_child * rCM_child_new)/m)
+        rCM = (m_root * rCM_root + m_child * rCM_child_new)/m
 
         # I: substract new common mass multiplied with skew matrices of
         #    center of mass from the sum of I_root_steiner and I_child_steiner
-        I::SMatrix{3,3,F,9} = SMatrix{3,3,F,9}(I_root_steiner + I_child_steiner - m * Modia3D.skew(rCM)' * Modia3D.skew(rCM) )
+        I =I_root_steiner + I_child_steiner - m * Modia3D.skew(rCM)' * Modia3D.skew(rCM)
 
         # Assign to obj_root
         obj_root.m    = m
