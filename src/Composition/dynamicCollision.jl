@@ -5,9 +5,10 @@
 # (see file ...\ContactDetectionMPR\handler.jl)
 # after computing all distances between colliding shapes response calculations are done
 function computeContactForcesAndTorques(sim::Modia.SimulationModel, scene, world, time, file)
-  ch = scene.options.contactDetection
-  # Compute signed distances of all contact shapes during zero-crossing computation
-    #try
+    if typeof(scene.options.contactDetection) <: Modia3D.ContactDetectionMPR_handler
+        ch::Modia3D.ContactDetectionMPR_handler = scene.options.contactDetection
+        # Compute signed distances of all contact shapes during zero-crossing computation
+            #try
         setComputationFlag(ch)
         if Modia.isEvent(sim)             # with Event
             # handle event
@@ -20,9 +21,14 @@ function computeContactForcesAndTorques(sim::Modia.SimulationModel, scene, world
             TimerOutputs.@timeit sim.timer "Modia3D_1 getDistances!"  getDistances!(scene, ch, world)
         end
         TimerOutputs.@timeit sim.timer "Modia3D_1 dealWithContacts!"  dealWithContacts!(sim, scene, ch, world, time, file)
+        # dealWithContacts!(sim, scene, ch, world, time, file)
     #catch e
         #println("Bug in Modia3D/src/Composition/dynamicCollision.jl: error curing collision detection at time = ", time)
     #end
+    else
+        error("No contact detection handler is defined")
+    end
+    return nothing
 end
 
 # each shape pair in contact is stored in ch.contactDict
@@ -33,15 +39,15 @@ end
 # (see file ...\Composition\responseCalculation\elasticCollisionResponse.jl)
 # further, at an event simulation status is updated, contact material is replaced
 # and the actual contactDict is stored
-function dealWithContacts!(sim::Modia.SimulationModel, scene::Scene{F}, ch::Composition.ContactDetectionMPR_handler, world::Composition.Object3D{F}, time::Float64, file::Nothing)::Nothing where F <: Modia3D.VarFloatType
+function dealWithContacts!(sim::Modia.SimulationModel{F, T}, scene::Scene{F}, ch::Composition.ContactDetectionMPR_handler{M,F}, world::Composition.Object3D{F}, time::Float64, file::Nothing)::Nothing where {F <: Modia3D.VarFloatType, T, M}
 
-    simh::Modia.EventHandler = sim.eventHandler
+    simh::Modia.EventHandler{F,T} = sim.eventHandler
     f1::SVector{3,F}=Modia3D.ZeroVector3D(F)
     f2::SVector{3,F}=Modia3D.ZeroVector3D(F)
     t1::SVector{3,F}=Modia3D.ZeroVector3D(F)
     t2::SVector{3,F}=Modia3D.ZeroVector3D(F)
 
-    for (pairID, pair) in ch.contactDict
+    for (pairID::Int64, pair::ContactPair{F}) in ch.contactDict
         obj1::Composition.Object3D{F} = pair.obj1
         obj2::Composition.Object3D{F} = pair.obj2
         rContact::SVector{3,F} = (pair.contactPoint1 + pair.contactPoint2)/F(2.0)
