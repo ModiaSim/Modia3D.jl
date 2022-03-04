@@ -466,12 +466,12 @@ end
 
 
 """
-    setStatesRevolute!(mbs::MultibodyData{F}, args::Vararg{F,NJOINTS_TIMES_2}) where {F,NJOINTS_TIMES_2}
+    setStatesRevolute!(mbs::MultibodyData{F}, args::Vararg{F,N}) where {F,N}
 
 Copy states of the revolute joints into the corresponding Object3Ds.
 """
-function setStatesRevolute!(mbs::MultibodyData{F,TimeType}, args::Vararg{F})::MultibodyData{F,TimeType} where {F,TimeType}
-    @assert(length(args) == 2*length(mbs.revoluteObjects))
+function setStatesRevolute!(mbs::MultibodyData{F,TimeType}, args::Vararg{F,N})::MultibodyData{F,TimeType} where {F,TimeType,N}
+    @assert(N == 2*length(mbs.revoluteObjects))
     scene = mbs.scene
     j = 1
     @inbounds for obj in mbs.revoluteObjects
@@ -485,12 +485,12 @@ end
 
 
 """
-    setStatesPrismatic!(mbs::MultibodyData{F}, args::Vararg{F,NJOINTS_TIMES_2}) where {F,NJOINTS_TIMES_2}
+    setStatesPrismatic!(mbs::MultibodyData{F}, args::Vararg{F,N}) where {F,N}
 
 Copy states of the prismatic joints into the corresponding Object3Ds.
 """
-function setStatesPrismatic!(mbs::MultibodyData{F,TimeType}, args::Vararg{F})::MultibodyData{F,TimeType} where {F,TimeType}
-    @assert(length(args) == 2*length(mbs.prismaticObjects))
+function setStatesPrismatic!(mbs::MultibodyData{F,TimeType}, args::Vararg{F,N})::MultibodyData{F,TimeType} where {F,TimeType,N}
+    @assert(N == 2*length(mbs.prismaticObjects))
     scene = mbs.scene
     j = 1
     @inbounds for obj in mbs.prismaticObjects
@@ -504,12 +504,12 @@ end
 
 
 """
-    setStatesFreeMotion!(mbs::MultibodyData{F}, args::Vararg{SVector{3,F},NJOINTS_TIMES_4}) where {F,NJOINTS_TIMES_4}
+    setStatesFreeMotion!(mbs::MultibodyData{F}, args::Vararg{SVector{3,F},N}) where {F,N}
 
 Copy states of the free motion joints into the corresponding Object3Ds.
 """
-function setStatesFreeMotion!(mbs::MultibodyData{F,TimeType}, args::Vararg{SVector{3,F}})::MultibodyData{F,TimeType} where {F,TimeType}
-    @assert(length(args) == 4*length(mbs.freeMotionObjects))
+function setStatesFreeMotion!(mbs::MultibodyData{F,TimeType}, args::Vararg{SVector{3,F},N})::MultibodyData{F,TimeType} where {F,TimeType,N}
+    @assert(N== 4*length(mbs.freeMotionObjects))
     scene = mbs.scene
     j = 1
     @inbounds for obj in mbs.freeMotionObjects
@@ -525,12 +525,12 @@ end
 
 
 """
-    setStatesFreeMotion_isrot123!(mbs::MultibodyData{F}, args::Vararg{Bool,NJOINTS})
+    setStatesFreeMotion_isrot123!(mbs::MultibodyData{F}, args::Vararg{Bool,N})
 
 Copy isrot123 of the free motion joints into the corresponding Object3Ds.
 """
-function setStatesFreeMotion_isrot123!(mbs::MultibodyData{F,TimeType}, args::Vararg{Bool})::MultibodyData{F,TimeType} where {F,TimeType}
-    @assert(length(args) == length(mbs.freeMotionObjects))
+function setStatesFreeMotion_isrot123!(mbs::MultibodyData{F,TimeType}, args::Vararg{Bool,N})::MultibodyData{F,TimeType} where {F,TimeType,N}
+    @assert(N == length(mbs.freeMotionObjects))
     scene = mbs.scene
     @inbounds for (i,obj) in enumerate(mbs.freeMotionObjects)
         scene.freeMotion[obj.jointIndex].isrot123 = args[i]
@@ -540,12 +540,12 @@ end
 
 
 """
-    setAccelerationsRevolute!(mbs::MultibodyData{F}, args::Vararg{F,NJOINTS}) where {F,NJOINTS}
+    setAccelerationsRevolute!(mbs::MultibodyData{F}, args::Vararg{F,N}) where {F,N}
 
 Copy accelerations of revolute joints into mbs.
 """
-function setAccelerationsRevolute!(mbs::MultibodyData{F,TimeType}, args::Vararg{F}) where {F,TimeType}
-    @assert(length(args) == length(mbs.revoluteObjects))
+function setAccelerationsRevolute!(mbs::MultibodyData{F,TimeType}, args::Vararg{F,N}) where {F,TimeType,N}
+    @assert(N == length(mbs.revoluteObjects))
     scene = mbs.scene
     @inbounds for (i,obj) in enumerate(mbs.revoluteObjects)
         scene.revolute[obj.jointIndex].a = args[i]
@@ -555,12 +555,12 @@ end
 
 
 """
-    setAccelerationsPrismatic!(mbs::MultibodyData{F}, args::Vararg{F,NJOINTS}) where {F,NJOINTS}
+    setAccelerationsPrismatic!(mbs::MultibodyData{F}, args::Vararg{F,N}) where {F,N}
 
 Copy accelerations of prismatic joints into mbs.
 """
-function setAccelerationsPrismatic!(mbs::MultibodyData{F,TimeType}, args::Vararg{F}) where {F,TimeType}
-    @assert(length(args) == length(mbs.prismaticObjects))
+function setAccelerationsPrismatic!(mbs::MultibodyData{F,TimeType}, args::Vararg{F,N}) where {F,TimeType,N}
+    @assert(N == length(mbs.prismaticObjects))
     scene = mbs.scene
     @inbounds for (i,obj) in enumerate(mbs.prismaticObjects)
         scene.prismatic[obj.jointIndex].a = args[i]
@@ -574,8 +574,8 @@ end
 
 Copy accelerations of free motion joints into mbs
 """
-function setAccelerationsFreeMotion!(mbs::MultibodyData{F,TimeType}, args::Vararg{SVector{3,F}}) where {F,TimeType}
-    @assert(length(args) == 2*length(mbs.freeMotionObjects))
+function setAccelerationsFreeMotion!(mbs::MultibodyData{F,TimeType}, args::Vararg{SVector{3,F},N}) where {F,TimeType,N}
+    @assert(N == 2*length(mbs.freeMotionObjects))
     scene = mbs.scene
     j = 1
     @inbounds for obj in mbs.freeMotionObjects

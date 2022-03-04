@@ -69,6 +69,10 @@ Modia3D has various *3D animation features*:
 
 ## Release Notes
 
+### Version 0.10.1
+
+- Reduce memory allocation, especially in case of collisions and FreeMotion joints.
+
 ### Version 0.10.0
 
 **Non-backwards compatible changes**:
