@@ -48,10 +48,10 @@ function dealWithContacts!(sim::Modia.SimulationModel{F, T}, scene::Scene{F}, ch
     t2::SVector{3,F}=Modia3D.ZeroVector3D(F)
 
     for (pairID::Int64, pair::ContactPair{F}) in ch.contactDict
-        obj1::Composition.Object3D{F} = pair.obj1
-        obj2::Composition.Object3D{F} = pair.obj2
-        rContact::SVector{3,F} = (pair.contactPoint1 + pair.contactPoint2)/F(2.0)
-        contactNormal::SVector{3,F} = pair.contactNormal
+        obj1 = pair.obj1
+        obj2= pair.obj2
+        rContact= (pair.contactPoint1 + pair.contactPoint2)/F(2.0)
+        contactNormal = pair.contactNormal
         if Modia.isEvent(sim)
             # println("$(sim.time): ", obj1.path, " ", obj2.path)
             getMaterialContactStart(scene, ch, simh, pair, pairID, obj1, obj2, rContact, contactNormal)
