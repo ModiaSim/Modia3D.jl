@@ -202,7 +202,7 @@ struct SceneOptions{F <: Modia3D.VarFloatType}
 
     ### Contact detection ###
     enableContactDetection::Bool            # = true, if contact detection is enabled
-    contactDetection::Modia3D.AbstractContactDetection
+    contactDetection::ContactDetectionMPR_handler{Modia3D.MPRFloatType, F}
     elasticContactReductionFactor::F  # c_res_used = c_res * elasticContactReductionFactor (> 0)
     maximumContactDamping::F
     gap::Float64

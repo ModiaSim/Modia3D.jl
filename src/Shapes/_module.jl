@@ -66,6 +66,10 @@ export ShapeKind, UndefinedShapeKind, SphereKind, EllipsoidKind, BoxKind, Cylind
 
 @enum ShapeKind UndefinedShapeKind SphereKind EllipsoidKind BoxKind CylinderKind ConeKind CapsuleKind BeamKind FileMeshKind CoordinateSystemKind GridKind SpringKind GearWheelKind ModelicaKind TextKind
 
+export PairMaterialKind, ElasticContactPairKind, NoContactPairKind, ObserverContactPairKind, ImpulseContactPairKind, WheelRailContactPairKind
+
+@enum PairMaterialKind ElasticContactPairKind NoContactPairKind ObserverContactPairKind ImpulseContactPairKind WheelRailContactPairKind
+
 include("color.jl")
 include("visualMaterial.jl")
 include("text.jl")

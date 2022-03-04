@@ -44,7 +44,7 @@ end
 # It sums up common mass, inertia tensor and center of mass.
 # The results are stored twice in actual root of super object:
 #       massProperties: container for actual values
-function addMassPropertiesOfAllSuperObjChildsToRootSuperObj!(rootSuperObj::Object3D, actualMassSuperObject::Vector{Object3D{F}}) where F <: Modia3D.VarFloatType
+function addMassPropertiesOfAllSuperObjChildsToRootSuperObj!(rootSuperObj::Object3D{F}, actualMassSuperObject::Vector{Object3D{F}}) where F <: Modia3D.VarFloatType
     if length(actualMassSuperObject) > 0
         for i=1:length(actualMassSuperObject)
             obj = actualMassSuperObject[i]
@@ -74,7 +74,8 @@ end
 
 # function computeInertiaTensorForTwoBodies!(massPropParent, massPropObj, obj; add=true)
 function addOrSubtractMassPropertiesOfChildToRoot!(obj_root::Object3D{F}, obj_child::Object3D{F}; add=true)::Nothing where F <: Modia3D.VarFloatType
-    massProperties_child = obj_child.feature.massProperties
+    solid::Shapes.Solid{F} = obj_child.feature
+    massProperties_child::Shapes.MassProperties{F} = solid.massProperties
 
     R_child   = obj_child.R_rel
     r_child   = obj_child.r_rel
@@ -94,7 +95,7 @@ function addOrSubtractMassPropertiesOfChildToRoot!(obj_root::Object3D{F}, obj_ch
     #                 (no need of rotation matrices)
     I_child_steiner = Modia3D.NullRotation(F) * I_child * Modia3D.NullRotation(F)' +
                     m_child * Modia3D.skew(rCM_child_new)' * Modia3D.skew(rCM_child_new)
-    I_root_steiner = I_root +
+    I_root_steiner  = I_root +
                     m_root * Modia3D.skew(rCM_root)' * Modia3D.skew(rCM_root)
 
     if add
@@ -108,13 +109,12 @@ function addOrSubtractMassPropertiesOfChildToRoot!(obj_root::Object3D{F}, obj_ch
 
         # I: substract new common mass multiplied with skew matrices of
         #    center of mass from the sum of I_root_steiner and I_child_steiner
-        I = I_root_steiner + I_child_steiner - m * Modia3D.skew(rCM)' * Modia3D.skew(rCM)
+        I =I_root_steiner + I_child_steiner - m * Modia3D.skew(rCM)' * Modia3D.skew(rCM)
 
         # Assign to obj_root
         obj_root.m    = m
         obj_root.r_CM = rCM
         obj_root.I_CM = I
-        return nothing
 
         #= # other way to compute inertia tensor
         a1 = rCM_new - rCM_child_new
@@ -143,5 +143,6 @@ function addOrSubtractMassPropertiesOfChildToRoot!(obj_root::Object3D{F}, obj_ch
         obj_root.m    = m
         obj_root.r_CM = rCM
         obj_root.I_CM = I
-        return nothing
-end; end
+    end
+    return nothing
+end
