@@ -60,13 +60,14 @@ function getPositionsOfObj(scene::Composition.Scene,
     if movablePos == 0
         return (false, 0, 0)
     else
-        return (true, movablePos, findall(x->x==obj, scene.superObjs[movablePos].superObjMovable.superObj)[1] )
+        # findall(x->x==obj, scene.superObjs[movablePos].superObjMovable.superObj)[1] # needs to be improved
+        return (true, movablePos, 0 )
     end
 end
 
-function computePairID(scene::Composition.Scene,
-        actObj::Composition.Object3D, nextObj::Composition.Object3D,
-        is::Int64, i::Int64, js::Int64, j::Int64)::Int64
+function computePairID(scene::Composition.Scene{F},
+        actObj::Composition.Object3D{F}, nextObj::Composition.Object3D{F},
+        is::Int64, i::Int64, js::Int64, j::Int64)::Int64 where F
     # is: actual super - object
     # js: subsequent super - object
     # i: Object3D of is_th super - object

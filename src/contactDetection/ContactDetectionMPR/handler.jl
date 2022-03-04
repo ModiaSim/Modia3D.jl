@@ -146,7 +146,7 @@ function computeDistances(scene::Composition.Scene{F}, ch::Composition.ContactDe
                                 n += 1
                                 nextObj  = nextSuperObj[j]
                                 nextAABB = nextSuperAABB[j]
-                                pairID::Int64 = computePairID(scene, actObj, nextObj, is,i,js,j)
+                                pairID = computePairID(scene, actObj, nextObj, is,i,js,j)
 
                                 storeDistancesForSolver!(world, pairID, ch, actObj, nextObj,
                                 actAABB, nextAABB, phase2, hasEvent)
