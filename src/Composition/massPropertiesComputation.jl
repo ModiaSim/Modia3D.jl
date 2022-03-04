@@ -79,9 +79,9 @@ function addOrSubtractMassPropertiesOfChildToRoot!(obj_root::Object3D{F}, obj_ch
 
     R_child   = obj_child.R_rel
     r_child   = obj_child.r_rel
-    m_child::F                = massProperties_child.m
-    rCM_child::SVector{3,F}   = massProperties_child.rCM
-    I_child::SMatrix{3,3,F,9} = massProperties_child.I
+    m_child   = massProperties_child.m
+    rCM_child = massProperties_child.rCM
+    I_child   = massProperties_child.I
 
     m_root    = obj_root.m
     rCM_root  = obj_root.r_CM

@@ -39,7 +39,7 @@ end
 function elasticContactPairCoefficients(obj1::Object3D{F}, obj2::Object3D{F}) where F <: Modia3D.VarFloatType
     solid1::Shapes.Solid{F} = obj1.feature
     solid2::Shapes.Solid{F} = obj2.feature
-    mu_r_geo::F = F(0.0)
+    mu_r_geo = F(0.0)
     if !solid1.isFlat && solid2.isFlat
         mu_r_geo = solid1.contactSphereRadius
     elseif solid1.isFlat && !solid2.isFlat
