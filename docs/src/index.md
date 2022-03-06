@@ -71,7 +71,8 @@ Modia3D has various *3D animation features*:
 
 ### Version 0.10.1
 
-- Reduce memory allocation, especially in case of collisions and FreeMotion joints.
+- Reduce memory allocations, especially in case of collisions and FreeMotion joints.
+- Require Modia 0.8.2 (drastically reduces memory allocations for FreeMotion joints).
 
 ### Version 0.10.0
 
