@@ -109,7 +109,7 @@ return a `Dict{String, ContactPairMaterial}` dictionary.
 """
 function readContactPairMaterialFromJSON(filename::AbstractString)
     dataJSON = JSON.parsefile(filename)
-    palette = Dict{TwoNamesKey, Modia3D.AbstractContactPairMaterial}()
+    palette = OrderedCollections.OrderedDict{TwoNamesKey, Modia3D.AbstractContactPairMaterial}()
     for (namesPair,dataPair) in dataJSON
         # Split a key "name1,name2" in two parts
         i = findfirst(",", namesPair)
@@ -132,14 +132,17 @@ end
 
 
 """
-    contactPairMaterialPalette
+    const contactPairMaterialPalette
 
 Dictionary of contact pair material data, see [`ElasticContactPairMaterial`](@ref)
 """
-contactPairMaterialPalette = readContactPairMaterialFromJSON( joinpath(Modia3D.path, "palettes", "contactPairMaterials.json") )
+const contactPairMaterialPalette = [readContactPairMaterialFromJSON( joinpath(Modia3D.path, "palettes", "contactPairMaterials.json") )]
 
-function rereadContactPairMaterialFromJSON()
-    global contactPairMaterialPalette = readContactPairMaterialFromJSON( joinpath(Modia3D.path, "palettes", "contactPairMaterials.json") )
+function rereadContactPairMaterialFromJSON(; file="")
+    if file == ""
+        file = joinpath(Modia3D.path, "palettes", "contactPairMaterials.json")
+    end
+    global contactPairMaterialPalette[1] = readContactPairMaterialFromJSON(file)
     return nothing
 end
 
@@ -154,11 +157,11 @@ function getContactPairMaterial(obj1, obj2)::Modia3D.AbstractContactPairMaterial
     name1 = obj1.feature.contactMaterial
     name2 = obj2.feature.contactMaterial
 
-    value = get(contactPairMaterialPalette, TwoNamesKey(name1,name2), NoContactPairMaterial())
+    value = get(contactPairMaterialPalette[1], TwoNamesKey(name1,name2), NoContactPairMaterial())
     if typeof(value) == NoContactPairMaterial
         # Combination name1,name2 is not present
-        value1 = get(contactPairMaterialPalette, TwoNamesKey(name1,name1), NoContactPairMaterial())
-        value2 = get(contactPairMaterialPalette, TwoNamesKey(name2,name2), NoContactPairMaterial())
+        value1 = get(contactPairMaterialPalette[1], TwoNamesKey(name1,name1), NoContactPairMaterial())
+        value2 = get(contactPairMaterialPalette[1], TwoNamesKey(name2,name2), NoContactPairMaterial())
         if typeof(value1) != NoContactPairMaterial && typeof(value2) != NoContactPairMaterial
             return combineContactPairMaterials(value1, value2)
         else
@@ -179,11 +182,11 @@ function checkContactPairMaterialInit(obj1, obj2)::Nothing
     name1 = obj1.feature.contactMaterial
     name2 = obj2.feature.contactMaterial
 
-    value = get(contactPairMaterialPalette, TwoNamesKey(name1,name2), NoContactPairMaterial())
+    value = get(contactPairMaterialPalette[1], TwoNamesKey(name1,name2), NoContactPairMaterial())
     if typeof(value) == NoContactPairMaterial
         # Combination name1,name2 is not present
-        value1 = get(contactPairMaterialPalette, TwoNamesKey(name1,name1), NoContactPairMaterial())
-        value2 = get(contactPairMaterialPalette, TwoNamesKey(name2,name2), NoContactPairMaterial())
+        value1 = get(contactPairMaterialPalette[1], TwoNamesKey(name1,name1), NoContactPairMaterial())
+        value2 = get(contactPairMaterialPalette[1], TwoNamesKey(name2,name2), NoContactPairMaterial())
         if typeof(value1) != NoContactPairMaterial && typeof(value2) != NoContactPairMaterial
             return nothing
         else

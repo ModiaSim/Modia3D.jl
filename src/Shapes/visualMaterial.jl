@@ -85,12 +85,20 @@ end
 Read a JSON file consisting of a dictionary of VisualMaterial instances from `fileName` and
 return a `Dict{String, VisualMaterial}` dictionary.
 """
-readDictOfStructsFromJSONVisualMaterial(fileName::AbstractString) = readDictOfStructsFromJSONVisualMaterial(fileName, VisualMaterial)
+readVisualMaterialFromJSON(fileName::AbstractString) = readDictOfStructsFromJSONVisualMaterial(fileName, VisualMaterial)
 
 
 """
-    const visualMaterialPalette
+    visualMaterialPalette
 
 Dictionary of visual material data, see [`Modia3D.Shapes.VisualMaterial`](@ref)
 """
-const visualMaterialPalette = readDictOfStructsFromJSONVisualMaterial( joinpath(Modia3D.path, "palettes", "visualMaterials.json") )
+visualMaterialPalette = readVisualMaterialFromJSON( joinpath(Modia3D.path, "palettes", "visualMaterials.json") )
+
+function rereadVisualMaterialFromJSON(; file="")
+    if file == ""
+        file = joinpath(Modia3D.path, "palettes", "visualMaterials.json")
+    end
+    global visualMaterialPalette = readVisualMaterialFromJSON( file )
+    return nothing
+end

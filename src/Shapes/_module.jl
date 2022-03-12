@@ -32,6 +32,7 @@ import JSON
 import Modia3D
 import Modia3D.Basics
 import Modia3D.Frames
+import Modia3D.Modia.OrderedCollections
 
 # Colors and material
 export rgb, defaultColor, colorPalette, visualMaterialPalette
@@ -53,7 +54,7 @@ export SolidMaterial
 export solidMaterial, solidMaterialPalette
 
 # Collision
-export rereadContactPairMaterialFromJSON
+export loadPalettes!, showPalettes
 export contactPairMaterialPalette, ElasticContactPairMaterial, TwoNamesKey
 export NoContactPairMaterial, ObserverContactPairMaterial, ImpulseContactPairMaterial, WheelRailContactPairMaterial
 export regularize, resultantCoefficientOfRestitution, resultantDampingCoefficient
@@ -86,5 +87,6 @@ include("massProperties.jl")
 include("contactPairMaterials.jl")
 include("setCollisionSmoothingRadius.jl")
 include("solid.jl")
+include("palettes.jl")
 
 end

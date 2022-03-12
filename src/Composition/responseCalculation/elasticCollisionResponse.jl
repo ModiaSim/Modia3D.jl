@@ -75,8 +75,11 @@ function contactStart(matPair::Shapes.ElasticContactPairMaterial,
     # Compute spring constant
     name1 = obj1.feature.contactMaterial
     name2 = obj2.feature.contactMaterial
-    mat1  = Shapes.solidMaterialPalette[name1]
-    mat2  = Shapes.solidMaterialPalette[name2]
+
+    solidMaterialPalette::Dict{String,Shapes.SolidMaterial} = Shapes.solidMaterialPalette[1]
+    mat1  = solidMaterialPalette[name1]
+    mat2  = solidMaterialPalette[name2]
+
     E1    = mat1.YoungsModulus
     E2    = mat2.YoungsModulus
     nu1   = mat1.PoissonsRatio

@@ -106,7 +106,7 @@ struct Solid{F <: Modia3D.VarFloatType} <: Modia3D.AbstractObject3DFeature
         end
 
         if typeof(solidMaterial) == String
-            solidMaterial = solidMaterialPalette[solidMaterial]
+            solidMaterial = solidMaterialPalette[1][solidMaterial]
         end
 
         if typeof(visualMaterial) == String

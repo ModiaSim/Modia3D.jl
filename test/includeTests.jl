@@ -1,5 +1,9 @@
 import Test
 
+Modia3D.loadPalettes!(solidMaterialPalette       = "$(Modia3D.path)/palettes/solidMaterials.json", 
+                      contactPairMaterialPalette = "$(Modia3D.path)/palettes/contactPairMaterials.json",
+                      visualMaterialPalette      = "$(Modia3D.path)/palettes/visualMaterials.json")                   
+                      
 Test.@testset "Basic" begin
     include(joinpath("Basic", "AllShapes.jl"))
     include(joinpath("Basic", "PendulumWithBar1.jl"))
