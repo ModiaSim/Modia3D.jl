@@ -76,7 +76,7 @@ function contactStart(matPair::Shapes.ElasticContactPairMaterial,
     name1 = obj1.feature.contactMaterial
     name2 = obj2.feature.contactMaterial
 
-    solidMaterialPalette::Dict{String,Shapes.SolidMaterial} = Shapes.solidMaterialPalette[1]
+    solidMaterialPalette::OrderedCollections.OrderedDict{String,Shapes.SolidMaterial} = Shapes.solidMaterialPalette[1]
     mat1  = solidMaterialPalette[name1]
     mat2  = solidMaterialPalette[name2]
 
