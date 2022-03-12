@@ -57,4 +57,13 @@ readSolidMaterialFromJSON(fileName::AbstractString) =
 Dictionary of solid material data, see [`SolidMaterial`](@ref)
 """
 const solidMaterialPalette =
-         readSolidMaterialFromJSON( joinpath(Modia3D.path, "palettes", "solidMaterials.json") )
+         [readSolidMaterialFromJSON( joinpath(Modia3D.path, "palettes", "solidMaterials.json") )]        
+
+function rereadSolidMaterialFromJSON(; file="")
+    if file == ""
+        file = joinpath(Modia3D.path, "palettes", "solidMaterials.json")
+    end
+    
+    global solidMaterialPalette[1] = readSolidMaterialFromJSON(file) 
+    return nothing
+end

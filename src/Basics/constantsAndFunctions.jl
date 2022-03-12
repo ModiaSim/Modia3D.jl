@@ -93,7 +93,7 @@ Read a JSON file from `fileName` and return a `Dict{String, StructType}` diction
 """
 function readDictOfStructsFromJSON(fileName, StructType)
     dict1 = JSON.parsefile(fileName)
-    palette = Dict{String, StructType}()
+    palette = OrderedCollections.OrderedDict{String, StructType}()
     for (key1,value1) in dict1
         obj = StructType()
         for (key2,value2) in value1

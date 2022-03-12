@@ -92,6 +92,7 @@ import Printf
 import Modia
 import TimerOutputs
 import MonteCarloMeasurements
+import Modia3D.Modia.OrderedCollections
 
 include(joinpath("joints", "object3DMotion.jl"))
 include("object3D.jl")

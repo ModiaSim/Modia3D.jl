@@ -68,7 +68,7 @@ MassProperties{F}(shape::Modia3D.AbstractGeometry, material::SolidMaterial) wher
 # Constructor d: shape and materialName is given, material must be defined in
 #                solidMaterialPalette --> constructor c is called
 MassProperties{F}(shape::Modia3D.AbstractGeometry, materialName::AbstractString) where F <: Modia3D.VarFloatType =
-                     MassProperties{F}(shape, solidMaterialPalette[materialName])
+                     MassProperties{F}(shape, solidMaterialPalette[1][materialName])
 
 
 createMassProperties(::Type{F}, massProperties::MassProperties, shape, solidMaterial) where F <: Modia3D.VarFloatType = massProperties
