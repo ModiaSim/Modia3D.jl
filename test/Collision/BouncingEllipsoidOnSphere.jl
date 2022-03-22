@@ -6,7 +6,7 @@ BouncingEllipsoid = Model3D(
     boxHeigth = 0.1,
     gravField = UniformGravityField(g=9.81, n=[0, -1, 0]),
     world = Object3D(feature=Scene(gravityField=:gravField,
-    mprTolerance=1.0e-19,
+    mprTolerance=1.0e-20,
                                    defaultFrameLength=0.2,
                                    enableContactDetection=true)),
     worldFrame = Object3D(parent=:world, feature=Visual(shape=CoordinateSystem(length=0.5))),

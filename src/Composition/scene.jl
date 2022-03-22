@@ -239,7 +239,7 @@ struct SceneOptions{F <: Modia3D.VarFloatType}
             gap                           = 0.001,
             enableVisualization           = true,
             animationFile                 = nothing,
-            provideAnimationHistory       = false, 
+            provideAnimationHistory       = false,
             visualizeFrames               = false,
             visualizeBoundingBox          = false,
             visualizeContactPoints        = false,
@@ -323,6 +323,7 @@ Defines global properties of the system, such as the gravity field. Exactly one 
 | `elasticContactReductionFactor` | 1.0  (> 0.0, <= 1.0)                    |
 | `maximumContactDamping`         | 2000.0                                  |
 | `mprTolerance`                  | 1.0e-20                                 |
+| `mprIterMax`                    | 120                                |
 | `visualizeFrames`               | false                                   |
 | `visualizeBoundingBox`          | false                                   |
 | `visualizeContactPoints`        | false                                   |
@@ -363,6 +364,8 @@ Defines global properties of the system, such as the gravity field. Exactly one 
 
 - `mprTolerance::1.0e-20`: Local tolerance used for terminating the mpr algorithm (that computes the distances between shapes). Changing this value might improve speed.
   For integrators with step-size control, a value is needed that is much smaller as the relative tolerance used for the integration.
+
+- `mprIterMax::120`: Local maximum amount of iterations used for mpr algorithm.  If more iterations are needed a message is printed.
 
 - `visualizeFrames::Bool`: = true, to visualize the coordinate system of every [Object3D](@ref) that is not explicitly switched off.
 
@@ -427,11 +430,11 @@ mutable struct Scene{F <: Modia3D.VarFloatType} <: Modia3D.AbstractScene
     AABB::Vector{Vector{Basics.BoundingBox{F}}}  # Bounding boxes of elements that can collide
     zStartIndex::Int                          # start index of collision zero crossing functions
     forceElements::Vector{Modia3D.AbstractForceElement}
-    provideAnimationData::Bool                # = true, if animation data shall be provided     
+    provideAnimationData::Bool                # = true, if animation data shall be provided
     exportAnimation::Bool                     # animation file export is enabled
     animation::Vector{animationStep}          # animation data of visible Object3Ds
     outputCounter::Int64                      # animation/visualization output step counter
-    
+
     # Data specific to a particular joint type
     revolute::Vector{Revolute{F}}
     prismatic::Vector{Prismatic{F}}
@@ -442,6 +445,7 @@ mutable struct Scene{F <: Modia3D.VarFloatType} <: Modia3D.AbstractScene
             useOptimizedStructure         = true,
             enableContactDetection        = true,
             mprTolerance                  = 1.0e-20,
+            mprIterMax                    = 120,
             elasticContactReductionFactor = F(1.0),
             maximumContactDamping         = F(2000),
             gap                           = 0.001,
@@ -465,7 +469,7 @@ mutable struct Scene{F <: Modia3D.VarFloatType} <: Modia3D.AbstractScene
 
         sceneOptions = SceneOptions{F}(gravityField = gravityField,
             useOptimizedStructure         = useOptimizedStructure,
-            contactDetection              = ContactDetectionMPR_handler{Modia3D.MPRFloatType, F}(tol_rel = mprTolerance),
+            contactDetection              = ContactDetectionMPR_handler{Modia3D.MPRFloatType, F}(tol_rel = mprTolerance, niter_max = mprIterMax),
             nVisualContSupPoints          = nVisualContSupPoints,
             gap                           = gap,
             enableContactDetection        = enableContactDetection,
@@ -476,7 +480,7 @@ mutable struct Scene{F <: Modia3D.VarFloatType} <: Modia3D.AbstractScene
             defaultFrameLength            = defaultFrameLength,
             enableVisualization           = enableVisualization,
             animationFile                 = animationFile,
-            provideAnimationHistory       = provideAnimationHistory,     
+            provideAnimationHistory       = provideAnimationHistory,
             visualizeFrames               = visualizeFrames,
             visualizeBoundingBox          = visualizeBoundingBox,
             visualizeContactPoints        = visualizeContactPoints,
@@ -524,7 +528,7 @@ mutable struct Scene{F <: Modia3D.VarFloatType} <: Modia3D.AbstractScene
             Vector{Vector{Basics.BoundingBox{F}}}[],
             1,
             Vector{Modia3D.AbstractForceElement}[],
-            provideAnimationData,            
+            provideAnimationData,
             exportAnimation,
             Vector{animationStep}[],
             0,
