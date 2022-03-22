@@ -149,12 +149,7 @@ function tetrahedronEncloseOrigin(r0::SupportPoint, r1::SupportPoint,
         break
     end
     if success != true
-        if niter_max < 100
-            @warn("MPR (phase 2): Max. number of iterations (= $niter_max) is reached. niter_max increased locally by 10 and phase 2 is rerun. Look at $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)).")
-            tetrahedronEncloseOrigin(r0, r1org, r2org, r3org, niter_max + 10, shapeA, shapeB, scale)
-        else
-            error("MPR (phase 2): Max. number of iterations (= $niter_max) is reached and $niter_max > 100, look at $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)).")
-        end
+        error("MPR (phase 2): Max. number of iterations (mprIterMax = $niter_max) is reached. Please, increase mprIterMax. Look at shapes: $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)).")
     end
     return (r1, r2, r3)
 end
