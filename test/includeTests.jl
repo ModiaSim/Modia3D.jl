@@ -1,9 +1,9 @@
 import Test
 
-Modia3D.loadPalettes!(solidMaterialPalette       = "$(Modia3D.path)/palettes/solidMaterials.json", 
+Modia3D.loadPalettes!(solidMaterialPalette       = "$(Modia3D.path)/palettes/solidMaterials.json",
                       contactPairMaterialPalette = "$(Modia3D.path)/palettes/contactPairMaterials.json",
-                      visualMaterialPalette      = "$(Modia3D.path)/palettes/visualMaterials.json")                   
-                      
+                      visualMaterialPalette      = "$(Modia3D.path)/palettes/visualMaterials.json")
+
 Test.@testset "Basic" begin
     include(joinpath("Basic", "AllShapes.jl"))
     include(joinpath("Basic", "PendulumWithBar1.jl"))
@@ -72,6 +72,10 @@ Test.@testset "Collision" begin
         include(joinpath("Collision", "BouncingBeams.jl"))
         Test.@test_skip  include(joinpath("Collision", "CollidingSphereWithBunnies.jl"))   # Error on Linux too large
         include(joinpath("Collision", "Billard4Balls.jl"))
+        Test.@test_throws LoadError include(joinpath("Collision", "OrthogonalLinesError.jl"))  # orthogonal lines moving until r_abs is NaN
+        Test.@test_throws LoadError include(joinpath("Collision", "ParallelLinesError.jl"))  # MPR 2D not implemented
+        Test.@test_throws LoadError include(joinpath("Collision", "PlaneVsPlaneEdgesError.jl"))  # MPR 2D not implemented
+        Test.@test_throws LoadError include(joinpath("Collision", "PlaneVSPointError.jl"))  # MPR 2D not implemented
     end
     if testsExtend == completeTests
         include(joinpath("Collision", "Billard16Balls.jl"))  # long computation time
