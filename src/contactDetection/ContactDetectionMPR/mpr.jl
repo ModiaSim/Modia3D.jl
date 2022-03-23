@@ -81,19 +81,19 @@ function checkIfShapesArePlanar(r0::SupportPoint,r1::SupportPoint,r2::SupportPoi
     n3 = cross(r1.p-r0.p, r2.p-r0.p)
     neps = Modia3D.nepsType(T)
     # the triangle r0-r1-r2 has degenerated into a line segment
+    # println("norm(n3) = ", norm(n3))
     if norm(n3) <= neps
         # change search direction for r2
         # because we are still interested in distances if shapes are not intersecting
         n2 = -n2
         r2 = getSupportPoint(shapeA, shapeB, n2)
-        if abs(dot((r2.p-r1.p),n2)) <= neps
+        n3 = cross(r1.p-r0.p, r2.p-r0.p)  # new normal to the triangle plane (r0-r1-r2_new)
+        if norm(n3) <= neps
             # Shape is purely planar. Computing the shortest distance for a planar shape
             # requires an MPR 2D algorithm (using lines instead of triangles as portals).
             # However, this is not implemented and therefore the shortest distance cannot be computed
-            error("MPR: Shapes are planar and MPR2D is not supported. abs(dot((r2.p-r1.p),n2)). Look at $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)).")
+            error("MPR: Shapes are planar and MPR2D is not supported. norm(cross(r1.p-r0.p, r2.p-r0.p)). Look at $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)).")
         end
-        # new normal to the triangle plane (r0-r1-r2_new)
-        n3 = cross(r1.p-r0.p, r2.p-r0.p)   # |n3| > 0 guaranteed, due to construction
     end
 
     if dot(n3,r0.p) >= 0.0
@@ -103,14 +103,15 @@ function checkIfShapesArePlanar(r0::SupportPoint,r1::SupportPoint,r2::SupportPoi
     # check if portal triangle r1-r2-r3 has degenerated into a line segment <--> points r1,r2,r3 are on the same line
     r3 = getSupportPoint(shapeA, shapeB, Basics.normalizeVector(n3))
     n3b = cross(r2.p-r1.p, r3.p-r1.p)
+    # println("norm(n3b) = ", norm(n3b))
     if norm(n3b) <= neps
         # change search direction for r3
         r3 = getSupportPoint(shapeA, shapeB, -r3.n)
-        if abs(dot((r3.p-r1.p),r3.n)) <= neps
+        if norm(cross(r2.p-r1.p, r3.p-r1.p)) <= neps
             # Shape is purely planar. Computing the shortest distance for a planar shape
             # requires an MPR 2D algorithm (using lines instead of triangles as portals).
             # However, this is not implemented and therefore the shortest distance cannot be computed
-            error("MPR: Shapes are planar and MPR2D is not supported. r1, r2, r3 are on the same ray. abs(dot((r3.p-r1.p),r3.n)) <= neps. Look at $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)).")
+            error("MPR: Shapes are planar and MPR2D is not supported. r1, r2, r3 are on the same ray. norm(cross(r2.p-r1.p, r3.p-r1.p)) <= neps. Look at $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)).")
         end
     end
 
@@ -162,15 +163,16 @@ function constructR4(r0::SupportPoint,r1::SupportPoint,r2::SupportPoint,r3::Supp
     r4 = SupportPoint{T}
     n4 = cross(r2.p-r1.p, r3.p-r1.p)
     neps = Modia3D.nepsType(T)
+    # println("norm(n4) = ", norm(n4))
     if norm(n4) <= neps
         r3 = getSupportPoint(shapeA, shapeB, -r3.n, scale=scale) # change search direction
-        if abs(dot((r3.p-r1.p),r3.n)) <= neps
+        n4 = cross(r2.p-r1.p, r3.p-r1.p)
+        if norm(n4) <= neps
             # Shape is purely planar. Computing the shortest distance for a planar shape
             # requires an MPR 2D algorithm (using lines instead of triangles as portals).
             # However, this is not implemented and therefore the shortest distance cannot be computed
-            error("MPR: Shapes are planar and MPR2D is not supported. abs(dot((r3.p-r1.p),r3.n)). Look at $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)).")
+            error("MPR: Shapes are planar and MPR2D is not supported. norm(n4). Look at $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)).")
         end
-        n4 = cross(r2.p-r1.p, r3.p-r1.p)   # |n4| > 0 guaranteed, due to construction
     end
     if dot(n4,r0.p) >= 0.0
         n4 = -n4
@@ -244,6 +246,7 @@ function finalTC3(r0::SupportPoint{T}, r1::SupportPoint{T}, r2::SupportPoint{T},
     (r4p, distance) = signedDistanceToPortal(r0.p, r1.p, r2.p, r3.p)
     r4 = SupportPoint{T}(r4p, r4.n, r4.a, r4.b)
     r4 = barycentric(r1, r2, r3, r4)
+    #println("distance ", distance)
     return distance, r1, r2, r3, r4
 end
 
@@ -368,6 +371,13 @@ function mprGeneral(ch::Composition.ContactDetectionMPR_handler{T,F}, shapeA::Co
     # the direction of the origin ray r0 is -r0.p
     centroidA = getCentroid(shapeA)
     centroidB = getCentroid(shapeB)
+    if isnan(centroidA[1]) || isnan(centroidA[2]) || isnan(centroidA[3]) || isnan(centroidB[1]) || isnan(centroidB[2]) || isnan(centroidB[3])
+        println("shapeA.r_abs ", shapeA.r_abs)
+        println("shapeA.R_abs ", shapeA.R_abs)
+        println("shapeB.r_abs ", shapeB.r_abs)
+        println("shapeB.R_abs ", shapeB.R_abs)
+        error("MPR: One of the absolute position or translation is NaN.")
+    end
     r0 = SupportPoint{T}(centroidA-centroidB, -(centroidA-centroidB), SVector{3,T}(0.0,0.0,0.0), SVector{3,T}(0.0,0.0,0.0))
     # check if centers of shapes are overlapping
     checkCentersOfShapesOverlapp(r0, shapeA, shapeB)
@@ -381,6 +391,7 @@ function mprGeneral(ch::Composition.ContactDetectionMPR_handler{T,F}, shapeA::Co
     ### Phase 1.3: construction of initial r2 ###
     n2 = cross(r0.n, r1.p)
     n2abs = norm(n2)
+    # println("norm(n2) = ", norm(n2))
     ## TERMINATION CONDITION 1 ##
     if n2abs <= neps
         # r0 || r1, r0 ist parallel zu r1
@@ -389,6 +400,7 @@ function mprGeneral(ch::Composition.ContactDetectionMPR_handler{T,F}, shapeA::Co
         # e.g. any collision/or distance between two spheres
         #println("TC 1")
         distance = dot(r1.p,normalize(r0.p))
+        #println("distance ", distance)
         return (distance, r1.a, r1.b, r1.n, false, Modia3D.ZeroVector3D(T), Modia3D.ZeroVector3D(T), Modia3D.ZeroVector3D(T), Modia3D.ZeroVector3D(T), Modia3D.ZeroVector3D(T), Modia3D.ZeroVector3D(T) )
     else
         # normalize n2
