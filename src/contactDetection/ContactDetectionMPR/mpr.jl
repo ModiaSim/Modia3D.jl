@@ -133,13 +133,13 @@ function tetrahedronEncloseOrigin(r0::SupportPoint{T}, r1::SupportPoint{T},
     success = false
     for i in 1:niter_max
         aux = cross(r1.p-r0.p,r3.p-r0.p)
-        if dot(aux,r0.n) < -neps
+        if dot(aux,r0.p) > neps
             r2 = r3
             r3 = getSupportPoint(shapeA,shapeB,Basics.normalizeVector(aux), scale=scale)
             continue
         end
         aux = cross(r3.p-r0.p,r2.p-r0.p)
-        if dot(aux,r0.n) < -neps
+        if dot(aux,r0.p) > neps
             r1 = r3
             r3 = getSupportPoint(shapeA,shapeB,Basics.normalizeVector(aux), scale=scale)
             continue
