@@ -244,6 +244,19 @@ function finalTC3(r0::SupportPoint{T}, r1::SupportPoint{T}, r2::SupportPoint{T},
 end
 
 
+function terminateMPR(r0::SupportPoint{T}, r1::SupportPoint{T}, r2::SupportPoint{T},
+                      r3::SupportPoint{T}, r4::SupportPoint{T}, isTC2::Bool, isTC3::Bool)::Tuple{T, SupportPoint{T}, SupportPoint{T}, SupportPoint{T}, SupportPoint{T}} where {T}
+    if isTC2
+        (distance,r1,r2,r3,r4) = finalTC2(r1, r2, r3, r4)
+        return distance, r1, r2, r3, r4
+    end
+    if isTC3
+        (distance,r1,r2,r3,r4) = finalTC3(r0, r1, r2, r3, r4)
+        return distance, r1, r2, r3, r4
+    end
+end
+
+
 function phase3(r0::SupportPoint{T}, r1::SupportPoint{T}, r2::SupportPoint{T}, r3::SupportPoint{T}, niter_max::Int64, tol_rel::T, shapeA::Composition.Object3D{F}, shapeB::Composition.Object3D{F}, scale::T) where {T,F}
     r1org = r1
     r2org = r2
@@ -268,13 +281,11 @@ function phase3(r0::SupportPoint{T}, r1::SupportPoint{T}, r2::SupportPoint{T}, r
         TC3 = abs(dot(r4.p-r1.p, r4.n)) # TC3
         ## TERMINATION CONDITION 2 ##
         if TC2 < tol_rel
-            (distance,r1,r2,r3,r4) = finalTC2(r1,r2,r3,r4)
-            return distance, r1, r2, r3, r4
+            return finalTC2(r1,r2,r3,r4)
 
         ## TERMINATION CONDITION 3 ##
         elseif TC3 < tol_rel
-            (distance,r1,r2,r3,r4) = finalTC3(r0, r1, r2, r3, r4)
-            return distance, r1, r2, r3, r4
+            return finalTC3(r0, r1, r2, r3, r4)
         else
             if TC2 < new_tol
                 new_tol = TC2
@@ -302,26 +313,11 @@ function phase3(r0::SupportPoint{T}, r1::SupportPoint{T}, r2::SupportPoint{T}, r
 
         if !nextPortal # createBabyTetrahedrons failed
             @warn("MPR (phase 3): Numerical issues with distance computation between $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)). tol_rel increased locally for this computation to $new_tol.")
-            if isTC2
-                (distance,r1,r2,r3,r4) = finalTC2(r1_new,r2_new,r3_new,r4_new)
-                return distance, r1, r2, r3, r4
-            end
-            if isTC3
-                (distance,r1,r2,r3,r4) = finalTC3(r0, r1_new, r2_new, r3_new, r4_new)
-                return distance, r1, r2, r3, r4
-            end
+            return terminateMPR(r0, r1_new, r2_new, r3_new, r4_new, isTC2, isTC3)
         end
     end
     @warn("MPR (phase 3): Max. number of iterations (mprIterMax = $niter_max) is reached. Please, increase mprIterMax. tol_rel increased locally for this computation to $new_tol. Look at shapes $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)).")
-    if isTC2
-        (distance,r1,r2,r3,r4) = finalTC2(r1_new,r2_new,r3_new,r4_new)
-        return distance, r1, r2, r3, r4
-    end
-    if isTC3
-        (distance,r1,r2,r3,r4) = finalTC3(r0, r1_new, r2_new, r3_new, r4_new)
-        return distance, r1, r2, r3, r4
-    end
-    return distance, r1, r2, r3, r4 # needed for a unique return type
+    return terminateMPR(r0, r1_new, r2_new, r3_new, r4_new, isTC2, isTC3)
 end
 
 # MPR - Minkowski Portal Refinement algorithm
