@@ -129,7 +129,9 @@ end
 """
     ModelicaShape(; type=1, lengthX=1.0, lengthY=1.0, lengthZ=1.0, extra=[0.0, 0.0, 0.0])
 
-Generate a new visual shape according to the [Modelica](https://modelica.org) [Visualization Library](https://www.systemcontrolinnovationlab.de/the-dlr-visualization-library/).
+Generate a new visual shape according to the
+[Modelica.Mechanicis.MultiBody.Visualizers.Advanced.Shape](https://doc.modelica.org/Modelica%204.0.0/Resources/helpDymola/Modelica_Mechanics_MultiBody_Visualizers_Advanced.html#Modelica.Mechanics.MultiBody.Visualizers.Advanced.Shape)
+model of the [Modelica Standard Library](https://github.com/modelica/ModelicaStandardLibrary).
 
 # Arguments
 - `type` defines the type of the shape: 1=box; 2=sphere; 3=cylinder; 4=cone; 5=capsule; 6=coordinate system;
@@ -141,7 +143,7 @@ Generate a new visual shape according to the [Modelica](https://modelica.org) [V
 
 # Notes
 - ModelicaShape is intended for import of Modelica models and not for Modia3D models.
-- ModelicaShape is [not supported by animation export](https://github.com/ModiaSim/PrivateModia3D.jl/issues/77).
+- ModelicaShape is [not yet supported by animation export](https://github.com/ModiaSim/PrivateModia3D.jl/issues/77).
 """
 mutable struct ModelicaShape <: Modia3D.AbstractShape
     type::Int

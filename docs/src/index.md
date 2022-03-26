@@ -21,33 +21,33 @@ julia> ]add Modia3D
 
 It is advised to also install Modia and at least one Modia plot package (for details see [Installation of Modia](https://modiasim.github.io/Modia.jl/stable/#Installation)).
 
-Note, Modia3D reexports the following definitions 
+Note, Modia3D reexports the following definitions
 
 - `using Modia`
 - `using Unitful`
 - `using DifferentialEquations`
 - and exports functions `CVODE_BDF` and `IDA` of [Sundials.jl](https://github.com/SciML/Sundials.jl).
 
-As a result, it is usually sufficient to have `using Modia3D` in a model to utilize the relevant 
+As a result, it is usually sufficient to have `using Modia3D` in a model to utilize the relevant
 functionalities of these packages.
 
 Modia3D has various *3D animation features*:
 
 - With `world = Object3D(feature=Scene(animationFile="filename.json"))` the animation produced during a simulation run
   is exported in [three.js JSON Object Scene format](https://github.com/mrdoob/three.js/wiki/JSON-Object-Scene-format-4).
-  The generated file can be imported into the open source web app [three.js editor](https://threejs.org/editor/) and 
-  use all the features of three.js, for example to export in the widely used glb format (the binary version of the [glTF](https://www.khronos.org/gltf/) format) 
+  The generated file can be imported into the open source web app [three.js editor](https://threejs.org/editor/) and
+  use all the features of three.js, for example to export in the widely used glb format (the binary version of the [glTF](https://www.khronos.org/gltf/) format)
   and use any glb viewer (for example 3D-Viewer of Windows).
 
-- With the default option `world = Object3D(feature=Scene(enableVisualization=true))` the 
+- With the default option `world = Object3D(feature=Scene(enableVisualization=true))` the
   [DLR Visualization Library](https://www.systemcontrolinnovationlab.de/the-dlr-visualization-library/)
-  (see the many examples from various research and industrial projects) is used, if installed, for 
+  (see the many examples from various research and industrial projects) is used, if installed, for
   online animation (during simulation), replays (after simulation), and the generation of mpg4-videos.
   This library is available as *(free) Community Edition* and as *(commercial) Professional Edition*
   ([Web page to request download of DLR Visualization Library](https://visualization.ltx.de/)).
   After download, make the library available in the following way:
-  - Set Julia environment variable `ENV["DLR_VISUALIZATION"] = "<path-to-library>/Visualization/Extras/SimVis"` 
-    or add it to the [Julia startup.jl file](https://github.com/ModiaSim/Modia3D.jl/wiki/Template-for-startup.jl). 
+  - Set Julia environment variable `ENV["DLR_VISUALIZATION"] = "<path-to-library>/Visualization/Extras/SimVis"`
+    or add it to the [Julia startup.jl file](https://github.com/ModiaSim/Modia3D.jl/wiki/Template-for-startup.jl).
     *Make sure that the SimVis executable under this directory has execution rights.*
     For example in Linux with command: `chmod ug+x <path-to-library>/Visualization/Extras/SimVis/linux/SimVis`
 
@@ -68,6 +68,33 @@ Modia3D has various *3D animation features*:
 
 
 ## Release Notes
+
+### Version 0.10.2
+
+- Model3D(..) with no degrees of freedom is now supported (previously, an error was triggered).
+
+- Massless solid is now supported (previously, an error was triggered if Solid(..) had zero mass).
+
+- SolidMaterial, MassProperties, VisualMaterial in Solid(..) and VisualMaterial in Visual(..) improved to handle corner cases:
+  - SolidMaterial=="" is treated as SolidMaterial = nothing
+  - VisualMaterial=="" is treated as Shapes.VisualMaterial(), that is the default VisualMaterial.
+  - massProperties==nothing && solidMaterial==nothing is treated as MassProperties(), that is as massless solid.
+
+- Error message improved, if closed kinematic loop is detected. Especially, the names of all Object3Ds in the kinematic loop are printed.
+
+- Error message improved, if no Scene is defined.
+
+- solid(..., contactSphereRadius::Union{Nothing,FloatType}=xxx) improved:
+  - changed to contactSphereRadius::Union{Nothing,Number} (e.g. Int is also allowed).
+  - contactSphereRadius <= 0 is the same as contactSphereRadius = nothing.
+
+- Removed keyword "path" from the docu of Prismatic, Revolute, FreeMotion, since not to be set by the user (path is set when calling Model3D(..) to store the absolute path name in the joint).
+
+- New function `loadPalettes!`. Example:
+  `Modia3D.loadPalettes!(solidMaterialPalette = "file1.json", contactPairMaterialPalette = "file2.json",
+                         visualMaterialPalette = "file3.json", log=true)`
+  to use the palettes from the provided files instead of the default palettes from `Modia3D/palettes/*.json`.
+
 
 ### Version 0.10.1
 
@@ -91,7 +118,7 @@ The effect on Modia3D is:
 
 - Modia3D is removed from Modia (so when a model is using Modia3D, the package must be explicitly imported
   and is no longer automatically imported from Modia).
-  
+
 - In user models, all references to ModiaBase and to ModiaLang should be replaced by Modia
   (otherwise, it is highly likely that the model does not longer compile and/or simulate).
 
@@ -107,10 +134,10 @@ The effect on Modia3D is:
 **Non-backwards compatible changes**:
 
 - Operator `buildModia3D(..)` is removed. Instead, the new constructor `Model3D(..)` must be used at the top level of a
-  Modia3D definition. It is now possible to define several, independent multibody systems 
+  Modia3D definition. It is now possible to define several, independent multibody systems
   (currently, only one of them can have animation and animation export).
 - If init/start vectors are defined (e.g. initial state of a FreeMotion joint), they must be defined as SVector{3,Float64}(..).
-  Otherwise, errors occur during compilation. 
+  Otherwise, errors occur during compilation.
 
 Other changes
 
