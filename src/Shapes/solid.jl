@@ -88,7 +88,7 @@ struct Solid{F <: Modia3D.VarFloatType} <: Modia3D.AbstractObject3DFeature
         collisionSmoothingRadius=F(0.001),
         visualMaterial::Union{Shapes.VisualMaterial,AbstractString,Nothing} = Shapes.VisualMaterial(),
         visualMaterialConvexDecomposition::Union{Shapes.VisualMaterial,AbstractString,Nothing} = Shapes.VisualMaterial(),
-        contactSphereRadius::Union{Nothing, F} = nothing) where F <: Modia3D.VarFloatType
+        contactSphereRadius::Union{Nothing, Number} = nothing) where F <: Modia3D.VarFloatType
 
         if collision && isnothing(shape)
             error("For collision/gripping simulations, a shape must be defined.")
@@ -119,6 +119,7 @@ struct Solid{F <: Modia3D.VarFloatType} <: Modia3D.AbstractObject3DFeature
         end
 
         massProperties = createMassProperties(F, massProperties, shape, solidMaterial)
+        contactSphereRadius::Union{Nothing,F} = isnothing(contactSphereRadius) || F(contactSphereRadius) <= F(0) ? nothing : F(contactSphereRadius)
         (isFlat, contactSphereRadius) = setContactSphereRadius(shape, contactSphereRadius, F)
         new(shape, solidMaterial, massProperties, collision, contactMaterial, setCollisionSmoothingRadius(shape, F(collisionSmoothingRadius)), visualMaterial, isFlat, contactSphereRadius)
     end
