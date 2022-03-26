@@ -1,7 +1,7 @@
 authors = ["Andrea Neumayr <andrea.neumayr@dlr.de>", "Martin Otter <Martin.Otter@dlr.de>", "Gerhard Hippmann <gerhard.hippmann@dlr.de>"]
 name = "Modia3D"
 uuid = "07f2c1e0-90b0-56cf-bda7-b44b56e34eed"
-version = "0.10.1"
+version = "0.10.2"
 
 [compat]
 Colors = "0.12, 0.11, 0.10"

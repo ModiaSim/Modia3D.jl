@@ -36,8 +36,8 @@ end
 """
     Object3D(;
         parent      = nothing,
-        translation = Modia3D.ZeroVector3D(F),
-        rotation    = Modia3D.ZeroVector3D(F),
+        translation = [0.0, 0.0, 0.0],
+        rotation    = [0.0, 0.0, 0.0],
         feature     = nothing)
 
 Generate a new Object3D object, that is a coordinate system (= frame, object3D) with associated feature that is described relatively to its (optional) parent Object3D.
@@ -46,7 +46,7 @@ Generate a new Object3D object, that is a coordinate system (= frame, object3D) 
 
 All arguments have default values. Thus, not all arguments must be defined.
 
-- `parent`: Parent Object3D. If `parent` is present, the Object3D is defined relatively to the parent. If `parent` is not present, the Object3D is either a reference object (such as the world-Object3D), or the object is connected later with a joint to another Object3D.
+- `parent`: Parent Object3D. If `parent` is present, the Object3D is defined relatively to the parent. If `parent` is not present, the Object3D is either the world-Object3D, or the object is connected later with a joint to another Object3D.
 
 - `translation`: Vector from the origin of the parent to the origin of the Object3D, resolved in the parent coordinate system in [m].
   - Example: `translation = [0.0, 0.5, 0.0]` is a relative translation of 0.5 m in y-direction of the parent. If nothing is defined, the default value (= no translation) is taken.
@@ -55,7 +55,7 @@ All arguments have default values. Thus, not all arguments must be defined.
   - Example: `rotation = [0.0, pi/2, 0.0]` or `rotation = [0.0, 90u"°", 0.0]` defines that a rotation around the y-axis of the parent coordinate system with 90 degrees arrives at the Object3D. If nothing is defined, the default value (= no rotation) is taken.
 
 - `feature`: Defines the (optional) property associated with the Object3D by a constructor call. Supported constructors:
-    - `Scene`: A [Scene](@ref) feature marks the root (world, origin) Object3D. It has no parent Object3D and allows to define global properties, such as the gravity field.
+    - `Scene`: A [Scene](@ref) feature marks the root Object3D (world, origin, inertial system). It has no parent Object3D and allows to define global properties, such as the gravity field.
     - `Visual`: A [Visual](@ref) feature defines a shape used for visualization.
     - `Solid`: A [Solid](@ref) feature defines the solid properties of an Object3D, like mass, inertia tensor, collision behavior.
     - `nothing`: No feature is associated with the Object3D. This might be useful for helper Object3Ds, for example to mark a point on a shape and connecting it later via a revolute joint.
@@ -63,7 +63,9 @@ All arguments have default values. Thus, not all arguments must be defined.
 # Example
 
 ```julia
-model = Model(
+using Modia3D
+
+model = Model3D(
     world      = Object3D(feature = Scene()),
     worldFrame = Object3D(parent  = :world,
                           feature = Visual(shape=CoordinateSystem())),

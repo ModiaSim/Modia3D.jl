@@ -30,21 +30,23 @@ gravityAcceleration(grav::NoGravityField, r_abs::SVector{3,F}) where F <: Modia3
 
 
 """
-    UniformGravityField(;g=9.81, n=[0,-1,0])
+    UniformGravityField(; g = 9.81,
+                          n = [0,-1,0])
 
 Generate an instance of type `UniformGravityField` that defines
 a uniform gravity field with gravitational acceleration `g` in
-direction `n`.
+direction `n`. The default value is a gravity of 9.81 m/s^2 in negative
+direction of the y-axis of the root (world) Object3D.
 
 # Arguments
-- `g::Float64`: Gravitational acceleration
+- `g::Float64`: Gravitational acceleration in m/s^2.
 - `n::AbstractVector`: Direction of gravitational acceleration
 
 # Example
 ```julia
-import Modia3D
+using Modia3D
 
-grav = Modia3D.Composition.UniformGravityField()
+grav = UniformGravityField()
    r = Modia3D.EarthRadius
    g = gravityAcceleration(grav,r)  # g is independent of r
 ```
@@ -66,7 +68,7 @@ const EarthRadius = 6.3781e6     # [m]           Radius of earth (https://en.wik
 
 
 """
-    PointGravityField([mass|;mue=G*EarthMass])
+    PointGravityField([mass|; mue = G*EarthMass])
 
 Generate an instance of type `PointGravityField` that defines
 a point gravity field of `mass` or gravity field constant `mue`.
@@ -76,11 +78,11 @@ from world.
 
 # Example
 ```julia
-import Modia3D
+using Modia3D
 
-grav = Modia3D.PointGravityField()   # Gravity field of earth
+grav = PointGravityField()   # Gravity field of earth
    r = Modia3D.EarthRadius
-   g = gravityAcceleration(grav,r)  # g is singular at r=0
+   g = gravityAcceleration(grav,r)  # g is a function of r.
 ```
 """
 struct PointGravityField <: Modia3D.AbstractGravityField
@@ -306,18 +308,17 @@ end
 """
     Scene(; kwargs...)
 
-Defines global properties of the system, such as the gravity field. Exactly one [Object3D](@ref) must have a `Scene` feature defined. This Object3D is used as inertial system (world, root) and is not allowed to have a parent Object3D.
+Defines global properties of the system, such as the gravity field. Exactly one [Object3D](@ref) must have a `Scene` feature defined. This Object3D is used as root Object3D (world, origin, inertial system) and is not allowed to have a parent Object3D.
 
 | Keyword arguments               | defaults                                |
 |:--------------------------------|:----------------------------------------|
-| `gravityField`                  | [`UniformGravityField`](@ref)`()`       |
-| `useOptimizedStructure`         | true                                    |
-| `enableContactDetection`        | true                                    |
-| `mprTolerance`                  | 1.0e-20                                 |
-| `elasticContactReductionFactor` | 1.0     (<= 1.0 required)               |
-| `maximumContactDamping`         | 2000.0                                  |
+| `gravityField`                  | UniformGravity(g=9.81, n=[0,-1,0])      |
 | `enableVisualization`           | true                                    |
-| `animationFile`                 | nothing                                 |
+| `animationFile`                 | nothing (e.g. animationFile = "animation.json") |
+| `enableContactDetection`        | true                                    |
+| `elasticContactReductionFactor` | 1.0  (> 0.0, <= 1.0)                    |
+| `maximumContactDamping`         | 2000.0                                  |
+| `mprTolerance`                  | 1.0e-20                                 |
 | `visualizeFrames`               | false                                   |
 | `visualizeBoundingBox`          | false                                   |
 | `visualizeContactPoints`        | false                                   |
@@ -332,6 +333,7 @@ Defines global properties of the system, such as the gravity field. Exactly one 
 | `lightDistance`                 | 10.0*`nominalLength`                    |
 | `lightLongitude`                | 60/180*pi                               |
 | `lightLatitude`                 | 45/180*pi                               |
+| `useOptimizedStructure`         | true                                    |
 
 
 # Arguments
@@ -340,20 +342,23 @@ Defines global properties of the system, such as the gravity field. Exactly one 
    - [`UniformGravityField`](@ref),
    - [`PointGravityField`](@ref)
 
-- `useOptimizedStructure::Bool`: = true, if pre-processing the whole system. For example, computing the common mass, common center of mass and common inertia tensor of all rigidly connected Object3Ds that have mass properties.
-
-- `enableContactDetection::Bool`: = true, if contact detection is enable, see [Collision Handling](@ref).
-
-- `mprTolerance::1.0e-20`: Local tolerance used for terminating the mpr algorithm. Changing this value might improve speed.
-
-- `elasticContactReductionFactor::Float64`: (> 0.0)
-  - ``usedContactCompliance = contactCompliance * elasticContactReductionFactor``
-
-- `maximumContactDamping`: Maximum damping factor for elastic contacts
-
 - `enableVisualization::Bool`: = true, to enable online animation with DLR SimVis. If SimVis is not installed, this flag has no effect.
 
-- `animationFile::String`: only if a valid path and name of the animation file is set (it must be a .json file) a json file is exported
+- `animationFile::String`: After termination of the simulation, store animation in json-file that can be imported into
+  the open source 3D editor [threejs.org](https://threejs.org/).
+  Example: `animationFile = "animation.json"`.
+
+- `enableContactDetection::Bool`: = true, if contact detection is enabled, see [Collision Handling](@ref).
+
+- `elasticContactReductionFactor::Float64` (> 0.0, <= 1.0):
+  `usedContactCompliance = contactCompliance * elasticContactReductionFactor`.
+  For more details, see [Material constants](@ref).
+
+- `maximumContactDamping` (> 0.0): Maximum damping factor for elastic contacts.
+  For more details, see [Damping coefficient](@ref).
+
+- `mprTolerance::1.0e-20`: Local tolerance used for terminating the mpr algorithm (that computes the distances between shapes). Changing this value might improve speed.
+  For integrators with step-size control, a value is needed that is much smaller as the relative tolerance used for the integration.
 
 - `visualizeFrames::Bool`: = true, to visualize the coordinate system of every [Object3D](@ref) that is not explicitly switched off.
 
@@ -382,6 +387,8 @@ Defines global properties of the system, such as the gravity field. Exactly one 
 - `lightLongitude::Float64`: longitude angle of light position (0 = -y/-z/-x direction)
 
 - `lightLatitude::Float64`: latitude angle of light position (0 = horizontal)
+
+- `useOptimizedStructure::Bool`: = true, if pre-processing the whole system. For example, computing the common mass, common center of mass and common inertia tensor of all rigidly connected Object3Ds that have mass properties.
 """
 mutable struct Scene{F <: Modia3D.VarFloatType} <: Modia3D.AbstractScene
     name::String                              # model name

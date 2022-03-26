@@ -1,12 +1,12 @@
 """
-    Solid(; shape = nothing,
-            solidMaterial = nothing,
-            massProperties = nothing,
-            collision = false,
+    Solid(; shape           = nothing,
+            solidMaterial   = nothing,
+            massProperties  = nothing,
+            visualMaterial  = VisualMaterial(),
+            collision       = false,
             contactMaterial = "",
             collisionSmoothingRadius = 0.001,
-            contactSphereRadius = nothing,
-            visualMaterial = VisualMaterial())
+            contactSphereRadius      = nothing)
 
 Generate a [Solid](@ref) with physical behavior of a rigid body with mass, visualization and collision properties.
 `Solid` is used as `feature` of an [Object3D](@ref).
@@ -19,25 +19,32 @@ Generate a [Solid](@ref) with physical behavior of a rigid body with mass, visua
 - `solidMaterial`: Defines the material of the solid used for mass properties computation and (if `contactMaterial` is
     undefined) contact force calculation. A pre-defined [Solid material](@ref) from palettes/solidMaterials.json (e.g.
     `"Steel"`) or a user-defined [Solid material](@ref) (e.g. `SolidMaterial(density=7850)`) can be used.
+    `solidMaterial = ""` is treated as `solidMaterial = nothing`.
 
-- `massProperties`: Defines the mass properties of the solid. If `massProperties` is undefined, the mass properties are
-    computed from `shape` and `solidMaterial`. It is also possible to define only the mass of the solid and compute the
-    center of mass and inertia tensor from `shape` (e.g. `MassPropertiesFromShapeAndMass(mass=4.5)`) or explicitly
-    define all mass properties (e.g. `MassProperties(mass=4.5, centerOfMass=[1.0,2.0,3.0], Ixx=4.0, Iyy=5.0, Izz=6.0,
-    Ixy=4.5, Ixz=4.6, Iyz=5.5)`). 
+- `massProperties`: Defines the mass properties of the solid.
+  - `massProperties = nothing`: The mass properties are computed from `shape` and `solidMaterial`.
+    If additionally `solidMaterial = nothing`, the solid is treated as massless.
+  - `massProperties = MassProperties(; mass=0.0, centerOfMass=[0.0,0.0,0.0], Ixx=0.0, Iyy=0.0, Izz=0.0)
+    Ixy=4.5, Ixz=4.6, Iyz=5.5)`: Defines all mass properties explicitly
+    `MassProperties()` defines a massless solid.
+  - `massProperties = MassPropertiesFromShapeAndMass(; mass=0.0)`:
+    The center of mass and the inertia tensor is computed from `shape` and from `mass`.
+
+- `visualMaterial`: Defines the material of the solid used for visualization. A pre-defined [Visual material](@ref)
+    from palettes/visualMaterials.json (e.g. `visualMaterial = "RedTransparent"`) or a user-defined [Visual material](@ref) (e.g.
+    `VisualMaterial(color="DeepSkyBlue4", transparency=0.75)`) can be used.
+    Note, `VisualMaterial = ""` is treated as `visualMaterial = VisualMaterial()`, so using the default visual material.
 
 - `collision`: Defines if the solid is considered in [Collision Handling](@ref). `collision=true` requires definition
-    of `shape`, mass properties (defined by `solidMaterial` or `massProperties`) and contact material (defined by
-    `solidMaterial` or `contactMaterial`).
+    of `shape` and of contact material (defined by `solidMaterial` or `contactMaterial`).
 
-- `contactMaterial`: Defines the contact material for force computation with [Contact Force Law](@ref) (e.g. `"Steel"`).
+- `contactMaterial`: Defines the contact material in case of collision. For details, see [Contact Force Law](@ref) (e.g. `"Steel"`).
     If undefined `solidMaterial` is used as contact material. Only contact material combinations defined in
     palettes/contactPairMaterials.json can be used.
 
-- `collisionSmoothingRadius`: Defines a collision smoothing radius for surface edges, its default value is `0.001`. It takes the minimum value of your collision smoothing radius and 10% of the smallest shape length, like `min(collisionSmoothingRadius, 0.1 min(shape dimensions))`. If it is set to `0.0` no `collisionSmoothingRadius` is used. A `collisionSmoothingRadius` is used for `Box`, `Cylinder`, `Cone`, and `Beam`.
+- `collisionSmoothingRadius`: Defines a collision smoothing radius for surface edges, its default value is `0.001` [m]. This improves the robustness of the integration, if contact is on or close to a surface edge. It takes the minimum value of the provided collision smoothing radius and 10% of the smallest shape length, like `min(collisionSmoothingRadius, 0.1 min(shape dimensions))`. If it is set to `0.0` no `collisionSmoothingRadius` is used. A `collisionSmoothingRadius` is used for `Box`, `Cylinder`, `Cone`, and `Beam`.
 
-- `contactSphereRadius`: for each shape a `contactSphereRadius` is defined. So that Herz' pressure is used in [Response calculation](@ref) not only for spheres. You can define your own `contactSphereRadius`, otherwise it is computed from shape geometry (sketched in the following table).
-
+- `contactSphereRadius`: For each shape a `contactSphereRadius` is defined, so that a rough approximiation of Hertz' pressure is used in [Response calculation](@ref) not only for spheres. You can define your own `contactSphereRadius`, otherwise it is computed from shape geometry (sketched in the following table).
 
 | Shape                     | `contactSphereRadius` from shape |
 |:--------------------------|:---------------------------------|
@@ -50,15 +57,11 @@ Generate a [Solid](@ref) with physical behavior of a rigid body with mass, visua
 | [Beam](@ref)              | `min(length, width, thickness)/2` |
 | [FileMesh](@ref)          | `shortestEdge/2` |
 
-For flat shapes, [Box](@ref) and [Beam](@ref), no `contactSphereRadius` is taken.  For Herz' pressure it is needed only if two flat shapes are colliding.
-
-- `visualMaterial`: Defines the material of the solid used for visualization. A pre-defined [Visual material](@ref)
-    from palettes/visualMaterials.json (e.g. `"RedTransparent"`) or a user-defined [Visual material](@ref) (e.g.
-    `VisualMaterial(color="DeepSkyBlue4", transparency=0.75)`) can be used.
+For flat shapes, [Box](@ref) and [Beam](@ref), no `contactSphereRadius` is taken.  For Herz' pressure it is needed only if two flat shapes are colliding. Note, `contactSphereRadius <= 0` is treated as `contactSphereRadius = nothing`, so is computed from the table above.
 
 # Example
 ```julia
-import Modia3D
+using Modia3D
 
 Solid(; shape = Sphere(diameter=0.5),
         solidMaterial = "DryWood",
@@ -108,12 +111,12 @@ struct Solid{F <: Modia3D.VarFloatType} <: Modia3D.AbstractObject3DFeature
         if typeof(solidMaterial) == String && solidMaterial == ""
             solidMaterial = nothing
         end
-        
+
         if typeof(solidMaterial) == String
             solidMaterial = solidMaterialPalette[1][solidMaterial]
         end
 
-        if typeof(visualMaterial) == String 
+        if typeof(visualMaterial) == String
             visualMaterial = visualMaterial == "" ? Shapes.VisualMaterial() : Shapes.visualMaterialPalette[visualMaterial]
         end
 

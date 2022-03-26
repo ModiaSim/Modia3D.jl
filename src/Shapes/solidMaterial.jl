@@ -1,13 +1,19 @@
 """
-    SolidMaterial(density=3000.0, YoungsModulus=2e11)
+    SolidMaterial(; density       = NaN,
+                    YoungsModulus = NaN,
+                    PoissonsRatio = NaN,
+                    meltingPoint  = NaN,
+                    specificHeatCapacity = NaN,
+                    thermalConductivity  = NaN,
+                    linearThermalExpansionCoefficient = NaN)
 
-Generates a SolidMaterial object by providing the material properties of a [Solid] with keyword arguments.
+Generates a SolidMaterial object by providing the material properties of a [Solid](@ref) with keyword arguments.
 
 # Arguments
 Arguments that are not provided have value `NaN`.
 - `density` in [kg/m^3]: Density, see [Wikipedia](https://en.wikipedia.org/wiki/Density).
-- `YoungsModulus` in [Pa]: Youngs's modulus, see [Wikipedia](https://en.wikipedia.org/wiki/Young%27s_modulus).
-- `PoissonsRatio`: Poisson's ratio, see [Wikipedia](https://en.wikipedia.org/wiki/Poisson%27s_ratio).
+- `YoungsModulus` in [Pa]: Youngs' modulus, see [Wikipedia](https://en.wikipedia.org/wiki/Young%27s_modulus).
+- `PoissonsRatio`: Poissons' ratio, see [Wikipedia](https://en.wikipedia.org/wiki/Poisson%27s_ratio).
 - `meltingPoint` in [K]: Melting point, see [Wikipedia](https://en.wikipedia.org/wiki/Melting_point).
                          If the material is destroyed before its melting point (e.g. wood that is burning)
                         then `meltingPoint` is the temperature when destruction of the solid starts.
@@ -16,6 +22,12 @@ Arguments that are not provided have value `NaN`.
                                 [List of thermal conductivities](https://en.wikipedia.org/wiki/List_of_thermal_conductivities)
 - `linearThermalExpansionCoefficient::Float64` in [1/K]: Linear thermal expansion coefficient, see [Wikipedia](https://en.wikipedia.org/wiki/Thermal_expansion).
 
+# Examples
+```julia
+using Modia3D
+
+solidMaterial = SolidMaterial(density=3000.0, YoungsModulus=2e11)
+```
 """
 mutable struct SolidMaterial
    density::Float64              # [kg/m^3], https://en.wikipedia.org/wiki/Density
@@ -31,12 +43,12 @@ mutable struct SolidMaterial
    linearThermalExpansionCoefficient::Float64  # [1/K], https://en.wikipedia.org/wiki/Thermal_expansion
 end
 SolidMaterial(; density=NaN,
-                 YoungsModulus=NaN,
-                 PoissonsRatio=NaN,
-                 meltingPoint=NaN,
-                 specificHeatCapacity=NaN,
-                 thermalConductivity=NaN,
-                 linearThermalExpansionCoefficient=NaN) =
+                YoungsModulus=NaN,
+                PoissonsRatio=NaN,
+                meltingPoint=NaN,
+                specificHeatCapacity=NaN,
+                thermalConductivity=NaN,
+                linearThermalExpansionCoefficient=NaN) =
               SolidMaterial(density, YoungsModulus, PoissonsRatio, meltingPoint, specificHeatCapacity,
                              thermalConductivity, linearThermalExpansionCoefficient)
 
@@ -57,13 +69,13 @@ readSolidMaterialFromJSON(fileName::AbstractString) =
 Dictionary of solid material data, see [`SolidMaterial`](@ref)
 """
 const solidMaterialPalette =
-         [readSolidMaterialFromJSON( joinpath(Modia3D.path, "palettes", "solidMaterials.json") )]        
+         [readSolidMaterialFromJSON( joinpath(Modia3D.path, "palettes", "solidMaterials.json") )]
 
 function rereadSolidMaterialFromJSON(; file="")
     if file == ""
         file = joinpath(Modia3D.path, "palettes", "solidMaterials.json")
     end
-    
-    global solidMaterialPalette[1] = readSolidMaterialFromJSON(file) 
+
+    global solidMaterialPalette[1] = readSolidMaterialFromJSON(file)
     return nothing
 end

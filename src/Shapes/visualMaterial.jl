@@ -13,27 +13,44 @@ import JSON
 
 # Material for visual elements
 """
-    VisualMaterial(; color="Green",
-                     wireframe=false, transparency=0.5,
-                     reflectslight=true, shininess=0.7,
-                     shadowMask=CastsAndReceivesShadows))
+    VisualMaterial(; color         = defaultColor(),
+                     wireframe     = false,
+                     transparency  = 0.0,
+                     reflectslight = true,
+                     shininess     = 0.7,
+                     shadowMask    = CastsAndReceivesShadows)
 
 Return a material object that defines attributes for the visualization of an Object3D
 that has visual or solid properties.
 
 # Arguments
-- `color` defines the material color as a String or RGB values. In case of Strings the color
-          is constructed using [Colors.jl](https://github.com/JuliaGraphics/Colors.jl). So
-          [named colors](https://juliagraphics.github.io/Colors.jl/stable/namedcolors/) and
-          many other kinds of [color specifications](https://juliagraphics.github.io/Colors.jl/stable/constructionandconversion/#Color-Parsing)
-          are available. In addition, colors can be directly defined by a vector of RGB values.
-          E.g. `color="MediumVioletRed"` or `color=[255, 0, 0]`.
+- `color` defines the material color
+  - `color::Vector{Int}`: The color is defined by a vector of RGB values where every value can be in the
+    range 0..255. Example: `color = [255, 0, 0]`.
+  - `color::String`: The color is constructed by using `color` as key of
+    [named colors](https://juliagraphics.github.io/Colors.jl/stable/namedcolors/).
+    Example: `color = "lightsteelblue1"` or `color = "LightSteelBlue1"`.
+    Note, color names are case insensitive.
+  - Otherwise: Any other of the [color specifications](https://juliagraphics.github.io/Colors.jl/stable/constructionandconversion/#Color-Parsing)
+    can be used.
 - `wireframe`: = false, if solid, otherwise wireframe representation.
 - `transparency`: = 0.0 (opaque) ... 1.0 (fully transparent).
 - `reflectslight`: = true if it reflects light and false, if it does not reflect light.
 - `shininess`: = 0.0 (matte surface) ... 1.0 (very shiny surface).
 - `shadowMask`: defines whether or not an object casts or receives shadows. Possible values:
    NoShadows, CastsShadows, ReceivesShadows, CastsAndReceivesShadows.
+
+# Examples
+```julia
+using Modia3D
+
+material = VisualMaterial(color         = "Green",
+                          wireframe     = false,
+                          transparency  = 0.5,
+                          reflectslight = true,
+                          shininess     = 0.5,
+                          shadowMask    = NoShadows))
+```
 """
 mutable struct VisualMaterial
   color::MVector{3,Cint}  # RGB color
