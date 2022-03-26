@@ -8,7 +8,7 @@ import Modia3D.Frames
 
 
 """
-    joint = Revolute(;obj1, obj2, path="", axis=3, phi=0, w=0, canCollide=false)
+    joint = Revolute(;obj1, obj2, axis=3, phi=0, w=0, canCollide=false)
 
 Return a Revolute `joint` that rotates `obj1::`[`Object3D`](@ref) into
 `obj2::`[`Object3D`](@ref) along the axis `axis` of `obj1` (`axis = 1,2,3,-1,-2,-3`).

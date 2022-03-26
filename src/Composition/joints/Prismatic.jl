@@ -16,7 +16,7 @@ get_eAxis(::Type{F}, axis::Int) where F <: Modia3D.VarFloatType = axis==  1 ? SV
                        error("Modia3D.Composition.Prismatic: axis = ", axis, " but must be 1, 2, 3, -1, -2, or -3.")
 
 """
-    joint = Prismatic(; obj1, obj2, path="", axis=1, s=0, v=0, canCollide=true)
+    joint = Prismatic(; obj1, obj2, axis=1, s=0, v=0, canCollide=true)
 
 Return a `joint` that translates `obj2::`[`Object3D`](@ref) with respect to
 `obj1::`[`Object3D`](@ref) along coordinate axis `axis` (`axis = 1,2,3,-1,-2,-3`)
