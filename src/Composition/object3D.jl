@@ -551,6 +551,18 @@ function rootObject3D(obj::Object3D{F}) where F <: Modia3D.VarFloatType
 end
 
 
+"""    path = rootObject3DPath(obj) - returns a vector of Object3D names of all objects from obj to root"""
+function rootObject3DPath(obj::Object3D{F}) where F <: Modia3D.VarFloatType
+    path = String[]
+    obj1 = obj
+    while hasParent(obj1)
+        obj1 = obj1.parent
+        push!(path, obj1.path)
+    end
+    return path
+end
+
+
 """    removeChild!(obj, child) - Remove child from obj.children"""
 function removeChild!(obj::Object3D{F}, child::Object3D{F})::Nothing where F <: Modia3D.VarFloatType
     children = obj.children

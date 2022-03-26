@@ -104,7 +104,7 @@ function addOrSubtractMassPropertiesOfChildToRoot!(obj_root::Object3D{F}, obj_ch
         m = m_root + m_child
 
         # common center of mass (parent + child)
-        @assert(m > 0.0)
+        @assert(m >= 0.0)
         rCM = (m_root * rCM_root + m_child * rCM_child_new)/m
 
         # I: substract new common mass multiplied with skew matrices of

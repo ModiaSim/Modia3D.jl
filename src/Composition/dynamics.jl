@@ -12,10 +12,10 @@ function getJointsAndForceElementsAndObject3DsWithoutParents!(evaluatedParameter
                 if typeof(value.feature) <: Scene
                     push!(object3DWithoutParents, value)
                 else
-                    error("\n", value.path, " is an Object3D that has no parent, but no feature=Scene(..)!\n")
+                    error("\n", value.path, " is an Object3D that has no parent, but no feature=Scene(..)!\nThis means no Scene is defined (exactly one Object3D must have feature=Scene(..))!")
                 end
             elseif typeof(value.feature) <: Scene
-                error("\n", value.path, " is an Object3D that has feature=Scene(..) and has a parent (= ", value.parent.path, ")!\n")
+                error("\n", value.path, " is an Object3D that has feature=Scene(..) and has a parent (= ", value.parent.path, ")!\nThe Object3D with feature=Scene(..) is not allowed to have a parent!")
             end
 
         elseif typeof(value) <: Modia3D.Composition.Revolute 

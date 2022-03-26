@@ -14,7 +14,7 @@ end
 
 
 """
-    joint = FreeMotion(; obj1, obj2, path="", r, rot, v, w)
+    joint = FreeMotion(; obj1, obj2, r, rot, v, w)
 
 Return a `joint` that describes the free movement of `obj2::`[`Object3D`](@ref)
 with respect to `obj1::`[`Object3D`](@ref). The initial position is `r`

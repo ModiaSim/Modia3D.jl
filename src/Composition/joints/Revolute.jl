@@ -8,7 +8,7 @@ import Modia3D.Frames
 
 
 """
-    joint = Revolute(;obj1, obj2, path="", axis=3, phi=0, w=0, canCollide=false)
+    joint = Revolute(;obj1, obj2, axis=3, phi=0, w=0, canCollide=false)
 
 Return a Revolute `joint` that rotates `obj1::`[`Object3D`](@ref) into
 `obj2::`[`Object3D`](@ref) along the axis `axis` of `obj1` (`axis = 1,2,3,-1,-2,-3`).
@@ -43,11 +43,7 @@ mutable struct Revolute{F <: Modia3D.VarFloatType} <: Modia3D.AbstractJoint
                         w::Real   = F(0.0),
                         canCollide::Bool = false) where F <: Modia3D.VarFloatType
 
-        (parent,obj,cutJoint) = attach(obj1, obj2)
-        if cutJoint
-            error("\nError from Revolute joint connecting ", Modia3D.fullName(obj1), " with ", Modia3D.fullName(obj2), ":\n",
-                "    This joint is a cut-joint which is currently not supported.!")
-        end
+        (parent,obj,cutJoint) = attach(obj1, obj2, name = "Revolute joint")  # an error is triggered if cutJoint=true
 
         if !(1 <= abs(axis) <= 3)
             error("\nError from Revolute joint connecting ", Modia3D.fullName(obj1), " with ", Modia3D.fullName(obj2), ":\n",

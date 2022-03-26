@@ -14,7 +14,7 @@ Read the palettes for which a file name is given and store them as global palett
 If `log=true`, log the reading of the files.
 
 When Modia3D is used the first time, it reads the palettes automatically from
-`"Modia3D/palettes/*.sjon"`. The `loadPalettes` function overwrites this default setting.
+`"Modia3D/palettes/*.json"`. The `loadPalettes` function overwrites this default setting.
 
 # Examples
 

@@ -97,6 +97,8 @@ function buildModia3D!(model::AbstractDict, FloatType::Type, TimeType::Type,
     jointStatesFreeMotion_isrot123 = Expr[]
     freeMotionIndices              = OrderedCollections.OrderedDict{String,Int}()
 
+    println("modelPath = $modelPath")
+    
     modelPathAsString = isnothing(modelPath) ? "" : string(modelPath)
     
     i=1
@@ -243,6 +245,9 @@ function buildModia3D!(model::AbstractDict, FloatType::Type, TimeType::Type,
         else
             @error "Error should not occur (buildOption = $buildOption)"
         end
+    else
+        # ndofTotal == 0
+        mbsCode = mbs_variables | Model(equations = :[$(mbs_equations...)])
     end
     
     # Store info in buildDict
