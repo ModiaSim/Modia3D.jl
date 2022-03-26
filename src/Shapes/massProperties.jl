@@ -15,7 +15,7 @@ struct MassProperties{F <: Modia3D.VarFloatType} <: Modia3D.AbstractMassProperti
     #---------------- different constructors for MassProperties -----------------
     # Constructor 0: takes mass, centerOfMass and inertiaMatrix as input values
     function MassProperties{F}(mass::Number, centerOfMass::AbstractVector, inertiaMatrix::AbstractMatrix) where F <: Modia3D.VarFloatType
-        @assert(mass > 0.0)
+        @assert(mass >= 0.0)
         new(mass, centerOfMass, inertiaMatrix)
     end
 end

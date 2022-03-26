@@ -24,7 +24,7 @@ Generate a [Solid](@ref) with physical behavior of a rigid body with mass, visua
     computed from `shape` and `solidMaterial`. It is also possible to define only the mass of the solid and compute the
     center of mass and inertia tensor from `shape` (e.g. `MassPropertiesFromShapeAndMass(mass=4.5)`) or explicitly
     define all mass properties (e.g. `MassProperties(mass=4.5, centerOfMass=[1.0,2.0,3.0], Ixx=4.0, Iyy=5.0, Izz=6.0,
-    Ixy=4.5, Ixz=4.6, Iyz=5.5)`).
+    Ixy=4.5, Ixz=4.6, Iyz=5.5)`). 
 
 - `collision`: Defines if the solid is considered in [Collision Handling](@ref). `collision=true` requires definition
     of `shape`, mass properties (defined by `solidMaterial` or `massProperties`) and contact material (defined by
@@ -105,12 +105,16 @@ struct Solid{F <: Modia3D.VarFloatType} <: Modia3D.AbstractObject3DFeature
             contactMaterial = ""
         end
 
+        if typeof(solidMaterial) == String && solidMaterial == ""
+            solidMaterial = nothing
+        end
+        
         if typeof(solidMaterial) == String
             solidMaterial = solidMaterialPalette[1][solidMaterial]
         end
 
-        if typeof(visualMaterial) == String
-            visualMaterial = Shapes.visualMaterialPalette[visualMaterial]
+        if typeof(visualMaterial) == String 
+            visualMaterial = visualMaterial == "" ? Shapes.VisualMaterial() : Shapes.visualMaterialPalette[visualMaterial]
         end
 
         if typeof(shape) == FileMesh
@@ -118,7 +122,8 @@ struct Solid{F <: Modia3D.VarFloatType} <: Modia3D.AbstractObject3DFeature
             (shape.volume, shape.centroidAlgo, shape.inertia) = computeMassProperties(shape.objPoints, shape.facesIndizes; bodyCoords=false)
         end
 
-        massProperties = createMassProperties(F, massProperties, shape, solidMaterial)
+        massProperties = isnothing(massProperties) && isnothing(solidMaterial) ? MassProperties{F}() : createMassProperties(F, massProperties, shape, solidMaterial)
+
         contactSphereRadius::Union{Nothing,F} = isnothing(contactSphereRadius) || F(contactSphereRadius) <= F(0) ? nothing : F(contactSphereRadius)
         (isFlat, contactSphereRadius) = setContactSphereRadius(shape, contactSphereRadius, F)
         new(shape, solidMaterial, massProperties, collision, contactMaterial, setCollisionSmoothingRadius(shape, F(collisionSmoothingRadius)), visualMaterial, isFlat, contactSphereRadius)

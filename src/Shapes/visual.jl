@@ -1,6 +1,7 @@
 convertStringToVisualMaterial(visualMaterial::Shapes.VisualMaterial) = visualMaterial
 
-convertStringToVisualMaterial(visualMaterial::AbstractString) = Shapes.visualMaterialPalette[visualMaterial]
+convertStringToVisualMaterial(visualMaterial::AbstractString) = visualMaterial == "" ? Shapes.VisualMaterial() : Shapes.visualMaterialPalette[visualMaterial]
+
 
 """
     Visual(;
