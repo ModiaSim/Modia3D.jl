@@ -34,11 +34,7 @@ struct Fix{F <: Modia3D.VarFloatType}
                 translation::AbstractVector = Modia3D.ZeroVector3D(F),
                 rotation::AbstractVector    = Modia3D.ZeroVector3D(F)) where F <: Modia3D.VarFloatType
 
-        (parent, child, cutJoint) = attach(obj1, obj2)
-        if cutJoint
-        error("\nError from Fix joint connecting ", Modia3D.fullName(obj1), " with ", Modia3D.fullName(obj2), ":",
-            "\nThis joint is a cut-joint which is not allowed.")
-        end
+        (parent, child, cutJoint) = attach(obj1, obj2, name = "Fix joint")  # an error is triggered if cutJoint=true
 
         r_rel = Modia3D.convertAndStripUnit(SVector{3,F}, u"m", translation)
         rot   = Modia3D.convertAndStripUnit(SVector{3,F}, u"rad", rotation)

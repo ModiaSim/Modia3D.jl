@@ -120,6 +120,8 @@ function attachAndReverseParents(newParent::Object3D{F}, obj::Object3D{F})::Noth
 end
 
 
+getParents(obj,rootPath) = "\"" * Modia3D.fullName(obj) * "\" has " * (length(rootPath) == 0 ? "no parents" : "parents: $rootPath")
+
 """
     (obj1, obj2, cutJoint) = attach(frame_a, frame_b)
 
@@ -128,7 +130,7 @@ and cutJoint = false is returned.
 
 If they have the same root, the tree is not modified and cutJoint=true is returned.
 """
-function attach(obj1::Object3D, obj2::Object3D)
+function attach(obj1::Object3D, obj2::Object3D; name = "")
    root1 = rootObject3D(obj1)
    root2 = rootObject3D(obj2)
    #println("attach: obj1 = ", Modia3D.fullName(obj1), ", root = ", Modia3D.fullName(root1))
@@ -137,6 +139,16 @@ function attach(obj1::Object3D, obj2::Object3D)
    if root1 ≡ root2
       # Compute absolute positions
       # updatePosition!(root1)
+
+      if name != ""
+        # Collect all objects that form a loop
+        rootPath1 = rootObject3DPath(obj1)
+        rootPath2 = rootObject3DPath(obj2)
+        error("\nError from $name connecting \"", Modia3D.fullName(obj1), "\" with \"", Modia3D.fullName(obj2), "\":\n",
+                "    ", getParents(obj1,rootPath1), "\n",
+                "    ", getParents(obj2,rootPath2), "\n",
+                "    Therefore, a closed kinematic loop is defined, which is currently not supported.")
+      end     
       return (obj1,obj2,true)
    end
 
