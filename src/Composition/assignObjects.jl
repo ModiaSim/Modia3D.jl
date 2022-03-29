@@ -55,7 +55,7 @@ end
 
 
 function fillVisuElements!(scene::Scene, obj::Object3D, world::Object3D)
-    if scene.options.enableVisualization || scene.exportAnimation
+    if scene.options.enableVisualization || scene.provideAnimationData
         if isNotCoordinateSystem(obj) && obj.visualizeFrame != Modia3D.False &&
         ((scene.options.visualizeFrames && obj.visualizeFrame == Modia3D.Inherited) || obj.visualizeFrame == Modia3D.True)
             name = Symbol(obj.path, ".", "visualizationFrame")

@@ -284,3 +284,74 @@ function getJointInfo!(model, jointInfo; path=nothing)::Nothing
     end
     return nothing
 end
+
+
+struct AnimationHistoryElement
+    positions::Vector{  SVector{3,Float64}}    # abs. Object3D position
+    quaternions::Vector{SVector{4,Float64}}    # abs. Object3D quaternion
+end
+
+
+"""
+    animationHistory = get_animationHistory(instantiatedModel, modelPathAsString)
+    
+After a simulation, return an ordered dictionary of the positions and orientations of all visual Object3D
+present in `instantiatedModel` with respect to the `modelPathAsString` of a `Model3D(..)` model.
+The time vector is provided as `animationHistory["time"]`.
+The animation history of an Object3D with name `"a.b.c"` is provided in the form:
+
+```julia
+animationHistory["a.b.c"] = OrdereDict{String,Any}("position"   => pos,
+                                                   "quaternion" => quat)
+
+#= Example
+pos = [[1.0, 2.0, 3.0],
+       [1.1, 2.1, 3.1],  # Absolute position [1.1, 2.2, 3.1] at time instant 2.
+       [1.2, 2.2, 3.2],
+       [1.3, 2.3, 3.3] ...]  
+
+quat = [[0.10, 0.20, 0.30, 0.86],
+        [0.11, 0.21, 0.31, 0.8477], ...]   # Quaternions [0.11, 0.21, 0.31, 0.8477]
+                                           # to rotate from world to Object3D at time instant 2.
+=#                                              
+```
+"""
+function get_animationHistory(instantiatedModel::Modia.SimulationModel{FloatType,TimeType}, 
+                              modelPathAsString::String; log::Bool = true)::Union{OrderedDict{String,Any},Nothing} where {FloatType,TimeType}
+                              
+    mbs::Modia3D.Composition.MultibodyData{FloatType,TimeType} = instantiatedModel.buildDict[modelPathAsString].mbs
+    scene = mbs.scene
+    allVisuElements = scene.allVisuElements
+    animation = scene.animation
+    animationHistory = OrderedDict{String,Any}()
+    
+    if length(allVisuElements) > 0 && scene.provideAnimationData
+        if log
+            println("get_animationHistory(..): Return animation history of ", length(allVisuElements), " Object3Ds at ",   
+                    length(animation), " time instants")
+        end
+        
+        timeVector = Float64[]
+        for obj in animation
+            push!(timeVector, obj.time)
+        end
+        animationHistory["time"] = timeVector
+        
+        for (iobj,obj) in enumerate(allVisuElements)
+            positions   = SVector{3,Float64}[]
+            quaternions = SVector{4,Float64}[]
+            for animationStep in animation
+                push!(positions  , animationStep.objectData[iobj].position)
+                push!(quaternions, animationStep.objectData[iobj].quaternion)
+            end
+            animationHistory[obj.path] = AnimationHistoryElement(positions, quaternions)
+        end
+        return animationHistory
+    else
+        println("\nget_animationHistory(..):\n  No animation history stored during simulation.",
+                "\n  Use Object3D(feature=Scene(provideAnimationHistory=true))!!!")
+        return nothing
+    end
+end
+
+
