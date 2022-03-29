@@ -368,6 +368,7 @@ function computeGeneralizedForces!(mbs::MultibodyData{F,TimeType}, _leq)::Multib
         forceElements   = scene.forceElements
         visualize       = scene.visualize   # && sim.model.visualiz
         exportAnimation = scene.exportAnimation
+        provideAnimationData = scene.provideAnimationData
     
         if isTerminal  #if Modia.isTerminalOfAllSegments(sim)
             TimerOutputs.@timeit instantiatedModel.timer "Modia3D_4 isTerminal" begin
@@ -467,7 +468,7 @@ function computeGeneralizedForces!(mbs::MultibodyData{F,TimeType}, _leq)::Multib
         elseif leq_mode == -2
             # Compute only terms needed at a communication point (currently: Only visualization + export animation)      
             TimerOutputs.@timeit instantiatedModel.timer "Modia3D_3" begin
-                if storeResult && !isTerminal && (visualize || exportAnimation)
+                if storeResult && !isTerminal && (visualize || provideAnimationData)
                     if abs(instantiatedModel.options.startTime + scene.outputCounter*instantiatedModel.options.interval - time) < 1.0e-6*(abs(time) + 1.0)
                         # Visualize at a communication point
                         scene.outputCounter += 1
@@ -497,8 +498,8 @@ function computeGeneralizedForces!(mbs::MultibodyData{F,TimeType}, _leq)::Multib
                                 Modia3D.visualize!(Modia3D.renderer[1], time)
                             end
                         end
-                        if exportAnimation
-                            TimerOutputs.@timeit instantiatedModel.timer "Modia3D_3 exportAnimation" begin
+                        if provideAnimationData
+                            TimerOutputs.@timeit instantiatedModel.timer "Modia3D_3 provideAnimationData" begin
                                 objectData = []
                                 for obj in scene.allVisuElements
                                     pos = Modia3D.convertToFloat64(obj.r_abs)

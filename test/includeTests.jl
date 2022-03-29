@@ -8,6 +8,7 @@ Test.@testset "Basic" begin
     include(joinpath("Basic", "AllShapes.jl"))
     include(joinpath("Basic", "PendulumWithBar1.jl"))
     include(joinpath("Basic", "PendulumWithBar2.jl"))
+    include(joinpath("Basic", "PendulumWithBar3.jl"))    
     include(joinpath("Basic", "PendulumWithDamper.jl"))
     include(joinpath("Basic", "PendulumWithFix.jl"))
     include(joinpath("Basic", "PendulumWithParameterizedDamper.jl"))

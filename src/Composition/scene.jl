@@ -213,6 +213,7 @@ struct SceneOptions{F <: Modia3D.VarFloatType}
     ### Animation and Visualization ###
     enableVisualization::Bool             # = true, if online animation is enabled
     animationFile::Union{Nothing,String}  # path&name of animation file
+    provideAnimationHistory::Bool         # = true, if animationDict shall be provided
     visualizeFrames::Bool                 # = true, if all frames shall be visualized
     visualizeBoundingBox::Bool            # = true, if AABB's are visualized
     visualizeContactPoints::Bool          # = true, if contact points shall be visualized
@@ -238,6 +239,7 @@ struct SceneOptions{F <: Modia3D.VarFloatType}
             gap                           = 0.001,
             enableVisualization           = true,
             animationFile                 = nothing,
+            provideAnimationHistory       = false, 
             visualizeFrames               = false,
             visualizeBoundingBox          = false,
             visualizeContactPoints        = false,
@@ -271,6 +273,7 @@ struct SceneOptions{F <: Modia3D.VarFloatType}
             gap,
             enableVisualization,
             animationFile,
+            provideAnimationHistory,
             visualizeFrames,
             visualizeBoundingBox,
             visualizeContactPoints,
@@ -315,6 +318,7 @@ Defines global properties of the system, such as the gravity field. Exactly one 
 | `gravityField`                  | UniformGravity(g=9.81, n=[0,-1,0])      |
 | `enableVisualization`           | true                                    |
 | `animationFile`                 | nothing (e.g. animationFile = "animation.json") |
+| `provideAnimationHistory`       | false                                   |
 | `enableContactDetection`        | true                                    |
 | `elasticContactReductionFactor` | 1.0  (> 0.0, <= 1.0)                    |
 | `maximumContactDamping`         | 2000.0                                  |
@@ -423,10 +427,11 @@ mutable struct Scene{F <: Modia3D.VarFloatType} <: Modia3D.AbstractScene
     AABB::Vector{Vector{Basics.BoundingBox{F}}}  # Bounding boxes of elements that can collide
     zStartIndex::Int                          # start index of collision zero crossing functions
     forceElements::Vector{Modia3D.AbstractForceElement}
+    provideAnimationData::Bool                # = true, if animation data shall be provided     
     exportAnimation::Bool                     # animation file export is enabled
     animation::Vector{animationStep}          # animation data of visible Object3Ds
     outputCounter::Int64                      # animation/visualization output step counter
-
+    
     # Data specific to a particular joint type
     revolute::Vector{Revolute{F}}
     prismatic::Vector{Prismatic{F}}
@@ -442,6 +447,7 @@ mutable struct Scene{F <: Modia3D.VarFloatType} <: Modia3D.AbstractScene
             gap                           = 0.001,
             enableVisualization           = true,
             animationFile                 = nothing,
+            provideAnimationHistory       = false,
             visualizeFrames               = false,
             visualizeBoundingBox          = false,
             visualizeContactPoints        = false,
@@ -470,6 +476,7 @@ mutable struct Scene{F <: Modia3D.VarFloatType} <: Modia3D.AbstractScene
             defaultFrameLength            = defaultFrameLength,
             enableVisualization           = enableVisualization,
             animationFile                 = animationFile,
+            provideAnimationHistory       = provideAnimationHistory,     
             visualizeFrames               = visualizeFrames,
             visualizeBoundingBox          = visualizeBoundingBox,
             visualizeContactPoints        = visualizeContactPoints,
@@ -482,10 +489,12 @@ mutable struct Scene{F <: Modia3D.VarFloatType} <: Modia3D.AbstractScene
             lightLatitude                 = lightLatitude)
 
         exportAnimation = false
+        provideAnimationData = provideAnimationHistory
         if !isnothing(sceneOptions.animationFile)
             (base, ext) = splitext(sceneOptions.animationFile)
             if ext == ".json"
                 exportAnimation = true
+                provideAnimationData = true
             else
                 @warn("Extension of animationFile=$(sceneOptions.animationFile) is not 'json'.\n-> Animation export is disabled.")
             end
@@ -515,6 +524,7 @@ mutable struct Scene{F <: Modia3D.VarFloatType} <: Modia3D.AbstractScene
             Vector{Vector{Basics.BoundingBox{F}}}[],
             1,
             Vector{Modia3D.AbstractForceElement}[],
+            provideAnimationData,            
             exportAnimation,
             Vector{animationStep}[],
             0,
