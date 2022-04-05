@@ -15,7 +15,7 @@ struct SupportPoint{T}
 end
 
 
-function getSupportPoint(shapeA::Modia3D.Composition.Object3D, shapeB::Composition.Object3D, n::SVector{3,T}; scale::T=T(1.0)) where {T}
+function getSupportPoint(shapeA::Modia3D.Composition.Object3D{F}, shapeB::Composition.Object3D{F}, n::SVector{3,T}; scale::T=T(1.0)) where {T,F}
     a = Modia3D.supportPoint(shapeA, n)
     b = Modia3D.supportPoint(shapeB, -n)
     return SupportPoint{T}((a-b).*scale,n,a,b)
@@ -66,15 +66,15 @@ end
 
 # checks if centers of shapeA and shapeB are overlapping
 # belongs to construction of r0
-function checkCentersOfShapesOverlapp(r0::SupportPoint{T}, shapeA::Composition.Object3D, shapeB::Composition.Object3D) where {T}
+function checkCentersOfShapesOverlapp(r0::SupportPoint{T}, shapeA::Composition.Object3D{F}, shapeB::Composition.Object3D{F}) where {T,F}
     if norm(r0.p) <= Modia3D.nepsType(T)
         error("MPR: Too large penetration (prerequisite of MPR violated). Centers are overlapping. Look at $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)).")
     end
 end
 
 
-function checkIfShapesArePlanar(r0::SupportPoint,r1::SupportPoint,r2::SupportPoint,n2::SVector{3,T},
-                                shapeA::Composition.Object3D,shapeB::Composition.Object3D) where {T}
+function checkIfShapesArePlanar(r0::SupportPoint{T},r1::SupportPoint{T},r2::SupportPoint{T},n2::SVector{3,T},
+                                shapeA::Composition.Object3D{F},shapeB::Composition.Object3D{F}) where {T,F}
     r3 = SupportPoint{T}
 
     # r3 is in the direction of plane normal that contains triangle r0-r1-r2
@@ -86,14 +86,13 @@ function checkIfShapesArePlanar(r0::SupportPoint,r1::SupportPoint,r2::SupportPoi
         # because we are still interested in distances if shapes are not intersecting
         n2 = -n2
         r2 = getSupportPoint(shapeA, shapeB, n2)
-        if abs(dot((r2.p-r1.p),n2)) <= neps
+        n3 = cross(r1.p-r0.p, r2.p-r0.p)  # new normal to the triangle plane (r0-r1-r2_new)
+        if norm(n3) <= neps
             # Shape is purely planar. Computing the shortest distance for a planar shape
             # requires an MPR 2D algorithm (using lines instead of triangles as portals).
             # However, this is not implemented and therefore the shortest distance cannot be computed
-            error("MPR: Shapes are planar and MPR2D is not supported. abs(dot((r2.p-r1.p),n2)). Look at $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)).")
+            error("MPR: Shapes are planar and MPR2D is not supported. norm(cross(r1.p-r0.p, r2.p-r0.p)). Look at $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)).")
         end
-        # new normal to the triangle plane (r0-r1-r2_new)
-        n3 = cross(r1.p-r0.p, r2.p-r0.p)   # |n3| > 0 guaranteed, due to construction
     end
 
     if dot(n3,r0.p) >= 0.0
@@ -106,11 +105,11 @@ function checkIfShapesArePlanar(r0::SupportPoint,r1::SupportPoint,r2::SupportPoi
     if norm(n3b) <= neps
         # change search direction for r3
         r3 = getSupportPoint(shapeA, shapeB, -r3.n)
-        if abs(dot((r3.p-r1.p),r3.n)) <= neps
+        if norm(cross(r2.p-r1.p, r3.p-r1.p)) <= neps
             # Shape is purely planar. Computing the shortest distance for a planar shape
             # requires an MPR 2D algorithm (using lines instead of triangles as portals).
             # However, this is not implemented and therefore the shortest distance cannot be computed
-            error("MPR: Shapes are planar and MPR2D is not supported. r1, r2, r3 are on the same ray. abs(dot((r3.p-r1.p),r3.n)) <= neps. Look at $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)).")
+            error("MPR: Shapes are planar and MPR2D is not supported. r1, r2, r3 are on the same ray. norm(cross(r2.p-r1.p, r3.p-r1.p)) <= neps. Look at $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)).")
         end
     end
 
@@ -122,10 +121,10 @@ end
 # loop around to "ensure" the tetrahedron r0,r1,r2 and r3 encloses the origin
 # stimmt so nicht wirklich, muss ich nochmal nachlesen!!!
 # Der Ursprung muss nicht enthalten sein!!!
-function tetrahedronEncloseOrigin(r0::SupportPoint, r1::SupportPoint,
-            r2::SupportPoint, r3::SupportPoint,
+function tetrahedronEncloseOrigin(r0::SupportPoint{T}, r1::SupportPoint{T},
+            r2::SupportPoint{T}, r3::SupportPoint{T},
             niter_max::Int64,
-            shapeA::Composition.Object3D, shapeB::Composition.Object3D, scale::T) where {T}
+            shapeA::Composition.Object3D{F}, shapeB::Composition.Object3D{F}, scale::T) where {T,F}
     r1org = r1
     r2org = r2
     r3org = r3
@@ -134,13 +133,13 @@ function tetrahedronEncloseOrigin(r0::SupportPoint, r1::SupportPoint,
     success = false
     for i in 1:niter_max
         aux = cross(r1.p-r0.p,r3.p-r0.p)
-        if dot(aux,r0.n) < -neps
+        if dot(aux,r0.p) > 0.0
             r2 = r3
             r3 = getSupportPoint(shapeA,shapeB,Basics.normalizeVector(aux), scale=scale)
             continue
         end
         aux = cross(r3.p-r0.p,r2.p-r0.p)
-        if dot(aux,r0.n) < -neps
+        if dot(aux,r0.p) > 0.0
             r1 = r3
             r3 = getSupportPoint(shapeA,shapeB,Basics.normalizeVector(aux), scale=scale)
             continue
@@ -149,12 +148,7 @@ function tetrahedronEncloseOrigin(r0::SupportPoint, r1::SupportPoint,
         break
     end
     if success != true
-        if niter_max < 100
-            @warn("MPR (phase 2): Max. number of iterations (= $niter_max) is reached. niter_max increased locally by 10 and phase 2 is rerun. Look at $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)).")
-            tetrahedronEncloseOrigin(r0, r1org, r2org, r3org, niter_max + 10, shapeA, shapeB, scale)
-        else
-            error("MPR (phase 2): Max. number of iterations (= $niter_max) is reached and $niter_max > 100, look at $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)).")
-        end
+        error("MPR (phase 2): Max. number of iterations (mprIterMax = $niter_max) is reached. Please, increase mprIterMax. Look at shapes: $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)).")
     end
     return (r1, r2, r3)
 end
@@ -162,20 +156,20 @@ end
 
 ###########      Phase 3, Minkowski Portal Refinement      ###################
 # construction of r4
-function constructR4(r0::SupportPoint,r1::SupportPoint,r2::SupportPoint,r3::SupportPoint,
-                     shapeA::Composition.Object3D,shapeB::Composition.Object3D, scale::T) where {T}
+function constructR4(r0::SupportPoint{T},r1::SupportPoint{T},r2::SupportPoint{T},r3::SupportPoint{T},
+                     shapeA::Composition.Object3D{F},shapeB::Composition.Object3D{F}, scale::T) where {T,F}
     r4 = SupportPoint{T}
     n4 = cross(r2.p-r1.p, r3.p-r1.p)
     neps = Modia3D.nepsType(T)
     if norm(n4) <= neps
         r3 = getSupportPoint(shapeA, shapeB, -r3.n, scale=scale) # change search direction
-        if abs(dot((r3.p-r1.p),r3.n)) <= neps
+        n4 = cross(r2.p-r1.p, r3.p-r1.p)
+        if norm(n4) <= neps
             # Shape is purely planar. Computing the shortest distance for a planar shape
             # requires an MPR 2D algorithm (using lines instead of triangles as portals).
             # However, this is not implemented and therefore the shortest distance cannot be computed
-            error("MPR: Shapes are planar and MPR2D is not supported. abs(dot((r3.p-r1.p),r3.n)). Look at $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)).")
+            error("MPR: Shapes are planar and MPR2D is not supported. norm(n4). Look at $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)).")
         end
-        n4 = cross(r2.p-r1.p, r3.p-r1.p)   # |n4| > 0 guaranteed, due to construction
     end
     if dot(n4,r0.p) >= 0.0
         n4 = -n4
@@ -196,7 +190,7 @@ isNextPortal(r0::SupportPoint, r1::SupportPoint, r2::SupportPoint, r4::SupportPo
 #   r1r2r4
 #   r2r3r4
 #   r3r1r4
-function createBabyTetrahedrons(r0::SupportPoint, r1::SupportPoint, r2::SupportPoint, r3::SupportPoint, r4::SupportPoint)
+function createBabyTetrahedrons(r0::SupportPoint{T}, r1::SupportPoint{T}, r2::SupportPoint{T}, r3::SupportPoint{T}, r4::SupportPoint{T}) where {T}
     nextPortal = true
     if isNextPortal(r0,r1,r2,r4)
         r3 = r4
@@ -224,7 +218,7 @@ function skalarization(r0::SupportPoint{T}, r1::SupportPoint{T}, r2::SupportPoin
     return (r0, r1, r2, r3, scale)
 end
 
-function finalTC2(r1::SupportPoint, r2::SupportPoint, r3::SupportPoint, r4::SupportPoint)
+function finalTC2(r1::SupportPoint{T}, r2::SupportPoint{T}, r3::SupportPoint{T}, r4::SupportPoint{T}) where {T}
     #println("TC 2")
     #if !analyzeFinalPortal(r1.p, r2.p, r3.p, r4.p)
         # error("shapeA = ", shapeA, " shapeB = ", shapeB)
@@ -239,9 +233,6 @@ function finalTC3(r0::SupportPoint{T}, r1::SupportPoint{T}, r2::SupportPoint{T},
     #println("TC 3")
 
     #doesRayIntersectPortal(r1.p,r2.p,r3.p, r4.p)
-    #println("r1.p = ", r1.p , " r2.p = ", r2.p ," r3.p = ", r3.p)
-    #println("r4.p = ", r4.p)
-    #println(" ")
     #if !analyzeFinalPortal(r1.p, r2.p, r3.p, r4.p)
         # error("shapeA = ", shapeA, " shapeB = ", shapeB)
     #end
@@ -253,7 +244,20 @@ function finalTC3(r0::SupportPoint{T}, r1::SupportPoint{T}, r2::SupportPoint{T},
 end
 
 
-function phase3(r0::SupportPoint, r1::SupportPoint, r2::SupportPoint, r3::SupportPoint, niter_max::Int64, tol_rel::T, shapeA::Composition.Object3D, shapeB::Composition.Object3D, scale::T) where {T}
+function terminateMPR(r0::SupportPoint{T}, r1::SupportPoint{T}, r2::SupportPoint{T},
+                      r3::SupportPoint{T}, r4::SupportPoint{T}, isTC2::Bool, isTC3::Bool)::Tuple{T, SupportPoint{T}, SupportPoint{T}, SupportPoint{T}, SupportPoint{T}} where {T}
+    if isTC2
+        (distance,r1,r2,r3,r4) = finalTC2(r1, r2, r3, r4)
+        return distance, r1, r2, r3, r4
+    end
+    if isTC3
+        (distance,r1,r2,r3,r4) = finalTC3(r0, r1, r2, r3, r4)
+        return distance, r1, r2, r3, r4
+    end
+end
+
+
+function phase3(r0::SupportPoint{T}, r1::SupportPoint{T}, r2::SupportPoint{T}, r3::SupportPoint{T}, niter_max::Int64, tol_rel::T, shapeA::Composition.Object3D{F}, shapeB::Composition.Object3D{F}, scale::T) where {T,F}
     r1org = r1
     r2org = r2
     r3org = r3
@@ -277,13 +281,11 @@ function phase3(r0::SupportPoint, r1::SupportPoint, r2::SupportPoint, r3::Suppor
         TC3 = abs(dot(r4.p-r1.p, r4.n)) # TC3
         ## TERMINATION CONDITION 2 ##
         if TC2 < tol_rel
-            (distance,r1,r2,r3,r4) = finalTC2(r1,r2,r3,r4)
-            return distance, r1, r2, r3, r4
+            return finalTC2(r1,r2,r3,r4)
 
         ## TERMINATION CONDITION 3 ##
         elseif TC3 < tol_rel
-            (distance,r1,r2,r3,r4) = finalTC3(r0, r1, r2, r3, r4)
-            return distance, r1, r2, r3, r4
+            return finalTC3(r0, r1, r2, r3, r4)
         else
             if TC2 < new_tol
                 new_tol = TC2
@@ -311,32 +313,11 @@ function phase3(r0::SupportPoint, r1::SupportPoint, r2::SupportPoint, r3::Suppor
 
         if !nextPortal # createBabyTetrahedrons failed
             @warn("MPR (phase 3): Numerical issues with distance computation between $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)). tol_rel increased locally for this computation to $new_tol.")
-            if isTC2
-                (distance,r1,r2,r3,r4) = finalTC2(r1_new,r2_new,r3_new,r4_new)
-                return distance, r1, r2, r3, r4
-            end
-            if isTC3
-                (distance,r1,r2,r3,r4) = finalTC3(r0, r1_new, r2_new, r3_new, r4_new)
-                return distance, r1, r2, r3, r4
-            end
+            return terminateMPR(r0, r1_new, r2_new, r3_new, r4_new, isTC2, isTC3)
         end
     end
-    if niter_max < 100
-        @warn("MPR (phase 3): Numerical issues with distance computation between $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)). Max. number of iterations (= $niter_max) is reached. niter_max increased locally by 10 and phase 3 is rerun.")
-        phase3(r0, r1org, r2org, r3org, niter_max + 10, tol_rel, shapeA, shapeB, scale)
-    else
-        @warn("MPR (phase 3): Max. number of iterations (= $niter_max) is reached and $niter_max > 100, look at $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)). tol_rel increased locally for this computation to $new_tol.")
-        if isTC2
-            (distance,r1,r2,r3,r4) = finalTC2(r1_new,r2_new,r3_new,r4_new)
-            return distance, r1, r2, r3, r4
-        end
-        if isTC3
-            (distance,r1,r2,r3,r4) = finalTC3(r0, r1_new, r2_new, r3_new, r4_new)
-            return distance, r1, r2, r3, r4
-        end
-    end
-    @error("passiert das?!?!?")
-    return distance, r1, r2, r3, r4 # needed for a unique return type
+    @warn("MPR (phase 3): Max. number of iterations (mprIterMax = $niter_max) is reached. Please, increase mprIterMax. tol_rel increased locally for this computation to $new_tol. Look at shapes $(Modia3D.fullName(shapeA)) and $(Modia3D.fullName(shapeB)).")
+    return terminateMPR(r0, r1_new, r2_new, r3_new, r4_new, isTC2, isTC3)
 end
 
 # MPR - Minkowski Portal Refinement algorithm
@@ -363,7 +344,7 @@ end
 #     Termination Condition 2
 #     Termination Condition 3
 #   Phase 3.3: construct baby tetrahedrons with r1,r2,r3,r4 and create a new portal
-function mprGeneral(ch::Composition.ContactDetectionMPR_handler{T,F}, shapeA::Composition.Object3D, shapeB::Modia3D.Composition.Object3D) where {T,F}
+function mprGeneral(ch::Composition.ContactDetectionMPR_handler{T,F}, shapeA::Composition.Object3D{F}, shapeB::Modia3D.Composition.Object3D{F}) where {T,F}
     tol_rel = ch.tol_rel
     niter_max = ch.niter_max
     neps = Modia3D.nepsType(T)
@@ -379,6 +360,11 @@ function mprGeneral(ch::Composition.ContactDetectionMPR_handler{T,F}, shapeA::Co
     # the direction of the origin ray r0 is -r0.p
     centroidA = getCentroid(shapeA)
     centroidB = getCentroid(shapeB)
+    if isnan(centroidA[1]) || isnan(centroidB[1]) ||
+       isnan(centroidA[2]) || isnan(centroidB[2]) ||
+       isnan(centroidA[3]) || isnan(centroidB[3])
+        error("MPR: One of the absolute position or translation is NaN. Look at $(Modia3D.fullName(shapeA)): r_abs = $(shapeA.r_abs), R_abs = $(shapeA.R_abs) and $(Modia3D.fullName(shapeB)): r_abs = $(shapeB.r_abs), R_abs = $(shapeB.R_abs).")
+    end
     r0 = SupportPoint{T}(centroidA-centroidB, -(centroidA-centroidB), SVector{3,T}(0.0,0.0,0.0), SVector{3,T}(0.0,0.0,0.0))
     # check if centers of shapes are overlapping
     checkCentersOfShapesOverlapp(r0, shapeA, shapeB)
