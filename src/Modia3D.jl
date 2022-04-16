@@ -5,7 +5,7 @@ module Modia3D
 
 const path = dirname(dirname(@__FILE__))   # Absolute path of package directory
 const Version = "0.10.3-dev"
-const Date = "2022-03-29"
+const Date = "2022-04-16"
 
 println("\nImporting Modia3D Version $Version ($Date)")
 
@@ -167,5 +167,8 @@ export rereadContactPairMaterialFromJSON
 import StaticArrays
 import LinearAlgebra
 import Test
+import JSON
+import HTTP
+import URIParser
 
 end # module

@@ -69,6 +69,15 @@ Modia3D has various *3D animation features*:
 
 ## Release Notes
 
+### Version 0.10.3
+
+- New keyword `Scene(provideAnimationHistory=true)` in order to store animation data compactly during a simulation run.
+  After `simulate!(instantiatedModel, ...)`, the animation data of a `Model3D(..)` can be retrieved as dictionary via the new 
+  function `get_animationHistory(instantiatedModel, modelPathAsString)`
+
+- Improvements of the MPR algorithm to determine the distances between Object3Ds. 
+
+
 ### Version 0.10.2
 
 - Model3D(..) with no degrees of freedom is now supported (previously, an error was triggered).

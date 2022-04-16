@@ -97,7 +97,7 @@ function buildModia3D!(model::AbstractDict, FloatType::Type, TimeType::Type,
     jointStatesFreeMotion_isrot123 = Expr[]
     freeMotionIndices              = OrderedCollections.OrderedDict{String,Int}()
 
-    println("modelPath = $modelPath")
+    #println("modelPath = $modelPath")
     
     modelPathAsString = isnothing(modelPath) ? "" : string(modelPath)
     
