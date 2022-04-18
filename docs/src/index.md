@@ -93,6 +93,11 @@ julia -JModia3D_sysimage.so  (otherwise)
 
 ## Release Notes
 
+### Version 0.10.4
+
+- Script `Modia3D/create_Modia3D_sysimage.jl` improved.
+
+
 ### Version 0.10.3
 
 - New script `Modia3D/create_Modia3D_sysimage.jl` to create a sysimage for a much faster startup

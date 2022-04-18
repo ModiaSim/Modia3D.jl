@@ -4,7 +4,7 @@
 module Modia3D
 
 const path = dirname(dirname(@__FILE__))   # Absolute path of package directory
-const Version = "0.10.3"
+const Version = "0.10.4"
 const Date = "2022-04-18"
 
 println("\nImporting Modia3D Version $Version ($Date)")
@@ -156,7 +156,6 @@ function reenableRenderer()
     return nothing
 end
 
-
 export PointGravityField, NoGravityField
 
 export print_ModelVariables
@@ -167,8 +166,7 @@ export rereadContactPairMaterialFromJSON
 import StaticArrays
 import LinearAlgebra
 import Test
-import JSON
-import HTTP
-import URIParser
+
+include("ModiatorServer.jl")
 
 end # module
