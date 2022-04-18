@@ -55,6 +55,30 @@ Modia3D has various *3D animation features*:
     For example in Linux with command: `chmod ug+x <path-to-library>/Visualization/Extras/SimVis/linux/SimVis`
 
 
+## Faster Startup
+ 
+In order to speed up startup, it is adviced to generate a sysimage by executing the following commands:
+
+```julia
+julia
+using Modia3D
+include("$(Modia3D.path)/create_Modia3D_sysimage.jl")
+exit()
+```
+
+This will include a file `Modia3D_sysimage.dll` (on Windows) or `Modia3D_sysimage.so` (otherwise) in your
+current working directory that includes all packages of your current project and the following packages
+(these packages are added to your current project, if not yet included):
+
+- Modia, Modia3D, ModiaPlot_PyPlot, PackageCompiler, Revise
+ 
+Start julia with this sysimage in the following way:
+
+```
+julia -JModia3D_sysimage.dll (on Windows)
+julia -JModia3D_sysimage.so  (otherwise)
+```
+
 ## Main Developers and License
 
 [Andrea Neumayr](mailto:andrea.neumayr@dlr.de),
