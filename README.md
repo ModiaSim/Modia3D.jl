@@ -56,7 +56,7 @@ Modia3D has various *3D animation features*:
 
 
 ## Faster Startup
-
+ 
 In order to speed up startup, it is adviced to generate a sysimage by executing the following commands:
 
 ```julia
