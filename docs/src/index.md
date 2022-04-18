@@ -52,6 +52,30 @@ Modia3D has various *3D animation features*:
     For example in Linux with command: `chmod ug+x <path-to-library>/Visualization/Extras/SimVis/linux/SimVis`
 
 
+## Faster Startup
+
+In order to speed up startup, it is adviced to generate a sysimage by executing the following commands:
+
+```julia
+julia
+using Modia3D
+include("$(Modia3D.path)/create_Modia3D_sysimage.jl")
+exit()
+```
+
+This will include a file `Modia3D_sysimage.dll` (on Windows) or `Modia3D_sysimage.so` (otherwise) in your
+current working directory that includes all packages of your current project and the following packages
+(these packages are added to your current project, if not yet included):
+
+- Modia, Modia3D, ModiaPlot_PyPlot, PackageCompiler, Revise
+ 
+Start julia with this sysimage in the following way:
+
+```
+julia -JModia3D_sysimage.dll (on Windows)
+julia -JModia3D_sysimage.so  (otherwise)
+```
+
 ## Publications
 
 |  | Paper or Talk | Conference | DOI or YouTube |
@@ -71,11 +95,14 @@ Modia3D has various *3D animation features*:
 
 ### Version 0.10.3
 
+- New script `Modia3D/create_Modia3D_sysimage.jl` to create a sysimage for a much faster startup
+  (usage see Installation notes above or README.md file).
+
 - New keyword `Scene(provideAnimationHistory=true)` in order to store animation data compactly during a simulation run.
   After `simulate!(instantiatedModel, ...)`, the animation data of a `Model3D(..)` can be retrieved as dictionary via the new 
   function `get_animationHistory(instantiatedModel, modelPathAsString)`
 
-- Improvements of the MPR algorithm to determine the distances between Object3Ds. 
+- Improvements of the MPR algorithm (which determines the distances between Object3Ds). 
 
 
 ### Version 0.10.2
