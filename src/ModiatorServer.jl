@@ -1,21 +1,18 @@
-module ModiatorServer
+export ModiatorServer
 
-using Modia3D
-using Modia3D.StaticArrays
-using Modia3D.JSON
-using Modia3D.HTTP
-using Modia3D.URIParser
-using Base64   # from Base
+import JSON
+import HTTP
+import URIParser
+using  Base64
 
 # ----------------------------------------------------------------------------------------
-
 function saveJSON(req)
     jsonString = String(req.body);
     index = findfirst("%25NAMEEND%25", jsonString);
     name = jsonString[1:index[1]-1]
     println("Saving ", name)
     jsonString = jsonString[index[end] + 1:end]
-    jsonString = unescape(jsonString)
+    jsonString = URIParser.unescape(jsonString)
     println(jsonString)
     io = open(string(name, ".json"), "w");
     write(io, jsonString);
@@ -48,7 +45,7 @@ function saveOBJ(req)
     name = objString[1:index[1]-1]
     println("Saving ", name)
     objString = objString[index[end] + 1:end]
-    objString = unescape(objString)
+    objString = URIParser.unescape(objString)
     io = open(string(name, ".obj"), "w");
     write(io, objString);
     close(io)
@@ -105,7 +102,7 @@ function simulateModel(req)
         return HTTP.Response(200, headers)
     end
     model = String(req.body);
-    model = unescape(model);
+    model = URIParser.unescape(model);
     experiment = JSON.parse(model);
     @time json = generateSimulationResult(experiment);
 #    open("SimRes.txt", "w") do f
@@ -116,7 +113,6 @@ function simulateModel(req)
     return response;
 end
 
-@usingModiaPlot
 
 function generateSimulationResult(experiment)
     println()
@@ -169,29 +165,36 @@ function unknownRequest(req)
     return HTTP.Response(200, "OK")
 end
 
-const ROUTER = HTTP.Router()
-
-HTTP.@register(ROUTER, "POST", "/Modiator/simulateModel/", simulateModel)
-HTTP.@register(ROUTER, "OPTIONS", "/Modiator/simulateModel/", simulateModel)
-
-HTTP.@register(ROUTER, "POST", "/Modiator/saveOBJ/", saveOBJ)
-HTTP.@register(ROUTER, "POST", "/Modiator/loadOBJ/", loadOBJ)
-HTTP.@register(ROUTER, "POST", "/Modiator/loadImageBase64/", loadImageBase64)
-HTTP.@register(ROUTER, "POST", "/Modiator/saveJSON/", saveJSON)
-HTTP.@register(ROUTER, "POST", "/Modiator/loadJSON/", loadJSON)
-#HTTP.@register(ROUTER, "GET", "/Modiator/public/*", getPublic)
-#HTTP.@register(ROUTER, "GET", "/Modiator/icons/*", getIcon)
-HTTP.@register(ROUTER, "GET", "/*", unknownRequest)
-HTTP.@register(ROUTER, "POST", "/*", unknownRequest)
-
-# println("Precompiling")
-# precompile(generateSimulationResult, (Dict,))
-# precompile(HTTP.Router)
-println("Server ready")
-println("Listening to: 127.0.0.1:8000")
-println()
-println("Note that it might take more than 20 seconds for the first simulation to start.")
-
-HTTP.serve(ROUTER, "127.0.0.1", 8000)
-
+function ModiatorServer()::Nothing
+    ROUTER = HTTP.Router()
+    
+    HTTP.@register(ROUTER, "POST", "/Modiator/simulateModel/", simulateModel)
+    HTTP.@register(ROUTER, "OPTIONS", "/Modiator/simulateModel/", simulateModel)
+    
+    HTTP.@register(ROUTER, "POST", "/Modiator/saveOBJ/", saveOBJ)
+    HTTP.@register(ROUTER, "POST", "/Modiator/loadOBJ/", loadOBJ)
+    HTTP.@register(ROUTER, "POST", "/Modiator/loadImageBase64/", loadImageBase64)
+    HTTP.@register(ROUTER, "POST", "/Modiator/saveJSON/", saveJSON)
+    HTTP.@register(ROUTER, "POST", "/Modiator/loadJSON/", loadJSON)
+    #HTTP.@register(ROUTER, "GET", "/Modiator/public/*", getPublic)
+    #HTTP.@register(ROUTER, "GET", "/Modiator/icons/*", getIcon)
+    HTTP.@register(ROUTER, "GET", "/*", unknownRequest)
+    HTTP.@register(ROUTER, "POST", "/*", unknownRequest)
+    
+    # println("Precompiling")
+    # precompile(generateSimulationResult, (Dict,))
+    # precompile(HTTP.Router)
+    println("Server ready")
+    println("Listening to: 127.0.0.1:8000")
+    println()
+    println("Note that it might take more than 20 seconds for the first simulation to start.")
+    
+    HTTP.serve(ROUTER, "127.0.0.1", 8000)
+    return nothing
 end
+
+function julia_main()::Cint
+    ModiatorServer()
+    return 0
+end
+

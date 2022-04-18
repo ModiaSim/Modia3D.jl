@@ -5,6 +5,7 @@ Modia3D.loadPalettes!(solidMaterialPalette       = "$(Modia3D.path)/palettes/sol
                       visualMaterialPalette      = "$(Modia3D.path)/palettes/visualMaterials.json")
 
 Test.@testset "Basic" begin
+    include(joinpath("Basic", "ModelsForPrecompilation.jl"))
     include(joinpath("Basic", "AllShapes.jl"))
     include(joinpath("Basic", "PendulumWithBar1.jl"))
     include(joinpath("Basic", "PendulumWithBar2.jl"))

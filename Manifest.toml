@@ -253,9 +253,9 @@ version = "0.8.6"
 
 [[deps.DoubleFloats]]
 deps = ["GenericLinearAlgebra", "LinearAlgebra", "Polynomials", "Printf", "Quadmath", "Random", "Requires", "SpecialFunctions"]
-git-tree-sha1 = "58b203210416b70fc4f41eed1d55bfe876ef90db"
+git-tree-sha1 = "da91494c1ebc1c057f21b6bef21e89ad5288c2c1"
 uuid = "497a8b3b-efae-58df-a0af-a86822472b78"
-version = "1.2.0"
+version = "1.2.1"
 
 [[deps.Downloads]]
 deps = ["ArgTools", "LibCURL", "NetworkOptions"]
