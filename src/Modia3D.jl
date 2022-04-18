@@ -5,7 +5,7 @@ module Modia3D
 
 const path = dirname(dirname(@__FILE__))   # Absolute path of package directory
 const Version = "0.10.3"
-const Date = "2022-04-16"
+const Date = "2022-04-18"
 
 println("\nImporting Modia3D Version $Version ($Date)")
 
@@ -34,8 +34,8 @@ abstract type AbstractDLR_VisualizationRenderer <: AbstractRenderer end  # Commu
 
 
 using  StaticArrays
-using  DoubleFloats
 using  Reexport
+import DoubleFloats
 import MonteCarloMeasurements
 import Measurements
 import Unitful
@@ -50,7 +50,7 @@ const modelsPath = joinpath(Modia.path, "models")
 const VarFloatType = Union{AbstractFloat, MonteCarloMeasurements.AbstractParticles}
 
 # MPRFloatType defines the float type of MPR calculations
-const MPRFloatType = Double64
+const MPRFloatType = DoubleFloats.Double64
 
 # Used renderer (actual value is defined with __init__() below)
 const renderer = Vector{AbstractRenderer}(undef,2)
