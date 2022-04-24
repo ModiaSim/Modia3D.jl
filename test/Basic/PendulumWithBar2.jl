@@ -10,6 +10,7 @@ Bar = Model(
     Lx = 0.1,
     frame0 = Object3D(feature=Solid(shape=Beam(axis=1, length=:Lx, width=:(0.2*Lx), thickness=:(0.2*Lx)),
                                     solidMaterial="Aluminium",
+                                    massProperties=MassPropertiesFromShape(),
                                     visualMaterial = VisualMaterial(color="Turquoise4", transparency=0.5))),
 	frame1 = Object3D(parent=:frame0,
                       translation=:[-Lx/2, 0.0, 0.0],

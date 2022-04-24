@@ -1,3 +1,5 @@
+# The precompile statements are generated via: 
+#     julia --trace-compile=stderr
 precompile(Tuple{typeof(Modia3D.ModiatorServer)})
 precompile(Tuple{typeof(Base.setindex!), Base.Dict{HTTP.Handlers.Route, Any}, Function, HTTP.Handlers.Route})
 precompile(Tuple{typeof(HTTP.Handlers.gh), String})
