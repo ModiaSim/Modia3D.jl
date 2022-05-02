@@ -391,6 +391,8 @@ YouBot = Model3D(
     servo3 = Servo,
     servo4 = Servo,
     servo5 = Servo,
+    
+    refPath = Var(hideResult=true),    
 
     equations=:[
         refPath = calculateRobotMovement(getReferencePath(), instantiatedModel),

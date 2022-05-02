@@ -474,6 +474,8 @@ YouBot(;pathIndexOffset) = Model(
     servo5 = Servo,
     servo6 = ServoTrans,
 
+    refPath = Var(hideResult=true),
+    
     equations=:[
         refPath = calculateRobotMovement(getReferencePath(), instantiatedModel),
         servo1.refLoadAngle = getRefPathPosition(refPath, 1+pathIndexOffset2),

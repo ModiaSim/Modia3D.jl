@@ -581,7 +581,7 @@ uuid = "a63ad114-7e13-5084-954f-fe012c677804"
 deps = ["DataFrames", "DifferentialEquations", "FiniteDiff", "ForwardDiff", "InteractiveUtils", "JSON", "LinearAlgebra", "Measurements", "ModiaBase", "ModiaResult", "MonteCarloMeasurements", "OrderedCollections", "Printf", "RecursiveFactorization", "Reexport", "StaticArrays", "Sundials", "Test", "TimerOutputs", "Unitful"]
 git-tree-sha1 = "28acd8404dcef5e884f987795093898df45e33a1"
 uuid = "cb905087-75eb-5f27-8515-1ce0ec8e839e"
-version = "0.8.3"
+version = "0.9.0"
 
 [[deps.ModiaBase]]
 deps = ["DataFrames", "DiffRules", "Measurements", "MonteCarloMeasurements", "OrderedCollections", "StaticArrays", "Unitful"]

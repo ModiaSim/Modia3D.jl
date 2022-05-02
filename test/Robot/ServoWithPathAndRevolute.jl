@@ -119,7 +119,7 @@ TestServo = Model3D(
     rev = RevoluteWithFlange(obj1=:world, obj2=:obj2, axis=axis, phi=Var(init=getRefPathInitPosition(referencePath1, 1)), w=Var(init=0.0)),
 
     servo = Servo | servoParameters,
-
+    refPath = Var(hideResult=true),
     equations=:[
         refPath = calculateRobotMovement(getReferencePath(), instantiatedModel),
         servo.refLoadAngle = getRefPathPosition(refPath, 1)
@@ -130,7 +130,7 @@ TestServo = Model3D(
     ]
 )
 
-servo = @instantiateModel(TestServo, unitless=true, logCode=false, log=false)
+servo = @instantiateModel(TestServo, unitless=true, logCode=true, log=true)
 
 stopTime = 4.0
 tolerance = 1e-6
