@@ -19,7 +19,7 @@ export Prismatic, PrismaticWithFlange
 export J123, J132, J123or132, singularRem, FreeMotion, change_rotSequenceInNextIteration!
 export Bushing, SpringDamperPtP
 
-export buildModia3D!, get_animationHistory
+export buildModel3D!, get_animationHistory
 
 import OrderedCollections
 import Modia3D

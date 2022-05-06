@@ -11,7 +11,7 @@ nextMbsName(mbsi,i) = (Symbol("_mbs"*string(i+1)), mbsi, i+1)
 
 
 """
-    buildCode = buildModia3D!(model, FloatType, TimeType, buildDict, modelPath; buildOption = "ComputeGeneralizedForces")
+    buildCode = buildModel3D!(model, FloatType, TimeType, buildDict, modelPath; buildOption = "ComputeGeneralizedForces")
 
 Generate and return the buildCode for a Modia3D model.
 
@@ -50,7 +50,7 @@ if buildOption == "ComputeGeneralizedForces"
 end
 ```
 """
-function buildModia3D!(model::AbstractDict, FloatType::Type, TimeType::Type,
+function buildModel3D!(model::AbstractDict, FloatType::Type, TimeType::Type,
                        buildDict::OrderedCollections.OrderedDict{String,Any},
                        modelPath::Union{Expr,Symbol,Nothing}, 
                        buildOption::String = "ComputeGeneralizedForces")   # ComputeJointAccelerations, ComputeJointAccelerationsOn
@@ -251,7 +251,7 @@ function buildModia3D!(model::AbstractDict, FloatType::Type, TimeType::Type,
     end
     
     # Store info in buildDict
-    buildDict[modelPathAsString] = Modia3D.Composition.MultibodyBuild{FloatType,TimeType}(modelPathAsString, Modia.splitPath(modelPath), revoluteIndices, prismaticIndices, freeMotionIndices)
+    buildDict[modelPathAsString] = Modia3D.Composition.MultibodyBuild{FloatType,TimeType}(modelPathAsString, revoluteIndices, prismaticIndices, freeMotionIndices)
     return mbsCode
 end
 
