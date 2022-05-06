@@ -156,8 +156,11 @@ mutable struct Object3D{F <: Modia3D.VarFloatType} <: Modia3D.AbstractObject3D
     function Object3D{F}(;
         parent::Union{Object3D,Nothing}=nothing,
         path::String="",
-        translation::AbstractVector = Modia3D.ZeroVector3D(F),
+        fixedToParent::Bool = true,
+        translation::Union{AbstractVector,Nothing} = nothing,
         rotation::Union{AbstractVector,Nothing} = nothing,
+        velocity::Union{AbstractVector,Nothing} = nothing,
+        angularVelocity::Union{AbstractVector,Nothing} = nothing,
         feature::Any=nothing,
         kwargs...) where F <: Modia3D.VarFloatType
         if length(kwargs) > 0
@@ -165,11 +168,7 @@ mutable struct Object3D{F <: Modia3D.VarFloatType} <: Modia3D.AbstractObject3D
         end
 
         # create Object3D with created feature
-        fixed = true
-        v_start = Modia3D.ZeroVector3D(F)
-        w_start = Modia3D.ZeroVector3D(F)
-        w_startVariables = WCartesian
-
+        fixed = fixedToParent
         visualizeFrame = Modia3D.Inherited
 
         if isnothing(feature)
@@ -179,14 +178,33 @@ mutable struct Object3D{F <: Modia3D.VarFloatType} <: Modia3D.AbstractObject3D
         end
 
         if !isnothing(parent)
+            if fixedToParent
+                if !isnothing(velocity) || !isnothing(angularVelocity)
+                    @warn("$path is fixedToParent $(parent.path). Therefore, velocity=$velocity and angularVelocity=$angularVelocity are ignored.")
+                end
+            end
             # with parent -> call constructor 3
             if !isnothing(rotation)
                 rotation = Modia3D.convertAndStripUnit(SVector{3,F}, u"rad", rotation)
                 rotation = Frames.rot123(rotation[1], rotation[2], rotation[3])
             end
-            obj = Object3D{F}(parent, feature, fixed=fixed, r=translation, R=rotation, v_start=v_start, w_start=w_start, w_startVariables=w_startVariables, visualizeFrame=visualizeFrame, path=path)
+            if isnothing(translation)
+                translation = Modia3D.ZeroVector3D(F)
+            end
+            if isnothing(velocity)
+                velocity = Modia3D.ZeroVector3D(F)
+            end
+            if isnothing(angularVelocity)
+                angularVelocity = Modia3D.ZeroVector3D(F)
+            end
+            w_startVariables = WCartesian
+
+            obj = Object3D{F}(parent, feature, fixed=fixed, r=translation, R=rotation, v_start=velocity, w_start=angularVelocity, w_startVariables=w_startVariables, visualizeFrame=visualizeFrame, path=path)
         else
             # no parent -> call constructor 2
+            if !isnothing(translation) || !isnothing(rotation) || !isnothing(velocity) || !isnothing(angularVelocity)
+                @warn("No parent is defined for $path. Therefore, translation = $translation, rotation = $rotation, velocity = $velocity and angularVelocity = $angularVelocity are ignored.")
+            end
             obj = Object3D{F}(feature, visualizeFrame=visualizeFrame, path=path)
         end
 
