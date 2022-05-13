@@ -77,7 +77,7 @@ vmat1 = VisualMaterial(color="LightBlue", transparency=0.5)
 arm_joint_2_obj = joinpath(Modia3D.path, "objects/robot_KUKA_YouBot/arm_joint_2.obj")
 m2 = 1.318
 translation2 = [0.155, 0, 0]
-rotation2= [90u"°", 0.0, -90u"°"]
+#rotation2= [90u"°", 0.0, -90u"°"]
 
 k1 = 50.0
 k2 = 0.1
@@ -112,8 +112,7 @@ TestServo = Model3D(
     world = Object3D(feature=Scene()),
     body  = Object3D(feature=Solid(shape=FileMesh(filename=arm_joint_2_obj),
                                    massProperties=MassPropertiesFromShapeAndMass(mass=m2),
-                                   visualMaterial=vmat1),
-                                   rotation = rotation2),
+                                   visualMaterial=vmat1)),
     obj2  = Object3D(parent=:body, translation=translation2),
 
     rev = RevoluteWithFlange(obj1=:world, obj2=:obj2, axis=axis, phi=Var(init=getRefPathInitPosition(referencePath1, 1)), w=Var(init=0.0)),
@@ -130,7 +129,7 @@ TestServo = Model3D(
     ]
 )
 
-servo = @instantiateModel(TestServo, unitless=true, logCode=true, log=true)
+servo = @instantiateModel(TestServo, unitless=true, logCode=false, log=false)
 
 stopTime = 4.0
 tolerance = 1e-6

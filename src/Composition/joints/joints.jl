@@ -7,55 +7,125 @@
 
 mutable struct MultibodyData{F <: Modia3D.VarFloatType, TimeType}
     instantiatedModel::Modia.SimulationModel{F,TimeType}
+    path::String                              # Path of Model3D(...)
 
-    nqdd::Int                                 # Length of qdd vector
     world::Object3D{F}                        # Pointer to world object
     scene::Scene{F}                           # Pointer to scene
-    
+
+    revolute::Vector{Revolute{F}}             # References to revolute joints
+    prismatic::Vector{Prismatic{F}}           # References to prismatic joints
+    freeMotion::Vector{FreeMotion{F}}         # References to freeMotion joints (joint.hidden_qdd_startIndex >= 0)
+
     revoluteObjects::Vector{Object3D{F}}      # References to Object3Ds with a Revolute joint
     prismaticObjects::Vector{Object3D{F}}     # References to Object3Ds with a Prismatic joint
-    freeMotionObjects::Vector{Object3D{F}}    # References to Object3Ds with a FreeMotion joint
-    
+    freeMotionObjects::Vector{Object3D{F}}    # References to Object3Ds with a FreeMotion joint and joint.hiddenState = false
+    hiddenJointObjects::Vector{Object3D{F}}   # References to Object3Ds with a joint that has joint.hiddenState = true
+
     revoluteGenForces::Vector{F}              # = M_r*der(qd_r) + h_r(q,qd,gravity,contact-forces) = <generalized driving torques>
-    prismaticGenForces::Vector{F}             # = M_p*der(qd_p) + h_p(q,qd,gravity,contact-forces) = <generalized driving forces>    
-    freeMotionGenForces::Vector{SVector{3,F}} # = M_f*der(qd_f) + h_f(q,qd,gravity,contact-forces) = 0
-    
+    prismaticGenForces::Vector{F}             # = M_p*der(qd_p) + h_p(q,qd,gravity,contact-forces) = <generalized driving forces>
+    freeMotionGenForces::Vector{SVector{3,F}} # = M_f*der(qd_f) + h_f(q,qd,gravity,contact-forces) = 0             (joint.hiddenState = false)
+    hiddenGenForces::Vector{F}                # = M_hidden*qdd_hidden + h_hidden(q,qd,gravity,contact-forces) = 0  (joint.hiddenState = true)
+
     revoluteCache_h::Vector{F}                # = h_r(q,qd,gravity,contact-forces)
     prismaticCache_h::Vector{F}               # = h_p(q,qd,gravity,contact-forces)
     freeMotionCache_h::Vector{SVector{3,F}}   # = h_f(q,qd,gravity,contact-forces)
-    
+    hiddenCache_h::Vector{F}                  # = h_hidden(q,qd,gravity,contact-forces)
+
     zStartIndex::Int                          # eventHandler.z[zStartIndex] is first index of crossing function
                                               # (or zero, if enableContactDetection=false)
     nz::Int                                   # Number of used zero crossing functions
     time::TimeType                            # Current time
 
-    freeMotionResiduals::Vector{F}  
-    
+    freeMotionResiduals::Vector{F}            # freeMotionGenForces with elements of type F instead of type SVector{3,F}
+
     # for multibodyAccelerations
     leq::Vector{Modia.LinearEquations{F}}
 
-    MultibodyData{F,TimeType}(instantiatedModel, nqdd, world, scene, 
-                              revoluteObjects, prismaticObjects, freeMotionObjects,
-                              zStartIndex, nz, time) where {F,TimeType} =
-                         new(instantiatedModel, nqdd, world, scene, 
-                             revoluteObjects, prismaticObjects, freeMotionObjects,
-                             zeros(F, length(revoluteObjects)), zeros(F, length(prismaticObjects)), zeros(SVector{3,F}, 2*length(freeMotionObjects)),
-                             zeros(F, length(revoluteObjects)), zeros(F, length(prismaticObjects)), zeros(SVector{3,F}, 2*length(freeMotionObjects)), 
-                             zStartIndex, nz, Modia3D.convertAndStripUnit(TimeType, u"s", time), 
-                             zeros(F, 2*3*length(freeMotionObjects)),
-                             Modia.LinearEquations{F}[])
+    function MultibodyData{F,TimeType}(partiallyInstantiatedModel::Modia.SimulationModel{F,TimeType}, modelPath::String, world, scene,
+                                       revoluteObjects, prismaticObjects, freeMotionObjects, hiddenJointObjects,
+                                       revoluteIndices, prismaticIndices, freeMotionIndices,
+                                       zStartIndex, nz) where {F,TimeType}
+        # Make joints available
+        revoluteJoints   = Vector{Revolute{F}}(  undef, length(revoluteObjects))
+        prismaticJoints  = Vector{Prismatic{F}}( undef, length(prismaticObjects))
+        freeMotionJoints = Vector{FreeMotion{F}}(undef, length(freeMotionObjects) + length(hiddenJointObjects))
+
+        for obj in revoluteObjects
+            obj.jointIndex = revoluteIndices[obj.joint.path]
+            revoluteJoints[obj.jointIndex] = obj.joint
+        end
+
+        for obj in prismaticObjects
+            obj.jointIndex = prismaticIndices[obj.joint.path]
+            prismaticJoints[obj.jointIndex] = obj.joint
+        end
+
+        for obj in freeMotionObjects
+            obj.jointIndex = freeMotionIndices[obj.joint.path]
+            freeMotionJoints[obj.jointIndex] = obj.joint
+
+            if hasNoParent(obj.parent)
+                obj.jointKind = AbsoluteFreeMotionKind
+            end
+        end
+
+        # Code below assumes, that all hiddenJointObjects are FreeMotion joints
+        i = 1
+        j = length(freeMotionObjects) + 1
+        eqInfo = partiallyInstantiatedModel.equationInfo
+        for obj in hiddenJointObjects
+            joint = obj.joint
+            @assert(typeof(joint) <: FreeMotion)
+            freeMotionJoints[j] = obj.joint
+            freeMotion = freeMotionJoints[j]
+            freeMotion.iqdd_hidden = i
+            obj.jointIndex = j
+            i += 6
+            j += 1
+
+            if hasNoParent(obj.parent)
+                obj.jointKind = AbsoluteFreeMotionKind
+            end
+
+            # Define hidden model states and copy initial values into eqInfo (since SVectors -> values are copied)
+            freeMotion.ix_r   = Modia.addState(eqInfo, modelPath*".translation"    , modelPath*".der(translation)"    , freeMotion.r)
+            freeMotion.ix_rot = Modia.addState(eqInfo, modelPath*".rotation"       , modelPath*".der(rotation)"       , freeMotion.rot)
+            freeMotion.ix_v   = Modia.addState(eqInfo, modelPath*".velocity"       , modelPath*".der(velocity)"       , freeMotion.v)
+            freeMotion.ix_w   = Modia.addState(eqInfo, modelPath*".angularVelocity", modelPath*".der(angularVelocity)", freeMotion.w)
+
+            # Define event indicator to monitor changing sequence of rotation angles
+            freeMotion.iz_rot2 = Modia.addZeroCrossings(partiallyInstantiatedModel, 1)
+        end
+
+        for obj in scene.treeForComputation
+            if obj.jointKind == FixKind
+                if obj.R_rel === Modia3D.NullRotation(F)
+                    obj.jointKind = FixTranslationKind
+                end
+            end
+        end
+        nhidden_qdd = 6*length(hiddenJointObjects)
+
+        new(partiallyInstantiatedModel, modelPath, world, scene,
+            revoluteJoints , prismaticJoints , freeMotionJoints,
+            revoluteObjects, prismaticObjects, freeMotionObjects, hiddenJointObjects,
+            zeros(F, length(revoluteObjects)), zeros(F, length(prismaticObjects)), zeros(SVector{3,F}, 2*length(freeMotionObjects)), zeros(F, nhidden_qdd),
+            zeros(F, length(revoluteObjects)), zeros(F, length(prismaticObjects)), zeros(SVector{3,F}, 2*length(freeMotionObjects)), zeros(F, nhidden_qdd),
+            zStartIndex, nz, partiallyInstantiatedModel.time,
+            zeros(F, 2*3*length(freeMotionObjects)),
+            Modia.LinearEquations{F}[])
+    end
 end
 
 mutable struct MultibodyBuild{F <: Modia3D.VarFloatType, TimeType}
     Model3DPath::String                         # Path of the Model3D(..) command used to define the system, e.g. "a.b.c"
-    Model3DSplittedPath::Vector{Symbol}         # Splitted Model3DPath, e.g. [:a, :b, :c]
     revoluteIndices::OrderedDict{String,Int}    # obj.jointIndex = revoluteIndices["a.b.c"] (= order of arguments in setStatesRevolute!(..., args...))
     prismaticIndices::OrderedDict{String,Int}   # obj.jointIndex = prismaticIndices["a.b.c"] (= order of arguments in setStatesPrismatic!(..., args...))
     freeMotionIndices::OrderedDict{String,Int}  # obj.jointIndex = freeMotionIndices["a.b.c"] (= order of arguments in setStatesFreeMotion!(..., args...))
-    mbs::Union{MultibodyData{F,TimeType}, Nothing}  
-    
-    MultibodyBuild{F,TimeType}(Model3DPath::String, Model3DSplittedPath::Vector{Symbol}, revoluteIndices, prismaticIndices, freeMotionIndices) where {F,TimeType} =
-                              new(Model3DPath, Model3DSplittedPath, revoluteIndices, prismaticIndices, freeMotionIndices, nothing)    
+    mbs::Union{MultibodyData{F,TimeType}, Nothing}
+
+    MultibodyBuild{F,TimeType}(Model3DPath::String, revoluteIndices, prismaticIndices, freeMotionIndices) where {F,TimeType} =
+                              new(Model3DPath, revoluteIndices, prismaticIndices, freeMotionIndices, nothing)
 end
 
 
@@ -148,7 +218,7 @@ function attach(obj1::Object3D, obj2::Object3D; name = "")
                 "    ", getParents(obj1,rootPath1), "\n",
                 "    ", getParents(obj2,rootPath2), "\n",
                 "    Therefore, a closed kinematic loop is defined, which is currently not supported.")
-      end     
+      end
       return (obj1,obj2,true)
    end
 
@@ -256,26 +326,21 @@ function wfromrot123(rot123::AbstractVector, derrot123::AbstractVector)
 end
 
 
-# Next function only for backwards compatibility (do not use for new model)
-#computeKinematics!(scene::Scene, joint::Modia3D.AbstractJoint, obj::Object3D, analysis::Modia3D.AnalysisType, time)::Nothing =
-#    computeKinematics!(scene, [obj], Float64(time) )
-
-
 """
-    computePositionsVelocitiesAccelerations!(scene::Scene{F}, tree::Vector{Object3D{F}}, time) where F <: Modia3D.VarFloatType
+    computePositionsVelocitiesAccelerations!(mbs::MultibodyData{F}, tree::Vector{Object3D{F}}, time) where F <: Modia3D.VarFloatType
 
 Compute position, velocity, acceleration variables of the Object3Ds that are connected
 in form of a tree. Variable `tree` contains the Object3Ds in a traversal order (e.g. pre-order traversal).
 `tree[1]` is the root object. It is assumed that the kinematic
 variables of tree[1].parent have a meaningful value.
 """
-function computePositionsVelocitiesAccelerations!(scene::Scene{F}, tree::Vector{Object3D{F}}, time)::Nothing where F <: Modia3D.VarFloatType
+function computePositionsVelocitiesAccelerations!(mbs::MultibodyData{F,TimeType}, tree::Vector{Object3D{F}}, time)::Nothing where {F <: Modia3D.VarFloatType, TimeType}
     @inbounds for obj in tree
         parent    = obj.parent
         jointKind = obj.jointKind
 
         if jointKind == RevoluteKind
-            revolute  = scene.revolute[obj.jointIndex]
+            revolute  = mbs.revolute[obj.jointIndex]
 
             obj.r_abs = parent.r_abs
             obj.R_rel = Frames.rotAxis(revolute.posAxis, revolute.posMovement, revolute.phi)
@@ -291,7 +356,7 @@ function computePositionsVelocitiesAccelerations!(scene::Scene{F}, tree::Vector{
             obj.z = obj.R_rel*(parent.z + z_rel + cross(parent.w, w_rel))
 
         elseif jointKind == PrismaticKind
-            prismatic = scene.prismatic[obj.jointIndex]
+            prismatic = mbs.prismatic[obj.jointIndex]
 
             obj.r_rel = prismatic.eAxis*prismatic.s
             obj.r_abs = parent.r_abs + parent.R_abs'*obj.r_rel
@@ -306,7 +371,7 @@ function computePositionsVelocitiesAccelerations!(scene::Scene{F}, tree::Vector{
             obj.z  = parent.z
 
         elseif jointKind == AbsoluteFreeMotionKind
-            freeMotion  = scene.freeMotion[obj.jointIndex]
+            freeMotion  = mbs.freeMotion[obj.jointIndex]
 
             obj.r_rel = freeMotion.r
             obj.R_rel = freeMotion.isrot123 ? Rfromrot123(freeMotion.rot) : Rfromrot132(freeMotion.rot)
@@ -321,7 +386,7 @@ function computePositionsVelocitiesAccelerations!(scene::Scene{F}, tree::Vector{
             obj.z  = freeMotion.z
 
         elseif jointKind == FreeMotionKind
-            freeMotion  = scene.freeMotion[obj.jointIndex]
+            freeMotion  = mbs.freeMotion[obj.jointIndex]
 
             obj.r_rel = freeMotion.r
             obj.R_rel = freeMotion.isrot123 ? Rfromrot123(freeMotion.rot) : Rfromrot132(freeMotion.rot)
@@ -334,7 +399,7 @@ function computePositionsVelocitiesAccelerations!(scene::Scene{F}, tree::Vector{
                                                     cross(parent.w, cross(parent.w, obj.r_rel)))
             obj.w  = parent.R_abs*parent.w + freeMotion.w
             obj.z  = parent.R_abs*parent.z + freeMotion.z
-            
+
         elseif jointKind == FixTranslationKind
             obj.r_abs = parent.r_abs + parent.R_abs'*obj.r_rel
             obj.R_abs = parent.R_abs
@@ -354,7 +419,7 @@ function computePositionsVelocitiesAccelerations!(scene::Scene{F}, tree::Vector{
 
             obj.w = obj.R_rel*parent.w
             obj.z = obj.R_rel*parent.z
-            
+
         else
             error("Bug in Modia3D/src/Composition/joints/joints.jl (computePositionsVelocitiesAccelerations!): jointKind = $jointKind is not known.")
         end
@@ -365,26 +430,26 @@ end
 
 
 """
-    computeAccelerations!(scene::Scene, tree::Vector{Object3D{F}}, time)
+    computeAccelerations!(mbs::MultibodyData{F,TimeType}, tree::Vector{Object3D{F}}, time)
 
-Traverse the tree of Object3Ds from world to leaf objects and compute the generalized accelerations of the 
+Traverse the tree of Object3Ds from world to leaf objects and compute the generalized accelerations of the
 joints and the accelerations of the Object3Ds. Hereby it is assumed that the generalized position/velocities
-of the joints and the position/velocities of bhe Object3Ds are already stored in the Object3Ds/joints.
+of the joints and the position/velocities of the Object3Ds are already stored in the Object3Ds/joints.
 """
-function computeAccelerations!(scene::Scene{F}, tree::Vector{Object3D{F}}, time)::Nothing where F <: Modia3D.VarFloatType
+function computeAccelerations!(mbs::MultibodyData{F,TimeType}, tree::Vector{Object3D{F}}, time)::Nothing where {F <: Modia3D.VarFloatType, TimeType}
     @inbounds for obj in tree
         parent    = obj.parent
         jointKind = obj.jointKind
 
         if jointKind == RevoluteKind
-            revolute = scene.revolute[obj.jointIndex]
+            revolute = mbs.revolute[obj.jointIndex]
 
             obj.a0 = parent.a0
             z_rel  = Frames.axisValue(revolute.posAxis, revolute.posMovement, revolute.a)
             obj.z  = obj.R_rel*(parent.z + z_rel)
 
         elseif jointKind == PrismaticKind
-            prismatic = scene.prismatic[obj.jointIndex]
+            prismatic = mbs.prismatic[obj.jointIndex]
 
             eAxis  = prismatic.posMovement ? prismatic.posAxis : -prismatic.posAxis
             a_rel  = prismatic.eAxis*prismatic.a
@@ -392,13 +457,13 @@ function computeAccelerations!(scene::Scene{F}, tree::Vector{Object3D{F}}, time)
             obj.z  = parent.z
 
         elseif jointKind == AbsoluteFreeMotionKind
-            freeMotion = scene.freeMotion[obj.jointIndex]
+            freeMotion = mbs.freeMotion[obj.jointIndex]
 
             obj.a0 = freeMotion.a
             obj.z  = freeMotion.z
 
         elseif jointKind == FreeMotionKind
-            freeMotion = scene.freeMotion[obj.jointIndex]
+            freeMotion = mbs.freeMotion[obj.jointIndex]
 
             obj.a0 = parent.a0 + parent.R_abs'*(freeMotion.a + cross(parent.z, obj.r_rel))
             obj.z  = parent.R_abs*parent.z + freeMotion.z
@@ -421,7 +486,7 @@ end
 
 
 """
-    computeObject3DForcesTorquesAndGenForces!(mbs::MultibodyData{F}, tree::Vector{Object3D{F}}, time)
+    computeObject3DForcesTorquesAndGenForces!(mbs::MultibodyData{F,TimeType}, tree::Vector{Object3D{F}}, time)
 
 Traverse the tree of Object3Ds from leaf objects to world, and transform/propagate the forces/torques
 from the Object3D to its parent Object3D. Furthermore, store the projection of the force/torque
@@ -430,18 +495,19 @@ along the degrees of freedoms of the joints in the joints.
 It is assumed that the force/torque variables of every Object3D are initialized (e.g. to zero), including
 tree[1].parent.
 """
-function computeObject3DForcesTorquesAndGenForces!(mbs::MultibodyData{F}, tree::Vector{Object3D{F}}, time)::Nothing where F <: Modia3D.VarFloatType
-    scene = mbs.scene
+function computeObject3DForcesTorquesAndGenForces!(mbs::MultibodyData{F,TimeType}, tree::Vector{Object3D{F}}, time)::Nothing where {F <: Modia3D.VarFloatType,TimeType}
     revoluteGenForces   = mbs.revoluteGenForces
     prismaticGenForces  = mbs.prismaticGenForces
-    freeMotionGenForces = mbs.freeMotionGenForces   
+    freeMotionGenForces = mbs.freeMotionGenForces
+    hiddenGenForces     = mbs.hiddenGenForces
+
     @inbounds for i = length(tree):-1:1
         obj       = tree[i]
         parent    = obj.parent
         jointKind = obj.jointKind
 
         if jointKind == RevoluteKind
-            revolute  = scene.revolute[obj.jointIndex]
+            revolute  = mbs.revolute[obj.jointIndex]
             parent.f += obj.R_rel'*obj.f
             parent.t += obj.R_rel'*obj.t
             obj.f     = -obj.f
@@ -449,18 +515,29 @@ function computeObject3DForcesTorquesAndGenForces!(mbs::MultibodyData{F}, tree::
             revoluteGenForces[obj.jointIndex] = revolute.posMovement ? obj.t[revolute.posAxis] : -obj.t[revolute.posAxis]
 
         elseif jointKind == PrismaticKind
-            prismatic = scene.prismatic[obj.jointIndex]
+            prismatic = mbs.prismatic[obj.jointIndex]
             parent.f += obj.f
             parent.t += obj.t + cross(obj.r_rel, obj.f)
             obj.f     = -obj.f
             obj.t     = -obj.t
-            prismaticGenForces[obj.jointIndex] = dot(prismatic.eAxis,obj.f)          
+            prismaticGenForces[obj.jointIndex] = dot(prismatic.eAxis,obj.f)
 
         elseif jointKind == AbsoluteFreeMotionKind || jointKind == FreeMotionKind
-            j = 2*obj.jointIndex 
-            freeMotionGenForces[j-1] = obj.f
-            freeMotionGenForces[j]   = obj.t    
-            
+            freeMotion = mbs.freeMotion[obj.jointIndex]
+            if freeMotion.hiddenState
+                j = freeMotion.iqdd_hidden
+                hiddenGenForces[j  ] = obj.f[1]
+                hiddenGenForces[j+1] = obj.f[2]
+                hiddenGenForces[j+2] = obj.f[3]
+                hiddenGenForces[j+3] = obj.t[1]
+                hiddenGenForces[j+4] = obj.t[2]
+                hiddenGenForces[j+5] = obj.t[3]
+            else
+                j = 2*obj.jointIndex
+                freeMotionGenForces[j-1] = obj.f
+                freeMotionGenForces[j]   = obj.t
+            end
+
         elseif jointKind == FixTranslationKind
             parent.f += obj.f
             parent.t += obj.t + cross(obj.r_rel, obj.f)
@@ -468,7 +545,7 @@ function computeObject3DForcesTorquesAndGenForces!(mbs::MultibodyData{F}, tree::
         elseif jointKind == FixKind
             parent.f += obj.R_rel'*obj.f
             parent.t += obj.R_rel'*obj.t + cross(obj.r_rel, obj.f)
-            
+
         else
             error("Bug in Modia3D/src/Composition/joints/joints.jl (computeGeneralizedForces!): jointKind = $jointKind is not known.")
         end
@@ -478,16 +555,15 @@ end
 
 
 """
-    setStatesRevolute!(mbs::MultibodyData{F}, args::Vararg{F,N}) where {F,N}
+    setStatesRevolute!(mbs::MultibodyData{F,TimeType}, args::Vararg{F,N}) where {F,TimeType,N}
 
 Copy states of the revolute joints into the corresponding Object3Ds.
 """
 function setStatesRevolute!(mbs::MultibodyData{F,TimeType}, args::Vararg{F,N})::MultibodyData{F,TimeType} where {F,TimeType,N}
     @assert(N == 2*length(mbs.revoluteObjects))
-    scene = mbs.scene
     j = 1
     @inbounds for obj in mbs.revoluteObjects
-        revolute     = scene.revolute[obj.jointIndex]
+        revolute     = mbs.revolute[obj.jointIndex]
         revolute.phi = args[j]
         revolute.w   = args[j+1]
         j += 2
@@ -497,16 +573,15 @@ end
 
 
 """
-    setStatesPrismatic!(mbs::MultibodyData{F}, args::Vararg{F,N}) where {F,N}
+    setStatesPrismatic!(mbs::MultibodyData{F,TimeType}, args::Vararg{F,N}) where {F,N}
 
 Copy states of the prismatic joints into the corresponding Object3Ds.
 """
 function setStatesPrismatic!(mbs::MultibodyData{F,TimeType}, args::Vararg{F,N})::MultibodyData{F,TimeType} where {F,TimeType,N}
     @assert(N == 2*length(mbs.prismaticObjects))
-    scene = mbs.scene
     j = 1
     @inbounds for obj in mbs.prismaticObjects
-        prismatic   = scene.prismatic[obj.jointIndex]
+        prismatic   = mbs.prismatic[obj.jointIndex]
         prismatic.s = args[j]
         prismatic.v = args[j+1]
         j += 2
@@ -516,19 +591,18 @@ end
 
 
 """
-    setStatesFreeMotion!(mbs::MultibodyData{F}, args::Vararg{SVector{3,F},N}) where {F,N}
+    setStatesFreeMotion!(mbs::MultibodyData{F,TimeType}, args::Vararg{SVector{3,F},N}) where {F,N}
 
 Copy states of the free motion joints into the corresponding Object3Ds.
 """
 function setStatesFreeMotion!(mbs::MultibodyData{F,TimeType}, args::Vararg{SVector{3,F},N})::MultibodyData{F,TimeType} where {F,TimeType,N}
     @assert(N== 4*length(mbs.freeMotionObjects))
-    scene = mbs.scene
     j = 1
     @inbounds for obj in mbs.freeMotionObjects
-        freeMotion     = scene.freeMotion[obj.jointIndex]
+        freeMotion     = mbs.freeMotion[obj.jointIndex]
         freeMotion.r   = args[j]
         freeMotion.v   = args[j+1]
-        freeMotion.rot = args[j+2]        
+        freeMotion.rot = args[j+2]
         freeMotion.w   = args[j+3]
         j += 4
     end
@@ -537,45 +611,79 @@ end
 
 
 """
-    setStatesFreeMotion_isrot123!(mbs::MultibodyData{F}, args::Vararg{Bool,N})
+    setStatesFreeMotion_isrot123!(mbs::MultibodyData{F,TimeType}, args::Vararg{Bool,N})
 
 Copy isrot123 of the free motion joints into the corresponding Object3Ds.
 """
 function setStatesFreeMotion_isrot123!(mbs::MultibodyData{F,TimeType}, args::Vararg{Bool,N})::MultibodyData{F,TimeType} where {F,TimeType,N}
     @assert(N == length(mbs.freeMotionObjects))
-    scene = mbs.scene
     @inbounds for (i,obj) in enumerate(mbs.freeMotionObjects)
-        scene.freeMotion[obj.jointIndex].isrot123 = args[i]
+        mbs.freeMotion[obj.jointIndex].isrot123 = args[i]
     end
     return mbs
 end
 
 
 """
-    setAccelerationsRevolute!(mbs::MultibodyData{F}, args::Vararg{F,N}) where {F,N}
+    setStatesHiddenJoints!(instantiatedModel::Modia.SimulationModel, mbs::MultibodyData)
+
+Copy states from the hidden state vector instantiatedModel.x_hidden to the hidden joints into the corresponding Object3Ds
+and copy some state derivatives into instantiatedModel.der_x_hidden.
+"""
+function setStatesHiddenJoints!(m::Modia.SimulationModel{F,TimeType}, mbs::MultibodyData{F,TimeType})::Nothing where {F,TimeType}
+    x     = m.x_hidden
+    der_x = m.der_x_hidden
+    j1::Int = 0
+    j2::Int = 0
+    j3::Int = 0
+    j4::Int = 0
+    for obj in mbs.hiddenJointObjects
+        # Copy x_hidden states into freeMotion states
+        freeMotion = mbs.freeMotion[obj.jointIndex]
+        j1 = freeMotion.ix_hidden_r  ;  freeMotion.r   = SVector{3,F}(x[j1], x[j1+1], x[j1+2])
+        j2 = freeMotion.ix_hidden_rot;  freeMotion.rot = SVector{3,F}(x[j2], x[j2+1], x[j2+2])
+        j3 = freeMotion.ix_hidden_v  ;  freeMotion.v   = SVector{3,F}(x[j3], x[j3+1], x[j3+2])
+        j4 = freeMotion.ix_hidden_w  ;  freeMotion.w   = SVector{3,F}(x[j4], x[j4+1], x[j4+2])
+
+        # Copy some freeMotion state derivatives into der_x_hidden
+            # der(r) = v
+            der_x[j1]   = freeMotion.v[j1]
+            der_x[j1+1] = freeMotion.v[j1+1]
+            der_x[j1+2] = freeMotion.v[j1+2]
+
+            # der(rot) = J123or132(rot,isrot123) * w
+            der_rot = J123or132(freeMotion.rot, freeMotion.isrot123)*freeMotion.w
+            der_x[j2]   = der_rot[1]
+            der_x[j2+1] = der_rot[2]
+            der_x[j2+2] = der_rot[3]
+    end
+    return nothing
+end
+
+
+"""
+    setAccelerationsRevolute!(mbs::MultibodyData{F,TimeType}, args::Vararg{F,N})
 
 Copy accelerations of revolute joints into mbs.
 """
 function setAccelerationsRevolute!(mbs::MultibodyData{F,TimeType}, args::Vararg{F,N}) where {F,TimeType,N}
     @assert(N == length(mbs.revoluteObjects))
-    scene = mbs.scene
     @inbounds for (i,obj) in enumerate(mbs.revoluteObjects)
-        scene.revolute[obj.jointIndex].a = args[i]
+        mbs.revolute[obj.jointIndex].a = args[i]
     end
     return mbs
 end
 
 
 """
-    setAccelerationsPrismatic!(mbs::MultibodyData{F}, args::Vararg{F,N}) where {F,N}
+    setAccelerationsPrismatic!(mbs::MultibodyData{F,TimeType}, args::Vararg{F,N})
 
 Copy accelerations of prismatic joints into mbs.
 """
 function setAccelerationsPrismatic!(mbs::MultibodyData{F,TimeType}, args::Vararg{F,N}) where {F,TimeType,N}
     @assert(N == length(mbs.prismaticObjects))
-    scene = mbs.scene
     @inbounds for (i,obj) in enumerate(mbs.prismaticObjects)
-        scene.prismatic[obj.jointIndex].a = args[i]
+        mbs.prismatic[obj.jointIndex].a = args[i]
     end
     return mbs
 end
@@ -588,10 +696,9 @@ Copy accelerations of free motion joints into mbs
 """
 function setAccelerationsFreeMotion!(mbs::MultibodyData{F,TimeType}, args::Vararg{SVector{3,F},N}) where {F,TimeType,N}
     @assert(N == 2*length(mbs.freeMotionObjects))
-    scene = mbs.scene
     j = 1
     @inbounds for obj in mbs.freeMotionObjects
-        freeMotion   = scene.freeMotion[obj.jointIndex]
+        freeMotion   = mbs.freeMotion[obj.jointIndex]
         freeMotion.a = args[j]
         freeMotion.z = args[j+1]
         j += 2
@@ -599,8 +706,48 @@ function setAccelerationsFreeMotion!(mbs::MultibodyData{F,TimeType}, args::Varar
     return mbs
 end
 
+
 """
-    (tau1,tau2,<...>) = getGenForcesRevolute(mbs::MultibodyData{F}, ::Val{N}) where {F <: Modia3D.VarFloatType,N}
+    setAccelerationsHiddenJoints!(mbs, qdd_hidden)
+
+Copy accelerations qdd_hidden of hidden joints into mbs
+"""
+function setAccelerationsHiddenJoints!(mbs::MultibodyData{F,TimeType}, qdd_hidden::Vector{F})::Nothing where {F,TimeType}
+    for obj in mbs.hiddenJointObjects
+        freeMotion = mbs.freeMotion[obj.jointIndex]
+        j = freeMotion.iqdd_hidden
+        freeMotion.a = SVector{3,F}(qdd_hidden[j]  , qdd_hidden[j+1], qdd_hidden[j+2])
+        freeMotion.z = SVector{3,F}(qdd_hidden[j+3], qdd_hidden[j+4], qdd_hidden[j+5])
+    end
+    return nothing
+end
+
+
+"""
+    setHiddenStatesDerivatives!(instantiatedModel, mbs)
+
+Copy derivatives of hidden states to instantiatedModel.der_x_hidden
+"""
+function setHiddenStatesDerivatives!(m::Modia.SimulationModel{F,TimeType}, mbs::MultibodyData{F,TimeType})::Nothing where {F,TimeType}
+    for obj in mbs.hiddenJointObjects
+        freeMotion = mbs.freeMotion[obj.jointIndex]
+
+        j = freeMotion.ix_hidden_v
+        m.der_x_hidden[j  ] = freeMotion.a[1]
+        m.der_x_hidden[j+1] = freeMotion.a[2]
+        m.der_x_hidden[j+2] = freeMotion.a[3]
+
+        j = freeMotion.ix_hidden_w
+        m.der_x_hidden[j  ] = freeMotion.z[1]
+        m.der_x_hidden[j+1] = freeMotion.z[2]
+        m.der_x_hidden[j+2] = freeMotion.z[3]
+    end
+    return nothing
+end
+
+
+"""
+    (tau1,tau2,<...>) = getGenForcesRevolute(mbs::MultibodyData{F,TimeType}, ::Val{N})
 
 Return generalized forces of revolute joints as NTuple.
 """
@@ -609,7 +756,7 @@ getGenForcesRevolute(mbs::MultibodyData{F,TimeType}, ::Val{N}) where {F,TimeType
 
 
 """
-    (f1,f2,<...>) = getGenForcesPrismatic(mbs::MultibodyData{F}, ::Val{N}) where {F <: Modia3D.VarFloatType,N}
+    (f1,f2,<...>) = getGenForcesPrismatic(mbs::MultibodyData{F,TimeType}, ::Val{N})
 
 Return generalized forces of prismatic joints as NTuple.
 """
@@ -618,7 +765,7 @@ getGenForcesPrismatic(mbs::MultibodyData{F,TimeType}, ::Val{N}) where {F,TimeTyp
 
 
 """
-    residuals = getGenForcesFreeMotion(mbs::MultibodyData{F}, ::Val{N}) where {F <: Modia3D.VarFloatType,N}
+    residuals = getGenForcesFreeMotion(mbs::MultibodyData{F,TimeType}, ::Val{N})
 
 Return generalized forces of free motion joints as Vector to be used for residuals vector.
 """
@@ -634,6 +781,14 @@ function getGenForcesFreeMotion(mbs::MultibodyData{F,TimeType})::Vector{F} where
     end
     return res
 end
+
+
+"""
+    residuals = getGenForcesHiddenJoints(mbs::MultibodyData{F,TimeType}, qdd_hidden::Vector{F})
+
+Return generalized forces of hidden joints as Vector to be used for residuals vector.
+"""
+getGenForcesHiddenJoints(mbs, qdd_hidden) = mbs.hiddenGenForces
 
 
 # For backwards compatibility (do not use for new models)

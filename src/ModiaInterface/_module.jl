@@ -34,7 +34,7 @@ include("$(Modia.path)/models/Electric.jl")
 include("$(Modia.path)/models/Rotational.jl")
 include("$(Modia.path)/models/Translational.jl")
 
-include("buildModia3D.jl")
+include("buildModel3D.jl")
 include("model3D.jl")
 
 end

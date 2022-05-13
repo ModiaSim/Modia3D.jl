@@ -31,28 +31,43 @@ Generate and return the buildCode for a Modia3D model.
 This function returns the following type of code:
 
 ```
-mbs1 = Modia3D.openModel3D!(instantiatedModel, modelPathAsString, ndofTotal, time)
-mbs2 = Modia3D.setStatesRevolute!(mbs1, jointStatesRevolute...)
-mbs3 = Modia3D.setStatesPrismatic!(mbs2, jointStatesPrismatic...)
-mbs4 = Modia3D.setStatesFreeMotion!(mbs3, jointStatesFreeMotion...)
-mbs5 = Modia3D.setStatesFreeMotion_isrot123!(mbs4, jointStatesFreeMotion_isrot123...)
+qdd_hidden = Var(hideResult=true, start=[]),
+success = Var(hideResult=true),
+mbs1 = Var(hideResult=true),
+mbs2 = Var(hideResult=true),
+mbs3 = Var(hideResult=true),
+mbs4 = Var(hideResult=true),
+mbs5 = Var(hideResult=true),
+mbs6 = Var(hideResult=true),
+mbs7 = Var(hideResult=true),
+mbs8 = Var(hideResult=true),
+mbs9 = Var(hideResult=true),
+equations = :[
+    mbs1 = Modia3D.openModel3D!(instantiatedModel, modelPathAsString, time)
+    mbs2 = Modia3D.setStatesRevolute!(mbs1, jointStatesRevolute...)
+    mbs3 = Modia3D.setStatesPrismatic!(mbs2, jointStatesPrismatic...)
+    mbs4 = Modia3D.setStatesFreeMotion!(mbs3, jointStatesFreeMotion...)
+    mbs5 = Modia3D.setStatesFreeMotion_isrot123!(mbs4, jointStatesFreeMotion_isrot123...)
 
-if buildOption == "ComputeGeneralizedForces"
-    # genForces := M(q)*qdd + h(q,qd)
-    mbs6 = Modia3D.setAccelerationsRevolute!  (mbs5, jointAccelerationsRevolute...)
-    mbs7 = Modia3D.setAccelerationsPrismatic!( mbs6, jointAccelerationsPrismatic...)
-    mbs8 = Modia3D.setAccelerationsFreeMotion!(mbs7, jointAccelerationsFreeMotion2...) 
-    mbs9 = Modia3D.computeGeneralizedForces!(  mbs8, _leq)
-    (success1, jointForcesRevolute...)   = implicitDependency(Modia3D.getGenForcesRevolute(  mbs9, Val(NRevolute))   , jointAccelerationsRevolute...))
-    (success2, jointForcesPrismatic...)  = implicitDependency(Modia3D.getGenForcesPrismatic( mbs9, Val(NPrismatic))  , jointAccelerationsPrismatic...)) 
-    (success3, jointForcesFreeMotion...) = implicitDependency(Modia3D.getGenForcesFreeMotion(mbs9, Val(NFreeMotion2)), jointAccelerationsFreeMotion2...))
-    success4 = Modia3D.closeModel3D!(mbs1, success1, success2, success3)
-end
+    if buildOption == "ComputeGeneralizedForces"
+        # genForces := M(q)*qdd + h(q,qd)
+        mbs6 = Modia3D.setAccelerationsRevolute! (   mbs5, jointAccelerationsRevolute...)
+        mbs7 = Modia3D.setAccelerationsPrismatic!(   mbs6, jointAccelerationsPrismatic...)
+        mbs8 = Modia3D.setAccelerationsFreeMotion!(  mbs7, jointAccelerationsFreeMotion2...)
+        mbs9 = Modia3D.setAccelerationsHiddenJoints!(mbs8, qdd_hidden)
+        mbs10 = Modia3D.computeGeneralizedForces!(mbs9, _leq)
+        (jointForcesRevolute...)  = implicitDependency(Modia3D.getGenForcesRevolute(    mbs10, Val(NRevolute))   , jointAccelerationsRevolute...))
+        (jointForcesPrismatic...) = implicitDependency(Modia3D.getGenForcesPrismatic(   mbs10, Val(NPrismatic))  , jointAccelerationsPrismatic...))
+        (0.0, 0.0, ...)           = implicitDependency(Modia3D.getGenForcesFreeMotion(  mbs10, Val(NFreeMotion2)), jointAccelerationsFreeMotion2...))
+        0.0                       =                    Modia3D.getGenForcesHiddenJoints(mbs10, qdd_hidden)
+        success = Modia3D.setHiddenStatesDerivatives!(instantiatedModel, mbs10)
+    end
+]
 ```
 """
 function buildModel3D!(model::AbstractDict, FloatType::Type, TimeType::Type,
                        buildDict::OrderedCollections.OrderedDict{String,Any},
-                       modelPath::Union{Expr,Symbol,Nothing}, 
+                       modelPath::Union{Expr,Symbol,Nothing},
                        buildOption::String = "ComputeGeneralizedForces")   # ComputeJointAccelerations, ComputeJointAccelerationsOn
     @assert(buildOption == "ComputeGeneralizedForces")
     jointInfo = []
@@ -77,7 +92,7 @@ function buildModel3D!(model::AbstractDict, FloatType::Type, TimeType::Type,
    =#
 
     ndofTotal = 0
-    
+
     NRevolute = 0
     jointStatesRevolute        = Expr[]
     jointForcesRevolute        = []
@@ -89,8 +104,8 @@ function buildModel3D!(model::AbstractDict, FloatType::Type, TimeType::Type,
     jointForcesPrismatic        = []
     jointAccelerationsPrismatic = []
     prismaticIndices            = OrderedCollections.OrderedDict{String,Int}()
-     
-    NFreeMotion = 0 
+
+    NFreeMotion = 0
     jointStatesFreeMotion         = Expr[]
     jointForcesFreeMotion2         = []
     jointAccelerationsFreeMotion2  = []
@@ -98,9 +113,9 @@ function buildModel3D!(model::AbstractDict, FloatType::Type, TimeType::Type,
     freeMotionIndices              = OrderedCollections.OrderedDict{String,Int}()
 
     #println("modelPath = $modelPath")
-    
+
     modelPathAsString = isnothing(modelPath) ? "" : string(modelPath)
-    
+
     i=1
     for joint in jointInfo
         path      = joint.path
@@ -128,7 +143,7 @@ function buildModel3D!(model::AbstractDict, FloatType::Type, TimeType::Type,
         elseif jointType == :Prismatic || jointType == :PrismaticWithFlange
             ndofTotal  += 1
             NPrismatic += 1
-            prismaticIndices[appendSymbol(modelPathAsString,path)] = NPrismatic            
+            prismaticIndices[appendSymbol(modelPathAsString,path)] = NPrismatic
             push!(jointStatesPrismatic, appendSymbol(path, :s))
             push!(jointStatesPrismatic, appendSymbol(path, :v))
             if jointType == :PrismaticWithFlange
@@ -147,10 +162,10 @@ function buildModel3D!(model::AbstractDict, FloatType::Type, TimeType::Type,
         elseif jointType == :FreeMotion
             ndofTotal += 6
             NFreeMotion += 1
-            freeMotionIndices[appendSymbol(modelPathAsString,path)] = NFreeMotion           
+            freeMotionIndices[appendSymbol(modelPathAsString,path)] = NFreeMotion
             push!(jointStatesFreeMotion, appendSymbol(path, :r))
             push!(jointStatesFreeMotion, appendSymbol(path, :v))
-            push!(jointStatesFreeMotion, appendSymbol(path, :rot))            
+            push!(jointStatesFreeMotion, appendSymbol(path, :rot))
             push!(jointStatesFreeMotion, appendSymbol(path, :w))
             push!(jointStatesFreeMotion_isrot123, appendSymbol(path, :isrot123))
             push!(jointForcesFreeMotion2, :(0.0))
@@ -174,8 +189,9 @@ function buildModel3D!(model::AbstractDict, FloatType::Type, TimeType::Type,
 
     i=1
     mbsi = :_mbs1
-    mbs_equations = [ :($mbsi = Modia3D.openModel3D!(instantiatedModel, $modelPathAsString, $ndofTotal, time)) ]
-    mbs_variables = Model()
+    mbs_equations = [ :($mbsi = Modia3D.openModel3D!(instantiatedModel, $modelPathAsString, time)) ]
+    mbs_variables = Model(qdd_hidden = Var(hideResult=true, start=[]),
+                          success = Var(hideResult=true))
     mbs_variables[mbsi] = Var(hideResult=true)
     if ndofTotal > 0
         if length(jointStatesRevolute) > 0
@@ -186,53 +202,55 @@ function buildModel3D!(model::AbstractDict, FloatType::Type, TimeType::Type,
         if length(jointStatesPrismatic) > 0
             (mbsi, mbsi_old, i) = nextMbsName(mbsi, i)
             push!(mbs_equations, :( $mbsi = Modia3D.setStatesPrismatic!($mbsi_old, $(jointStatesPrismatic...)) ))
-            mbs_variables[mbsi] = Var(hideResult=true)            
-        end    
+            mbs_variables[mbsi] = Var(hideResult=true)
+        end
         if length(jointStatesFreeMotion) > 0
             (mbsi, mbsi_old, i) = nextMbsName(mbsi, i)
             push!(mbs_equations, :( $mbsi = Modia3D.setStatesFreeMotion!($mbsi_old, $(jointStatesFreeMotion...)) ))
-            mbs_variables[mbsi] = Var(hideResult=true)            
+            mbs_variables[mbsi] = Var(hideResult=true)
             (mbsi, mbsi_old, i) = nextMbsName(mbsi, i)
             push!(mbs_equations, :( $mbsi = Modia3D.setStatesFreeMotion_isrot123!($mbsi_old, $(jointStatesFreeMotion_isrot123...)) ))
             mbs_variables[mbsi] = Var(hideResult=true)
         end
-    
+
         if buildOption == "ComputeGeneralizedForces"
             if length(jointAccelerationsRevolute) > 0
                 (mbsi, mbsi_old, i) = nextMbsName(mbsi, i)
                 push!(mbs_equations, :( $mbsi = Modia3D.setAccelerationsRevolute!($mbsi_old, $(jointAccelerationsRevolute...)) ))
-                mbs_variables[mbsi] = Var(hideResult=true)                
+                mbs_variables[mbsi] = Var(hideResult=true)
             end
             if length(jointAccelerationsPrismatic) > 0
                 (mbsi, mbsi_old, i) = nextMbsName(mbsi, i)
                 push!(mbs_equations, :( $mbsi = Modia3D.setAccelerationsPrismatic!($mbsi_old, $(jointAccelerationsPrismatic...)) ))
-                mbs_variables[mbsi] = Var(hideResult=true)                    
-            end        
+                mbs_variables[mbsi] = Var(hideResult=true)
+            end
             if length(jointAccelerationsFreeMotion2) > 0
                 (mbsi, mbsi_old, i) = nextMbsName(mbsi, i)
                 push!(mbs_equations, :( $mbsi = Modia3D.setAccelerationsFreeMotion!($mbsi_old, $(jointAccelerationsFreeMotion2...)) ))
-                mbs_variables[mbsi] = Var(hideResult=true)                    
+                mbs_variables[mbsi] = Var(hideResult=true)
             end
             (mbsi, mbsi_old, i) = nextMbsName(mbsi, i)
-            push!(mbs_equations, :( $mbsi = Modia3D.computeGeneralizedForces!($mbsi_old, _leq_mode) )) 
-            mbs_variables[mbsi] = Var(hideResult=true)                
-        
+            push!(mbs_equations, :( $mbsi = Modia3D.computeGeneralizedForces!($mbsi_old, qdd_hidden, _leq_mode) ))
+            mbs_variables[mbsi] = Var(hideResult=true)
+
             if length(jointAccelerationsRevolute) > 0
                 push!(mbs_equations, :( ($(jointForcesRevolute...), ) = implicitDependency(Modia3D.getGenForcesRevolute($mbsi, Val($NRevolute)), $(jointAccelerationsRevolute...)) ))
-                mbs_variables[mbsi] = Var(hideResult=true)                    
+                mbs_variables[mbsi] = Var(hideResult=true)
             end
             if length(jointAccelerationsPrismatic) > 0
                 push!(mbs_equations, :( ($(jointForcesPrismatic...), ) = implicitDependency(Modia3D.getGenForcesPrismatic($mbsi, Val($NPrismatic)), $(jointAccelerationsPrismatic...)) ))
-                mbs_variables[mbsi] = Var(hideResult=true)                    
+                mbs_variables[mbsi] = Var(hideResult=true)
             end
             if length(jointAccelerationsFreeMotion2) > 0
                 NFreeMotion2 = 2*NFreeMotion
                 push!(mbs_equations, :( ($(jointForcesFreeMotion2...), ) = implicitDependency(Modia3D.getGenForcesFreeMotion($mbsi), $(jointAccelerationsFreeMotion2...)) ))
-                mbs_variables[mbsi] = Var(hideResult=true)                    
+                mbs_variables[mbsi] = Var(hideResult=true)
             end
-
-            mbsCode = mbs_variables | Model(equations = :[$(mbs_equations...)])
+            push!(mbs_equations, :( 0.0 = Modia3D.getGenForcesHiddenJoints($mbsi, qdd_hidden) ) )
+            push!(mbs_equations, :( success = Modia3D.setHiddenStatesDerivatives!(instantiatedModel, $mbsi) ) )
             
+            mbsCode = mbs_variables | Model(equations = :[$(mbs_equations...)])
+
         elseif method == "ComputeJointAccelerations"
             mbsCode = Model(_id = rand(Int),
                             _qdd = Var(start = zeros(ndofTotal)),
@@ -249,7 +267,7 @@ function buildModel3D!(model::AbstractDict, FloatType::Type, TimeType::Type,
         # ndofTotal == 0
         mbsCode = mbs_variables | Model(equations = :[$(mbs_equations...)])
     end
-    
+
     # Store info in buildDict
     buildDict[modelPathAsString] = Modia3D.Composition.MultibodyBuild{FloatType,TimeType}(modelPathAsString, revoluteIndices, prismaticIndices, freeMotionIndices)
     return mbsCode
@@ -271,7 +289,7 @@ function getJointInfo!(model, jointInfo; path=nothing)::Nothing
             if haskey(model, :_rotName)
                 # Hack to provide the full path name of FreeMotion.rot to the FreeMotion object
                 model[:_rotName] = string(path)*".rot"
-            end        
+            end
             push!(jointInfo, (path=path, jointType=constructor[:_jointType]))
             return
         end
@@ -294,7 +312,7 @@ end
 
 """
     animationHistory = get_animationHistory(instantiatedModel, modelPathAsString)
-    
+
 After a simulation, return an ordered dictionary of the positions and orientations of all visual Object3D
 present in `instantiatedModel` with respect to the `modelPathAsString` of a `Model3D(..)` model.
 The time vector is provided as `animationHistory["time"]`.
@@ -308,35 +326,35 @@ animationHistory["a.b.c"] = OrdereDict{String,Any}("position"   => pos,
 pos = [[1.0, 2.0, 3.0],
        [1.1, 2.1, 3.1],  # Absolute position [1.1, 2.2, 3.1] at time instant 2.
        [1.2, 2.2, 3.2],
-       [1.3, 2.3, 3.3] ...]  
+       [1.3, 2.3, 3.3] ...]
 
 quat = [[0.10, 0.20, 0.30, 0.86],
         [0.11, 0.21, 0.31, 0.8477], ...]   # Quaternions [0.11, 0.21, 0.31, 0.8477]
                                            # to rotate from world to Object3D at time instant 2.
-=#                                              
+=#
 ```
 """
-function get_animationHistory(instantiatedModel::Modia.SimulationModel{FloatType,TimeType}, 
+function get_animationHistory(instantiatedModel::Modia.SimulationModel{FloatType,TimeType},
                               modelPathAsString::String; log::Bool = true)::Union{OrderedDict{String,Any},Nothing} where {FloatType,TimeType}
-                              
+
     mbs::Modia3D.Composition.MultibodyData{FloatType,TimeType} = instantiatedModel.buildDict[modelPathAsString].mbs
     scene = mbs.scene
     allVisuElements = scene.allVisuElements
     animation = scene.animation
     animationHistory = OrderedDict{String,Any}()
-    
+
     if length(allVisuElements) > 0 && scene.provideAnimationData
         if log
-            println("get_animationHistory(..): Return animation history of ", length(allVisuElements), " Object3Ds at ",   
+            println("get_animationHistory(..): Return animation history of ", length(allVisuElements), " Object3Ds at ",
                     length(animation), " time instants")
         end
-        
+
         timeVector = Float64[]
         for obj in animation
             push!(timeVector, obj.time)
         end
         animationHistory["time"] = timeVector
-        
+
         for (iobj,obj) in enumerate(allVisuElements)
             positions   = SVector{3,Float64}[]
             quaternions = SVector{4,Float64}[]

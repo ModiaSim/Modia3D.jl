@@ -35,30 +35,42 @@ end
 
 """
     Object3D(;
-        parent      = nothing,
-        translation = [0.0, 0.0, 0.0],
-        rotation    = [0.0, 0.0, 0.0],
-        feature     = nothing)
+        parent          = nothing,
+        fixedToParent   = true,
+        translation     = [0.0, 0.0, 0.0],
+        rotation        = [0.0, 0.0, 0.0],
+        velocity        = [0.0, 0.0, 0.0],
+        angularVelocity = [0.0, 0.0, 0.0],
+        feature         = nothing)
 
-Generate a new Object3D object, that is a coordinate system (= frame, object3D) with associated feature that is described relatively to its (optional) parent Object3D.
+Generate a new Object3D object, that is a coordinate system with associated feature that is described relatively to its (optional) parent Object3D.
+
+Vectors `translation`, `rotation`, `velocity`, `angularVelocity` can be defined with units from package [Unitful](https://github.com/PainterQubits/Unitful.jl). If not units are provided, SI units are assumed (internally, all computations are performed with SI units, that is in m, rad, m/s, rad/s).
+
 
 # Arguments
 
-All arguments have default values. Thus, not all arguments must be defined.
+- `parent`: Parent Object3D. If `parent` is present, the Object3D is defined relatively to `parent`. If `parent` is not present, the Object3D is either the inertial system (typically called `world`), or the object is the reference system of a sub-system (via joints, all sub-systems must be connected directly or indirectly to `world` when a `Model3D(..)` is instantiated). If `parent=nothing`, arguments `translation`, `rotation`, `velocity`, `angularVelocity` are ignored (a warning is printed, if these arguments do not have zero values in this case).
 
-- `parent`: Parent Object3D. If `parent` is present, the Object3D is defined relatively to the parent. If `parent` is not present, the Object3D is either the world-Object3D, or the object is connected later with a joint to another Object3D.
+- `fixedToParent`: = true, if Object3D is fixed relatively to `parent`. Otherwise, Object3D can move freely relatively to parent (`translation`, `rotation`, `velocity`, `angularVelocity` is the initial state of Object3D with respect to `parent`). If `parent=nothing`, then `fixedToParent` is ignored.
 
-- `translation`: Vector from the origin of the parent to the origin of the Object3D, resolved in the parent coordinate system in [m].
-  - Example: `translation = [0.0, 0.5, 0.0]` is a relative translation of 0.5 m in y-direction of the parent. If nothing is defined, the default value (= no translation) is taken.
+- `translation`: Vector from the origin of the parent to the origin of the Object3D, resolved in the parent coordinate system.
+  - Example: `translation = [0.0, 0.5, 0.0]` or `translation = [0.0, 50.0, 0.0]u"cm"` are a relative translation of 0.5 m in y-direction of the parent.
 
-- `rotation`: Vector `[angleX, angleY, angleZ]` to rotate the parent coordinate system along the x-axis with `angleX`, the y-axis with `angleY` and the z-axis with `angleZ` to arrive at the Object3D coordinate system. Angles can be provided in radians or with unit `u"°"` (degree).
-  - Example: `rotation = [0.0, pi/2, 0.0]` or `rotation = [0.0, 90u"°", 0.0]` defines that a rotation around the y-axis of the parent coordinate system with 90 degrees arrives at the Object3D. If nothing is defined, the default value (= no rotation) is taken.
+- `rotation`: Vector `[angleX, angleY, angleZ]` to rotate the parent coordinate system along the x-axis with `angleX`, the y-axis with `angleY` and the z-axis with `angleZ` to arrive at the Object3D coordinate system.
+  - Example: `rotation = [0.0, pi/2, 0.0]` or `rotation = [0.0, 90u"°", 0.0]` defines that a rotation around the y-axis of the parent coordinate system with 90 degrees arrives at the Object3D.
+
+- `velocity`: If `parent` is defined and `fixedToParent=false`, the initial velocity of the origin of the Object3D with respect to the `parent`, resolved in the parent coordinate system.
+  - Example: `velocity = [0.0, 0.5, 0.0]` or `velocity = [0.0, 50.0, 0.0]u"cm/s"` is an initial relative velocity of 0.5 m/s in y-direction of the parent.
+
+- `angularVelocity`: If `parent` is defined and `fixedToParent=false`, the initial angular velocity of the Object3D with respect to the `parent`, **resolved in Object3D (needs to be changed to parent)**.
+  - Example: `angularVelocity = [0.0, pi/2, 0.0]` or `angularVelocity = [0.0, 90u"°/s", 0.0]` is an initial relative angular velocity of 90 degrees per second in y-direction of the parent.
 
 - `feature`: Defines the (optional) property associated with the Object3D by a constructor call. Supported constructors:
     - `Scene`: A [Scene](@ref) feature marks the root Object3D (world, origin, inertial system). It has no parent Object3D and allows to define global properties, such as the gravity field.
     - `Visual`: A [Visual](@ref) feature defines a shape used for visualization.
     - `Solid`: A [Solid](@ref) feature defines the solid properties of an Object3D, like mass, inertia tensor, collision behavior.
-    - `nothing`: No feature is associated with the Object3D. This might be useful for helper Object3Ds, for example to mark a point on a shape and connecting it later via a revolute joint.
+    - `nothing`: No feature is associated with the Object3D. This might be useful for helper Object3Ds, for example to mark a point on a shape and connecting it later via a joint.
 
 # Example
 
@@ -152,62 +164,107 @@ mutable struct Object3D{F <: Modia3D.VarFloatType} <: Modia3D.AbstractObject3D
     ###--------------------- Object3D constructor ------------------------------
     ## Constructor 1
     # constructor for Modia interface (only keyword arguments)
-    # calls constructor 2 or 3 or 5
     function Object3D{F}(;
-        parent::Union{Object3D,Nothing}=nothing,
+        parent::Union{Object3D,Nothing} = nothing,
         path::String="",
         fixedToParent::Bool = true,
-        translation::Union{AbstractVector,Nothing} = nothing,
-        rotation::Union{AbstractVector,Nothing} = nothing,
-        velocity::Union{AbstractVector,Nothing} = nothing,
-        angularVelocity::Union{AbstractVector,Nothing} = nothing,
-        feature::Any=nothing,
+        translation     = Modia3D.ZeroVector3D(F),
+        rotation        = Modia3D.ZeroVector3D(F),
+        velocity        = Modia3D.ZeroVector3D(F),
+        angularVelocity = Modia3D.ZeroVector3D(F),
+        feature = nothing,
         kwargs...) where F <: Modia3D.VarFloatType
+        interactionBehavior = Modia3D.NoInteraction
+
         if length(kwargs) > 0
-            @warn "Object3D: path=$path, kwargs = $(kwargs...)"
+            @warn "Object3D $path: Keyword arguments `$(kwargs...)` are ignored."
         end
 
         # create Object3D with created feature
-        fixed = fixedToParent
         visualizeFrame = Modia3D.Inherited
 
         if isnothing(feature)
             feature = emptyObject3DFeature
-        else
-            feature = feature
         end
-
+        if isnothing(translation)
+            @warn("$path::Object3D: translation=nothing is interpreted as translation=[0.0, 0.0, 0.0]")
+            translation = Modia3D.ZeroVector3D(F)
+        end
+        if isnothing(rotation)
+            @warn("$path::Object3D: rotation=nothing is interpreted as rotation=[0.0, 0.0, 0.0]")
+            rotation = Modia3D.ZeroVector3D(F)
+        end        
+        if isnothing(velocity)
+            @warn("$path::Object3D: velocity=nothing is interpreted as velocity=[0.0, 0.0, 0.0]")
+            velocity = Modia3D.ZeroVector3D(F)
+        end 
+        if isnothing(angularVelocity)
+            @warn("$path::Object3D: angularVelocity=nothing is interpreted as angularVelocity=[0.0, 0.0, 0.0]")
+            angularVelocity = Modia3D.ZeroVector3D(F)
+        end         
+        
         if !isnothing(parent)
+            # with parent
+
             if fixedToParent
-                if !isnothing(velocity) || !isnothing(angularVelocity)
-                    @warn("$path is fixedToParent $(parent.path). Therefore, velocity=$velocity and angularVelocity=$angularVelocity are ignored.")
+                if !iszero(velocity) || !iszero(angularVelocity)
+                    @warn("$path::Object3D is fixed to parent $(parent.path).\nTherefore, velocity=$velocity and angularVelocity=$angularVelocity are ignored.")
                 end
             end
-            # with parent -> call constructor 3
-            if !isnothing(rotation)
-                rotation = Modia3D.convertAndStripUnit(SVector{3,F}, u"rad", rotation)
-                rotation = Frames.rot123(rotation[1], rotation[2], rotation[3])
-            end
-            if isnothing(translation)
-                translation = Modia3D.ZeroVector3D(F)
-            end
-            if isnothing(velocity)
-                velocity = Modia3D.ZeroVector3D(F)
-            end
-            if isnothing(angularVelocity)
-                angularVelocity = Modia3D.ZeroVector3D(F)
-            end
-            w_startVariables = WCartesian
 
-            obj = Object3D{F}(parent, feature, fixed=fixed, r=translation, R=rotation, v_start=velocity, w_start=angularVelocity, w_startVariables=w_startVariables, visualizeFrame=visualizeFrame, path=path)
+            translation = Modia3D.convertAndStripUnit(SVector{3,F}, u"m"  , translation)
+            rotation    = Modia3D.convertAndStripUnit(SVector{3,F}, u"rad", rotation)
+
+            if !fixedToParent
+                velocity        = Modia3D.convertAndStripUnit(SVector{3,F}, u"m/s"  , velocity)
+                angularVelocity = Modia3D.convertAndStripUnit(SVector{3,F}, u"rad/s", angularVelocity)
+            end
+
+            r_rel = translation
+            r_abs = parent.r_abs + r_rel
+            R_rel = Frames.rot123(rotation[1], rotation[2], rotation[3])
+            R_abs = R_rel*parent.R_abs
+
+            #obj = Object3D{F}(parent, feature, fixed=fixed, r=translation, R=rotation, v_start=velocity, w_start=angularVelocity, w_startVariables=w_startVariables, visualizeFrame=visualizeFrame, path=path)
+
+            visualizeFrame2 = typeof(visualizeFrame) == Modia3D.Ternary ? visualizeFrame : (visualizeFrame ? Modia3D.True : Modia3D.False)
+
+            (shapeKind, shape, visualMaterial, centroid) = setShapeKind(F, feature)
+            obj = new(parent, Vector{Object3D{F}}[],
+                false, InteractionManner(interactionBehavior), FixedJoint{F}(), FixKind, 0, 0, true,
+                r_rel, R_rel, r_abs, R_abs,
+                Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F),
+                false, F(0.0), Modia3D.ZeroVector3D(F), SMatrix{3,3,F,9}(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
+                feature, Modia3D.AbstractTwoObject3DObject[],
+                false, false, false, false,
+                shapeKind, shape, visualMaterial, centroid,
+                visualizeFrame2,
+                Vector{Object3D{F}}[],
+                Vector{Object3D{F}}[], Vector{Object3D{F}}[],
+                Vector{Object3D{F}}[], Vector{Object3D{F}}[], Vector{Object3D{F}}[], Vector{Object3D{F}}[],
+                Vector{Object3D{F}}[], Vector{Object3D{F}}[], Vector{Object3D{F}}[], Vector{Object3D{F}}[],
+                path)
+
+            if fixedToParent
+                # obj is children of parent
+                push!(parent.children, obj)
+
+            else
+                # obj has FreeMotion joint
+                FreeMotion{F}(; obj1=parent, obj2=obj, path=path, hidden_qdd_startIndex=-1, r=translation, rot=rotation, v=velocity, w=angularVelocity)
+            end
+
         else
-            # no parent -> call constructor 2
-            if !isnothing(translation) || !isnothing(rotation) || !isnothing(velocity) || !isnothing(angularVelocity)
-                @warn("No parent is defined for $path. Therefore, translation = $translation, rotation = $rotation, velocity = $velocity and angularVelocity = $angularVelocity are ignored.")
+            # no parent
+            if !iszero(translation) || !iszero(rotation) || !iszero(velocity) || !iszero(angularVelocity)
+                @warn("$path::Object3D has parent=nothing.\nTherefore, translation = $translation, rotation = $rotation,\nvelocity = $velocity and angularVelocity = $angularVelocity are ignored.")
             end
-            obj = Object3D{F}(feature, visualizeFrame=visualizeFrame, path=path)
-        end
 
+            # obj = Object3D{F}(feature, visualizeFrame=visualizeFrame, path=path)
+            obj = Object3DWithoutParent(new(), visualizeFrame = visualizeFrame, interactionBehavior = interactionBehavior, path=path)
+            obj.feature = feature
+            (obj.shapeKind, obj.shape, obj.visualMaterial, obj.centroid) = setShapeKind(F, feature)
+        end
 
         if typeof(feature) <: Modia3D.Shapes.Visual && typeof(feature.shape) <: Modia3D.Shapes.FileMesh && feature.shape.convexPartition
             createConvexPartition(obj, feature, feature.shape)
@@ -357,7 +414,7 @@ function setShapeKind(::Type{F}, feature) where F <: Modia3D.VarFloatType
     end
 end
 
-# Object3DWithoutParent is called from constructor 2 (for objs without a parent)
+# Object3DWithoutParent is called from constructor 1 or 2 (for objs without a parent)
 function Object3DWithoutParent(obj::Object3D{F};
                                visualizeFrame::Union{Modia3D.Ternary,Bool} = Modia3D.Inherited, interactionBehavior::InteractionBehavior = Modia3D.NoInteraction,
                                path::String="") where F <: Modia3D.VarFloatType
@@ -599,9 +656,8 @@ end
 
 # Print Object3D
 function Base.show(io::IO, obj::Object3D)
-    print(io,"Object3D(path=\"", obj.path, "\"")
+    print(io,"Object3D(path=", obj.path)
     commaNeeded = true
-
     if hasParent(obj)
         if commaNeeded
             print(io,", ")
@@ -613,9 +669,9 @@ function Base.show(io::IO, obj::Object3D)
             print(io,", ")
         end
         print(io, "joint=", typeof(obj.joint), "(path = \"", obj.joint.path, "\", ...)")
-    end
+    end   
     if commaNeeded
         print(io,", ")
     end
-    print(io, "feature=", typeof(obj.feature), "(...))")
+    print(io, "feature=", typeof(obj.feature), "(...))")  
 end
