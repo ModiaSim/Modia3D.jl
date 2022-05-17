@@ -38,6 +38,7 @@ export setStatesPrismatic! , setAccelerationsPrismatic! , getGenForcesPrismatic
 export setStatesFreeMotion!, setAccelerationsFreeMotion!, getGenForcesFreeMotion
 export setStatesFreeMotion_isrot123!
 export setHiddenStatesDerivatives!, getGenForcesHiddenJoints
+export J123, J132, J123or132
 
 export computeGeneralizedForces!
 

@@ -90,29 +90,6 @@ PrismaticWithFlange(; obj1, obj2, axis=1, s=Var(init=0.0), v=Var(init=0.0), canC
         ]
 )
 
-"""
-    J = J123(rot123::AbstractVector)
-
-Return joint rot. kinematics matrix `J` for Cardan angles `rot123` (rotation sequence x-y-z).
-"""
-function J123(rot123::SVector{3,F})::SMatrix{3,3,F,9} where {F}
-    (sbe, cbe) = sincos(rot123[2])
-    (sga, cga) = sincos(rot123[3])
-    return SMatrix{3,3,F,9}(cga/cbe, sga, -sbe*cga/cbe, -sga/cbe, cga, sbe*sga/cbe, F(0.0), F(0.0), F(1.0))
-end
-
-"""
-    J = J132(rot132::AbstractVector)
-
-Return joint rot. kinematics matrix `J` for Cardan angles `rot132` (rotation sequence x-z-y).
-"""
-function J132(rot132::SVector{3,F})::SMatrix{3,3,F,9} where {F}
-    (sga, cga) = sincos(rot132[2])
-    (sbe, cbe) = sincos(rot132[3])
-    return SMatrix{3,3,F,9}(cbe/cga, -sbe, cbe*sga/cga, F(0.0), F(0.0), F(1.0), sbe/cga, cbe, sbe*sga/cga)
-end
-
-
 
 """
     next_isrot123 = change_rotSequenceInNextIteration!(rot::AbstractVector, isrot123::Bool, instantiatedModel::SimulationModel, x, rot_name)
@@ -144,7 +121,6 @@ function change_rotSequenceInNextIteration!(rot::AbstractVector, isrot123::Bool,
 end
 
 singularRem(ang) = abs(rem2pi(ang, RoundNearest)) - 1.5  # is negative/positive in valid/singular angle range
-J123or132(rot, isrot123) = isrot123 ? J123(rot) : J132(rot)
 
 FreeMotion(; obj1, obj2, r=Var(init=Modia.SVector{3,Float64}(zeros(3))), rot=Var(init=Modia.SVector{3,Float64}(zeros(3))), v=Var(init=Modia.SVector{3,Float64}(zeros(3))), w=Var(init=Modia.SVector{3,Float64}(zeros(3)))) = Model(; _constructor = Par(value = :(Modia3D.Composition.FreeMotion{FloatType}), _path = true, _jointType = :FreeMotion),
     obj1 = Par(value = obj1),
@@ -163,6 +139,6 @@ FreeMotion(; obj1, obj2, r=Var(init=Modia.SVector{3,Float64}(zeros(3))), rot=Var
         isrot123 = pre(next_isrot123)
         rot2_singularity = positive(singularRem(rot[2]))
         next_isrot123 = if rot2_singularity; change_rotSequenceInNextIteration!(rot, isrot123, instantiatedModel, _x, _rotName) else isrot123 end
-        der(rot) = J123or132(rot,isrot123) * w
+        der(rot) = Modia3D.J123or132(rot,isrot123) * w
         ]
 )

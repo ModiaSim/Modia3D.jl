@@ -18,13 +18,13 @@ mutable struct MultibodyData{F <: Modia3D.VarFloatType, TimeType}
 
     revoluteObjects::Vector{Object3D{F}}      # References to Object3Ds with a Revolute joint
     prismaticObjects::Vector{Object3D{F}}     # References to Object3Ds with a Prismatic joint
-    freeMotionObjects::Vector{Object3D{F}}    # References to Object3Ds with a FreeMotion joint and joint.hiddenState = false
-    hiddenJointObjects::Vector{Object3D{F}}   # References to Object3Ds with a joint that has joint.hiddenState = true
+    freeMotionObjects::Vector{Object3D{F}}    # References to Object3Ds with a FreeMotion joint and joint.hiddenStates = false
+    hiddenJointObjects::Vector{Object3D{F}}   # References to Object3Ds with a joint that has joint.hiddenStates = true
 
     revoluteGenForces::Vector{F}              # = M_r*der(qd_r) + h_r(q,qd,gravity,contact-forces) = <generalized driving torques>
     prismaticGenForces::Vector{F}             # = M_p*der(qd_p) + h_p(q,qd,gravity,contact-forces) = <generalized driving forces>
-    freeMotionGenForces::Vector{SVector{3,F}} # = M_f*der(qd_f) + h_f(q,qd,gravity,contact-forces) = 0             (joint.hiddenState = false)
-    hiddenGenForces::Vector{F}                # = M_hidden*qdd_hidden + h_hidden(q,qd,gravity,contact-forces) = 0  (joint.hiddenState = true)
+    freeMotionGenForces::Vector{SVector{3,F}} # = M_f*der(qd_f) + h_f(q,qd,gravity,contact-forces) = 0             (joint.hiddenStates = false)
+    hiddenGenForces::Vector{F}                # = M_hidden*qdd_hidden + h_hidden(q,qd,gravity,contact-forces) = 0  (joint.hiddenStates = true)
 
     revoluteCache_h::Vector{F}                # = h_r(q,qd,gravity,contact-forces)
     prismaticCache_h::Vector{F}               # = h_p(q,qd,gravity,contact-forces)
@@ -73,6 +73,7 @@ mutable struct MultibodyData{F <: Modia3D.VarFloatType, TimeType}
         i = 1
         j = length(freeMotionObjects) + 1
         eqInfo = partiallyInstantiatedModel.equationInfo
+        path::String = ""
         for obj in hiddenJointObjects
             joint = obj.joint
             @assert(typeof(joint) <: FreeMotion)
@@ -87,11 +88,12 @@ mutable struct MultibodyData{F <: Modia3D.VarFloatType, TimeType}
                 obj.jointKind = AbsoluteFreeMotionKind
             end
 
-            # Define hidden model states and copy initial values into eqInfo (since SVectors -> values are copied)
-            freeMotion.ix_r   = Modia.addState(eqInfo, modelPath*".translation"    , modelPath*".der(translation)"    , freeMotion.r)
-            freeMotion.ix_rot = Modia.addState(eqInfo, modelPath*".rotation"       , modelPath*".der(rotation)"       , freeMotion.rot)
-            freeMotion.ix_v   = Modia.addState(eqInfo, modelPath*".velocity"       , modelPath*".der(velocity)"       , freeMotion.v)
-            freeMotion.ix_w   = Modia.addState(eqInfo, modelPath*".angularVelocity", modelPath*".der(angularVelocity)", freeMotion.w)
+            # Define hidden model states and copy initial values into eqInfo
+            path = obj.path * "."
+            freeMotion.ix_hidden_r   = Modia.addHiddenState!(eqInfo, path*"translation"    , path*"der(translation)"    , freeMotion.r)
+            freeMotion.ix_hidden_rot = Modia.addHiddenState!(eqInfo, path*"rotation"       , path*"der(rotation)"       , freeMotion.rot)
+            freeMotion.ix_hidden_v   = Modia.addHiddenState!(eqInfo, path*"velocity"       , path*"der(velocity)"       , freeMotion.v)
+            freeMotion.ix_hidden_w   = Modia.addHiddenState!(eqInfo, path*"angularVelocity", path*"der(angularVelocity)", freeMotion.w)
 
             # Define event indicator to monitor changing sequence of rotation angles
             freeMotion.iz_rot2 = Modia.addZeroCrossings(partiallyInstantiatedModel, 1)
@@ -524,7 +526,7 @@ function computeObject3DForcesTorquesAndGenForces!(mbs::MultibodyData{F,TimeType
 
         elseif jointKind == AbsoluteFreeMotionKind || jointKind == FreeMotionKind
             freeMotion = mbs.freeMotion[obj.jointIndex]
-            if freeMotion.hiddenState
+            if freeMotion.hiddenStates
                 j = freeMotion.iqdd_hidden
                 hiddenGenForces[j  ] = obj.f[1]
                 hiddenGenForces[j+1] = obj.f[2]
@@ -732,15 +734,17 @@ function setHiddenStatesDerivatives!(m::Modia.SimulationModel{F,TimeType}, mbs::
     for obj in mbs.hiddenJointObjects
         freeMotion = mbs.freeMotion[obj.jointIndex]
 
-        j = freeMotion.ix_hidden_v
-        m.der_x_hidden[j  ] = freeMotion.a[1]
-        m.der_x_hidden[j+1] = freeMotion.a[2]
-        m.der_x_hidden[j+2] = freeMotion.a[3]
-
-        j = freeMotion.ix_hidden_w
-        m.der_x_hidden[j  ] = freeMotion.z[1]
-        m.der_x_hidden[j+1] = freeMotion.z[2]
-        m.der_x_hidden[j+2] = freeMotion.z[3]
+        j1 = freeMotion.ix_hidden_v
+        m.der_x_hidden[j1  ] = freeMotion.a[1]
+        m.der_x_hidden[j1+1] = freeMotion.a[2]
+        m.der_x_hidden[j1+2] = freeMotion.a[3]
+       
+        j2 = freeMotion.ix_hidden_w
+        m.der_x_hidden[j2  ] = freeMotion.z[1]
+        m.der_x_hidden[j2+1] = freeMotion.z[2]
+        m.der_x_hidden[j2+2] = freeMotion.z[3]
+        
+        #println("   j1=$j1, j2=$j2, freeMotion.a[2] = ", freeMotion.a[2], ", m.der_x_hidden = ", m.der_x_hidden)        
     end
     return nothing
 end

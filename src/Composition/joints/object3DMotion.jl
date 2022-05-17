@@ -14,6 +14,32 @@ end
 
 
 """
+    J = J123(rot123::AbstractVector)
+
+Return joint rot. kinematics matrix `J` for Cardan angles `rot123` (rotation sequence x-y-z).
+"""
+function J123(rot123::SVector{3,F})::SMatrix{3,3,F,9} where {F}
+    (sbe, cbe) = sincos(rot123[2])
+    (sga, cga) = sincos(rot123[3])
+    return SMatrix{3,3,F,9}(cga/cbe, sga, -sbe*cga/cbe, -sga/cbe, cga, sbe*sga/cbe, F(0.0), F(0.0), F(1.0))
+end
+
+"""
+    J = J132(rot132::AbstractVector)
+
+Return joint rot. kinematics matrix `J` for Cardan angles `rot132` (rotation sequence x-z-y).
+"""
+function J132(rot132::SVector{3,F})::SMatrix{3,3,F,9} where {F}
+    (sga, cga) = sincos(rot132[2])
+    (sbe, cbe) = sincos(rot132[3])
+    return SMatrix{3,3,F,9}(cbe/cga, -sbe, cbe*sga/cga, F(0.0), F(0.0), F(1.0), sbe/cga, cbe, sbe*sga/cga)
+end
+
+J123or132(rot, isrot123) = isrot123 ? J123(rot) : J132(rot)
+
+
+
+"""
     joint = FreeMotion(; obj1, obj2, r, rot, v, w)
 
 Return a `joint` that describes the free movement of `obj2::`[`Object3D`](@ref)
@@ -38,14 +64,14 @@ mutable struct FreeMotion{F <: Modia3D.VarFloatType} <: Modia3D.AbstractJoint
     #   der(v)   = ...
     #   der(w)   = ...
     
-    hiddenState::Bool   # = true, if state is not visible in generated code
-    ix_hidden_r::Int    # instantiatedModel.x_hidden[ix_r_hidden  :ix_hidden_r+2]     are the elements of x_hidden that are stored in r   if hiddenState
-    ix_hidden_rot::Int  # instantiatedModel.x_hidden[ix_rot_hidden:ix_hidden_rot+2] are the elements of x_hidden that are stored in rot if hiddenState
-    ix_hidden_v::Int    # instantiatedModel.x_hidden[ix_v_hidden  :ix_hidden_v+2]     are the elements of x_hidden that are stored in v   if hiddenState
-    ix_hidden_w::Int    # instantiatedModel.x_hidden[ix_w_hidden  :ix_hidden_w+2]     are the elements of x_hidden that are stored in w   if hiddenState
-    iz_rot2::Int        # instantiatedModel.eventHandler.z[iz_rot2] is the element of z in which singularRem(rot[2]) is stored if hiddenState, 
+    hiddenStates::Bool   # = true, if state is not visible in generated code
+    ix_hidden_r::Int    # instantiatedModel.x_hidden[ix_r_hidden  :ix_hidden_r+2]     are the elements of x_hidden that are stored in r   if hiddenStates
+    ix_hidden_rot::Int  # instantiatedModel.x_hidden[ix_rot_hidden:ix_hidden_rot+2] are the elements of x_hidden that are stored in rot if hiddenStates
+    ix_hidden_v::Int    # instantiatedModel.x_hidden[ix_v_hidden  :ix_hidden_v+2]     are the elements of x_hidden that are stored in v   if hiddenStates
+    ix_hidden_w::Int    # instantiatedModel.x_hidden[ix_w_hidden  :ix_hidden_w+2]     are the elements of x_hidden that are stored in w   if hiddenStates
+    iz_rot2::Int        # instantiatedModel.eventHandler.z[iz_rot2] is the element of z in which singularRem(rot[2]) is stored if hiddenStates, 
                         # to monitor when to switch to a different rotation sequence of rot
-    iqdd_hidden::Int    # qdd_hidden[iqdd_hidden:iqdd_hidden+5] are the elements of qdd that are stored in [a,z] if hiddenState
+    iqdd_hidden::Int    # qdd_hidden[iqdd_hidden:iqdd_hidden+5] are the elements of qdd that are stored in [a,z] if hiddenStates
     
     obj1::Modia3D.AbstractObject3D
     obj2::Modia3D.AbstractObject3D
@@ -70,7 +96,7 @@ mutable struct FreeMotion{F <: Modia3D.VarFloatType} <: Modia3D.AbstractJoint
                              v::AbstractVector   = Modia3D.ZeroVector3D(F),
                              w::AbstractVector   = Modia3D.ZeroVector3D(F),
                              next_isrot123::Bool = true,
-                             hiddenState::Bool = false
+                             hiddenStates::Bool = false
                           ) where F <: Modia3D.VarFloatType
 
         #(parent,obj,cutJoint) = attach(obj1, obj2)
@@ -92,7 +118,7 @@ mutable struct FreeMotion{F <: Modia3D.VarFloatType} <: Modia3D.AbstractJoint
         z   = Modia3D.ZeroVector3D(F)
         isrot123 = true
 
-        obj2.joint      = new(path, hiddenState, -1, -1, -1, -1, -1, -1, obj1, obj2, 6, r, rot, isrot123, v, w, a, z)
+        obj2.joint      = new(path, hiddenStates, -1, -1, -1, -1, -1, -1, obj1, obj2, 6, r, rot, isrot123, v, w, a, z)
         obj2.parent     = obj1
         obj2.jointKind  = FreeMotionKind
         obj2.jointIndex = 0

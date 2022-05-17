@@ -18,7 +18,7 @@ function getJointsAndForceElementsAndObject3DsWithoutParents!(evaluatedParameter
             elseif typeof(value.feature) <: Scene
                 error("\n", value.path, " is an Object3D that has feature=Scene(..) and has a parent (= ", value.parent.path, ")!\nThe Object3D with feature=Scene(..) is not allowed to have a parent!")
             end
-            if typeof(value.joint) <: Modia3D.Composition.FreeMotion && value.joint.hiddenState
+            if typeof(value.joint) <: Modia3D.Composition.FreeMotion && value.joint.hiddenStates
                 push!(hiddenJointObjects, value)
             end
 
@@ -103,14 +103,15 @@ end
 
 """
     instantiateModel3D!(partiallyInstantiatedModel::Modia.SimulationModel,
-                        modelDict::AbstractDict, modelPath::String)
+                        modelDict::AbstractDict, modelPath::String; log=false)
 
 Instantiate Model3D model during evaluation of the parameters (before initialization)
 """
 function instantiateModel3D!(partiallyInstantiatedModel::Modia.SimulationModel{F,TimeType},
-                             modelDict::AbstractDict, modelPath::String)::Nothing where {F,TimeType}
-    # in argument list:
-    # partiallyInstantiatedModel
+                             modelDict::AbstractDict, modelPath::String; log=false)::Nothing where {F,TimeType}
+    if log
+        println("Modia3D.instantiateModel3D! called for path=\"$modelPath\":")
+    end
     mbsBuild::MultibodyBuild{F,TimeType} = partiallyInstantiatedModel.buildDict[modelPath]
     (world, revoluteObjects, prismaticObjects, freeMotionObjects, hiddenJointObjects, forceElements) = checkMultibodySystemAndGetWorldAndJointsAndForceElements(modelDict, modelPath, F)
 
@@ -136,6 +137,15 @@ function instantiateModel3D!(partiallyInstantiatedModel::Modia.SimulationModel{F
                                              zStartIndex, nz)
     modelDict[:qdd_hidden] = zeros(F, length(mbsBuild.mbs.hiddenGenForces))
 
+    if log
+        mbs = mbsBuild.mbs
+        println("  Number of degrees of freedom: ", length(mbs.revoluteObjects) + length(mbs.prismaticObjects) + 6*length(mbs.hiddenJointObjects))
+        println("  Number of revolute joints:    ", length(mbs.revoluteObjects))
+        println("  Number of prismatic joints:   ", length(mbs.prismaticObjects))
+        println("  Number of freeMotion joints:  ", length(mbs.freeMotionObjects))     
+        println("  Number of Object3Ds with fixedToParent=false: ", length(mbs.hiddenJointObjects)) 
+    end
+    
     if scene.visualize
         TimerOutputs.@timeit partiallyInstantiatedModel.timer "Modia3D_0 initializeVisualization" Modia3D.Composition.initializeVisualization(Modia3D.renderer[1], scene.allVisuElements)
         if partiallyInstantiatedModel.options.log

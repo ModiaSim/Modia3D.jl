@@ -193,79 +193,75 @@ function buildModel3D!(model::AbstractDict, FloatType::Type, TimeType::Type,
     mbs_variables = Model(qdd_hidden = Var(hideResult=true, start=[]),
                           success = Var(hideResult=true))
     mbs_variables[mbsi] = Var(hideResult=true)
-    if ndofTotal > 0
-        if length(jointStatesRevolute) > 0
-            (mbsi, mbsi_old, i) = nextMbsName(mbsi, i)
-            push!(mbs_equations, :( $mbsi = Modia3D.setStatesRevolute!($mbsi_old, $(jointStatesRevolute...)) ))
-            mbs_variables[mbsi] = Var(hideResult=true)
-        end
-        if length(jointStatesPrismatic) > 0
-            (mbsi, mbsi_old, i) = nextMbsName(mbsi, i)
-            push!(mbs_equations, :( $mbsi = Modia3D.setStatesPrismatic!($mbsi_old, $(jointStatesPrismatic...)) ))
-            mbs_variables[mbsi] = Var(hideResult=true)
-        end
-        if length(jointStatesFreeMotion) > 0
-            (mbsi, mbsi_old, i) = nextMbsName(mbsi, i)
-            push!(mbs_equations, :( $mbsi = Modia3D.setStatesFreeMotion!($mbsi_old, $(jointStatesFreeMotion...)) ))
-            mbs_variables[mbsi] = Var(hideResult=true)
-            (mbsi, mbsi_old, i) = nextMbsName(mbsi, i)
-            push!(mbs_equations, :( $mbsi = Modia3D.setStatesFreeMotion_isrot123!($mbsi_old, $(jointStatesFreeMotion_isrot123...)) ))
-            mbs_variables[mbsi] = Var(hideResult=true)
-        end
 
-        if buildOption == "ComputeGeneralizedForces"
-            if length(jointAccelerationsRevolute) > 0
-                (mbsi, mbsi_old, i) = nextMbsName(mbsi, i)
-                push!(mbs_equations, :( $mbsi = Modia3D.setAccelerationsRevolute!($mbsi_old, $(jointAccelerationsRevolute...)) ))
-                mbs_variables[mbsi] = Var(hideResult=true)
-            end
-            if length(jointAccelerationsPrismatic) > 0
-                (mbsi, mbsi_old, i) = nextMbsName(mbsi, i)
-                push!(mbs_equations, :( $mbsi = Modia3D.setAccelerationsPrismatic!($mbsi_old, $(jointAccelerationsPrismatic...)) ))
-                mbs_variables[mbsi] = Var(hideResult=true)
-            end
-            if length(jointAccelerationsFreeMotion2) > 0
-                (mbsi, mbsi_old, i) = nextMbsName(mbsi, i)
-                push!(mbs_equations, :( $mbsi = Modia3D.setAccelerationsFreeMotion!($mbsi_old, $(jointAccelerationsFreeMotion2...)) ))
-                mbs_variables[mbsi] = Var(hideResult=true)
-            end
+    if length(jointStatesRevolute) > 0
+        (mbsi, mbsi_old, i) = nextMbsName(mbsi, i)
+        push!(mbs_equations, :( $mbsi = Modia3D.setStatesRevolute!($mbsi_old, $(jointStatesRevolute...)) ))
+        mbs_variables[mbsi] = Var(hideResult=true)
+    end
+    if length(jointStatesPrismatic) > 0
+        (mbsi, mbsi_old, i) = nextMbsName(mbsi, i)
+        push!(mbs_equations, :( $mbsi = Modia3D.setStatesPrismatic!($mbsi_old, $(jointStatesPrismatic...)) ))
+        mbs_variables[mbsi] = Var(hideResult=true)
+    end
+    if length(jointStatesFreeMotion) > 0
+        (mbsi, mbsi_old, i) = nextMbsName(mbsi, i)
+        push!(mbs_equations, :( $mbsi = Modia3D.setStatesFreeMotion!($mbsi_old, $(jointStatesFreeMotion...)) ))
+        mbs_variables[mbsi] = Var(hideResult=true)
+        (mbsi, mbsi_old, i) = nextMbsName(mbsi, i)
+        push!(mbs_equations, :( $mbsi = Modia3D.setStatesFreeMotion_isrot123!($mbsi_old, $(jointStatesFreeMotion_isrot123...)) ))
+        mbs_variables[mbsi] = Var(hideResult=true)
+    end
+
+    if buildOption == "ComputeGeneralizedForces"
+        if length(jointAccelerationsRevolute) > 0
             (mbsi, mbsi_old, i) = nextMbsName(mbsi, i)
-            push!(mbs_equations, :( $mbsi = Modia3D.computeGeneralizedForces!($mbsi_old, qdd_hidden, _leq_mode) ))
+            push!(mbs_equations, :( $mbsi = Modia3D.setAccelerationsRevolute!($mbsi_old, $(jointAccelerationsRevolute...)) ))
             mbs_variables[mbsi] = Var(hideResult=true)
-
-            if length(jointAccelerationsRevolute) > 0
-                push!(mbs_equations, :( ($(jointForcesRevolute...), ) = implicitDependency(Modia3D.getGenForcesRevolute($mbsi, Val($NRevolute)), $(jointAccelerationsRevolute...)) ))
-                mbs_variables[mbsi] = Var(hideResult=true)
-            end
-            if length(jointAccelerationsPrismatic) > 0
-                push!(mbs_equations, :( ($(jointForcesPrismatic...), ) = implicitDependency(Modia3D.getGenForcesPrismatic($mbsi, Val($NPrismatic)), $(jointAccelerationsPrismatic...)) ))
-                mbs_variables[mbsi] = Var(hideResult=true)
-            end
-            if length(jointAccelerationsFreeMotion2) > 0
-                NFreeMotion2 = 2*NFreeMotion
-                push!(mbs_equations, :( ($(jointForcesFreeMotion2...), ) = implicitDependency(Modia3D.getGenForcesFreeMotion($mbsi), $(jointAccelerationsFreeMotion2...)) ))
-                mbs_variables[mbsi] = Var(hideResult=true)
-            end
-            push!(mbs_equations, :( 0.0 = Modia3D.getGenForcesHiddenJoints($mbsi, qdd_hidden) ) )
-            push!(mbs_equations, :( success = Modia3D.setHiddenStatesDerivatives!(instantiatedModel, $mbsi) ) )
-            
-            mbsCode = mbs_variables | Model(equations = :[$(mbs_equations...)])
-
-        elseif method == "ComputeJointAccelerations"
-            mbsCode = Model(_id = rand(Int),
-                            _qdd = Var(start = zeros(ndofTotal)),
-                            equations = :[_mbs1 = Modia3D.initJoints!(_id, instantiatedModel, $ndofTotal, time)
-                                        _mbs2 = Modia3D.setJointStates1!(_mbs1, $(jointStates1...))
-                                        _qdd = Modia3D.getJointResiduals_method3!(_mbs2, $(jointForces1...))
-                                        $(jointAcc1...)
-                                        ]
-                            )
-        else
-            @error "Error should not occur (buildOption = $buildOption)"
         end
-    else
-        # ndofTotal == 0
+        if length(jointAccelerationsPrismatic) > 0
+            (mbsi, mbsi_old, i) = nextMbsName(mbsi, i)
+            push!(mbs_equations, :( $mbsi = Modia3D.setAccelerationsPrismatic!($mbsi_old, $(jointAccelerationsPrismatic...)) ))
+            mbs_variables[mbsi] = Var(hideResult=true)
+        end
+        if length(jointAccelerationsFreeMotion2) > 0
+            (mbsi, mbsi_old, i) = nextMbsName(mbsi, i)
+            push!(mbs_equations, :( $mbsi = Modia3D.setAccelerationsFreeMotion!($mbsi_old, $(jointAccelerationsFreeMotion2...)) ))
+            mbs_variables[mbsi] = Var(hideResult=true)
+        end
+        (mbsi, mbsi_old, i) = nextMbsName(mbsi, i)
+        push!(mbs_equations, :( $mbsi = Modia3D.computeGeneralizedForces!($mbsi_old, qdd_hidden, _leq_mode) ))
+        mbs_variables[mbsi] = Var(hideResult=true)
+
+        if length(jointAccelerationsRevolute) > 0
+            push!(mbs_equations, :( ($(jointForcesRevolute...), ) = implicitDependency(Modia3D.getGenForcesRevolute($mbsi, Val($NRevolute)), $(jointAccelerationsRevolute...)) ))
+            mbs_variables[mbsi] = Var(hideResult=true)
+        end
+        if length(jointAccelerationsPrismatic) > 0
+            push!(mbs_equations, :( ($(jointForcesPrismatic...), ) = implicitDependency(Modia3D.getGenForcesPrismatic($mbsi, Val($NPrismatic)), $(jointAccelerationsPrismatic...)) ))
+            mbs_variables[mbsi] = Var(hideResult=true)
+        end
+        if length(jointAccelerationsFreeMotion2) > 0
+            NFreeMotion2 = 2*NFreeMotion
+            push!(mbs_equations, :( ($(jointForcesFreeMotion2...), ) = implicitDependency(Modia3D.getGenForcesFreeMotion($mbsi), $(jointAccelerationsFreeMotion2...)) ))
+            mbs_variables[mbsi] = Var(hideResult=true)
+        end
+        push!(mbs_equations, :( 0.0 = Modia3D.getGenForcesHiddenJoints($mbsi, qdd_hidden) ) )
+        push!(mbs_equations, :( success = Modia3D.setHiddenStatesDerivatives!(instantiatedModel, $mbsi) ) )
+        
         mbsCode = mbs_variables | Model(equations = :[$(mbs_equations...)])
+
+    elseif method == "ComputeJointAccelerations"
+        mbsCode = Model(_id = rand(Int),
+                        _qdd = Var(start = zeros(ndofTotal)),
+                        equations = :[_mbs1 = Modia3D.initJoints!(_id, instantiatedModel, $ndofTotal, time)
+                                    _mbs2 = Modia3D.setJointStates1!(_mbs1, $(jointStates1...))
+                                    _qdd = Modia3D.getJointResiduals_method3!(_mbs2, $(jointForces1...))
+                                    $(jointAcc1...)
+                                    ]
+                        )
+    else
+        @error "Error should not occur (buildOption = $buildOption)"
     end
 
     # Store info in buildDict

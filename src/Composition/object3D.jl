@@ -251,7 +251,7 @@ mutable struct Object3D{F <: Modia3D.VarFloatType} <: Modia3D.AbstractObject3D
 
             else
                 # obj has FreeMotion joint
-                FreeMotion{F}(; obj1=parent, obj2=obj, path=path, hidden_qdd_startIndex=-1, r=translation, rot=rotation, v=velocity, w=angularVelocity)
+                FreeMotion{F}(; obj1=parent, obj2=obj, path=path, r=translation, rot=rotation, v=velocity, w=angularVelocity, hiddenStates=true)
             end
 
         else

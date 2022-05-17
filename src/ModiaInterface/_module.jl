@@ -16,7 +16,7 @@ export getRefPathPosition, getRefPathInitPosition, getVariables
 export Fix
 export Revolute, RevoluteWithFlange
 export Prismatic, PrismaticWithFlange
-export J123, J132, J123or132, singularRem, FreeMotion, change_rotSequenceInNextIteration!
+export singularRem, FreeMotion, change_rotSequenceInNextIteration!
 export Bushing, SpringDamperPtP
 
 export buildModel3D!, get_animationHistory
