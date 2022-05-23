@@ -45,32 +45,43 @@ end
 
 Generate a new Object3D object, that is a coordinate system with associated feature that is described relatively to its (optional) parent Object3D.
 
-Vectors `translation`, `rotation`, `velocity`, `angularVelocity` can be defined with units from package [Unitful](https://github.com/PainterQubits/Unitful.jl). If not units are provided, SI units are assumed (internally, all computations are performed with SI units, that is in m, rad, m/s, rad/s).
+Vectors `translation`, `rotation`, `velocity`, `angularVelocity` can be defined with units from package [Unitful](https://github.com/PainterQubits/Unitful.jl). If no units are provided, SI units are assumed (internally, all computations are performed with SI units, that is in m, rad, m/s, rad/s).
 
 
 # Arguments
 
-- `parent`: Parent Object3D. If `parent` is present, the Object3D is defined relatively to `parent`. If `parent` is not present, the Object3D is either the inertial system (typically called `world`), or the object is the reference system of a sub-system (via joints, all sub-systems must be connected directly or indirectly to `world` when a `Model3D(..)` is instantiated). If `parent=nothing`, arguments `translation`, `rotation`, `velocity`, `angularVelocity` are ignored (a warning is printed, if these arguments do not have zero values in this case).
+- `parent`: Parent Object3D. If `parent` is present, the Object3D is defined relatively to `parent`. 
+  If `parent=nothing`, the Object3D is either the inertial system (typically called `world`), or the object is the reference system of a sub-system (via joints, all sub-systems must be connected directly or indirectly to `world`). Arguments `translation`, `rotation`, `velocity`, `angularVelocity` are ignored in this case (a warning is printed, if these arguments do not have zero values).
 
 - `fixedToParent`: = true, if Object3D is fixed relatively to `parent`. Otherwise, Object3D can move freely relatively to parent (`translation`, `rotation`, `velocity`, `angularVelocity` is the initial state of Object3D with respect to `parent`). If `parent=nothing`, then `fixedToParent` is ignored.
 
-- `translation`: Vector from the origin of the parent to the origin of the Object3D, resolved in the parent coordinate system.
-  - Example: `translation = [0.0, 0.5, 0.0]` or `translation = [0.0, 50.0, 0.0]u"cm"` are a relative translation of 0.5 m in y-direction of the parent.
+- `translation`: Vector from the origin of the parent to the origin of the Object3D, resolved in the parent coordinate system. \\
+  Example: `translation = [0.0, 0.5, 0.0]` or `translation = [0.0, 50.0, 0.0]u"cm"` are a relative translation of 0.5 m in y-direction of the parent.
 
-- `rotation`: Vector `[angleX, angleY, angleZ]` to rotate the parent coordinate system along the x-axis with `angleX`, the y-axis with `angleY` and the z-axis with `angleZ` to arrive at the Object3D coordinate system.
-  - Example: `rotation = [0.0, pi/2, 0.0]` or `rotation = [0.0, 90u"°", 0.0]` defines that a rotation around the y-axis of the parent coordinate system with 90 degrees arrives at the Object3D.
+- `rotation`: Vector `[angleX, angleY, angleZ]` to rotate the parent coordinate system along the x-axis with `angleX`, the y-axis with `angleY` and the z-axis with `angleZ` to arrive at the Object3D coordinate system.\\
+  Example: `rotation = [0.0, pi/2, 0.0]` or `rotation = [0.0, 90u"°", 0.0]` defines that a rotation around the y-axis of the parent coordinate system with 90 degrees arrives at the Object3D.
 
-- `velocity`: If `parent` is defined and `fixedToParent=false`, the initial velocity of the origin of the Object3D with respect to the `parent`, resolved in the parent coordinate system.
-  - Example: `velocity = [0.0, 0.5, 0.0]` or `velocity = [0.0, 50.0, 0.0]u"cm/s"` is an initial relative velocity of 0.5 m/s in y-direction of the parent.
+- `velocity`: If `parent` is defined and `fixedToParent=false`, the initial velocity of the origin of the Object3D with respect to the `parent`, resolved in the parent coordinate system.\\
+  Example: `velocity = [0.0, 0.5, 0.0]` or `velocity = [0.0, 50.0, 0.0]u"cm/s"` is an initial relative velocity of 0.5 m/s in y-direction of the parent.
 
-- `angularVelocity`: If `parent` is defined and `fixedToParent=false`, the initial angular velocity of the Object3D with respect to the `parent`, **resolved in Object3D (needs to be changed to parent)**.
-  - Example: `angularVelocity = [0.0, pi/2, 0.0]` or `angularVelocity = [0.0, 90u"°/s", 0.0]` is an initial relative angular velocity of 90 degrees per second in y-direction of the parent.
+- `angularVelocity`: If `parent` is defined and `fixedToParent=false`, the initial angular velocity of the Object3D with respect to the `parent`, **resolved in Object3D (needs to be changed to parent)**.\\
+  Example: `angularVelocity = [0.0, pi/2, 0.0]` or `angularVelocity = [0.0, 90u"°/s", 0.0]` is an initial relative angular velocity of 90 degrees per second in y-direction of the parent.
 
 - `feature`: Defines the (optional) property associated with the Object3D by a constructor call. Supported constructors:
     - `Scene`: A [Scene](@ref) feature marks the root Object3D (world, origin, inertial system). It has no parent Object3D and allows to define global properties, such as the gravity field.
     - `Visual`: A [Visual](@ref) feature defines a shape used for visualization.
     - `Solid`: A [Solid](@ref) feature defines the solid properties of an Object3D, like mass, inertia tensor, collision behavior.
     - `nothing`: No feature is associated with the Object3D. This might be useful for helper Object3Ds, for example to mark a point on a shape and connecting it later via a joint.
+
+# States, if freely moving
+
+If `fixedToParent=false`, the Object3D is moving freely relatively to `parent`.
+Vectors `translation`, `rotation`, `velocity`, `angularVelocity` (all resolved in `parent`) are used as states and are available in the result for plotting.
+
+If `rotation[2]` is close to its singular position (= 90u"°" or -90u"°"), an event is triggered and the rotation sequence is changed from `[angleX, angleY, angleZ]` to
+`[angleX, angleZ, angleY]`. In the new rotation sequence, `rotation[2]` is far from its singular position at this time instant. Variable `rotation123::Bool` in the result signals whether `rotation` is defined with rotation sequence `[angleX, angleY, angleZ]` (`rotation123=true`) or with rotation sequence `[angleX, angleZ, angleY]` (`rotation123=false`).
+See, example `Modia3D/test/Basic/ShaftFreeMotionAdaptiveRotSequence.jl`.
+
 
 # Example
 

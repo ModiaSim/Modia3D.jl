@@ -19,7 +19,9 @@ Prismatic
 
 
 
-## FreeMotion
+## FreeMotion (deprecated)
+
+Do no longer use FreeMotion joints, but instead use [`Object3D`](@ref) with `fixedToParent=false`.
 
 ```@docs
 FreeMotion
