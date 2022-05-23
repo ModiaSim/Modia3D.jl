@@ -72,7 +72,6 @@ mutable struct MultibodyData{F <: Modia3D.VarFloatType, TimeType}
         # Code below assumes, that all hiddenJointObjects are FreeMotion joints
         i = 1
         j = length(freeMotionObjects) + 1
-        eqInfo = partiallyInstantiatedModel.equationInfo
         path::String = ""
         for obj in hiddenJointObjects
             joint = obj.joint
@@ -90,13 +89,15 @@ mutable struct MultibodyData{F <: Modia3D.VarFloatType, TimeType}
 
             # Define hidden model states and copy initial values into eqInfo
             path = obj.path * "."
-            freeMotion.ix_hidden_r   = Modia.addHiddenState!(eqInfo, path*"translation"    , path*"der(translation)"    , freeMotion.r)
-            freeMotion.ix_hidden_rot = Modia.addHiddenState!(eqInfo, path*"rotation"       , path*"der(rotation)"       , freeMotion.rot)
-            freeMotion.ix_hidden_v   = Modia.addHiddenState!(eqInfo, path*"velocity"       , path*"der(velocity)"       , freeMotion.v)
-            freeMotion.ix_hidden_w   = Modia.addHiddenState!(eqInfo, path*"angularVelocity", path*"der(angularVelocity)", freeMotion.w)
+            freeMotion.ix_hidden_r     = Modia.newHiddenState!(partiallyInstantiatedModel, path*"translation"    , path*"der(translation)"    , freeMotion.r)
+            freeMotion.ix_hidden_rot   = Modia.newHiddenState!(partiallyInstantiatedModel, path*"rotation"       , path*"der(rotation)"       , freeMotion.rot)
+            freeMotion.ix_hidden_v     = Modia.newHiddenState!(partiallyInstantiatedModel, path*"velocity"       , path*"der(velocity)"       , freeMotion.v)
+            freeMotion.ix_hidden_w     = Modia.newHiddenState!(partiallyInstantiatedModel, path*"angularVelocity", path*"der(angularVelocity)", freeMotion.w)
+            freeMotion.iextra_isrot123 = Modia.newExtraResult!(partiallyInstantiatedModel, path*"rotation123", freeMotion.isrot123)
+            freeMotion.ix_rot          = Modia.getStateStartIndexFromHiddenStateStartIndex(partiallyInstantiatedModel,freeMotion.ix_hidden_rot)
 
             # Define event indicator to monitor changing sequence of rotation angles
-            freeMotion.iz_rot2 = Modia.addZeroCrossings(partiallyInstantiatedModel, 1)
+            freeMotion.iz_rot2 = Modia.newZeroCrossings(partiallyInstantiatedModel, 1)
         end
 
         for obj in scene.treeForComputation
@@ -626,15 +627,60 @@ function setStatesFreeMotion_isrot123!(mbs::MultibodyData{F,TimeType}, args::Var
 end
 
 
+singularRem(ang) = abs(rem2pi(ang, RoundNearest)) - 1.5  # is negative/positive in valid/singular angle range
+
+
 """
-    setStatesHiddenJoints!(instantiatedModel::Modia.SimulationModel, mbs::MultibodyData)
+    change_rotSequence!(instantiatedModel, freeMotion::FreeMotion, x::AbstractVector, x_hidden::AbstractVector)
+
+Change rotation sequence of `freeMotion.rot` from `x-axis, y-axis, z-axis` to `x-axis, z-axis, y-axis` or visa versa:
+
+- If `freeMotion.isrot123 = true` , set `freeMotion.isrot123 = false` and `x[..] = x_hidden[..] = rot132fromR(Rfromrot123(freeMotion.rot))`
+
+- If `freeMotion.isrot123 = false`, set `freeMotion.isrot123 = true`  and `x[..] = x_hidden[..] = rot123fromR(Rfromrot132(freeMotion.rot))`
+"""
+function change_rotSequence!(m::Modia.SimulationModel, freeMotion::FreeMotion, x::AbstractVector, x_hidden::AbstractVector)::Nothing
+    if freeMotion.isrot123
+        freeMotion.rot      = rot132fromR(Rfromrot123(freeMotion.rot))
+        freeMotion.isrot123 = false
+    else
+        freeMotion.rot      = rot123fromR(Rfromrot132(freeMotion.rot))
+        freeMotion.isrot123 = true
+    end
+    Modia.addExtraResult!(m, freeMotion.iextra_isrot123, freeMotion.isrot123)
+
+    # Change x-vector
+    startIndex = freeMotion.ix_hidden_rot
+    x_hidden[startIndex  ] = freeMotion.rot[1]
+    x_hidden[startIndex+1] = freeMotion.rot[2]
+    x_hidden[startIndex+2] = freeMotion.rot[3]
+
+    startIndex = freeMotion.ix_rot
+    x[startIndex]   = freeMotion.rot[1]
+    x[startIndex+1] = freeMotion.rot[2]
+    x[startIndex+2] = freeMotion.rot[3]
+
+    # Change z-vector
+    m.eventHandler.z[freeMotion.iz_rot2]         = freeMotion.rot[2]
+    m.eventHandler.zPositive[freeMotion.iz_rot2] = false
+    if m.options.logEvents
+        println("        ", freeMotion.path * ".rotation123 changed to ", freeMotion.isrot123)
+        println("        ", freeMotion.path * ".rotation changed to ", freeMotion.rot)
+    end
+
+    return nothing
+end
+
+
+"""
+    setStatesHiddenJoints!(instantiatedModel::Modia.SimulationModel, mbs::MultibodyData, x)
 
 Copy states from the hidden state vector instantiatedModel.x_hidden to the hidden joints into the corresponding Object3Ds
 and copy some state derivatives into instantiatedModel.der_x_hidden.
 """
-function setStatesHiddenJoints!(m::Modia.SimulationModel{F,TimeType}, mbs::MultibodyData{F,TimeType})::Nothing where {F,TimeType}
-    x     = m.x_hidden
-    der_x = m.der_x_hidden
+function setStatesHiddenJoints!(m::Modia.SimulationModel{F,TimeType}, mbs::MultibodyData{F,TimeType}, _x)::Nothing where {F,TimeType}
+    x_hidden     = m.x_hidden
+    der_x_hidden = m.der_x_hidden
     j1::Int = 0
     j2::Int = 0
     j3::Int = 0
@@ -642,22 +688,27 @@ function setStatesHiddenJoints!(m::Modia.SimulationModel{F,TimeType}, mbs::Multi
     for obj in mbs.hiddenJointObjects
         # Copy x_hidden states into freeMotion states
         freeMotion = mbs.freeMotion[obj.jointIndex]
-        j1 = freeMotion.ix_hidden_r  ;  freeMotion.r   = SVector{3,F}(x[j1], x[j1+1], x[j1+2])
-        j2 = freeMotion.ix_hidden_rot;  freeMotion.rot = SVector{3,F}(x[j2], x[j2+1], x[j2+2])
-        j3 = freeMotion.ix_hidden_v  ;  freeMotion.v   = SVector{3,F}(x[j3], x[j3+1], x[j3+2])
-        j4 = freeMotion.ix_hidden_w  ;  freeMotion.w   = SVector{3,F}(x[j4], x[j4+1], x[j4+2])
+        j1 = freeMotion.ix_hidden_r  ;  freeMotion.r   = SVector{3,F}(x_hidden[j1], x_hidden[j1+1], x_hidden[j1+2])
+        j2 = freeMotion.ix_hidden_rot;  freeMotion.rot = SVector{3,F}(x_hidden[j2], x_hidden[j2+1], x_hidden[j2+2])
+        j3 = freeMotion.ix_hidden_v  ;  freeMotion.v   = SVector{3,F}(x_hidden[j3], x_hidden[j3+1], x_hidden[j3+2])
+        j4 = freeMotion.ix_hidden_w  ;  freeMotion.w   = SVector{3,F}(x_hidden[j4], x_hidden[j4+1], x_hidden[j4+2])
 
         # Copy some freeMotion state derivatives into der_x_hidden
             # der(r) = v
-            der_x[j1]   = freeMotion.v[j1]
-            der_x[j1+1] = freeMotion.v[j1+1]
-            der_x[j1+2] = freeMotion.v[j1+2]
+            der_x_hidden[j1]   = freeMotion.v[j1]
+            der_x_hidden[j1+1] = freeMotion.v[j1+1]
+            der_x_hidden[j1+2] = freeMotion.v[j1+2]
+
+            if Modia.positive(m, freeMotion.iz_rot2, singularRem(freeMotion.rot[2]), freeMotion.str_rot2, nothing)
+                # freeMotion.rot[2] mapped to range -pi .. pi is either >= 1.5 or <= -1.5 (so comes close to singular position pi/2 = 1.57...)
+                change_rotSequence!(m, freeMotion, _x, x_hidden)
+            end
 
             # der(rot) = J123or132(rot,isrot123) * w
             der_rot = J123or132(freeMotion.rot, freeMotion.isrot123)*freeMotion.w
-            der_x[j2]   = der_rot[1]
-            der_x[j2+1] = der_rot[2]
-            der_x[j2+2] = der_rot[3]
+            der_x_hidden[j2]   = der_rot[1]
+            der_x_hidden[j2+1] = der_rot[2]
+            der_x_hidden[j2+2] = der_rot[3]
     end
     return nothing
 end
@@ -738,13 +789,13 @@ function setHiddenStatesDerivatives!(m::Modia.SimulationModel{F,TimeType}, mbs::
         m.der_x_hidden[j1  ] = freeMotion.a[1]
         m.der_x_hidden[j1+1] = freeMotion.a[2]
         m.der_x_hidden[j1+2] = freeMotion.a[3]
-       
+
         j2 = freeMotion.ix_hidden_w
         m.der_x_hidden[j2  ] = freeMotion.z[1]
         m.der_x_hidden[j2+1] = freeMotion.z[2]
         m.der_x_hidden[j2+2] = freeMotion.z[3]
-        
-        #println("   j1=$j1, j2=$j2, freeMotion.a[2] = ", freeMotion.a[2], ", m.der_x_hidden = ", m.der_x_hidden)        
+
+        #println("   j1=$j1, j2=$j2, freeMotion.a[2] = ", freeMotion.a[2], ", m.der_x_hidden = ", m.der_x_hidden)
     end
     return nothing
 end

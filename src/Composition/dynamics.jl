@@ -125,7 +125,7 @@ function instantiateModel3D!(partiallyInstantiatedModel::Modia.SimulationModel{F
     scene.forceElements = forceElements
     if scene.options.enableContactDetection && scene.collide
         nz = 2
-        zStartIndex = Modia.addZeroCrossings(partiallyInstantiatedModel, nz)
+        zStartIndex = Modia.newZeroCrossings(partiallyInstantiatedModel, nz)
         scene.zStartIndex = zStartIndex
     else
         nz = 0
@@ -142,10 +142,10 @@ function instantiateModel3D!(partiallyInstantiatedModel::Modia.SimulationModel{F
         println("  Number of degrees of freedom: ", length(mbs.revoluteObjects) + length(mbs.prismaticObjects) + 6*length(mbs.hiddenJointObjects))
         println("  Number of revolute joints:    ", length(mbs.revoluteObjects))
         println("  Number of prismatic joints:   ", length(mbs.prismaticObjects))
-        println("  Number of freeMotion joints:  ", length(mbs.freeMotionObjects))     
-        println("  Number of Object3Ds with fixedToParent=false: ", length(mbs.hiddenJointObjects)) 
+        println("  Number of freeMotion joints:  ", length(mbs.freeMotionObjects))
+        println("  Number of Object3Ds with fixedToParent=false: ", length(mbs.hiddenJointObjects))
     end
-    
+
     if scene.visualize
         TimerOutputs.@timeit partiallyInstantiatedModel.timer "Modia3D_0 initializeVisualization" Modia3D.Composition.initializeVisualization(Modia3D.renderer[1], scene.allVisuElements)
         if partiallyInstantiatedModel.options.log
@@ -163,7 +163,7 @@ end
 
 
 """
-    mbs = openModel3D!(instantiatedModel, modelPath::String, time)
+    mbs = openModel3D!(instantiatedModel, modelPath::String, x, time)
 
 Open Model3D:
 
@@ -172,7 +172,7 @@ Open Model3D:
 - Copy der(r):=v and der(rot):= f(w) into hidden derivatives.
 - Return mbs.
 """
-function openModel3D!(instantiatedModel::Modia.SimulationModel{F,TimeType}, modelPath::String, time::TimeType)::MultibodyData{F,TimeType} where {F,TimeType}
+function openModel3D!(instantiatedModel::Modia.SimulationModel{F,TimeType}, modelPath::String, x::AbstractVector, time::TimeType)::MultibodyData{F,TimeType} where {F,TimeType}
     mbsBuild::MultibodyBuild{F,TimeType} = instantiatedModel.buildDict[modelPath]
 
     if isnothing(mbsBuild.mbs)
@@ -182,7 +182,7 @@ function openModel3D!(instantiatedModel::Modia.SimulationModel{F,TimeType}, mode
     mbs = mbsBuild.mbs
     mbs.time = time
 
-    setStatesHiddenJoints!(instantiatedModel, mbs)
+    setStatesHiddenJoints!(instantiatedModel, mbs, x)
     return mbs
 end
 

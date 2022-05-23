@@ -51,7 +51,7 @@ velocity vectors.
 """
 mutable struct FreeMotion{F <: Modia3D.VarFloatType} <: Modia3D.AbstractJoint
     path::String
-    
+
     # Hidden states are stored in the following way:
     #   x_hidden[ix_r:...] = [r, rot, v, w]
     #
@@ -63,16 +63,19 @@ mutable struct FreeMotion{F <: Modia3D.VarFloatType} <: Modia3D.AbstractJoint
     #   der(rot) = J123or132(rot,isrot123) * w
     #   der(v)   = ...
     #   der(w)   = ...
-    
-    hiddenStates::Bool   # = true, if state is not visible in generated code
-    ix_hidden_r::Int    # instantiatedModel.x_hidden[ix_r_hidden  :ix_hidden_r+2]     are the elements of x_hidden that are stored in r   if hiddenStates
-    ix_hidden_rot::Int  # instantiatedModel.x_hidden[ix_rot_hidden:ix_hidden_rot+2] are the elements of x_hidden that are stored in rot if hiddenStates
-    ix_hidden_v::Int    # instantiatedModel.x_hidden[ix_v_hidden  :ix_hidden_v+2]     are the elements of x_hidden that are stored in v   if hiddenStates
-    ix_hidden_w::Int    # instantiatedModel.x_hidden[ix_w_hidden  :ix_hidden_w+2]     are the elements of x_hidden that are stored in w   if hiddenStates
-    iz_rot2::Int        # instantiatedModel.eventHandler.z[iz_rot2] is the element of z in which singularRem(rot[2]) is stored if hiddenStates, 
-                        # to monitor when to switch to a different rotation sequence of rot
-    iqdd_hidden::Int    # qdd_hidden[iqdd_hidden:iqdd_hidden+5] are the elements of qdd that are stored in [a,z] if hiddenStates
-    
+
+    hiddenStates::Bool    # = true, if state is not visible in generated code
+    ix_hidden_r::Int      # instantiatedModel.x_hidden[ix_r_hidden  :ix_hidden_r+2]     are the elements of x_hidden that are stored in r   if hiddenStates
+    ix_hidden_rot::Int    # instantiatedModel.x_hidden[ix_rot_hidden:ix_hidden_rot+2] are the elements of x_hidden that are stored in rot if hiddenStates
+    ix_hidden_v::Int      # instantiatedModel.x_hidden[ix_v_hidden  :ix_hidden_v+2]     are the elements of x_hidden that are stored in v   if hiddenStates
+    ix_hidden_w::Int      # instantiatedModel.x_hidden[ix_w_hidden  :ix_hidden_w+2]     are the elements of x_hidden that are stored in w   if hiddenStates
+    iextra_isrot123::Int  # Startindex of extra result isrot123
+    iz_rot2::Int          # instantiatedModel.eventHandler.z[iz_rot2] is the element of z in which singularRem(rot[2]) is stored if hiddenStates,
+                          # to monitor when to switch to a different rotation sequence of rot
+    iqdd_hidden::Int      # qdd_hidden[iqdd_hidden:iqdd_hidden+5] are the elements of qdd that are stored in [a,z] if hiddenStates
+    ix_rot::Int           # startIndex of rot with respect to x-vector
+    str_rot2::String      # String to be used for zero crossing logging of iz_rot2
+
     obj1::Modia3D.AbstractObject3D
     obj2::Modia3D.AbstractObject3D
 
@@ -117,8 +120,9 @@ mutable struct FreeMotion{F <: Modia3D.VarFloatType} <: Modia3D.AbstractJoint
         a   = Modia3D.ZeroVector3D(F)
         z   = Modia3D.ZeroVector3D(F)
         isrot123 = true
+        str_rot2 = "singularRem(" * path * ".rotation[2])"
 
-        obj2.joint      = new(path, hiddenStates, -1, -1, -1, -1, -1, -1, obj1, obj2, 6, r, rot, isrot123, v, w, a, z)
+        obj2.joint      = new(path, hiddenStates, -1, -1, -1, -1, -1, -1, -1, -1, str_rot2, obj1, obj2, 6, r, rot, isrot123, v, w, a, z)
         obj2.parent     = obj1
         obj2.jointKind  = FreeMotionKind
         obj2.jointIndex = 0

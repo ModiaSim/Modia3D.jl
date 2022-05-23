@@ -43,7 +43,7 @@ mbs7 = Var(hideResult=true),
 mbs8 = Var(hideResult=true),
 mbs9 = Var(hideResult=true),
 equations = :[
-    mbs1 = Modia3D.openModel3D!(instantiatedModel, modelPathAsString, time)
+    mbs1 = Modia3D.openModel3D!(instantiatedModel, modelPathAsString, _x, time)
     mbs2 = Modia3D.setStatesRevolute!(mbs1, jointStatesRevolute...)
     mbs3 = Modia3D.setStatesPrismatic!(mbs2, jointStatesPrismatic...)
     mbs4 = Modia3D.setStatesFreeMotion!(mbs3, jointStatesFreeMotion...)
@@ -189,7 +189,7 @@ function buildModel3D!(model::AbstractDict, FloatType::Type, TimeType::Type,
 
     i=1
     mbsi = :_mbs1
-    mbs_equations = [ :($mbsi = Modia3D.openModel3D!(instantiatedModel, $modelPathAsString, time)) ]
+    mbs_equations = [ :($mbsi = Modia3D.openModel3D!(instantiatedModel, $modelPathAsString, _x, time)) ]
     mbs_variables = Model(qdd_hidden = Var(hideResult=true, start=[]),
                           success = Var(hideResult=true))
     mbs_variables[mbsi] = Var(hideResult=true)
@@ -248,7 +248,7 @@ function buildModel3D!(model::AbstractDict, FloatType::Type, TimeType::Type,
         end
         push!(mbs_equations, :( 0.0 = Modia3D.getGenForcesHiddenJoints($mbsi, qdd_hidden) ) )
         push!(mbs_equations, :( success = Modia3D.setHiddenStatesDerivatives!(instantiatedModel, $mbsi) ) )
-        
+
         mbsCode = mbs_variables | Model(equations = :[$(mbs_equations...)])
 
     elseif method == "ComputeJointAccelerations"

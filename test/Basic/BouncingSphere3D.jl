@@ -8,11 +8,11 @@ BouncingSphere = Model3D(
                          feature=Solid(shape=Box(lengthX=4.0, lengthY=:boxHeigth, lengthZ=0.7),
                                        visualMaterial=VisualMaterial(color="DarkGreen"),
                                        solidMaterial="Steel",
-                                       collision=true)), 
+                                       collision=true)),
     sphere    = Object3D(parent=:world, fixedToParent=false, translation=[0.0, 1.0, 0.0],
                          feature=Solid(shape=Sphere(diameter=0.2),
                                        visualMaterial=VisualMaterial(color="Blue"),
-                                       solidMaterial="Steel", 
+                                       solidMaterial="Steel",
                                        massProperties=MassPropertiesFromShapeAndMass(mass=0.001),
                                        collision=true)),
 )
@@ -22,6 +22,6 @@ simulate!(bouncingSphere, stopTime=2.2, dtmax=0.1, log=true, logStates=true)
 printResultInfo(bouncingSphere)
 
 @usingModiaPlot
-plot(bouncingSphere, ["sphere.translation", "sphere.velocity"], figure=1)
+plot(bouncingSphere, ["sphere.translation", "sphere.velocity", "sphere.rotation123"], figure=1)
 
 end
