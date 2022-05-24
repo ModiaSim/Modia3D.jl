@@ -69,12 +69,18 @@ end
 
 """
     R = Modia3D.rot123(angle1, angle2, angle3)
+    R = Modia3D.rot123(angles::AbstractVector)
 
 Return rotation matrix R by rotating with angle1 along the x-axis of frame 1,
 then with angle2 along the y-axis of this frame and then with angle3 along
-the z-axis of this frame.
+the z-axis of this frame. The angles can be optionally provided in form of a vector
+`angles = [angle1, angle2, angle3]`.
 """
 rot123(angle1::F, angle2::F, angle3::F) where F <: Modia3D.VarFloatType = rot3(angle3)*rot2(angle2)*rot1(angle1)
+@inline function rot123(angles::AbstractVector)
+    @assert(length(angles) == 3)
+    return rot123(angles[1], angles[2], angles[3])
+end
 
 
 """
@@ -148,27 +154,32 @@ rot_nxy(nx::AbstractVector, ny::AbstractVector) = rot_nxy(SVector{3,F}(nx), SVec
 
 
 """
-    v1 = Modia3D.resolve1([R|q], v2)
+    v1 = Modia3D.resolve1([R|q|angles], v2)
 
-Transform vector v2 (v resolved in frame 2) to vector v1 (v resolved in frame 1)
-given either SMatrix ` R` or
-quaternion `q` (to rotate a frame 1 into a frame 2).
+Transform vector v2 (v resolved in frame 2) to vector v1 (v resolved in frame 1) given
+
+- SMatrix ` R` (rotate frame 1 into frame 2) or
+- quaternion SVector `q` (rotate frame 1 into frame 2) or
+- angles SVector `angles` (= [angleX, angleY, angleZ]).
 """
-resolve1(R::SMatrix{3,3,F,9}, v2::SVector{3,F})   where F <: Modia3D.VarFloatType = R'*v2
-resolve1(R::SMatrix{3,3,F,9}, v2::AbstractVector) where F <: Modia3D.VarFloatType = R'*SVector{3,F}(v2)
+resolve1(R::SMatrix{3,3,F,9}, v2::SVector{3,F})    where F <: Modia3D.VarFloatType = R'*v2
+resolve1(R::SMatrix{3,3,F,9}, v2::AbstractVector)  where F <: Modia3D.VarFloatType = R'*SVector{3,F}(v2)
+resolve1(angles::SVector{3,F}, v2::AbstractVector) where F <: Modia3D.VarFloatType = resolve1(rot123(angles),v2)
 
 
 
 """
-    v2 = Modia3D.resolve2([R|q], v1)
+    v2 = Modia3D.resolve2([R|q|angles], v1)
 
-Transform vector v1 (v resolved in frame 1) to vector v2 (v resolved in frame 2)
-given either SMatrix ` R` or
-quaternion `q` (to rotate a frame 1 into a frame 2).
+Transform vector v1 (v resolved in frame 1) to vector v2 (v resolved in frame 2) given
+
+- SMatrix ` R` (rotate frame 1 into frame 2) or
+- quaternion SVector `q` (rotate frame 1 into frame 2) or
+- angles SVector `angles` (= [angleX, angleY, angleZ]).
 """
-resolve2(R::SMatrix{3,3,F,9}, v1::SVector{3,F})   where F <: Modia3D.VarFloatType = R*v1
-resolve2(R::SMatrix{3,3,F,9}, v1::AbstractVector) where F <: Modia3D.VarFloatType = R*SVector{3,F}(v1)
-
+resolve2(R::SMatrix{3,3,F,9}, v1::SVector{3,F})    where F <: Modia3D.VarFloatType = R*v1
+resolve2(R::SMatrix{3,3,F,9}, v1::AbstractVector)  where F <: Modia3D.VarFloatType = R*SVector{3,F}(v1)
+resolve2(angles::SVector{3,F}, v1::AbstractVector) where F <: Modia3D.VarFloatType = resolve2(rot123(angles),v2)
 
 """
      R2 = Modia3D.absoluteRotation(R1, R_rel)

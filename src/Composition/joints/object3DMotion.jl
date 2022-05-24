@@ -75,6 +75,7 @@ mutable struct FreeMotion{F <: Modia3D.VarFloatType} <: Modia3D.AbstractJoint
     iqdd_hidden::Int      # qdd_hidden[iqdd_hidden:iqdd_hidden+5] are the elements of qdd that are stored in [a,z] if hiddenStates
     ix_rot::Int           # startIndex of rot with respect to x-vector
     str_rot2::String      # String to be used for zero crossing logging of iz_rot2
+    wResolvedInParent::Bool  # = true, if w is resolved in obj1 (= parent); = false, if w is resolved in obj2.
 
     obj1::Modia3D.AbstractObject3D
     obj2::Modia3D.AbstractObject3D
@@ -99,8 +100,20 @@ mutable struct FreeMotion{F <: Modia3D.VarFloatType} <: Modia3D.AbstractJoint
                              v::AbstractVector   = Modia3D.ZeroVector3D(F),
                              w::AbstractVector   = Modia3D.ZeroVector3D(F),
                              next_isrot123::Bool = true,
-                             hiddenStates::Bool = false
+                             hiddenStates::Bool = false,
+                             wResolvedInParent  = false
                           ) where F <: Modia3D.VarFloatType
+
+        if !hiddenStates
+            str::String = !wResolvedInParent && !iszero(w) ? ("\nFreeMotion(..., w=Var(start=w_start)) has start or init value w_start=$w which is not zero.\n"*
+                                                      "When changing from FreeMotion to Object3D, this value must be transformed to the parent Object3D, e.g. with \n"*
+                                                      "Object3D(..., rotation=xxx, angularVelocity = Modia3D.resolve1(rotation,w_start)).\n\n") : "\n\n"
+            printstyled("\nWarning due to `", path, " = Modia3D.FreeMotion(..)`:\n"*
+                "The FreeMotion joint is deprecated. Please, use Object3D(..., fixedToParent=false, ...) instead.\n"*
+                "Note, Object3D resolves variable angularVelocity in the parent Object3D, whereas\n"*
+                "the FreeMotion joint resolves w in obj2 of FreeMotion(obj1=..., obj2=..., ) and not in obj1."*str,
+                bold=true, color=:red)
+        end
 
         #(parent,obj,cutJoint) = attach(obj1, obj2)
         #if cutJoint
@@ -120,9 +133,9 @@ mutable struct FreeMotion{F <: Modia3D.VarFloatType} <: Modia3D.AbstractJoint
         a   = Modia3D.ZeroVector3D(F)
         z   = Modia3D.ZeroVector3D(F)
         isrot123 = true
-        str_rot2 = "singularRem(" * path * ".rotation[2])"
+        str_rot2 = "singularitySafetyMargin(" * path * ".rotation[2])"
 
-        obj2.joint      = new(path, hiddenStates, -1, -1, -1, -1, -1, -1, -1, -1, str_rot2, obj1, obj2, 6, r, rot, isrot123, v, w, a, z)
+        obj2.joint      = new(path, hiddenStates, -1, -1, -1, -1, -1, -1, -1, -1, str_rot2, wResolvedInParent, obj1, obj2, 6, r, rot, isrot123, v, w, a, z)
         obj2.parent     = obj1
         obj2.jointKind  = FreeMotionKind
         obj2.jointIndex = 0

@@ -89,10 +89,11 @@ mutable struct MultibodyData{F <: Modia3D.VarFloatType, TimeType}
 
             # Define hidden model states and copy initial values into eqInfo
             path = obj.path * "."
+            w_init = freeMotion.wResolvedInParent ? resolve2(freeMotion.rot, freeMotion.w) : freeMotion.w
             freeMotion.ix_hidden_r     = Modia.newHiddenState!(partiallyInstantiatedModel, path*"translation"    , path*"der(translation)"    , freeMotion.r)
             freeMotion.ix_hidden_v     = Modia.newHiddenState!(partiallyInstantiatedModel, path*"velocity"       , path*"der(velocity)"       , freeMotion.v)
             freeMotion.ix_hidden_rot   = Modia.newHiddenState!(partiallyInstantiatedModel, path*"rotation"       , path*"der(rotation)"       , freeMotion.rot)
-            freeMotion.ix_hidden_w     = Modia.newHiddenState!(partiallyInstantiatedModel, path*"angularVelocity", path*"der(angularVelocity)", freeMotion.w)
+            freeMotion.ix_hidden_w     = Modia.newHiddenState!(partiallyInstantiatedModel, path*"angularVelocity", path*"der(angularVelocity)", w_init)
             freeMotion.iextra_isrot123 = Modia.newExtraResult!(partiallyInstantiatedModel, path*"rotation123", freeMotion.isrot123)
             freeMotion.ix_rot          = Modia.getStateStartIndexFromHiddenStateStartIndex(partiallyInstantiatedModel,freeMotion.ix_hidden_rot)
 
@@ -627,7 +628,7 @@ function setStatesFreeMotion_isrot123!(mbs::MultibodyData{F,TimeType}, args::Var
 end
 
 
-singularRem(ang) = abs(rem2pi(ang, RoundNearest)) - 1.5  # is negative/positive in valid/singular angle range
+singularitySafetyMargin(ang) = abs(rem2pi(ang, RoundNearest)) - 1.5  # is negative/positive in valid/singular angle range
 
 
 """
@@ -663,9 +664,13 @@ function change_rotSequence!(m::Modia.SimulationModel, freeMotion::FreeMotion, x
     # Change z-vector
     m.eventHandler.z[freeMotion.iz_rot2]         = freeMotion.rot[2]
     m.eventHandler.zPositive[freeMotion.iz_rot2] = false
+    rotation2ZeroCrossing = singularitySafetyMargin(freeMotion.rot[2])
+    @assert(rotation2ZeroCrossing <= 0)
+
     if m.options.logEvents
         println("        ", freeMotion.path * ".rotation123 changed to ", freeMotion.isrot123)
         println("        ", freeMotion.path * ".rotation changed to ", freeMotion.rot)
+        println("        ", freeMotion.str_rot2 * " (= ", rotation2ZeroCrossing, ", ) became <= 0")
     end
 
     return nothing
@@ -692,14 +697,17 @@ function setStatesHiddenJoints!(m::Modia.SimulationModel{F,TimeType}, mbs::Multi
         j2 = freeMotion.ix_hidden_rot;  freeMotion.rot = SVector{3,F}(x_hidden[j2], x_hidden[j2+1], x_hidden[j2+2])
         j3 = freeMotion.ix_hidden_v  ;  freeMotion.v   = SVector{3,F}(x_hidden[j3], x_hidden[j3+1], x_hidden[j3+2])
         j4 = freeMotion.ix_hidden_w  ;  freeMotion.w   = SVector{3,F}(x_hidden[j4], x_hidden[j4+1], x_hidden[j4+2])
+        if freeMotion.wResolvedInParent
+            freeMotion.w = resolve2(obj.R_rel,freeMotion.w)
+        end
 
         # Copy some freeMotion state derivatives into der_x_hidden
             # der(r) = v
-            der_x_hidden[j1]   = freeMotion.v[j1]
-            der_x_hidden[j1+1] = freeMotion.v[j1+1]
-            der_x_hidden[j1+2] = freeMotion.v[j1+2]
+            der_x_hidden[j1]   = freeMotion.v[1]
+            der_x_hidden[j1+1] = freeMotion.v[2]
+            der_x_hidden[j1+2] = freeMotion.v[3]
 
-            if Modia.positive(m, freeMotion.iz_rot2, singularRem(freeMotion.rot[2]), freeMotion.str_rot2, nothing)
+            if Modia.positive(m, freeMotion.iz_rot2, singularitySafetyMargin(freeMotion.rot[2]), freeMotion.str_rot2, nothing)
                 # freeMotion.rot[2] mapped to range -pi .. pi is either >= 1.5 or <= -1.5 (so comes close to singular position pi/2 = 1.57...)
                 change_rotSequence!(m, freeMotion, _x, x_hidden)
             end
@@ -791,9 +799,10 @@ function setHiddenStatesDerivatives!(m::Modia.SimulationModel{F,TimeType}, mbs::
         m.der_x_hidden[j1+2] = freeMotion.a[3]
 
         j2 = freeMotion.ix_hidden_w
-        m.der_x_hidden[j2  ] = freeMotion.z[1]
-        m.der_x_hidden[j2+1] = freeMotion.z[2]
-        m.der_x_hidden[j2+2] = freeMotion.z[3]
+        z = freeMotion.wResolvedInParent ? resolve1(obj.R_rel, freeMotion.z) : freeMotion.z
+        m.der_x_hidden[j2  ] = z[1]
+        m.der_x_hidden[j2+1] = z[2]
+        m.der_x_hidden[j2+2] = z[3]
 
         #println("   j1=$j1, j2=$j2, freeMotion.a[2] = ", freeMotion.a[2], ", m.der_x_hidden = ", m.der_x_hidden)
     end

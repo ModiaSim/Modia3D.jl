@@ -50,7 +50,7 @@ Vectors `translation`, `rotation`, `velocity`, `angularVelocity` can be defined 
 
 # Arguments
 
-- `parent`: Parent Object3D. If `parent` is present, the Object3D is defined relatively to `parent`. 
+- `parent`: Parent Object3D. If `parent` is present, the Object3D is defined relatively to `parent`.
   If `parent=nothing`, the Object3D is either the inertial system (typically called `world`), or the object is the reference system of a sub-system (via joints, all sub-systems must be connected directly or indirectly to `world`). Arguments `translation`, `rotation`, `velocity`, `angularVelocity` are ignored in this case (a warning is printed, if these arguments do not have zero values).
 
 - `fixedToParent`: = true, if Object3D is fixed relatively to `parent`. Otherwise, Object3D can move freely relatively to parent (`translation`, `rotation`, `velocity`, `angularVelocity` is the initial state of Object3D with respect to `parent`). If `parent=nothing`, then `fixedToParent` is ignored.
@@ -64,7 +64,7 @@ Vectors `translation`, `rotation`, `velocity`, `angularVelocity` can be defined 
 - `velocity`: If `parent` is defined and `fixedToParent=false`, the initial velocity of the origin of the Object3D with respect to the `parent`, resolved in the parent coordinate system.\\
   Example: `velocity = [0.0, 0.5, 0.0]` or `velocity = [0.0, 50.0, 0.0]u"cm/s"` is an initial relative velocity of 0.5 m/s in y-direction of the parent.
 
-- `angularVelocity`: If `parent` is defined and `fixedToParent=false`, the initial angular velocity of the Object3D with respect to the `parent`, **resolved in Object3D (needs to be changed to parent)**.\\
+- `angularVelocity`: If `parent` is defined and `fixedToParent=false`, the initial angular velocity of the Object3D with respect to the `parent`, resolved in the parent coordinate system.\\
   Example: `angularVelocity = [0.0, pi/2, 0.0]` or `angularVelocity = [0.0, 90u"°/s", 0.0]` is an initial relative angular velocity of 90 degrees per second in y-direction of the parent.
 
 - `feature`: Defines the (optional) property associated with the Object3D by a constructor call. Supported constructors:
@@ -79,7 +79,8 @@ If `fixedToParent=false`, the Object3D is moving freely relatively to `parent`.
 Vectors `translation`, `rotation`, `velocity`, `angularVelocity` (all resolved in `parent`) are used as states and are available in the result for plotting.
 
 If `rotation[2]` is close to its singular position (= 90u"°" or -90u"°"), an event is triggered and the rotation sequence is changed from `[angleX, angleY, angleZ]` to
-`[angleX, angleZ, angleY]`. In the new rotation sequence, `rotation[2]` is far from its singular position at this time instant. Variable `rotation123::Bool` in the result signals whether `rotation` is defined with rotation sequence `[angleX, angleY, angleZ]` (`rotation123=true`) or with rotation sequence `[angleX, angleZ, angleY]` (`rotation123=false`).
+`[angleX, angleZ, angleY]`. In the new rotation sequence, `rotation[2]` is far from its singular position at this time instant. Variable `rotation123::Bool` in the result
+signals whether `rotation` is defined with rotation sequence `[angleX, angleY, angleZ]` (`rotation123=true`) or with rotation sequence `[angleX, angleZ, angleY]` (`rotation123=false`).
 See, example `Modia3D/test/Basic/ShaftFreeMotionAdaptiveRotSequence.jl`.
 
 
@@ -184,6 +185,7 @@ mutable struct Object3D{F <: Modia3D.VarFloatType} <: Modia3D.AbstractObject3D
         velocity        = Modia3D.ZeroVector3D(F),
         angularVelocity = Modia3D.ZeroVector3D(F),
         feature = nothing,
+        angularVelocityResolvedInParent = false,
         kwargs...) where F <: Modia3D.VarFloatType
         interactionBehavior = Modia3D.NoInteraction
 
@@ -204,16 +206,16 @@ mutable struct Object3D{F <: Modia3D.VarFloatType} <: Modia3D.AbstractObject3D
         if isnothing(rotation)
             @warn("$path::Object3D: rotation=nothing is interpreted as rotation=[0.0, 0.0, 0.0]")
             rotation = Modia3D.ZeroVector3D(F)
-        end        
+        end
         if isnothing(velocity)
             @warn("$path::Object3D: velocity=nothing is interpreted as velocity=[0.0, 0.0, 0.0]")
             velocity = Modia3D.ZeroVector3D(F)
-        end 
+        end
         if isnothing(angularVelocity)
             @warn("$path::Object3D: angularVelocity=nothing is interpreted as angularVelocity=[0.0, 0.0, 0.0]")
             angularVelocity = Modia3D.ZeroVector3D(F)
-        end         
-        
+        end
+
         if !isnothing(parent)
             # with parent
 
@@ -262,7 +264,8 @@ mutable struct Object3D{F <: Modia3D.VarFloatType} <: Modia3D.AbstractObject3D
 
             else
                 # obj has FreeMotion joint
-                FreeMotion{F}(; obj1=parent, obj2=obj, path=path, r=translation, rot=rotation, v=velocity, w=angularVelocity, hiddenStates=true)
+                FreeMotion{F}(; obj1=parent, obj2=obj, path=path, r=translation, rot=rotation, v=velocity, w=angularVelocity, hiddenStates=true,
+                                wResolvedInParent=angularVelocityResolvedInParent)
             end
 
         else
@@ -680,9 +683,9 @@ function Base.show(io::IO, obj::Object3D)
             print(io,", ")
         end
         print(io, "joint=", typeof(obj.joint), "(path = \"", obj.joint.path, "\", ...)")
-    end   
+    end
     if commaNeeded
         print(io,", ")
     end
-    print(io, "feature=", typeof(obj.feature), "(...))")  
+    print(io, "feature=", typeof(obj.feature), "(...))")
 end

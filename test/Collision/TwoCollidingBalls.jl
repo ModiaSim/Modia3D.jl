@@ -28,22 +28,22 @@ collidingBalls = Model3D(
                                    contactMaterial="BilliardTable",
                                    collision=true)),
 
-    ball1 = Object3D(feature=Solid(shape=Sphere(diameter=diameter),
+    ball1 = Object3D(parent=:world, fixedToParent=false,
+                     translation = [-1.3, 0.0, diameter/2],
+                     velocity    = [3.0, 0.0, 0.0],
+                     rotation    = [pi/2, 0.0, 0.0],
+                     feature=Solid(shape=Sphere(diameter=diameter),
                                    solidMaterial="BilliardBall",
                                    visualMaterial=vmatSolids,
                                    collision=true)),
-    joint1 = FreeMotion(obj1=:world, obj2=:ball1,
-                        r=Var(init=Modia.SVector{3,Float64}(-1.3, 0.0, diameter/2)),
-                        v=Var(init=Modia.SVector{3,Float64}(3.0, 0.0, 0.0)),
-                        rot=Var(init=Modia.SVector{3,Float64}(pi/2, 0.0, 0.0))),
 
-    ball2 = Object3D(feature=Solid(shape=Sphere(diameter=diameter),
+    ball2 = Object3D(parent=:world, fixedToParent=false,
+                     translation = [0.0, 0.0, diameter/2],
+                     rotation    = [pi/2, 0.0, 0.0],
+                     feature=Solid(shape=Sphere(diameter=diameter),
                                    solidMaterial="BilliardBall",
                                    visualMaterial=vmatSolids,
                                    collision=true)),
-    joint2 = FreeMotion(obj1=:world, obj2=:ball2,
-                        r=Var(init=Modia.SVector{3,Float64}(0.0, 0.0, diameter/2)),
-                        rot=Var(init=Modia.SVector{3,Float64}(pi/2, 0.0, 0.0)))
 )
 
 twoCollidingBalls = @instantiateModel(collidingBalls, unitless=true, log=false, logStateSelection=false, logCode=false)
@@ -54,6 +54,6 @@ requiredFinalStates = [0.4489974852019629, 4.971482124288075e-6, 0.0299968612747
 simulate!(twoCollidingBalls, stopTime=stopTime, tolerance=tolerance, log=true, logStates=false, logEvents=false, requiredFinalStates=requiredFinalStates)
 
 @usingModiaPlot
-plot(twoCollidingBalls, ["joint1.r" "joint1.rot"; "joint1.v" "joint1.w"], figure=1)
+plot(twoCollidingBalls, ["ball1.translation" "ball1.rotation"; "ball1.velocity" "ball1.angularVelocity"], figure=1)
 
 end

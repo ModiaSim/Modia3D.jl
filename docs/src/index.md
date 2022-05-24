@@ -93,6 +93,30 @@ julia -JModia3D_sysimage.so  (otherwise)
 
 ## Release Notes
 
+
+### Version 0.11.0-dev
+
+- Requires Modia 0.9.0 or later.
+
+- Additional keyword arguments of Object3D: `Object3D(..., fixedInParent=true, velocity=[0.0, 0.0, 0.0], angularVelocity=[0.0, 0.0, 0.0])`.
+  A freely moving Object3D is defined with `Object3D(..., fixedInParent=false, ...)`. The states and other code for such Object3Ds are
+  no longer visible in the generated code (so compilation is faster).
+
+- Joint `FreeMotion` is **deprecated**. Use instead `Object3D(..., fixedInParent=false, ...)`.
+  Note, Object3D has variables `translation, rotation, velocity, angularVelocity` instead of `r, rot, v, w` of `FreeMotion`.
+  Furthermore, `angularVelocity` is resolved in the parent `Object3D` whereas `w` in `FreeMotion(obj1=.., obj2=..., ..)` is resolved in
+  `obj2` and not in `obj1`. This means in particular that the init/start value `FreeMotion(.., w=Var(start=w_start)...)` needs
+  to be transformed in Object3D with `Object3D(..., fixedInParent=false, rotation=xxx, angularVelocity = Modia3D.resolve1(rotation,w_start))`.
+  
+- New variants of functions: `Modia3D.rot123(angles), Modia3D.resolve1(angles,v2), Modia3D.resolve2(angles,v1)`.
+
+
+**Non-backwards compatible changes**
+
+- Since Modia3D 0.11.0 is based on Modia 0.9.0, the non-backwards compatible changes of Modia have also an effect on Modia3D
+  (for details, see the release notes of Modia 0.9.0).
+ 
+
 ### Version 0.10.4
 
 - Script `Modia3D/create_Modia3D_sysimage.jl` improved.
