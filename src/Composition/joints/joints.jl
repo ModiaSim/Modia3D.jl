@@ -90,8 +90,8 @@ mutable struct MultibodyData{F <: Modia3D.VarFloatType, TimeType}
             # Define hidden model states and copy initial values into eqInfo
             path = obj.path * "."
             freeMotion.ix_hidden_r     = Modia.newHiddenState!(partiallyInstantiatedModel, path*"translation"    , path*"der(translation)"    , freeMotion.r)
-            freeMotion.ix_hidden_rot   = Modia.newHiddenState!(partiallyInstantiatedModel, path*"rotation"       , path*"der(rotation)"       , freeMotion.rot)
             freeMotion.ix_hidden_v     = Modia.newHiddenState!(partiallyInstantiatedModel, path*"velocity"       , path*"der(velocity)"       , freeMotion.v)
+            freeMotion.ix_hidden_rot   = Modia.newHiddenState!(partiallyInstantiatedModel, path*"rotation"       , path*"der(rotation)"       , freeMotion.rot)
             freeMotion.ix_hidden_w     = Modia.newHiddenState!(partiallyInstantiatedModel, path*"angularVelocity", path*"der(angularVelocity)", freeMotion.w)
             freeMotion.iextra_isrot123 = Modia.newExtraResult!(partiallyInstantiatedModel, path*"rotation123", freeMotion.isrot123)
             freeMotion.ix_rot          = Modia.getStateStartIndexFromHiddenStateStartIndex(partiallyInstantiatedModel,freeMotion.ix_hidden_rot)
