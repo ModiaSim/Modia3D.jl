@@ -1,4 +1,4 @@
-module ShaftFreeMotionAdaptiveRotSequence
+module FreeShaftAdaptiveRotSequence
 
 using Modia3D
 using Modia3D.Unitful

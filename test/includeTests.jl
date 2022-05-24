@@ -17,8 +17,9 @@ Test.@testset "Basic" begin
     include(joinpath("Basic", "PendulumWithSpring.jl"))
     include(joinpath("Basic", "DoublePendulumWithDampers.jl"))
     include(joinpath("Basic", "BoxPlanarMotion.jl"))
-    include(joinpath("Basic", "ShaftFreeMotion.jl"))
-    include(joinpath("Basic", "ShaftFreeMotionAdaptiveRotSequence.jl"))
+    include(joinpath("Basic", "FreeShaft.jl"))
+    include(joinpath("Basic", "FreeShaftAdaptiveRotSequence.jl"))
+    include(joinpath("Basic", "FreeShaftAdaptiveRotSequenceWithFreeMotion.jl"))    
     Test.@test_throws LoadError include(joinpath("Basic", "Object3DWithoutParentError.jl"))  # test for too many objects without parent
     if testsExtend >= normalTests
         include(joinpath("Basic", "Mobile.jl"))

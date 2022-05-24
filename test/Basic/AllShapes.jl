@@ -32,9 +32,8 @@ AllShapes = Model3D(
     solidSphere = Object3D(parent=:world, feature=Solid(shape=
         Sphere(diameter=0.5), visualMaterial=vmatBlue, solidMaterial="Steel"), translation=[-7.0, 0.0, 0.0]),
 
-    solidEllipsoid = Object3D(feature=Solid(shape=
+    solidEllipsoid = Object3D(parent=:world, fixedToParent=false, translation=[-6.0, 0.0, 0.0], feature=Solid(shape=
         Ellipsoid(lengthX=0.6, lengthY=0.9, lengthZ=0.3), visualMaterial=vmatBlue, solidMaterial="DryWood")),
-    jointEllipsoid = FreeMotion(obj1=:world, obj2=:solidEllipsoid, r=Var(init=Modia.SVector{3,Float32}(-6.0, 0.0, 0.0))),
 
     solidBox = Object3D(feature=Solid(shape=
         Box(lengthX=0.9, lengthY=0.5, lengthZ=0.3), visualMaterial=vmatBlue, solidMaterial="Steel")),
