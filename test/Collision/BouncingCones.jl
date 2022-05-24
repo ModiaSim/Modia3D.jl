@@ -28,37 +28,37 @@ BouncingCones = Model3D(
                       translation=:[-1.0, -0.5, 1.0],
                       rotation=:[-90*u"°", 0.0, -90*u"°"],
                       feature=Visual(shape=CoordinateSystem(length=0.5))),
-    coneX = Object3D(feature=Solid(shape=Cone(axis=1, diameter=0.4, length=1.0),
+    coneX = Object3D(parent=:frameX, fixedToParent=false,
+                     translation=[0.0, 0.0, 0.0],
+                     rotation   =[0.0, -60*u"°", 0.0],
+                     velocity   =[0.0, 1.0, 0.0],    
+                     feature=Solid(shape=Cone(axis=1, diameter=0.4, length=1.0),
                                    visualMaterial=vmatRed,
                                    solidMaterial="DryWood",
                                    collision=true)),
-    jointX = FreeMotion(obj1=:frameX, obj2=:coneX,
-                        r=Var(init=Modia.SVector{3,Float64}(0.0, 0.0, 0.0)),
-                        rot=Var(init=Modia.SVector{3,Float64}(0.0, -60*u"°", 0.0)),
-                        v=Var(init=Modia.SVector{3,Float64}(0.0, 1.0, 0.0))),
     frameY = Object3D(parent=:world,
                       translation=:[0.0, -0.5, 1.0],
                       rotation=:[90*u"°", 90*u"°", 0.0],
                       feature=Visual(shape=CoordinateSystem(length=0.5))),
-    coneY = Object3D(feature=Solid(shape=Cone(axis=2, diameter=0.4, length=1.0),
+    coneY = Object3D(parent=:frameY, fixedToParent=false,
+                     translation=[0.0, 0.0, 0.0],
+                     rotation   =[0.0, 0.0, -60*u"°"],
+                     velocity   =[0.0, 0.0, 1.0],    
+                     feature=Solid(shape=Cone(axis=2, diameter=0.4, length=1.0),
                                    visualMaterial=vmatGreen,
                                    solidMaterial="DryWood",
                                    collision=true)),
-    jointY = FreeMotion(obj1=:frameY, obj2=:coneY,
-                        r=Var(init=Modia.SVector{3,Float64}(0.0, 0.0, 0.0)),
-                        rot=Var(init=Modia.SVector{3,Float64}(0.0, 0.0, -60*u"°")),
-                        v=Var(init=Modia.SVector{3,Float64}(0.0, 0.0, 1.0))),
     frameZ = Object3D(parent=:world,
                       translation=:[1.0, -0.5, 1.0],
                       feature=Visual(shape=CoordinateSystem(length=0.5))),
-    coneZ = Object3D(feature=Solid(shape=Cone(axis=3, diameter=0.4, length=1.0),
+    coneZ = Object3D(parent=:frameZ, fixedToParent=false,
+                     translation=[0.0, 0.0, 0.0],
+                     rotation   =[-60*u"°", 0.0, 0.0],
+                     velocity   =[1.0, 0.0, 0.0],    
+                     feature=Solid(shape=Cone(axis=3, diameter=0.4, length=1.0),
                                    visualMaterial=vmatBlue,
                                    solidMaterial="DryWood",
-                                   collision=true)),
-    jointZ = FreeMotion(obj1=:frameZ, obj2=:coneZ,
-                        r=Var(init=Modia.SVector{3,Float64}(0.0, 0.0, 0.0)),
-                        rot=Var(init=Modia.SVector{3,Float64}(-60*u"°", 0.0, 0.0)),
-                        v=Var(init=Modia.SVector{3,Float64}(1.0, 0.0, 0.0)))
+                                   collision=true))
 )
 
 bouncingCones = @instantiateModel(BouncingCones, unitless=true, log=false, logStateSelection=false, logCode=false)
@@ -69,7 +69,7 @@ requiredFinalStates = [-0.7999312016374764, 1.0550588860480428, 0.89212547705109
 simulate!(bouncingCones, stopTime=stopTime, tolerance=tolerance, log=true, logStates=false, logEvents=false, requiredFinalStates=requiredFinalStates)
 
 @usingModiaPlot
-plot(bouncingCones, [("jointX.r", "jointY.r", "jointZ.r") ("jointX.rot", "jointY.rot", "jointZ.rot")
-                     ("jointX.v", "jointY.v", "jointZ.v") ("jointX.w", "jointY.w", "jointZ.w")], figure=1)
+plot(bouncingCones, [("coneX.translation", "coneY.translation", "coneZ.translation") ("coneX.rotation", "coneY.rotation", "coneZ.rotation")
+                     ("coneX.velocity", "coneY.velocity", "coneZ.velocity") ("coneX.angularVelocity", "coneY.angularVelocity", "coneZ.angularVelocity")], figure=1)
 
 end

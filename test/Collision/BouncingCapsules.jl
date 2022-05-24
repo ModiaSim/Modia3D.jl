@@ -28,37 +28,37 @@ BouncingCapsules = Model3D(
                       translation=:[-1.0, 0.0, 1.0],
                       rotation=:[-90*u"°", 0.0, -90*u"°"],
                       feature=Visual(shape=CoordinateSystem(length=0.5))),
-    capsuleX = Object3D(feature=Solid(shape=Capsule(axis=1, diameter=0.4, length=1.0),
+    capsuleX = Object3D(parent=:frameX, fixedToParent=false,
+                        translation=[0.0, 0.0, 0.0],
+                        rotation   =[0.0, -60*u"°", 0.0],
+                        velocity   =[0.0, 1.0, 0.0],
+                        feature=Solid(shape=Capsule(axis=1, diameter=0.4, length=1.0),
                                       visualMaterial=vmatRed,
                                       solidMaterial="Steel",
                                       collision=true)),
-    jointX = FreeMotion(obj1=:frameX, obj2=:capsuleX,
-                        r=Var(init=Modia.SVector{3,Float64}(0.0, 0.0, 0.0)),
-                        rot=Var(init=Modia.SVector{3,Float64}(0.0, -60*u"°", 0.0)),
-                        v=Var(init=Modia.SVector{3,Float64}(0.0, 1.0, 0.0))),
     frameY = Object3D(parent=:world,
                       translation=:[0.0, 0.0, 1.0],
                       rotation=:[90*u"°", 90*u"°", 0.0],
                       feature=Visual(shape=CoordinateSystem(length=0.5))),
-    capsuleY = Object3D(feature=Solid(shape=Capsule(axis=2, diameter=0.4, length=1.0),
+    capsuleY = Object3D(parent=:frameY, fixedToParent=false,
+                        translation=[0.0, 0.0, 0.0],
+                        rotation   =[0.0, 0.0, -60*u"°"],
+                        velocity   =[0.0, 0.0, 1.0],
+                        feature=Solid(shape=Capsule(axis=2, diameter=0.4, length=1.0),
                                       visualMaterial=vmatGreen,
                                       solidMaterial="Steel",
                                       collision=true)),
-    jointY = FreeMotion(obj1=:frameY, obj2=:capsuleY,
-                        r=Var(init=Modia.SVector{3,Float64}(0.0, 0.0, 0.0)),
-                        rot=Var(init=Modia.SVector{3,Float64}(0.0, 0.0, -60*u"°")),
-                        v=Var(init=Modia.SVector{3,Float64}(0.0, 0.0, 1.0))),
     frameZ = Object3D(parent=:world,
                       translation=:[1.0, 0.0, 1.0],
                       feature=Visual(shape=CoordinateSystem(length=0.5))),
-    capsuleZ = Object3D(feature=Solid(shape=Capsule(axis=3, diameter=0.4, length=1.0),
+    capsuleZ = Object3D(parent=:frameZ, fixedToParent=false,
+                        translation=[0.0, 0.0, 0.0],
+                        rotation   =[-60*u"°", 0.0, 0.0],
+                        velocity   =[1.0, 0.0, 0.0],
+                        feature=Solid(shape=Capsule(axis=3, diameter=0.4, length=1.0),
                                       visualMaterial=vmatBlue,
                                       solidMaterial="Steel",
                                       collision=true)),
-    jointZ = FreeMotion(obj1=:frameZ, obj2=:capsuleZ,
-                        r=Var(init=Modia.SVector{3,Float64}(0.0, 0.0, 0.0)),
-                        rot=Var(init=Modia.SVector{3,Float64}(-60*u"°", 0.0, 0.0)),
-                        v=Var(init=Modia.SVector{3,Float64}(1.0, 0.0, 0.0)))
 )
 
 bouncingCapsules = @instantiateModel(BouncingCapsules, unitless=true, log=false, logStateSelection=false, logCode=false)
@@ -72,7 +72,7 @@ requiredFinalStates = [-0.7673604039864523, 0.9516988414284928, 0.24982620243724
 simulate!(bouncingCapsules, stopTime=stopTime, tolerance=tolerance, log=true, logStates=false, logEvents=false, requiredFinalStates=requiredFinalStates)
 
 @usingModiaPlot
-plot(bouncingCapsules, [("jointX.r", "jointY.r", "jointZ.r") ("jointX.rot", "jointY.rot", "jointZ.rot")
-                        ("jointX.v", "jointY.v", "jointZ.v") ("jointX.w", "jointY.w", "jointZ.w")], figure=1)
+plot(bouncingCapsules, [("capsuleX.translation", "capsuleY.translation", "capsuleZ.translation") ("capsuleX.rotation", "capsuleY.rotation", "capsuleZ.rotation")
+                        ("capsuleX.velocity", "capsuleY.velocity", "capsuleZ.velocity") ("capsuleX.angularVelocity", "capsuleY.angularVelocity", "capsuleZ.angularVelocity")], figure=1)
 
 end
