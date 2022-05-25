@@ -18,11 +18,13 @@ BouncingEllipsoid = Model3D(
                                     visualMaterial=VisualMaterial(color="DarkGreen", transparency=0.5),
                                     solidMaterial="Steel",
                                     collision=true)),
-    ellipsoid = Object3D(feature=Solid(shape=Ellipsoid(lengthX=0.1, lengthY=0.2, lengthZ=0.3),
+    ellipsoid = Object3D(parent=:world, fixedToParent=false,
+                         translation=[0.0, 1.0, 0.0],
+                         angularVelocity=[5.0, 0.0, -2.0],
+                         feature=Solid(shape=Ellipsoid(lengthX=0.1, lengthY=0.2, lengthZ=0.3),
                                        visualMaterial=VisualMaterial(color="Blue"),
                                        solidMaterial="Steel",
-                                       collision=true)),
-    free = FreeMotion(obj1=:world, obj2=:ellipsoid, r=Var(init=Modia.SVector{3,Float64}(0.0, 1.0, 0.0)), w=Var(init=Modia.SVector{3,Float64}(5.0, 0.0, -2.0)))
+                                       collision=true))
 )
 
 bouncingEllipsoid = @instantiateModel(BouncingEllipsoid, unitless=true, log=false, logStateSelection=false, logCode=false)
@@ -34,6 +36,6 @@ requiredFinalStates = [-0.48480963673904126, -0.31544579779174053, 1.82176471645
 simulate!(bouncingEllipsoid, stopTime=stopTime, tolerance=tolerance, log=true, requiredFinalStates=requiredFinalStates)
 
 @usingModiaPlot
-plot(bouncingEllipsoid, ["free.r" "free.rot"; "free.v" "free.w"], figure=1)
+plot(bouncingEllipsoid, ["ellipsoid.translation" "ellipsoid.rotation"; "ellipsoid.velocity" "ellipsoid.angularVelocity"], figure=1)
 
 end

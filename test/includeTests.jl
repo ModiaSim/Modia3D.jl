@@ -57,7 +57,7 @@ end
 
 Test.@testset "Collision" begin
     include(joinpath("Collision", "BouncingSphere.jl"))
-    include(joinpath("Collision", "BouncingSphereFreeMotion.jl"))
+    include(joinpath("Collision", "BouncingSphereFree.jl"))
     include(joinpath("Collision", "BouncingEllipsoid.jl"))
     include(joinpath("Collision", "BouncingEllipsoidOnSphere.jl"))
     include(joinpath("Collision", "TwoCollidingBalls.jl"))
@@ -78,7 +78,7 @@ Test.@testset "Collision" begin
         Test.@test_throws LoadError include(joinpath("Collision", "OrthogonalLinesError.jl"))  # orthogonal lines moving until r_abs is NaN
         Test.@test_throws LoadError include(joinpath("Collision", "ParallelLinesError.jl"))  # MPR 2D not implemented
         Test.@test_throws LoadError include(joinpath("Collision", "PlaneVsPlaneEdgesError.jl"))  # MPR 2D not implemented
-        Test.@test_throws LoadError include(joinpath("Collision", "PlaneVSPointError.jl"))  # MPR 2D not implemented
+        Test.@test_throws LoadError include(joinpath("Collision", "PlaneVsPointError.jl"))  # MPR 2D not implemented
     end
     if testsExtend == completeTests
         include(joinpath("Collision", "Billard16Balls.jl"))  # long computation time

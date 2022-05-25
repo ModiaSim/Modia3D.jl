@@ -13,10 +13,11 @@ LineLine = Model3D(
     world = Object3D(feature=Scene(gravityField=:gravField,
                                    visualizeFrames=false,
                                    defaultFrameLength=0.2,
-                                   visualizeBoundingBox = true,
+                                   visualizeBoundingBox=true,
                                    enableContactDetection=true,
                                    visualizeContactPoints=false)),
-    worldFrame = Object3D(parent=:world, feature=Visual(shape=CoordinateSystem(length=0.5))),
+    worldFrame = Object3D(parent=:world,
+                          feature=Visual(shape=CoordinateSystem(length=0.5))),
     ground = Object3D(parent=:world,
                       translation=:[0.0, 0.0, 0.0],
                       feature=Solid(shape=Box(lengthX=5.0, lengthY=0.0, lengthZ=0.0),
@@ -26,17 +27,15 @@ LineLine = Model3D(
                                     collision=true)),
     frameX = Object3D(parent=:world,
                       translation=:[0.0, 0.0, 1.0],
-                      rotation=:[0.0, 0*u"°", 0.0], # [-90*u"°", 0.0, -90*u"°"],
+                      rotation=:[0.0, 0*u"°", 0.0],
                       feature=Visual(shape=CoordinateSystem(length=0.5))),
-    capsuleX = Object3D(feature=Solid(shape=Box(lengthX=0.0, lengthY = 0.0, lengthZ = 3.0),
+    capsuleX = Object3D(parent=:frameX, fixedToParent=false,
+                        velocity=[0.0, 1.0, 0.0],
+                        feature=Solid(shape=Box(lengthX=0.0, lengthY=0.0, lengthZ=3.0),
                                       visualMaterial=vmatRed,
                                       solidMaterial="Steel",
-                                      massProperties = MassProperties(mass = 1273.39, Ixx = 24.39551415267595, Iyy = 185.24505801647337, Izz = 185.24505801647337, Ixy = 0.0, Ixz = 0.0, Iyz = 0.0),
-                                      collision=true)),
-    jointX = FreeMotion(obj1=:frameX, obj2=:capsuleX,
-                        r=Var(init=Modia.SVector{3,Float64}(0.0, 0.0, 0.0)),
-                        rot=Var(init=Modia.SVector{3,Float64}(0.0, 0.0, 0.0)),
-                        v=Var(init=Modia.SVector{3,Float64}(0.0, 1.0, 0.0)))
+                                      massProperties=MassProperties(mass=1273.39, Ixx=24.39551415267595, Iyy=185.24505801647337, Izz=185.24505801647337, Ixy=0.0, Ixz=0.0, Iyz=0.0),
+                                      collision=true))
 )
 
 lineLine = @instantiateModel(LineLine, unitless=true, log=false, logStateSelection=false, logCode=false)

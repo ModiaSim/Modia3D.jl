@@ -23,12 +23,14 @@ Rattleback = Model3D(
                                     visualMaterial=VisualMaterial(color="Grey90", transparency=0.5),
                                     solidMaterial="DryWood",
                                     collision=true)),
-    ellipsoid = Object3D(feature=Solid(massProperties=massProps,
+    ellipsoid = Object3D(parent=:world, fixedToParent=false,
+                         translation=[0.0, 0.0, 0.01],
+                         angularVelocity=[0.0, 0.1, 5.0],
+                         feature=Solid(massProperties=massProps,
                                        shape=Ellipsoid(lengthX=0.1, lengthY=0.02, lengthZ=0.02),
                                        visualMaterial=VisualMaterial(color="Blue"),
                                        solidMaterial="DryWood",
-                                       collision=true)),
-    joint = FreeMotion(obj1=:world, obj2=:ellipsoid, r=Var(init=Modia.SVector{3,Float64}(0.0, 0.0, 0.01)), w=Var(init=Modia.SVector{3,Float64}(0.0, 0.1, 5.0)))
+                                       collision=true))
 )
 
 rattleback = @instantiateModel(Rattleback, unitless=true)
@@ -39,6 +41,6 @@ requiredFinalStates = [0.0006643219607533129, -0.0003421523453737833, 0.00999995
 simulate!(rattleback, stopTime=stopTime, tolerance=tolerance, log=false, requiredFinalStates=requiredFinalStates)
 
 @usingModiaPlot
-plot(rattleback, ["joint.r" "joint.rot"; "joint.v" "joint.w"], figure=1)
+plot(rattleback, ["ellipsoid.translation" "ellipsoid.rotation"; "ellipsoid.velocity" "ellipsoid.angularVelocity"], figure=1)
 
 end

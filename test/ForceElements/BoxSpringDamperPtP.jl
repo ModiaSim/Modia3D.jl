@@ -9,16 +9,17 @@ SpringDamper = Model3D(
     Stiffness = 100.0,
     Damping = 2.0,
     visualMaterial = VisualMaterial(color="IndianRed1", transparency=0.5),
-    world = Object3D(feature=Scene(gravityField=UniformGravityField(g=9.81, n=[0, 0, -1]), nominalLength=:Length)),
+    world = Object3D(feature=Scene(gravityField=UniformGravityField(g=9.81, n=[0, 0, -1]),
+                                   nominalLength=:Length)),
     worldFrame = Object3D(parent=:world,
                           feature=Visual(shape=CoordinateSystem(length=:Length))),
-    box = Object3D(feature=Solid(shape=Box(lengthX=:Length, lengthY=:Length, lengthZ=:Length),
+    box = Object3D(parent=:world, fixedToParent=false,
+                   feature=Solid(shape=Box(lengthX=:Length, lengthY=:Length, lengthZ=:Length),
                                  massProperties=MassProperties(; mass=:Mass, Ixx=:IMoment, Iyy=:IMoment, Izz=:IMoment),
                                  visualMaterial=:(visualMaterial))),
     boxCornerFrame = Object3D(parent=:box,
                               feature=Visual(shape=CoordinateSystem(length=:(Length/2))),
                               translation=:[Length/2, Length/2, Length/2]),
-    joint = FreeMotion(obj1=:world, obj2=:box),
     force = SpringDamperPtP(obj1=:world, obj2=:boxCornerFrame, springForceLaw=:Stiffness, damperForceLaw=:Damping)
 )
 
@@ -30,6 +31,6 @@ requiredFinalStates = [-0.031789887795694936, -0.03179006302845493, -0.139604387
 simulate!(springDamper, stopTime=stopTime, dtmax=dtmax, log=true, requiredFinalStates=requiredFinalStates)
 
 @usingModiaPlot
-plot(springDamper, ["joint.r", "joint.v", "joint.rot", "joint.w"], figure=1)
+plot(springDamper, ["box.translation", "box.velocity", "box.rotation", "box.angularVelocity"], figure=1)
 
 end

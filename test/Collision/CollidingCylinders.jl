@@ -17,31 +17,27 @@ innerDiameterCyl = 0.08
 collidingCylinders = Model3D(
     world = Object3D(feature=Scene(gravityField=UniformGravityField(g=9.81, n=[0, 0, -1]),
                                    enableContactDetection=true)),
-
-    cylinderX = Object3D(feature=Solid(shape=Cylinder(axis=1, diameter=diameterCyl, length=lengthCyl, innerDiameter=innerDiameterCyl),
+    cylinderX = Object3D(parent=:world, fixedToParent=false,
+                         translation=[-0.3, -0.1, 0.5],
+                         rotation=[0.0, -90*u"°", -80*u"°"],
+                         feature=Solid(shape=Cylinder(axis=1, diameter=diameterCyl, length=lengthCyl, innerDiameter=innerDiameterCyl),
                                        solidMaterial="BilliardBall",
                                        visualMaterial=vmatRed,
                                        collision=true)),
-    jointX = FreeMotion(obj1=:world, obj2=:cylinderX,
-                        r=Var(init=Modia.SVector{3,Float64}(-0.3, -0.1, 0.5)),
-                        rot=Var(init=Modia.SVector{3,Float64}(0.0, -90*u"°", -80*u"°"))),
-
-    cylinderY = Object3D(feature=Solid(shape=Cylinder(axis=2, diameter=diameterCyl, length=lengthCyl, innerDiameter=innerDiameterCyl),
+    cylinderY = Object3D(parent=:world, fixedToParent=false,
+                         translation=[0.0, -0.1, 0.5],
+                         rotation=[-10*u"°", 0.0, 0.0],
+                         feature=Solid(shape=Cylinder(axis=2, diameter=diameterCyl, length=lengthCyl, innerDiameter=innerDiameterCyl),
                                        solidMaterial="BilliardBall",
                                        visualMaterial=vmatGreen,
                                        collision=true)),
-    jointY = FreeMotion(obj1=:world, obj2=:cylinderY,
-                        r=Var(init=Modia.SVector{3,Float64}(0.0, -0.1, 0.5)),
-                        rot=Var(init=Modia.SVector{3,Float64}(-10*u"°", 0.0, 0.0))),
-
-    cylinderZ = Object3D(feature=Solid(shape=Cylinder(axis=3, diameter=diameterCyl, length=lengthCyl, innerDiameter=innerDiameterCyl),
+    cylinderZ = Object3D(parent=:world, fixedToParent=false,
+                         translation=[0.3, -0.1, 0.5],
+                         rotation=[80*u"°", 0.0, 0.0],
+                         feature=Solid(shape=Cylinder(axis=3, diameter=diameterCyl, length=lengthCyl, innerDiameter=innerDiameterCyl),
                                        solidMaterial="BilliardBall",
                                        visualMaterial=vmatBlue,
                                        collision=true)),
-    jointZ = FreeMotion(obj1=:world, obj2=:cylinderZ,
-                        r=Var(init=Modia.SVector{3,Float64}(0.3, -0.1, 0.5)),
-                        rot=Var(init=Modia.SVector{3,Float64}(80*u"°", 0.0, 0.0))),
-
     cylinder2 = Object3D(parent=:world,
                          translation=[0.0, 0.1, 0.2],
                          feature=Solid(shape=Cylinder(axis=1, diameter=diameterCyl, length=1.0),
@@ -65,7 +61,7 @@ finalStates = [-0.3, -0.7970361906996144, 0.008588032900251187, 1.81258097566445
 simulate!(CollidingCylinders, stopTime=stopTime, interval=interval, tolerance=tolerance, log=true, logStates=false, logEvents=false, requiredFinalStates=finalStates)
 
 @usingModiaPlot
-plot(CollidingCylinders, [("jointX.r", "jointY.r", "jointZ.r") ("jointX.rot", "jointY.rot", "jointZ.rot")
-                                    ("jointX.v", "jointY.v", "jointZ.v") ("jointX.w", "jointY.w", "jointZ.w")], figure=1)
+plot(CollidingCylinders, [("cylinderX.translation", "cylinderY.translation", "cylinderZ.translation") ("cylinderX.rotation", "cylinderY.rotation", "cylinderZ.rotation")
+                          ("cylinderX.velocity", "cylinderY.velocity", "cylinderZ.velocity") ("cylinderX.angularVelocity", "cylinderY.angularVelocity", "cylinderZ.angularVelocity")], figure=1)
 
 end

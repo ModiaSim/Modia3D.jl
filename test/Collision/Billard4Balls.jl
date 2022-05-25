@@ -74,35 +74,33 @@ Cushion = Model(
                                        collision=true))
 )
 
-Ball = Model(
-    ball = Object3D(feature=Solid(shape=Sphere(diameter=diameter),
-                                  solidMaterial="BilliardBall",
-                                  visualMaterial=vmatBalls,
-                                  collision=true))
-)
+ball = Solid(shape=Sphere(diameter=diameter),
+                          solidMaterial="BilliardBall",
+                          visualMaterial=vmatBalls,
+                          collision=true)
 
 Billard = Model3D(
     world = Object3D(feature=Scene(gravityField=UniformGravityField(g=9.81, n=[0, 0, -1]),
                                           enableContactDetection=true)),
     table = Table,
     cushion = Cushion,
-    ball0 = Ball,
-    joint0 = FreeMotion(obj1=:world, obj2=:(ball0.ball),
-                        r=Var(init=Modia.SVector{3,Float64}(-0.8, -0.1, diameter/2)),
-                        v=Var(init=Modia.SVector{3,Float64}(3.0, 0.1, 0.0)),
-                        rot=Var(init=Modia.SVector{3,Float64}(pi/2, 0.0, 0.0))),
-    ball1 = Ball,
-    joint1 = FreeMotion(obj1=:world, obj2=:(ball1.ball),
-                        r=Var(init=Modia.SVector{3,Float64}(TableX/6, 0.0, diameter/2)),
-                        rot=Var(init=Modia.SVector{3,Float64}(pi/2, 0.0, 0.0))),
-    ball2 = Ball,
-    joint2 = FreeMotion(obj1=:world, obj2=:(ball2.ball),
-                        r=Var(init=Modia.SVector{3,Float64}(TableX/6+1*distance_balls+dist, 1/2*(diameter+dist), diameter/2)),
-                        rot=Var(init=Modia.SVector{3,Float64}(pi/2, 0.0, 0.0))),
-    ball3 = Ball,
-    joint3 = FreeMotion(obj1=:world, obj2=:(ball3.ball),
-                        r=Var(init=Modia.SVector{3,Float64}(TableX/6+1*distance_balls+dist, -1/2*(diameter+dist), diameter/2)),
-                        rot=Var(init=Modia.SVector{3,Float64}(pi/2, 0.0, 0.0)))
+    ball0 = Object3D(parent=:world, fixedToParent=false,
+                     translation=[-0.8, -0.1, diameter/2],
+                     velocity=[3.0, 0.1, 0.0],
+                     rotation=[pi/2, 0.0, 0.0],
+                     feature=ball),
+    ball1 = Object3D(parent=:world, fixedToParent=false,
+                     translation=[TableX/6, 0.0, diameter/2],
+                     rotation=[pi/2, 0.0, 0.0],
+                     feature=ball),
+    ball2 = Object3D(parent=:world, fixedToParent=false,
+                     translation=[TableX/6+1*distance_balls+dist, 1/2*(diameter+dist), diameter/2],
+                     rotation=[pi/2, 0.0, 0.0],
+                     feature=ball),
+    ball3 = Object3D(parent=:world, fixedToParent=false,
+                     translation=[TableX/6+1*distance_balls+dist, -1/2*(diameter+dist), diameter/2],
+                     rotation=[pi/2, 0.0, 0.0],
+                     feature=ball)
 )
 
 billard = @instantiateModel(Billard, unitless=true, log=false, logStateSelection=false, logCode=false)
@@ -116,8 +114,6 @@ requiredFinalStates = [-0.07276225904925236, 0.2453456530297493, 0.0299980846819
 simulate!(billard, stopTime=testTime, tolerance=tolerance, interval=interval, log=true, logStates=false, logEvents=false,  useRecursiveFactorizationUptoSize=500, requiredFinalStates=requiredFinalStates) # logTiming=true,
 
 @usingModiaPlot
-plot(billard, ["joint0.r" "joint0.rot"; "joint0.v" "joint0.w"], figure=1)
-#plot(billard, ["joint0.r[1]" "joint0.r[2]" "joint0.r[3]";
-#               "joint0.v[1]" "joint0.v[2]" "joint0.v[3]"], figure=2)
+plot(billard, ["ball0.translation" "ball0.rotation"; "ball0.velocity" "ball0.angularVelocity"], figure=1)
 
 end
