@@ -16,9 +16,10 @@ Shaft = Model(
 )
 
 model = Model3D(
-    shaft = Shaft | Map(Length=1.0, Diameter=0.2, shaft = Map(velocity = [0.0, 0.1, 0.6],
-                                                              rotation = [30, 20, 10]u"°",
-                                                              angularVelocity = [1.0, 2.0, 3.0])
+    shaft = Shaft | Map(Length=1.0, Diameter=0.2, shaft = Map(velocity=[0.0, 0.1, 0.6],
+                                                              rotation=[30, 20, 10]u"°",
+                                                              angularVelocity=[1.0, 2.0, 3.0],
+                                                              angularVelocityInParent=false)
                        )
 )
 #@showModel model
