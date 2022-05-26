@@ -101,14 +101,16 @@ julia -JModia3D_sysimage.so  (otherwise)
 - Additional keyword arguments of Object3D: `Object3D(..., fixedInParent=true, velocity=[0.0, 0.0, 0.0], angularVelocity=[0.0, 0.0, 0.0])`.
   A freely moving Object3D is defined with `Object3D(..., fixedInParent=false, ...)`. The states and other code for such Object3Ds are
   no longer visible in the generated code (so compilation is faster).
+  
+- New variants of functions: `Modia3D.rot1(angle,v), Modia3D.rot2(angle,v), Modia3D.rot3(angle,v), Modia3D.resolve1(rotation,v2), Modia3D.resolve2(rotation,v1)`.
+
+**Deprecated**
 
 - Joint `FreeMotion` is **deprecated**. Use instead `Object3D(..., fixedInParent=false, ...)`.
   Note, Object3D has variables `translation, rotation, velocity, angularVelocity` instead of `r, rot, v, w` of `FreeMotion`.
   Furthermore, `angularVelocity` is resolved in the parent `Object3D` whereas `w` in `FreeMotion(obj1=.., obj2=..., ..)` is resolved in
   `obj2` and not in `obj1`. This means in particular that the init/start value `FreeMotion(.., w=Var(start=w_start)...)` needs
   to be transformed in Object3D with `Object3D(..., fixedInParent=false, rotation=xxx, angularVelocity = Modia3D.resolve1(rotation,w_start))`.
-  
-- New variants of functions: `Modia3D.rot123(angles), Modia3D.resolve1(angles,v2), Modia3D.resolve2(angles,v1)`.
 
 
 **Non-backwards compatible changes**

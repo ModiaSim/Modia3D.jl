@@ -89,7 +89,7 @@ mutable struct MultibodyData{F <: Modia3D.VarFloatType, TimeType}
 
             # Define hidden model states and copy initial values into eqInfo
             path = obj.path * "."
-            w_init = freeMotion.wResolvedInParent ? resolve2(freeMotion.rot, freeMotion.w) : freeMotion.w
+            w_init = freeMotion.wResolvedInParent ? resolve2(freeMotion.rot, freeMotion.w, rotation123=freeMotion.isrot123) : freeMotion.w
             freeMotion.ix_hidden_r     = Modia.newHiddenState!(partiallyInstantiatedModel, path*"translation"    , path*"der(translation)"    , freeMotion.r)
             freeMotion.ix_hidden_v     = Modia.newHiddenState!(partiallyInstantiatedModel, path*"velocity"       , path*"der(velocity)"       , freeMotion.v)
             freeMotion.ix_hidden_rot   = Modia.newHiddenState!(partiallyInstantiatedModel, path*"rotation"       , path*"der(rotation)"       , freeMotion.rot)
@@ -698,7 +698,7 @@ function setStatesHiddenJoints!(m::Modia.SimulationModel{F,TimeType}, mbs::Multi
         j3 = freeMotion.ix_hidden_v  ;  freeMotion.v   = SVector{3,F}(x_hidden[j3], x_hidden[j3+1], x_hidden[j3+2])
         j4 = freeMotion.ix_hidden_w  ;  freeMotion.w   = SVector{3,F}(x_hidden[j4], x_hidden[j4+1], x_hidden[j4+2])
         if freeMotion.wResolvedInParent
-            freeMotion.w = resolve2(obj.R_rel,freeMotion.w)
+            freeMotion.w = resolve2(freeMotion.rot, freeMotion.w, rotation123 = freeMotion.isrot123)
         end
 
         # Copy some freeMotion state derivatives into der_x_hidden

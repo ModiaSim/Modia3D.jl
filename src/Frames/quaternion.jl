@@ -25,7 +25,7 @@ q = [e*sin(angle/2),
 
 Constant quaternion vector of a null rotation (= no rotation from frame 1 to frame 2)
 """
-NullQuaternion(::Type{F}) where F <: Modia3D.VarFloatType = SVector{4,F}(0.0, 0.0, 0.0, 1.0)
+NullQuaternion(::Type{F}) where F <: Modia3D.VarFloatType = SVector{4,F}(0, 0, 0, 1)
 
 
 
@@ -46,20 +46,16 @@ end
 
 Return SMatrix{4,4,F,16} `R` from quaternion `q`.
 """
-from_q(q::SVector{4,F}) where F <: Modia3D.VarFloatType = SMatrix{3,3,F,9}( 2.0 * (q[1] * q[1] + q[4] * q[4]) - 1.0,
-                                            2.0 * (q[2] * q[1] - q[3] * q[4]),
-                                            2.0 * (q[3] * q[1] + q[2] * q[4]),
-                                            2.0 * (q[1] * q[2] + q[3] * q[4]),
-                                            2.0 * (q[2] * q[2] + q[4] * q[4]) - 1.0,
-                                            2.0 * (q[3] * q[2] - q[1] * q[4]),
-                                            2.0 * (q[1] * q[3] - q[2] * q[4]),
-                                            2.0 * (q[2] * q[3] + q[1] * q[4]),
-                                            2.0 * (q[3] * q[3] + q[4] * q[4]) - 1.0)
+from_q(q::SVector{4,F}) where F <: Modia3D.VarFloatType = SMatrix{3,3,F,9}( F(2.0) * (q[1] * q[1] + q[4] * q[4]) - F(1.0),
+                                            F(2.0) * (q[2] * q[1] - q[3] * q[4]),
+                                            F(2.0) * (q[3] * q[1] + q[2] * q[4]),
+                                            F(2.0) * (q[1] * q[2] + q[3] * q[4]),
+                                            F(2.0) * (q[2] * q[2] + q[4] * q[4]) - F(1.0),
+                                            F(2.0) * (q[3] * q[2] - q[1] * q[4]),
+                                            F(2.0) * (q[1] * q[3] - q[2] * q[4]),
+                                            F(2.0) * (q[2] * q[3] + q[1] * q[4]),
+                                            F(2.0) * (q[3] * q[3] + q[4] * q[4]) - F(1.0) )
 
-
-
-const p4limit = 0.1
-const c4limit = 4.0 * p4limit * p4limit
 
 """
     q = Modia3D.from_R(R::SMatrix{3,3,F,9};

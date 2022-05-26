@@ -42,7 +42,7 @@ export J123, J132, J123or132
 
 export computeGeneralizedForces!
 
-export distanceAndAngles, distance, planarRotationAngle
+export distanceAndAngles, distance
 export measFrameRotation, measFramePosition, measFrameDistance
 export measFrameRotVelocity, measFrameTransVelocity, measFrameDistVelocity
 export measFrameRotAcceleration, measFrameTransAcceleration, measFrameDistAcceleration

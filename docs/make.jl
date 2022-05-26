@@ -22,6 +22,7 @@ makedocs(
         "Components/GravityField.md"
         "Components/ForceElements.md"
      ],
+     "Functions" => "Functions.md",
      "Internal" => [
         "internal/Profiling.md"
         "internal/DynamicDispatch.md"

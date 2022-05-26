@@ -9,9 +9,10 @@
 
 
 """
-Constant rotation matrix that defines no rotation from frame 1 to frame 2.
+    R = Modia3D.MullRotation(::Type{F}) where F
+
+Return rotation matrix `R::SMatrix{3,3,F,9}` that defines no rotation from frame 1 to frame 2.
 """
-#NullRotation(::Type{F}) where F <: Modia3D.VarFloatType = SMatrix{3,3,F,9}(Matrix(F(1.0)I, 3, 3))
 NullRotation(::Type{F}) where F <: Modia3D.VarFloatType = @SMatrix [F(1.0) F(0.0) F(0.0);
                                                                     F(0.0) F(1.0) F(0.0);
                                                                     F(0.0) F(0.0) F(1.0)]
@@ -32,35 +33,67 @@ end
     R = Modia3D.rot1(angle)
 
 Return rotation matrix R that rotates with angle `angle` along the x-axis of frame 1.
+`angle` can be provided in radian or in degree, e.g. `using Unitful; Modia3D.rot1(90u"°")`.
 """
-@inline function rot1(angle::F) where F <: Modia3D.VarFloatType
+@inline function rot1(angle::Number)
+    (s,c) = sincos(angle)
+    F = typeof(s)
+    @SMatrix [F(1.0)  F(0.0)  F(0.0);
+              F(0.0)     c      s ;
+              F(0.0)    -s      c ]
+end
+
+
+"""
+    Modia3D.rot1(angle,v::AbstractVector)
+
+Return in principal Modia3D.rot1(angle)*v,
+but compute this efficiently by taking the zeros in rot1(..) into account.
+`angle` can be provided in radian or in degree, e.g. `using Unitful; Modia3D.rot1(90u"°", v)`.
+"""
+@inline function rot1(angle::Number, v::AbstractVector)
    (s,c) = sincos(angle)
-   R = @SMatrix [F(1.0)  F(0.0)  F(0.0);
-                 F(0.0)     c      s ;
-                 F(0.0)    -s      c ]
+   SVector{3,typeof(s)}(v[1], v[2]*c + v[3]*s, -v[2]*s + v[3]*c)
 end
 
 
 """
     R = Modia3D.rot2(angle)
 
-Return rotation matrix R that rotates with angle `angle` in [radian] along the y-axis of frame 1.
+Return rotation matrix R that rotates with angle `angle` along the y-axis of frame 1.
+`angle` can be provided in radian or in degree, e.g. `using Unitful; Modia3D.rot2(90u"°")`.
 """
-@inline function rot2(angle::F) where F <: Modia3D.VarFloatType
+@inline function rot2(angle::Number)
+    (s,c) = sincos(angle)
+    F = typeof(s)
+    @SMatrix [   c    F(0.0)   -s ;
+              F(0.0)  F(1.0)  F(0.0);
+                 s    F(0.0)    c ]
+end
+
+
+"""
+    Modia3D.rot2(angle,v::AbstractVector)
+
+Return in principal Modia3D.rot2(angle)*v,
+but compute this efficiently by taking the zeros in rot2(..) into account.
+`angle` can be provided in radian or in degree, e.g. `using Unitful; Modia3D.rot2(90u"°", v)`.
+"""
+@inline function rot2(angle::Number, v::AbstractVector)
    (s,c) = sincos(angle)
-   R = @SMatrix [   c    F(0.0)   -s ;
-                 F(0.0)  F(1.0)  F(0.0);
-                    s    F(0.0)    c ]
+   SVector{3,typeof(s)}(v[1]*c - v[3]*s, v[2], v[1]*s + v[3]*c)
 end
 
 
 """
     R = Modia3D.rot3(angle)
 
-Return rotation matrix R that rotates with angle `angle` in [radian] along the z-axis of frame 1.
+Return rotation matrix R that rotates with angle `angle` along the z-axis of frame 1.
+`angle` can be provided in radian or in degree, e.g. `using Unitful; Modia3D.rot3(90u"°")`.
 """
-@inline function rot3(angle::F) where F <: Modia3D.VarFloatType
+@inline function rot3(angle::Number)
    (s,c) = sincos(angle)
+   F = typeof(s)
    R = @SMatrix [   c      s    F(0.0);
                    -s      c    F(0.0);
                  F(0.0) F(0.0)  F(1.0)]
@@ -68,31 +101,45 @@ end
 
 
 """
+    Modia3D.rot3(angle::F,v::AbstractVector) where F
+
+Return in principal Modia3D.rot3(angle)*v,
+but compute this efficiently by taking the zeros in rot3(..) into account.
+`angle` can be provided in radian or in degree, e.g. `using Unitful; Modia3D.rot3(90u"°", v)`.
+"""
+@inline function rot3(angle::Number, v::AbstractVector)
+   (s,c) = sincos(angle)
+   SVector{3,typeof(s)}(c*v[1] + s*v[2], -v[1]*s + v[2]*c, v[3])
+end
+
+
+"""
     R = Modia3D.rot123(angle1, angle2, angle3)
-    R = Modia3D.rot123(angles::AbstractVector)
+    R = Modia3D.rot123(angles)
 
 Return rotation matrix R by rotating with angle1 along the x-axis of frame 1,
 then with angle2 along the y-axis of this frame and then with angle3 along
 the z-axis of this frame. The angles can be optionally provided in form of a vector
 `angles = [angle1, angle2, angle3]`.
 """
-rot123(angle1::F, angle2::F, angle3::F) where F <: Modia3D.VarFloatType = rot3(angle3)*rot2(angle2)*rot1(angle1)
-@inline function rot123(angles::AbstractVector)
-    @assert(length(angles) == 3)
-    return rot123(angles[1], angles[2], angles[3])
-end
+rot123(angle1, angle2, angle3) = rot3(angle3)*rot2(angle2)*rot1(angle1)
+rot123(angles::AbstractVector) = rot123(angles[1], angles[2], angles[3])
 
 
 """
     R = Modia3D.rotAxis(axis, angle)
     R = Modia3D.rotAxis(axis, positive, angle)
 
-Return rotation matrix R that rotates with angle `angle` in [radian] along axis `axis` (= 1, 2 or 3), or
+Return rotation matrix R that rotates with angle `angle` along axis `axis` (= 1, 2 or 3), or
 with `angle` if `positive=true` and otherwise with `-angle`.
+`angle` can be provided in radian or in degree, e.g. `using Unitful; Modia3D.rotAxis(2, 90u"°")`.
 """
-@inline rotAxis(axis::Int, angle::F) where F = axis==3 ? rot3(angle) : (axis==2 ? rot2(angle) :
-        (axis==1 ? rot1(angle) : error("Bug in Modia3D: rotAxis($axis, ...) - argument needs to be 1,2 or 3.")))
-@inline rotAxis(axis::Int, positive::Bool, angle::F) where F = positive ? rotAxis(axis, angle) : rotAxis(axis, -angle)
+@inline rotAxis(axis::Int, angle::Number) =
+         axis==3 ? rot3(angle) :
+        (axis==2 ? rot2(angle) :
+        (axis==1 ? rot1(angle) :
+         error("Error when calling Modia3D.rotAxis($axis, ...) - first argument needs to be 1,2 or 3.")))
+@inline rotAxis(axis::Int, positive::Bool, angle::Number) = positive ? rotAxis(axis, angle) : rotAxis(axis, -angle)
 
 
 """
@@ -101,11 +148,11 @@ with `angle` if `positive=true` and otherwise with `-angle`.
 Return rotation matrix that rotates around angle `angle` along unit axis `e`.
 This function assumes that `norm(e) == 1`.
 """
-@inline function rot_e(e::SVector{3,F},angle::F) where F
+@inline function rot_e(e::AbstractVector,angle::Number)
     (s,c) = sincos(angle)
+    F = typeof(s)
     return e*e' + (NullRotation(F) - e*e')*c - skew(e)*s
 end
-rot_e(e::AbstractVector, angle::F) where F = rot_e( SVector{3,F}(e), F(angle) )
 
 
 """
@@ -152,34 +199,43 @@ end
 rot_nxy(nx::AbstractVector, ny::AbstractVector) = rot_nxy(SVector{3,F}(nx), SVector{3,F}(ny))
 
 
+"""
+    v1 = Modia3D.resolve1(R, v2)
+    v1 = Modia3D.resolve1(q, v2)
+    v1 = Modia3D.resolve1(rotation, v2; rotation123=true)
+
+Transform vector `v2::AbstractVector` (vector resolved in frame 2) to
+vector `v1::SVector{3,F}` (vector resolved in frame 1) given
+
+- Rotation matrix `R::SMatrix{3,3,F,9}` (rotate frame 1 into frame 2) or
+- Quaternion vector `q::SVector{4,F}` (rotate frame 1 into frame 2) or
+- Angles vector `rotation::SVector{3,F}` (= rotation123 ? [angleX, angleY, angleZ] : [angleX, angleZ, angleY]).
+"""
+resolve1(R::SMatrix{3,3,F,9}, v2::SVector{3,F})   where F <: Modia3D.VarFloatType = R'*v2
+resolve1(R::SMatrix{3,3,F,9}, v2::AbstractVector) where F <: Modia3D.VarFloatType = R'*SVector{3,F}(v2)
+resolve1(rotation::SVector{3,F}, v2::AbstractVector; rotation123=true) where F <: Modia3D.VarFloatType =
+    rotation123 ? rot1(rotation[1], rot2(rotation[2], rot3(rotation[3],v2))) :
+                  rot1(rotation[1], rot3(rotation[3], rot2(rotation[2],v2)))
+
 
 """
-    v1 = Modia3D.resolve1([R|q|angles], v2)
+    v2 = Modia3D.resolve2(R, v1)
+    v2 = Modia3D.resolve2(q, v1)
+    v2 = Modia3D.resolve2(rotation, v1; rotation123=true)
 
-Transform vector v2 (v resolved in frame 2) to vector v1 (v resolved in frame 1) given
+Transform vector `v1::AbstractVector` (vector resolved in frame 1) to
+vector `v2::SVector{3,F}` (vector resolved in frame 2) given
 
-- SMatrix ` R` (rotate frame 1 into frame 2) or
-- quaternion SVector `q` (rotate frame 1 into frame 2) or
-- angles SVector `angles` (= [angleX, angleY, angleZ]).
-"""
-resolve1(R::SMatrix{3,3,F,9}, v2::SVector{3,F})    where F <: Modia3D.VarFloatType = R'*v2
-resolve1(R::SMatrix{3,3,F,9}, v2::AbstractVector)  where F <: Modia3D.VarFloatType = R'*SVector{3,F}(v2)
-resolve1(angles::SVector{3,F}, v2::AbstractVector) where F <: Modia3D.VarFloatType = resolve1(rot123(angles),v2)
-
-
-
-"""
-    v2 = Modia3D.resolve2([R|q|angles], v1)
-
-Transform vector v1 (v resolved in frame 1) to vector v2 (v resolved in frame 2) given
-
-- SMatrix ` R` (rotate frame 1 into frame 2) or
-- quaternion SVector `q` (rotate frame 1 into frame 2) or
-- angles SVector `angles` (= [angleX, angleY, angleZ]).
+- Rotation matrix `R::SMatrix{3,3,F,9}` (rotate frame 1 into frame 2) or
+- Quaternion vector `q::SVector{4,F}` (rotate frame 1 into frame 2) or
+- Angles vector `rotation::SVector{3,F}` (= rotation123 ? [angleX, angleY, angleZ] : [angleX, angleZ, angleY]).
 """
 resolve2(R::SMatrix{3,3,F,9}, v1::SVector{3,F})    where F <: Modia3D.VarFloatType = R*v1
 resolve2(R::SMatrix{3,3,F,9}, v1::AbstractVector)  where F <: Modia3D.VarFloatType = R*SVector{3,F}(v1)
-resolve2(angles::SVector{3,F}, v1::AbstractVector) where F <: Modia3D.VarFloatType = resolve2(rot123(angles),v2)
+resolve2(rotation::SVector{3,F}, v1::AbstractVector; rotation123=true) where F <: Modia3D.VarFloatType =
+    rotation123 ? rot3(rotation[3], rot2(rotation[2], rot1(rotation[1], v1))) :
+                  rot2(rotation[2], rot3(rotation[3], rot1(rotation[1], v1)))
+
 
 """
      R2 = Modia3D.absoluteRotation(R1, R_rel)
@@ -309,9 +365,9 @@ resulting in
 
 
 """
-    e = eAxis(axis::Int)
+    e = eAxis(::Type{F}, axis::Int)
 
-Return unit vector `e` in direction of axis `axis` (`axis` = 1,2,3 or -1,-2-,3).
+Return unit vector `e::SVector{3,F}` in direction of axis `axis` (`axis` = 1,2,3 or -1,-2-,3).
 
 
 # Example
