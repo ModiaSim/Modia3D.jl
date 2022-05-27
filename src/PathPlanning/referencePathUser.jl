@@ -40,7 +40,7 @@ end
 calculateRobotMovement(; referencePath, instantiatedModel) = calculateRobotMovement(referencePath, instantiatedModel)
 
 
-function calculateRobotMovement(referencePath, instantiatedModel)
+function calculateRobotMovement(referencePath, instantiatedModel)::ReferencePath
     referencePath.instantiatedModel = instantiatedModel
     if Modia.isEvent(instantiatedModel)
         if Modia.getTime(instantiatedModel) < referencePath.nextEventTime

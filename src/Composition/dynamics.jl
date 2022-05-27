@@ -82,7 +82,7 @@ end
 
 
 
-function initAnalysis2!(world)
+function initAnalysis2!(world, timer)
     # use Scene(..) of world object
     if typeof(world.feature) <: Modia3D.Composition.Scene
         scene = world.feature
@@ -90,6 +90,7 @@ function initAnalysis2!(world)
         error("Internal error of Modia3D: typeof(world.feature) = ", typeof(world.feature), ", but must be Modia3D.Composition.Scene")
     end
     scene.analysis = Modia3D.DynamicAnalysis
+    scene.timer    = timer
 
     Modia3D.Composition.chooseAndBuildUpTree(world, scene)
 
@@ -114,14 +115,16 @@ function instantiateModel3D!(partiallyInstantiatedModel::Modia.SimulationModel{F
     end
     mbsBuild::MultibodyBuild{F,TimeType} = partiallyInstantiatedModel.buildDict[modelPath]
     (world, revoluteObjects, prismaticObjects, freeMotionObjects, hiddenJointObjects, forceElements) = checkMultibodySystemAndGetWorldAndJointsAndForceElements(modelDict, modelPath, F)
-
+    
+    # Set timer in scene (so that timer is easily available in Modia3D functions)
+    
     # Initialize force elements
     for force in forceElements
         initializeForceElement(force)
     end
 
     # Construct MultibodyData
-    scene = initAnalysis2!(world)
+    scene = initAnalysis2!(world,partiallyInstantiatedModel.timer)
     scene.forceElements = forceElements
     if scene.options.enableContactDetection && scene.collide
         nz = 2
@@ -372,7 +375,7 @@ function computeGeneralizedForces!(mbs::MultibodyData{F,TimeType}, qdd_hidden::V
                     terminateForceElement(force)
                 end
                 if exportAnimation
-                    Modia3D.exportAnimation(scene)
+                    TimerOutputs.@timeit instantiatedModel.timer "Modia3D_4b exportAnimation" Modia3D.exportAnimation(scene)
                 end
                 if visualize
                     #println("... time = $time: visualization is closed")
