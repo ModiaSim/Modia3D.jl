@@ -31,6 +31,7 @@ export qrot1, qrot2, qrot3, qrot123,          qrot_e, qrot_nxy, from_R
 
 export resolve1, resolve2, absoluteRotation, relativeRotation, inverseRotation
 export planarRotationAngle, eAxis
+export angularVelocityResolvedInParentStates!
 
 export Path, t_pathEnd, interpolate, interpolate_r
 export skew

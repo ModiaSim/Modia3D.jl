@@ -46,7 +46,7 @@ Return a `joint` that describes the free movement of `obj2::`[`Object3D`](@ref)
 with respect to `obj1::`[`Object3D`](@ref). The initial position is `r`
 (resolved in `obj1`) and the initial orientation is `rot` in [Cardan (Tait–Bryan) angles](https://en.wikipedia.org/wiki/Euler_angles#Chained_rotations_equivalence)
 (rotation sequence x-y-z from `obj1` to `obj2`). `v` (resolved in `obj1`) and `w`
-(resolved in `obj2`) are the initial cartesian translational and rotational
+(resolved in `obj1`) are the initial cartesian translational and rotational
 velocity vectors.
 """
 mutable struct FreeMotion{F <: Modia3D.VarFloatType} <: Modia3D.AbstractJoint
@@ -75,22 +75,23 @@ mutable struct FreeMotion{F <: Modia3D.VarFloatType} <: Modia3D.AbstractJoint
     iqdd_hidden::Int      # qdd_hidden[iqdd_hidden:iqdd_hidden+5] are the elements of qdd that are stored in [a,z] if hiddenStates
     ix_rot::Int           # startIndex of rot with respect to x-vector
     str_rot2::String      # String to be used for zero crossing logging of iz_rot2
-    wResolvedInParent::Bool  # = true, if w is resolved in obj1 (= parent); = false, if w is resolved in obj2.
+    wResolvedInParent::Bool  # = true: For external interface (w in state, der(w) in der(x)) w is resolved in obj1 (= parent);
+                             # = false: For external interface w is resolved in obj2 (!).
 
     obj1::Modia3D.AbstractObject3D
     obj2::Modia3D.AbstractObject3D
 
     ndof::Int
 
-    r::SVector{3,F}
-    rot::SVector{3,F}        # cardan angles
+    r::SVector{3,F}          # Relative position vector from obj1 to obj2, resolved in obj1
+    rot::SVector{3,F}        # Rotation angles from obj1 to obj2 with rotation sequence isrot123
     isrot123::Bool           # = true: rotation sequence x-y-z, otherwise x-z-y
 
-    v::SVector{3,F}          # = der(r)
-    w::SVector{3,F}          # angular velocity vector
+    v::SVector{3,F}          # = der(r), that is relative velocity of obj2 with respect to obj1, resolved in obj1
+    w::SVector{3,F}          # Relative angular velocity vector of obj2 with respect to obj1, resolved in obj2 (!)
 
-    a::SVector{3,F}          # = der(v)
-    z::SVector{3,F}          # = der(w)
+    a::SVector{3,F}          # = der(v), that is relative acceleration of obj2 with respect to obj1, resolved in obj1
+    z::SVector{3,F}          # = der(w), that is relative angular velocity of obj2 with respect to obj1, resolved in obj2 (!)
 
     function FreeMotion{F}(; obj1::Modia3D.AbstractObject3D,
                              obj2::Modia3D.AbstractObject3D,
@@ -126,13 +127,17 @@ mutable struct FreeMotion{F <: Modia3D.VarFloatType} <: Modia3D.AbstractJoint
         #        "    obj2 has a root, but obj1 has not root. This is currently not supported (exchange obj1 and obj2)!")
         #end
 
+        isrot123 = true
         r   = Modia3D.convertAndStripUnit(SVector{3,F}, u"m", r)
         rot = Modia3D.convertAndStripUnit(SVector{3,F}, u"rad", rot)
         v   = Modia3D.convertAndStripUnit(SVector{3,F}, u"m/s"  , v)
         w   = Modia3D.convertAndStripUnit(SVector{3,F}, u"rad/s", w)
+        if wResolvedInParent
+            # Transform w from obj1 to obj2
+            w = Modia3D.resolve2(rot, w, rotation123=isrot123)
+        end
         a   = Modia3D.ZeroVector3D(F)
         z   = Modia3D.ZeroVector3D(F)
-        isrot123 = true
         str_rot2 = "singularitySafetyMargin(" * path * ".rotation[2])"
 
         obj2.joint      = new(path, hiddenStates, -1, -1, -1, -1, -1, -1, -1, -1, str_rot2, wResolvedInParent, obj1, obj2, 6, r, rot, isrot123, v, w, a, z)

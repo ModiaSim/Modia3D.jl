@@ -9,7 +9,7 @@ BouncingSphere = Model3D(
                                        visualMaterial=VisualMaterial(color="DarkGreen"),
                                        solidMaterial="Steel",
                                        collision=true)),
-    sphere    = Object3D(parent=:world, fixedToParent=false, translation=[0.0, 1.0, 0.0],
+    sphere    = Object3D(parent=:world, fixedToParent=false, translation=[0.0, 1.0, 0.0], angularVelocityResolvedInParent=true,
                          feature=Solid(shape=Sphere(diameter=0.2),
                                        visualMaterial=VisualMaterial(color="Blue"),
                                        solidMaterial="Steel",
@@ -18,7 +18,9 @@ BouncingSphere = Model3D(
 )
 
 bouncingSphere = @instantiateModel(BouncingSphere, unitless=true, logCode=true)
-simulate!(bouncingSphere, stopTime=2.2, dtmax=0.1, log=true, logStates=true)
+
+requiredFinalStates = [-1.1158498420134682e-7, 0.09999999283736953, 1.9605796328352922e-10, -1.3226335283305713e-12, 3.726293803759173e-13, 6.442335795625085e-16, -4.97188563948566e-9, 6.3453729183502065e-15, -2.8482188606342696e-6, 6.351235882032115e-15, -4.677163261435682e-20, 1.3039308706792498e-11]
+simulate!(bouncingSphere, stopTime=2.2, dtmax=0.1, log=true, logStates=true, requiredFinalStates=requiredFinalStates)
 printResultInfo(bouncingSphere)
 
 @usingModiaPlot
