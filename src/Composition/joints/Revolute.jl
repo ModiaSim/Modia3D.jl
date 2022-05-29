@@ -4,19 +4,20 @@
 # This file is part of module
 #   Modia3D.Composition (Modia3D/Composition/_module.jl)
 #
-import Modia3D.Frames
-
 
 """
     joint = Revolute(;obj1, obj2, axis=3, phi=0, w=0, canCollide=false)
 
 Return a Revolute `joint` that rotates `obj1::`[`Object3D`](@ref) into
-`obj2::`[`Object3D`](@ref) along the axis `axis` of `obj1` (`axis = 1,2,3,-1,-2,-3`).
-The initial start angle is `phi` and the initial angular velocity
-is `w`. Negative `axis` values describe axes in negative axis directions, i.e.
-the signs of the values of `phi` and `w` are reversed. If `canCollide=false`, no
-collision detection will occur between `obj1` and `obj2` (and `Object3D`s that are
-directly or indirectly rigidly fixed to `obj1` or `obj2`).
+`obj2::`[`Object3D`](@ref) along the axis `axis` of `obj1` (`axis = 1,2,3,-1,-2,-3`) with angle `phi`.
+Optionally, `axis` can be a vector, such as `axis = [1.0, 2.0, 3.0]`, defining the direction of the
+axis of rotation in `obj1`. The initial start angle is `phi` and the initial angular velocity
+is `w`.
+
+If `canCollide=false`, no collision detection will occur between `obj1` and `obj2` (and `Object3D`s that are
+directly or indirectly rigidly fixed to `obj1` or `obj2`). Note, if both `obj1` and `obj2` have
+solids defined that are overlapping around the axis of rotation, then collision will be permanently
+occuring and `canCollide=false` is the only meaningful value.
 
 It is currently not supported that a `Revolute` joint *closes a kinematic loop*.
 """
@@ -26,49 +27,51 @@ mutable struct Revolute{F <: Modia3D.VarFloatType} <: Modia3D.AbstractJoint
     obj1::Object3D{F}
     obj2::Object3D{F}
 
-    posAxis::Int      # = 1,2,3
-    posMovement::Bool # = true, if movement along posAxis, otherwise in negative posAxis
-    ndof::Int
-    canCollide::Bool  # = false, if no collision between obj1 and obj2
+    eAxis::SVector{3,F}   # Rotation axis with norm(eAxis) = 1
+    canCollide::Bool      # = false, if no collision between obj1 and obj2
 
     phi::F
     w::F
     a::F
 
     function Revolute{F}(; obj1::Object3D{F},
-                        obj2::Object3D{F},
-                        path::String="",
-                        axis::Int = 3,
-                        phi::Real = F(0.0),
-                        w::Real   = F(0.0),
-                        canCollide::Bool = false) where F <: Modia3D.VarFloatType
+                           obj2::Object3D{F},
+                           path::String="",
+                           axis::Union{Int, AbstractVector} = 3,
+                           phi::Real = F(0.0),
+                           w::Real   = F(0.0),
+                           canCollide::Bool = false) where F <: Modia3D.VarFloatType
 
         (parent,obj,cutJoint) = attach(obj1, obj2, name = "Revolute joint")  # an error is triggered if cutJoint=true
 
-        if !(1 <= abs(axis) <= 3)
-            error("\nError from Revolute joint connecting ", Modia3D.fullName(obj1), " with ", Modia3D.fullName(obj2), ":\n",
-                "    axis = $axis, but must be 1,2,3 or -1,-2-3.!")
+        if typeof(axis) <: Int
+            eAxis =  abs(axis) == 1 ? SVector{3,F}(1, 0, 0) :
+                    (abs(axis) == 2 ? SVector{3,F}(0, 1, 0) :
+                    (abs(axis) == 3 ? SVector{3,F}(0, 0, 1) :
+                        error("\nError from $path = Revolute(obj1 = :($(obj1.path)), obj2 = :($(obj2.path)), axis = $axis, ...):\n",
+                              "    axis = must be 1,2,3 or -1,-2,-3 or a vector with 3 elements!")))
+            if axis < 0
+                eAxis = -eAxis
+            end
+        else
+            eAxis = normalize(SVector{3,F}(ustrip.(axis)))
+            if !all(isfinite,eAxis)
+                error("\nError from $path = Revolute(obj1 = :($(obj1.path)), obj2 = :($(obj2.path)), axis = $axis, ...):\n",
+                      "    normalize(axis) results in vector $eAxis that has non-finite elements!")
+            end
         end
 
-        if !(typeof(phi) <: AbstractFloat) || !(typeof(w) <: AbstractFloat)
-            error("\nError from Revolute joint connecting ", Modia3D.fullName(obj1), " with ", Modia3D.fullName(obj2), ":\n",
-                "    phi and/or w are not <: AbstractFloat!")
-        end
-
-        axis = obj === obj2 ? axis : -axis
+        eAxis = obj === obj2 ? eAxis : -eAxis
         phi = Modia3D.convertAndStripUnit(F, u"rad"  , phi)
         w   = Modia3D.convertAndStripUnit(F, u"rad/s", w)
 
-        posAxis     = abs(axis)
-        posMovement = axis > 0
-
-        obj.joint = new(path, parent, obj, posAxis, posMovement, 1, canCollide, phi, w, F(0.0))
+        obj.joint = new(path, parent, obj, eAxis, canCollide, phi, w, F(0.0))
         obj.jointKind  = RevoluteKind
         obj.jointIndex = 0
         obj.ndof       = 1
         obj.canCollide = canCollide
         obj.r_rel      = Modia3D.ZeroVector3D(F)
-        obj.R_rel      = Frames.rotAxis(posAxis, posMovement, phi)
+        obj.R_rel      = Modia3D.rot_e(eAxis, phi)
         parent.hasChildJoint = true
         return obj.joint
     end

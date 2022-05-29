@@ -347,14 +347,14 @@ function computePositionsVelocitiesAccelerations!(mbs::MultibodyData{F,TimeType}
             revolute  = mbs.revolute[obj.jointIndex]
 
             obj.r_abs = parent.r_abs
-            obj.R_rel = Frames.rotAxis(revolute.posAxis, revolute.posMovement, revolute.phi)
+            obj.R_rel = Frames.rot_e(revolute.eAxis, revolute.phi)
             obj.R_abs = obj.R_rel*parent.R_abs
 
             obj.v0 = parent.v0
             obj.a0 = parent.a0
 
-            w_rel = Frames.axisValue(revolute.posAxis, revolute.posMovement, revolute.w)
-            z_rel = Frames.axisValue(revolute.posAxis, revolute.posMovement, revolute.a)
+            w_rel = revolute.eAxis*revolute.w
+            z_rel = revolute.eAxis*revolute.a
 
             obj.w = obj.R_rel*(parent.w + w_rel)
             obj.z = obj.R_rel*(parent.z + z_rel + cross(parent.w, w_rel))
@@ -449,13 +449,12 @@ function computeAccelerations!(mbs::MultibodyData{F,TimeType}, tree::Vector{Obje
             revolute = mbs.revolute[obj.jointIndex]
 
             obj.a0 = parent.a0
-            z_rel  = Frames.axisValue(revolute.posAxis, revolute.posMovement, revolute.a)
+            z_rel  = revolute.eAxis*revolute.a
             obj.z  = obj.R_rel*(parent.z + z_rel)
 
         elseif jointKind == PrismaticKind
             prismatic = mbs.prismatic[obj.jointIndex]
 
-            eAxis  = prismatic.posMovement ? prismatic.posAxis : -prismatic.posAxis
             a_rel  = prismatic.eAxis*prismatic.a
             obj.a0 = parent.a0 + parent.R_abs'*(a_rel + cross(parent.z, obj.r_rel))
             obj.z  = parent.z
@@ -516,7 +515,7 @@ function computeObject3DForcesTorquesAndGenForces!(mbs::MultibodyData{F,TimeType
             parent.t += obj.R_rel'*obj.t
             obj.f     = -obj.f
             obj.t     = -obj.t
-            revoluteGenForces[obj.jointIndex] = revolute.posMovement ? obj.t[revolute.posAxis] : -obj.t[revolute.posAxis]
+            revoluteGenForces[obj.jointIndex] = dot(revolute.eAxis,obj.t)
 
         elseif jointKind == PrismaticKind
             prismatic = mbs.prismatic[obj.jointIndex]
@@ -858,7 +857,7 @@ getGenForcesHiddenJoints(mbs, qdd_hidden) = mbs.hiddenGenForces
 function setAngle!(revolute::Revolute, phi::F) where F <: Modia3D.VarFloatType
    obj          = revolute.obj2
    revolute.phi = phi
-   obj.R_rel    = Frames.rotAxis(revolute.posAxis, revolute.posMovement, phi)
+   obj.R_rel    = Frames.rot_e(revolute.eAxis, phi)
    obj.R_abs    = obj.R_rel*obj.parent.R_abs
    return revolute
 end

@@ -101,7 +101,9 @@ julia -JModia3D_sysimage.so  (otherwise)
 - Additional keyword arguments of Object3D: `Object3D(..., fixedInParent=true, velocity=[0.0, 0.0, 0.0], angularVelocity=[0.0, 0.0, 0.0])`.
   A freely moving Object3D is defined with `Object3D(..., fixedInParent=false, ...)`. The states and other code for such Object3Ds are
   no longer visible in the generated code (so compilation is faster).
-  
+
+- `Revolute(..)` and `Prismatic(..)` joints can define axis of rotation/translation optionally as vector, e.g., `axis = [1.0, 2.0, 3.0]`.
+
 - New variants of functions: `Modia3D.rot1(angle,v), Modia3D.rot2(angle,v), Modia3D.rot3(angle,v), Modia3D.resolve1(rotation,v2), Modia3D.resolve2(rotation,v1)`.
 
 **Deprecated**
@@ -110,13 +112,13 @@ julia -JModia3D_sysimage.so  (otherwise)
   Note, Object3D has variables `translation, rotation, velocity, angularVelocity` instead of `r, rot, v, w` of `FreeMotion`.
   Furthermore, `angularVelocity` is resolved in the parent `Object3D` whereas `w` in `FreeMotion(obj1=.., obj2=..., ..)` is resolved in
   `obj2` and not in `obj1`. This means in particular that the init/start value `FreeMotion(.., w=Var(start=w_start)...)` needs
-  to be transformed in Object3D with `Object3D(..., fixedInParent=false, rotation=xxx, angularVelocity = Modia3D.resolve1(rotation,w_start))`.
-
+  to be transformed in Object3D with `Object3D(..., fixedInParent=false, rotation=XXX, angularVelocity = Modia3D.resolve1(XXX,w_start))`.
+  As a side effect, 
 
 **Non-backwards compatible changes**
 
 - Since Modia3D 0.11.0 is based on Modia 0.9.0, the non-backwards compatible changes of Modia have also an effect on Modia3D
-  (for details, see the release notes of Modia 0.9.0).
+  (for details, see the release notes of Modia 0.9.0). Typically, this should give problems only in seldomly occuring corner cases.
  
 
 ### Version 0.10.4

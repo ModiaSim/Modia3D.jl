@@ -13,7 +13,7 @@ Dummy = Model3D(
     rev    = Revolute(obj1=:world, obj2=:frame1),
 
     body2  = Object3D(feature=Solid(shape=Box(lengthX=1.0, lengthY=0.1, lengthZ=0.1), massProperties=MassProperties(mass=1.0))),
-    prism  = Prismatic(obj1=:world , obj2=:body2, axis=2),
+    prism  = Prismatic(obj1=:world , obj2=:body2, axis=[0.0, 20.0, 0.0]),
 
     body3  = Object3D(parent=:world, fixedToParent=:false,
                                     translation=[0.0, 1.0, 0.0],

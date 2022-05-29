@@ -145,10 +145,10 @@ with `angle` if `positive=true` and otherwise with `-angle`.
 """
     R = Modia3D.rot_e(e, angle)
 
-Return rotation matrix that rotates around angle `angle` along unit axis `e`.
-This function assumes that `norm(e) == 1`.
+Return rotation matrix that rotates frame1 around `angle` along unit axis `e`
+arriving at frame2. This function assumes that `norm(e) == 1`.
 """
-@inline function rot_e(e::AbstractVector,angle::Number)
+@inline function rot_e(e::AbstractVector, angle::Number)
     (s,c) = sincos(angle)
     F = typeof(s)
     return e*e' + (NullRotation(F) - e*e')*c - skew(e)*s
