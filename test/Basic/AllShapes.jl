@@ -12,8 +12,8 @@ vmatYellow = VisualMaterial(color="Yellow", transparency=0.5)
 font2 = Font(fontFamily="FreeSans", bold=false, italic=false, charSize=0.1, color="LightBlue", transparency=0.0)
 
 # material for massProperties where all MassProperties are defined
-m   = 2.0
-rCM = [1,2,3]
+m = 2.0
+rCM = [1, 2, 3]
 massDefined = MassProperties(mass=m, centerOfMass=rCM, Ixx=3.0, Iyy=4.0, Izz=4.0, Ixy=6.0, Ixz=7.0, Iyz=9.0)
 
 # mass properties are computed from shape and mass
@@ -149,8 +149,6 @@ AllShapes = Model3D(
 )
 
 allShapes = @instantiateModel(AllShapes, unitless=true, log=false, logStateSelection=false, logCode=false, FloatType=Float32)
-
-
 
 simulate!(allShapes, stopTime=0.0, log=false, logStates=false, logEvents=false)
 

@@ -23,7 +23,7 @@ LineLine = Model3D(
                       feature=Solid(shape=Box(lengthX=5.0, lengthY=3.0, lengthZ=0.0),
                                     visualMaterial=vmatGrey,
                                     solidMaterial="Steel",
-                                    massProperties = MassProperties(mass = 12000.0),
+                                    massProperties = MassProperties(mass=12000.0),
                                     collision=true)),
     frameX = Object3D(parent=:world,
                       translation=:[0.1, 0.1, 0.0],

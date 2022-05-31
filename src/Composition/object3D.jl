@@ -185,7 +185,7 @@ mutable struct Object3D{F <: Modia3D.VarFloatType} <: Modia3D.AbstractObject3D
         velocity        = Modia3D.ZeroVector3D(F),
         angularVelocity = Modia3D.ZeroVector3D(F),
         feature = nothing,
-        angularVelocityResolvedInParent = false,
+        angularVelocityResolvedInParent = true,
         kwargs...) where F <: Modia3D.VarFloatType
         interactionBehavior = Modia3D.NoInteraction
 

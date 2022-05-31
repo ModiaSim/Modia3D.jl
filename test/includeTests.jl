@@ -4,17 +4,17 @@ Modia3D.loadPalettes!(solidMaterialPalette       = "$(Modia3D.path)/palettes/sol
                       contactPairMaterialPalette = "$(Modia3D.path)/palettes/contactPairMaterials.json",
                       visualMaterialPalette      = "$(Modia3D.path)/palettes/visualMaterials.json")
 
-Test.@testset "Frames" begin  
-    include("TestFrames.jl") 
+Test.@testset "Frames" begin
+    include("TestFrames.jl")
 end
- 
-Test.@testset "Basic" begin  
-    include(joinpath("Basic", "Pendulum.jl"))   
+
+Test.@testset "Basic" begin
+    include(joinpath("Basic", "Pendulum.jl"))
     include(joinpath("Basic", "ModelsForPrecompilation.jl"))
     include(joinpath("Basic", "AllShapes.jl"))
     include(joinpath("Basic", "PendulumWithBar1.jl"))
     include(joinpath("Basic", "PendulumWithBar2.jl"))
-    include(joinpath("Basic", "PendulumWithBar3.jl"))    
+    include(joinpath("Basic", "PendulumWithBar3.jl"))
     include(joinpath("Basic", "PendulumWithDamper.jl"))
     include(joinpath("Basic", "PendulumWithFix.jl"))
     include(joinpath("Basic", "PendulumWithParameterizedDamper.jl"))
@@ -23,7 +23,7 @@ Test.@testset "Basic" begin
     include(joinpath("Basic", "BoxPlanarMotion.jl"))
     include(joinpath("Basic", "FreeShaft.jl"))
     include(joinpath("Basic", "FreeShaftAdaptiveRotSequence.jl"))
-    include(joinpath("Basic", "FreeShaftAdaptiveRotSequenceWithFreeMotion.jl"))    
+    include(joinpath("Basic", "FreeShaftAdaptiveRotSequenceWithFreeMotion.jl"))
     Test.@test_throws LoadError include(joinpath("Basic", "Object3DWithoutParentError.jl"))  # test for too many objects without parent
     if testsExtend >= normalTests
         include(joinpath("Basic", "Mobile.jl"))
@@ -50,12 +50,16 @@ Test.@testset "Robot" begin
     include(joinpath("Robot", "ServoWithRampAndRevolute.jl"))
     include(joinpath("Robot", "ServoWithPathAndRevolute.jl"))
     if testsExtend >= normalTests
-        include(joinpath("Robot", "YouBotWithSphere.jl"))
+        if Sys.islinux()
+            Test.@test_skip include(joinpath("Robot", "YouBotWithSphere.jl"))  # LinearAlgebra.SingularException on linux
+        else
+            include(joinpath("Robot", "YouBotWithSphere.jl"))
+        end
         include(joinpath("Robot", "YouBotGripping.jl"))
     end
     if testsExtend == completeTests
         include(joinpath("Robot", "YouBotPingPong.jl"))  # long computation time
-        Test.@test_skip include(joinpath("Robot", "YouBotsGripping.jl"))  # long computation time  error on Linux: [CVODES ERROR]  CVode At t = 3.24097 and h = 3.25115e-08, the error test failed repeatedly or with |h| = hmin.
+        include(joinpath("Robot", "YouBotsGripping.jl"))  # long computation time
     end
 end
 
@@ -66,7 +70,7 @@ Test.@testset "Collision" begin
     include(joinpath("Collision", "BouncingEllipsoidOnSphere.jl"))
     include(joinpath("Collision", "TwoCollidingBalls.jl"))
     include(joinpath("Collision", "TwoCollidingBoxes.jl"))
-    Test.@test_skip include(joinpath("Collision", "CollidingCylinders.jl"))  # windows: cylinder in the middle has a different behaviour
+    include(joinpath("Collision", "CollidingCylinders.jl"))
     include(joinpath("Collision", "NewtonsCradle.jl"))
     Test.@test_throws LoadError include(joinpath("Collision", "InValidCollisionPairingError.jl"))  # test for undefined collision pair material
     if testsExtend >= normalTests
@@ -77,7 +81,7 @@ Test.@testset "Collision" begin
         include(joinpath("Collision", "BouncingFrustums.jl"))
         include(joinpath("Collision", "BouncingCapsules.jl"))
         include(joinpath("Collision", "BouncingBeams.jl"))
-        Test.@test_skip  include(joinpath("Collision", "CollidingSphereWithBunnies.jl"))   # Error on Linux too large
+        include(joinpath("Collision", "CollidingSphereWithBunnies.jl"))
         include(joinpath("Collision", "Billard4Balls.jl"))
         Test.@test_throws LoadError include(joinpath("Collision", "OrthogonalLinesError.jl"))  # orthogonal lines moving until r_abs is NaN
         Test.@test_throws LoadError include(joinpath("Collision", "ParallelLinesError.jl"))  # MPR 2D not implemented
