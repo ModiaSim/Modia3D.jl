@@ -128,7 +128,7 @@ function instantiateModel3D!(partiallyInstantiatedModel::Modia.SimulationModel{F
     scene.forceElements = forceElements
     if scene.options.enableContactDetection && scene.collide
         nz = 2
-        zStartIndex = Modia.newZeroCrossings(partiallyInstantiatedModel, nz)
+        zStartIndex = Modia.new_z_segmented_variable!(partiallyInstantiatedModel, nz)
         scene.zStartIndex = zStartIndex
     else
         nz = 0

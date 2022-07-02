@@ -42,9 +42,9 @@ end
 
 
 """
-    R = Modia3D.from_q(q::SVector{4,F})
+    R = Modia3D.from_q(q)
 
-Return SMatrix{4,4,F,16} `R` from quaternion `q`.
+Return rotation matrix `R::SMatrix{3,3,F,9}` from quaternions `q::SVector{4,F}`.
 """
 from_q(q::SVector{4,F}) where F <: Modia3D.VarFloatType = SMatrix{3,3,F,9}( F(2.0) * (q[1] * q[1] + q[4] * q[4]) - F(1.0),
                                             F(2.0) * (q[2] * q[1] - q[3] * q[4]),
@@ -58,10 +58,9 @@ from_q(q::SVector{4,F}) where F <: Modia3D.VarFloatType = SMatrix{3,3,F,9}( F(2.
 
 
 """
-    q = Modia3D.from_R(R::SMatrix{3,3,F,9};
-                       q_guess = NullQuaternion(F))
+    q = Modia3D.from_R(R; q_guess = NullQuaternion(F))
 
-Return quaternion `SVector{4,F} q` from rotation matrix `SMatrix{3,3,F,9} R`.
+Return quaternion `q::SVector{4,F}` from rotation matrix `R::SMatrix{3,3,F,9}`.
 
 From the two possible solutions `q` the one is returned that is closer
 to `q_guess` (note, `q` and `-q` define the same rotation).

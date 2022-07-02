@@ -53,10 +53,10 @@ mutable struct FreeMotion{F <: Modia3D.VarFloatType} <: Modia3D.AbstractJoint
     path::String
 
     # Hidden states are stored in the following way:
-    #   x_hidden[ix_r:...] = [r, rot, v, w]
+    #   x_segmented[ix_r:...] = [r, rot, v, w]
     #
     # Derivatives of hidden states are stored in the following way
-    #   der_x_hidden[ix_r:...] = [der(r), der(rot), der(v), der(w)]
+    #   der_x_segmented[ix_r:...] = [der(r), der(rot), der(v), der(w)]
     #
     # with
     #   der(r)   = v
@@ -65,10 +65,10 @@ mutable struct FreeMotion{F <: Modia3D.VarFloatType} <: Modia3D.AbstractJoint
     #   der(w)   = ...
 
     hiddenStates::Bool    # = true, if state is not visible in generated code
-    ix_hidden_r::Int      # instantiatedModel.x_hidden[ix_r_hidden  :ix_hidden_r+2]     are the elements of x_hidden that are stored in r   if hiddenStates
-    ix_hidden_rot::Int    # instantiatedModel.x_hidden[ix_rot_hidden:ix_hidden_rot+2] are the elements of x_hidden that are stored in rot if hiddenStates
-    ix_hidden_v::Int      # instantiatedModel.x_hidden[ix_v_hidden  :ix_hidden_v+2]     are the elements of x_hidden that are stored in v   if hiddenStates
-    ix_hidden_w::Int      # instantiatedModel.x_hidden[ix_w_hidden  :ix_hidden_w+2]     are the elements of x_hidden that are stored in w   if hiddenStates
+    ix_segmented_r::Int      # instantiatedModel.x_segmented[ix_r_hidden  :ix_segmented_r+2]   are the elements of x_segmented that are stored in r   if hiddenStates
+    ix_segmented_rot::Int    # instantiatedModel.x_segmented[ix_rot_hidden:ix_segmented_rot+2] are the elements of x_segmented that are stored in rot if hiddenStates
+    ix_segmented_v::Int      # instantiatedModel.x_segmented[ix_v_hidden  :ix_segmented_v+2]   are the elements of x_segmented that are stored in v   if hiddenStates
+    ix_segmented_w::Int      # instantiatedModel.x_segmented[ix_w_hidden  :ix_segmented_w+2]   are the elements of x_segmented that are stored in w   if hiddenStates
     iextra_isrot123::Int  # Startindex of extra result isrot123
     iz_rot2::Int          # instantiatedModel.eventHandler.z[iz_rot2] is the element of z in which singularRem(rot[2]) is stored if hiddenStates,
                           # to monitor when to switch to a different rotation sequence of rot
