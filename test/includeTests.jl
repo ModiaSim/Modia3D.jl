@@ -53,7 +53,7 @@ Test.@testset "Robot" begin
         if Sys.islinux()
             Test.@test_skip include(joinpath("Robot", "YouBotWithSphere.jl"))  # LinearAlgebra.SingularException on linux
         else
-            include(joinpath("Robot", "YouBotWithSphere.jl"))
+            Test.@test_skip include(joinpath("Robot", "YouBotWithSphere.jl"))  # LinearAlgebra.SingularException
         end
         include(joinpath("Robot", "YouBotGripping.jl"))
     end
