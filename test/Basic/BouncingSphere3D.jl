@@ -1,15 +1,18 @@
 module BouncingSphere3D
+
 using Modia3D
 
 BouncingSphere = Model3D(
     boxHeigth = 0.1,
     world     = Object3D(feature=Scene()),
-    ground    = Object3D(parent=:world, translation=:[0.0,-boxHeigth/2,0.0],
+    ground    = Object3D(parent=:world,
+                         translation=:[0.0,-boxHeigth/2,0.0],
                          feature=Solid(shape=Box(lengthX=4.0, lengthY=:boxHeigth, lengthZ=0.7),
                                        visualMaterial=VisualMaterial(color="DarkGreen"),
                                        solidMaterial="Steel",
                                        collision=true)),
-    sphere    = Object3D(parent=:world, fixedToParent=false, translation=[0.0, 1.0, 0.0], angularVelocityResolvedInParent=true,
+    sphere    = Object3D(parent=:world, fixedToParent=false,
+                         translation=[0.0, 1.0, 0.0],
                          feature=Solid(shape=Sphere(diameter=0.2),
                                        visualMaterial=VisualMaterial(color="Blue"),
                                        solidMaterial="Steel",

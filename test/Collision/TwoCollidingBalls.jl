@@ -29,17 +29,17 @@ collidingBalls = Model3D(
                                    collision=true)),
 
     ball1 = Object3D(parent=:world, fixedToParent=false,
-                     translation = [-1.3, 0.0, diameter/2],
-                     velocity    = [3.0, 0.0, 0.0],
-                     rotation    = [pi/2, 0.0, 0.0], angularVelocityResolvedInParent=true,
+                     translation=[-1.3, 0.0, diameter/2],
+                     velocity=[3.0, 0.0, 0.0],
+                     rotation=[pi/2, 0.0, 0.0],
                      feature=Solid(shape=Sphere(diameter=diameter),
                                    solidMaterial="BilliardBall",
                                    visualMaterial=vmatSolids,
                                    collision=true)),
 
     ball2 = Object3D(parent=:world, fixedToParent=false,
-                     translation = [0.0, 0.0, diameter/2],
-                     rotation    = [pi/2, 0.0, 0.0], angularVelocityResolvedInParent=true,
+                     translation=[0.0, 0.0, diameter/2],
+                     rotation=[pi/2, 0.0, 0.0],
                      feature=Solid(shape=Sphere(diameter=diameter),
                                    solidMaterial="BilliardBall",
                                    visualMaterial=vmatSolids,
@@ -51,9 +51,7 @@ twoCollidingBalls = @instantiateModel(collidingBalls, unitless=true, log=false, 
 stopTime = 1.5
 tolerance = 1e-6
 dtmax = 0.1
-requiredFinalStates = [0.4489974852019629, 4.971482124288075e-6, 0.029996861274764766, 0.5336096206429409, 4.775435383850775e-6, -8.566849073992856e-7, 1.5708013764495665, 1.2298784775382833e-5, -55.4441088791202, -6.408457808447407e-5, -9.894396552324208e-5, -17.78647176388158, 1.4032405177409832, -4.464837913922324e-6, 0.029997744288682248, 1.4383823207541608, -4.574293232521244e-6, -2.3103945635420407e-6, 1.570796533109225, 1.2115305686199998e-8, -44.07171252097457, 0.00015344214722251976, 2.5704782290946986e-6, -47.9463685248874]
-Modia3D.angularVelocityResolvedInParentStates!(requiredFinalStates,  7, true)
-Modia3D.angularVelocityResolvedInParentStates!(requiredFinalStates, 19, true)
+requiredFinalStates = [0.44876394694456134, 9.305927636126645e-17, 0.029996866914584027, 0.5333704927224155, 9.191631858558948e-17, -8.536332325885959e-7, 1.5707963267948966, 2.428034767780229e-16, -55.43736210378611, -3.0637882098742386e-15, 17.778500349018145, 1.6854528233546344e-19, 1.4034679368692125, -2.5752631917689518e-14, 0.029997749668811288, 1.4386201962066418, -2.635051209881685e-14, -2.3079771375263612e-6, 1.570796326794897, -1.816097264237583e-14, -44.078687623522335, 8.783557043687735e-13, 47.95429595521847, 0.0]
 simulate!(twoCollidingBalls, stopTime=stopTime, tolerance=tolerance, dtmax=dtmax, log=true, logStates=true, logEvents=true, requiredFinalStates=requiredFinalStates)
 
 @usingModiaPlot

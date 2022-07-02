@@ -29,9 +29,8 @@ BouncingCones = Model3D(
                       rotation=:[-90*u"°", 0.0, -90*u"°"],
                       feature=Visual(shape=CoordinateSystem(length=0.5))),
     coneX = Object3D(parent=:frameX, fixedToParent=false,
-                     translation=[0.0, 0.0, 0.0],
-                     rotation   =[0.0, -60*u"°", 0.0],
-                     velocity   =[0.0, 1.0, 0.0],    
+                     rotation=[0.0, -60*u"°", 0.0],
+                     velocity=[0.0, 1.0, 0.0],
                      feature=Solid(shape=Cone(axis=1, diameter=0.4, length=1.0),
                                    visualMaterial=vmatRed,
                                    solidMaterial="DryWood",
@@ -41,9 +40,8 @@ BouncingCones = Model3D(
                       rotation=:[90*u"°", 90*u"°", 0.0],
                       feature=Visual(shape=CoordinateSystem(length=0.5))),
     coneY = Object3D(parent=:frameY, fixedToParent=false,
-                     translation=[0.0, 0.0, 0.0],
-                     rotation   =[0.0, 0.0, -60*u"°"],
-                     velocity   =[0.0, 0.0, 1.0],    
+                     rotation=[0.0, 0.0, -60*u"°"],
+                     velocity=[0.0, 0.0, 1.0],
                      feature=Solid(shape=Cone(axis=2, diameter=0.4, length=1.0),
                                    visualMaterial=vmatGreen,
                                    solidMaterial="DryWood",
@@ -52,9 +50,8 @@ BouncingCones = Model3D(
                       translation=:[1.0, -0.5, 1.0],
                       feature=Visual(shape=CoordinateSystem(length=0.5))),
     coneZ = Object3D(parent=:frameZ, fixedToParent=false,
-                     translation=[0.0, 0.0, 0.0],
-                     rotation   =[-60*u"°", 0.0, 0.0],
-                     velocity   =[1.0, 0.0, 0.0],    
+                     rotation=[-60*u"°", 0.0, 0.0],
+                     velocity=[1.0, 0.0, 0.0],
                      feature=Solid(shape=Cone(axis=3, diameter=0.4, length=1.0),
                                    visualMaterial=vmatBlue,
                                    solidMaterial="DryWood",
@@ -65,7 +62,7 @@ bouncingCones = @instantiateModel(BouncingCones, unitless=true, log=false, logSt
 
 stopTime = 1.2
 tolerance = 1e-8
-requiredFinalStates = [-0.7999312016374764, 1.0550588860480428, 0.8921254770510955, -0.1896960061863984, 0.8841404598824826, 0.43402607612744604, 1.3606906655246873, 1.1282714887339953, 2.052883317050297, 4.6497266384364115, 0.052126888408507835, 1.009893100393836, 0.8916594826499894, -0.8000400934802586, 1.0551915122440447, 0.43363393980540194, -0.19001673923281473, 0.8846394848571297, 2.735874415024229, -0.2906589834171084, -1.476919610003813, 1.010451091809992, 4.65340945904709, 0.051874592801066474, 1.0551437465113622, 0.8923792400352838, -0.8001536268911364, 0.8848687234167343, 0.4342006445471319, -0.19173561019070964, -1.7767415342672759, -0.2277632915908899, 2.6985438395240826, 0.05325010071392679, 1.012579595034664, 4.656827261542965]
+requiredFinalStates = [-0.7999311625652963, 1.0550589340109533, 0.8921255200490438, -0.18969494953144356, 0.8841403146779124, 0.43402600857718365, 1.3606906685626896, 1.1282713416507297, 2.0528833436012595, -0.030303266151766442, -1.514825830499711, 4.510758033358663, 0.8916596085646129, -0.800040034923405, 1.0551915260680085, 0.43363424025808023, -0.19001477209520348, 0.8846396171051895, 2.7358742077100384, -0.2906589654151757, -1.4769196629577481, 4.514472763028119, -0.030810996624682587, -1.515427655179665, 1.0551437942348352, 0.8923793589673877, -0.8001535827544871, 0.884868848392877, 0.4342007829869422, -0.1917344341104826, -1.7767415484303393, -0.2277633762477909, 2.698544037765237, -1.521254393123658, 4.516519345054235, -0.03229086240525738]
 simulate!(bouncingCones, stopTime=stopTime, tolerance=tolerance, log=true, logStates=false, logEvents=false, requiredFinalStates=requiredFinalStates)
 
 @usingModiaPlot

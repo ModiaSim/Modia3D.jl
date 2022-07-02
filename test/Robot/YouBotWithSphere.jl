@@ -394,8 +394,8 @@ YouBot = Model3D(
     servo3 = Servo,
     servo4 = Servo,
     servo5 = Servo,
-    
-    refPath = Var(hideResult=true),    
+
+    refPath = Var(hideResult=true),
 
     equations=:[
         refPath = calculateRobotMovement(getReferencePath(), instantiatedModel),
@@ -429,7 +429,7 @@ youbot = @instantiateModel(youbotModel, unitless=true, logCode=false, log=false)
 
 stopTime = 5.0
 tolerance = 1e-6
-requiredFinalStates = [-9.383344936381005e-8, 9.389603739560729e-8, -1.8328641561777211e-6, 1.8330742520937859e-6, -3.5544825676660483e-6, 3.5549633644145916e-6, -2.1817741434619022e-6, 2.1821367966272557e-6, 8.488356772578307e-9, -8.48976837104511e-9, -0.0007167747672183611, 0.22762659704571067, -0.0182094121578842, -0.008528689854159254, 2.952598273502447e-5, 0.38409567560169544, -0.0001587184773197484, -0.3452201053213271, 0.15251715704624744, -3.0310382137746827e-5, 2.155114685778146e-7, 1.5711355855217919, -0.0004850869325017541, -21.21870863208986, 0.002893915095100067, 0.00045577428292246436, -6.127288457361323]
+requiredFinalStates = missing
 simulate!(youbot, stopTime=stopTime, tolerance=tolerance, requiredFinalStates_rtol=0.1, requiredFinalStates_atol=0.1, log=true, logStates=true, requiredFinalStates=requiredFinalStates)
 
 @usingModiaPlot
