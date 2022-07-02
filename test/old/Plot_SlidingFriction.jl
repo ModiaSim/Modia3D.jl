@@ -1,6 +1,6 @@
 module Plot_SlidingFriction
 
-import ModiaPlot_PyPlot: PyCall, PyPlot
+import SignalTablesInterface_PyPlot: PyCall, PyPlot
 
 pyplot_rc = PyCall.PyDict(PyPlot.matplotlib."rcParams")
 pyplot_rc["font.size"] = 10.0
