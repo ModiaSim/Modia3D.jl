@@ -47,8 +47,13 @@ algorithm = Tsit5()
 stopTime = 10.0
 requiredFinalStates = [-1.578178763749515, 0.06153191687388868]
 simulate!(pendulumWithBar, algorithm, stopTime=stopTime, log=true, logStates=false, requiredFinalStates=requiredFinalStates)
+showInfo(pendulumWithBar)
+phi = getValues(pendulumWithBar, "pendulum.rev.phi")
+@show phi[1:5]
 
 @usingModiaPlot
 plot(pendulumWithBar, "pendulum.rev.flange.phi", figure=1)
+
+writeSignalTable("PendulumWithBar1.jl", pendulumWithBar; indent=2, log=true)
 
 end
