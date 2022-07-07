@@ -31,7 +31,7 @@ stopTime = 5.0
 requiredFinalStates=[0.0, 0.5, -0.75, 0.0, 0.1, -0.9, 12.518049845080435, -0.901864379852841, 13.979844149553378, -1.556318674959713, 1.9667313208626755, 2.776623306112369]
 simulate!(shaft, stopTime=stopTime, log=true, logStates=false, requiredFinalStates=requiredFinalStates)
 
-@usingPlotPackage
+@usingModiaPlot
 plot(shaft, ["shaft.shaft.translation", "shaft.shaft.rotation", "shaft.shaft.velocity", "shaft.shaft.angularVelocity"], figure=1)
 
 end

@@ -13,7 +13,7 @@ pendulum = @instantiateModel(Pendulum, unitless=true, log=false, logDetails=fals
 requiredFinalStates = [5.970529829666215, -1.1395482781332746]
 simulate!(pendulum, stopTime=3.0, log=true, requiredFinalStates = requiredFinalStates)
 
-@usingPlotPackage
+@usingModiaPlot
 plot(pendulum, "rev.phi")
 
 

@@ -31,7 +31,7 @@ BouncingSphere = Model3D(
 bouncingSphere = @instantiateModel(BouncingSphere, unitless=true)
 simulate!(bouncingSphere, stopTime=2.2, dtmax=0.1)
 
-@usingPlotPackage
+@usingModiaPlot
 plot(bouncingSphere, "sphere.translation", figure=1)
 
 end

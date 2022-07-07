@@ -136,7 +136,7 @@ tolerance = 1e-6
 requiredFinalStates = [2.1923247415673457e-7, -2.1923342072392868e-7, -0.06934863003447111]
 simulate!(servo, stopTime=stopTime, tolerance=tolerance, log=true, logStates=false, logEvents=false, requiredFinalStates=requiredFinalStates)
 
-@usingPlotPackage
+@usingModiaPlot
 plotVariables = [("servo.refLoadAngle", "rev.phi"); "servo.ppi.gainOuter.u"; "rev.w"; "servo.ppi.PI.x"; "servo.ppi.refTorque"]
 plot(servo, plotVariables, figure=1)
 

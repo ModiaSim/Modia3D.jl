@@ -36,7 +36,7 @@ tolerance = 1e-8
 requiredFinalStates = [0.01948634300615831, 0.10092552754875266]
 @time simulate!(bouncingSphere, stopTime=stopTime, tolerance=tolerance, dtmax=dtmax, log=false, logStates=false, logEvents=false, requiredFinalStates=requiredFinalStates)
 
-@usingPlotPackage
+@usingModiaPlot
 @time plot(bouncingSphere, ["prism.s", "prism.v"], figure=1)
 
 end

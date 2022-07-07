@@ -573,7 +573,7 @@ open("YouBotsGripping_profile.txt", "w") do io
 end
 =#
 
-@usingPlotPackage
+@usingModiaPlot
 plot(youbot, ["sphere.translation"], figure=1)
 
 end

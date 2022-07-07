@@ -60,7 +60,7 @@ tolerance = 1e-8
 finalStates = [-0.3, -0.7970361906203778, 0.008588033707431024, -7.237169810640399e-24, -1.6896514746046425, -1.8362931543566983, 5.311030412261472, 3.273267080119862e-13, -1.5707963267949006, 12.501897002117005, -6.119100356078922e-14, 8.97384406112105e-14, -6.4344239781983074e-24, -0.7958169253113232, 0.009907524790588372, -9.132826064767804e-28, -1.6857839839384585, -1.8338319584815206, 3.739172631603938, -2.2304263793016205e-13, -2.2968456547063965e-15, 12.491667707530048, 3.8752399136944956e-14, -7.288167098788829e-14, 0.3, -0.7972350189036318, 0.008404752508151168, 4.172205601393931e-27, -1.6904048029264813, -1.8367363258987721, 5.309290153368781, 7.938841542342687e-16, -8.112382530020162e-14, 12.494972632285036, 2.02760099086996e-14, -2.895778704265324e-14]
 simulate!(CollidingCylinders, stopTime=stopTime, interval=interval, tolerance=tolerance, log=true, logStates=false, logEvents=false, requiredFinalStates=finalStates)
 
-@usingPlotPackage
+@usingModiaPlot
 plot(CollidingCylinders, [("cylinderX.translation", "cylinderY.translation", "cylinderZ.translation") ("cylinderX.rotation", "cylinderY.rotation", "cylinderZ.rotation")
                           ("cylinderX.velocity", "cylinderY.velocity", "cylinderZ.velocity") ("cylinderX.angularVelocity", "cylinderY.angularVelocity", "cylinderZ.angularVelocity")], figure=1)
 

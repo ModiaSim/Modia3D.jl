@@ -47,7 +47,7 @@ end
 
 simulate!(boxBushing, stopTime=stopTime, dtmax=dtmax, log=true, requiredFinalStates=requiredFinalStates)
 
-@usingPlotPackage
+@usingModiaPlot
 plot(boxBushing, ["box.translation", "box.velocity", "box.rotation", "box.angularVelocity"], figure=1)
 
 end

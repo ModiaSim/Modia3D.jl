@@ -30,7 +30,7 @@ requiredFinalStates = [0.0, 0.7, -7.350074420637136, 0.0, 0.1, -2.1, 0.698131700
 simulate!(shaft, stopTime=stopTime, dtmax=dtmax, log=true, logEvents=true, logStates=false, requiredFinalStates=requiredFinalStates)
 showInfo(shaft)
 
-@usingPlotPackage
+@usingModiaPlot
 plot(shaft, ["shaft.rotation", "shaft.rotationXYZ", "shaft.angularVelocity", "shaft.translation", "shaft.velocity"], figure=1)
 
 end

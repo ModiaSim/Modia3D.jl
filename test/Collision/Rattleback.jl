@@ -40,7 +40,7 @@ tolerance = 1e-8
 requiredFinalStates = [0.0006642916745069836, -0.0003421601373475422, 0.009999957179380127, 0.00048100224838247405, 0.0001387189555267131, -3.844627131472889e-8, 0.08140087449927354, -0.2616224376222781, -1.264936920220031, -0.014944019262829457, 0.05292038717100961, -2.294245213745764]
 simulate!(rattleback, stopTime=stopTime, tolerance=tolerance, log=false, requiredFinalStates=requiredFinalStates)
 
-@usingPlotPackage
+@usingModiaPlot
 plot(rattleback, ["ellipsoid.translation" "ellipsoid.rotation"; "ellipsoid.velocity" "ellipsoid.angularVelocity"], figure=1)
 
 end

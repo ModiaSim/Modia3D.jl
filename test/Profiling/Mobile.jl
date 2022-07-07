@@ -109,7 +109,7 @@ println("... first simulation:")
 println("... second simulation:")
 @time simulate!(mobile, stopTime=stopTime, tolerance=tolerance, logTiming=true, log=true, requiredFinalStates=requiredFinalStates)
 
-#@usingPlotPackage
+#@usingModiaPlot
 #plot(mobile, "rev0.rev.phi")
 
 end

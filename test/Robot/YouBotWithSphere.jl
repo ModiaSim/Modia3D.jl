@@ -432,7 +432,7 @@ tolerance = 1e-6
 requiredFinalStates = missing
 simulate!(youbot, stopTime=stopTime, tolerance=tolerance, requiredFinalStates_rtol=0.1, requiredFinalStates_atol=0.1, log=true, logStates=true, requiredFinalStates=requiredFinalStates)
 
-@usingPlotPackage
+@usingModiaPlot
 plot(youbot, ["sphere.rotation"], figure=1)
 
 end

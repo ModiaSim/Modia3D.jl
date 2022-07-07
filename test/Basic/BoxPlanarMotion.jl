@@ -22,7 +22,7 @@ stopTime = 4.0
 requiredFinalStates = [1.0, 3.0, -2.0, -1.0, 3.0, 12.0]
 simulate!(model, stopTime=stopTime, log=true, logStates=true, requiredFinalStates=requiredFinalStates)
 
-@usingPlotPackage
+@usingModiaPlot
 plot(model, ["prismatic_x.s", "prismatic_y.s", "revolute_z.phi"], figure=1)
 
 end

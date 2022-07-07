@@ -51,7 +51,7 @@ showInfo(pendulumWithBar)
 phi = getValues(pendulumWithBar, "pendulum.rev.phi")
 @show phi[1:5]
 
-@usingPlotPackage
+@usingModiaPlot
 plot(pendulumWithBar, "pendulum.rev.flange.phi", figure=1)
 
 writeSignalTable("PendulumWithBar1.jl", pendulumWithBar; indent=2, log=true)

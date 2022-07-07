@@ -46,7 +46,7 @@ requiredFinalStates = [-1.578178283450938, 0.061515170100766486]
 
 simulate!(pendulumWithDamper, stopTime=stopTime, log=true, logStates=false, requiredFinalStates=requiredFinalStates)
 
-@usingPlotPackage
+@usingModiaPlot
 plot(pendulumWithDamper, ["pendulum.rev.flange.phi", "pendulum.rev.w"], figure=1)
 
 end

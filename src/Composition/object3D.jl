@@ -82,8 +82,13 @@ If `rotation[2]` is close to its singular position (= 90u"°" or -90u"°"), an e
 `[angleX, angleZ, angleY]`. In the new rotation sequence, `rotation[2]` is far from its singular position at this time instant. Variable `rotationXYZ::Bool` in the result
 signals whether `rotation` is defined with rotation sequence `[angleX, angleY, angleZ]` (`rotationXYZ=true`) or with rotation sequence `[angleX, angleZ, angleY]` (`rotationXYZ=false`).
 See, example `Modia3D/test/Basic/ShaftFreeMotionAdaptiveRotSequence.jl`.
+The initial conditions (so `rotation=...` as key/value pair in the Object3D constructor) are always with `rotationXYZ=true`.\
 
-
+With respect to an approach where the rotation is described with *quaternions*, the
+adaptive rotation sequence handling has the benefit that all integrators can be used
+(a quaternion description works with an overdetermined set of states and therefore standard
+integrators with step size control need non-trivial code changes).
+  
 # Example
 
 ```julia
