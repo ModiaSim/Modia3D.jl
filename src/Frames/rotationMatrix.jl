@@ -202,7 +202,7 @@ rot_nxy(nx::AbstractVector, ny::AbstractVector) = rot_nxy(SVector{3,F}(nx), SVec
 """
     v1 = Modia3D.resolve1(R, v2)
     v1 = Modia3D.resolve1(q, v2)
-    v1 = Modia3D.resolve1(rotation, v2; rotation123=true)
+    v1 = Modia3D.resolve1(rotation, v2; rotationXYZ=true)
 
 Transform vector `v2::AbstractVector` (vector resolved in frame 2) to
 vector `v1::SVector{3,F}` (vector resolved in frame 1) given
@@ -210,20 +210,20 @@ vector `v1::SVector{3,F}` (vector resolved in frame 1) given
 - Rotation matrix `R::SMatrix{3,3,F,9}` (rotate frame 1 into frame 2) or
 - Quaternion vector `q::SVector{4,F}` (rotate frame 1 into frame 2) or
 - Angles vector `rotation::AbstractVector`
-  (rotation123=true: rotate around X with rotation[1], around Y with rotation[2], around Z with rotation[3];
-   rotation123=false: rotate around X with rotation[1], around Z with rotation[2], around Y with rotation[3]).
+  (rotationXYZ=true: rotate around X with rotation[1], around Y with rotation[2], around Z with rotation[3];
+   rotationXYZ=false: rotate around X with rotation[1], around Z with rotation[2], around Y with rotation[3]).
 """
 resolve1(R::SMatrix{3,3,F,9}, v2::SVector{3,F})   where F <: Modia3D.VarFloatType = R'*v2
 resolve1(R::SMatrix{3,3,F,9}, v2::AbstractVector) where F <: Modia3D.VarFloatType = R'*SVector{3,F}(v2)
-resolve1(rotation::AbstractVector, v2::AbstractVector; rotation123=true) where F <: Modia3D.VarFloatType =
-    rotation123 ? rot1(-rotation[1], rot2(-rotation[2], rot3(-rotation[3],v2))) :
+resolve1(rotation::AbstractVector, v2::AbstractVector; rotationXYZ=true) where F <: Modia3D.VarFloatType =
+    rotationXYZ ? rot1(-rotation[1], rot2(-rotation[2], rot3(-rotation[3],v2))) :
                   rot1(-rotation[1], rot3(-rotation[2], rot2(-rotation[3],v2)))
 
 
 """
     v2 = Modia3D.resolve2(R, v1)
     v2 = Modia3D.resolve2(q, v1)
-    v2 = Modia3D.resolve2(rotation, v1; rotation123=true)
+    v2 = Modia3D.resolve2(rotation, v1; rotationXYZ=true)
 
 Transform vector `v1::AbstractVector` (vector resolved in frame 1) to
 vector `v2::SVector{3,F}` (vector resolved in frame 2) given
@@ -231,23 +231,23 @@ vector `v2::SVector{3,F}` (vector resolved in frame 2) given
 - Rotation matrix `R::SMatrix{3,3,F,9}` (rotate frame 1 into frame 2) or
 - Quaternion vector `q::SVector{4,F}` (rotate frame 1 into frame 2) or
 - Angles vector `rotation::AbstractVector`
-  (rotation123=true: rotate around X with rotation[1], around Y with rotation[2], around Z with rotation[3];
-   rotation123=false: rotate around X with rotation[1], around Z with rotation[2], around Y with rotation[3]).
+  (rotationXYZ=true: rotate around X with rotation[1], around Y with rotation[2], around Z with rotation[3];
+   rotationXYZ=false: rotate around X with rotation[1], around Z with rotation[2], around Y with rotation[3]).
 """
 resolve2(R::SMatrix{3,3,F,9}, v1::SVector{3,F})    where F <: Modia3D.VarFloatType = R*v1
 resolve2(R::SMatrix{3,3,F,9}, v1::AbstractVector)  where F <: Modia3D.VarFloatType = R*SVector{3,F}(v1)
-resolve2(rotation::AbstractVector, v1::AbstractVector; rotation123=true) where F <: Modia3D.VarFloatType =
-    rotation123 ? rot3(rotation[3], rot2(rotation[2], rot1(rotation[1], v1))) :
+resolve2(rotation::AbstractVector, v1::AbstractVector; rotationXYZ=true) where F <: Modia3D.VarFloatType =
+    rotationXYZ ? rot3(rotation[3], rot2(rotation[2], rot1(rotation[1], v1))) :
                   rot2(rotation[3], rot3(rotation[2], rot1(rotation[1], v1)))
 
 
 """
-    Modia3D.angularVelocityResolvedInParentStates!(states, startIndexRotation, rotation123)
+    Modia3D.angularVelocityResolvedInParentStates!(states, startIndexRotation, rotationXYZ)
 """
-function angularVelocityResolvedInParentStates!(states::AbstractVector, startIndexRotation::Int, rotation123::Bool)::Nothing
+function angularVelocityResolvedInParentStates!(states::AbstractVector, startIndexRotation::Int, rotationXYZ::Bool)::Nothing
     rotation = states[startIndexRotation:startIndexRotation+2]
     w2       = states[startIndexRotation+3:startIndexRotation+5]
-    states[startIndexRotation+3:startIndexRotation+5] = Modia3D.resolve1(rotation, w2, rotation123=rotation123)
+    states[startIndexRotation+3:startIndexRotation+5] = Modia3D.resolve1(rotation, w2, rotationXYZ=rotationXYZ)
     return nothing
 end
 

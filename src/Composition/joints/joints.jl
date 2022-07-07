@@ -89,12 +89,12 @@ mutable struct MultibodyData{F <: Modia3D.VarFloatType, TimeType}
 
             # Define hidden model states and copy initial values into eqInfo
             path = obj.path * "."
-            w_init = freeMotion.wResolvedInParent ? Modia3D.resolve1(freeMotion.rot, freeMotion.w, rotation123=freeMotion.isrot123) : freeMotion.w
+            w_init = freeMotion.wResolvedInParent ? Modia3D.resolve1(freeMotion.rot, freeMotion.w, rotationXYZ=freeMotion.isrot123) : freeMotion.w
             freeMotion.ix_segmented_r     = Modia.new_x_segmented_variable!(partiallyInstantiatedModel, path*"translation"    , path*"der(translation)"    , freeMotion.r)
             freeMotion.ix_segmented_v     = Modia.new_x_segmented_variable!(partiallyInstantiatedModel, path*"velocity"       , path*"der(velocity)"       , freeMotion.v)
             freeMotion.ix_segmented_rot   = Modia.new_x_segmented_variable!(partiallyInstantiatedModel, path*"rotation"       , path*"der(rotation)"       , freeMotion.rot)
             freeMotion.ix_segmented_w     = Modia.new_x_segmented_variable!(partiallyInstantiatedModel, path*"angularVelocity", path*"der(angularVelocity)", w_init)
-            freeMotion.iextra_isrot123 = Modia.new_w_segmented_variable!(partiallyInstantiatedModel, path*"rotation123", freeMotion.isrot123)
+            freeMotion.iextra_isrot123 = Modia.new_w_segmented_variable!(partiallyInstantiatedModel, path*"rotationXYZ", freeMotion.isrot123)
             freeMotion.ix_rot          = Modia.get_x_startIndex_from_x_segmented_startIndex(partiallyInstantiatedModel,freeMotion.ix_segmented_rot)
 
             # Define event indicator to monitor changing sequence of rotation angles
@@ -667,7 +667,7 @@ function change_rotSequence!(m::Modia.SimulationModel, freeMotion::FreeMotion, x
     @assert(rotation2ZeroCrossing <= 0)
 
     if m.options.logEvents
-        println("        ", freeMotion.path * ".rotation123 changed to ", freeMotion.isrot123)
+        println("        ", freeMotion.path * ".rotationXYZ changed to ", freeMotion.isrot123)
         println("        ", freeMotion.path * ".rotation changed to ", freeMotion.rot)
         println("        ", freeMotion.str_rot2 * " (= ", rotation2ZeroCrossing, ", ) became <= 0")
     end
@@ -697,7 +697,7 @@ function setStatesHiddenJoints!(m::Modia.SimulationModel{F,TimeType}, mbs::Multi
         j3 = freeMotion.ix_segmented_v  ;  freeMotion.v   = SVector{3,F}(x_segmented[j3], x_segmented[j3+1], x_segmented[j3+2])
         j4 = freeMotion.ix_segmented_w  ;  freeMotion.w   = SVector{3,F}(x_segmented[j4], x_segmented[j4+1], x_segmented[j4+2])
         if freeMotion.wResolvedInParent
-            freeMotion.w = Modia3D.resolve2(freeMotion.rot, freeMotion.w, rotation123 = freeMotion.isrot123)
+            freeMotion.w = Modia3D.resolve2(freeMotion.rot, freeMotion.w, rotationXYZ = freeMotion.isrot123)
         end
 
         # der(r) = v

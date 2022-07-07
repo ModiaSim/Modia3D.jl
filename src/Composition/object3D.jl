@@ -79,8 +79,8 @@ If `fixedToParent=false`, the Object3D is moving freely relatively to `parent`.
 Vectors `translation`, `rotation`, `velocity`, `angularVelocity` (all resolved in `parent`) are used as states and are available in the result for plotting.
 
 If `rotation[2]` is close to its singular position (= 90u"°" or -90u"°"), an event is triggered and the rotation sequence is changed from `[angleX, angleY, angleZ]` to
-`[angleX, angleZ, angleY]`. In the new rotation sequence, `rotation[2]` is far from its singular position at this time instant. Variable `rotation123::Bool` in the result
-signals whether `rotation` is defined with rotation sequence `[angleX, angleY, angleZ]` (`rotation123=true`) or with rotation sequence `[angleX, angleZ, angleY]` (`rotation123=false`).
+`[angleX, angleZ, angleY]`. In the new rotation sequence, `rotation[2]` is far from its singular position at this time instant. Variable `rotationXYZ::Bool` in the result
+signals whether `rotation` is defined with rotation sequence `[angleX, angleY, angleZ]` (`rotationXYZ=true`) or with rotation sequence `[angleX, angleZ, angleY]` (`rotationXYZ=false`).
 See, example `Modia3D/test/Basic/ShaftFreeMotionAdaptiveRotSequence.jl`.
 
 

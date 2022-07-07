@@ -27,6 +27,6 @@ simulate!(bouncingSphere, stopTime=2.2, dtmax=0.1, log=true, logStates=true, req
 showInfo(bouncingSphere)
 
 @usingModiaPlot
-plot(bouncingSphere, ["sphere.translation", "sphere.velocity", "sphere.rotation123"], figure=1)
+plot(bouncingSphere, ["sphere.translation", "sphere.velocity", "sphere.rotationXYZ"], figure=1)
 
 end

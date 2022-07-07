@@ -134,7 +134,7 @@ mutable struct FreeMotion{F <: Modia3D.VarFloatType} <: Modia3D.AbstractJoint
         w   = Modia3D.convertAndStripUnit(SVector{3,F}, u"rad/s", w)
         if wResolvedInParent
             # Transform w from obj1 to obj2
-            w = Modia3D.resolve2(rot, w, rotation123=isrot123)
+            w = Modia3D.resolve2(rot, w, rotationXYZ=isrot123)
         end
         a   = Modia3D.ZeroVector3D(F)
         z   = Modia3D.ZeroVector3D(F)

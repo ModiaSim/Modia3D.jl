@@ -31,6 +31,6 @@ simulate!(shaft, stopTime=stopTime, dtmax=dtmax, log=true, logEvents=true, logSt
 showInfo(shaft)
 
 @usingModiaPlot
-plot(shaft, ["shaft.rotation", "shaft.rotation123", "shaft.angularVelocity", "shaft.translation", "shaft.velocity"], figure=1)
+plot(shaft, ["shaft.rotation", "shaft.rotationXYZ", "shaft.angularVelocity", "shaft.translation", "shaft.velocity"], figure=1)
 
 end

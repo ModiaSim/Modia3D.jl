@@ -67,7 +67,7 @@ This will include a file `Modia3D_sysimage.dll` (on Windows) or `Modia3D_sysimag
 current working directory that includes all packages of your current project and the following packages
 (these packages are added to your current project, if not yet included):
 
-- Modia, Modia3D, ModiaPlot_PyPlot, PackageCompiler, Revise
+- Modia, Modia3D, SignalTablesInterface_PyPlot, PackageCompiler, Revise
  
 Start julia with this sysimage in the following way:
 
@@ -94,31 +94,72 @@ julia -JModia3D_sysimage.so  (otherwise)
 ## Release Notes
 
 
-### Version 0.11.0-dev
+### Version 0.11.0
 
 - Requires Modia 0.9.0 or later.
 
-- Additional keyword arguments of Object3D: `Object3D(..., fixedInParent=true, velocity=[0.0, 0.0, 0.0], angularVelocity=[0.0, 0.0, 0.0])`.
-  A freely moving Object3D is defined with `Object3D(..., fixedInParent=false, ...)`. The states and other code for such Object3Ds are
-  no longer visible in the generated code (so compilation is faster).
+- Additional keyword arguments of Object3D: `Object3D(..., fixedInParent=true, velocity=[0.0, 0.0, 0.0], angularVelocity=[0.0, 0.0, 0.0])`,
+  besides the existing `parent, translation, rotation, feature`. A freely moving Object3D is defined with
+  `Object3D(..., fixedInParent=false, ...)`, where `velocity=.., angularVelocity=..`
+  are the initial conditions (resolved in the parent frame). The states and other code for such Object3Ds are
+  *not* part of the generated code (so compilation is faster, and the objects can be changed after code generation).\
+  If `fixedToParent=false`, vectors `translation, rotation, velocity, angularVelocity` (all resolved in `parent`) 
+  are used as states and are available in the result for plotting.
+  `rotation` is vector `[angleX, angleY, angleZ]` to rotate the parent coordinate system
+  along the x-axis with `angleX`, the y-axis with `angleY` and the z-axis with `angleZ` to arrive at the Object3D 
+  coordinate system.  If `rotation[2]` is close to its singular position (= 90u"°" or -90u"°"), 
+  an event is triggered and the rotation sequence is changed from `[angleX, angleY, angleZ]` to `[angleX, angleZ, angleY]`. 
+  In the new rotation sequence, `rotation[2]` is far from its singular position at this time instant.
+  Variable `rotationXYZ::Bool` in the result signals whether rotation is defined with rotation
+  sequence `[angleX, angleY, angleZ]` (`rotationXYZ=true`) or with rotation sequence 
+  `[angleX, angleZ, angleY]` (`rotationXYZ=false`). See, example `Modia3D/test/Basic/ShaftFreeMotionAdaptiveRotSequence.jl`.
+  Note, the initial conditions (so `rotation=...` as key/value pair in the Object3D constructor)
+  are always with `rotationXYZ=true`.\
+  With respect to an approach where the rotation is described with *quaternions*, the
+  adaptive rotation sequence handling has the benefits, that (1) all integrators can be used
+  (a quaternion description works with an overdetermined set of states and therefore standard
+  integrators with step size control need code changes) and that (2) integrators with step size control can usually
+  perform larger steps.
+
+- The `FreeMotion` joints in all test models have been removed and replaced by Object3Ds with `fixedInParent=false`.
+  A new test model test/Basic/FreeShaftAdaptiveRotSequenceWithFreeMotion.jl has been introduced with a `FreeMotion`
+  joint, to still have one test for a `FreeMotion` joint.
 
 - `Revolute(..)` and `Prismatic(..)` joints can define axis of rotation/translation optionally as vector, e.g., `axis = [1.0, 2.0, 3.0]`.
 
-- New variants of functions: `Modia3D.rot1(angle,v), Modia3D.rot2(angle,v), Modia3D.rot3(angle,v), Modia3D.resolve1(rotation,v2), Modia3D.resolve2(rotation,v1)`.
+- New function `Modia3D.rot1(angle,v)` which is an efficient implementation of `Modia3D.rot1(angle)*v` where `rot1(angle)` returns
+  a transformation matrix and `v` is a vector and `rot1(angle,v)` returns the product of the transformation matrix and a vector
+  in an efficient way. Correspondingly, there are new functions
+  `Modia3D.rot2(angle,v), Modia3D.rot3(angle,v), Modia3D.resolve1(rotation,v2), Modia3D.resolve2(rotation,v1)`.
+
+- Simulation speed improved, if contact of FileMesh objects.
+
+- contactPairMaterials.json updated with more material pairs (e.g. results in less warning messages for runtests).
+
+- New file `Modia3D.create_Modia3D_sysimage.jl` to create a *sysimage*. Using this sysimage has the
+  advantage that `using Modia3D` is nearly immediatedly executed (instead of > 30 seconds). 
+  For details, see README.md file.
+  
+- Internal: Timer included in Scene (scene.timer), so that a timer is more easily accessible for debugging.
+
+- Internal: Cleanup and improvements of Modia3D/src/Frames.jl 
+
 
 **Deprecated**
 
 - Joint `FreeMotion` is **deprecated**. Use instead `Object3D(..., fixedInParent=false, ...)`.
-  Note, Object3D has variables `translation, rotation, velocity, angularVelocity` instead of `r, rot, v, w` of `FreeMotion`.
+  Note, Object3D has variables `translation, rotation, velocity, angularVelocity, rotationXYZ` instead of 
+  `r, rot, v, w, isrot123` of `FreeMotion`.
   Furthermore, `angularVelocity` is resolved in the parent `Object3D` whereas `w` in `FreeMotion(obj1=.., obj2=..., ..)` is resolved in
   `obj2` and not in `obj1`. This means in particular that the init/start value `FreeMotion(.., w=Var(start=w_start)...)` needs
-  to be transformed in Object3D with `Object3D(..., fixedInParent=false, rotation=XXX, angularVelocity = Modia3D.resolve1(XXX,w_start))`.
-  As a side effect, 
+  to be transformed in Object3D with `Object3D(..., fixedInParent=false, rotation=XXX, angularVelocity = Modia3D.resolve1(XXX,w_start))`
+  and the results of `angularVelocity` will be different to `w` because resolved in different coordinate systems.
 
 **Non-backwards compatible changes**
 
 - Since Modia3D 0.11.0 is based on Modia 0.9.0, the non-backwards compatible changes of Modia have also an effect on Modia3D
-  (for details, see the release notes of Modia 0.9.0). Typically, this should give problems only in seldomly occuring corner cases.
+  (for details, see the [release notes of Modia 0.9.0](https://github.com/ModiaSim/Modia.jl/releases/tag/v0.9.0)). 
+  Typically, this should give problems only in seldomly occuring corner cases.
  
 
 ### Version 0.10.4

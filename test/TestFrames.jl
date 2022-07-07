@@ -25,12 +25,12 @@ angle3 = 40.0u"°"
 angle2 = 50.0u"°"
 anglesb = [angle1, angle3, angle2]
 Rb = Modia3D.rot2(angle2)*Modia3D.rot3(angle3)*Modia3D.rot1(angle1)  # rotation sequence 132
-rotation123b = false
+rotationXYZb = false
 vb1 = va1
 vb2 = Modia3D.resolve2(Rb,vb1)
 @test isapprox(vb1, Modia3D.resolve1(Rb, vb2))
-@test isapprox(vb2, Modia3D.resolve2(anglesb, vb1, rotation123=rotation123b))
-@test isapprox(vb1, Modia3D.resolve1(anglesb, vb2, rotation123=rotation123b))
+@test isapprox(vb2, Modia3D.resolve2(anglesb, vb1, rotationXYZ=rotationXYZb))
+@test isapprox(vb1, Modia3D.resolve1(anglesb, vb2, rotationXYZ=rotationXYZb))
 
 
 end
