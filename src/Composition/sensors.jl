@@ -15,7 +15,7 @@
 Under the assumption that the z-axes of frame1 and frame2 coincide, return the
 angle between the x-axis of frame1 and the position vector from frame1 to frame2.
 """
-function planarRotationAngle(frame1::Object3D, frame2::Object3D)
+function Frames.planarRotationAngle(frame1::Object3D, frame2::Object3D)
    # Extract needed vectors
    e1z = frame1.R_abs[3,:]
    e2z = frame2.R_abs[3,:]

@@ -23,22 +23,24 @@ Rattleback = Model3D(
                                     visualMaterial=VisualMaterial(color="Grey90", transparency=0.5),
                                     solidMaterial="DryWood",
                                     collision=true)),
-    ellipsoid = Object3D(feature=Solid(massProperties=massProps,
+    ellipsoid = Object3D(parent=:world, fixedToParent=false,
+                         translation=[0.0, 0.0, 0.01],
+                         angularVelocity=[0.0, 0.1, 5.0],
+                         feature=Solid(massProperties=massProps,
                                        shape=Ellipsoid(lengthX=0.1, lengthY=0.02, lengthZ=0.02),
                                        visualMaterial=VisualMaterial(color="Blue"),
                                        solidMaterial="DryWood",
-                                       collision=true)),
-    joint = FreeMotion(obj1=:world, obj2=:ellipsoid, r=Var(init=Modia.SVector{3,Float64}(0.0, 0.0, 0.01)), w=Var(init=Modia.SVector{3,Float64}(0.0, 0.1, 5.0)))
+                                       collision=true))
 )
 
 rattleback = @instantiateModel(Rattleback, unitless=true)
 
 stopTime = 6.0
 tolerance = 1e-8
-requiredFinalStates = [0.0006643219607533129, -0.0003421523453737833, 0.00999995717824536, 0.0004810494172644089, 0.00013865075493256469, -3.842333721570369e-8, 0.08135690941922864, -0.26163303787420544, -1.2651039117459748, -0.05518153954821725, -0.6191105987556029, -2.2091732972104654]
+requiredFinalStates = [0.0006642916745069836, -0.0003421601373475422, 0.009999957179380127, 0.00048100224838247405, 0.0001387189555267131, -3.844627131472889e-8, 0.08140087449927354, -0.2616224376222781, -1.264936920220031, -0.014944019262829457, 0.05292038717100961, -2.294245213745764]
 simulate!(rattleback, stopTime=stopTime, tolerance=tolerance, log=false, requiredFinalStates=requiredFinalStates)
 
 @usingModiaPlot
-plot(rattleback, ["joint.r" "joint.rot"; "joint.v" "joint.w"], figure=1)
+plot(rattleback, ["ellipsoid.translation" "ellipsoid.rotation"; "ellipsoid.velocity" "ellipsoid.angularVelocity"], figure=1)
 
 end

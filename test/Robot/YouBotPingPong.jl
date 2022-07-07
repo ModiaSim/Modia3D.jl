@@ -14,8 +14,6 @@ vmat2 = VisualMaterial(color="DarkGrey"   , transparency=0.0)  # material of wor
 vmat3 = VisualMaterial(color="DodgerBlue3", transparency=0.0)  # material of table
 vmat4 = VisualMaterial(color=[255,215,0]  , transparency=0.0)  # material of ground
 
-
-
 xPosTable = 0.71
 tableX    = 0.3
 tableY    = 0.3
@@ -43,7 +41,7 @@ gripper_left_finger_obj  = joinpath(Modia3D.path, "objects/robot_KUKA_YouBot/gri
 gripper_right_finger_obj = joinpath(Modia3D.path, "objects/robot_KUKA_YouBot/gripper_right_finger.obj")
 
 # Drive train data: motor inertias and gear ratios
-nullRot = nothing
+nullRot = [0, 0, 0]
 
 motorInertia1 = 0.0000135 + 0.000000409
 motorInertia2 = 0.0000135 + 0.000000409
@@ -383,6 +381,8 @@ YouBot = Model(
     servo4 = Servo,
     servo5 = Servo,
 
+    refPath = Var(hideResult=true),
+
     equations=:[
         refPath = calculateRobotMovement(getReferencePath(), instantiatedModel),
         servo1.refLoadAngle = getRefPathPosition(refPath, 1),
@@ -401,29 +401,40 @@ YouBot = Model(
         ]
 )
 
+animationFile = nothing  # "YouBotPingPong.json"
+
 Setup = Model3D(
     gravField = UniformGravityField(g=9.81, n=[0,0,-1]),
-    world = Object3D(feature=Scene(gravityField = :gravField, visualizeFrames=false, defaultFrameLength=0.1, enableContactDetection=true, elasticContactReductionFactor=1e-4, animationFile="YouBotPingPong.json")),
+    world = Object3D(feature=Scene(gravityField = :gravField, visualizeFrames=false, defaultFrameLength=0.1, enableContactDetection=true, elasticContactReductionFactor=1e-4, animationFile=animationFile)),
 
     # worldFrame = Object3D(parent=:world, feature=Visual(shape=CoordinateSystem(length = 0.5))),
 
     table = Table,
     ground = Ground,
 
-    sphere1 = Object3D(
-        feature=Solid(shape=Sphere(diameter=diameter), visualMaterial=vmat2, solidMaterial="BilliardBall", collision=true)),
+    sphere1 = Object3D(parent=:(table.plate), fixedToParent=false,
+                       translation=[-tableX/2+diameter/2+0.001, 0.0002, diameter/2+tableZ/2],
+                       rotation=[pi/2, 0.0, 0.0],
+                       feature=Solid(shape=Sphere(diameter=diameter),
+                                     visualMaterial=vmat2,
+                                     solidMaterial="BilliardBall",
+                                     collision=true)),
 
-    free1 = FreeMotion(obj1=:(table.plate), obj2=:sphere1, r=Var(init=Modia.SVector{3,Float64}(-tableX/2+diameter/2+0.001, 0.0002, diameter/2+tableZ/2)), rot=Var(init=Modia.SVector{3,Float64}(pi/2, 0.0, 0.0))),
+    sphere2 = Object3D(parent=:(table.plate), fixedToParent=false,
+                       translation=[tableX/2-diameter/2-0.0001, -0.003, diameter/2+tableZ/2],
+                       rotation=[pi/2, 0.0, 0.0],
+                       feature=Solid(shape=Sphere(diameter=diameter),
+                                     visualMaterial=vmat2,
+                                     solidMaterial="BilliardBall",
+                                     collision=true)),
 
-    sphere2 = Object3D(
-        feature=Solid(shape=Sphere(diameter=diameter), visualMaterial=vmat2, solidMaterial="BilliardBall", collision=true)),
-
-    free2 = FreeMotion(obj1=:(table.plate), obj2=:sphere2, r=Var(init=Modia.SVector{3,Float64}(tableX/2-diameter/2-0.0001, -0.003, diameter/2+tableZ/2)), rot=Var(init=Modia.SVector{3,Float64}(pi/2, 0.0, 0.0))),
-
-    sphere3 = Object3D(
-        feature=Solid(shape=Sphere(diameter=diameter), visualMaterial=vmat2, solidMaterial="BilliardBall", collision=true)),
-
-    free3 = FreeMotion(obj1=:(table.plate), obj2=:sphere3, r=Var(init=Modia.SVector{3,Float64}(-0.01, tableX/2-diameter/2-0.002, diameter/2+tableZ/2)), rot=Var(init=Modia.SVector{3,Float64}(pi/2, 0.0, 0.0))),
+    sphere3 = Object3D(parent=:(table.plate), fixedToParent=false,
+                       translation=[-0.01, tableX/2-diameter/2-0.002, diameter/2+tableZ/2],
+                       rotation=[pi/2, 0.0, 0.0],
+                       feature=Solid(shape=Sphere(diameter=diameter),
+                                     visualMaterial=vmat2,
+                                     solidMaterial="BilliardBall",
+                                     collision=true)),
 
     youbot1 = YouBot,
     youbot2 = YouBot,
@@ -476,8 +487,7 @@ modelParameters = Map(
 stopTime = 5.0
 testTime = 2.6
 tolerance = 1e-6
-requiredFinalStates = [-0.031058480611579637, -0.11131601419357129, 0.029896056231649582, 0.0018108544954039748, -0.018398717067104806, 3.18458481411634e-6, 6.1276285038678635, -0.10283199185702306, -3.19638839886394, -0.735149888693328, -0.11267543845082122, -0.0649990597001986, -0.0213425010849096, -0.04301927935698638, 0.02989440328270474, -3.4070640727872146e-10,
--3.068900414962272e-10, -2.0223211796932104e-6, 2.6871824069631205, 1.053554620854836, 5.600838036728896, -5.113258042895109e-9, 7.294739213679486e-9, 9.889049486470221e-9, 0.03278388550757873, 0.08625297583076974, 0.029894101450869983, 7.082224110863361e-19, 2.4454446892041373e-19, -1.1462637989445882e-6, 2.9401488473966704, -0.6689700579914613, 1.2913367628067651, -2.0787563245913748e-17, 2.190253696750652e-18, 1.1532671847956196e-18, -1.1074362611898026e-6, -1.5707198549590212e-6, 0.0043187678851806756, -0.05498125972716101, 0.01834152280425301, -0.23292171811817347, -2.5341260474901556e-5, 9.56381649601528e-6, 9.861894783625605e-8, -3.757452664153385e-8, -0.008203103943920882, 0.08427968033785894, -0.19863612511095569, -0.08581304513679631, 0.000330183816938746, -1.1073561236455634e-6, -1.5707999918658427e-6, 0.004318767865452493, -0.05498125970743127, 0.018341522786344114, -0.23292171810026155, -2.5341271877166888e-5, 9.563827900569396e-6, 9.861970889354406e-8, -3.757528770950012e-8, -0.008202491367579737, 0.08427952954729884, -0.19863621284818073, -0.0858130847969572, 0.00033018646462512353, -1.10761216034589e-6, -1.5705439568070628e-6, 0.004318767937143109, -0.05498125977912553, 0.018341522794175506, -0.23292171810809956, -2.53412450552167e-5, 9.563801073632897e-6, 9.862522682182094e-8, -3.758080560633876e-8, -0.008204448524670616, 0.08428007752471801, -0.19863617450949345, -0.08581299150133814, 0.00033020566158642516]
-simulate!(youbot, stopTime=testTime, tolerance=tolerance, requiredFinalStates_atol=0.001, log=true, logStates=false, requiredFinalStates=requiredFinalStates)
+requiredFinalStates = [-1.1074978783759582e-6, -1.570747703629748e-6, 0.004318767919951474, -0.0549812597953512, 0.018341522580910104, -0.23292171803618567, -2.534124522624635e-5, 9.563710809399636e-6, 9.861973396234135e-8, -3.757467512539292e-8, -0.008203590033661555, 0.08427994005001081, -0.19863723582073903, -0.08581299939477528, 0.00033018659968802954, -1.1074200569122266e-6, -1.5708263713012027e-6, 0.0043187678930928465, -0.05498125976851441, 0.018341522543336177, -0.23292171799856823, -2.534126529442995e-5, 9.56373088476002e-6, 9.862064185082083e-8, -3.757557154425868e-8, -0.008202995290518284, 0.08427973475762648, -0.19863741990192438, -0.08581306919745206, 0.00033018975899107305, -1.1076798558101526e-6, -1.5705669322894108e-6, 0.0043187679492551565, -0.05498125982470267, 0.01834152269871932, -0.23292171815396823, -2.5341227273090288e-5, 9.563692850073009e-6, 9.862615462010235e-8, -3.75810794007931e-8, -0.008204981270599298, 0.0842801639946964, -0.19863665861302235, -0.08581293696403483, 0.00033020893844453315, -0.03115475862837085, -0.11125563267445951, 0.029895997426713106, 0.0017946401823462636, -0.018357368928619104, 3.1736209814576047e-6, 6.124750738435461, -0.10238920861984666, -3.196447929215203, 0.7413068802380435, 0.07247112153696908, 1.2407948792111158e-9, -0.021227054369602854, -0.04314767659983426, 0.02989433840011587, -6.177188142769807e-11, -5.4900323083533724e-11, -2.0276807149401204e-6, 2.69656332595518, 1.055051111300377, 5.5910711591768525, 1.5490360538316245e-9, -1.7422145853925698e-9, 1.1413316933822115e-16, 0.03273618052943733, 0.08635389194381642, 0.029894138850117238, -3.5731867519998584e-15, -5.375430908160776e-16, -1.147180140838865e-6, 2.9348029381961904, -0.6682705964387874, 1.2874777825970185, 1.537570196058376e-14, -1.022143475920382e-13, -2.4721108835282384e-28]
+simulate!(youbot, stopTime=testTime, tolerance=tolerance, requiredFinalStates_atol=0.02, log=true, logStates=false, requiredFinalStates=requiredFinalStates)
 
 end

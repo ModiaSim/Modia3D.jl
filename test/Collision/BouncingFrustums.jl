@@ -27,48 +27,45 @@ BouncingFrustums = Model3D(
                       translation=:[-1.0, -0.5, 1.0],
                       rotation=:[-90*u"°", 0.0, -90*u"°"],
                       feature=Visual(shape=CoordinateSystem(length=0.5))),
-    coneX = Object3D(feature=Solid(shape=Cone(axis=1, diameter=0.4, length=1.0, topDiameter=0.3),
+    coneX = Object3D(parent=:frameX, fixedToParent=false,
+                     rotation=[0.0, -60*u"°", 0.0],
+                     velocity=[0.0, 1.0, 0.0],
+                     feature=Solid(shape=Cone(axis=1, diameter=0.4, length=1.0, topDiameter=0.3),
                                    visualMaterial=vmatRed,
                                    solidMaterial="DryWood",
                                    collision=true)),
-    jointX = FreeMotion(obj1=:frameX, obj2=:coneX,
-                        r=Var(init=Modia.SVector{3,Float64}(0.0, 0.0, 0.0)),
-                        rot=Var(init=Modia.SVector{3,Float64}(0.0, -60*u"°", 0.0)),
-                        v=Var(init=Modia.SVector{3,Float64}(0.0, 1.0, 0.0))),
     frameY = Object3D(parent=:world,
                       translation=:[0.0, -0.5, 1.0],
                       rotation=:[90*u"°", 90*u"°", 0.0],
                       feature=Visual(shape=CoordinateSystem(length=0.5))),
-    coneY = Object3D(feature=Solid(shape=Cone(axis=2, diameter=0.4, length=1.0, topDiameter=0.3),
+    coneY = Object3D(parent=:frameY, fixedToParent=false,
+                     rotation=[0.0, 0.0, -60*u"°"],
+                     velocity=[0.0, 0.0, 1.0],
+                     feature=Solid(shape=Cone(axis=2, diameter=0.4, length=1.0, topDiameter=0.3),
                                    visualMaterial=vmatGreen,
                                    solidMaterial="DryWood",
                                    collision=true)),
-    jointY = FreeMotion(obj1=:frameY, obj2=:coneY,
-                        r=Var(init=Modia.SVector{3,Float64}(0.0, 0.0, 0.0)),
-                        rot=Var(init=Modia.SVector{3,Float64}(0.0, 0.0, -60*u"°")),
-                        v=Var(init=Modia.SVector{3,Float64}(0.0, 0.0, 1.0))),
     frameZ = Object3D(parent=:world,
                       translation=:[1.0, -0.5, 1.0],
                       feature=Visual(shape=CoordinateSystem(length=0.5))),
-    coneZ = Object3D(feature=Solid(shape=Cone(axis=3, diameter=0.4, length=1.0, topDiameter=0.3),
+    coneZ = Object3D(parent=:frameZ, fixedToParent=false,
+                     rotation=[-60*u"°", 0.0, 0.0],
+                     velocity=[1.0, 0.0, 0.0],
+                     feature=Solid(shape=Cone(axis=3, diameter=0.4, length=1.0, topDiameter=0.3),
                                    visualMaterial=vmatBlue,
                                    solidMaterial="DryWood",
-                                   collision=true)),
-    jointZ = FreeMotion(obj1=:frameZ, obj2=:coneZ,
-                        r=Var(init=Modia.SVector{3,Float64}(0.0, 0.0, 0.0)),
-                        rot=Var(init=Modia.SVector{3,Float64}(-60*u"°", 0.0, 0.0)),
-                        v=Var(init=Modia.SVector{3,Float64}(1.0, 0.0, 0.0)))
+                                   collision=true))
 )
 
 bouncingFrustums = @instantiateModel(BouncingFrustums, unitless=true, log=false, logStateSelection=false, logCode=false)
 
 stopTime = 1.2
 tolerance = 1e-8
-requiredFinalStates = missing
+requiredFinalStates = [-0.800383758696937, 0.949741937109897, 0.38422127001602735, 0.07288055494670782, 0.6958162086297855, 0.02928114392694946, 1.5105310059041943, 0.898119482643151, 1.6377172728247884, 0.0249943736329831, -0.19041506193314, 3.4867605703264064, 0.38392633247105096, -0.7999007836143879, 0.9506521787824257, 0.01858528412490112, -0.15332873114484707, 0.6954024470051271, 2.4765087135097246, -0.017901203986858016, -1.53539300618968, 3.49400206910128, 0.03178922643898537, 0.2688280046672574, 0.9502971301756091, 0.3824740603974736, -0.7910626574280535, 0.7004417337114894, 0.02536843290108837, 0.06457785563906525, -1.6290607416066407, 0.007344877012290217, 2.475842546041932, -0.2035283758057457, 3.4990370424861688, -0.023454704613229824]
 simulate!(bouncingFrustums, stopTime=stopTime, tolerance=tolerance, log=true, logStates=false, logEvents=false, requiredFinalStates=requiredFinalStates)
 
 @usingModiaPlot
-plot(bouncingFrustums, [("jointX.r", "jointY.r", "jointZ.r") ("jointX.rot", "jointY.rot", "jointZ.rot")
-                        ("jointX.v", "jointY.v", "jointZ.v") ("jointX.w", "jointY.w", "jointZ.w")], figure=1)
+plot(bouncingFrustums, [("coneX.translation", "coneY.translation", "coneZ.translation") ("coneX.rotation", "coneY.rotation", "coneZ.rotation")
+                        ("coneX.velocity", "coneY.velocity", "coneZ.velocity") ("coneX.angularVelocity", "coneY.angularVelocity", "coneZ.angularVelocity")], figure=1)
 
 end

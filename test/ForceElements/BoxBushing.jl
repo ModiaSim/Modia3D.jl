@@ -4,9 +4,9 @@ using Modia3D
 
 const largeAngles = true
 if largeAngles
-    startAngles = Modia.SVector{3,Float64}(0.8, 0.4, 0.2)
+    startAngles = [0.8, 0.4, 0.2]
 else
-    startAngles = Modia.SVector{3,Float64}(0.12, 0.06, 0.03)
+    startAngles = [0.12, 0.06, 0.03]
 end
 fc(p) = 50.0 * p
 fd(v) = 2.0 * v
@@ -18,13 +18,16 @@ BoxBushing = Model3D(
     Mass = 1.0,
     IMoment = 0.1,
     visualMaterial = VisualMaterial(color="IndianRed1", transparency=0.5),
-    world = Object3D(feature=Scene(gravityField=UniformGravityField(g=9.81, n=[0, 0, -1]), nominalLength=:Length)),
+    world = Object3D(feature=Scene(gravityField=UniformGravityField(g=9.81, n=[0, 0, -1]),
+                                   nominalLength=:Length)),
     worldFrame = Object3D(parent=:world,
                           feature=Visual(shape=CoordinateSystem(length=:Length))),
-    box = Object3D(feature=Solid(shape=Box(lengthX=:Length, lengthY=:Length, lengthZ=:Length),
+    box = Object3D(parent=:world, fixedToParent=false,
+                   translation=[0.2, 0.1, 0.05],
+                   rotation=startAngles,
+                   feature=Solid(shape=Box(lengthX=:Length, lengthY=:Length, lengthZ=:Length),
                                  massProperties=MassProperties(; mass=:Mass, Ixx=:IMoment, Iyy=:IMoment, Izz=:IMoment),
                                  visualMaterial=:(visualMaterial))),
-    joint = FreeMotion(obj1=:world, obj2=:box, r=Var(init=Modia.SVector{3,Float64}(0.2, 0.1, 0.05)), rot=Var(init=startAngles)),
     force = Bushing(obj1=:world, obj2=:box,
                     springForceLaw=[fc, 100.0, 200.0], damperForceLaw=[1.0, fd, 4.0],
                     rotSpringForceLaw=[5.0, 10.0, mc], rotDamperForceLaw=[0.1, md, 0.4], largeAngles=largeAngles)
@@ -35,13 +38,13 @@ boxBushing = @instantiateModel(BoxBushing, unitless=true, logCode=true)
 stopTime = 5.0
 dtmax = 0.1
 if largeAngles
-    requiredFinalStates = [-0.013214812736859366, 0.0005523898753356359, -0.04904666002334838, 0.0757946142513073, 0.003341416782112683, -4.954082753506823e-5, -0.056708142772310295, 0.0009597147602342456, 4.340509280339362e-5, 0.3809257838547459, 0.001097814904879805, -0.00018842580793933223]
+    requiredFinalStates = [-0.013214709281307713, 0.000552354087222612, -0.04904666187675468, 0.07579402127381728, 0.0033411984137335553, -4.9513118790869216e-5, -0.056707801161520716, 0.0009597189920446882, 4.333168563994031e-5, 0.380922690677635, 0.0010802088978311055, -0.000616198472040944]
 else
-    requiredFinalStates = [-0.01321449035293881, 0.0005522522622707078, -0.04904666423238891, 0.07579225811468479, 0.0033409499586830368, -4.943166272627969e-5, -0.008049782190986742, 0.00034916853581158153, 1.460039207707777e-6, 0.04510769348383226, 0.0018233644599616554, 9.80056841368889e-6]
+    requiredFinalStates = [-0.013214485263238932, 0.0005522500941536969, -0.0490466643002863, 0.0757922207638451, 0.0033409424747158703, -4.942995177735604e-5, -0.00804978203315705, 0.0003491684885472317, 1.460136858508138e-6, 0.04510757535421865, 0.00182330830539622, -2.0621586293093137e-5]
 end
 simulate!(boxBushing, stopTime=stopTime, dtmax=dtmax, log=true, requiredFinalStates=requiredFinalStates)
 
 @usingModiaPlot
-plot(boxBushing, ["joint.r", "joint.v", "joint.rot", "joint.w"], figure=1)
+plot(boxBushing, ["box.translation", "box.velocity", "box.rotation", "box.angularVelocity"], figure=1)
 
 end

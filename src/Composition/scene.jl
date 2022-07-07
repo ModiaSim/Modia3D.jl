@@ -434,13 +434,8 @@ mutable struct Scene{F <: Modia3D.VarFloatType} <: Modia3D.AbstractScene
     exportAnimation::Bool                     # animation file export is enabled
     animation::Vector{animationStep}          # animation data of visible Object3Ds
     outputCounter::Int64                      # animation/visualization output step counter
-
-    # Data specific to a particular joint type
-    revolute::Vector{Revolute{F}}
-    prismatic::Vector{Prismatic{F}}
-    freeMotion::Vector{FreeMotion{F}}
-
-
+    timer::TimerOutputs.TimerOutput           # Timer
+    
     function Scene{F}(;gravityField          = UniformGravityField(),
             useOptimizedStructure         = true,
             enableContactDetection        = true,
@@ -531,10 +526,7 @@ mutable struct Scene{F <: Modia3D.VarFloatType} <: Modia3D.AbstractScene
             provideAnimationData,
             exportAnimation,
             Vector{animationStep}[],
-            0,
-            Revolute{F}[],
-            Prismatic{F}[],
-            FreeMotion{F}[])
+            0)
     end
 end
 

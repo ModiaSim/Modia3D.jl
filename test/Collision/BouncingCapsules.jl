@@ -28,37 +28,34 @@ BouncingCapsules = Model3D(
                       translation=:[-1.0, 0.0, 1.0],
                       rotation=:[-90*u"°", 0.0, -90*u"°"],
                       feature=Visual(shape=CoordinateSystem(length=0.5))),
-    capsuleX = Object3D(feature=Solid(shape=Capsule(axis=1, diameter=0.4, length=1.0),
+    capsuleX = Object3D(parent=:frameX, fixedToParent=false,
+                        rotation=[0.0, -60*u"°", 0.0],
+                        velocity=[0.0, 1.0, 0.0],
+                        feature=Solid(shape=Capsule(axis=1, diameter=0.4, length=1.0),
                                       visualMaterial=vmatRed,
                                       solidMaterial="Steel",
                                       collision=true)),
-    jointX = FreeMotion(obj1=:frameX, obj2=:capsuleX,
-                        r=Var(init=Modia.SVector{3,Float64}(0.0, 0.0, 0.0)),
-                        rot=Var(init=Modia.SVector{3,Float64}(0.0, -60*u"°", 0.0)),
-                        v=Var(init=Modia.SVector{3,Float64}(0.0, 1.0, 0.0))),
     frameY = Object3D(parent=:world,
                       translation=:[0.0, 0.0, 1.0],
                       rotation=:[90*u"°", 90*u"°", 0.0],
                       feature=Visual(shape=CoordinateSystem(length=0.5))),
-    capsuleY = Object3D(feature=Solid(shape=Capsule(axis=2, diameter=0.4, length=1.0),
+    capsuleY = Object3D(parent=:frameY, fixedToParent=false,
+                        rotation=[0.0, 0.0, -60*u"°"],
+                        velocity=[0.0, 0.0, 1.0],
+                        feature=Solid(shape=Capsule(axis=2, diameter=0.4, length=1.0),
                                       visualMaterial=vmatGreen,
                                       solidMaterial="Steel",
                                       collision=true)),
-    jointY = FreeMotion(obj1=:frameY, obj2=:capsuleY,
-                        r=Var(init=Modia.SVector{3,Float64}(0.0, 0.0, 0.0)),
-                        rot=Var(init=Modia.SVector{3,Float64}(0.0, 0.0, -60*u"°")),
-                        v=Var(init=Modia.SVector{3,Float64}(0.0, 0.0, 1.0))),
     frameZ = Object3D(parent=:world,
                       translation=:[1.0, 0.0, 1.0],
                       feature=Visual(shape=CoordinateSystem(length=0.5))),
-    capsuleZ = Object3D(feature=Solid(shape=Capsule(axis=3, diameter=0.4, length=1.0),
+    capsuleZ = Object3D(parent=:frameZ, fixedToParent=false,
+                        rotation=[-60*u"°", 0.0, 0.0],
+                        velocity=[1.0, 0.0, 0.0],
+                        feature=Solid(shape=Capsule(axis=3, diameter=0.4, length=1.0),
                                       visualMaterial=vmatBlue,
                                       solidMaterial="Steel",
                                       collision=true)),
-    jointZ = FreeMotion(obj1=:frameZ, obj2=:capsuleZ,
-                        r=Var(init=Modia.SVector{3,Float64}(0.0, 0.0, 0.0)),
-                        rot=Var(init=Modia.SVector{3,Float64}(-60*u"°", 0.0, 0.0)),
-                        v=Var(init=Modia.SVector{3,Float64}(1.0, 0.0, 0.0)))
 )
 
 bouncingCapsules = @instantiateModel(BouncingCapsules, unitless=true, log=false, logStateSelection=false, logCode=false)
@@ -68,11 +65,11 @@ bouncingCapsules = @instantiateModel(BouncingCapsules, unitless=true, log=false,
 
 stopTime = 1.4
 tolerance = 1e-8
-requiredFinalStates = [-0.7673604039864523, 0.9516988414284928, 0.24982620243724654, 0.014180822268884124, 0.5036323273267752, -0.18340022474242668, 1.5220127656990843, 1.1890544892808237, 1.4103120626088645, 2.622092435351728, -0.22352345880886096, -0.10544477069267612, 0.2498438864904243, -0.7676017038880056, 0.951656101955695, -0.18458496829981588, 0.013038547274916143, 0.503371330630657, 2.7566146861930125, 0.20558772188486563, -1.552314769388157, -0.10825787299295013, 2.6224532099355535, -0.23084017453690012, 0.9516460970951072, 0.249610396714428, -0.767900681642965, 0.5031767718168185, -0.1856868932825187, 0.017287282775231304, -1.510292025990061, 0.19727749473740247, 2.753891529551364, -0.23790362799901707, -0.11054266322392534, 2.6231546726843544]
+requiredFinalStates = [-0.7673603852532035, 0.9516987938720817, 0.24982627222882978, 0.014181604247774255, 0.5036323108091764, -0.18340043302903947, 1.5220130850376044, 1.189054333976943, 1.4103120018571025, 0.1404386744698787, 0.7566171345994552, 2.518780172214569, 0.24984395219388528, -0.7676016983741861, 0.9516561037775035, -0.18458497129918844, 0.013039131889693219, 0.5033713001962383, 2.7566146230019166, 0.20558776690709502, -1.5523147262260408, 2.5177060411206855, 0.140488382214332, 0.7639936864415756, 0.9516460922089696, 0.24961032780512585, -0.7679007020906763, 0.503176747722619, -0.18568702124334946, 0.017287192617502473, -1.5102920379213918, 0.19727751116246142, 2.7538915212516004, 0.771095914174634, 2.5170524258497915, 0.1400597191869728]
 simulate!(bouncingCapsules, stopTime=stopTime, tolerance=tolerance, log=true, logStates=false, logEvents=false, requiredFinalStates=requiredFinalStates)
 
 @usingModiaPlot
-plot(bouncingCapsules, [("jointX.r", "jointY.r", "jointZ.r") ("jointX.rot", "jointY.rot", "jointZ.rot")
-                        ("jointX.v", "jointY.v", "jointZ.v") ("jointX.w", "jointY.w", "jointZ.w")], figure=1)
+plot(bouncingCapsules, [("capsuleX.translation", "capsuleY.translation", "capsuleZ.translation") ("capsuleX.rotation", "capsuleY.rotation", "capsuleZ.rotation")
+                        ("capsuleX.velocity", "capsuleY.velocity", "capsuleZ.velocity") ("capsuleX.angularVelocity", "capsuleY.angularVelocity", "capsuleZ.angularVelocity")], figure=1)
 
 end

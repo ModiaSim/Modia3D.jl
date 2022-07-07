@@ -16,10 +16,10 @@ export getRefPathPosition, getRefPathInitPosition, getVariables
 export Fix
 export Revolute, RevoluteWithFlange
 export Prismatic, PrismaticWithFlange
-export J123, J132, J123or132, singularRem, FreeMotion, change_rotSequenceInNextIteration!
+export singularRem, FreeMotion, change_rotSequenceInNextIteration!
 export Bushing, SpringDamperPtP
 
-export buildModia3D!, get_animationHistory
+export buildModel3D!, get_animationHistory
 
 import OrderedCollections
 import Modia3D
@@ -34,7 +34,7 @@ include("$(Modia.path)/models/Electric.jl")
 include("$(Modia.path)/models/Rotational.jl")
 include("$(Modia.path)/models/Translational.jl")
 
-include("buildModia3D.jl")
+include("buildModel3D.jl")
 include("model3D.jl")
 
 end

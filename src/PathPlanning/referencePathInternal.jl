@@ -32,11 +32,11 @@ end
 
 ReferencePath(; names, position, v_max, a_max) = ReferencePath(names, position=position, v_max=v_max, a_max=a_max)
 
-getRefPathPosition(referencePath, index) = referencePath.position[index]
-getRefPathPosition(; referencePath, index) = referencePath.position[index]
+getRefPathPosition(referencePath::ReferencePath, index)::Float64 = referencePath.position[index]
+getRefPathPosition(; referencePath::ReferencePath, index)::Float64 = referencePath.position[index]
 
-getRefPathInitPosition(referencePath, index) = referencePath.initPos[index]
-getRefPathInitPosition(; referencePath, index) = referencePath.initPos[index]
+getRefPathInitPosition(referencePath::ReferencePath, index)::Float64 = referencePath.initPos[index]
+getRefPathInitPosition(; referencePath::ReferencePath, index)::Float64 = referencePath.initPos[index]
 
 
 ## -------------------- utility functions ------------------------

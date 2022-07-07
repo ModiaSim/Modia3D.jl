@@ -18,11 +18,13 @@ BouncingEllipsoid = Model3D(
                                     visualMaterial=VisualMaterial(color="DarkGreen", transparency=0.5),
                                     solidMaterial="Steel",
                                     collision=true)),
-    ellipsoid = Object3D(feature=Solid(shape=Ellipsoid(lengthX=0.1, lengthY=0.2, lengthZ=0.3),
+    ellipsoid = Object3D(parent=:world, fixedToParent=false,
+                         translation=[0.0, 1.0, 0.0],
+                         angularVelocity=[5.0, 0.0, -2.0],
+                         feature=Solid(shape=Ellipsoid(lengthX=0.1, lengthY=0.2, lengthZ=0.3),
                                        visualMaterial=VisualMaterial(color="Blue"),
                                        solidMaterial="Steel",
-                                       collision=true)),
-    free = FreeMotion(obj1=:world, obj2=:ellipsoid, r=Var(init=Modia.SVector{3,Float64}(0.0, 1.0, 0.0)), w=Var(init=Modia.SVector{3,Float64}(5.0, 0.0, -2.0)))
+                                       collision=true))
 )
 
 bouncingEllipsoid = @instantiateModel(BouncingEllipsoid, unitless=true, log=false, logStateSelection=false, logCode=false)
@@ -30,10 +32,10 @@ bouncingEllipsoid = @instantiateModel(BouncingEllipsoid, unitless=true, log=fals
 
 stopTime = 2.0
 tolerance = 1e-8
-requiredFinalStates = [-0.48480963673904126, -0.31544579779174053, 1.8217647164503947, -0.5223680077157852, -2.9525461969237083, 1.0275379269471818, 16.477526009450994, 0.45153448141912156, -0.5122120185437135, 8.566326595961337, 1.198449699792746, 1.45190940975166]
+requiredFinalStates = [-0.4848756849364805, -0.3152596292050405, 1.8217924654907032, -0.5225235181495869, -2.951876778895525, 1.0276278036774111, 16.477475569988698, 0.4513592819174489, -0.5123012801778761, 7.880815138676465, 0.7279928544430719, 3.7799789451161594]
 simulate!(bouncingEllipsoid, stopTime=stopTime, tolerance=tolerance, log=true, requiredFinalStates=requiredFinalStates)
 
 @usingModiaPlot
-plot(bouncingEllipsoid, ["free.r" "free.rot"; "free.v" "free.w"], figure=1)
+plot(bouncingEllipsoid, ["ellipsoid.translation" "ellipsoid.rotation"; "ellipsoid.velocity" "ellipsoid.angularVelocity"], figure=1)
 
 end

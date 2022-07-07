@@ -25,7 +25,7 @@ q = [e*sin(angle/2),
 
 Constant quaternion vector of a null rotation (= no rotation from frame 1 to frame 2)
 """
-NullQuaternion(::Type{F}) where F <: Modia3D.VarFloatType = SVector{4,F}(0.0, 0.0, 0.0, 1.0)
+NullQuaternion(::Type{F}) where F <: Modia3D.VarFloatType = SVector{4,F}(0, 0, 0, 1)
 
 
 
@@ -42,30 +42,25 @@ end
 
 
 """
-    R = Modia3D.from_q(q::SVector{4,F})
+    R = Modia3D.from_q(q)
 
-Return SMatrix{4,4,F,16} `R` from quaternion `q`.
+Return rotation matrix `R::SMatrix{3,3,F,9}` from quaternions `q::SVector{4,F}`.
 """
-from_q(q::SVector{4,F}) where F <: Modia3D.VarFloatType = SMatrix{3,3,F,9}( 2.0 * (q[1] * q[1] + q[4] * q[4]) - 1.0,
-                                            2.0 * (q[2] * q[1] - q[3] * q[4]),
-                                            2.0 * (q[3] * q[1] + q[2] * q[4]),
-                                            2.0 * (q[1] * q[2] + q[3] * q[4]),
-                                            2.0 * (q[2] * q[2] + q[4] * q[4]) - 1.0,
-                                            2.0 * (q[3] * q[2] - q[1] * q[4]),
-                                            2.0 * (q[1] * q[3] - q[2] * q[4]),
-                                            2.0 * (q[2] * q[3] + q[1] * q[4]),
-                                            2.0 * (q[3] * q[3] + q[4] * q[4]) - 1.0)
+from_q(q::SVector{4,F}) where F <: Modia3D.VarFloatType = SMatrix{3,3,F,9}( F(2.0) * (q[1] * q[1] + q[4] * q[4]) - F(1.0),
+                                            F(2.0) * (q[2] * q[1] - q[3] * q[4]),
+                                            F(2.0) * (q[3] * q[1] + q[2] * q[4]),
+                                            F(2.0) * (q[1] * q[2] + q[3] * q[4]),
+                                            F(2.0) * (q[2] * q[2] + q[4] * q[4]) - F(1.0),
+                                            F(2.0) * (q[3] * q[2] - q[1] * q[4]),
+                                            F(2.0) * (q[1] * q[3] - q[2] * q[4]),
+                                            F(2.0) * (q[2] * q[3] + q[1] * q[4]),
+                                            F(2.0) * (q[3] * q[3] + q[4] * q[4]) - F(1.0) )
 
-
-
-const p4limit = 0.1
-const c4limit = 4.0 * p4limit * p4limit
 
 """
-    q = Modia3D.from_R(R::SMatrix{3,3,F,9};
-                       q_guess = NullQuaternion(F))
+    q = Modia3D.from_R(R; q_guess = NullQuaternion(F))
 
-Return quaternion `SVector{4,F} q` from rotation matrix `SMatrix{3,3,F,9} R`.
+Return quaternion `q::SVector{4,F}` from rotation matrix `R::SMatrix{3,3,F,9}`.
 
 From the two possible solutions `q` the one is returned that is closer
 to `q_guess` (note, `q` and `-q` define the same rotation).

@@ -1,4 +1,4 @@
-module ShaftFreeMotionAdaptiveRotSequence
+module FreeShaftAdaptiveRotSequenceWithFreeMotion
 
 using Modia3D
 

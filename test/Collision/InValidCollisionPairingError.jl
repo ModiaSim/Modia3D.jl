@@ -26,48 +26,41 @@ BouncingCones = Model3D(
                       translation=:[-1.0, -0.5, 1.0],
                       rotation=:[-90*u"°", 0.0, -90*u"°"],
                       feature=Visual(shape=CoordinateSystem(length=0.5))),
-    coneX = Object3D(feature=Solid(shape=Cone(axis=1, diameter=0.4, length=1.0, topDiameter=0.3),
+    coneX = Object3D(parent=:frameX, fixedToParent=false,
+                     translation=[0.0, 0.0, 0.0],
+                     rotation=[0.0, -60*u"°", 0.0],
+                     velocity=[0.0, 1.0, 0.0],
+                     feature=Solid(shape=Cone(axis=1, diameter=0.4, length=1.0, topDiameter=0.3),
                                    visualMaterial=vmatRed,
                                    solidMaterial="BilliardTable",
                                    collision=true)),
-    jointX = FreeMotion(obj1=:frameX, obj2=:coneX,
-                        r=Var(init=Modia.SVector{3,Float64}(0.0, 0.0, 0.0)),
-                        rot=Var(init=Modia.SVector{3,Float64}(0.0, -60*u"°", 0.0)),
-                        v=Var(init=Modia.SVector{3,Float64}(0.0, 1.0, 0.0))),
     frameY = Object3D(parent=:world,
                       translation=:[0.0, -0.5, 1.0],
                       rotation=:[90*u"°", 90*u"°", 0.0],
                       feature=Visual(shape=CoordinateSystem(length=0.5))),
-    coneY = Object3D(feature=Solid(shape=Cone(axis=2, diameter=0.4, length=1.0, topDiameter=0.3),
+    coneY = Object3D(parent=:frameY, fixedToParent=false,
+                     rotation=[0.0, 0.0, -60*u"°"],
+                     velocity=[0.0, 0.0, 1.0],
+                     feature=Solid(shape=Cone(axis=2, diameter=0.4, length=1.0, topDiameter=0.3),
                                    visualMaterial=vmatGreen,
                                    solidMaterial="DryWood",
                                    collision=true)),
-    jointY = FreeMotion(obj1=:frameY, obj2=:coneY,
-                        r=Var(init=Modia.SVector{3,Float64}(0.0, 0.0, 0.0)),
-                        rot=Var(init=Modia.SVector{3,Float64}(0.0, 0.0, -60*u"°")),
-                        v=Var(init=Modia.SVector{3,Float64}(0.0, 0.0, 1.0))),
     frameZ = Object3D(parent=:world,
                       translation=:[1.0, -0.5, 1.0],
                       feature=Visual(shape=CoordinateSystem(length=0.5))),
-    coneZ = Object3D(feature=Solid(shape=Cone(axis=3, diameter=0.4, length=1.0, topDiameter=0.3),
+    coneZ = Object3D(parent=:frameZ, fixedToParent=false,
+                     rotation=[-60*u"°", 0.0, 0.0],
+                     velocity=[1.0, 0.0, 0.0],
+                     feature=Solid(shape=Cone(axis=3, diameter=0.4, length=1.0, topDiameter=0.3),
                                    visualMaterial=vmatBlue,
                                    solidMaterial="DryWood",
-                                   collision=true)),
-    jointZ = FreeMotion(obj1=:frameZ, obj2=:coneZ,
-                        r=Var(init=Modia.SVector{3,Float64}(0.0, 0.0, 0.0)),
-                        rot=Var(init=Modia.SVector{3,Float64}(-60*u"°", 0.0, 0.0)),
-                        v=Var(init=Modia.SVector{3,Float64}(1.0, 0.0, 0.0)))
+                                   collision=true))
 )
 
 bouncingCones = @instantiateModel(BouncingCones, unitless=true, log=false, logStateSelection=false, logCode=false)
 
-
 stopTime = 1.3
 tolerance = 1e-8
 simulate!(bouncingCones, stopTime=stopTime, tolerance=tolerance)
-
-#@usingModiaPlot
-#plot(bouncingCones, [("jointX.r", "jointY.r", "jointZ.r") ("jointX.rot", "jointY.rot", "jointZ.rot")
-#                     ("jointX.v", "jointY.v", "jointZ.v") ("jointX.w", "jointY.w", "jointZ.w")], figure=1)
 
 end

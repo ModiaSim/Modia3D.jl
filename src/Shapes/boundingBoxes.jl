@@ -247,10 +247,21 @@ end
 
 # [Gino v.d. Bergen, p. 131]
 @inline function supportPoint_abs_FileMesh(shape::FileMesh, e_abs::SVector{3,T}) where {T}
-    e_absVec = Vector{SVector{3,Float64}}(undef, 1)
-    e_absVec[1] = e_abs
-    (max_value, position) = findmax(broadcast(dot, shape.objPoints, e_absVec))
-    return SVector{3,T}(shape.objPoints[position])
+    #e_absVec = Vector{SVector{3,Float64}}(undef, 1)
+    #e_absVec[1] = e_abs
+    #(max_value, position) = findmax(broadcast(dot, shape.objPoints, e_absVec))
+    #return SVector{3,T}(shape.objPoints[position])
+    iMax::Int = 1
+    dotMax::T = typemin(T)
+    objPoints = shape.objPoints
+    for i in 2:length(shape.objPoints)
+        doti = dot(objPoints[i],e_abs)
+        if doti > dotMax
+            iMax = i
+            dotMax = doti
+        end
+    end        
+    return objPoints[iMax]
 end
 
 

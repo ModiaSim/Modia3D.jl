@@ -9,7 +9,7 @@
 # to generate a sysimage of your current project and store it in your current working directory.
 # Before generating the sysimage, the following packages are added to your current project (if not yet included):
 #
-#    Modia, Modia3D, ModiaPlot_PyPlot, PackageCompiler, Revise
+#    Modia, Modia3D, SignalTablesInterface_PyPlot, PackageCompiler, Revise
 #
 module Create_Modia3D_sysimage
 
@@ -21,7 +21,7 @@ import Pkg
 project     = Pkg.project()
 projectPath = project.path
 availablePackages = keys(project.dependencies)
-addPackages       = setdiff!(["Modia", "Modia3D", "ModiaPlot_PyPlot", "PackageCompiler", "Revise"], availablePackages)
+addPackages       = setdiff!(["Modia", "Modia3D", "SignalTablesInterface_PyPlot", "PackageCompiler", "Revise"], availablePackages)
 println("!!! Creating sysimage for Modia3D (executing: $file)")
 println("!!! This will include all packages from project $projectPath")
 if length(addPackages) > 0

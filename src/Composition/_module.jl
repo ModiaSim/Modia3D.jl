@@ -22,6 +22,7 @@ module Composition
 
 export MultibodyData
 
+export instantiateModel3D!
 export initialize, initAnalysis!, performAnalysis!, closeAnalysis!, visualize!, visualizeWorld!
 export updatePosition!, update!
 export RotationVariables, RCardan123
@@ -36,10 +37,12 @@ export setStatesRevolute!  , setAccelerationsRevolute!  , getGenForcesRevolute
 export setStatesPrismatic! , setAccelerationsPrismatic! , getGenForcesPrismatic
 export setStatesFreeMotion!, setAccelerationsFreeMotion!, getGenForcesFreeMotion
 export setStatesFreeMotion_isrot123!
+export setHiddenStatesDerivatives!, getGenForcesHiddenJoints
+export J123, J132, J123or132
 
 export computeGeneralizedForces!
 
-export distanceAndAngles, distance, planarRotationAngle
+export distanceAndAngles, distance
 export measFrameRotation, measFramePosition, measFrameDistance
 export measFrameRotVelocity, measFrameTransVelocity, measFrameDistVelocity
 export measFrameRotAcceleration, measFrameTransAcceleration, measFrameDistAcceleration
