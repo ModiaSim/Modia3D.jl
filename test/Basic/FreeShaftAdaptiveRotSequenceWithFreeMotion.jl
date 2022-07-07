@@ -29,7 +29,7 @@ dtmax = 0.1
 requiredFinalStates = [0.0, 0.7, -7.350074420637136, 0.0, 0.1, -2.1, 0.6981317007977381, 1.4336293856408397, 1.5707963267949017, -2.0, 0.0, 0.0]
 simulate!(shaft, stopTime=stopTime, dtmax=dtmax, log=true, logEvents=false, logStates=false, requiredFinalStates=requiredFinalStates)
 
-@usingModiaPlot
+@usingPlotPackage
 plot(shaft, ["free.rot", "free.isrot123", "free.w", "free.r", "free.v"], figure=1)
 
 end

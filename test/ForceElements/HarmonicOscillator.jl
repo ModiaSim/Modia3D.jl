@@ -26,7 +26,7 @@ dtmax = 0.1
 requiredFinalStates = [0.0034429013089251376, -0.10253096819858225]
 simulate!(oscillator, stopTime=stopTime, dtmax=dtmax, log=true, requiredFinalStates=requiredFinalStates)
 
-@usingModiaPlot
+@usingPlotPackage
 plot(oscillator, ["joint.s", "joint.v"], figure=1)
 
 end

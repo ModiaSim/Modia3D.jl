@@ -43,7 +43,7 @@ stopTime = 6.0
 requiredFinalStates = [-1.47312952226279, -0.5146766053301051]
 simulate!(pendulum, stopTime=stopTime, log=true, logStates=false, requiredFinalStates=requiredFinalStates)
 
-@usingModiaPlot
+@usingPlotPackage
 plot(pendulum, ["rev.phi", "rev.w"], figure=1)
 
 end

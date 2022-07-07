@@ -1,7 +1,7 @@
 module Test_PathPlanning
 
 using Modia3D
-@usingModiaPlot
+@usingPlotPackage
 
 const ptp_path = PTP_path(["angle1", "angle2", "angle3"],
                             positions=[0.0 2.0 3.0;

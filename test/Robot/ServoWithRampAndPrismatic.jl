@@ -129,7 +129,7 @@ tolerance = 1e-6
 requiredFinalStates = [-269.9911219480055, 1594.1933857866297, 25436.042732813803]
 simulate!(servo, stopTime=stopTime, tolerance=tolerance, log=true, logStates=false, requiredFinalStates=requiredFinalStates)
 
-@usingModiaPlot
+@usingPlotPackage
 plotVariables = [("ramp.y", "rev.s"); "rev.v"; "servo.ppi.PI.x"; "servo.ppi.refForce"]
 plot(servo, plotVariables, figure=1)
 

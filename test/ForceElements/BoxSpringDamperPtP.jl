@@ -30,7 +30,7 @@ dtmax = 0.1
 requiredFinalStates = [-0.0317899616936806, -0.031789987944650766, -0.13960438446373588, -0.22639392571053196, -0.22639355519359725, -0.09585537982617036, -0.04370174242082521, 0.04366049248771943, 0.0009545457607853683, 0.8435417114212301, -0.8435409897813606, 1.1525522669027586e-7]
 simulate!(springDamper, stopTime=stopTime, dtmax=dtmax, log=true, requiredFinalStates=requiredFinalStates)
 
-@usingModiaPlot
+@usingPlotPackage
 plot(springDamper, ["box.translation", "box.velocity", "box.rotation", "box.angularVelocity"], figure=1)
 
 end

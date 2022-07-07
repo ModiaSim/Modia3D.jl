@@ -527,7 +527,7 @@ else
 end
 simulate!(youbot, stopTime=stopTime, tolerance=tolerance, useRecursiveFactorizationUptoSize=500, requiredFinalStates_atol=0.001, log=true, logStates=false, logEvents=false, requiredFinalStates=requiredFinalStates)
 
-@usingModiaPlot
+@usingPlotPackage
 plot(youbot, ["sphere.translation"], figure=1)
 
 end

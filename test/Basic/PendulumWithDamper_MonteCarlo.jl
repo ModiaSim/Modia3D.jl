@@ -42,7 +42,7 @@ stopTime = 10.0
 requiredFinalStates = missing
 simulate!(pendulumWithDamper, QBDF(autodiff=false), stopTime=stopTime, log=true, logStates=false, requiredFinalStates=requiredFinalStates)
 
-@usingModiaPlot
+@usingPlotPackage
 plot(pendulumWithDamper, ["pendulum.rev.flange.phi"], figure=1)
 
 end

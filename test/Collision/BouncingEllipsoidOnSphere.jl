@@ -32,7 +32,7 @@ tolerance = 1e-8
 requiredFinalStates = [1.8699989130901813, -5.222327808647324, -0.6154343686911469, 1.3616434929142358, -10.68139650349135, -0.33484894334316573, 2.493917143587957, 0.3726401558620851, -8.102293063844746, 10.930247061463712, -5.829926511030707, -7.212001322832058]
 simulate!(bouncingEllipsoid, stopTime=stopTime, tolerance=tolerance, log=true, requiredFinalStates=requiredFinalStates)
 
-@usingModiaPlot
+@usingPlotPackage
 plot(bouncingEllipsoid, ["ellipsoid.translation" "ellipsoid.rotation"; "ellipsoid.velocity" "ellipsoid.angularVelocity"], figure=1)
 
 end

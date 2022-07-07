@@ -42,7 +42,7 @@ requiredFinalStates = [-0.4417983315849275, 0.0003869217525311367]
 simulate!(bouncingSphere, stopTime=stopTime, tolerance=tolerance, dtmax=dtmax, log=true, logStates=false, logEvents=false,
           requiredFinalStates_atol = 1e-7, requiredFinalStates=requiredFinalStates)
 
-@usingModiaPlot
+@usingPlotPackage
 plot(bouncingSphere, ["prism.s", "prism.v"], figure=1)
 
 #=

@@ -53,7 +53,7 @@ requiredFinalStates = [0.292862783655338, -1.2390369485250046, -0.13258270312197
 simulate!(bouncingSphere, stopTime=stopTime, tolerance=tolerance, log=true, logStates=false, logEvents=false,
           requiredFinalStates_rtol=0.2, requiredFinalStates_atol=0.2, requiredFinalStates=requiredFinalStates)
 
-@usingModiaPlot
+@usingPlotPackage
 plot(bouncingSphere, ["sphere.translation" "sphere.rotation"; "sphere.velocity" "sphere.angularVelocity"], figure=1)
 
 end

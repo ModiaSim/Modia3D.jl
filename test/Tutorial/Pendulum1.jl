@@ -11,7 +11,7 @@ Pendulum = Model3D(
 pendulum = @instantiateModel(Pendulum, unitless=true)
 simulate!(pendulum, stopTime=3.0)
 
-@usingModiaPlot     # use the plot package defined by ENV["MODIA_PLOT"]
+@usingPlotPackage     # use the plot package defined by ENV["MODIA_PLOT"]
 plot(pendulum, "rev.phi")
 
 end

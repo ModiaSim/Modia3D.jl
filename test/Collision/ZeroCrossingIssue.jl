@@ -35,7 +35,7 @@ tolerance = 1e-8
 requiredFinalStates = missing
 simulate!(zeroCrossing, stopTime=stopTime, tolerance=tolerance, log=true, logEvents=false, logStates=false, requiredFinalStates=requiredFinalStates)
 
-@usingModiaPlot
+@usingPlotPackage
 plot(zeroCrossing, ["ellipsoid.translation"; "ellipsoid.velocity"], figure=1)
 
 end
