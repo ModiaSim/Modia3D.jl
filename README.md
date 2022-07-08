@@ -9,6 +9,7 @@ Modia3D supports currently tree-structured multibody systems, but does not (yet)
 
 Example videos:
 
+- [Rattleback](rattleback.mp4) (video in [glb format](https://modiasim.github.io/Modia3D.jl/resources/videos/rattleback.glb), Modia3D [code](test/Collision/Rattleback.jl))
 - [YouBot robots gripping a workpiece](https://modiasim.github.io/Modia3D.jl/resources/videos/YouBotsGripping.mp4) (Modia3D [code](test/Robot/YouBotsGripping.jl))
 - [Billiard table with 16 balls](https://modiasim.github.io/Modia3D.jl/resources/videos/Billard16Balls.mp4) (Modia3D [code](test/Collision/Billard16Balls.jl))
 - [Mobile with 8 levels](https://modiasim.github.io/Modia3D.jl/resources/videos/Mobile8.mp4) (Modia3D [code](test/Basic/Mobile.jl) - recursive definition)
