@@ -101,7 +101,7 @@ julia -JModia3D_sysimage.so  (otherwise)
 - Additional keyword arguments of Object3D: `Object3D(..., fixedInParent=true, velocity=[0.0, 0.0, 0.0], angularVelocity=[0.0, 0.0, 0.0])`,
   besides the existing `parent, translation, rotation, feature`. A freely moving Object3D is defined with
   `Object3D(..., fixedInParent=false, ...)`, where `velocity=.., angularVelocity=..`
-  are the initial conditions (resolved in the parent frame). For more details, see [`Object3D`](@ref).\
+  are the initial conditions (resolved in the parent frame). For more details, see [Object3D](@ref).\
   The states and other code for such Object3Ds are *not* part of the generated code
   (so compilation is faster, and the objects can be changed after code generation).
 
