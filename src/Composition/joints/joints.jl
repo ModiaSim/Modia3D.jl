@@ -669,7 +669,7 @@ function change_rotSequence!(m::Modia.SimulationModel, freeMotion::FreeMotion, x
     if m.options.logEvents
         println("        ", freeMotion.path * ".rotationXYZ changed to ", freeMotion.isrot123)
         println("        ", freeMotion.path * ".rotation changed to ", freeMotion.rot)
-        println("        ", freeMotion.str_rot2 * " (= ", rotation2ZeroCrossing, ", ) became <= 0")
+        println("        ", freeMotion.str_rot2 * " (= ", rotation2ZeroCrossing, ") became <= 0")
     end
 
     return nothing

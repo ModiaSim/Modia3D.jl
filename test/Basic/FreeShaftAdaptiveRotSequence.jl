@@ -33,4 +33,6 @@ showInfo(shaft)
 @usingModiaPlot
 plot(shaft, ["shaft.rotation", "shaft.rotationXYZ", "shaft.angularVelocity", "shaft.translation", "shaft.velocity"], figure=1)
 
+simulate!(shaft, IDA(), nlinearMinForDAE=1, stopTime=stopTime, dtmax=dtmax, log=true, logEvents=false, logStates=false, requiredFinalStates=requiredFinalStates)
+
 end

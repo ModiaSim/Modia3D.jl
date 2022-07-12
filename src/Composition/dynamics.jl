@@ -435,7 +435,7 @@ function computeGeneralizedForces!(mbs::MultibodyData{F,TimeType}, qdd_hidden::V
                     mbs.hiddenCache_h     .= mbs.hiddenGenForces
                 elseif leq_mode == -1
                     # Store state derivatives
-                    setStateDerivativesHiddenJoints!(instantiatedModel, mbs)
+                    setHiddenStatesDerivatives!(instantiatedModel, mbs)
                 end
             end
 
