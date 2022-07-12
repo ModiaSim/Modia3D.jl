@@ -32,4 +32,6 @@ simulate!(shaft, stopTime=stopTime, dtmax=dtmax, log=true, logEvents=false, logS
 @usingModiaPlot
 plot(shaft, ["free.rot", "free.isrot123", "free.w", "free.r", "free.v"], figure=1)
 
+simulate!(shaft, IDA(), nlinearMinForDAE=1, stopTime=stopTime, dtmax=dtmax, log=true, logEvents=false, logStates=false, requiredFinalStates=requiredFinalStates)
+
 end

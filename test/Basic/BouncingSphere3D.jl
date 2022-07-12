@@ -29,4 +29,5 @@ showInfo(bouncingSphere)
 @usingModiaPlot
 plot(bouncingSphere, ["sphere.translation", "sphere.velocity", "sphere.rotationXYZ"], figure=1)
 
+simulate!(bouncingSphere, IDA(), nlinearMinForDAE=1, stopTime=2.2, dtmax=0.1, log=true, logStates=false, requiredFinalStates=requiredFinalStates)
 end
