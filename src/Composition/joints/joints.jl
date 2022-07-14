@@ -23,11 +23,11 @@ mutable struct MultibodyData{F <: Modia3D.VarFloatType, TimeType}
 
     revoluteGenForces::Vector{F}              # = M_r*der(qd_r) + h_r(q,qd,gravity,contact-forces) = <generalized driving torques>
     prismaticGenForces::Vector{F}             # = M_p*der(qd_p) + h_p(q,qd,gravity,contact-forces) = <generalized driving forces>
+    genForces::Vector{F}                      # = [revoluteGenForces, prismaticGenForces]
     freeMotionGenForces::Vector{SVector{3,F}} # = M_f*der(qd_f) + h_f(q,qd,gravity,contact-forces) = 0             (joint.hiddenStates = false)
     hiddenGenForces::Vector{F}                # = M_hidden*qdd_hidden + h_hidden(q,qd,gravity,contact-forces) = 0  (joint.hiddenStates = true)
 
-    revoluteCache_h::Vector{F}                # = h_r(q,qd,gravity,contact-forces)
-    prismaticCache_h::Vector{F}               # = h_p(q,qd,gravity,contact-forces)
+    genForcesCache_h::Vector{F}               # = [h_r, h_p]
     freeMotionCache_h::Vector{SVector{3,F}}   # = h_f(q,qd,gravity,contact-forces)
     hiddenCache_h::Vector{F}                  # = h_hidden(q,qd,gravity,contact-forces)
 
@@ -113,8 +113,9 @@ mutable struct MultibodyData{F <: Modia3D.VarFloatType, TimeType}
         new(partiallyInstantiatedModel, modelPath, world, scene,
             revoluteJoints , prismaticJoints , freeMotionJoints,
             revoluteObjects, prismaticObjects, freeMotionObjects, hiddenJointObjects,
-            zeros(F, length(revoluteObjects)), zeros(F, length(prismaticObjects)), zeros(SVector{3,F}, 2*length(freeMotionObjects)), zeros(F, nhidden_qdd),
-            zeros(F, length(revoluteObjects)), zeros(F, length(prismaticObjects)), zeros(SVector{3,F}, 2*length(freeMotionObjects)), zeros(F, nhidden_qdd),
+            zeros(F, length(revoluteObjects)), zeros(F, length(prismaticObjects)),
+            zeros(F, length(revoluteObjects)+length(prismaticObjects)), zeros(SVector{3,F}, 2*length(freeMotionObjects)), zeros(F, nhidden_qdd),
+            zeros(F, length(revoluteObjects)+length(prismaticObjects)), zeros(SVector{3,F}, 2*length(freeMotionObjects)), zeros(F, nhidden_qdd),
             zStartIndex, nz, partiallyInstantiatedModel.time,
             zeros(F, 2*3*length(freeMotionObjects)),
             Modia.LinearEquations{F}[])
@@ -553,6 +554,8 @@ function computeObject3DForcesTorquesAndGenForces!(mbs::MultibodyData{F,TimeType
             error("Bug in Modia3D/src/Composition/joints/joints.jl (computeGeneralizedForces!): jointKind = $jointKind is not known.")
         end
     end
+    copyto!(mbs.genForces,                           1, revoluteGenForces , 1, length(revoluteGenForces))
+    copyto!(mbs.genForces, length(revoluteGenForces)+1, prismaticGenForces, 1, length(prismaticGenForces))
     return nothing
 end
 
@@ -783,11 +786,11 @@ end
 
 
 """
-    setHiddenStatesDerivatives!(instantiatedModel, mbs)
+    setHiddenStatesDerivatives!(instantiatedModel, mbs, genForces)
 
 Copy derivatives of hidden states to instantiatedModel.der_x_segmented
 """
-function setHiddenStatesDerivatives!(m::Modia.SimulationModel{F,TimeType}, mbs::MultibodyData{F,TimeType})::Nothing where {F,TimeType}
+function setHiddenStatesDerivatives!(m::Modia.SimulationModel{F,TimeType}, mbs::MultibodyData{F,TimeType}, genForces::Vector{F})::Nothing where {F,TimeType}
     for obj in mbs.hiddenJointObjects
         freeMotion = mbs.freeMotion[obj.jointIndex]
 
@@ -809,29 +812,11 @@ end
 
 
 """
-    (tau1,tau2,<...>) = getGenForcesRevolute(mbs::MultibodyData{F,TimeType}, ::Val{N})
-
-Return generalized forces of revolute joints as NTuple.
-"""
-#getGenForcesRevolute(mbs::MultibodyData{F,TimeType}) where {F,TimeType} = mbs.revoluteGenForces
-getGenForcesRevolute(mbs::MultibodyData{F,TimeType}, ::Val{N}) where {F,TimeType,N} = ntuple(i->mbs.revoluteGenForces[i], Val(N))
-
-
-"""
-    (f1,f2,<...>) = getGenForcesPrismatic(mbs::MultibodyData{F,TimeType}, ::Val{N})
-
-Return generalized forces of prismatic joints as NTuple.
-"""
-#getGenForcesPrismatic(mbs::MultibodyData{F,TimeType}) where {F,TimeType} = mbs.prismaticGenForces
-getGenForcesPrismatic(mbs::MultibodyData{F,TimeType}, ::Val{N}) where {F,TimeType,N} = ntuple(i->mbs.prismaticGenForces[i], Val(N))
-
-
-"""
-    residuals = getGenForcesFreeMotion(mbs::MultibodyData{F,TimeType}, ::Val{N})
+    residuals = getGenForcesFreeMotion(mbs::MultibodyData{F,TimeType}, genForces::Vector{F})
 
 Return generalized forces of free motion joints as Vector to be used for residuals vector.
 """
-function getGenForcesFreeMotion(mbs::MultibodyData{F,TimeType})::Vector{F} where {F,TimeType}
+function getGenForcesFreeMotion(mbs::MultibodyData{F,TimeType}, genForces::Vector{F})::Vector{F} where {F,TimeType}
     res = mbs.freeMotionResiduals
     j = 1
     @assert(length(res) == 3*length(mbs.freeMotionGenForces))
@@ -846,11 +831,11 @@ end
 
 
 """
-    residuals = getGenForcesHiddenJoints(mbs::MultibodyData{F,TimeType}, qdd_hidden::Vector{F})
+    residuals = getGenForcesHiddenJoints(mbs::MultibodyData{F,TimeType}, genForces::Vector{F}, qdd_hidden::Vector{F})
 
 Return generalized forces of hidden joints as Vector to be used for residuals vector.
 """
-getGenForcesHiddenJoints(mbs, qdd_hidden) = mbs.hiddenGenForces
+getGenForcesHiddenJoints(mbs, genForces, qdd_hidden) = mbs.hiddenGenForces
 
 
 # For backwards compatibility (do not use for new models)

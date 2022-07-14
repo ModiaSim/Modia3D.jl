@@ -307,11 +307,12 @@ end
 
 
 """
-    mbs = computeGeneralizedForces!(mbs::MultibodyData, qdd_hidden, _leq)
+    genForces = computeGeneralizedForces!(mbs::MultibodyData, qdd_hidden, _leq)
 
 Given the states of the joints (provided via functions setStatesXXX(..)), compute
-the generalized forces of the joints. The function returns mbs. The generalized forces
-can be accessed afterwards via functions getGenForcesXXX
+the generalized forces of the joints. The function returns genForces, that is the
+vector of generalized forces of all joints with exception of free motion joints
+(currently: generalized forces of revolute and prismatic joints).
 
 A typical computation sequence is:
 
@@ -350,7 +351,7 @@ while LinearEquationsIteration(_leq, <...>)
 end
 ```
 """
-function computeGeneralizedForces!(mbs::MultibodyData{F,TimeType}, qdd_hidden::Vector{F}, _leq)::MultibodyData{F,TimeType} where {F,TimeType}
+function computeGeneralizedForces!(mbs::MultibodyData{F,TimeType}, qdd_hidden::Vector{F}, _leq)::Vector{F} where {F,TimeType}
     instantiatedModel = mbs.instantiatedModel
     TimerOutputs.@timeit instantiatedModel.timer "Modia3D computeGeneralizedForces!" begin
         storeResult   = instantiatedModel.storeResult
@@ -415,8 +416,10 @@ function computeGeneralizedForces!(mbs::MultibodyData{F,TimeType}, qdd_hidden::V
                 end # end forward recursion
 
                 # Evaluate force elements
-                for force in forceElements
-                    evaluateForceElement(force)
+                TimerOutputs.@timeit instantiatedModel.timer "Modia3D_1 evaluateForceElements" begin
+                    for force in forceElements
+                        evaluateForceElement(force)
+                    end
                 end
 
                 # Compute contact forces/torques
@@ -429,13 +432,12 @@ function computeGeneralizedForces!(mbs::MultibodyData{F,TimeType}, qdd_hidden::V
 
                 if leq_mode == 0
                     # Store GenForces in cache (qdd = 0)
-                    mbs.revoluteCache_h   .= mbs.revoluteGenForces
-                    mbs.prismaticCache_h  .= mbs.prismaticGenForces
+                    mbs.genForcesCache_h  .= mbs.genForces
                     mbs.freeMotionCache_h .= mbs.freeMotionGenForces
                     mbs.hiddenCache_h     .= mbs.hiddenGenForces
                 elseif leq_mode == -1
                     # Store state derivatives
-                    setHiddenStatesDerivatives!(instantiatedModel, mbs)
+                    setHiddenStatesDerivatives!(instantiatedModel, mbs, mbs.genForces)
                 end
             end
 
@@ -463,8 +465,7 @@ function computeGeneralizedForces!(mbs::MultibodyData{F,TimeType}, qdd_hidden::V
                 TimerOutputs.@timeit instantiatedModel.timer "Modia3D_2 computeObject3DForcesTorquesAndGenForces!" computeObject3DForcesTorquesAndGenForces!(mbs, tree,time)
 
                 # Add GenForces from cache (computed with qdd=0)
-                mbs.revoluteGenForces   .+= mbs.revoluteCache_h
-                mbs.prismaticGenForces  .+= mbs.prismaticCache_h
+                mbs.genForces           .+= mbs.genForcesCache_h
                 mbs.freeMotionGenForces .+= mbs.freeMotionCache_h
                 mbs.hiddenGenForces     .+= mbs.hiddenCache_h
             end
@@ -524,5 +525,5 @@ function computeGeneralizedForces!(mbs::MultibodyData{F,TimeType}, qdd_hidden::V
         end
     end
 
-    return mbs
+    return mbs.genForces
 end
