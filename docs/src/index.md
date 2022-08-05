@@ -93,6 +93,10 @@ julia -JModia3D_sysimage.so  (otherwise)
 
 ## Release Notes
 
+### Version 0.11.2
+
+- Require Modia 0.9.3
+
 ### Version 0.11.1
 
 - Bug fix: integrator IDA() can be used (especially to avoid solving large linear equation systems in the model).\
