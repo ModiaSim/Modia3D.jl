@@ -8,7 +8,8 @@ cmat = "Steel"
 
 collidingBoxes = Model3D(
     world = Object3D(feature=Scene(gravityField=UniformGravityField(g=9.81, n=[-1, 0, 0]),
-                                   mprTolerance = 1.0e-9,
+                                   nominalLength=2.0,
+                                   mprTolerance=1.0e-9,
                                    enableContactDetection=true)),
 
     fixedBox = Object3D(parent=:world,
@@ -36,11 +37,11 @@ stopTime = 3.0
 tolerance = 1e-6
 interval = 0.001
 if Sys.iswindows()
-    requiredFinalStates = missing
+    requiredFinalStates = [-8.610431763203458, 2.9112770479128316e-6, 1.9276176089234778, -12.03082391486749, 1.0247685765613612e-6, 1.36660423237635, 1.570848419422615, -2.3500723576443827e-5, 5.824511804298696, -3.599213868059848e-5, -4.192510808640643, -1.8368394553890083e-5]
 elseif Sys.isapple()
     requiredFinalStates = missing
 else
-    requiredFinalStates = [-8.610431763203458, 2.9112770479128316e-6, 1.9276176089234778, -12.03082391486749, 1.0247685765613612e-6, 1.36660423237635, 1.570848419422615, -2.3500723576443827e-5, 5.824511804298696, -3.599213868059848e-5, -4.192510808640643, -1.8368394553890083e-5]
+    requiredFinalStates = [-8.441744413186479, 2.080248745633074e-5, 2.017853339927745, -11.885206471305127, 1.578631293289433e-5, 1.4531990639865306, 1.5708195046594045, 3.9733642937971214e-6, 6.203744909797819, -0.00026576504942249794, -4.54547324864426, -8.602582070671429e-5]
 end
 
 simulate!(twoCollidingBoxes, stopTime=stopTime, tolerance=tolerance, interval=interval, log=true, logStates=false, logEvents=false,

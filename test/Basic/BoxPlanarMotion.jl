@@ -3,7 +3,7 @@ module BoxPlanarMotionSimulation
 using Modia3D
 
 BoxPlanarMotion = Model3D(
-    world = Object3D(feature=Scene(gravityField=UniformGravityField(g=1.0, n=[0, -1, 0]))),
+    world = Object3D(feature=Scene(gravityField=UniformGravityField(g=1.0, n=[0, -1, 0]), nominalLength=0.5)),
     worldFrame = Object3D(parent=:world,
                           feature=Visual(shape=CoordinateSystem(length=0.2))),
     transx = Object3D(),

@@ -89,14 +89,18 @@ T2Gripper = 1.0
 motorInertiaGripper = 0.1
 gearRatioGripper    = 1.0
 
-#### ----------- Path Planning ------------------
-referencePath1 = Modia3D.PathPlanning.ReferencePath(
+#### ----------- Robot Program ------------------
+initPosition = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+
+function robotProgram(robotActions)
+    addReferencePath(robotActions,
     names =    ["bot1angle1", "bot1angle2", "bot1angle3", "bot1angle4", "bot1angle5", "bot1gripper", "bot2angle1", "bot2angle2", "bot2angle3", "bot2angle4", "bot2angle5", "bot2gripper"],
-    position = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+    position = initPosition,
     v_max =    [2.68512, 2.68512, 4.8879, 5.8997, 5.8997, 2.0, 2.68512, 2.68512, 4.8879, 5.8997, 5.8997, 2.0],
     a_max =    [1.5, 1.5, 1.5, 1.5, 1.5, 0.5, 1.5, 1.5, 1.5, 1.5, 1.5, 0.5])
 
-Modia3D.PathPlanning.ptpJointSpace(referencePath = referencePath1, positions =[
+    ptpJointSpace(robotActions,
+    [
         0.0  0.0    0.0       0.0    0.0  diameter        0.0  0.0    0.0       0.0   0.0  diameter;
         pi   pi/4   pi/4      0.0    0.0  diameter+0.01   0.0  0.0    0.0       0.0   0.0  diameter;
         pi   pi/4   pi/4      1.057  0.0  diameter+0.01   0.0  0.0    0.0       0.0   0.0  diameter;
@@ -118,7 +122,8 @@ Modia3D.PathPlanning.ptpJointSpace(referencePath = referencePath1, positions =[
         0.0  0.0    0.0       0.0    0.0  0.001           0.0  0.0    0.0       0.0   0.0  0.01
     ])
 
-getReferencePath() = referencePath1
+    return nothing
+end
 
 # Controller Model
 Controller = Model(
@@ -369,7 +374,7 @@ featureBody5 = Solid(shape = FileMesh(filename = arm_joint_5_obj), massPropertie
 linkParameters1 = Map(
                     parent1 = Par(value = :(armBase_b)),
                     featureBody = featureBody1,
-                    initRefPos = referencePath1.position[1],
+                    initRefPos = initPosition[1],
                     trans = translation1,
                     rota = Par(value = :(rotation1))
 )
@@ -378,7 +383,7 @@ linkParameters2 = Map(
                     parent1 = Par(value = :(link1.obj2)),
                     featureBody = featureBody2,
                     m = m2,
-                    initRefPos = referencePath1.position[2],
+                    initRefPos = initPosition[2],
                     trans = translation2,
                     rota = Par(value = :(rotation2))
 )
@@ -387,7 +392,7 @@ linkParameters3 = Map(
                     parent1 = Par(value = :(link2.obj2)),
                     featureBody = featureBody3,
                     m = m3,
-                    initRefPos = referencePath1.position[3],
+                    initRefPos = initPosition[3],
                     trans = translation3,
                     rota = Par(value = :(rotation3))
 )
@@ -396,7 +401,7 @@ linkParameters4 = Map(
                     parent1 = Par(value = :(link3.obj2)),
                     featureBody = featureBody4,
                     m = m4,
-                    initRefPos = referencePath1.position[4],
+                    initRefPos = initPosition[4],
                     trans = translation4,
                     rota = Par(value = :(nullRot))
 )
@@ -405,7 +410,7 @@ linkParameters5 = Map(
                     parent1 = Par(value = :(link4.obj2)),
                     featureBody = featureBody5,
                     m = m5,
-                    initRefPos = referencePath1.position[5],
+                    initRefPos = initPosition[5],
                     trans = translation5,
                     rota = Par(value = :(rotation5))
 )
@@ -438,8 +443,9 @@ Gripper = Model(
         feature = Solid(shape=Box(lengthX=0.012, lengthY=0.01, lengthZ=0.045), massProperties=MassPropertiesFromShapeAndMass(mass=1.0e-9), visualMaterial=vmatInvisible, contactMaterial="DryWood", collision=simplifiedContact))
 )
 
-YouBot(;pathIndexOffset) = Model(
+YouBot(worldName;pathIndexOffset) = Model(
     pathIndexOffset2 = pathIndexOffset,
+    worldName = Par(worldName),
     base = Base,
     arm_base_frame = Object3D(parent=:(base.base_frame),
         translation=[0.143, 0.0, 0.046],
@@ -454,18 +460,18 @@ YouBot(;pathIndexOffset) = Model(
     gripper = Gripper,
 
     rev1 = RevoluteWithFlange(obj1 = :(link1.obj1), obj2 = :(link1.body),
-        axis=axisLink, phi = Var(init = getRefPathInitPosition(referencePath1, 1+pathIndexOffset))),
+        axis=axisLink, phi = Var(init = initPosition[1+pathIndexOffset])),
     rev2 = RevoluteWithFlange(obj1 = :(link2.obj1), obj2 = :(link2.body),
-        axis=axisLink, phi = Var(init = getRefPathInitPosition(referencePath1, 2+pathIndexOffset))),
+        axis=axisLink, phi = Var(init = initPosition[2+pathIndexOffset])),
     rev3 = RevoluteWithFlange(obj1 = :(link3.obj1), obj2 = :(link3.body),
-        axis=axisLink, phi = Var(init = getRefPathInitPosition(referencePath1, 3+pathIndexOffset))),
+        axis=axisLink, phi = Var(init = initPosition[3+pathIndexOffset])),
     rev4 = RevoluteWithFlange(obj1 = :(link4.obj1), obj2 = :(link4.body),
-        axis=axisLink, phi = Var(init = getRefPathInitPosition(referencePath1, 4+pathIndexOffset))),
+        axis=axisLink, phi = Var(init = initPosition[4+pathIndexOffset])),
     rev5 = RevoluteWithFlange(obj1 = :(link5.obj1), obj2 = :(link5.body),
-        axis=axisLink, phi = Var(init = getRefPathInitPosition(referencePath1, 5+pathIndexOffset))),
+        axis=axisLink, phi = Var(init = initPosition[5+pathIndexOffset])),
 
     prism = PrismaticWithFlange(obj1 = :(gripper.gripper_right_finger_a), obj2 = :(gripper.gripper_left_finger_a),
-        axis=axisGripper, s = Var(init = getRefPathInitPosition(referencePath1, 6+pathIndexOffset)) ),
+        axis=axisGripper, s = Var(init = initPosition[6+pathIndexOffset]) ),
 
     servo1 = Servo,
     servo2 = Servo,
@@ -474,16 +480,17 @@ YouBot(;pathIndexOffset) = Model(
     servo5 = Servo,
     servo6 = ServoTrans,
 
-    refPath = Var(hideResult=true),
+    modelActions = ModelActions(world=:world, actions=robotProgram),
+    currentAction = Var(hideResult=true),
 
     equations=:[
-        refPath = calculateRobotMovement(getReferencePath(), instantiatedModel),
-        servo1.refLoadAngle = getRefPathPosition(refPath, 1+pathIndexOffset2),
-        servo2.refLoadAngle = getRefPathPosition(refPath, 2+pathIndexOffset2),
-        servo3.refLoadAngle = getRefPathPosition(refPath, 3+pathIndexOffset2),
-        servo4.refLoadAngle = getRefPathPosition(refPath, 4+pathIndexOffset2),
-        servo5.refLoadAngle = getRefPathPosition(refPath, 5+pathIndexOffset2),
-        servo6.refLoadPos   = getRefPathPosition(refPath, 6+pathIndexOffset2)
+        currentAction = executeActions(modelActions),
+        servo1.refLoadAngle = getRefPathPosition(currentAction, 1+pathIndexOffset2),
+        servo2.refLoadAngle = getRefPathPosition(currentAction, 2+pathIndexOffset2),
+        servo3.refLoadAngle = getRefPathPosition(currentAction, 3+pathIndexOffset2),
+        servo4.refLoadAngle = getRefPathPosition(currentAction, 4+pathIndexOffset2),
+        servo5.refLoadAngle = getRefPathPosition(currentAction, 5+pathIndexOffset2),
+        servo6.refLoadPos   = getRefPathPosition(currentAction, 6+pathIndexOffset2)
     ],
 
     connect = :[
@@ -496,12 +503,12 @@ YouBot(;pathIndexOffset) = Model(
         ]
 )
 
-YouBot1 = YouBot(pathIndexOffset=0)
-YouBot2 = YouBot(pathIndexOffset=6)
+YouBot1 = YouBot("world",pathIndexOffset=0)
+YouBot2 = YouBot("world",pathIndexOffset=6)
 
 Scenario = Model3D(
     gravField = UniformGravityField(g=9.81, n=[0,0,-1]),
-    world = Object3D(feature=Scene(gravityField=:gravField, visualizeFrames=false, nominalLength=tableX,
+    world = Object3D(feature=Scene(gravityField=:gravField, visualizeFrames=false, nominalLength=2*tableX,
     #mprTolerance = 1.0e-14,
         animationFile="YouBotsGripping.json",
         enableContactDetection=true, maximumContactDamping=1000, elasticContactReductionFactor=1e-3)),
@@ -555,7 +562,7 @@ youbotModel = Scenario | modelParameters
 youbot = @instantiateModel(youbotModel, unitless=true, logCode=false, log=false)
 
 stopTime = 28.0
-tolerance = 1e-8
+tolerance = 1e-7
 if simplifiedContact
     requiredFinalStates = [-9.490499993063348e-13, 9.49521396217752e-13, -1.2103796232223387e-11, 1.2105343846072095e-11, -2.7635885750388134e-11, 2.763943936699973e-11, -1.698188958399516e-11, 1.6984582753298095e-11, 1.7018876531636215e-13, -1.7019949848349886e-13, -7.250861793979752e-9, 0.24163527980804445, -0.0007949866399281717, -0.0009396439191568809, 5.920486169459873e-10, -1.9542320533079828e-8, 0.0009999996012684277, 3.986421278296727e-10, 8.969178740968352e-7, -8.966301213410245e-7, -8.55772283937007e-6, 8.558676371773805e-6, -1.6071240387994337e-5, 1.6073420087694973e-5, -9.522488402878734e-6, 9.524109799446574e-6, 6.905348353234116e-8, -6.906113393331655e-8, 0.006858284528305427, 0.17622757555621163, -0.07953303206521266, -0.03406256684879136, 0.00024020988783035656, -0.002704002727756535, 0.00994482890386302, 5.515871850091264e-5, 0.005097159939784612, 0.7904171497206783, 0.18419406920309517, 4.224313986095156e-14, -2.1413979850342814e-13, 3.465757851766067e-14, -1.39319751561902, 1.0554934095276296, 0.34667989498861007, 2.512395607229298e-12, -6.133879423008952e-13, 7.669170732067673e-12]
 else

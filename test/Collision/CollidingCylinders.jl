@@ -16,6 +16,7 @@ innerDiameterCyl = 0.08
 
 collidingCylinders = Model3D(
     world = Object3D(feature=Scene(gravityField=UniformGravityField(g=9.81, n=[0, 0, -1]),
+                                   nominalLength=lengthCyl,
                                    enableContactDetection=true)),
     cylinderX = Object3D(parent=:world, fixedToParent=false,
                          translation=[-0.3, -0.1, 0.5],

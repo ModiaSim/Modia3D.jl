@@ -9,7 +9,7 @@ Oscillator = Model3D(
     Stiffness = 100.0,
     Damping = 2.0,
     visualMaterial = VisualMaterial(color="IndianRed1", transparency=0.5),
-    world = Object3D(feature=Scene(gravityField=UniformGravityField(g=9.81, n=[0, 0, -1]), nominalLength=:Length)),
+    world = Object3D(feature=Scene(gravityField=UniformGravityField(g=9.81, n=[0, 0, -1]), nominalLength=:(2*Length))),
     worldFrame = Object3D(parent=:world,
                           feature=Visual(shape=CoordinateSystem(length=:Length))),
     oscillator = Object3D(feature=Solid(shape=Box(lengthX=:Length, lengthY=:Length, lengthZ=:Length),

@@ -12,6 +12,7 @@ BouncingFrustums = Model3D(
     gravField = UniformGravityField(g=9.81, n=[0, 0, -1]),
     world = Object3D(feature=Scene(gravityField=:gravField,
                                    visualizeFrames=false,
+                                   nominalLength=2.0,
                                    defaultFrameLength=0.2,
                                    visualizeBoundingBox = true,
                                    enableContactDetection=true,
