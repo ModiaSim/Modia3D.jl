@@ -68,7 +68,7 @@ current working directory that includes all packages of your current project and
 (these packages are added to your current project, if not yet included):
 
 - Modia, Modia3D, SignalTablesInterface_PyPlot, PackageCompiler, Revise
- 
+
 Start julia with this sysimage in the following way:
 
 ```
@@ -78,7 +78,7 @@ julia -JModia3D_sysimage.so  (otherwise)
 
 ## Publications
 
-|  | Paper or Talk | Conference | DOI or YouTube |
+|  | Paper or Talk | Conference or Journal | DOI or YouTube |
 |:---|:--------------|:-----------|:---------------|
 | [1] |*[Collision Handling with Variable-Step Integrators](../resources/documentation/CollisionHandling_Neumayr_Otter_2017.pdf)*|[EOOLT 2017, December](http://www.eoolt.org/2017/)|[10.1145/3158191.3158193](https://doi.org/10.1145/3158191.3158193)|
 | [2] |*[Component-Based 3D Modeling of Dynamic Systems](http://www.ep.liu.se/ecp/154/019/ecp18154019.pdf)*|[American Modelica Conference 2018, October](https://www.modelica.org/events/modelica2018Americas/index_html)|[10.3384/ECP18154175](https://doi.org/10.3384/ECP18154175)|
@@ -88,14 +88,39 @@ julia -JModia3D_sysimage.so  (otherwise)
 | [5] |*[Collision Handling with Elastic Response Calculation and Zero-Crossing Functions](https://doi.org/10.1145/3365984.3365986)*|[EOOLT 2019, November](http://www.eoolt.org/2019/)|[10.1145/3365984.3365986](https://doi.org/10.1145/3365984.3365986)|
 | [6] |*[Modia – Modeling Multidomain Engineering Systems with Julia](https://www.youtube.com/watch?v=N94si3rOl1g)*|[JuliaCon 2021, July](https://juliacon.org/2021/)|[YouTube](https://www.youtube.com/watch?v=N94si3rOl1g)|
 | [7a] |*[Modia – Equation Based Modeling and Domain Specific Algorithms](https://doi.org/10.3384/ecp2118173)*|[14th International Modelica Conference 2021, September](http://www.modelica.org/)| [10.3384/ecp2118173](https://doi.org/10.3384/ecp2118173) |
-| [7b] |*[Modia – Equation Based Modeling and Domain Specific Algorithms](https://doi.org/10.3384/ecp2118173)*|[14th International Modelica Conference 2021, September](http://www.modelica.org/)| YouTube comming soon |
-
+| [7b] |*[Modia – Equation Based Modeling and Domain Specific Algorithms](https://doi.org/10.3384/ecp2118173)*|[14th International Modelica Conference 2021, September](http://www.modelica.org/)|  |
+| [8] |*[Modelling and Simulation of Physical Systems with Dynamically Changing Degrees of Freedom](https://doi.org/10.3390/electronics12030500)*| Electronics 2023, 12(3), 500 | [10.3390/electronics12030500](https://doi.org/10.3390/electronics12030500) |
 
 ## Release Notes
+### Version 0.12.0
+- Support for variable-structure systems where variables (states) can appear and disappear during simulation
+    - A simulation run is partitioned into phases that are called segments or modes (multi-mode modeling)
+    - The transition between modes is triggered by a full restart
+    - The number of modes is usually not known in advance
+    - Modia3D is a built-in component for Modia
+    - Using segmented simulation for Modia3D models defined in an action program, the following actions trigger a full restart for next mode (segment)
+        - `ActionAttach`, `ActionReleaseAndAttach`, `ActionRelease`, `ActionDelete`
+    - Enable modeling and simulation of 3D mechanical systems with dynamically changing degrees of freedom during simulation, see corresponding paper: DOI: [10.3390/electronics12030500](https://doi.org/10.3390/electronics12030500)
+        - All applications and models mentioned in this paper, can be found in Modia3D release v0.12.0 or Modia release v0.10.0
+- Add Force Elements WorldForce and WorldTorque for force/torque vector application by functions of time.
+- Enable Force Element results by interface extension (element path and simulation model).
+- Improve efficiency of FileMesh contact (faster support point calculation).
+- Fix Animation Export:
+    - Update three.js geometry type names, e.g. "SphereBufferGeometry" -> "SphereGeometry".
+    - Enable/fix FileMesh options useMaterialColor and doubleSided.
+    - Disable double side rendering for standard objects.
+
+**Non-backwards compatible changes**
+
+- Requires Modia 0.10.0. Some internal interfaces have been changed
+  (should not have an influence on user models).
+  
 
 ### Version 0.11.2
 
+- Modia3D code generation improved for rheonomic joints.
 - Require Modia 0.9.3
+
 
 ### Version 0.11.1
 
@@ -129,18 +154,18 @@ julia -JModia3D_sysimage.so  (otherwise)
 - contactPairMaterials.json updated with more material pairs (e.g. results in less warning messages for runtests).
 
 - New file `Modia3D.create_Modia3D_sysimage.jl` to create a *sysimage*. Using this sysimage has the
-  advantage that `using Modia3D` is nearly immediatedly executed (instead of > 30 seconds). 
+  advantage that `using Modia3D` is nearly immediatedly executed (instead of > 30 seconds).
   For details, see README.md file.
-  
+
 - Internal: Timer included in Scene (scene.timer), so that a timer is more easily accessible for debugging.
 
-- Internal: Cleanup and improvements of Modia3D/src/Frames.jl 
+- Internal: Cleanup and improvements of Modia3D/src/Frames.jl
 
 
 **Deprecated**
 
 - Joint `FreeMotion` is **deprecated**. Use instead `Object3D(..., fixedInParent=false, ...)`.
-  Note, Object3D has variables `translation, rotation, velocity, angularVelocity, rotationXYZ` instead of 
+  Note, Object3D has variables `translation, rotation, velocity, angularVelocity, rotationXYZ` instead of
   `r, rot, v, w, isrot123` of `FreeMotion`.
   Furthermore, `angularVelocity` is resolved in the parent `Object3D` whereas `w` in `FreeMotion(obj1=.., obj2=..., ..)` is resolved in
   `obj2` and not in `obj1`. This means in particular that the init/start value `FreeMotion(.., w=Var(start=w_start)...)` needs
@@ -150,9 +175,9 @@ julia -JModia3D_sysimage.so  (otherwise)
 **Non-backwards compatible changes**
 
 - Since Modia3D 0.11.0 is based on Modia 0.9.0, the non-backwards compatible changes of Modia have also an effect on Modia3D
-  (for details, see the [release notes of Modia 0.9.0](https://github.com/ModiaSim/Modia.jl/releases/tag/v0.9.0)). 
+  (for details, see the [release notes of Modia 0.9.0](https://github.com/ModiaSim/Modia.jl/releases/tag/v0.9.0)).
   Typically, this should give problems only in seldomly occuring corner cases.
- 
+
 
 ### Version 0.10.4
 
@@ -165,10 +190,10 @@ julia -JModia3D_sysimage.so  (otherwise)
   (usage see Installation notes above or README.md file).
 
 - New keyword `Scene(provideAnimationHistory=true)` in order to store animation data compactly during a simulation run.
-  After `simulate!(instantiatedModel, ...)`, the animation data of a `Model3D(..)` can be retrieved as dictionary via the new 
+  After `simulate!(instantiatedModel, ...)`, the animation data of a `Model3D(..)` can be retrieved as dictionary via the new
   function `get_animationHistory(instantiatedModel, modelPathAsString)`
 
-- Improvements of the MPR algorithm (which determines the distances between Object3Ds). 
+- Improvements of the MPR algorithm (which determines the distances between Object3Ds).
 
 
 ### Version 0.10.2
