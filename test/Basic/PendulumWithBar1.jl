@@ -54,6 +54,6 @@ phi = getValues(pendulumWithBar, "pendulum.rev.phi")
 @usingModiaPlot
 plot(pendulumWithBar, "pendulum.rev.flange.phi", figure=1)
 
-writeSignalTable("PendulumWithBar1.jl", pendulumWithBar; indent=2, log=true)
+writeSignalTable("PendulumWithBar1.json", pendulumWithBar; indent=2, log=true)
 
 end

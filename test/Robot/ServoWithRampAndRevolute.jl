@@ -102,7 +102,7 @@ servoParameters = Map(
                   )
 
 TestServo = Model3D(
-    world = Object3D(feature=Scene()),
+    world = Object3D(feature=Scene(nominalLength=0.2)),
     body  = Object3D(feature = Solid(
             shape = FileMesh(filename = arm_joint_1_obj), massProperties = MassPropertiesFromShapeAndMass(mass=m1), visualMaterial=vmat1)),
     obj2  = Object3D(parent = :body, translation = translation1, rotation = rotation1),

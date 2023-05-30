@@ -15,7 +15,7 @@ axisValue
 
 ## Rotation Matrices
 
-Functions to construct rotation matrices `R::SMatrix{3,3,F,9}` rotating a 
+Functions to construct rotation matrices `R::SMatrix{3,3,F,9}` rotating a
 coordinate-system/frame 1 into a coordinate-system/frame 2.
 
 | Function                                         | Description                                        |
@@ -31,6 +31,7 @@ coordinate-system/frame 1 into a coordinate-system/frame 2.
 | [`Modia3D.rotAxis`](@ref)(axis,positive,angle)   | Rotate around `angle` if `positive`, else `-angle` |
 | [`Modia3D.rot_e`](@ref)(e, angle)                | Rotate around `angle` along unit vector `e`        |
 | [`Modia3D.rot_nxy`](@ref)(nx, ny)                | `nx`/`ny` are in x/y-direction of frame 2          |
+| [`Modia3D.rot_nxz`](@ref)(nx, nz)                | `nx`/`nz` are in x/z-direction of frame 2          |
 | [`Modia3D.from_q`](@ref)(q)                      | Return rotation matrix from quaternion `q`         |
 
 
@@ -55,12 +56,13 @@ rot123
 rotAxis
 rot_e
 rot_nxy
+rot_nxz
 from_q
 ```
 
 ## Quaternions
 
-Functions to construct quaternions `q::SVector{4,F}` rotating a 
+Functions to construct quaternions `q::SVector{4,F}` rotating a
 coordinate-system/frame 1 into a coordinate-system/frame 2.
 
 | Function                                          | Description                                |
@@ -73,6 +75,7 @@ coordinate-system/frame 1 into a coordinate-system/frame 2.
 | [`Modia3D.qrot123`](@ref)(angle1, angle2, angle3) | Rotate around angles along x,y,z-axes      |
 | [`Modia3D.qrot_e`](@ref)(e, angle)                | Rotate around `angle` along unit vector `e`|
 | [`Modia3D.qrot_nxy`](@ref)(nx, ny)                | `nx`/`ny` are in x/y-direction of frame 2  |
+| [`Modia3D.qrot_nxz`](@ref)(nx, nz)                | `nx`/`nz` are in x/z-direction of frame 2  |
 | [`Modia3D.from_R`](@ref)(R)                       | Return `q` from rotation matrix `R`        |
 
 
@@ -85,6 +88,7 @@ qrot3
 qrot123
 qrot_e
 qrot_nxy
+qrot_nxz
 from_R
 ```
 

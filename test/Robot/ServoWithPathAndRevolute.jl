@@ -1,5 +1,6 @@
 module ServoWithPathAndRevolute
 
+using Base: Float64
 using Modia3D
 
 include("$(Modia3D.modelsPath)/Blocks.jl")
@@ -98,30 +99,39 @@ servoParameters = Map(
                       )
                   )
 
-referencePath1 = Modia3D.PathPlanning.ReferencePath(names = ["angle2"],
-                                            position = [0.0],
-                                            v_max = [2.68512],
-                                            a_max = [1.5])
+initPosition = [0.0]
 
-Modia3D.PathPlanning.ptpJointSpace(referencePath = referencePath1, positions = [0.0; 0.3; 0.0])
+function robotProgram(robotActions)
+    addReferencePath(robotActions,
+        names = ["angle2"],
+        position = initPosition,
+        v_max = [2.68512],
+        a_max = [1.5])
+
+    ptpJointSpace(robotActions, [0.0; 0.3; 0.0])
+
+    return nothing
+end
 
 
-getReferencePath() = referencePath1
+# getReferencePath() = referencePath1
 
 TestServo = Model3D(
-    world = Object3D(feature=Scene()),
+    world = Object3D(feature=Scene(nominalLength=0.2)),
     body  = Object3D(feature=Solid(shape=FileMesh(filename=arm_joint_2_obj),
                                    massProperties=MassPropertiesFromShapeAndMass(mass=m2),
                                    visualMaterial=vmat1)),
     obj2  = Object3D(parent=:body, translation=translation2),
 
-    rev = RevoluteWithFlange(obj1=:world, obj2=:obj2, axis=axis, phi=Var(init=getRefPathInitPosition(referencePath1, 1)), w=Var(init=0.0)),
+    rev = RevoluteWithFlange(obj1=:world, obj2=:obj2, axis=axis, phi=Var(init = initPosition[1]), w=Var(init=0.0)),
+
 
     servo = Servo | servoParameters,
-    refPath = Var(hideResult=true),
+    modelActions = ModelActions(world=:world, actions=robotProgram),
+    currentAction = Var(hideResult=true),
     equations=:[
-        refPath = calculateRobotMovement(getReferencePath(), instantiatedModel),
-        servo.refLoadAngle = getRefPathPosition(refPath, 1)
+        currentAction = executeActions(modelActions),
+        servo.refLoadAngle = getRefPathPosition(currentAction, 1)
     ],
 
     connect = :[

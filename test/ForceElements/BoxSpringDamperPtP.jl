@@ -10,7 +10,7 @@ SpringDamper = Model3D(
     Damping = 2.0,
     visualMaterial = VisualMaterial(color="IndianRed1", transparency=0.5),
     world = Object3D(feature=Scene(gravityField=UniformGravityField(g=9.81, n=[0, 0, -1]),
-                                   nominalLength=:Length)),
+                                   nominalLength=:(2*Length))),
     worldFrame = Object3D(parent=:world,
                           feature=Visual(shape=CoordinateSystem(length=:Length))),
     box = Object3D(parent=:world, fixedToParent=false,
@@ -30,7 +30,12 @@ dtmax = 0.1
 requiredFinalStates = [-0.0317899616936806, -0.031789987944650766, -0.13960438446373588, -0.22639392571053196, -0.22639355519359725, -0.09585537982617036, -0.04370174242082521, 0.04366049248771943, 0.0009545457607853683, 0.8435417114212301, -0.8435409897813606, 1.1525522669027586e-7]
 simulate!(springDamper, stopTime=stopTime, dtmax=dtmax, log=true, requiredFinalStates=requiredFinalStates)
 
+showInfo(springDamper)
+
 @usingModiaPlot
 plot(springDamper, ["box.translation", "box.velocity", "box.rotation", "box.angularVelocity"], figure=1)
+plot(springDamper, ["force.distance", "force.deflection", "force.velocity"], figure=2)
+plot(springDamper, ["force.springForce", "force.damperForce", "force.force"], figure=3)
+plot(springDamper, ["force.forceVector"], figure=4)
 
 end

@@ -1,7 +1,8 @@
 module ModiaInterface
 
 export Model3D
-export Object3D, Scene, Visual, Solid
+export Object3D, Scene
+export Visual, Solid
 export Box, Beam, Cylinder, Sphere, Ellipsoid
 export Cone, Capsule, GearWheel, Grid, SpringShape
 export CoordinateSystem, FileMesh, ModelicaShape
@@ -10,16 +11,20 @@ export VisualMaterial
 export MassProperties, MassPropertiesFromShape
 export MassPropertiesFromShapeAndMass
 export UniformGravityField
-export RefPath, ptpJointSpace, scheduleReferenceMotion
-export calculateRobotMovement
+export ptpJointSpace
+export executeActions
 export getRefPathPosition, getRefPathInitPosition, getVariables
-export Fix
+export Fix, Free
 export Revolute, RevoluteWithFlange
 export Prismatic, PrismaticWithFlange
 export singularRem, FreeMotion, change_rotSequenceInNextIteration!
-export Bushing, SpringDamperPtP
+export WorldForce, WorldTorque, Bushing, SpringDamperPtP
+export FreeMotion2
 
-export buildModel3D!, get_animationHistory
+export ModelActions, ActionAttach, ActionRelease, ActionReleaseAndAttach, ActionDelete, EventAfterPeriod, ActionWait
+export addReferencePath
+
+export build_Model3D!, get_animationHistory
 
 import OrderedCollections
 import Modia3D

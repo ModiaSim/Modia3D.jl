@@ -25,7 +25,7 @@ beam = Modia3D.Shapes.Visual(shape=Modia3D.Shapes.Beam(axis=1, length=1.0, width
 spring = Modia3D.Shapes.Visual(shape=Modia3D.Shapes.Spring(axis=3, length=1.0, diameter=3.0,
     windings=10, wireDiameter=0.2), visualMaterial=material2)
 gearWheel = Modia3D.Shapes.Visual(shape=Modia3D.Shapes.GearWheel(axis=3, diameter=3.0,
-    length=1.0, innerDiameter=2.4, teeth=30, angle=0.2), visualMaterial=material2)
+    length=1.0, innerDiameter=2.4, rootDiameter=2.7, teeth=30, angle=0.2), visualMaterial=material2)
 coordsys = Modia3D.Shapes.Visual(shape=Modia3D.Shapes.CoordinateSystem(length=2.0))
 grid= Modia3D.Shapes.Visual(shape=Modia3D.Shapes.Grid(axis=3, length=3.0, width=1.0, distance=0.1, lineWidth=2.0))
 

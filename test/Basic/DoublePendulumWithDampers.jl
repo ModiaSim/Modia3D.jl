@@ -25,7 +25,7 @@ Bar = Model(
 
 DoublePendulum = Model3D(
     Lx = 1.0,
-    world = Object3D(feature=Scene()),
+    world = Object3D(feature=Scene(nominalLength=2.0)),
     worldFrame = Object3D(parent=:world,
                           feature=Visual(shape=CoordinateSystem(length=:(Lx/2)))),
     bar1 = Bar | Map(Lx=:Lx),

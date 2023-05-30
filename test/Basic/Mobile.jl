@@ -87,7 +87,7 @@ function createMobile(depth)
     end
 end
 Mobile = Model3D(
-    world      = Object3D(feature=Scene(gravityField=UniformGravityField(g=9.81, n=[0, -1, 0]), enableContactDetection=false, nominalLength=0.2*barLength(depthMax), enableVisualization=enableVisualization, animationFile=animationFile)),
+    world      = Object3D(feature=Scene(gravityField=UniformGravityField(g=9.81, n=[0, -1, 0]), enableContactDetection=false, nominalLength=0.5*barLength(depthMax), enableVisualization=enableVisualization, animationFile=animationFile)),
     worldFrame = Object3D(parent = :world, feature = Visual(shape = CoordinateSystem(length=rodLength))),
     top        = createMobile(depthMax),
     rev0       = RevoluteWithDamping(obj1 = :world, obj2 = :(top.rod.frame1), phi_start=0.2)

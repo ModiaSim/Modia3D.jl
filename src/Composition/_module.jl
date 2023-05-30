@@ -22,7 +22,7 @@ module Composition
 
 export MultibodyData
 
-export instantiateModel3D!
+export initSegment_Model3D!
 export initialize, initAnalysis!, performAnalysis!, closeAnalysis!, visualize!, visualizeWorld!
 export updatePosition!, update!
 export RotationVariables, RCardan123
@@ -71,13 +71,9 @@ export fullName, instanceName
 
 # export updateSimulationModel!
 
-export InteractionBehavior, Gripper, Movable, Lockable, NoInteraction
-
 export rot123fromR, rot132fromR, Rfromrot123, Rfromrot132
 
 export supportPoint, boundingBox!, contactPointIsLocallyBijectiveToNormal
-
-@enum InteractionBehavior Gripper Movable Lockable NoInteraction
 
 
 using StaticArrays
@@ -108,6 +104,8 @@ include(joinpath("joints", "Fix.jl"))
 include(joinpath("joints", "Revolute.jl"))
 include(joinpath("joints", "Prismatic.jl"))
 
+include(joinpath("ForceElements", "WorldForce.jl"))
+include(joinpath("ForceElements", "WorldTorque.jl"))
 include(joinpath("ForceElements", "Bushing.jl"))
 include(joinpath("ForceElements", "SpringDamperPtP.jl"))
 

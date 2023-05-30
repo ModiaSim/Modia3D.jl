@@ -12,7 +12,8 @@ makedocs(
         "tutorial/GettingStarted.md",
         "tutorial/HierarchicalModels.md",
         "tutorial/RecursiveModels.md",
-        "tutorial/CollisionHandling.md"
+        "tutorial/CollisionHandling.md",
+        "tutorial/SegmentedSimulation.md"
      ],
      "Components" => [
         "Components/Object3D.md"

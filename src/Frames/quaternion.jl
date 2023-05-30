@@ -91,8 +91,8 @@ function from_R(R::SMatrix{3,3,F,9};
     return dot(q, q_guess) >= 0 ? SVector{4,F}(q) : SVector{4,F}(-q)
 end
 
-from_R(R::AbstractMatrix; q_guess::AbstractVector=NullQuaternion(F)) where F <: Modia3D.VarFloatType=
-    from_R(SMatrix{3,3,F,9}(R); q_guess=SVector{4,F}(q_guess))
+#from_R(R::AbstractMatrix; q_guess::AbstractVector=NullQuaternion(F)) where F <: Modia3D.VarFloatType=
+#    from_R(SMatrix{3,3,F,9}(R); q_guess=SVector{4,F}(q_guess))
 
 
 
@@ -207,8 +207,45 @@ isapprox(q1,q2)   # returns true
 isapprox(q1,q3)   # returns true
 ```
 """
-qrot_nxy(nx, ny)::SVector{4,F} = from_R(rot_nxy(nx, ny))
+qrot_nxy(nx::SVector{3,F}, ny::SVector{3,F}) where F <: Modia3D.VarFloatType =
+    SVector{4,F}(from_R(rot_nxy(nx, ny)))
+qrot_nxy(nx::AbstractVector, ny::AbstractVector) = qrot_nxy(SVector{3,Float64}(nx), SVector{3,Float64}(ny))
 
+
+"""
+    q = Modia3D.qrot_nxz(nx, nz)
+
+It is assumed that the two input vectors `nx` and `nz` are resolved in frame 1 and
+are directed along the x and z axis of frame 2.
+The function returns the quaternion `q` to rotate from frame 1 to frame 2.
+
+The function is robust in the sense that it returns always a quaternion `q`,
+even if `nx` is not orthogonal to `nz` or if one or both vectors have zero length.
+This is performed in the following way:
+If `nx` and `nz` are not orthogonal to each other, first a unit vector `ex` is
+determined that is orthogonal to `nz` and is lying in the plane spanned by
+`nx` and `nz`. If `nx` and `nz` are parallel or nearly parallel to each other
+or `nx` is a vector with zero or nearly zero length, a vector `ex` is selected
+arbitrarily such that `ex` and `ez` are orthogonal to each other.
+If both `nx` and `nz` are vectors with zero or nearly zero length, an
+arbitrary quaternion `q` is returned.
+
+# Example
+
+```julia
+using Unitful
+import Modia3D
+
+q1 = Modia3D.qrot3(90u"°")
+q2 = Modia3D.qrot_nxz([0, 1  , 0  ], [0, 0, 1  ])
+q3 = Modia3D.qrot_nxz([0, 1.1, 1.1], [0, 0, 0.9])
+isapprox(q1,q2)   # returns true
+isapprox(q1,q3)   # returns true
+```
+"""
+qrot_nxz(nx::SVector{3,F}, nz::SVector{3,F}) where F <: Modia3D.VarFloatType =
+    SVector{4,F}(from_R(rot_nxz(nx, nz)))
+qrot_nxz(nx::AbstractVector, nz::AbstractVector) = qrot_nxz(SVector{3,Float64}(nx), SVector{3,Float64}(nz))
 
 
 resolve1(q::SVector{4,F}, v2::SVector{3,F}) where F <: Modia3D.VarFloatType =

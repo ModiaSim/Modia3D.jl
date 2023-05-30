@@ -15,7 +15,7 @@ end
 =#
 
 mutable struct SimVis_Renderer
-    velements::AbstractVector{Composition.Object3D}  # Objects to be visualized
+    velements::Vector{Composition.Object3D}  # Objects to be visualized
     ids::Vector{Ptr{Nothing}}                # ids[i] is the SimVis id of velements[i]
     isInitialized::Bool                      # = true, if SimVis is initialized (SimVis_init was called)
     host::String
@@ -66,16 +66,16 @@ end
 struct ProfessionalEdition <: Modia3D.AbstractDLR_VisualizationRenderer
     simVis::SimVis_Renderer
 
-    ProfessionalEdition(info; host="127.0.0.1",port=11000,sync=false) =
-        new( SimVis_Renderer(info, host=host,port=port,sync=sync) )
+    ProfessionalEdition(info; host="127.0.0.1", port=11000, sync=false) =
+        new( SimVis_Renderer(info, host=host, port=port, sync=sync) )
 end
 
 
 struct CommunityEdition <: Modia3D.AbstractDLR_VisualizationRenderer
     simVis::SimVis_Renderer
 
-    CommunityEdition(info; host="127.0.0.1",port=11000,sync=false) =
-        new( SimVis_Renderer(info, host=host,port=port,sync=sync,professionalEdition=false) )
+    CommunityEdition(info; host="127.0.0.1", port=11000, sync=false) =
+        new( SimVis_Renderer(info, host=host, port=port, sync=sync, professionalEdition=false) )
 end
 
 
@@ -163,12 +163,12 @@ function getSimVisInfo()
     # Print info message
     if isProfessionalEdition
         println("   Renderer: Professional edition of the DLR_Visualization library.\n",
-                "             (", dll_name, ")")
+                "   (", dll_name, ")")
 
     else
-        println("   Renderer: Community edition of the DLR_Visualization library",
-                "\n             (", dll_name, ",",
-                "\n              -> the renderer supports only a subset of the Modia3D functionality).\n")
+        println("   Renderer: Community edition of the DLR_Visualization library.\n",
+                "   (", dll_name, ")\n",
+                "   Community edition supports only a subset of the Modia3D functionality.")
     end
 
     return (directory, dll_name, isProfessionalEdition, false)

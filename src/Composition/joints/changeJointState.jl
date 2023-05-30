@@ -1,42 +1,15 @@
-
-# a free moving object will be gripped
-function changeJointFromFreeMotionToFix!(obj)
-    obj.joint = fixedJoint
-#    obj.parent.hasChildJoint = true
+# a free moving object is fixed to his parent (gripping)
+function changeJointFromFreeMotionToFix!(obj1::Object3D{F}, obj2::Object3D{F}) where F <: Modia3D.VarFloatType
+    FixInternal{Float64}(child=obj2) #fixedJoint
+    obj2.fixedToParent = true
+    return nothing
 end
 
-# a fixed object will be released
-function changeJointFromFixToFreeMotion!(obj)
-    r = obj.r_rel
-    q = Modia3D.from_R(obj.R_rel)
-    v = Modia3D.resolve2(obj.parent.R_abs,
-        (obj.v0 - obj.parent.v0) )
-    w = Modia3D.resolve2(obj.parent.R_abs,
-        (obj.w - obj.parent.w) )
-    #=
-    println("r ", r)
-    println("q ", q)
-    println("v ", v)
-    println("w ", w)
-    println("obj.v0 ", obj.v0)
-    println("obj.parent.v0 ", obj.parent.v0)
-    println("obj.w ", obj.w)
-    println("obj.parent.w ", obj.parent.w)
-    =#
-    obj.joint = FreeMotion(obj;
-                r_start = r,
-                q_start = q,
-                v_start = v,
-                w_start = w)
-#    obj.parent.hasChildJoint = true
+# a fixed object is allowed to move freely (release)
+function changeJointFromFixToFreeMotion!(obj1::Object3D{F}, obj2::Object3D{F}) where F <: Modia3D.VarFloatType
 
-# resolve2 R*v
-# resolve1 R'*v
+    FreeMotion{Float64}(; obj1=obj1, obj2=obj2, path=obj2.path, r=obj2.r_abs, rot=Modia3D.rot123fromR(obj2.R_abs), v=obj2.v0, w=obj2.w, hiddenStates=true, wResolvedInParent=true)
 
-#    obj.joint = FreeMotion(obj;
-#                    r_start = obj.r_abs,
-#                    q_start = Modia3D.from_R(obj.R_abs) )
-                   # v_start=v_start,
-                   # w_start=w_start) #, v_start = v_start, q_start = obj.R_abs,
-
+    obj2.fixedToParent = false
+    return nothing
 end

@@ -13,7 +13,8 @@ massAndGeoSphere = MassPropertiesFromShape()
 ConvexPartitions = Model3D(
     gravField = UniformGravityField(g=9.81, n=[0, -1, 0]),
     world = Object3D(feature=Scene(gravityField=:gravField,
-                                   mprTolerance = 1.0e-13)),
+                                   nominalLength=2.0,
+                                   mprTolerance=1.0e-13)),
 
     sphere = Object3D(parent=:world, fixedToParent=false,
                       translation=[0.0, 2.0, 0.0],

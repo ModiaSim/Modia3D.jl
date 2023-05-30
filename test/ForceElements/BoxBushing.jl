@@ -19,7 +19,7 @@ BoxBushing = Model3D(
     IMoment = 0.1,
     visualMaterial = VisualMaterial(color="IndianRed1", transparency=0.5),
     world = Object3D(feature=Scene(gravityField=UniformGravityField(g=9.81, n=[0, 0, -1]),
-                                   nominalLength=:Length)),
+                                   nominalLength=:(2*Length))),
     worldFrame = Object3D(parent=:world,
                           feature=Visual(shape=CoordinateSystem(length=:Length))),
     box = Object3D(parent=:world, fixedToParent=false,
@@ -46,5 +46,8 @@ simulate!(boxBushing, stopTime=stopTime, dtmax=dtmax, log=true, requiredFinalSta
 
 @usingModiaPlot
 plot(boxBushing, ["box.translation", "box.velocity", "box.rotation", "box.angularVelocity"], figure=1)
+plot(boxBushing, ["force.translation", "force.velocity", "force.rotation", "force.rotationVelocity"], figure=2)
+plot(boxBushing, ["force.springForce", "force.damperForce", "force.forceVector"], figure=3)
+plot(boxBushing, ["force.springTorque", "force.damperTorque", "force.torque", "force.torqueVector"], figure=4)
 
 end

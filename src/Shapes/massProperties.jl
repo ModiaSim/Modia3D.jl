@@ -52,23 +52,50 @@ function Base.show(io::IO, mp::MassProperties)
 end
 
 # Constructor a: mass, centerOfMass and entries of inertia tensor are optional
-#                --> if nothing special is defined it takes predefined values (= zero values)
+"""
+    massProps = MassProperties(;
+        mass::Number = 0,
+        centerOfMass::Real = [0.0, 0.0, 0.0],
+        Ixx::Real = 0.0,
+        Iyy::Real = 0.0,
+        Izz::Real = 0.0,
+        Ixy::Real = 0.0,
+        Ixz::Real = 0.0,
+        Iyz::Real = 0.0)
+
+Return mass properties of a [`Solid`](@ref).
+
+# Arguments
+- `mass`: Mass of the solid [kg].
+- `centerOfMass`: Position vector from the Object3D frame to the center of mass, resolved in Object3D frame [m].
+- `Ixx`: x-moment of inertia [kg.m^2].
+- `Iyy`: y-moment of inertia [kg.m^2].
+- `Izz`: z-moment of inertia [kg.m^2].
+- `Ixy`: xy-product of inertia [kg.m^2].
+- `Ixz`: zx-product of inertia [kg.m^2].
+- `Iyz`: yz-product of inertia [kg.m^2].
+
+# Notes
+- The moments and products of inertia are defined with respect to the center of mass, resolved in the Object3D frame.
+- The products of inertia are defined in the [physical correct representation](https://en.wikipedia.org/wiki/Moment_of_inertia#Definition_2) (i.e. with negative sign) and are therefore directly used as off-diagonal inertia tensor elements.
+- Attention: [Some CAE applications use products of inertia defined with inversed sign](https://en.wikipedia.org/wiki/Moment_of_inertia#Alternate_inertia_convention).
+"""
 MassProperties{F}(; mass::Number=F(0.0), centerOfMass=Modia3D.ZeroVector3D(F),
-               Ixx::Number=F(0.0), Iyy::Number=F(0.0), Izz::Number=F(0.0),
-               Ixy::Number=F(0.0), Ixz::Number=F(0.0), Iyz::Number=F(0.0)) where F <: Modia3D.VarFloatType =
-                  MassProperties{F}(mass, centerOfMass, [Ixx Ixy Ixz; Ixy Iyy Iyz; Ixz Iyz Izz])
+                    Ixx::Number=F(0.0), Iyy::Number=F(0.0), Izz::Number=F(0.0),
+                    Ixy::Number=F(0.0), Ixz::Number=F(0.0), Iyz::Number=F(0.0)) where F <: Modia3D.VarFloatType =
+    MassProperties{F}(mass, centerOfMass, [Ixx Ixy Ixz; Ixy Iyy Iyz; Ixz Iyz Izz])
 # Constructor b: shape and mass is given, center of mass and inertia tensor is
 #                calculated via shape --> constructor 0 is called
 MassProperties{F}(shape::Modia3D.AbstractGeometry, mass::Number) where F <: Modia3D.VarFloatType =
-                     MassProperties{F}(F(mass), centroid(shape), inertiaMatrix(shape,F(mass)))
+    MassProperties{F}(F(mass), centroid(shape), inertiaMatrix(shape,F(mass)))
 # Constructor c: shape and material is given, mass is computed via volume of
 #                shape and density --> constructor b is called
 MassProperties{F}(shape::Modia3D.AbstractGeometry, material::SolidMaterial) where F <: Modia3D.VarFloatType =
-                     MassProperties{F}(shape, material.density*volume(shape))
+    MassProperties{F}(shape, material.density*volume(shape))
 # Constructor d: shape and materialName is given, material must be defined in
 #                solidMaterialPalette --> constructor c is called
 MassProperties{F}(shape::Modia3D.AbstractGeometry, materialName::AbstractString) where F <: Modia3D.VarFloatType =
-                     MassProperties{F}(shape, solidMaterialPalette[1][materialName])
+    MassProperties{F}(shape, solidMaterialPalette[1][materialName])
 
 
 createMassProperties(::Type{F}, massProperties::MassProperties, shape, solidMaterial) where F <: Modia3D.VarFloatType = massProperties

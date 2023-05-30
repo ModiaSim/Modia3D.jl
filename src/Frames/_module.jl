@@ -26,8 +26,8 @@ export NullRotation  , assertRotationMatrix
 export NullQuaternion, assertQuaternion
 export ZeroVector3D  , axisValue
 
-export  rot1,  rot2,  rot3,  rot123, rotAxis,  rot_e,  rot_nxy, from_q
-export qrot1, qrot2, qrot3, qrot123,          qrot_e, qrot_nxy, from_R
+export  rot1,  rot2,  rot3,  rot123, rotAxis,  rot_e,  rot_nxy,  rot_nxz, from_q
+export qrot1, qrot2, qrot3, qrot123,          qrot_e, qrot_nxy, qrot_nxz, from_R
 
 export resolve1, resolve2, absoluteRotation, relativeRotation, inverseRotation
 export planarRotationAngle, eAxis

@@ -83,3 +83,16 @@ struct Fix{F <: Modia3D.VarFloatType}
         end
     end
 end
+
+
+struct FixInternal{F <: Modia3D.VarFloatType}
+    function FixInternal{F}(; child::Object3D{F}) where F <: Modia3D.VarFloatType
+
+        child.jointIndex = 0
+        child.ndof       = 0
+
+        child.joint     = FixedJoint{F}()
+        child.jointKind = FixKind
+        return child
+    end
+end

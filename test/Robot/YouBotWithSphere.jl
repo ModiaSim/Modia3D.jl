@@ -91,19 +91,23 @@ T2Gripper = 1.0
 motorInertiaGripper = 0.0
 gearRatioGripper    = 1.0
 
-#### ----------- Path Planning ------------------
-referencePath1 = Modia3D.PathPlanning.ReferencePath(
+#### ----------- Robot Program ------------------
+initPosition = [0.0,     0.0,     pi/2,   0.0,    0.0,   0.0]
+
+function robotProgram(robotActions)
+    addReferencePath(robotActions,
     names = ["angle1", "angle2", "angle3", "angle4", "angle5", "gripper"],
-    position = [0.0,     0.0,     pi/2,   0.0,    0.0,   0.0],
+    position = initPosition,
     v_max =    [2.68512, 2.68512, 4.8879, 5.8997, 5.8997, 1.0],
     a_max =    [1.5, 1.5, 1.5, 1.5, 1.5, 0.5])
-#
-Modia3D.PathPlanning.ptpJointSpace(referencePath = referencePath1, positions =
+
+    ptpJointSpace(robotActions,
     [0.0 0.0 pi/2     0.0 0.0 0.0;
     0.0  0.3 pi/2-0.3 0.0 0.0 0.0;
     0.0  0.0 0.0      0.0 0.0 0.0])
 
-getReferencePath() = referencePath1
+    return nothing
+end
 
 # Controller Model
 Controller = Model(
@@ -275,7 +279,7 @@ featureBody5 = Solid(shape = FileMesh(filename = arm_joint_5_obj), massPropertie
 linkParameters1 = Map(
                     parent1 = Par(value = :(armBase_b)),
                     featureBody = featureBody1, # Par(value = :featureBody1),
-                    initRefPos = referencePath1.position[1],
+                    initRefPos = initPosition[1],
                     trans = translation1,
                     rota = Par(value = :(rotation1))
 )
@@ -284,7 +288,7 @@ linkParameters2 = Map(
                     parent1 = Par(value = :(link1.obj2)),
                     featureBody = featureBody2, #Par(value = :featureBody2),
                     m = m2,
-                    initRefPos = referencePath1.position[2],
+                    initRefPos = initPosition[2],
                     trans = translation2,
                     rota = Par(value = :(rotation2))
 )
@@ -293,7 +297,7 @@ linkParameters3 = Map(
                     parent1 = Par(value = :(link2.obj2)),
                     featureBody = featureBody3, # Par(value = :featureBody3),
                     m = m3,
-                    initRefPos = referencePath1.position[3],
+                    initRefPos = initPosition[3],
                     trans = translation3,
                     rota = Par(value = :(rotation3))
 )
@@ -302,7 +306,7 @@ linkParameters4 = Map(
                     parent1 = Par(value = :(link3.obj2)),
                     featureBody = featureBody4, # Par(value = :featureBody4),
                     m = m4,
-                    initRefPos = referencePath1.position[4],
+                    initRefPos = initPosition[4],
                     trans = translation4,
                     rota = Par(value = :(nullRot))
 )
@@ -311,7 +315,7 @@ linkParameters5 = Map(
                     parent1 = Par(value = :(link4.obj2)),
                     featureBody = featureBody5, # Par(value = :featureBody5),
                     m = m5,
-                    initRefPos = referencePath1.position[5],
+                    initRefPos = initPosition[5],
                     trans = translation5,
                     rota = Par(value = :(rotation5))
 )
@@ -349,12 +353,13 @@ Gripper = Model(
     #                                d=d, k1=k1, k2=k2, T2=T2, gearRatio=gearRatio, referencePath=referencePath,  ref_index=6)
 )
 
-YouBot = Model3D(
+YouBot(worldName) = Model3D(
     gravField = UniformGravityField(g=9.81, n=[0,0,-1]),
         world = Object3D(feature=Scene(gravityField = :gravField, mprTolerance=1.0e-18,
-                visualizeFrames=false, defaultFrameLength=0.1,
+                visualizeFrames=false, defaultFrameLength=0.1, nominalLength=2*tableX,
                 enableContactDetection=true, elasticContactReductionFactor=1e-4)),
     base = Base,
+    worldName = Par(worldName),
     table = Table,
     ground = Ground,
 
@@ -379,15 +384,15 @@ YouBot = Model3D(
     gripper = Gripper,
 
     rev1 = RevoluteWithFlange(obj1 = :(link1.obj1), obj2 = :(link1.body),
-        axis=axisLink, phi = Var(init = getRefPathInitPosition(referencePath1, 1)), w=Var(init=0.0)),
+        axis=axisLink, phi = Var(init = initPosition[1]), w=Var(init=0.0)),
     rev2 = RevoluteWithFlange(obj1 = :(link2.obj1), obj2 = :(link2.body),
-        axis=axisLink, phi = Var(init = getRefPathInitPosition(referencePath1, 1)), w=Var(init=0.0)),
+        axis=axisLink, phi = Var(init = initPosition[1]), w=Var(init=0.0)),
     rev3 = RevoluteWithFlange(obj1 = :(link3.obj1), obj2 = :(link3.body),
-        axis=axisLink, phi = Var(init = getRefPathInitPosition(referencePath1, 1)), w=Var(init=0.0)),
+        axis=axisLink, phi = Var(init = initPosition[1]), w=Var(init=0.0)),
     rev4 = RevoluteWithFlange(obj1 = :(link4.obj1), obj2 = :(link4.body),
-        axis=axisLink, phi = Var(init = getRefPathInitPosition(referencePath1, 1)), w=Var(init=0.0)),
+        axis=axisLink, phi = Var(init = initPosition[1]), w=Var(init=0.0)),
     rev5 = RevoluteWithFlange(obj1 = :(link5.obj1), obj2 = :(link5.body),
-        axis=axisLink, phi = Var(init = getRefPathInitPosition(referencePath1, 1)), w=Var(init=0.0)),
+        axis=axisLink, phi = Var(init = initPosition[1]), w=Var(init=0.0)),
 
     servo1 = Servo,
     servo2 = Servo,
@@ -395,15 +400,16 @@ YouBot = Model3D(
     servo4 = Servo,
     servo5 = Servo,
 
-    refPath = Var(hideResult=true),
+    modelActions = ModelActions(world=:world, actions=robotProgram),
+    currentAction = Var(hideResult=true),
 
     equations=:[
-        refPath = calculateRobotMovement(getReferencePath(), instantiatedModel),
-        servo1.refLoadAngle = getRefPathPosition(refPath, 1),
-        servo2.refLoadAngle = getRefPathPosition(refPath, 2),
-        servo3.refLoadAngle = getRefPathPosition(refPath, 3),
-        servo4.refLoadAngle = getRefPathPosition(refPath, 4),
-        servo5.refLoadAngle = getRefPathPosition(refPath, 5)
+        currentAction = executeActions(modelActions),
+        servo1.refLoadAngle = getRefPathPosition(currentAction, 1),
+        servo2.refLoadAngle = getRefPathPosition(currentAction, 2),
+        servo3.refLoadAngle = getRefPathPosition(currentAction, 3),
+        servo4.refLoadAngle = getRefPathPosition(currentAction, 4),
+        servo5.refLoadAngle = getRefPathPosition(currentAction, 5)
     ],
 
     connect = :[
@@ -423,7 +429,7 @@ modelParameters = Map(
     servo5 = servoParameters5,
 )
 
-youbotModel = YouBot | modelParameters
+youbotModel = YouBot("world") | modelParameters
 
 youbot = @instantiateModel(youbotModel, unitless=true, logCode=false, log=false)
 

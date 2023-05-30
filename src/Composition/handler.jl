@@ -6,7 +6,7 @@
 #
 
 
-function build_tree!(scene::Scene, world::Object3D)::Nothing
+function build_tree!(scene::Scene{F}, world::Object3D{F})::Nothing where F <: Modia3D.VarFloatType
     tree                = scene.tree
     stack               = scene.stack
     allCollisionElements = scene.allCollisionElements
@@ -37,7 +37,7 @@ end
 
 insert_and_dedup!(v::Vector, x) = (splice!(v, searchsorted(v,x), x); v)
 
-function addIndicesOfCutJointsToSuperObj(scene::Scene)
+function addIndicesOfCutJointsToSuperObj(scene::Scene{F})::Nothing where F <: Modia3D.VarFloatType
     tmp = collect(values(scene.noCPairsHelp))
     for i=1:length(tmp)
         if length(tmp[i]) == 2
@@ -50,7 +50,7 @@ function addIndicesOfCutJointsToSuperObj(scene::Scene)
 end
 
 
-function createAABB_noCPairs(scene::Scene{F}, superObjsRow::SuperObjsRow) where F <: Modia3D.VarFloatType
+function createAABB_noCPairs(scene::Scene{F}, superObjsRow::SuperObjsRow{F})::Nothing where F <: Modia3D.VarFloatType
     if length(superObjsRow.superObjCollision.superObj) > 0 && !isempty(superObjsRow.noCPair)
         push!(scene.noCPairs, superObjsRow.noCPair)
     else
@@ -67,7 +67,7 @@ function createAABB_noCPairs(scene::Scene{F}, superObjsRow::SuperObjsRow) where 
 end
 
 
-function changeParentToRootObj(newParent::Object3D, obj::Object3D)
+function changeParentToRootObj(newParent::Object3D{F}, obj::Object3D{F})::Nothing where F <: Modia3D.VarFloatType
     if !isRootObject(newParent)
         error("from changeParentToRootObj: new parent is not a root object!")
     end
@@ -88,7 +88,7 @@ function changeParentToRootObj(newParent::Object3D, obj::Object3D)
 end
 
 
-function changeParent(newParent::Object3D, obj::Object3D)
+function changeParent(newParent::Object3D{F}, obj::Object3D{F})::Nothing where F <: Modia3D.VarFloatType
     if isRootObject(newParent)
         child_r_abs  = obj.r_abs
         child_R_abs  = obj.R_abs
@@ -106,10 +106,11 @@ function changeParent(newParent::Object3D, obj::Object3D)
     else
         error("from changeParent: this should not happen")
     end
+    return nothing
 end
 
 
-function getRootObj(obj::Object3D)
+function getRootObj(obj::Object3D{F}) where F <: Modia3D.VarFloatType
     if isRootObject(obj)
         return obj
     else
@@ -117,7 +118,7 @@ function getRootObj(obj::Object3D)
 end; end
 
 
-function getWorldObj(obj::Object3D)
+function getWorldObj(obj::Object3D{F}) where F <: Modia3D.VarFloatType
     root = getRootObj(obj)
     if isWorld(root)
         return root
@@ -127,7 +128,7 @@ function getWorldObj(obj::Object3D)
 end
 
 # the indices of super objects, which can't collide, are stored in a list
-function fillStackOrBuffer!(scene::Scene, superObj::SuperObjsRow, obj::Object3D, rootSuperObj::Object3D)::Nothing
+function fillStackOrBuffer!(scene::Scene{F}, superObj::SuperObjsRow{F}, obj::Object3D{F}, rootSuperObj::Object3D{F})::Nothing where F <: Modia3D.VarFloatType
     n_children = length(obj.children)
     help = fill(false, n_children)
 
@@ -170,7 +171,7 @@ end
 #     these elements form together a super object
 #   elements which are directly connected with a joint can't collide
 #     these elements are excluded from the collision list
-function build_superObjs!(scene::Scene{F}, world::Object3D)::Nothing where F <: Modia3D.VarFloatType
+function build_superObjs!(scene::Scene{F}, world::Object3D{F})::Nothing where F <: Modia3D.VarFloatType
     if !scene.initSuperObj
     stack = scene.stack
     buffer = scene.buffer
@@ -299,7 +300,96 @@ function build_superObjs!(scene::Scene{F}, world::Object3D)::Nothing where F <: 
 end
 
 
-function visualizeWorld!(world::Object3D; scene = Scene())::Nothing
+function rebuild_superObjs!(scene::Scene{F}, world::Object3D{F})::Nothing where F <: Modia3D.VarFloatType
+    empty!(scene.stack)
+    empty!(scene.buffer)
+    empty!(scene.treeAccVelo)
+    empty!(scene.allowedToMove)
+    empty!(scene.superObjs)
+    empty!(scene.noCPairs)
+    empty!(scene.noCPairsHelp)
+    empty!(scene.AABB)
+
+    stack = scene.stack
+    buffer = scene.buffer
+    treeAccVelo  = scene.treeAccVelo
+
+    world.computeAcceleration = true
+    world.isRootObj = true # all objs stored in buffer are root objs
+    push!(buffer, world)
+    actPos = 1
+    nPos   = 1
+
+    hasOneCollisionSuperObj  = false
+    hasMoreCollisionSuperObj = false
+
+    while actPos <= nPos
+        superObjsRow = SuperObjsRow{F}()
+        AABBrow      = Vector{Basics.BoundingBox{F}}[]
+        rootSuperObj = buffer[actPos]
+
+        if rootSuperObj != world
+            assignAll(scene, superObjsRow, rootSuperObj, world, actPos)
+            push!(treeAccVelo, rootSuperObj)
+        end
+        fillStackOrBuffer!(scene, superObjsRow, rootSuperObj, rootSuperObj)
+
+        if isMovable(rootSuperObj)
+            push!(scene.allowedToMove, true)
+        else
+            push!(scene.allowedToMove, nothing)
+        end
+
+        while length(stack) > 0
+            frameChild = pop!(stack)
+            assignAll(scene, superObjsRow, frameChild, world, actPos)
+            fillStackOrBuffer!(scene, superObjsRow, frameChild, rootSuperObj)
+        end
+
+        if length(superObjsRow.superObjCollision.superObj) > 0 && hasOneCollisionSuperObj == true
+            hasMoreCollisionSuperObj = true
+        elseif length(superObjsRow.superObjCollision.superObj) > 0
+            hasOneCollisionSuperObj = true
+        end
+
+        createAABB_noCPairs(scene, superObjsRow)
+        push!(scene.superObjs, superObjsRow)
+        nPos = length(buffer)
+        actPos += 1
+    end
+    addIndicesOfCutJointsToSuperObj(scene)
+    @assert(length(scene.noCPairs) == length(scene.superObjs))
+
+    #=
+    println("first elements of tree")
+    println("[")
+    for a in scene.treeAccVelo
+      println("parent = ", ModiaMath.fullName(a.parent))
+      println(ModiaMath.fullName(a))
+      println("[")
+      for b in a.children
+        println("children = ", ModiaMath.fullName(b))
+      end
+      println("]")
+    end
+    println("]")
+=#
+
+
+    if hasMoreCollisionSuperObj
+        scene.collide = true
+    else
+        scene.collide = false
+    end
+    scene.initSuperObj = true
+
+
+    return nothing
+end
+
+
+
+function visualizeWorld!(world::Object3D{F}; scene = Scene())::Nothing where F <: Modia3D.VarFloatType
     scene.analysis = Modia3D.KinematicAnalysis
     initAnalysis!(world, scene)
     updatePosition!(world)
@@ -310,7 +400,7 @@ function visualizeWorld!(world::Object3D; scene = Scene())::Nothing
 end
 
 
-function makeTreeAvailable(scene::Scene)
+function makeTreeAvailable(scene::Scene{F})::Nothing where F <: Modia3D.VarFloatType
     if scene.options.useOptimizedStructure
         scene.treeForComputation = scene.treeAccVelo
     else
@@ -324,6 +414,7 @@ function makeTreeAvailable(scene::Scene)
         end
         scene.treeForComputation = scene.tree
     end
+    return nothing
 end
 
 
@@ -377,11 +468,11 @@ function chooseAndBuildUpTree(world::Object3D{F}, scene::Scene{F}) where F <: Mo
 end
 
 
-function initAnalysis!(world::Object3D, scene::Scene)
+function initAnalysis!(world::Object3D{F}, scene::Scene{F}) where F <: Modia3D.VarFloatType
     # Initialize spanning tree and visualization (if visualization desired and visual elements present)
     chooseAndBuildUpTree(world, scene)
     if scene.visualize
-        initializeVisualization(Modia3D.renderer[1], scene.allVisuElements)
+        initializeVisualization(Modia3D.renderer[1], scene)
     end
     return nothing
 end
@@ -393,14 +484,15 @@ function errorMessageCollision(functionName::String)
 end
 
 
-function visualize!(scene::Scene, time)
+function visualize!(scene::Scene{F}, time)::Nothing where F <: Modia3D.VarFloatType
     if scene.visualize
         visualize!(Modia3D.renderer[1], time)
     end
+    return nothing
 end
 
 
-function emptyScene!(scene)
+function emptyScene!(scene::Scene{F})::Nothing where F <: Modia3D.VarFloatType
     empty!(scene.stack)
     empty!(scene.buffer)
 
@@ -420,10 +512,11 @@ function emptyScene!(scene)
 
     # Close Analysis
     scene.initAnalysis = false
+    return nothing
 end
 
 
-function closeAnalysis!(scene::Scene)
+function closeAnalysis!(scene::Scene{F})::Nothing where F <: Modia3D.VarFloatType
     # Close Visualisation
     closeVisualization(Modia3D.renderer[1])
     empty!(scene.allVisuElements)
@@ -433,4 +526,5 @@ function closeAnalysis!(scene::Scene)
         closeContactDetection!(scene.options.contactDetection)
     end
     emptyScene!(scene)
+    return nothing
 end

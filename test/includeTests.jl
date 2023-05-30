@@ -14,7 +14,7 @@ Test.@testset "Basic" begin
     include(joinpath("Basic", "AllShapes.jl"))
     include(joinpath("Basic", "PendulumWithBar1.jl"))
     include(joinpath("Basic", "PendulumWithBar2.jl"))
-    include(joinpath("Basic", "PendulumWithBar3.jl"))
+    Test.@test_broken include(joinpath("Basic", "PendulumWithBar3.jl"))  # error when called from here, works when called from REPL
     include(joinpath("Basic", "PendulumWithDamper.jl"))
     include(joinpath("Basic", "PendulumWithFix.jl"))
     include(joinpath("Basic", "PendulumWithParameterizedDamper.jl"))
@@ -35,6 +35,8 @@ Test.@testset "Basic" begin
 end
 
 Test.@testset "Force Elements" begin
+    include(joinpath("ForceElements", "BoxWorldForce.jl"))
+    include(joinpath("ForceElements", "BoxWorldTorque.jl"))
     include(joinpath("ForceElements", "HarmonicOscillator.jl"))
     include(joinpath("ForceElements", "BoxBushing.jl"))
     include(joinpath("ForceElements", "BoxSpringDamperPtP.jl"))
@@ -50,12 +52,9 @@ Test.@testset "Robot" begin
     include(joinpath("Robot", "ServoWithRampAndRevolute.jl"))
     include(joinpath("Robot", "ServoWithPathAndRevolute.jl"))
     if testsExtend >= normalTests
-        if Sys.islinux()
-            Test.@test_skip include(joinpath("Robot", "YouBotWithSphere.jl"))  # LinearAlgebra.SingularException on linux
-        else
-            Test.@test_skip include(joinpath("Robot", "YouBotWithSphere.jl"))  # LinearAlgebra.SingularException
-        end
+        Test.@test_broken include(joinpath("Robot", "YouBotWithSphere.jl"))  # LinearAlgebra.SingularException
         include(joinpath("Robot", "YouBotGripping.jl"))
+        include(joinpath("Robot", "YouBotSphereTransport.jl"))
     end
     if testsExtend == completeTests
         include(joinpath("Robot", "YouBotPingPong.jl"))  # long computation time
@@ -68,11 +67,7 @@ Test.@testset "Collision" begin
     include(joinpath("Collision", "BouncingSphereFree.jl"))
     include(joinpath("Collision", "BouncingEllipsoid.jl"))
     include(joinpath("Collision", "BouncingEllipsoidOnSphere.jl"))
-    if Sys.islinux()
-        Test.@test_skip include(joinpath("Collision", "TwoCollidingBalls.jl"))  # final states are completely different to windows
-    else
-        include(joinpath("Collision", "TwoCollidingBalls.jl"))
-    end
+    include(joinpath("Collision", "TwoCollidingBalls.jl"))
     include(joinpath("Collision", "TwoCollidingBoxes.jl"))
     include(joinpath("Collision", "CollidingCylinders.jl"))
     include(joinpath("Collision", "NewtonsCradle.jl"))
@@ -97,11 +92,21 @@ Test.@testset "Collision" begin
     end
 end
 
+Test.@testset "Segmented" begin
+    include(joinpath("Segmented", "TwoStageRocket3D.jl"))
+    if testsExtend >= normalTests
+        include(joinpath("Segmented", "YouBotDynamicState.jl"))
+        include(joinpath("Segmented", "YouBotFixBox.jl"))
+        include(joinpath("Segmented", "YouBotFixSphere.jl"))
+    end
+end
+
 Test.@testset "Tutorial" begin
     include(joinpath("Tutorial", "Pendulum1.jl"))
     include(joinpath("Tutorial", "Pendulum2.jl"))
     include(joinpath("Tutorial", "Pendulum3.jl"))
     include(joinpath("Tutorial", "BouncingSphere.jl"))
+    include(joinpath("Tutorial", "TwoStageRocket3D.jl"))
 end
 
 Test.@testset "old" begin

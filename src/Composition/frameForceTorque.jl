@@ -53,7 +53,7 @@ end
 
 Apply torque vector `torque` resolved in frame `frameCoord` at origins of frames `frameMeas` (negative) and `frameOrig` (positive).
 
-If `frameCoord` is omitted torque` is resolved in absolute coordinates.
+If `frameCoord` is omitted `torque` is resolved in absolute coordinates.
 """
 function applyFrameTorquePair!(frameMeas::Object3D{F}, frameOrig::Object3D{F}, torque::SVector{3,F}; frameCoord::Union{Object3D, Nothing}=nothing) where F <: Modia3D.VarFloatType
     applyFrameTorque!(frameMeas, -torque; frameCoord=frameCoord)

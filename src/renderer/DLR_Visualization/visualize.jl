@@ -33,31 +33,33 @@ FMat(mat) = SMatrix{3,3,Float64,9}(Modia3D.convertToFloat64(mat))
     SimVis_setBaseObject(simVis, id, Cint(0), Cint(shape), rabs, Rabs, mvecSize,
         material.color, Cint(material.wireframe), Cint(material.reflectslight),
         material.shininess, extras, material.transparency, Cint(0), Cint(material.shadowMask))
+
+    return nothing
 end
 
 
-function visualizeObject(obj::Composition.Object3D, id::Ptr{Nothing}, simVis::SimVis_Renderer)
+function visualizeObject(obj::Composition.Object3D{F}, id::Ptr{Nothing}, simVis::SimVis_Renderer) where F <: Modia3D.VarFloatType
     shapeKind = obj.shapeKind
     r_abs = FVec(obj.r_abs)
     R_abs = FMat(obj.R_abs)
 
     if shapeKind == Modia3D.SphereKind
-        sphere::Modia3D.Shapes.Sphere = obj.shape
+        sphere::Modia3D.Shapes.Sphere{F} = obj.shape
         visualizeShape(simVis, r_abs, R_abs, SimVisSphere, id, obj.visualMaterial,
                        FVal(sphere.diameter), FVal(sphere.diameter), FVal(sphere.diameter))
 
     elseif shapeKind == Modia3D.EllipsoidKind
-        ellipsoid::Modia3D.Shapes.Ellipsoid = obj.shape
+        ellipsoid::Modia3D.Shapes.Ellipsoid{F} = obj.shape
         visualizeShape(simVis, r_abs, R_abs, SimVisSphere, id, obj.visualMaterial,
         FVal(ellipsoid.lengthX), FVal(ellipsoid.lengthY), FVal(ellipsoid.lengthZ))
 
     elseif shapeKind == Modia3D.BoxKind
-        box::Modia3D.Shapes.Box = obj.shape
+        box::Modia3D.Shapes.Box{F} = obj.shape
         visualizeShape(simVis, r_abs, R_abs, SimVisBox, id, obj.visualMaterial,
         FVal(box.lengthX), FVal(box.lengthY), FVal(box.lengthZ))
 
     elseif shapeKind == Modia3D.CylinderKind
-        cylinder::Modia3D.Shapes.Cylinder = obj.shape
+        cylinder::Modia3D.Shapes.Cylinder{F} = obj.shape
         if cylinder.innerDiameter == 0.0
             visualizeShape(simVis, r_abs, Shapes.rotateAxis2z(cylinder.axis, R_abs), SimVisCylinder, id, obj.visualMaterial,
             FVal(cylinder.diameter), FVal(cylinder.diameter), FVal(cylinder.length))
@@ -67,7 +69,7 @@ function visualizeObject(obj::Composition.Object3D, id::Ptr{Nothing}, simVis::Si
         end
 
     elseif shapeKind == Modia3D.ConeKind
-        cone::Modia3D.Shapes.Cone = obj.shape
+        cone::Modia3D.Shapes.Cone{F} = obj.shape
         if cone.axis == 1
             dr = SVector{3,Float64}([0.25*FVal(cone.length), 0.0, 0.0])
         elseif cone.axis == 2
@@ -80,12 +82,12 @@ function visualizeObject(obj::Composition.Object3D, id::Ptr{Nothing}, simVis::Si
         FVal(cone.diameter), FVal(cone.diameter), FVal(cone.length); extras=@MVector[FVal(cone.topDiameter/cone.diameter), 0.0, 0.0])
 
     elseif shapeKind == Modia3D.CapsuleKind
-        capsule::Modia3D.Shapes.Capsule = obj.shape
+        capsule::Modia3D.Shapes.Capsule{F} = obj.shape
         visualizeShape(simVis, r_abs, Shapes.rotateAxis2z(capsule.axis, R_abs), SimVisCapsule, id, obj.visualMaterial,
         FVal(capsule.diameter), FVal(capsule.diameter), FVal(capsule.length))
 
     elseif shapeKind == Modia3D.BeamKind
-        beam::Modia3D.Shapes.Beam = obj.shape
+        beam::Modia3D.Shapes.Beam{F} = obj.shape
         visualizeShape(simVis, r_abs, Shapes.rotateAxis2x(beam.axis, R_abs), SimVisBeam, id, obj.visualMaterial,
         FVal(beam.length), FVal(beam.width), FVal(beam.thickness) )
 
@@ -128,4 +130,5 @@ function visualizeObject(obj::Composition.Object3D, id::Ptr{Nothing}, simVis::Si
                              textShape.offset, Cint(textShape.alignment), Cint(0))
 
     end
+    return nothing
 end

@@ -18,18 +18,32 @@ const emptyTwoObject3DObject = EmptyTwoObject3DObject()
 
 
 mutable struct InteractionManner
-    gripper::Bool
-    movable::Bool
-    lockable::Bool
-    movablePos::Int64
-    originPos::Int64
-    actualPos::Int64
-    InteractionManner() = new(false, false, false, 0, 0, 0)
+    movable::Bool                    # For Object3Ds which can be gripped and displaced
+    lockable::Bool                   # For Object3Ds which lock movable Object3Ds to other Objs
+    originPos::Int64                 # each object knows its origin order in the buffer
+    movablePos::Int64                # each object which belongs to a movable super object, knows its order in the buffer
 
-    function InteractionManner(interactionBehavior::InteractionBehavior)
-        new(false, false, false, 0, 0, 0)
+
+    InteractionManner() = new(false, false, 0)
+
+    function InteractionManner(lockable::Bool, assemblyRoot::Bool)
+        if lockable && assemblyRoot
+            @error("Currently, lockable = true and assemblyRoot = true it is not implemented.")
+            return new(false, false, 0)
+        end
+        if assemblyRoot
+            movable = true
+            lockable = false
+        elseif lockable
+            movable = false
+            lockable = true
+        else
+            movable = false
+            lockable = false
+        end
+        new(movable, lockable, 0)
     end
-end
+ end
 
 
 
@@ -88,7 +102,7 @@ With respect to an approach where the rotation is described with *quaternions*, 
 adaptive rotation sequence handling has the benefit that all integrators can be used
 (a quaternion description works with an overdetermined set of states and therefore standard
 integrators with step size control need non-trivial code changes).
-  
+
 # Example
 
 ```julia
@@ -105,14 +119,14 @@ model = Model3D(
 """
 mutable struct Object3D{F <: Modia3D.VarFloatType} <: Modia3D.AbstractObject3D
     # Tree connection structure of Object3D (for efficient processing of Object3Ds)
-    parent::Object3D{F}                 # Parent Object3D (if parent===Object3D, no parent is yet defined)
-    children::Vector{Object3D{F}}       # All Object3Ds, where Object3D is the parent
-    isRootObj::Bool                  # = true, if it is a root obj of a super obj
-    interactionManner::InteractionManner
+    parent::Object3D{F}                  # Parent Object3D (if parent===Object3D, no parent is yet defined)
+    children::Vector{Object3D{F}}        # All Object3Ds, where Object3D is the parent
+    isRootObj::Bool                      # = true, if it is a root obj of a super obj
+    interactionManner::InteractionManner # stores interaction behavior for gripping
 
     # Joint properties, defining the relative motion from parent to Object3D
     joint::Modia3D.AbstractJoint     # ::Fix, ::Revolute, ...
-
+    fixedToParent::Bool
     # Efficient access of joint properties
     jointKind::JointKind             # Kind of joint
     jointIndex::Int                  # scene.<jointType>[jointIndex] = joint
@@ -133,7 +147,7 @@ mutable struct Object3D{F <: Modia3D.VarFloatType} <: Modia3D.AbstractObject3D
     # Mass properties.
     #   The root of each super object has potentially hasMass=true. All other Object3Ds have hasMass=false.
     #   The initial (fixed) mass properties defined in the Modia model are stored in feature.
-    hasMass::Bool                 # = false, if m and I_CM are zero. = true, otherwise.
+    hasMass::Bool           # false, if m and I_CM are zero. = true, otherwise.
     m::F                    # Mass in [kg]
     r_CM::SVector{3,F}      # Position vector from Object3D to Center of Mass resolved in Object3D in [m]
     I_CM::SMatrix{3,3,F,9}  # Inertia matrix at Center of Mass resolved in a frame in the center of mass that is parallel to Object3D in [kg*m^2]
@@ -141,16 +155,16 @@ mutable struct Object3D{F <: Modia3D.VarFloatType} <: Modia3D.AbstractObject3D
     # Additional information associated with Object3D
     feature::Union{Modia3D.AbstractObject3DFeature, Modia3D.AbstractScene}  # Optional feature associated with Object3D
     twoObject3Dobject::Vector{Modia3D.AbstractTwoObject3DObject}  # Optional AbstractTwoObject3DObject object associated with Object3D
-    hasCutJoint::Bool          # = true if it has a cut joint
-    hasForceElement::Bool      # = true if it has a force element
-    hasChildJoint::Bool        # = true if its child has a joint
-    computeAcceleration::Bool  # = true if acceleration needs to be computed
+    hasCutJoint::Bool          # true if it has a cut joint
+    hasForceElement::Bool      # true if it has a force element
+    hasChildJoint::Bool        # true if its child has a joint
+    computeAcceleration::Bool  # true if acceleration needs to be computed
 
     # internal shortcuts to avoid costly runtime dispatch
     shapeKind::Shapes.ShapeKind             # marks the defined shape
     shape::Modia3D.AbstractShape            # stores shape defined in Solid or Visual
     visualMaterial::Shapes.VisualMaterial   # stores visualMaterial defined in Solid or Visual
-    centroid::SVector{3,F}            # stores the centroid of a solid shape
+    centroid::SVector{3,F}                  # stores the centroid of a solid shape
 
     # = True: Coordinate system of Object3D is always visualized
     # = False: Coordinate system of Object3D is never visualized
@@ -185,6 +199,8 @@ mutable struct Object3D{F <: Modia3D.VarFloatType} <: Modia3D.AbstractObject3D
         parent::Union{Object3D,Nothing} = nothing,
         path::String="",
         fixedToParent::Bool = true,
+        lockable::Bool = false,
+        assemblyRoot::Bool = false,
         translation     = Modia3D.ZeroVector3D(F),
         rotation        = Modia3D.ZeroVector3D(F),
         velocity        = Modia3D.ZeroVector3D(F),
@@ -192,7 +208,6 @@ mutable struct Object3D{F <: Modia3D.VarFloatType} <: Modia3D.AbstractObject3D
         feature = nothing,
         angularVelocityResolvedInParent = true,
         kwargs...) where F <: Modia3D.VarFloatType
-        interactionBehavior = Modia3D.NoInteraction
 
         if length(kwargs) > 0
             @warn "Object3D $path: Keyword arguments `$(kwargs...)` are ignored."
@@ -249,7 +264,7 @@ mutable struct Object3D{F <: Modia3D.VarFloatType} <: Modia3D.AbstractObject3D
 
             (shapeKind, shape, visualMaterial, centroid) = setShapeKind(F, feature)
             obj = new(parent, Vector{Object3D{F}}[],
-                false, InteractionManner(interactionBehavior), FixedJoint{F}(), FixKind, 0, 0, true,
+                false, InteractionManner(lockable, assemblyRoot), FixedJoint{F}(), fixedToParent, FixKind, 0, 0, true,
                 r_rel, R_rel, r_abs, R_abs,
                 Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F),
                 false, F(0.0), Modia3D.ZeroVector3D(F), SMatrix{3,3,F,9}(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
@@ -280,7 +295,7 @@ mutable struct Object3D{F <: Modia3D.VarFloatType} <: Modia3D.AbstractObject3D
             end
 
             # obj = Object3D{F}(feature, visualizeFrame=visualizeFrame, path=path)
-            obj = Object3DWithoutParent(new(), visualizeFrame = visualizeFrame, interactionBehavior = interactionBehavior, path=path)
+            obj = Object3DWithoutParent(new(), visualizeFrame = visualizeFrame, lockable=lockable, assemblyRoot=assemblyRoot, path=path)
             obj.feature = feature
             (obj.shapeKind, obj.shape, obj.visualMaterial, obj.centroid) = setShapeKind(F, feature)
         end
@@ -300,9 +315,11 @@ mutable struct Object3D{F <: Modia3D.VarFloatType} <: Modia3D.AbstractObject3D
     ## Constructor 2
     # Object3D constructor: with feature and without parent (less keywords)
     function Object3D{F}(feature;
-                    visualizeFrame::Union{Modia3D.Ternary,Bool} = Modia3D.Inherited, interactionBehavior::InteractionBehavior = Modia3D.NoInteraction,
+                    visualizeFrame::Union{Modia3D.Ternary,Bool} = Modia3D.Inherited,
+                    lockable::Bool = false,
+                    assemblyRoot::Bool = false,
                     path::String="")::Object3D where F <: Modia3D.VarFloatType
-        obj = Object3DWithoutParent( new(), visualizeFrame = visualizeFrame, interactionBehavior = interactionBehavior, path=path)
+        obj = Object3DWithoutParent( new(), visualizeFrame = visualizeFrame, lockable=lockable, assemblyRoot=assemblyRoot, path=path)
 
         obj.feature = feature
         (obj.shapeKind, obj.shape, obj.visualMaterial, obj.centroid) = setShapeKind(F, feature)
@@ -315,7 +332,8 @@ mutable struct Object3D{F <: Modia3D.VarFloatType} <: Modia3D.AbstractObject3D
     function Object3D{F}(parent::Object3D{F},
                       feature::Modia3D.AbstractObject3DFeature = emptyObject3DFeature;
                       fixed::Bool = true,
-                      interactionBehavior::InteractionBehavior = Modia3D.NoInteraction,
+                      lockable::Bool = false,
+                      assemblyRoot::Bool = false,
                       r::AbstractVector = Modia3D.ZeroVector3D(F),
                       R::Union{SMatrix{3,3,F,9},Nothing} = nothing,
                       q::Union{SVector{4,F},Nothing} = nothing,
@@ -343,7 +361,7 @@ mutable struct Object3D{F <: Modia3D.VarFloatType} <: Modia3D.AbstractObject3D
 
         (shapeKind, shape, visualMaterial, centroid) = setShapeKind(F, feature)
         obj = new(parent, Vector{Object3D{F}}[],
-              false, InteractionManner(interactionBehavior), FixedJoint{F}(), FixKind, 0, 0, true,
+              false, InteractionManner(lockable, assemblyRoot), FixedJoint{F}(), fixed, FixKind, 0, 0, true,
               r_rel, R_rel, r_abs, R_abs,
               Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F),
               false, F(0.0), Modia3D.ZeroVector3D(F), SMatrix{3,3,F,9}(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
@@ -391,7 +409,7 @@ mutable struct Object3D{F <: Modia3D.VarFloatType} <: Modia3D.AbstractObject3D
 
         (shapeKind, shape, visualMaterial, centroid) = setShapeKind(F, feature)
         new(parent, Vector{Object3D{F}}[], false,
-        InteractionManner(Modia3D.NoInteraction), FixedJoint{F}(), FixKind, 0, 0, true,
+        InteractionManner(false, false), FixedJoint{F}(), true, FixKind, 0, 0, true,
         r_rel, R_rel, r_abs, R_abs,
         Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F),
         false, F(0.0), Modia3D.ZeroVector3D(F), SMatrix{3,3,F,9}(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
@@ -435,13 +453,16 @@ end
 
 # Object3DWithoutParent is called from constructor 1 or 2 (for objs without a parent)
 function Object3DWithoutParent(obj::Object3D{F};
-                               visualizeFrame::Union{Modia3D.Ternary,Bool} = Modia3D.Inherited, interactionBehavior::InteractionBehavior = Modia3D.NoInteraction,
+                               visualizeFrame::Union{Modia3D.Ternary,Bool} = Modia3D.Inherited,
+                               lockable::Bool = false,
+                               assemblyRoot::Bool = false,
                                path::String="") where F <: Modia3D.VarFloatType
     obj.parent             = obj
     obj.children           = Vector{Object3D{F}}[]
     obj.isRootObj          = false
-    obj.interactionManner  = InteractionManner(interactionBehavior)
+    obj.interactionManner  = InteractionManner(lockable, assemblyRoot)
     obj.joint              = FixedJoint{F}()
+    obj.fixedToParent      = true
     obj.jointKind          = FixKind
     obj.jointIndex         = 0
     obj.ndof               = 0
@@ -611,21 +632,21 @@ hasChildJoint(        obj::Object3D{F}) where F <: Modia3D.VarFloatType = obj.ha
 needsAcceleration(    obj::Object3D{F}) where F <: Modia3D.VarFloatType = obj.computeAcceleration
 objectHasMass(        obj::Object3D{F}) where F <: Modia3D.VarFloatType = obj.hasMass
 isRootObject(         obj::Object3D{F}) where F <: Modia3D.VarFloatType = obj.isRootObj
-objectHasMovablePos(  obj::Object3D{F}) where F <: Modia3D.VarFloatType = !isnothing(obj.interactionManner.movablePos)
+objectHasMovablePos(  obj::Object3D{F}) where F <: Modia3D.VarFloatType = isdefined(obj.interactionManner, :movablePos)
 
 featureHasMass(obj::Object3D{F}) where F <: Modia3D.VarFloatType = featureHasMass(obj.feature)
 featureHasMass(feature::Modia3D.AbstractObject3DFeature) = false
 featureHasMass(feature::Modia3D.AbstractScene) = false
-featureHasMass(feature::Shapes.Solid)                 = !isnothing(feature.massProperties)
+featureHasMass(feature::Shapes.Solid{F}) where F <: Modia3D.VarFloatType = !isnothing(feature.massProperties)
 
-isVisible(obj::Object3D, renderer::Modia3D.AbstractRenderer) = isVisible(obj.feature, renderer)
+isVisible(obj::Object3D{F}, renderer::Modia3D.AbstractRenderer) where F <: Modia3D.VarFloatType = isVisible(obj.feature, renderer)
 isVisible(feature::Modia3D.AbstractObject3DFeature, renderer::Modia3D.AbstractRenderer) = false
 
 isVisible(feature::Modia3D.AbstractScene, renderer::Modia3D.AbstractRenderer) = false
 
 canCollide(feature::Modia3D.AbstractObject3DFeature) = false
 
-function canCollide(obj::Object3D)::Bool
+function canCollide(obj::Object3D{F})::Bool where F <: Modia3D.VarFloatType
     if typeof(obj.feature) <: Modia3D.Shapes.Solid
         if !isnothing(obj.feature.shape) && !isnothing(obj.feature.contactMaterial)
             if typeof(obj.feature.contactMaterial) == String
@@ -640,7 +661,7 @@ end
 """    rootObject3D(obj) - returns the root Object3D of all parents of obj"""
 function rootObject3D(obj::Object3D{F}) where F <: Modia3D.VarFloatType
     obj1 = obj
-    while hasParent(obj1)
+    while hasParent(obj1) && obj1.fixedToParent
         obj1 = obj1.parent
     end
     return obj1
@@ -675,7 +696,7 @@ end
 
 # Print Object3D
 function Base.show(io::IO, obj::Object3D)
-    print(io,"Object3D(path=", obj.path)
+    print(io,"Object3D(path=\"", obj.path, "\"")
     commaNeeded = true
     if hasParent(obj)
         if commaNeeded
@@ -683,14 +704,24 @@ function Base.show(io::IO, obj::Object3D)
         end
         print(io, "parent=", obj.parent.path)
     end
+    if !obj.fixedToParent
+        if commaNeeded
+            print(io,", ")
+        end
+        print(io, "fixedToParent=", obj.fixedToParent)
+    end
     if hasJoint(obj)
         if commaNeeded
             print(io,", ")
         end
         print(io, "joint=", typeof(obj.joint), "(path = \"", obj.joint.path, "\", ...)")
     end
-    if commaNeeded
-        print(io,", ")
+    if typeof(obj.feature) == Modia3D.Composition.EmptyObject3DFeature
+        print(io,")")
+    else
+        if commaNeeded
+            print(io,", ")
+        end
+        print(io, "feature=", typeof(obj.feature), "(...))")
     end
-    print(io, "feature=", typeof(obj.feature), "(...))")
 end

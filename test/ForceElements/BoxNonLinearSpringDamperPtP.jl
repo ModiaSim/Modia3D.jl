@@ -23,7 +23,7 @@ SpringDamper = Model3D(
     IMoment = 0.1,
     visualMaterial = VisualMaterial(color="IndianRed1", transparency=0.5),
     world = Object3D(feature=Scene(gravityField=UniformGravityField(g=9.81, n=[0, 0, -1]),
-                                   nominalLength=:Length)),
+                                   nominalLength=:(2*Length))),
     worldFrame = Object3D(parent=:world,
                           feature=Visual(shape=CoordinateSystem(length=:Length))),
     box = Object3D(parent=:world, fixedToParent=false,

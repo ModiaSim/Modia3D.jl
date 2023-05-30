@@ -1,4 +1,4 @@
-function getJointsAndForceElementsAndObject3DsWithoutParents!(evaluatedParameters,
+function getJointsAndForceElementsAndObject3DsWithoutParents!(evaluatedParameters::AbstractDict,
                                                               object3DWithoutParents::Vector{Object3D{F}},
                                                               revoluteObjects::Vector{Object3D{F}},
                                                               prismaticObjects::Vector{Object3D{F}},
@@ -13,7 +13,7 @@ function getJointsAndForceElementsAndObject3DsWithoutParents!(evaluatedParameter
                 if typeof(value.feature) <: Scene
                     push!(object3DWithoutParents, value)
                 else
-                    error("\n", value.path, " is an Object3D that has no parent, but no feature=Scene(..)!\nThis means no Scene is defined (exactly one Object3D must have feature=Scene(..))!")
+                    error("\n", value.path, " is an Object3D that has no parent, but no feature=Scene(..)!\n(an Object3D that has no parent must have feature=Scene(..))")
                 end
             elseif typeof(value.feature) <: Scene
                 error("\n", value.path, " is an Object3D that has feature=Scene(..) and has a parent (= ", value.parent.path, ")!\nThe Object3D with feature=Scene(..) is not allowed to have a parent!")
@@ -35,18 +35,20 @@ function getJointsAndForceElementsAndObject3DsWithoutParents!(evaluatedParameter
             push!(forceElements, value)
 
         elseif typeof(value) <: OrderedDict
-            getJointsAndForceElementsAndObject3DsWithoutParents!(value, object3DWithoutParents, revoluteObjects, prismaticObjects,
+            value1::OrderedDict = value
+            getJointsAndForceElementsAndObject3DsWithoutParents!(value1, object3DWithoutParents, revoluteObjects, prismaticObjects,
                                                                  freeMotionObjects, hiddenJointObjects, forceElements, path*"."*string(key))
         end
     end
     return nothing
 end
 
-multiBodyName(instantiatedModel, mbsPath) = mbsPath == "" ? instantiatedModel.modelName :
-                                                            instantiatedModel.modelName * "." * mbsPath
+multiBodyName(instantiatedModelName, mbsPath) = mbsPath == "" ? instantiatedModelName :
+                                                                instantiatedModelName * "." * mbsPath
 
 """
-    (world, jointObjects, forceElements) = checkMultibodySystemAndGetWorldAndJointsAndForceElements(mbsRoot)
+    (world, jointObjects, forceElements) = checkMultibodySystemAndGetWorldAndJointsAndForceElements(
+        instantiatedModelName, mbsRoot, mbsPath, FloatType)
 
 Recursively traverse model mbsRoot and perform the following actions:
 
@@ -55,7 +57,7 @@ Recursively traverse model mbsRoot and perform the following actions:
 - Check that only `world` has a `feature` entry that is a SceneOption.
 - Return (world, revoluteObjects, prismaticObjects, freeMotionObjects, hiddenJointObjects, forceElements)
 """
-function checkMultibodySystemAndGetWorldAndJointsAndForceElements(mbsRoot, mbsPath::String, FloatType::Type)
+function checkMultibodySystemAndGetWorldAndJointsAndForceElements(instantiatedModelName, mbsRoot, mbsPath::String, FloatType::Type)
     object3DWithoutParents = Object3D{FloatType}[]
     revoluteObjects    = Object3D{FloatType}[]
     prismaticObjects   = Object3D{FloatType}[]
@@ -66,14 +68,14 @@ function checkMultibodySystemAndGetWorldAndJointsAndForceElements(mbsRoot, mbsPa
                                                          freeMotionObjects, hiddenJointObjects, forceElements, mbsPath)
 
     if length(object3DWithoutParents) == 0
-        error("\n", multiBodyName(instantiatedModel, mbsPath), ": There is either no Object3D or all of them have a parent!\n",
+        error("\n", multiBodyName(instantiatedModelName, mbsPath), ": There is either no Object3D or all of them have a parent!\n",
               "(Note, there must be exactly one Object3D that has no parent and feature=Scene(..).)")
     elseif length(object3DWithoutParents) > 1
         object3DNames = "   " * object3DWithoutParents[1].path
         for i = 2:length(object3DWithoutParents)
             object3DNames *= "\n   " * object3DWithoutParents[i].path
         end
-        error("\n", instantiatedModel.modelName, ": The following ", length(object3DWithoutParents), " Object3Ds have no parents and feature=Scene(..)\n",
+        error("\n", instantiatedModelName, ": The following ", length(object3DWithoutParents), " Object3Ds have no parents and feature=Scene(..)\n",
               "(note, there must be exactly one Object3D that has no parent and feature=Scene(..)):\n", object3DNames, "\n")
     end
     world = object3DWithoutParents[1]
@@ -82,16 +84,16 @@ end
 
 
 
-function initAnalysis2!(world, timer)
+function initAnalysis2!(world::Object3D{F}, timer::TimerOutputs.TimerOutput)::Scene{F} where F <: Modia3D.VarFloatType
     # use Scene(..) of world object
     if typeof(world.feature) <: Modia3D.Composition.Scene
-        scene = world.feature
+        scene::Scene{F} = world.feature
     else
         error("Internal error of Modia3D: typeof(world.feature) = ", typeof(world.feature), ", but must be Modia3D.Composition.Scene")
     end
     scene.analysis = Modia3D.DynamicAnalysis
     scene.timer    = timer
-
+    # rebuild tree
     Modia3D.Composition.chooseAndBuildUpTree(world, scene)
 
     if !scene.options.enableContactDetection
@@ -103,63 +105,101 @@ end
 
 
 """
-    instantiateModel3D!(partiallyInstantiatedModel::Modia.SimulationModel,
-                        modelDict::AbstractDict, modelPath::String; log=false)
+    initSegment_Model3D!(partiallyInstantiatedModel::Modia.SimulationModel,
+                         modelPath::String, ID, parameters::AbstractDict; log=false)
 
-Instantiate Model3D model during evaluation of the parameters (before initialization)
+Called once before initialization of a new simulation segment to instantiate/re-initialize a Model3D model
 """
-function instantiateModel3D!(partiallyInstantiatedModel::Modia.SimulationModel{F,TimeType},
-                             modelDict::AbstractDict, modelPath::String; log=false)::Nothing where {F,TimeType}
-    if log
-        println("Modia3D.instantiateModel3D! called for path=\"$modelPath\":")
-    end
-    mbsBuild::MultibodyBuild{F,TimeType} = partiallyInstantiatedModel.buildDict[modelPath]
-    (world, revoluteObjects, prismaticObjects, freeMotionObjects, hiddenJointObjects, forceElements) = checkMultibodySystemAndGetWorldAndJointsAndForceElements(modelDict, modelPath, F)
-    
-    # Set timer in scene (so that timer is easily available in Modia3D functions)
-    
-    # Initialize force elements
-    for force in forceElements
-        initializeForceElement(force)
-    end
+function initSegment_Model3D!(partiallyInstantiatedModel::Modia.SimulationModel{F,TimeType},
+                              modelPath::String, ID, parameters::AbstractDict; log=false)::Nothing where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
+    TimerOutputs.@timeit partiallyInstantiatedModel.timer "Modia3D_0 initSegment_Model3D!" begin
+        if log
+            println("Modia3D.initSegment_Model3D! called for path=\"$modelPath\":")
+        end
 
-    # Construct MultibodyData
-    scene = initAnalysis2!(world,partiallyInstantiatedModel.timer)
-    scene.forceElements = forceElements
-    if scene.options.enableContactDetection && scene.collide
-        nz = 2
-        zStartIndex = Modia.new_z_segmented_variable!(partiallyInstantiatedModel, nz)
-        scene.zStartIndex = zStartIndex
-    else
-        nz = 0
-        zStartIndex = 0
-    end
-    mbsBuild.mbs = MultibodyData{F,TimeType}(partiallyInstantiatedModel, modelPath, world, scene,
-                                             revoluteObjects, prismaticObjects, freeMotionObjects, hiddenJointObjects,
-                                             mbsBuild.revoluteIndices, mbsBuild.prismaticIndices, mbsBuild.freeMotionIndices,
-                                             zStartIndex, nz)
-    modelDict[:qdd_hidden] = zeros(F, length(mbsBuild.mbs.hiddenGenForces))
+        mbsBuild::MultibodyBuild{F,TimeType} = Modia.get_instantiatedSubmodel(partiallyInstantiatedModel, ID)
+        # hier Gripping Sachen
 
-    if log
-        mbs = mbsBuild.mbs
-        println("  Number of degrees of freedom: ", length(mbs.revoluteObjects) + length(mbs.prismaticObjects) + 6*length(mbs.hiddenJointObjects))
-        println("  Number of revolute joints:    ", length(mbs.revoluteObjects))
-        println("  Number of prismatic joints:   ", length(mbs.prismaticObjects))
-        println("  Number of freeMotion joints:  ", length(mbs.freeMotionObjects))
-        println("  Number of Object3Ds with fixedToParent=false: ", length(mbs.hiddenJointObjects))
-    end
+        if isnothing(mbsBuild.mbs) || partiallyInstantiatedModel.nsegments == 1
+            firstSegment = true
+            (world, revoluteObjects, prismaticObjects, freeMotionObjects, hiddenJointObjects, forceElements) = checkMultibodySystemAndGetWorldAndJointsAndForceElements(partiallyInstantiatedModel.modelName, parameters, modelPath, F)
 
-    if scene.visualize
-        TimerOutputs.@timeit partiallyInstantiatedModel.timer "Modia3D_0 initializeVisualization" Modia3D.Composition.initializeVisualization(Modia3D.renderer[1], scene.allVisuElements)
-        if partiallyInstantiatedModel.options.log
-            println(    "        Modia3D: nVisualShapes = ", length(scene.allVisuElements))
-            if scene.options.enableContactDetection
-                println("                 mprTolerance  = ", scene.options.contactDetection.tol_rel)
-                println("                 contact_eps   = ", scene.options.contactDetection.contact_eps)
+            # Set timer in scene (so that timer is easily available in Modia3D functions)
+
+            # Initialize force elements
+            for force in forceElements
+                initializeForceElement(partiallyInstantiatedModel, force)
+            end
+
+            # Construct MultibodyData
+            scene = initAnalysis2!(world,partiallyInstantiatedModel.timer)
+        else
+            firstSegment = false
+            world::Object3D{F} = mbsBuild.mbs.world
+            scene::Scene{F} = mbsBuild.mbs.scene
+            #instantiatedModel = mbsBuild.mbs.instantiatedModel
+            #gripPair = scene.gripPair
+            if Modia3D.checkGrippingFeatures(scene, scene.gripPair)
+                Modia3D.changeParentOfMovableUnit!(scene, world, scene.gripPair)
+            else
+                @error("Andrea: print warning für gripping features")
+                # printWarnGrip(robotOrDepot, movableObj, waitingPeriod)
+            end
+
+            (worldDummy, revoluteObjects, prismaticObjects, freeMotionObjects, hiddenJointObjects, forceElements) = checkMultibodySystemAndGetWorldAndJointsAndForceElements(partiallyInstantiatedModel.modelName, parameters, modelPath, F)
+
+            # Set timer in scene (so that timer is easily available in Modia3D functions)
+
+            # Initialize force elements
+            for force in forceElements
+                initializeForceElement(partiallyInstantiatedModel, force)
+            end
+
+            # Construct MultibodyData
+            # rebuild MKS
+            if scene.options.useOptimizedStructure
+                rebuild_superObjs!(scene, world)
+            else
+                error("Full restart is possible only if useOptimizedStructure is enabled in SceneOptions.")
+            end
+        end
+
+        scene.forceElements = forceElements
+        if scene.options.enableContactDetection && scene.collide
+            nz = 2
+            zStartIndex = Modia.new_z_segmented_variable!(partiallyInstantiatedModel, nz)
+            scene.zStartIndex = zStartIndex
+        else
+            nz = 0
+            zStartIndex = 0
+        end
+
+        mbsBuild.mbs = MultibodyData{F,TimeType}(partiallyInstantiatedModel, modelPath, world, scene,
+                                                revoluteObjects, prismaticObjects, freeMotionObjects, hiddenJointObjects,
+                                                mbsBuild.revoluteIndices, mbsBuild.prismaticIndices, mbsBuild.freeMotionIndices,
+                                                zStartIndex, nz)
+        parameters[:qdd_hidden] = zeros(F, length(mbsBuild.mbs.hiddenGenForces))
+
+        if log
+            mbs = mbsBuild.mbs
+            println("  Number of degrees of freedom: ", length(mbs.revoluteObjects) + length(mbs.prismaticObjects) + 6*length(mbs.hiddenJointObjects))
+            println("  Number of revolute joints:    ", length(mbs.revoluteObjects))
+            println("  Number of prismatic joints:   ", length(mbs.prismaticObjects))
+            println("  Number of freeMotion joints:  ", length(mbs.freeMotionObjects))
+            println("  Number of Object3Ds with fixedToParent=false: ", length(mbs.hiddenJointObjects))
+        end
+
+        if scene.visualize && firstSegment
+            TimerOutputs.@timeit partiallyInstantiatedModel.timer "Modia3D_0 initializeVisualization" Modia3D.Composition.initializeVisualization(Modia3D.renderer[1], scene)
+            if partiallyInstantiatedModel.options.log
+                println(    "        Modia3D: nVisualShapes = ", length(scene.allVisuElements))
+                if scene.options.enableContactDetection
+                    println("                 mprTolerance  = ", scene.options.contactDetection.tol_rel)
+                    println("                 contact_eps   = ", scene.options.contactDetection.contact_eps)
+                end
             end
         end
     end
-
     return nothing
 end
 
@@ -175,11 +215,12 @@ Open Model3D:
 - Copy der(r):=v and der(rot):= f(w) into hidden derivatives.
 - Return mbs.
 """
-function openModel3D!(instantiatedModel::Modia.SimulationModel{F,TimeType}, modelPath::String, x::AbstractVector, time::TimeType)::MultibodyData{F,TimeType} where {F,TimeType}
+function openModel3D!(instantiatedModel::Modia.SimulationModel{F,TimeType}, modelPath::String, x::AbstractVector, time::TimeType)::MultibodyData{F,TimeType} where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
+    # println("bin in openModel3D ", instantiatedModel.eventHandler.restart)
     mbsBuild::MultibodyBuild{F,TimeType} = instantiatedModel.buildDict[modelPath]
 
     if isnothing(mbsBuild.mbs)
-        error("Error in Modia3D.openModel3D!: instantiateModel3D!(..) was not called.\nShould have been called during evaluation of the parameters for $modelPath!!!")
+        error("Error in Modia3D.openModel3D!: initSegment_Model3D!(..) was not called.\nShould have been called during evaluation of the parameters for $modelPath!!!")
     end
     @assert(instantiatedModel === mbsBuild.mbs.instantiatedModel)
     mbs = mbsBuild.mbs
@@ -307,11 +348,12 @@ end
 
 
 """
-    mbs = computeGeneralizedForces!(mbs::MultibodyData, qdd_hidden, _leq)
+    genForces = computeGeneralizedForces!(mbs::MultibodyData, qdd_hidden, _leq)
 
 Given the states of the joints (provided via functions setStatesXXX(..)), compute
-the generalized forces of the joints. The function returns mbs. The generalized forces
-can be accessed afterwards via functions getGenForcesXXX
+the generalized forces of the joints. The function returns genForces, that is the
+vector of generalized forces of all joints with exception of free motion joints
+(currently: generalized forces of revolute and prismatic joints).
 
 A typical computation sequence is:
 
@@ -350,13 +392,13 @@ while LinearEquationsIteration(_leq, <...>)
 end
 ```
 """
-function computeGeneralizedForces!(mbs::MultibodyData{F,TimeType}, qdd_hidden::Vector{F}, _leq)::MultibodyData{F,TimeType} where {F,TimeType}
+function computeGeneralizedForces!(mbs::MultibodyData{F,TimeType}, qdd_hidden::Vector{F}, _leq)::Vector{F} where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
     instantiatedModel = mbs.instantiatedModel
+
     TimerOutputs.@timeit instantiatedModel.timer "Modia3D computeGeneralizedForces!" begin
         storeResult   = instantiatedModel.storeResult
         leq_mode::Int = isnothing(_leq) ? -2 : _leq.mode
-        isTerminal    = Modia.isTerminal(instantiatedModel) && leq_mode == -2
-
+        isTerminalOfAllSegments::Bool = Modia.isTerminalOfAllSegments(instantiatedModel) && leq_mode == -2
 
         scene = mbs.scene
         world = mbs.world
@@ -369,8 +411,8 @@ function computeGeneralizedForces!(mbs::MultibodyData{F,TimeType}, qdd_hidden::V
         exportAnimation = scene.exportAnimation
         provideAnimationData = scene.provideAnimationData
 
-        if isTerminal  #if Modia.isTerminalOfAllSegments(sim)
-            TimerOutputs.@timeit instantiatedModel.timer "Modia3D_4 isTerminal" begin
+        if isTerminalOfAllSegments
+            TimerOutputs.@timeit instantiatedModel.timer "Modia3D_4 isTerminalOfAllSegments" begin
                 for force in forceElements
                     terminateForceElement(force)
                 end
@@ -385,8 +427,6 @@ function computeGeneralizedForces!(mbs::MultibodyData{F,TimeType}, qdd_hidden::V
             #if scene.collide
             #    closeContactDetection!(m.assembly)
             #end
-            # Do not return, since otherwise the linear system of equations cannot be solved -> error
-            #return nothing
         end
 
         # Initialize force/torque of world-frame
@@ -415,8 +455,10 @@ function computeGeneralizedForces!(mbs::MultibodyData{F,TimeType}, qdd_hidden::V
                 end # end forward recursion
 
                 # Evaluate force elements
-                for force in forceElements
-                    evaluateForceElement(force)
+                TimerOutputs.@timeit instantiatedModel.timer "Modia3D_1 evaluateForceElements" begin
+                    for force in forceElements
+                        evaluateForceElement(instantiatedModel, force, time)
+                    end
                 end
 
                 # Compute contact forces/torques
@@ -429,13 +471,12 @@ function computeGeneralizedForces!(mbs::MultibodyData{F,TimeType}, qdd_hidden::V
 
                 if leq_mode == 0
                     # Store GenForces in cache (qdd = 0)
-                    mbs.revoluteCache_h   .= mbs.revoluteGenForces
-                    mbs.prismaticCache_h  .= mbs.prismaticGenForces
+                    mbs.genForcesCache_h  .= mbs.genForces
                     mbs.freeMotionCache_h .= mbs.freeMotionGenForces
                     mbs.hiddenCache_h     .= mbs.hiddenGenForces
                 elseif leq_mode == -1
                     # Store state derivatives
-                    setHiddenStatesDerivatives!(instantiatedModel, mbs)
+                    setHiddenStatesDerivatives!(instantiatedModel, mbs, mbs.genForces)
                 end
             end
 
@@ -463,8 +504,7 @@ function computeGeneralizedForces!(mbs::MultibodyData{F,TimeType}, qdd_hidden::V
                 TimerOutputs.@timeit instantiatedModel.timer "Modia3D_2 computeObject3DForcesTorquesAndGenForces!" computeObject3DForcesTorquesAndGenForces!(mbs, tree,time)
 
                 # Add GenForces from cache (computed with qdd=0)
-                mbs.revoluteGenForces   .+= mbs.revoluteCache_h
-                mbs.prismaticGenForces  .+= mbs.prismaticCache_h
+                mbs.genForces           .+= mbs.genForcesCache_h
                 mbs.freeMotionGenForces .+= mbs.freeMotionCache_h
                 mbs.hiddenGenForces     .+= mbs.hiddenCache_h
             end
@@ -472,8 +512,27 @@ function computeGeneralizedForces!(mbs::MultibodyData{F,TimeType}, qdd_hidden::V
         elseif leq_mode == -2
             # Compute only terms needed at a communication point (currently: Only visualization + export animation)
             TimerOutputs.@timeit instantiatedModel.timer "Modia3D_3" begin
-                if storeResult && !isTerminal && (visualize || provideAnimationData)
-                    if abs(instantiatedModel.options.startTime + scene.outputCounter*instantiatedModel.options.interval - time) < 1.0e-6*(abs(time) + 1.0)
+                # objects can have interactionManner (need to rename updateVisuElements)
+                if scene.options.useOptimizedStructure
+                    for obj in scene.updateVisuElements
+                        parent = obj.parent
+                        obj.r_abs = obj.r_rel ≡ Modia3D.ZeroVector3D(F) ? parent.r_abs : parent.r_abs + parent.R_abs'*obj.r_rel
+                        obj.R_abs = obj.R_rel ≡ Modia3D.NullRotation(F) ? parent.R_abs : obj.R_rel*parent.R_abs
+
+                        # is executed only if an internal Object3D called
+                        if length( obj.visualizationFrame ) == 1
+                            obj.visualizationFrame[1].r_abs = obj.r_abs
+                            obj.visualizationFrame[1].R_abs = obj.R_abs
+                        end
+                        for mesh in obj.fileMeshConvexShapes
+                            mesh.r_abs = obj.r_abs
+                            mesh.R_abs = obj.R_abs
+                        end
+                    end
+                end
+
+                if storeResult && !isTerminalOfAllSegments && (visualize || provideAnimationData)
+                    if abs(instantiatedModel.options.startTimeFirstSegment + scene.outputCounter*instantiatedModel.options.interval - time) < 1.0e-6*(abs(time) + 1.0)
                         # Visualize at a communication point
                         scene.outputCounter += 1
                         #if sim.options.log
@@ -481,23 +540,7 @@ function computeGeneralizedForces!(mbs::MultibodyData{F,TimeType}, qdd_hidden::V
                         #end
                         # Compute positions of frames that are only used for visualization
                         TimerOutputs.@timeit instantiatedModel.timer "Modia3D_3 visualize!" begin
-                            if scene.options.useOptimizedStructure
-                                for obj in scene.updateVisuElements
-                                    parent = obj.parent
-                                    obj.r_abs = obj.r_rel ≡ Modia3D.ZeroVector3D(F) ? parent.r_abs : parent.r_abs + parent.R_abs'*obj.r_rel
-                                    obj.R_abs = obj.R_rel ≡ Modia3D.NullRotation(F) ? parent.R_abs : obj.R_rel*parent.R_abs
 
-                                    # is executed only if an internal Object3D called
-                                    if length( obj.visualizationFrame ) == 1
-                                        obj.visualizationFrame[1].r_abs = obj.r_abs
-                                        obj.visualizationFrame[1].R_abs = obj.R_abs
-                                    end
-                                    for mesh in obj.fileMeshConvexShapes
-                                        mesh.r_abs = obj.r_abs
-                                        mesh.R_abs = obj.R_abs
-                                    end
-                                end
-                            end
                             if visualize
                                 Modia3D.visualize!(Modia3D.renderer[1], time)
                             end
@@ -524,5 +567,5 @@ function computeGeneralizedForces!(mbs::MultibodyData{F,TimeType}, qdd_hidden::V
         end
     end
 
-    return mbs
+    return mbs.genForces
 end

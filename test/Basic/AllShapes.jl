@@ -25,7 +25,8 @@ geomAndSolidMat = MassPropertiesFromShape()
 # Objects3D
 AllShapes = Model3D(
     gravField = UniformGravityField(g=9.81, n=[0, 0, -1]),
-    world = Object3D(feature=Scene(gravityField=:gravField)),
+    world = Object3D(feature=Scene(gravityField=:gravField,
+                                   nominalLength=5.0)),
     worldFrame = Object3D(parent=:world, feature=Visual(shape=CoordinateSystem(length=0.7))),
 
     # solid objects
@@ -108,7 +109,7 @@ AllShapes = Model3D(
         SpringShape(axis=3, length=0.8, diameter=0.3, wireDiameter=0.04, windings=5), visualMaterial=vmatGreen), translation=[6.0, 0.0, 1.0]),
 
     visualGearWheel = Object3D(parent=:world, feature=Visual(shape=
-        GearWheel(axis=3, diameter=0.5, length=0.8, innerDiameter=0.25, angle=15/180*pi, teeth=16), visualMaterial=vmatGreen), translation=[7.0, 0.0, 1.0]),
+        GearWheel(axis=3, diameter=0.5, length=0.8, innerDiameter=0.25, rootDiameter=0.45, angle=15/180*pi, teeth=16), visualMaterial=vmatGreen), translation=[7.0, 0.0, 1.0]),
 
     visualText = Object3D(parent=:world, feature=Visual(shape=
         TextShape(text="Modia3D", axisAlignment=Modia3D.XZ_Plane, alignment=Modia3D.Left)), translation=[8.0, 0.0, 1.0]),
