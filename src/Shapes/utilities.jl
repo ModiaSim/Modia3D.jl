@@ -42,23 +42,34 @@ end
 #          see: https://github.com/kmammou/v-hacd
 
 function getMeshInfos(filename::AbstractString, scaleFactor::SVector{3,Float64})
+    mesh = FileIO.load(filename, pointtype=MeshIO.Point3{Float64}, facetype = MeshIO.TriangleFace{MeshIO.OneIndex{Int64}}) # ::MeshIO.Mesh
+    coordinates = MeshIO.coordinates(mesh) # ::Vector{Point3{Float64}} # ::StructArrays.StructVector
+
+    nCoordinates::Int64 = length(coordinates)
+    facesMesh = MeshIO.faces(mesh) # ::Vector{MeshIO.TriangleFace{MeshIO.OneIndex{Int64}}}
+    nfacesMesh::Int64 = length(facesMesh)
+
+
     objPoints = Vector{SVector{3,Float64}}()
+    #objPoints = fill(SVector{3,Float64}(0,0,0), length(coordinates))
     facesIndizes = Vector{SVector{3,Int64}}()
+    #facesIndizes = fill(SVector{3,Float64}(0,0,0), length(facesMesh))
     vertices = Vector{SVector{3,Float64}}()
     faces = Vector{SVector{3,Int64}}()
     centroid::SVector{3,Float64} = Modia3D.ZeroVector3D(Float64)
     shortestEdge::Float64 = 0.0
     longestEdge::Float64 = 0.0
 
-    mesh = FileIO.load(filename, pointtype=MeshIO.Point3{Float64}, facetype=MeshIO.TriangleFace{MeshIO.OneIndex{Int64}})
-    for i in 1:length(MeshIO.coordinates(mesh))
-        objPoint = SVector{3,Float64}(MeshIO.coordinates(mesh)[i][1]*scaleFactor[1],
-                                      MeshIO.coordinates(mesh)[i][2]*scaleFactor[2],
-                                      MeshIO.coordinates(mesh)[i][3]*scaleFactor[3])
+    for i in 1:nCoordinates
+        objPoint::SVector{3,Float64} = SVector{3,Float64}(coordinates[i][1]*scaleFactor[1],
+                                      coordinates[i][2]*scaleFactor[2],
+                                      coordinates[i][3]*scaleFactor[3])
         push!(objPoints, objPoint)
+        #objPoints[i] = objPoint
     end
-    for i in 1:length(MeshIO.faces(mesh))
-        push!(facesIndizes, MeshIO.faces(mesh)[i])
+    for i in 1:nfacesMesh
+        push!(facesIndizes, facesMesh[i])
+        #facesIndizes[i] = facesMesh[i]
     end
 
     (vertices, faces) = cleanMesh(objPoints, facesIndizes)

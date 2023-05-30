@@ -208,7 +208,7 @@ Beam(; kwargs...) = Beam{Float64}(; kwargs...)
 
 """
     FileMesh(; filename::AbstractString="", scale=SVector{3,Float64}(1.0,1.0,1.0),
-    useMaterialColor::Bool=false, smoothNormals::Bool=false, convexPartition::Bool=false)
+    doubleSided::Bool=false, useMaterialColor::Bool=false, smoothNormals::Bool=false, convexPartition::Bool=false)
 
 Generate a new solid or visual shape representing a mesh.
 The reference frame = Object3D frame is defined by the mesh data.
@@ -217,6 +217,7 @@ The reference frame = Object3D frame is defined by the mesh data.
 - `filename` defines the name of the mesh file.
 - `scale` defines the scaling factors to be applied in x-, y- and z-direction.
 - `useMaterialColor` defines if the material color of the shape is to be considered.
+- `doubleSided` defines if rendering of mesh backside is enabled.
 - `smoothNormals` defines if smoothing of mesh normals is active.
 - `convexPartition` defines if partitioning into convex sub meshes is active.
 
@@ -230,6 +231,7 @@ mutable struct FileMesh <: Modia3D.AbstractGeometry
     filename::AbstractString
     scaleFactor::SVector{3,Float64}
     useMaterialColor::Bool
+    doubleSided::Bool
     smoothNormals::Bool
     convexPartition::Bool
 
@@ -242,15 +244,23 @@ mutable struct FileMesh <: Modia3D.AbstractGeometry
     volume::Float64
     centroidAlgo::SVector{3,Float64}
     inertia::SMatrix{3,3,Float64,9}
-    function FileMesh(; filename::AbstractString="", scale=SVector{3,Float64}(1.0,1.0,1.0),
-        useMaterialColor::Bool=false, smoothNormals::Bool=false, convexPartition::Bool=false)
+    function FileMesh(; filename::AbstractString="",
+                        scale=SVector{3,Float64}(1.0,1.0,1.0),
+                        useMaterialColor::Bool=false,
+                        doubleSided::Bool=false,
+                        smoothNormals::Bool=false,
+                        convexPartition::Bool=false)
         if !isfile(filename)
-        error("FileMesh(\"$filename\",...): file not found.")
+            error("FileMesh(\"$filename\",...): file not found.")
         end
         @assert(scale[1] >= 0.0)
         @assert(scale[2] >= 0.0)
         @assert(scale[3] >= 0.0)
-        fileMesh = new(filename, scale, useMaterialColor, smoothNormals, convexPartition)
+        fileMesh = new(filename, scale, useMaterialColor, doubleSided, smoothNormals, convexPartition)
         return fileMesh
     end
+end
+
+function Base.show(io::IO, obj::FileMesh)
+    print(io,"FileMesh(filename=\"", obj.filename, "\", ...)")
 end

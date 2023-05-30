@@ -187,16 +187,60 @@ isapprox(R1,R3)   # returns true
 ```
 """
 function rot_nxy(nx::SVector{3,F}, ny::SVector{3,F}) where F <: Modia3D.VarFloatType
-  abs_nx  = norm(nx)
-  e1      = abs_nx < F(1e-10) ?  SVector{3,F}(1.0, 0.0, 0.0) : nx/abs_nx
-  n3_aux  = cross(e1, ny)
-  e2_aux  = dot(n3_aux,n3_aux) > F(1e-6) ? ny : ( abs(e1[1]) > F(1e-6) ? SVector{3,F}(0.0,1.0,0.0)
-                                                                       : SVector{3,F}(1.0,0.0,0.0))
-  n3_aux2 = cross(e1, e2_aux)
-  e3      = normalize(n3_aux2)
-  R       = SMatrix{3,3,F,9}(vcat(e1', cross(e3,e1)', e3'))
+    abs_nx  = norm(nx)
+    e1      = abs_nx < F(1e-10) ?  SVector{3,F}(1.0, 0.0, 0.0) : nx/abs_nx
+    n3_aux  = cross(e1, ny)
+    e2_aux  = dot(n3_aux, n3_aux) > F(1e-6) ? ny : ( abs(e1[1]) > F(1e-6) ? SVector{3,F}(0.0, 1.0, 0.0)
+                                                                          : SVector{3,F}(1.0, 0.0, 0.0))
+    n3_aux2 = cross(e1, e2_aux)
+    e3      = normalize(n3_aux2)
+    R       = SMatrix{3,3,F,9}(vcat(e1', cross(e3,e1)', e3'))
 end
-rot_nxy(nx::AbstractVector, ny::AbstractVector) = rot_nxy(SVector{3,F}(nx), SVector{3,F}(ny))
+rot_nxy(nx::AbstractVector, ny::AbstractVector) = rot_nxy(SVector{3,Float64}(nx), SVector{3,Float64}(ny))
+
+
+"""
+    R = Modia3D.rot_nxz(nx, nz)
+
+It is assumed that the two input vectors `nx` and `nz` are resolved in frame 1 and
+are directed along the x and y axis of frame 2.
+The function returns the rotation matrix R to rotate from frame 1 to frame 2.
+
+The function is robust in the sense that it returns always a rotation matrix R,
+even if `nx` is not orthogonal to `nz` or if one or both vectors have zero length.
+This is performed in the following way:
+If `nx` and `nz` are not orthogonal to each other, first a unit vector `ex` is
+determined that is orthogonal to `nz` and is lying in the plane spanned by
+`nx` and `nz`. If `nx` and `nz` are parallel or nearly parallel to each other
+or `nx` is a vector with zero or nearly zero length, a vector `ex` is selected
+arbitrarily such that `ex` and `ez` are orthogonal to each other.
+If both `nx` and `nz` are vectors with zero or nearly zero length, an
+arbitrary rotation matrix is returned.
+
+# Example
+
+```julia
+using Unitful
+import Modia3D
+
+R1 = Modia3D.rot3(90u"°")
+R2 = Modia3D.rot_nxz([0, 1  , 0  ], [0, 0, 1  ])
+R3 = Modia3D.rot_nxz([0, 1.1, 1.1], [0, 0, 0.9])
+isapprox(R1,R2)   # returns true
+isapprox(R1,R3)   # returns true
+```
+"""
+function rot_nxz(nx::SVector{3,F}, nz::SVector{3,F}) where F <: Modia3D.VarFloatType
+    abs_nz  = norm(nz)
+    e3      = abs_nz < F(1e-10) ?  SVector{3,F}(0.0, 0.0, 1.0) : nz/abs_nz
+    n2_aux  = cross(e3, nx)
+    e1_aux  = dot(n2_aux, n2_aux) > F(1e-6) ? nx : (abs(e3[3]) > F(1e-6) ? SVector{3,F}(1.0, 0.0, 0.0)
+                                                                         : SVector{3,F}(0.0, 0.0, 1.0))
+    n2_aux2 = cross(e3, e1_aux)
+    e2      = normalize(n2_aux2)
+    R       = SMatrix{3,3,F,9}(vcat(cross(e2,e3)', e2', e3'))
+end
+rot_nxz(nx::AbstractVector, nz::AbstractVector) = rot_nxz(SVector{3,Float64}(nx), SVector{3,Float64}(nz))
 
 
 """
@@ -215,7 +259,7 @@ vector `v1::SVector{3,F}` (vector resolved in frame 1) given
 """
 resolve1(R::SMatrix{3,3,F,9}, v2::SVector{3,F})   where F <: Modia3D.VarFloatType = R'*v2
 resolve1(R::SMatrix{3,3,F,9}, v2::AbstractVector) where F <: Modia3D.VarFloatType = R'*SVector{3,F}(v2)
-resolve1(rotation::AbstractVector, v2::AbstractVector; rotationXYZ=true) where F <: Modia3D.VarFloatType =
+resolve1(rotation::AbstractVector, v2::AbstractVector; rotationXYZ=true) =
     rotationXYZ ? rot1(-rotation[1], rot2(-rotation[2], rot3(-rotation[3],v2))) :
                   rot1(-rotation[1], rot3(-rotation[2], rot2(-rotation[3],v2)))
 
@@ -236,7 +280,7 @@ vector `v2::SVector{3,F}` (vector resolved in frame 2) given
 """
 resolve2(R::SMatrix{3,3,F,9}, v1::SVector{3,F})    where F <: Modia3D.VarFloatType = R*v1
 resolve2(R::SMatrix{3,3,F,9}, v1::AbstractVector)  where F <: Modia3D.VarFloatType = R*SVector{3,F}(v1)
-resolve2(rotation::AbstractVector, v1::AbstractVector; rotationXYZ=true) where F <: Modia3D.VarFloatType =
+resolve2(rotation::AbstractVector, v1::AbstractVector; rotationXYZ=true) =
     rotationXYZ ? rot3(rotation[3], rot2(rotation[2], rot1(rotation[1], v1))) :
                   rot2(rotation[3], rot3(rotation[2], rot1(rotation[1], v1)))
 

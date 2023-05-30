@@ -7,11 +7,11 @@ appendSymbol(path::String , name::Union{Symbol,Expr}) = path == "" ? string(name
 derSymbol(path::Nothing, name::Symbol) = :(der($name))
 derSymbol(path         , name::Symbol) = :(der($path.$name))
 
-nextMbsName(mbsi,i) = (Symbol("_mbs"*string(i+1)), mbsi, i+1)
+nextMbsName(mbs,i,mbsi) = (Symbol(mbs*string(i+1)), mbsi, i+1)
 
 
 """
-    buildCode = buildModel3D!(model, FloatType, TimeType, buildDict, modelPath; buildOption = "ComputeGeneralizedForces")
+    buildCode = build_Model3D!(model, FloatType, TimeType, unitless, ID, modelPath; buildOption = "ComputeGeneralizedForces")
 
 Generate and return the buildCode for a Modia3D model.
 
@@ -65,9 +65,8 @@ equations = :[
 ]
 ```
 """
-function buildModel3D!(model::AbstractDict, FloatType::Type, TimeType::Type,
-                       buildDict::OrderedCollections.OrderedDict{String,Any},
-                       modelPath::Union{Expr,Symbol,Nothing},
+function build_Model3D!(model::AbstractDict, FloatType::Type, TimeType::Type, unitless::Bool,
+                       ID, modelPath::Union{Expr,Symbol,Nothing},
                        buildOption::String = "ComputeGeneralizedForces")   # ComputeJointAccelerations, ComputeJointAccelerationsOn
     @assert(buildOption == "ComputeGeneralizedForces")
     jointInfo = []
@@ -113,7 +112,6 @@ function buildModel3D!(model::AbstractDict, FloatType::Type, TimeType::Type,
     freeMotionIndices              = OrderedCollections.OrderedDict{String,Int}()
 
     #println("modelPath = $modelPath")
-
     modelPathAsString = isnothing(modelPath) ? "" : string(modelPath)
 
     i=1
@@ -187,67 +185,77 @@ function buildModel3D!(model::AbstractDict, FloatType::Type, TimeType::Type,
         end
     end
 
-    i=1
-    mbsi = :_mbs1
-    mbs_equations = [ :($mbsi = Modia3D.openModel3D!(instantiatedModel, $modelPathAsString, _x, time)) ]
+    if modelPathAsString == ""
+        mbs       = "_mbs"
+        genForces = :_genForces
+    else
+        mbs       = modelPathAsString * "._mbs"
+        genForces = Symbol(modelPathAsString * "._genForces")
+    end
+    i=0
+    (mbsi, mbsi_old, i) = nextMbsName(mbs, i, :_dummy)
+    mbs_equations = [ :($mbsi = Modia3D.openModel3D!(instantiatedModel, $ID, _x, time)) ]
     mbs_variables = Model(qdd_hidden = Var(hideResult=true, start=[]),
                           success = Var(hideResult=true))
     mbs_variables[mbsi] = Var(hideResult=true)
 
     if length(jointStatesRevolute) > 0
-        (mbsi, mbsi_old, i) = nextMbsName(mbsi, i)
+        (mbsi, mbsi_old, i) = nextMbsName(mbs, i, mbsi)
         push!(mbs_equations, :( $mbsi = Modia3D.setStatesRevolute!($mbsi_old, $(jointStatesRevolute...)) ))
         mbs_variables[mbsi] = Var(hideResult=true)
     end
     if length(jointStatesPrismatic) > 0
-        (mbsi, mbsi_old, i) = nextMbsName(mbsi, i)
+        (mbsi, mbsi_old, i) = nextMbsName(mbs, i, mbsi)
         push!(mbs_equations, :( $mbsi = Modia3D.setStatesPrismatic!($mbsi_old, $(jointStatesPrismatic...)) ))
         mbs_variables[mbsi] = Var(hideResult=true)
     end
     if length(jointStatesFreeMotion) > 0
-        (mbsi, mbsi_old, i) = nextMbsName(mbsi, i)
+        (mbsi, mbsi_old, i) = nextMbsName(mbs, i, mbsi)
         push!(mbs_equations, :( $mbsi = Modia3D.setStatesFreeMotion!($mbsi_old, $(jointStatesFreeMotion...)) ))
         mbs_variables[mbsi] = Var(hideResult=true)
-        (mbsi, mbsi_old, i) = nextMbsName(mbsi, i)
+        (mbsi, mbsi_old, i) = nextMbsName(mbs, i, mbsi)
         push!(mbs_equations, :( $mbsi = Modia3D.setStatesFreeMotion_isrot123!($mbsi_old, $(jointStatesFreeMotion_isrot123...)) ))
         mbs_variables[mbsi] = Var(hideResult=true)
     end
 
     if buildOption == "ComputeGeneralizedForces"
         if length(jointAccelerationsRevolute) > 0
-            (mbsi, mbsi_old, i) = nextMbsName(mbsi, i)
+            (mbsi, mbsi_old, i) = nextMbsName(mbs, i, mbsi)
             push!(mbs_equations, :( $mbsi = Modia3D.setAccelerationsRevolute!($mbsi_old, $(jointAccelerationsRevolute...)) ))
             mbs_variables[mbsi] = Var(hideResult=true)
         end
         if length(jointAccelerationsPrismatic) > 0
-            (mbsi, mbsi_old, i) = nextMbsName(mbsi, i)
+            (mbsi, mbsi_old, i) = nextMbsName(mbs, i, mbsi)
             push!(mbs_equations, :( $mbsi = Modia3D.setAccelerationsPrismatic!($mbsi_old, $(jointAccelerationsPrismatic...)) ))
             mbs_variables[mbsi] = Var(hideResult=true)
         end
         if length(jointAccelerationsFreeMotion2) > 0
-            (mbsi, mbsi_old, i) = nextMbsName(mbsi, i)
+            (mbsi, mbsi_old, i) = nextMbsName(mbs, i, mbsi)
             push!(mbs_equations, :( $mbsi = Modia3D.setAccelerationsFreeMotion!($mbsi_old, $(jointAccelerationsFreeMotion2...)) ))
             mbs_variables[mbsi] = Var(hideResult=true)
         end
-        (mbsi, mbsi_old, i) = nextMbsName(mbsi, i)
-        push!(mbs_equations, :( $mbsi = Modia3D.computeGeneralizedForces!($mbsi_old, qdd_hidden, _leq_mode) ))
-        mbs_variables[mbsi] = Var(hideResult=true)
 
-        if length(jointAccelerationsRevolute) > 0
-            push!(mbs_equations, :( ($(jointForcesRevolute...), ) = implicitDependency(Modia3D.getGenForcesRevolute($mbsi, Val($NRevolute)), $(jointAccelerationsRevolute...)) ))
-            mbs_variables[mbsi] = Var(hideResult=true)
+        unknowns = []
+        append!(unknowns, jointAccelerationsRevolute, jointForcesRevolute, jointAccelerationsPrismatic, jointForcesPrismatic, jointAccelerationsFreeMotion2)
+        push!(mbs_equations, :( $genForces = implicitDependency(Modia3D.computeGeneralizedForces!($mbsi, qdd_hidden, _leq_mode), $unknowns) ))
+        mbs_variables[mbsi] = Var(hideResult=true)
+        mbs_variables[genForces] = Var(hideResult=true)
+
+        i = 0
+        for j=1:length(jointAccelerationsRevolute)
+            i += 1
+            push!(mbs_equations, :( $(jointForcesRevolute[j]) = implicitDependency($genForces[$i], $mbsi, $unknowns)) )
         end
-        if length(jointAccelerationsPrismatic) > 0
-            push!(mbs_equations, :( ($(jointForcesPrismatic...), ) = implicitDependency(Modia3D.getGenForcesPrismatic($mbsi, Val($NPrismatic)), $(jointAccelerationsPrismatic...)) ))
-            mbs_variables[mbsi] = Var(hideResult=true)
+        for j=1:length(jointAccelerationsPrismatic)
+            i += 1
+            push!(mbs_equations, :( $(jointForcesPrismatic[j]) = implicitDependency($genForces[$i], $mbsi, $unknowns)) )
         end
         if length(jointAccelerationsFreeMotion2) > 0
             NFreeMotion2 = 2*NFreeMotion
-            push!(mbs_equations, :( ($(jointForcesFreeMotion2...), ) = implicitDependency(Modia3D.getGenForcesFreeMotion($mbsi), $(jointAccelerationsFreeMotion2...)) ))
-            mbs_variables[mbsi] = Var(hideResult=true)
+            push!(mbs_equations, :( ($(jointForcesFreeMotion2...), ) = implicitDependency(Modia3D.getGenForcesFreeMotion($mbsi, $genForces), $(jointAccelerationsFreeMotion2...)) ))
         end
-        push!(mbs_equations, :( 0.0 = Modia3D.getGenForcesHiddenJoints($mbsi, qdd_hidden) ) )
-        push!(mbs_equations, :( success = Modia3D.setHiddenStatesDerivatives!(instantiatedModel, $mbsi) ) )
+        push!(mbs_equations, :( 0.0 = Modia3D.getGenForcesHiddenJoints($mbsi, $genForces, qdd_hidden) ) )
+        push!(mbs_equations, :( success = Modia3D.setHiddenStatesDerivatives!(instantiatedModel, $mbsi, $genForces) ) )
 
         mbsCode = mbs_variables | Model(equations = :[$(mbs_equations...)])
 
@@ -264,9 +272,7 @@ function buildModel3D!(model::AbstractDict, FloatType::Type, TimeType::Type,
         @error "Error should not occur (buildOption = $buildOption)"
     end
 
-    # Store info in buildDict
-    buildDict[modelPathAsString] = Modia3D.Composition.MultibodyBuild{FloatType,TimeType}(modelPathAsString, revoluteIndices, prismaticIndices, freeMotionIndices)
-    return mbsCode
+    return ( model|mbsCode, Modia3D.Composition.MultibodyBuild{FloatType,TimeType}(modelPathAsString, revoluteIndices, prismaticIndices, freeMotionIndices) )
 end
 
 
@@ -367,5 +373,3 @@ function get_animationHistory(instantiatedModel::Modia.SimulationModel{FloatType
         return nothing
     end
 end
-
-

@@ -100,6 +100,7 @@ The reference frame = Object3D frame is located at the center of the gearwheel.
 - `diameter` defines the diameter of the gearwheel.
 - `length` defines the length of the gearwheel.
 - `innerDiameter` defines the inner diameter of the gearwheel (where `innerDiameter=0` defines a full gearwheel).
+- `rootDiameter`defines the root circle diameter of the gearwheel.
 - `angle` defines the bevel angle of the gearwheel (where `angle=0` defines a cylindrical gearwheel).
 - `teeth` defines the number of teeth of the gearwheel.
 
@@ -111,17 +112,18 @@ mutable struct GearWheel <: Modia3D.AbstractShape
     diameter::Float64
     length::Float64
     innerDiameter::Float64
+    rootDiameter::Float64
     angle::Float64
     teeth::Int
 
-    function GearWheel(; axis=3, diameter=1.0, length=1.0, innerDiameter=0.0, angle=0.0, teeth=20)
+    function GearWheel(; axis=3, diameter=1.0, length=1.0, innerDiameter=0.0, rootDiameter=0.9, angle=0.0, teeth=20)
         @assert(1 <= axis <= 3)
         @assert(diameter >= 0.0)
         @assert(length >= 0.0)
-        @assert(0.0 <= innerDiameter < diameter)
+        @assert(0.0 <= innerDiameter < rootDiameter < diameter)
         @assert(isinteger(teeth))
         @assert(teeth > 0)
-        new(axis, diameter, length, innerDiameter, angle, teeth)
+        new(axis, diameter, length, innerDiameter, rootDiameter, angle, teeth)
     end
 end
 

@@ -21,6 +21,7 @@ import Base
 import Modia3D
 import Modia3D.Basics
 import Modia3D.Composition
+import Modia3D.GrippingDetection
 import Modia3D.Shapes
 
 using Modia

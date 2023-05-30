@@ -6,15 +6,6 @@
 #
 
 
-
-#-------------------------------------- Default Renderer -------------------------------
-
-initializeVisualization(renderer::Modia3D.AbstractRenderer, allVisuElements::Vector{Object3D{F}}) where F <: Modia3D.VarFloatType = error("No renderer defined.")
-visualize!(renderer::Modia3D.AbstractRenderer, time) = error("No renderer defined.")
-closeVisualization(renderer::Modia3D.AbstractRenderer)        = error("No renderer defined.")
-
-
-
 #-------------------------------------- Gravity field ----------------------------------
 
 """
@@ -127,11 +118,9 @@ function upwardsDirection(gravityField::Modia3D.AbstractGravityField)
                 end
             else
                 if gv[3] < 0.0
-                    if gv[3] < 0.0
-                        sceneUpDir = +3
-                    else
-                        sceneUpDir = -3
-                    end
+                    sceneUpDir = +3
+                else
+                    sceneUpDir = -3
                 end
             end
         end
@@ -207,7 +196,7 @@ struct SceneOptions{F <: Modia3D.VarFloatType}
     contactDetection::ContactDetectionMPR_handler{Modia3D.MPRFloatType, F}
     elasticContactReductionFactor::F  # c_res_used = c_res * elasticContactReductionFactor (> 0)
     maximumContactDamping::F
-    gap::Float64
+    gap::Float64                          # defines the gap between two lockable objects
 
 
     ### Animation and Visualization ###
@@ -230,7 +219,7 @@ struct SceneOptions{F <: Modia3D.VarFloatType}
     lightLongitude::Float64               # Longitude angle of light position (0 = -y/-z/-x direction)
     lightLatitude::Float64                # Latitude angle of light position (0 = horizontal)
 
-    function SceneOptions{F}(;gravityField    = UniformGravityField(),
+    function SceneOptions{F}(;gravityField = UniformGravityField(),
             useOptimizedStructure         = true,
             enableContactDetection        = true,
             contactDetection              = ContactDetectionMPR_handler(),
@@ -317,13 +306,13 @@ Defines global properties of the system, such as the gravity field. Exactly one 
 |:--------------------------------|:----------------------------------------|
 | `gravityField`                  | UniformGravity(g=9.81, n=[0,-1,0])      |
 | `enableVisualization`           | true                                    |
-| `animationFile`                 | nothing (e.g. animationFile = "animation.json") |
+| `animationFile`                 | nothing                                 |
 | `provideAnimationHistory`       | false                                   |
 | `enableContactDetection`        | true                                    |
 | `elasticContactReductionFactor` | 1.0  (> 0.0, <= 1.0)                    |
 | `maximumContactDamping`         | 2000.0                                  |
 | `mprTolerance`                  | 1.0e-20                                 |
-| `mprIterMax`                    | 120                                |
+| `mprIterMax`                    | 120                                     |
 | `visualizeFrames`               | false                                   |
 | `visualizeBoundingBox`          | false                                   |
 | `visualizeContactPoints`        | false                                   |
@@ -379,23 +368,24 @@ Defines global properties of the system, such as the gravity field. Exactly one 
 
 - `defaultFrameLength::Float64`: Default frame length in [m] for visualizing little [CoordinateSystem](@ref).
 
-- `nVisualContSupPoints::Int64`: defines how many contact as well as support points are visualized (there is a warning if you'll need to increase it)
+- `nVisualContSupPoints::Int64`: Defines how many contact as well as support points are visualized (there is a warning if you'll need to increase it)
 
-- `defaultContactSphereDiameter::Float64`: diameter of [Sphere](@ref) in [m] used for contact and support point visualization
+- `defaultContactSphereDiameter::Float64`: Diameter of [Sphere](@ref) in [m] used for contact and support point visualization
 
-- `cameraDistance::Float64`: distance between world frame and camera position
+- `cameraDistance::Float64`: Distance between world frame and camera position (animation export only)
 
-- `cameraLongitude::Float64`: longitude angle of camera position (0 = -y/-z/-x direction)
+- `cameraLongitude::Float64`: Longitude angle of camera position (0 = -y/-z/-x direction) (animation export only)
 
-- `cameraLatitude::Float64`: latitude angle of camera position (0 = horizontal)
+- `cameraLatitude::Float64`: Latitude angle of camera position (0 = horizontal) (animation export only)
 
-- `lightDistance::Float64`: distance between world frame and light position
+- `lightDistance::Float64`: Distance between world frame and light position (animation export only)
 
-- `lightLongitude::Float64`: longitude angle of light position (0 = -y/-z/-x direction)
+- `lightLongitude::Float64`: Longitude angle of light position (0 = -y/-z/-x direction) (animation export only)
 
-- `lightLatitude::Float64`: latitude angle of light position (0 = horizontal)
+- `lightLatitude::Float64`: Latitude angle of light position (0 = horizontal) (animation export only)
 
 - `useOptimizedStructure::Bool`: = true, if pre-processing the whole system. For example, computing the common mass, common center of mass and common inertia tensor of all rigidly connected Object3Ds that have mass properties.
+
 """
 mutable struct Scene{F <: Modia3D.VarFloatType} <: Modia3D.AbstractScene
     name::String                              # model name
@@ -435,34 +425,37 @@ mutable struct Scene{F <: Modia3D.VarFloatType} <: Modia3D.AbstractScene
     animation::Vector{animationStep}          # animation data of visible Object3Ds
     outputCounter::Int64                      # animation/visualization output step counter
     timer::TimerOutputs.TimerOutput           # Timer
-    
-    function Scene{F}(;gravityField          = UniformGravityField(),
-            useOptimizedStructure         = true,
-            enableContactDetection        = true,
-            mprTolerance                  = 1.0e-20,
-            mprIterMax                    = 120,
-            elasticContactReductionFactor = F(1.0),
-            maximumContactDamping         = F(2000),
-            gap                           = 0.001,
-            enableVisualization           = true,
-            animationFile                 = nothing,
-            provideAnimationHistory       = false,
-            visualizeFrames               = false,
-            visualizeBoundingBox          = false,
-            visualizeContactPoints        = false,
-            visualizeSupportPoints        = false,
-            nominalLength                 = 1.0,
-            defaultFrameLength            = 0.2*nominalLength,
-            nVisualContSupPoints          = 5,
-            defaultContactSphereDiameter  = 0.1,
-            cameraDistance                = 10.0*nominalLength,
-            cameraLongitude               = 30/180*pi,
-            cameraLatitude                = 15/180*pi,
-            lightDistance                 = 10.0*nominalLength,
-            lightLongitude                = 60/180*pi,
-            lightLatitude                 = 45/180*pi) where F <: Modia3D.VarFloatType
+    gripPair
 
-        sceneOptions = SceneOptions{F}(gravityField = gravityField,
+    function Scene{F}(;
+        gravityField                  = UniformGravityField(),
+        useOptimizedStructure         = true,
+        enableContactDetection        = true,
+        mprTolerance                  = 1.0e-20,
+        mprIterMax                    = 120,
+        elasticContactReductionFactor = F(1.0),
+        maximumContactDamping         = F(2000),
+        gap                           = 0.001,
+        enableVisualization           = true,
+        animationFile                 = nothing,
+        provideAnimationHistory       = false,
+        visualizeFrames               = false,
+        visualizeBoundingBox          = false,
+        visualizeContactPoints        = false,
+        visualizeSupportPoints        = false,
+        nominalLength                 = 1.0,
+        defaultFrameLength            = 0.2*nominalLength,
+        nVisualContSupPoints          = 5,
+        defaultContactSphereDiameter  = 0.1,
+        cameraDistance                = 10.0*nominalLength,
+        cameraLongitude               = 30/180*pi,
+        cameraLatitude                = 15/180*pi,
+        lightDistance                 = 10.0*nominalLength,
+        lightLongitude                = 60/180*pi,
+        lightLatitude                 = 45/180*pi) where F <: Modia3D.VarFloatType
+
+        sceneOptions = SceneOptions{F}(
+            gravityField                  = gravityField,
             useOptimizedStructure         = useOptimizedStructure,
             contactDetection              = ContactDetectionMPR_handler{Modia3D.MPRFloatType, F}(tol_rel = mprTolerance, niter_max = mprIterMax),
             nVisualContSupPoints          = nVisualContSupPoints,
@@ -531,3 +524,9 @@ mutable struct Scene{F <: Modia3D.VarFloatType} <: Modia3D.AbstractScene
 end
 
 Scene(; kwargs...) = Scene{Float64}(; kwargs...)
+
+
+#-------------------------------------- Default Renderer -------------------------------
+initializeVisualization(renderer::Modia3D.AbstractRenderer, scene::Scene{F}) where F <: Modia3D.VarFloatType = error("No renderer defined.")
+visualize!(renderer::Modia3D.AbstractRenderer, time) = error("No renderer defined.")
+closeVisualization(renderer::Modia3D.AbstractRenderer) = error("No renderer defined.")

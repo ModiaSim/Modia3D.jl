@@ -53,36 +53,10 @@ function orderPositions(is::Int64, i::Int64, js::Int64, j::Int64)::Int64
     return p
 end
 
-#getPositionsOfObj(scene::Composition.Scene, obj::Composition.Object3D,
-#                  movablePos::Nothing) = (false, 0, 0)
-function getPositionsOfObj(scene::Composition.Scene,
-            obj::Composition.Object3D, movablePos::Int64)::Tuple{Bool, Int64, Int64}
-    if movablePos == 0
-        return (false, 0, 0)
-    else
-        # findall(x->x==obj, scene.superObjs[movablePos].superObjMovable.superObj)[1] # needs to be improved
-        return (true, movablePos, 0 )
-    end
-end
 
 function computePairID(scene::Composition.Scene{F},
         actObj::Composition.Object3D{F}, nextObj::Composition.Object3D{F},
         is::Int64, i::Int64, js::Int64, j::Int64)::Int64 where F
-    # is: actual super - object
-    # js: subsequent super - object
-    # i: Object3D of is_th super - object
-    # j: Object3D of js_th super - object
-    (isSetAct, isPosActSuper, iPosActObj)    = getPositionsOfObj(scene, actObj,  actObj.interactionManner.movablePos)
-    (isSetNext, jsPosNextSuper, jPosNextObj) = getPositionsOfObj(scene, nextObj, nextObj.interactionManner.movablePos)
-    pairID = 0
-    if isSetAct && isSetNext
-        pairID = orderPositions(isPosActSuper,iPosActObj,jsPosNextSuper,jPosNextObj)
-    elseif isSetAct && !isSetNext
-        pairID = orderPositions(isPosActSuper,iPosActObj,js,j)
-    elseif isSetNext && !isSetAct
-        pairID = orderPositions(is,i,jsPosNextSuper,jPosNextObj)
-    else
-        pairID = orderPositions(is,i,js,j)
-    end
-    return pairID
+
+    return orderPositions(is,i,js,j)
 end

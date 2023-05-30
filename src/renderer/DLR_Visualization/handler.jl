@@ -5,8 +5,9 @@
 #   Modia3D.DLR_Visualization (Modia3D/renderer/DLR_Visualization/_module.jl)
 #
 
-function Composition.initializeVisualization(renderer::Modia3D.AbstractDLR_VisualizationRenderer, velements::Vector{Composition.Object3D{F}})::Nothing where F <: Modia3D.VarFloatType
-    simVis = renderer.simVis
+function Composition.initializeVisualization(renderer::Modia3D.AbstractDLR_VisualizationRenderer, scene::Composition.Scene{F})::Nothing where F <: Modia3D.VarFloatType
+    simVis::SimVis_Renderer = renderer.simVis
+    velements = scene.allVisuElements
     @assert(length(velements) > 0)
     if simVis.isInitialized
         Composition.closeVisualization(renderer)
@@ -26,7 +27,7 @@ end
 
 
 function Composition.visualize!(renderer::Modia3D.AbstractDLR_VisualizationRenderer, time)
-    simVis = renderer.simVis
+    simVis::SimVis_Renderer = renderer.simVis
     @assert(length(simVis.velements) > 0)
     if simVis.isInitialized
         velements = simVis.velements
@@ -38,33 +39,35 @@ function Composition.visualize!(renderer::Modia3D.AbstractDLR_VisualizationRende
     else
         error("visualize! called without initializing visualization first.")
     end
+    return nothing
 end
 
 
 function Composition.closeVisualization(renderer::Modia3D.AbstractDLR_VisualizationRenderer)
-    simVis = renderer.simVis
+    simVis::SimVis_Renderer = renderer.simVis
     if simVis.isInitialized
         sleep(0.01)
         for id in simVis.ids
-        SimVis_freeObjectID(simVis, id)
+            SimVis_freeObjectID(simVis, id)
         end
         SimVis_shutdown(simVis)
     end
     empty!(simVis.ids)
     empty!(simVis.velements)
     simVis.isInitialized = false
+    return nothing
 end
 
 
-function Composition.isVisible(feature::Shapes.Solid, renderer::Modia3D.AbstractRenderer)
+function Composition.isVisible(feature::Shapes.Solid{F}, renderer::Modia3D.AbstractDLR_VisualizationRenderer) where F <: Modia3D.VarFloatType
     return !isnothing(feature.visualMaterial) && !isnothing(feature.shape)
 end
 
-function Composition.isVisible(feature::Shapes.Visual, renderer::Modia3D.AbstractRenderer)
+function Composition.isVisible(feature::Shapes.Visual, renderer::Modia3D.AbstractDLR_VisualizationRenderer)
     if isnothing(feature.shape)
         return false
     elseif typeof(feature.shape) == Shapes.TextShape
-        return typeof(renderer) == ProfessionalEdition
+        return typeof(renderer) != CommunityEdition
     else
         return !isnothing(feature.visualMaterial)
     end

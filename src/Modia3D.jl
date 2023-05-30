@@ -4,8 +4,8 @@
 module Modia3D
 
 const path = dirname(dirname(@__FILE__))   # Absolute path of package directory
-const Version = "0.11.2"
-const Date = "2022-08-05"
+const Version = "0.12.0"
+const Date = "2023-05-30"
 
 println("\nImporting Modia3D Version $Version ($Date)")
 
@@ -14,7 +14,9 @@ println("\nImporting Modia3D Version $Version ($Date)")
 abstract type AbstractObject3DFeature                            end  # Data associated with one Object3D
 abstract type AbstractVisualElement   <: AbstractObject3DFeature end  # Visual element associated with one Object3D
 abstract type AbstractShape           <: AbstractVisualElement   end  # Geometry type
-abstract type AbstractGeometry        <: AbstractShape           end  # Immutable shape type that  has a volume and optionally mass. Can be used in collisions.
+abstract type AbstractGeometry        <: AbstractShape           end  # Immutable shape type that has a volume and optionally mass. Can be used in collisions.
+abstract type AbstractLight           <: AbstractObject3DFeature end
+abstract type AbstractCamera          <: AbstractObject3DFeature end
 
 abstract type AbstractObject3D                                       end
 abstract type AbstractTwoObject3DObject <: AbstractObject3D          end  # Object related to two Object3Ds
@@ -29,8 +31,8 @@ abstract type AbstractContactMaterial         end  # Contact properties of a sol
 abstract type AbstractContactPairMaterial     end  # Constants needed to compute the contact response between two objects
 abstract type AbstractContactDetection        end  # Contact detection type
 
-abstract type AbstractRenderer                                      end  # Renderer type
-abstract type AbstractDLR_VisualizationRenderer <: AbstractRenderer end  # Community or Professional edition of DLR_Visualization renderer
+abstract type AbstractRenderer                                       end  # Renderer type
+abstract type AbstractDLR_VisualizationRenderer  <: AbstractRenderer end  # Community or Professional edition of DLR_Visualization renderer
 
 
 using  StaticArrays
@@ -108,16 +110,17 @@ convertAndStripUnit(TargetType, requiredUnit, value) =
             convert(TargetType, Unitful.ustrip.( Unitful.uconvert.(requiredUnit, value))) : convert(TargetType, value)
 
 # Include sub-modules
-include(joinpath("Frames"          , "_module.jl"))
-include(joinpath("Basics"          , "_module.jl"))
-include(joinpath("Shapes"          , "_module.jl"))
-include(joinpath("Composition"     , "_module.jl"))
-include(joinpath("AnimationExport" , "_module.jl"))
-include(joinpath("PathPlanning"    , "_module.jl"))
-include(joinpath("renderer"        , "DLR_Visualization"  , "_module.jl"))
-include(joinpath("renderer"        , "NoRenderer"         , "_module.jl"))
-include(joinpath("contactDetection", "ContactDetectionMPR", "_module.jl"))
-include(joinpath("ModiaInterface"  , "_module.jl"))
+include(joinpath("Frames"           , "_module.jl"))
+include(joinpath("Basics"           , "_module.jl"))
+include(joinpath("Shapes"           , "_module.jl"))
+include(joinpath("Composition"      , "_module.jl"))
+include(joinpath("AnimationExport"  , "_module.jl"))
+include(joinpath("GrippingDetection", "_module.jl"))
+include(joinpath("renderer"         , "NoRenderer"         , "_module.jl"))
+include(joinpath("renderer"         , "DLR_Visualization"  , "_module.jl"))
+include(joinpath("contactDetection" , "ContactDetectionMPR", "_module.jl"))
+include(joinpath("PathPlanning"     , "_module.jl"))
+include(joinpath("ModiaInterface"   , "_module.jl"))
 
 # Make symbols available that have been exported in sub-modules
 using  .Frames
@@ -125,24 +128,29 @@ using  .Basics
 using  .Shapes
 using  .AnimationExport
 using  .Composition
-import .DLR_Visualization
 import .NoRenderer
+import .DLR_Visualization
+using  .GrippingDetection
 using  .PathPlanning
 @reexport using .ModiaInterface
 
 
 # Called implicitely at the first import/using of Modia3D (when loading Modia3D to the current Julia session)
 function __init__()
+    # check for SimVis
     info = DLR_Visualization.getSimVisInfo()
     (directory, dll_name, isProfessionalEdition, isNoRenderer) = info
-
-    if isNoRenderer
-        renderer[1] = NoRenderer.DummyRenderer(info)
-    elseif isProfessionalEdition
-        renderer[1] = DLR_Visualization.ProfessionalEdition(info)
+    if !isNoRenderer
+        if isProfessionalEdition
+            renderer[1] = DLR_Visualization.ProfessionalEdition(info)
+        else
+            renderer[1] = DLR_Visualization.CommunityEdition(info)
+        end
     else
-        renderer[1] = DLR_Visualization.CommunityEdition(info)
-end; end
+        println("\n... Info: No renderer found -> online visualization is disabled.\n")
+        renderer[1] = NoRenderer.DummyRenderer(info)
+    end
+end
 
 function disableRenderer()
     renderer[2] = renderer[1]

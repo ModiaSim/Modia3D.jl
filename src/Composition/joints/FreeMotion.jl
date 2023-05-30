@@ -8,6 +8,47 @@
 # mutable struct of FreeMotion is defined in Modia3D/src/Composition/joints/object3DMotion.jl,
 # since Object3D references FreeMotion and FreeMotion references Object3D
 
+"""
+    free = Free(; obj1, obj2,
+                  translation     = [0.0, 0.0, 0.0],
+                  rotation        = [0.0, 0.0, 0.0],    
+                  velocity        = [0.0, 0.0, 0.0],
+                  angularVelocity = [0.0, 0.0, 0.0])
+
+Make obj2 move freely with respect to obj1 and defining initial conditions of obj2 with 
+translation, rotation, velocity, angularVelocity (for details see Object3D).
+It is required that on entry, no parent is defined for obj2.
+"""
+struct Free{F <: Modia3D.VarFloatType}
+    obj1::Object3D{F}
+    obj2::Object3D{F}
+    
+    function Free{F}(; obj1::Object3D{F}, obj2::Object3D{F},
+                       translation     = [0.0, 0.0, 0.0],
+                       rotation        = [0.0, 0.0, 0.0],    
+                       velocity        = [0.0, 0.0, 0.0],
+                       angularVelocity = [0.0, 0.0, 0.0]) where F <: Modia3D.VarFloatType
+        @assert(obj2.parent == obj2)
+        obj2.parent = obj1
+        obj2.fixedToParent = false
+
+        translation     = Modia3D.convertAndStripUnit(SVector{3,F}, u"m"  , translation)
+        rotation        = Modia3D.convertAndStripUnit(SVector{3,F}, u"rad", rotation)
+        velocity        = Modia3D.convertAndStripUnit(SVector{3,F}, u"m/s"  , velocity)
+        angularVelocity = Modia3D.convertAndStripUnit(SVector{3,F}, u"rad/s", angularVelocity)
+
+        obj2.r_rel = translation
+        obj2.r_abs = obj1.r_abs + obj1.R_abs'*obj2.r_rel        
+        obj2.R_rel = Frames.rot123(rotation[1], rotation[2], rotation[3])
+        obj2.R_abs = obj2.R_rel*obj1.R_abs
+        
+        FreeMotion{F}(; obj1=obj1, obj2=obj2, path=obj2.path, r=translation, rot=rotation, v=velocity, w=angularVelocity, hiddenStates=true,
+                         wResolvedInParent=true)     
+        new(obj1, obj2)
+    end
+end
+
+
 
 """
     [angle1 angle2 angle3] = rot123fromR(R::SMatrix{3,3,F,9})

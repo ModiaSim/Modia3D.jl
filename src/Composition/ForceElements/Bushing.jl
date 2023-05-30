@@ -51,8 +51,33 @@ i.e. the orientation of `obj2` does not influence the resulting forces.
     supports angles up to nearly 90°, but introduces local rotation
     directions [alpha, beta gamma] which differ from the axes [x, y, z]
     of `obj1` and increases computation effort.
+
+# Results
+
+- `translation` is the translation vector from `obj1` to `obj2`,
+  resolved in `obj1`.
+- `rotation` contains the rotation angles alpha, beta and gamma from
+  `obj1` to `obj2`.
+- `velocity` is the translation velocity vector from `obj1` to `obj2`,
+  resolved in `obj1`.
+- `rotationVelocity` contains the rotation angular velocities about
+  alpha-, beta- and gamma-direction from `obj1` to `obj2`.
+- `springForce` is the spring force vector.
+- `springTorque` contains the spring torques.
+- `damperForce` is the damper force vector.
+- `damperTorque` contains the damper torques.
+- `torque` contains the total torques.
+- `forceVector` is the force vector acting on `obj2`, resolved in `obj1`.
+   At `obj1` the same force vector is applied in inverse direction. In
+   addition a compensation torque is applied at `obj1` to satisfy torque
+   balance.
+- `torqueVector` is the torque vector acting on `obj2`, resolved in
+  `obj1`. At `obj1` the same torque vector is applied in inverse
+  direction.
 """
 mutable struct Bushing{F <: Modia3D.VarFloatType} <: Modia3D.AbstractForceElement
+
+    path::String
 
     obj1::Object3D{F}
     obj2::Object3D{F}
@@ -65,7 +90,20 @@ mutable struct Bushing{F <: Modia3D.VarFloatType} <: Modia3D.AbstractForceElemen
     rotDamperForceFunction::SVector{3,Function}
     largeAngles::Bool
 
-    function Bushing{F}(; obj1::Object3D{F},
+    translationResultIndex::Int
+    rotationResultIndex::Int
+    velocityResultIndex::Int
+    rotationVelocityResultIndex::Int
+    springForceResultIndex::Int
+    springTorqueResultIndex::Int
+    damperForceResultIndex::Int
+    damperTorqueResultIndex::Int
+    torqueResultIndex::Int
+    forceVectorResultIndex::Int
+    torqueVectorResultIndex::Int
+
+    function Bushing{F}(; path::String = "",
+                          obj1::Object3D{F},
                           obj2::Object3D{F},
                           nominalForce::AbstractVector = Modia3D.ZeroVector3D(F),
                           springForceLaw::AbstractVector = Modia3D.ZeroVector3D(F),
@@ -80,39 +118,38 @@ mutable struct Bushing{F <: Modia3D.VarFloatType} <: Modia3D.AbstractForceElemen
         damperForceFunction = Vector{Function}(undef, 3)
         rotSpringForceFunction = Vector{Function}(undef, 3)
         rotDamperForceFunction = Vector{Function}(undef, 3)
-        irand = rand(Int)
         for dir in 1:3
             if (isa(springForceLaw[dir], Function))
                 springForceFunction[dir] = springForceLaw[dir]
             else
                 stiffness = Modia3D.convertAndStripUnit(F, u"N/m", springForceLaw[dir])
-                fsymb = Symbol("fc", dir, "_", irand)  # todo: replace irand by force.path
+                fsymb = Symbol(path, "_", "fc", dir)
                 springForceFunction[dir] = eval(:($fsymb(pos) = $stiffness * pos))
             end
             if (isa(damperForceLaw[dir], Function))
                 damperForceFunction[dir] = damperForceLaw[dir]
             else
                 damping = Modia3D.convertAndStripUnit(F, u"N*s/m", damperForceLaw[dir])
-                fsymb = Symbol("fd", dir, "_", irand)  # todo: replace irand by force.path
+                fsymb = Symbol(path, "_", "fd", dir)
                 damperForceFunction[dir] = eval(:($fsymb(vel) = $damping * vel))
             end
             if (isa(rotSpringForceLaw[dir], Function))
                 rotSpringForceFunction[dir] = rotSpringForceLaw[dir]
             else
                 stiffness = Modia3D.convertAndStripUnit(F, u"N*m/rad", rotSpringForceLaw[dir])
-                fsymb = Symbol("mc", dir, "_", irand)  # todo: replace irand by force.path
+                fsymb = Symbol(path, "_", "mc", dir)
                 rotSpringForceFunction[dir] = eval(:($fsymb(ang) = $stiffness * ang))
             end
             if (isa(rotDamperForceLaw[dir], Function))
                 rotDamperForceFunction[dir] = rotDamperForceLaw[dir]
             else
                 damping = Modia3D.convertAndStripUnit(F, u"N*m*s/rad", rotDamperForceLaw[dir])
-                fsymb = Symbol("md", dir, "_", irand)  # todo: replace irand by force.path
+                fsymb = Symbol(path, "_", "md", dir)
                 rotDamperForceFunction[dir] = eval(:($fsymb(angd) = $damping * angd))
             end
         end
 
-        return new(obj1, obj2, nomForce, springForceFunction, damperForceFunction, nomTorque, rotSpringForceFunction, rotDamperForceFunction, largeAngles)
+        return new(path, obj1, obj2, nomForce, springForceFunction, damperForceFunction, nomTorque, rotSpringForceFunction, rotDamperForceFunction, largeAngles)
     end
 end
 Bushing(; kwargs...) = Bushing{Float64}(; kwargs...)
@@ -164,29 +201,63 @@ function torqueFromMoments(largeAngles::Bool, moments::SVector{3,F}, sico::SMatr
 end
 
 
-function initializeForceElement(force::Bushing{F})::Nothing where F <: Modia3D.VarFloatType
+function initializeForceElement(model::Modia.SimulationModel{F,TimeType}, force::Bushing{F})::Nothing where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
     force.obj1.hasForceElement = true
     force.obj2.hasForceElement = true
+
+    force.translationResultIndex      = Modia.new_w_segmented_variable!(model, force.path*".translation"     , SVector{3,F}(0, 0, 0), "m")
+    force.rotationResultIndex         = Modia.new_w_segmented_variable!(model, force.path*".rotation"        , SVector{3,F}(0, 0, 0), "rad")
+    force.velocityResultIndex         = Modia.new_w_segmented_variable!(model, force.path*".velocity"        , SVector{3,F}(0, 0, 0), "m/s")
+    force.rotationVelocityResultIndex = Modia.new_w_segmented_variable!(model, force.path*".rotationVelocity", SVector{3,F}(0, 0, 0), "rad/s")
+    force.springForceResultIndex      = Modia.new_w_segmented_variable!(model, force.path*".springForce"     , SVector{3,F}(0, 0, 0), "N")
+    force.springTorqueResultIndex     = Modia.new_w_segmented_variable!(model, force.path*".springTorque"    , SVector{3,F}(0, 0, 0), "N*m")
+    force.damperForceResultIndex      = Modia.new_w_segmented_variable!(model, force.path*".damperForce"     , SVector{3,F}(0, 0, 0), "N")
+    force.damperTorqueResultIndex     = Modia.new_w_segmented_variable!(model, force.path*".damperTorque"    , SVector{3,F}(0, 0, 0), "N*m")
+    force.torqueResultIndex           = Modia.new_w_segmented_variable!(model, force.path*".torque"          , SVector{3,F}(0, 0, 0), "N*m")
+    force.forceVectorResultIndex      = Modia.new_w_segmented_variable!(model, force.path*".forceVector"     , SVector{3,F}(0, 0, 0), "N")
+    force.torqueVectorResultIndex     = Modia.new_w_segmented_variable!(model, force.path*".torqueVector"    , SVector{3,F}(0, 0, 0), "N*m")
+
     return nothing
 end
 
-function evaluateForceElement(force::Bushing{F})::Nothing where F <: Modia3D.VarFloatType
+function evaluateForceElement(model::Modia.SimulationModel{F,TimeType}, force::Bushing{F}, time::TimeType) where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
     R12 = measFrameRotation(force.obj2; frameOrig=force.obj1)
     r12 = measFramePosition(force.obj2; frameOrig=force.obj1, frameCoord=force.obj1)
     w12 = measFrameRotVelocity(force.obj2; frameOrig=force.obj1, frameCoord=force.obj1)
     v12 = measFrameTransVelocity(force.obj2; frameOrig=force.obj1, frameCoord=force.obj1, frameObsrv=force.obj1)
     (ang, angd, sico) = anglesFromRotation(force.largeAngles, R12, w12)
 
-    f12 = Vector{F}(undef, 3)
-    mom = Vector{F}(undef, 3)
+    fc = zeros(SVector{3,F})
+    fd = zeros(SVector{3,F})
+    mc = zeros(SVector{3,F})
+    md = zeros(SVector{3,F})
     for dir in 1:3
-        f12[dir] = force.springForceFunction[dir](r12[dir]) + force.damperForceFunction[dir](v12[dir]) + force.nominalForce[dir]
-        mom[dir] = force.rotSpringForceFunction[dir](ang[dir]) + force.rotDamperForceFunction[dir](angd[dir]) + force.nominalTorque[dir]
+        fc = setindex(fc, force.springForceFunction[dir](r12[dir]), dir)
+        fd = setindex(fd, force.damperForceFunction[dir](v12[dir]), dir)
+        mc = setindex(mc, force.rotSpringForceFunction[dir](ang[dir]), dir)
+        md = setindex(md, force.rotDamperForceFunction[dir](angd[dir]), dir)
     end
-    t12 = torqueFromMoments(force.largeAngles, SVector{3,F}(mom), sico)
+    f12 = fc + fd + force.nominalForce
+    mom = mc + md + force.nominalTorque
+    t12 = torqueFromMoments(force.largeAngles, mom, sico)
 
-    applyFrameForcePair!(force.obj2, force.obj1, SVector{3,F}(f12); frameCoord=force.obj1)
+    applyFrameForcePair!(force.obj2, force.obj1, f12; frameCoord=force.obj1)
     applyFrameTorquePair!(force.obj2, force.obj1, t12; frameCoord=force.obj1)
+
+    if Modia.storeResults(model)
+        Modia.add_w_segmented_value!(model, force.translationResultIndex, r12)
+        Modia.add_w_segmented_value!(model, force.rotationResultIndex, ang)
+        Modia.add_w_segmented_value!(model, force.velocityResultIndex, v12)
+        Modia.add_w_segmented_value!(model, force.rotationVelocityResultIndex, angd)
+        Modia.add_w_segmented_value!(model, force.springForceResultIndex, fc)
+        Modia.add_w_segmented_value!(model, force.springTorqueResultIndex, mc)
+        Modia.add_w_segmented_value!(model, force.damperForceResultIndex, fd)
+        Modia.add_w_segmented_value!(model, force.damperTorqueResultIndex, md)
+        Modia.add_w_segmented_value!(model, force.torqueResultIndex, mom)
+        Modia.add_w_segmented_value!(model, force.forceVectorResultIndex, -f12)
+        Modia.add_w_segmented_value!(model, force.torqueVectorResultIndex, -t12)
+    end
+
     return nothing
 end
 
