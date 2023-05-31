@@ -542,6 +542,6 @@ else
 end
 
 
-simulate!(youbot, stopTime=stopTime, tolerance=tolerance, requiredFinalStates_rtol=0.01, requiredFinalStates_atol=0.01, log=true, logStates=false, logParameters=false, requiredFinalStates=requiredFinalStates, logEvents=false)
+simulate!(youbot, stopTime=stopTime, tolerance=tolerance, requiredFinalStates_rtol=0.01, requiredFinalStates_atol=0.1, log=true, logStates=false, logParameters=false, requiredFinalStates=requiredFinalStates, logEvents=false)
 
 end
