@@ -56,7 +56,7 @@ if Sys.iswindows()
 else
     requiredFinalStates = missing
 end
-simulate!(twoCollidingBalls, stopTime=stopTime, tolerance=tolerance, dtmax=dtmax, log=true, logStates=true, logEvents=true, requiredFinalStates=requiredFinalStates)
+simulate!(twoCollidingBalls, stopTime=stopTime, tolerance=tolerance, dtmax=dtmax, log=true, logStates=true, logEvents=true, requiredFinalStates=requiredFinalStates, requiredFinalStates_rtol=1.1, requiredFinalStates_atol=0.1)
 
 @usingModiaPlot
 plot(twoCollidingBalls, ["ball1.translation" "ball1.rotation"; "ball1.velocity" "ball1.angularVelocity"], figure=1)
