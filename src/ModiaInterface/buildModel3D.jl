@@ -65,10 +65,19 @@ equations = :[
 ]
 ```
 """
-function build_Model3D!(model::AbstractDict, FloatType::Type, TimeType::Type, unitless::Bool,
-                       ID, modelPath::Union{Expr,Symbol,Nothing},
-                       buildOption::String = "ComputeGeneralizedForces")   # ComputeJointAccelerations, ComputeJointAccelerationsOn
+function build_Model3D!(model::AbstractDict, modelModule, FloatType::Type, TimeType::Type, 
+                        instantiateModelOptions::OrderedDict{Symbol,Any},
+                        ID, modelPath::Union{Expr,Symbol,Nothing},
+                        buildOption::String = "ComputeGeneralizedForces")   # ComputeJointAccelerations, ComputeJointAccelerationsOn
     @assert(buildOption == "ComputeGeneralizedForces")
+    #println("modelPath = $modelPath")
+    modelPathAsString = isnothing(modelPath) ? "" : string(modelPath)
+    unitless = instantiateModelOptions[:unitless]
+    if !unitless
+        source    = instantiateModelOptions[:source]
+        modelName = instantiateModelOptions[:modelName]
+        error("\nError from Model3D(..) in model $modelName at $source:\n@instantiatedModel(..., unitless=true, ...) required, because units not yet fully supported by Model3D.\n")   
+    end
     jointInfo = []
     getJointInfo!(model, jointInfo)
 
@@ -110,9 +119,6 @@ function build_Model3D!(model::AbstractDict, FloatType::Type, TimeType::Type, un
     jointAccelerationsFreeMotion2  = []
     jointStatesFreeMotion_isrot123 = Expr[]
     freeMotionIndices              = OrderedCollections.OrderedDict{String,Int}()
-
-    #println("modelPath = $modelPath")
-    modelPathAsString = isnothing(modelPath) ? "" : string(modelPath)
 
     i=1
     for joint in jointInfo
