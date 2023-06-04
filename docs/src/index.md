@@ -95,7 +95,10 @@ julia -JModia3D_sysimage.so  (otherwise)
 
 ### Version 0.12.1
 
-- Adapted to Modia 0.11.0 (arguments of buildFunction in ModiaInterface had been changed)
+- Adapted to Modia 0.12.0 (arguments of buildFunction in ModiaInterface had been changed, 
+  as well as function names to define/access variables of built-in components)
+- Absolute position (`r_abs`) and orientation (`R_abs`) of visible shapes are stored in the result
+  data structure and can be plotted (see Modia3D/test/Basid/Pendulum.jl, Modia3D/test/Segmented/TwoStageRocket3D.jl)
 - Manifest.toml file removed
 
 
