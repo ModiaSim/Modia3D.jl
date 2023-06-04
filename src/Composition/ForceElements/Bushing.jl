@@ -245,17 +245,17 @@ function evaluateForceElement(model::Modia.SimulationModel{F,TimeType}, force::B
     applyFrameTorquePair!(force.obj2, force.obj1, t12; frameCoord=force.obj1)
 
     if Modia.storeResults(model)
-        Modia.add_w_segmented_value!(model, force.translationResultIndex, r12)
-        Modia.add_w_segmented_value!(model, force.rotationResultIndex, ang)
-        Modia.add_w_segmented_value!(model, force.velocityResultIndex, v12)
-        Modia.add_w_segmented_value!(model, force.rotationVelocityResultIndex, angd)
-        Modia.add_w_segmented_value!(model, force.springForceResultIndex, fc)
-        Modia.add_w_segmented_value!(model, force.springTorqueResultIndex, mc)
-        Modia.add_w_segmented_value!(model, force.damperForceResultIndex, fd)
-        Modia.add_w_segmented_value!(model, force.damperTorqueResultIndex, md)
-        Modia.add_w_segmented_value!(model, force.torqueResultIndex, mom)
-        Modia.add_w_segmented_value!(model, force.forceVectorResultIndex, -f12)
-        Modia.add_w_segmented_value!(model, force.torqueVectorResultIndex, -t12)
+        Modia.copy_w_segmented_value_to_result(model, force.translationResultIndex, r12)
+        Modia.copy_w_segmented_value_to_result(model, force.rotationResultIndex, ang)
+        Modia.copy_w_segmented_value_to_result(model, force.velocityResultIndex, v12)
+        Modia.copy_w_segmented_value_to_result(model, force.rotationVelocityResultIndex, angd)
+        Modia.copy_w_segmented_value_to_result(model, force.springForceResultIndex, fc)
+        Modia.copy_w_segmented_value_to_result(model, force.springTorqueResultIndex, mc)
+        Modia.copy_w_segmented_value_to_result(model, force.damperForceResultIndex, fd)
+        Modia.copy_w_segmented_value_to_result(model, force.damperTorqueResultIndex, md)
+        Modia.copy_w_segmented_value_to_result(model, force.torqueResultIndex, mom)
+        Modia.copy_w_segmented_value_to_result(model, force.forceVectorResultIndex, -f12)
+        Modia.copy_w_segmented_value_to_result(model, force.torqueVectorResultIndex, -t12)
     end
 
     return nothing

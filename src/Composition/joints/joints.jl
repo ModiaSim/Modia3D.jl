@@ -650,7 +650,7 @@ function change_rotSequence!(m::Modia.SimulationModel, freeMotion::FreeMotion, x
         freeMotion.rot      = rot123fromR(Rfromrot132(freeMotion.rot))
         freeMotion.isrot123 = true
     end
-    Modia.add_w_segmented_value!(m, freeMotion.iextra_isrot123, freeMotion.isrot123)
+    Modia.copy_w_segmented_value_to_result(m, freeMotion.iextra_isrot123, freeMotion.isrot123)
 
     # Change x-vector
     startIndex = freeMotion.ix_segmented_rot

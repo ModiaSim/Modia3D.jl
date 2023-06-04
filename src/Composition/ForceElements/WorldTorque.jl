@@ -63,7 +63,7 @@ function evaluateForceElement(model::Modia.SimulationModel{F,TimeType}, force::W
     applyFrameTorque!(force.objectApply, torqueVector; frameCoord=force.objectCoord)
 
     if Modia.storeResults(model)
-        Modia.add_w_segmented_value!(model, force.torqueVectorResultIndex, torqueVector)
+        Modia.copy_w_segmented_value_to_result(model, force.torqueVectorResultIndex, torqueVector)
     end
 
     return nothing
