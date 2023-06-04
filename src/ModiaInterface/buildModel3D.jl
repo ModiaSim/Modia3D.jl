@@ -11,7 +11,8 @@ nextMbsName(mbs,i,mbsi) = (Symbol(mbs*string(i+1)), mbsi, i+1)
 
 
 """
-    buildCode = build_Model3D!(model, FloatType, TimeType, unitless, ID, modelPath; buildOption = "ComputeGeneralizedForces")
+    buildCode = build_Model3D!(model, modelModule, FloatType, TimeType, instantiateModelOptions,
+                              ID, modelPath; buildOption = "ComputeGeneralizedForces")
 
 Generate and return the buildCode for a Modia3D model.
 
@@ -19,6 +20,8 @@ Generate and return the buildCode for a Modia3D model.
 
 - `model`: Modia Model that contains Modia3D elements.
 - `FloatType`, `TimeType`: Types used when instantiating `SimulationModel{FloatType,TimeType}
+- `instantiateModelOptions`: Options of @instantiateModel(...)
+- `ID`: Unique ID within a model to identify the built-in component
 - `modelPath`: Path upto `model`. Path is a Symbol or Expr (such as :( a.b.c )) or nothing, if at the root.
 - `buildDict`: Dictionary, that will be stored in SimulationModel. An initial instance of Modia3D.Composition.MultibodyBuild{FloatType,TimeType}
                is stored in `buildDict` with key `string(modelPath)`, containing info about the generated code, in particular the joint type, path and

@@ -92,6 +92,13 @@ julia -JModia3D_sysimage.so  (otherwise)
 | [8] |*[Modelling and Simulation of Physical Systems with Dynamically Changing Degrees of Freedom](https://doi.org/10.3390/electronics12030500)*| Electronics 2023, 12(3), 500 | [10.3390/electronics12030500](https://doi.org/10.3390/electronics12030500) |
 
 ## Release Notes
+
+### Version 0.12.1
+
+- Adapted to Modia 0.11.0 (arguments of buildFunction in ModiaInterface had been changed)
+- Manifest.toml file removed
+
+
 ### Version 0.12.0
 - Support for variable-structure systems where variables (states) can appear and disappear during simulation
     - A simulation run is partitioned into phases that are called segments or modes (multi-mode modeling)
