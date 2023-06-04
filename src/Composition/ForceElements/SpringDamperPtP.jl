@@ -83,7 +83,7 @@ end
 SpringDamperPtP(; kwargs...) = SpringDamperPtP{Float64}(; kwargs...)
 
 
-function initializeForceElement(model::Modia.SimulationModel{F,TimeType}, force::SpringDamperPtP{F}) where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
+function initializeForceElement(model::Modia.InstantiatedModel{F,TimeType}, force::SpringDamperPtP{F}) where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
     force.obj1.hasForceElement = true
     force.obj2.hasForceElement = true
 
@@ -98,7 +98,7 @@ function initializeForceElement(model::Modia.SimulationModel{F,TimeType}, force:
     return nothing
 end
 
-function evaluateForceElement(model::Modia.SimulationModel{F,TimeType}, force::SpringDamperPtP{F}, time::TimeType) where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
+function evaluateForceElement(model::Modia.InstantiatedModel{F,TimeType}, force::SpringDamperPtP{F}, time::TimeType) where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
     (pos, norm) = measFrameDistance(force.obj2; frameOrig=force.obj1)
     vel = measFrameDistVelocity(force.obj2; frameOrig=force.obj1)
 

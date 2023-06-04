@@ -201,7 +201,7 @@ function torqueFromMoments(largeAngles::Bool, moments::SVector{3,F}, sico::SMatr
 end
 
 
-function initializeForceElement(model::Modia.SimulationModel{F,TimeType}, force::Bushing{F})::Nothing where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
+function initializeForceElement(model::Modia.InstantiatedModel{F,TimeType}, force::Bushing{F})::Nothing where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
     force.obj1.hasForceElement = true
     force.obj2.hasForceElement = true
 
@@ -220,7 +220,7 @@ function initializeForceElement(model::Modia.SimulationModel{F,TimeType}, force:
     return nothing
 end
 
-function evaluateForceElement(model::Modia.SimulationModel{F,TimeType}, force::Bushing{F}, time::TimeType) where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
+function evaluateForceElement(model::Modia.InstantiatedModel{F,TimeType}, force::Bushing{F}, time::TimeType) where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
     R12 = measFrameRotation(force.obj2; frameOrig=force.obj1)
     r12 = measFramePosition(force.obj2; frameOrig=force.obj1, frameCoord=force.obj1)
     w12 = measFrameRotVelocity(force.obj2; frameOrig=force.obj1, frameCoord=force.obj1)

@@ -27,7 +27,7 @@ end
 mutable struct ModelActions{F <: Modia3D.VarFloatType, TimeType}
     path::String
     scene::Composition.Scene{F}
-    instantiatedModel::Modia.SimulationModel{F,TimeType} # SimulationModel of model
+    instantiatedModel::Modia.InstantiatedModel{F,TimeType} # InstantiatedModel of model
     refMotion::Vector{ArbitraryMotion} # stores explicit robot functions
     nextEventTime::Float64
 

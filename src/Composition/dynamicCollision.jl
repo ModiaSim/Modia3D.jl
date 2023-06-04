@@ -4,7 +4,7 @@
 # between objs with mpr algorithm, and use them as zero-crossing functions
 # (see file ...\ContactDetectionMPR\handler.jl)
 # after computing all distances between colliding shapes response calculations are done
-function computeContactForcesAndTorques(sim::Modia.SimulationModel, scene, world, time, file)
+function computeContactForcesAndTorques(sim::Modia.InstantiatedModel, scene, world, time, file)
     if typeof(scene.options.contactDetection) <: Modia3D.ContactDetectionMPR_handler
         ch::Modia3D.ContactDetectionMPR_handler = scene.options.contactDetection
         # Compute signed distances of all contact shapes during zero-crossing computation
@@ -39,7 +39,7 @@ end
 # (see file ...\Composition\responseCalculation\elasticCollisionResponse.jl)
 # further, at an event simulation status is updated, contact material is replaced
 # and the actual contactDict is stored
-function dealWithContacts!(sim::Modia.SimulationModel{F, T}, scene::Scene{F}, ch::Composition.ContactDetectionMPR_handler{M,F}, world::Composition.Object3D{F}, time::Float64, file::Nothing)::Nothing where {F <: Modia3D.VarFloatType, T, M}
+function dealWithContacts!(sim::Modia.InstantiatedModel{F, T}, scene::Scene{F}, ch::Composition.ContactDetectionMPR_handler{M,F}, world::Composition.Object3D{F}, time::Float64, file::Nothing)::Nothing where {F <: Modia3D.VarFloatType, T, M}
 
     simh::Modia.EventHandler{F,T} = sim.eventHandler
     f1::SVector{3,F}=Modia3D.ZeroVector3D(F)

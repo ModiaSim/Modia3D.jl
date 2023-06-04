@@ -19,11 +19,11 @@ Generate and return the buildCode for a Modia3D model.
 # Arguments
 
 - `model`: Modia Model that contains Modia3D elements.
-- `FloatType`, `TimeType`: Types used when instantiating `SimulationModel{FloatType,TimeType}
+- `FloatType`, `TimeType`: Types used when instantiating `InstantiatedModel{FloatType,TimeType}
 - `instantiateModelOptions`: Options of @instantiateModel(...)
 - `ID`: Unique ID within a model to identify the built-in component
 - `modelPath`: Path upto `model`. Path is a Symbol or Expr (such as :( a.b.c )) or nothing, if at the root.
-- `buildDict`: Dictionary, that will be stored in SimulationModel. An initial instance of Modia3D.Composition.MultibodyBuild{FloatType,TimeType}
+- `buildDict`: Dictionary, that will be stored in InstantiatedModel. An initial instance of Modia3D.Composition.MultibodyBuild{FloatType,TimeType}
                is stored in `buildDict` with key `string(modelPath)`, containing info about the generated code, in particular the joint type, path and
                order of the joint variables in the function calls present in the returned `buildCode`.
 - `buildOption`: Code generation method. Possible values: `"ComputeGeneralizedForces"` (and in the future: `"ComputeGeneralizedAccelerations"`).
@@ -345,7 +345,7 @@ quat = [[0.10, 0.20, 0.30, 0.86],
 =#
 ```
 """
-function get_animationHistory(instantiatedModel::Modia.SimulationModel{FloatType,TimeType},
+function get_animationHistory(instantiatedModel::Modia.InstantiatedModel{FloatType,TimeType},
                               modelPathAsString::String; log::Bool = true)::Union{OrderedDict{String,Any},Nothing} where {FloatType,TimeType}
 
     mbs::Modia3D.Composition.MultibodyData{FloatType,TimeType} = instantiatedModel.buildDict[modelPathAsString].mbs

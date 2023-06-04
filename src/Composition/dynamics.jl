@@ -105,12 +105,12 @@ end
 
 
 """
-    initSegment_Model3D!(partiallyInstantiatedModel::Modia.SimulationModel,
+    initSegment_Model3D!(partiallyInstantiatedModel::Modia.InstantiatedModel,
                          modelPath::String, ID, parameters::AbstractDict; log=false)
 
 Called once before initialization of a new simulation segment to instantiate/re-initialize a Model3D model
 """
-function initSegment_Model3D!(partiallyInstantiatedModel::Modia.SimulationModel{F,TimeType},
+function initSegment_Model3D!(partiallyInstantiatedModel::Modia.InstantiatedModel{F,TimeType},
                               modelPath::String, ID, parameters::AbstractDict; log=false)::Nothing where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
     TimerOutputs.@timeit partiallyInstantiatedModel.timer "Modia3D_0 initSegment_Model3D!" begin
         if log
@@ -215,7 +215,7 @@ Open Model3D:
 - Copy der(r):=v and der(rot):= f(w) into hidden derivatives.
 - Return mbs.
 """
-function openModel3D!(instantiatedModel::Modia.SimulationModel{F,TimeType}, modelPath::String, x::AbstractVector, time::TimeType)::MultibodyData{F,TimeType} where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
+function openModel3D!(instantiatedModel::Modia.InstantiatedModel{F,TimeType}, modelPath::String, x::AbstractVector, time::TimeType)::MultibodyData{F,TimeType} where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
     # println("bin in openModel3D ", instantiatedModel.eventHandler.restart)
     mbsBuild::MultibodyBuild{F,TimeType} = instantiatedModel.buildDict[modelPath]
 

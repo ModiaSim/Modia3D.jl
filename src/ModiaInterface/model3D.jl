@@ -103,7 +103,7 @@ PrismaticWithFlange(; obj1, obj2, axis=1, s=Var(init=0.0), v=Var(init=0.0), canC
 
 
 """
-    next_isrot123 = change_rotSequenceInNextIteration!(rot::AbstractVector, isrot123::Bool, instantiatedModel::SimulationModel, x, rot_name)
+    next_isrot123 = change_rotSequenceInNextIteration!(rot::AbstractVector, isrot123::Bool, instantiatedModel::InstantiatedModel, x, rot_name)
 
 Change rotation sequence of `rot` from `x-axis, y-axis, z-axis` to `x-axis, z-axis, y-axis` or visa versa in the next event iteration:
 
@@ -111,7 +111,7 @@ Change rotation sequence of `rot` from `x-axis, y-axis, z-axis` to `x-axis, z-ax
 
 - If `isrot123 = false`, return `next_isrot123 = true` and `x[..] = rot123fromR(Rfromrot132(rot))`
 """
-function change_rotSequenceInNextIteration!(rot::AbstractVector, isrot123::Bool, instantiatedModel::SimulationModel, x, rot_name)::Bool
+function change_rotSequenceInNextIteration!(rot::AbstractVector, isrot123::Bool, instantiatedModel::InstantiatedModel, x, rot_name)::Bool
     if isrot123
         #println("        switch $rot_name 123 -> 132")
         next_rot      = Modia3D.rot132fromR(Modia3D.Rfromrot123(rot))

@@ -69,7 +69,7 @@ export isFree, isNotFree, changeJointFromFreeMotionToFix!, changeJointFromFixToF
 
 export fullName, instanceName
 
-# export updateSimulationModel!
+# export updateInstantiatedModel!
 
 export rot123fromR, rot132fromR, Rfromrot123, Rfromrot132
 
