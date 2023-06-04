@@ -31,6 +31,8 @@ mutable struct MultibodyData{F <: Modia3D.VarFloatType, TimeType}
     freeMotionCache_h::Vector{SVector{3,F}}   # = h_f(q,qd,gravity,contact-forces)
     hiddenCache_h::Vector{F}                  # = h_hidden(q,qd,gravity,contact-forces)
 
+    objIndices::Matrix{Int}                   # objIndices[i,1]: Index of local w_segmented variable r_abs of Object3D i
+                                              #           [i,2]: Index of local w_segmented variable R_abs of Object3D i
     zStartIndex::Int                          # eventHandler.z[zStartIndex] is first index of crossing function
                                               # (or zero, if enableContactDetection=false)
     nz::Int                                   # Number of used zero crossing functions
@@ -43,7 +45,7 @@ mutable struct MultibodyData{F <: Modia3D.VarFloatType, TimeType}
 
     function MultibodyData{F,TimeType}(partiallyInstantiatedModel::Modia.InstantiatedModel{F,TimeType}, modelPath::String, world, scene,
                                        revoluteObjects, prismaticObjects, freeMotionObjects, hiddenJointObjects,
-                                       revoluteIndices, prismaticIndices, freeMotionIndices,
+                                       revoluteIndices, prismaticIndices, freeMotionIndices, objIndices,
                                        zStartIndex, nz) where {F,TimeType}
         # Make joints available
         revoluteJoints   = Vector{Revolute{F}}(  undef, length(revoluteObjects))
@@ -116,7 +118,7 @@ mutable struct MultibodyData{F <: Modia3D.VarFloatType, TimeType}
             zeros(F, length(revoluteObjects)), zeros(F, length(prismaticObjects)),
             zeros(F, length(revoluteObjects)+length(prismaticObjects)), zeros(SVector{3,F}, 2*length(freeMotionObjects)), zeros(F, nhidden_qdd),
             zeros(F, length(revoluteObjects)+length(prismaticObjects)), zeros(SVector{3,F}, 2*length(freeMotionObjects)), zeros(F, nhidden_qdd),
-            zStartIndex, nz, partiallyInstantiatedModel.time,
+            objIndices, zStartIndex, nz, partiallyInstantiatedModel.time,
             zeros(F, 2*3*length(freeMotionObjects)),
             Modia.LinearEquations{F}[])
     end
