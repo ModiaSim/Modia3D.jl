@@ -201,7 +201,7 @@ function torqueFromMoments(largeAngles::Bool, moments::SVector{3,F}, sico::SMatr
 end
 
 
-function initializeForceElement(model::Modia.SimulationModel{F,TimeType}, force::Bushing{F})::Nothing where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
+function initializeForceElement(model::Modia.InstantiatedModel{F,TimeType}, force::Bushing{F})::Nothing where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
     force.obj1.hasForceElement = true
     force.obj2.hasForceElement = true
 
@@ -220,7 +220,7 @@ function initializeForceElement(model::Modia.SimulationModel{F,TimeType}, force:
     return nothing
 end
 
-function evaluateForceElement(model::Modia.SimulationModel{F,TimeType}, force::Bushing{F}, time::TimeType) where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
+function evaluateForceElement(model::Modia.InstantiatedModel{F,TimeType}, force::Bushing{F}, time::TimeType) where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
     R12 = measFrameRotation(force.obj2; frameOrig=force.obj1)
     r12 = measFramePosition(force.obj2; frameOrig=force.obj1, frameCoord=force.obj1)
     w12 = measFrameRotVelocity(force.obj2; frameOrig=force.obj1, frameCoord=force.obj1)
@@ -245,17 +245,17 @@ function evaluateForceElement(model::Modia.SimulationModel{F,TimeType}, force::B
     applyFrameTorquePair!(force.obj2, force.obj1, t12; frameCoord=force.obj1)
 
     if Modia.storeResults(model)
-        Modia.add_w_segmented_value!(model, force.translationResultIndex, r12)
-        Modia.add_w_segmented_value!(model, force.rotationResultIndex, ang)
-        Modia.add_w_segmented_value!(model, force.velocityResultIndex, v12)
-        Modia.add_w_segmented_value!(model, force.rotationVelocityResultIndex, angd)
-        Modia.add_w_segmented_value!(model, force.springForceResultIndex, fc)
-        Modia.add_w_segmented_value!(model, force.springTorqueResultIndex, mc)
-        Modia.add_w_segmented_value!(model, force.damperForceResultIndex, fd)
-        Modia.add_w_segmented_value!(model, force.damperTorqueResultIndex, md)
-        Modia.add_w_segmented_value!(model, force.torqueResultIndex, mom)
-        Modia.add_w_segmented_value!(model, force.forceVectorResultIndex, -f12)
-        Modia.add_w_segmented_value!(model, force.torqueVectorResultIndex, -t12)
+        Modia.copy_w_segmented_value_to_result(model, force.translationResultIndex, r12)
+        Modia.copy_w_segmented_value_to_result(model, force.rotationResultIndex, ang)
+        Modia.copy_w_segmented_value_to_result(model, force.velocityResultIndex, v12)
+        Modia.copy_w_segmented_value_to_result(model, force.rotationVelocityResultIndex, angd)
+        Modia.copy_w_segmented_value_to_result(model, force.springForceResultIndex, fc)
+        Modia.copy_w_segmented_value_to_result(model, force.springTorqueResultIndex, mc)
+        Modia.copy_w_segmented_value_to_result(model, force.damperForceResultIndex, fd)
+        Modia.copy_w_segmented_value_to_result(model, force.damperTorqueResultIndex, md)
+        Modia.copy_w_segmented_value_to_result(model, force.torqueResultIndex, mom)
+        Modia.copy_w_segmented_value_to_result(model, force.forceVectorResultIndex, -f12)
+        Modia.copy_w_segmented_value_to_result(model, force.torqueVectorResultIndex, -t12)
     end
 
     return nothing

@@ -44,7 +44,7 @@ end
 WorldTorque(; kwargs...) = WorldTorque{Float64}(; kwargs...)
 
 
-function initializeForceElement(model::Modia.SimulationModel{F,TimeType}, force::WorldTorque{F})::Nothing where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
+function initializeForceElement(model::Modia.InstantiatedModel{F,TimeType}, force::WorldTorque{F})::Nothing where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
 
     force.objectApply.hasForceElement = true
     if !isnothing(force.objectCoord)
@@ -56,14 +56,14 @@ function initializeForceElement(model::Modia.SimulationModel{F,TimeType}, force:
     return nothing
 end
 
-function evaluateForceElement(model::Modia.SimulationModel{F,TimeType}, force::WorldTorque{F}, time::TimeType) where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
+function evaluateForceElement(model::Modia.InstantiatedModel{F,TimeType}, force::WorldTorque{F}, time::TimeType) where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
 
     torqueVector = force.torqueFunction(; time=time, objectApply=force.objectApply, objectCoord=force.objectCoord)
 
     applyFrameTorque!(force.objectApply, torqueVector; frameCoord=force.objectCoord)
 
     if Modia.storeResults(model)
-        Modia.add_w_segmented_value!(model, force.torqueVectorResultIndex, torqueVector)
+        Modia.copy_w_segmented_value_to_result(model, force.torqueVectorResultIndex, torqueVector)
     end
 
     return nothing

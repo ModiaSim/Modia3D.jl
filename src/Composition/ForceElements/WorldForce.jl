@@ -44,7 +44,7 @@ end
 WorldForce(; kwargs...) = WorldForce{Float64}(; kwargs...)
 
 
-function initializeForceElement(model::Modia.SimulationModel{F,TimeType}, force::WorldForce{F})::Nothing where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
+function initializeForceElement(model::Modia.InstantiatedModel{F,TimeType}, force::WorldForce{F})::Nothing where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
 
     force.objectApply.hasForceElement = true
     if !isnothing(force.objectCoord)
@@ -56,14 +56,14 @@ function initializeForceElement(model::Modia.SimulationModel{F,TimeType}, force:
     return nothing
 end
 
-function evaluateForceElement(model::Modia.SimulationModel{F,TimeType}, force::WorldForce{F}, time::TimeType) where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
+function evaluateForceElement(model::Modia.InstantiatedModel{F,TimeType}, force::WorldForce{F}, time::TimeType) where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
 
     forceVector = force.forceFunction(; time=time, objectApply=force.objectApply, objectCoord=force.objectCoord)
 
     applyFrameForce!(force.objectApply, forceVector; frameCoord=force.objectCoord)
 
     if Modia.storeResults(model)
-        Modia.add_w_segmented_value!(model, force.forceVectorResultIndex, forceVector)
+        Modia.copy_w_segmented_value_to_result(model, force.forceVectorResultIndex, forceVector)
     end
 
     return nothing

@@ -69,12 +69,13 @@ rocket = @instantiateModel(TwoStageRocket, unitless=true)
 stopTime = 15.0
 tolerance = 1.0e-6
 requiredFinalStates = [0.0, 1232.2203937213537, 0.0, 0.0, 77.85108394267779, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-simulate!(rocket, stopTime=stopTime, tolerance=tolerance, log=true, logEvents=false, logStates=false, requiredFinalStates=requiredFinalStates)
-
+simulate!(rocket, stopTime=stopTime, tolerance=tolerance, log=true, logEvents=true, logStates=false, requiredFinalStates=requiredFinalStates)
+showInfo(rocket)
 
 @usingModiaPlot
 plot(rocket, [("stage2.body.translation[2]", "stage1.body.translation[2]" ),
               ("stage2.body.velocity[2]", "stage1.body.velocity[2]"),
               ("stage1.thrust.forceVector[2]", "stage2.thrust.forceVector[2]")])
 
+plot(rocket, ["stage1.body.r_abs[2]", "stage2.body.r_abs[2]"], figure=2)
 end

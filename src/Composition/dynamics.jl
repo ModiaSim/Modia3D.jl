@@ -105,12 +105,12 @@ end
 
 
 """
-    initSegment_Model3D!(partiallyInstantiatedModel::Modia.SimulationModel,
+    initSegment_Model3D!(partiallyInstantiatedModel::Modia.InstantiatedModel,
                          modelPath::String, ID, parameters::AbstractDict; log=false)
 
 Called once before initialization of a new simulation segment to instantiate/re-initialize a Model3D model
 """
-function initSegment_Model3D!(partiallyInstantiatedModel::Modia.SimulationModel{F,TimeType},
+function initSegment_Model3D!(partiallyInstantiatedModel::Modia.InstantiatedModel{F,TimeType},
                               modelPath::String, ID, parameters::AbstractDict; log=false)::Nothing where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
     TimerOutputs.@timeit partiallyInstantiatedModel.timer "Modia3D_0 initSegment_Model3D!" begin
         if log
@@ -174,10 +174,23 @@ function initSegment_Model3D!(partiallyInstantiatedModel::Modia.SimulationModel{
             zStartIndex = 0
         end
 
+        # objIndices[i,1]: Index of r_abs of Object3D i
+        #           [i,2]: Index of R_abs of Object3D i
+        objIndices = Matrix{Int}(undef, length(scene.updateVisuElements), 2)
+        for (i,obj) in enumerate(scene.updateVisuElements)
+            if typeof(obj.feature) == Modia3D.Composition.EmptyObject3DFeature
+                objIndices[i,1] = 0
+                objIndices[i,2] = 0
+            else
+                objIndices[i,1] = Modia.new_w_segmented_variable!(partiallyInstantiatedModel, obj.path*".r_abs", Modia3D.ZeroVector3D(F), "m")
+                objIndices[i,2] = Modia.new_w_segmented_variable!(partiallyInstantiatedModel, obj.path*".R_abs", Modia3D.NullRotation(F), "")   
+            end
+        end      
+        
         mbsBuild.mbs = MultibodyData{F,TimeType}(partiallyInstantiatedModel, modelPath, world, scene,
-                                                revoluteObjects, prismaticObjects, freeMotionObjects, hiddenJointObjects,
-                                                mbsBuild.revoluteIndices, mbsBuild.prismaticIndices, mbsBuild.freeMotionIndices,
-                                                zStartIndex, nz)
+                                                 revoluteObjects, prismaticObjects, freeMotionObjects, hiddenJointObjects,
+                                                 mbsBuild.revoluteIndices, mbsBuild.prismaticIndices, mbsBuild.freeMotionIndices,
+                                                 objIndices, zStartIndex, nz)
         parameters[:qdd_hidden] = zeros(F, length(mbsBuild.mbs.hiddenGenForces))
 
         if log
@@ -215,7 +228,7 @@ Open Model3D:
 - Copy der(r):=v and der(rot):= f(w) into hidden derivatives.
 - Return mbs.
 """
-function openModel3D!(instantiatedModel::Modia.SimulationModel{F,TimeType}, modelPath::String, x::AbstractVector, time::TimeType)::MultibodyData{F,TimeType} where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
+function openModel3D!(instantiatedModel::Modia.InstantiatedModel{F,TimeType}, modelPath::String, x::AbstractVector, time::TimeType)::MultibodyData{F,TimeType} where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
     # println("bin in openModel3D ", instantiatedModel.eventHandler.restart)
     mbsBuild::MultibodyBuild{F,TimeType} = instantiatedModel.buildDict[modelPath]
 
@@ -514,11 +527,17 @@ function computeGeneralizedForces!(mbs::MultibodyData{F,TimeType}, qdd_hidden::V
             TimerOutputs.@timeit instantiatedModel.timer "Modia3D_3" begin
                 # objects can have interactionManner (need to rename updateVisuElements)
                 if scene.options.useOptimizedStructure
-                    for obj in scene.updateVisuElements
+                    objIndices = mbs.objIndices
+                    for (i,obj) in enumerate(scene.updateVisuElements)
                         parent = obj.parent
                         obj.r_abs = obj.r_rel ≡ Modia3D.ZeroVector3D(F) ? parent.r_abs : parent.r_abs + parent.R_abs'*obj.r_rel
                         obj.R_abs = obj.R_rel ≡ Modia3D.NullRotation(F) ? parent.R_abs : obj.R_rel*parent.R_abs
 
+                        if objIndices[i,1] > 0
+                            Modia.copy_w_segmented_value_to_result(instantiatedModel, objIndices[i,1], obj.r_abs)
+                            Modia.copy_w_segmented_value_to_result(instantiatedModel, objIndices[i,2], obj.R_abs)
+                        end
+            
                         # is executed only if an internal Object3D called
                         if length( obj.visualizationFrame ) == 1
                             obj.visualizationFrame[1].r_abs = obj.r_abs

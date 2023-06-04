@@ -83,7 +83,7 @@ end
 SpringDamperPtP(; kwargs...) = SpringDamperPtP{Float64}(; kwargs...)
 
 
-function initializeForceElement(model::Modia.SimulationModel{F,TimeType}, force::SpringDamperPtP{F}) where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
+function initializeForceElement(model::Modia.InstantiatedModel{F,TimeType}, force::SpringDamperPtP{F}) where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
     force.obj1.hasForceElement = true
     force.obj2.hasForceElement = true
 
@@ -98,7 +98,7 @@ function initializeForceElement(model::Modia.SimulationModel{F,TimeType}, force:
     return nothing
 end
 
-function evaluateForceElement(model::Modia.SimulationModel{F,TimeType}, force::SpringDamperPtP{F}, time::TimeType) where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
+function evaluateForceElement(model::Modia.InstantiatedModel{F,TimeType}, force::SpringDamperPtP{F}, time::TimeType) where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
     (pos, norm) = measFrameDistance(force.obj2; frameOrig=force.obj1)
     vel = measFrameDistVelocity(force.obj2; frameOrig=force.obj1)
 
@@ -111,13 +111,13 @@ function evaluateForceElement(model::Modia.SimulationModel{F,TimeType}, force::S
     applyFrameForcePair!(force.obj2, force.obj1, f12; frameCoord=force.obj1)
 
     if Modia.storeResults(model)
-        Modia.add_w_segmented_value!(model, force.distanceResultIndex, pos)
-        Modia.add_w_segmented_value!(model, force.deflectionResultIndex, defl)
-        Modia.add_w_segmented_value!(model, force.velocityResultIndex, vel)
-        Modia.add_w_segmented_value!(model, force.springForceResultIndex, fc)
-        Modia.add_w_segmented_value!(model, force.damperForceResultIndex, fd)
-        Modia.add_w_segmented_value!(model, force.forceResultIndex, frc)
-        Modia.add_w_segmented_value!(model, force.forceVectorResultIndex, -f12)
+        Modia.copy_w_segmented_value_to_result(model, force.distanceResultIndex, pos)
+        Modia.copy_w_segmented_value_to_result(model, force.deflectionResultIndex, defl)
+        Modia.copy_w_segmented_value_to_result(model, force.velocityResultIndex, vel)
+        Modia.copy_w_segmented_value_to_result(model, force.springForceResultIndex, fc)
+        Modia.copy_w_segmented_value_to_result(model, force.damperForceResultIndex, fd)
+        Modia.copy_w_segmented_value_to_result(model, force.forceResultIndex, frc)
+        Modia.copy_w_segmented_value_to_result(model, force.forceVectorResultIndex, -f12)
     end
 
     return nothing

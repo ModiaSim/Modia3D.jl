@@ -12,9 +12,9 @@ Pendulum = Model3D(
 pendulum = @instantiateModel(Pendulum, unitless=true, log=false, logDetails=false, logCode=true, logStateSelection=false, logCalculations=false)
 requiredFinalStates = [5.970529829666215, -1.1395482781332746]
 simulate!(pendulum, stopTime=3.0, log=true, requiredFinalStates = requiredFinalStates)
+showInfo(pendulum)
 
 @usingModiaPlot
-plot(pendulum, "rev.phi")
-
+plot(pendulum, ["rev.phi", "body.r_abs", "body.R_abs"])
 
 end

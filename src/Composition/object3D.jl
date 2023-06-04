@@ -607,7 +607,7 @@ end
 
 
 # Inquire properties of a Object3D
-fullName(             obj::Object3D{F}) where F <: Modia3D.VarFloatType = obj.path # Modia.SimulationModel.modelName + Object3D.path (wird ca. 98x verwendet)
+fullName(             obj::Object3D{F}) where F <: Modia3D.VarFloatType = obj.path # Modia.InstantiatedModel.modelName + Object3D.path (wird ca. 98x verwendet)
 instanceName(         obj::Object3D{F}) where F <: Modia3D.VarFloatType = obj.path
 fullName(obj) = error("fullName not implemented for ", typeof(obj))
 instanceName(obj) = error("instanceName not implemented for ", typeof(obj))

@@ -6,7 +6,7 @@
 #
 
 mutable struct MultibodyData{F <: Modia3D.VarFloatType, TimeType}
-    instantiatedModel::Modia.SimulationModel{F,TimeType}
+    instantiatedModel::Modia.InstantiatedModel{F,TimeType}
     path::String                              # Path of Model3D(...)
 
     world::Object3D{F}                        # Pointer to world object
@@ -31,6 +31,8 @@ mutable struct MultibodyData{F <: Modia3D.VarFloatType, TimeType}
     freeMotionCache_h::Vector{SVector{3,F}}   # = h_f(q,qd,gravity,contact-forces)
     hiddenCache_h::Vector{F}                  # = h_hidden(q,qd,gravity,contact-forces)
 
+    objIndices::Matrix{Int}                   # objIndices[i,1]: Index of local w_segmented variable r_abs of Object3D i
+                                              #           [i,2]: Index of local w_segmented variable R_abs of Object3D i
     zStartIndex::Int                          # eventHandler.z[zStartIndex] is first index of crossing function
                                               # (or zero, if enableContactDetection=false)
     nz::Int                                   # Number of used zero crossing functions
@@ -41,9 +43,9 @@ mutable struct MultibodyData{F <: Modia3D.VarFloatType, TimeType}
     # for multibodyAccelerations
     leq::Vector{Modia.LinearEquations{F}}
 
-    function MultibodyData{F,TimeType}(partiallyInstantiatedModel::Modia.SimulationModel{F,TimeType}, modelPath::String, world, scene,
+    function MultibodyData{F,TimeType}(partiallyInstantiatedModel::Modia.InstantiatedModel{F,TimeType}, modelPath::String, world, scene,
                                        revoluteObjects, prismaticObjects, freeMotionObjects, hiddenJointObjects,
-                                       revoluteIndices, prismaticIndices, freeMotionIndices,
+                                       revoluteIndices, prismaticIndices, freeMotionIndices, objIndices,
                                        zStartIndex, nz) where {F,TimeType}
         # Make joints available
         revoluteJoints   = Vector{Revolute{F}}(  undef, length(revoluteObjects))
@@ -116,7 +118,7 @@ mutable struct MultibodyData{F <: Modia3D.VarFloatType, TimeType}
             zeros(F, length(revoluteObjects)), zeros(F, length(prismaticObjects)),
             zeros(F, length(revoluteObjects)+length(prismaticObjects)), zeros(SVector{3,F}, 2*length(freeMotionObjects)), zeros(F, nhidden_qdd),
             zeros(F, length(revoluteObjects)+length(prismaticObjects)), zeros(SVector{3,F}, 2*length(freeMotionObjects)), zeros(F, nhidden_qdd),
-            zStartIndex, nz, partiallyInstantiatedModel.time,
+            objIndices, zStartIndex, nz, partiallyInstantiatedModel.time,
             zeros(F, 2*3*length(freeMotionObjects)),
             Modia.LinearEquations{F}[])
     end
@@ -642,7 +644,7 @@ Change rotation sequence of `freeMotion.rot` from `x-axis, y-axis, z-axis` to `x
 
 - If `freeMotion.isrot123 = false`, set `freeMotion.isrot123 = true`  and `x[..] = x_segmented[..] = rot123fromR(Rfromrot132(freeMotion.rot))`
 """
-function change_rotSequence!(m::Modia.SimulationModel, freeMotion::FreeMotion, x::AbstractVector, x_segmented::AbstractVector)::Nothing
+function change_rotSequence!(m::Modia.InstantiatedModel, freeMotion::FreeMotion, x::AbstractVector, x_segmented::AbstractVector)::Nothing
     if freeMotion.isrot123
         freeMotion.rot      = rot132fromR(Rfromrot123(freeMotion.rot))
         freeMotion.isrot123 = false
@@ -650,7 +652,7 @@ function change_rotSequence!(m::Modia.SimulationModel, freeMotion::FreeMotion, x
         freeMotion.rot      = rot123fromR(Rfromrot132(freeMotion.rot))
         freeMotion.isrot123 = true
     end
-    Modia.add_w_segmented_value!(m, freeMotion.iextra_isrot123, freeMotion.isrot123)
+    Modia.copy_w_segmented_value_to_result(m, freeMotion.iextra_isrot123, freeMotion.isrot123)
 
     # Change x-vector
     startIndex = freeMotion.ix_segmented_rot
@@ -680,12 +682,12 @@ end
 
 
 """
-    setStatesHiddenJoints!(instantiatedModel::Modia.SimulationModel, mbs::MultibodyData, x)
+    setStatesHiddenJoints!(instantiatedModel::Modia.InstantiatedModel, mbs::MultibodyData, x)
 
 Copy states from the hidden state vector instantiatedModel.x_segmented to the hidden joints into the corresponding Object3Ds
 and copy some state derivatives into instantiatedModel.der_x_segmented.
 """
-function setStatesHiddenJoints!(m::Modia.SimulationModel{F,TimeType}, mbs::MultibodyData{F,TimeType}, _x)::Nothing where {F,TimeType}
+function setStatesHiddenJoints!(m::Modia.InstantiatedModel{F,TimeType}, mbs::MultibodyData{F,TimeType}, _x)::Nothing where {F,TimeType}
     x_segmented     = m.x_segmented
     der_x_segmented = m.der_x_segmented
     j1::Int = 0
@@ -790,7 +792,7 @@ end
 
 Copy derivatives of hidden states to instantiatedModel.der_x_segmented
 """
-function setHiddenStatesDerivatives!(m::Modia.SimulationModel{F,TimeType}, mbs::MultibodyData{F,TimeType}, genForces::Vector{F})::Nothing where {F,TimeType}
+function setHiddenStatesDerivatives!(m::Modia.InstantiatedModel{F,TimeType}, mbs::MultibodyData{F,TimeType}, genForces::Vector{F})::Nothing where {F,TimeType}
     for obj in mbs.hiddenJointObjects
         freeMotion = mbs.freeMotion[obj.jointIndex]
 
