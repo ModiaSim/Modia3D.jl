@@ -189,8 +189,8 @@ function initSegment_Model3D!(partiallyInstantiatedModel::Modia.InstantiatedMode
 
         # objIndices[i,1]: Index of r_abs of Object3D i
         #           [i,2]: Index of R_abs of Object3D i
-        objIndices = Matrix{Int}(undef, length(scene.updateVisuElements), 2)
-        for (i,obj) in enumerate(scene.updateVisuElements)
+        objIndices = Matrix{Int}(undef, length(scene.allVisuElements), 2)
+        for (i,obj) in enumerate(scene.allVisuElements)
             if typeof(obj.feature) == Modia3D.Composition.EmptyObject3DFeature
                 objIndices[i,1] = 0
                 objIndices[i,2] = 0
