@@ -146,11 +146,13 @@ function initSegment_Model3D!(partiallyInstantiatedModel::Modia.InstantiatedMode
             scene::Scene{F} = mbsBuild.mbs.scene
             #instantiatedModel = mbsBuild.mbs.instantiatedModel
             #gripPair = scene.gripPair
-            if Modia3D.checkGrippingFeatures(scene, scene.gripPair)
-                Modia3D.changeParentOfMovableUnit!(scene, world, scene.gripPair)
-            else
-                @error("Andrea: print warning für gripping features")
-                # printWarnGrip(robotOrDepot, movableObj, waitingPeriod)
+            if isdefined(scene, :gripPair)
+                if Modia3D.checkGrippingFeatures(scene, scene.gripPair)
+                    Modia3D.changeParentOfMovableUnit!(scene, world, scene.gripPair)
+                else
+                    @error("Andrea: print warning für gripping features")
+                    # printWarnGrip(robotOrDepot, movableObj, waitingPeriod)
+                end
             end
 
             (worldDummy, revoluteObjects, prismaticObjects, freeMotionObjects, hiddenJointObjects, forceElements, resultElements) = checkMultibodySystemAndGetWorldAndJointsAndForceElementsAndResultElements(partiallyInstantiatedModel.modelName, parameters, modelPath, F)
