@@ -547,7 +547,7 @@ function computeGeneralizedForces!(mbs::MultibodyData{F,TimeType}, qdd_hidden::V
                 # objects can have interactionManner (need to rename updateVisuElements)
                 if scene.options.useOptimizedStructure
                     objIndices = mbs.objIndices
-                    for (i,obj) in enumerate(scene.updateVisuElements)
+                    for (i,obj) in enumerate(scene.allVisuElements)
                         parent = obj.parent
                         obj.r_abs = obj.r_rel ≡ Modia3D.ZeroVector3D(F) ? parent.r_abs : parent.r_abs + parent.R_abs'*obj.r_rel
                         obj.R_abs = obj.R_rel ≡ Modia3D.NullRotation(F) ? parent.R_abs : obj.R_rel*parent.R_abs
