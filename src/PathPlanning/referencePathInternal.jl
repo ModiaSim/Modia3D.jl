@@ -4,6 +4,7 @@ struct ArbitraryMotion
     inputArg1       # e.g. positions, waitingPeriod, robotOrDepot
     inputArg2       # e.g. nothing, movablePart
     inputArg3       # e.g. nothing, waitingPeriod
+    inputArg4       # e.g. nothing, waitingPeriod
 end
 
 
@@ -86,7 +87,7 @@ end
 
 #--------------  Functions that can be executed at an event instant -------
 ### ------------------ ptpJointSpace! -------------------------------------
-function ptpJointSpace!(ref::ModelActions{F,TimeType}, positions::Matrix{Float64}, dummy1, dummy2) where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
+function ptpJointSpace!(ref::ModelActions{F,TimeType}, positions::Matrix{Float64}, dummy1, dummy2, dummy3) where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
     pos1 = size(transpose(ref.referencePath.position))
     pos2 = size(positions)
     if pos1[2] != pos2[2]
@@ -101,31 +102,35 @@ function ptpJointSpace!(ref::ModelActions{F,TimeType}, positions::Matrix{Float64
     return nothing
 end
 
-ptpJointSpace!(ref::ModelActions{F,TimeType}, positions::Vector{Float64}, dummy1, dummy2) where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat} =
-    ptpJointSpace!(ref, reshape(positions, :, 1), dummy1, dummy2)
+ptpJointSpace!(ref::ModelActions{F,TimeType}, positions::Vector{Float64}, dummy1, dummy2, dummy3) where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat} =
+    ptpJointSpace!(ref, reshape(positions, :, 1), dummy1, dummy2, dummy3)
 
-ptpJointSpace!(ref::ModelActions{F,TimeType}, positions::Float64, dummy1, dummy2) where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat} =
-    ptpJointSpace!(ref, reshape([positions], :, 1), dummy1, dummy2)
+ptpJointSpace!(ref::ModelActions{F,TimeType}, positions::Float64, dummy1, dummy2, dummy3) where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat} =
+    ptpJointSpace!(ref, reshape([positions], :, 1), dummy1, dummy2, dummy3)
 
 
 
 ###------------------------- ActionWait! ----------------------------------
-function ActionWait!(ref::ModelActions{F,TimeType}, waitingPeriod::Float64, dummy1, dummy2) where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
+function ActionWait!(ref::ModelActions{F,TimeType}, waitingPeriod::Float64, dummy1, dummy2, dummy3) where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
     @assert(waitingPeriod >= 0.0)
     setAttributesReferencePath!(ref, Modia.getTime(ref.instantiatedModel) + waitingPeriod)
     return nothing
 end
 
-function robotEventAfterPeriod!(ref::ModelActions{F,TimeType}, waitingPeriod::Float64, dummy1, dummy2) where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
+function robotEventAfterPeriod!(ref::ModelActions{F,TimeType}, waitingPeriod::Float64, dummy1, dummy2, dummy3) where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
     @assert(waitingPeriod >= 0.0)
     setAttributesReferencePathRestart!(ref, Modia.getTime(ref.instantiatedModel) + waitingPeriod)
     return nothing
 end
 
 ###--------------------- ActionReleaseAndAttach! -------------------------
-function ActionReleaseAndAttach!(ref::ModelActions{F,TimeType}, robotOrDepot::String, movableObj::String, waitingPeriod::Float64) where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
+function ActionReleaseAndAttach!(ref::ModelActions{F,TimeType}, robotOrDepot::String, movableObj::String, waitingPeriod::Float64, enableContactDetection::Union{Bool, Nothing}) where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
     @assert(waitingPeriod >= 0.0) # waitingPeriod must be positive
     ref.scene.gripPair = Modia3D.GrippingPair{F}( Modia3D.ReleaseAndSetDown, getComponent(ref, movableObj), getComponent(ref, robotOrDepot))
+
+    if !isnothing(enableContactDetection)
+        ref.scene.gripPair.enableContactDetection = enableContactDetection
+    end
 
     setAttributesReferencePathRestart!(ref, Modia.getTime(ref.instantiatedModel) + waitingPeriod)
     return nothing
@@ -133,18 +138,27 @@ end
 
 
 ###------------------------- ActionAttach! ----------------------------------
-function ActionAttach!(ref::ModelActions{F,TimeType}, robotOrDepot::String, movableObj::String, waitingPeriod::Float64) where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
+function ActionAttach!(ref::ModelActions{F,TimeType}, robotOrDepot::String, movableObj::String, waitingPeriod::Float64, enableContactDetection::Union{Bool,Nothing}) where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
     @assert(waitingPeriod >= 0.0) # waitingPeriod must be bigger than 0.1 sec
     ref.scene.gripPair = Modia3D.GrippingPair{F}(Modia3D.Grip, getComponent(ref, movableObj), getComponent(ref, robotOrDepot))
+
+    if !isnothing(enableContactDetection)
+        ref.scene.gripPair.enableContactDetection = enableContactDetection
+    end
+
     setAttributesReferencePathRestart!(ref, Modia.getTime(ref.instantiatedModel) + waitingPeriod)
     return nothing
 end
 
 
 ###------------------------- ActionRelease! -------------------------------
-function ActionRelease!(ref::ModelActions{F,TimeType}, movableObj::String, waitingPeriod::Float64, nothing) where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
+function ActionRelease!(ref::ModelActions{F,TimeType}, movableObj::String, waitingPeriod::Float64, enableContactDetection::Union{Bool,Nothing}, nothing) where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
     @assert(waitingPeriod >= 0.0) # waitingPeriod must be positive
     ref.scene.gripPair = Modia3D.GrippingPair{F}(Modia3D.Release, getComponent(ref, movableObj))
+
+    if !isnothing(enableContactDetection)
+        ref.scene.gripPair.enableContactDetection = enableContactDetection
+    end
 
     setAttributesReferencePathRestart!(ref, Modia.getTime(ref.instantiatedModel) + waitingPeriod)
     return nothing
@@ -152,9 +166,13 @@ end
 
 
 ###------------------------- ActionDelete! -------------------------------
-function ActionDelete!(ref::ModelActions{F,TimeType}, movableObj::String, waitingPeriod::Float64, nothing) where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
+function ActionDelete!(ref::ModelActions{F,TimeType}, movableObj::String, waitingPeriod::Float64, enableContactDetection::Union{Bool,Nothing}, nothing) where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
     @assert(waitingPeriod >= 0.0) # waitingPeriod must be positive
     ref.scene.gripPair = Modia3D.GrippingPair{F}(Modia3D.Delete, getComponent(ref, movableObj))
+
+    if !isnothing(enableContactDetection)
+        ref.scene.gripPair.enableContactDetection = enableContactDetection
+    end
 
     setAttributesReferencePathRestart!(ref, Modia.getTime(ref.instantiatedModel) + waitingPeriod)
     return nothing
