@@ -41,7 +41,13 @@ Test.@testset "Force Elements" begin
     include(joinpath("ForceElements", "BoxBushing.jl"))
     include(joinpath("ForceElements", "BoxSpringDamperPtP.jl"))
     include(joinpath("ForceElements", "BoxNonLinearSpringDamperPtP.jl"))
+    if testsExtend >= normalTests
+        include(joinpath("ForceElements", "PCMBubbleFunnel.jl"))
+    end
     if testsExtend == completeTests
+        include(joinpath("ForceElements", "PCMTorusSphere.jl"))
+        include(joinpath("ForceElements", "PCMTorusSpheres.jl"))
+        include(joinpath("ForceElements", "PCMBouncingBubbles.jl"))
         include(joinpath("ForceElements", "BoxBushing_Measurements.jl"))
     end
 end

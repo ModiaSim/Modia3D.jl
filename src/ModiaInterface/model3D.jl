@@ -29,6 +29,7 @@ WorldForce(           ; kwargs...) = Par(; _constructor = :(Modia3D.Composition.
 WorldTorque(          ; kwargs...) = Par(; _constructor = :(Modia3D.Composition.WorldTorque{FloatType})          , _path = true, kwargs...)
 Bushing(              ; kwargs...) = Par(; _constructor = :(Modia3D.Composition.Bushing{FloatType})              , _path = true, kwargs...)
 SpringDamperPtP(      ; kwargs...) = Par(; _constructor = :(Modia3D.Composition.SpringDamperPtP{FloatType})      , _path = true, kwargs...)
+PolygonalContactModel(; kwargs...) = Par(; _constructor = :(Modia3D.Composition.PolygonalContactModel{FloatType}), _path = true, kwargs...)
 
 MassPropertiesFromShape()              = Par(; _constructor = :(Modia3D.Shapes.MassPropertiesFromShape{FloatType}))
 MassPropertiesFromShapeAndMass(; mass) = Par(; _constructor = :(Modia3D.Shapes.MassPropertiesFromShapeAndMass{FloatType}), mass = mass)

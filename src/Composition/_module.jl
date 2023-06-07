@@ -108,6 +108,7 @@ include(joinpath("ForceElements", "WorldForce.jl"))
 include(joinpath("ForceElements", "WorldTorque.jl"))
 include(joinpath("ForceElements", "Bushing.jl"))
 include(joinpath("ForceElements", "SpringDamperPtP.jl"))
+include(joinpath("ForceElements", "PolygonalContactModel.jl"))
 
 include("contactPairs.jl")
 include(joinpath(Modia3D.path, "src", "contactDetection", "ContactDetectionMPR", "ContactDetectionMPR_handler.jl"))

@@ -30,3 +30,10 @@ Bushing
 ```@docs
 SpringDamperPtP
 ```
+
+
+## PolygonalContactModel
+
+```@docs
+PolygonalContactModel
+```
