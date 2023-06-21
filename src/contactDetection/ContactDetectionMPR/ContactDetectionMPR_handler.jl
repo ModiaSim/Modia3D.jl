@@ -21,20 +21,20 @@ const PairID = Int64
 Generate a new `ContactPair` object of two objects that have `contact = true`.
 """
 mutable struct ContactPair{F <: Modia3D.VarFloatType}
-    contactPoint1::SVector{3,F}
-    contactPoint2::SVector{3,F}
-    contactNormal::SVector{3,F}
+    contactPoint1::SVector{3,F}     # absolute coordinate of contact point on object1 in world object
+    contactPoint2::SVector{3,F}     # absolute coordinate of contact point on object2 in world object
+    contactNormal::SVector{3,F}     # vector pointing from contactPoint1 to contactPoint2
     obj1::Object3D{F}
     obj2::Object3D{F}
-    distanceWithHysteresis::F
+    distanceWithHysteresis::F       # signed distance: positive: Euclidean distance (no contact), negative: penetration depth (contact)
 
     supportPointsDefined::Bool
-    support1A::SVector{3,F}
-    support2A::SVector{3,F}
-    support3A::SVector{3,F}
-    support1B::SVector{3,F}
-    support2B::SVector{3,F}
-    support3B::SVector{3,F}
+    support1A::SVector{3,F}         # absolute coordinate of support point 1 on obj1 in world object
+    support2A::SVector{3,F}         # absolute coordinate of support point 2 on obj1 in world object
+    support3A::SVector{3,F}         # absolute coordinate of support point 3 on obj1 in world object
+    support1B::SVector{3,F}         # absolute coordinate of support point 1 on obj2 in world object
+    support2B::SVector{3,F}         # absolute coordinate of support point 2 on obj2 in world object
+    support3B::SVector{3,F}         # absolute coordinate of support point 3 on obj2 in world object
 
     pairKind::Shapes.PairMaterialKind
     contactPairMaterial::Union{Modia3D.AbstractContactPairMaterial,Nothing}  # only if contact = true, otherwise not defined
