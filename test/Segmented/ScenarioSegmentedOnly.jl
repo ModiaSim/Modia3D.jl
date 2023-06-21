@@ -99,10 +99,9 @@ function robotProgram(robotActions)
         v_max =    [2.68512, 2.68512, 4.8879, 5.8997, 5.8997, 2.0],
         a_max =    [1.5, 1.5, 1.5, 1.5, 1.5, 0.5])
 
+
     ActionAttach(robotActions, "sphereLock", "youbot1.base.plateLock",waitingPeriod=0.0)
-
     EventAfterPeriod(robotActions, 1e-10)
-
     ptpJointSpace(robotActions, [
         pi   pi/4           pi/4    0.0   0.0  diameter+0.01; # start top of ball
         pi   pi/4           pi/4    1.04  0.0  diameter+0.01; # go to plate
@@ -572,15 +571,20 @@ requiredFinalStates = [3.1415949391160716, 2.336082293991764e-6, 0.0641313354140
 simulate!(youbot, stopTime=stopTime, tolerance=tolerance, requiredFinalStates_atol=0.002, log=true, logStates=false, logParameters=false, requiredFinalStates=missing, logEvents=false)
 
 
-# @usingModiaPlot
+@usingModiaPlot
 # plot(youbot, ["sphere.translation",
 #               ("youbot1.rev1.phi",
 #                "youbot1.rev2.phi",
 #                "youbot1.rev3.phi",
 #                "youbot1.rev4.phi",
-#                "youbot1.rev5.phi")], figure=1)
+#                "youbot1.rev5.phi")
+#                ], figure=1)
 
-# plot(youbot, [ "sphere.r_abs[1]",
-#     "sphere.r_abs[2]",
-#     "sphere.r_abs[3]"], figure=2)
+plot(youbot, [ "sphere.translation[1]",
+"sphere.translation[2]",
+"sphere.translation[3]"], reuse=true, prefix="S4: ", figure=1)
+
+plot(youbot, [ "sphere.r_abs[1]",
+    "sphere.r_abs[2]",
+    "sphere.r_abs[3]"], reuse=true, prefix="S4: ", figure=2)
 end

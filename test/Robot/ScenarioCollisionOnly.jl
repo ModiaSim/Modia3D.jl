@@ -498,7 +498,10 @@ YouBot(worldName;pathIndexOffset) = Model(
 Scenario = Model3D(
     gravField = UniformGravityField(g=9.81, n=[0,0,-1]),
     world = Object3D(feature=Scene(gravityField=:gravField, visualizeFrames=false, nominalLength=tableX, gap=0.2,
-        enableContactDetection=true, maximumContactDamping=1000, elasticContactReductionFactor=1e-3, enableVisualization=true)),
+    enableContactDetection=true, maximumContactDamping=1000, elasticContactReductionFactor=1e-3, enableVisualization=true)),
+
+    worldFrame = Object3D(parent=:world,
+                          feature=Visual(shape=CoordinateSystem(length=1.0))),
 
     # table = Table,
     ground = Ground,
@@ -548,15 +551,23 @@ end
 simulate!(youbot, stopTime=stopTime, tolerance=tolerance, requiredFinalStates_rtol=0.01, requiredFinalStates_atol=0.01, log=true, logStates=false, logParameters=false, requiredFinalStates=missing, logEvents=false)
 
 @usingModiaPlot
-plot(youbot, ["sphere.translation",
-              ("youbot1.rev1.phi",
-               "youbot1.rev2.phi",
-               "youbot1.rev3.phi",
-               "youbot1.rev4.phi",
-               "youbot1.rev5.phi")], figure=1)
+plot(youbot, [ "sphere.translation[1]",
+"sphere.translation[2]",
+"sphere.translation[3]"], reuse=true, prefix="S1: ", figure=1)
 
 plot(youbot, [ "sphere.r_abs[1]",
     "sphere.r_abs[2]",
-    "sphere.r_abs[3]"], figure=2)
+    "sphere.r_abs[3]"], reuse=true, prefix="S1: ", figure=2)
+
+
+# plot(youbot, ["sphere.translation",
+#             #   ("youbot1.rev1.phi",
+#             #    "youbot1.rev2.phi",
+#             #    "youbot1.rev3.phi",
+#             #    "youbot1.rev4.phi",
+#             #    "youbot1.rev5.phi")
+#             ], figure=1)
+
+
 
 end

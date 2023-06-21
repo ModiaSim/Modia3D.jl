@@ -145,8 +145,6 @@ function robotProgram(robotActions)
     ptpJointSpace(robotActions, [
         pi   0.0    pi/2      0.0   0.0  diameter-0.002; # grip + top
         ])
-
-
     return nothing
 end
 
@@ -576,15 +574,19 @@ simulate!(youbot, stopTime=stopTime, tolerance=tolerance, requiredFinalStates_at
 # showInfo(youbot)
 
 @usingModiaPlot
-plot(youbot, ["sphere.translation",
-              ("youbot1.rev1.phi",
-               "youbot1.rev2.phi",
-               "youbot1.rev3.phi",
-               "youbot1.rev4.phi",
-               "youbot1.rev5.phi")], figure=1)
+# plot(youbot, ["sphere.translation",
+#               ("youbot1.rev1.phi",
+#                "youbot1.rev2.phi",
+#                "youbot1.rev3.phi",
+#                "youbot1.rev4.phi",
+#                "youbot1.rev5.phi")], figure=1)
+
+plot(youbot, [ "sphere.translation[1]",
+"sphere.translation[2]",
+"sphere.translation[3]"], reuse=true, prefix="S2: ", figure=1)
 
 plot(youbot, [ "sphere.r_abs[1]",
     "sphere.r_abs[2]",
-    "sphere.r_abs[3]"], figure=2)
+    "sphere.r_abs[3]"], reuse=true, prefix="S2: ", figure=2)
 
 end

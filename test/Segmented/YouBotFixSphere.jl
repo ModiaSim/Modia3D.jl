@@ -522,7 +522,7 @@ YouBot(worldName;pathIndexOffset) = Model(
 Scenario = Model3D(
     gravField = UniformGravityField(g=9.81, n=[0,0,-1]),
     world = Object3D(feature=Scene(gravityField=:gravField, visualizeFrames=false, nominalLength=tableX, gap=0.2,
-        enableContactDetection=false, maximumContactDamping=1000, elasticContactReductionFactor=1e-3, enableVisualization=false)),
+        enableContactDetection=false, maximumContactDamping=1000, elasticContactReductionFactor=1e-3, enableVisualization=true)),
 
     table = Table,
     ground = Ground,
