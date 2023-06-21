@@ -183,10 +183,10 @@ function initSegment_Model3D!(partiallyInstantiatedModel::Modia.InstantiatedMode
                 objIndices[i,2] = 0
             else
                 objIndices[i,1] = Modia.new_w_segmented_variable!(partiallyInstantiatedModel, obj.path*".r_abs", Modia3D.ZeroVector3D(F), "m")
-                objIndices[i,2] = Modia.new_w_segmented_variable!(partiallyInstantiatedModel, obj.path*".R_abs", Modia3D.NullRotation(F), "")   
+                objIndices[i,2] = Modia.new_w_segmented_variable!(partiallyInstantiatedModel, obj.path*".R_abs", Modia3D.NullRotation(F), "")
             end
-        end      
-        
+        end
+
         mbsBuild.mbs = MultibodyData{F,TimeType}(partiallyInstantiatedModel, modelPath, world, scene,
                                                  revoluteObjects, prismaticObjects, freeMotionObjects, hiddenJointObjects,
                                                  mbsBuild.revoluteIndices, mbsBuild.prismaticIndices, mbsBuild.freeMotionIndices,
@@ -477,6 +477,7 @@ function computeGeneralizedForces!(mbs::MultibodyData{F,TimeType}, qdd_hidden::V
                 # Compute contact forces/torques
                 if scene.collide
                     computeContactForcesAndTorques(instantiatedModel, scene, world, time, nothing)
+                    # getElasticContactPair(instantiatedModel, scene, "sphere", "ground")
                 end
 
                 # Compute forces/torques and residues in a backward recursion
@@ -537,7 +538,7 @@ function computeGeneralizedForces!(mbs::MultibodyData{F,TimeType}, qdd_hidden::V
                             Modia.copy_w_segmented_value_to_result(instantiatedModel, objIndices[i,1], obj.r_abs)
                             Modia.copy_w_segmented_value_to_result(instantiatedModel, objIndices[i,2], obj.R_abs)
                         end
-            
+
                         # is executed only if an internal Object3D called
                         if length( obj.visualizationFrame ) == 1
                             obj.visualizationFrame[1].r_abs = obj.r_abs

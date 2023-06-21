@@ -245,3 +245,30 @@ function setVisualizationContactProperties!(obj::Composition.Object3D{F}, transp
     obj.feature.visualMaterial.transparency = transparency
     return nothing
 end
+
+
+function getElasticContactPair(sim::Modia.InstantiatedModel{F, T}, scene::Scene{F}, obj1::String, obj2::String) where {F <: Modia3D.VarFloatType, T}
+    ch::Modia3D.ContactDetectionMPR_handler = scene.options.contactDetection
+    obj1::Composition.Object3D{F} = getComponent(sim, obj1)
+    obj2::Composition.Object3D{F} = getComponent(sim, obj2)
+
+    for (pairID::Int64, pair::ContactPair{F}) in ch.contactDict
+        obj1pair = pair.obj1
+        obj2pair = pair.obj2
+
+        if scene.options.enableContactDetection
+            if pair.pairKind == Modia3D.ElasticContactPairKind
+                if (obj1 == obj1pair && obj2 == obj2pair) || (obj2 == obj1pair && obj1 == obj2pair)
+                    return pair
+                end
+            end
+        end
+    end
+
+    return nothing
+end
+
+function getComponent(sim::Modia.InstantiatedModel{F, T}, path::String) where {F <: Modia3D.VarFloatType, T <: AbstractFloat}
+    obj::Composition.Object3D{F} = Modia.getValue(sim, path)
+    return obj
+end
