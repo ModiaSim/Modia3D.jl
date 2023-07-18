@@ -74,17 +74,18 @@ function evaluateResultElement(model::Modia.InstantiatedModel{F,TimeType}, scene
 
     (contactPair, converse) = getElasticContactPair(scene, result.object1, result.object2)
     if !isnothing(contactPair)
-        penetration = contactPair.results.penetration
-        penetrationVelocity = contactPair.results.penetrationVelocity
-        tangentialVelocity = contactPair.results.tangentialVelocity
-        angularVelocity = contactPair.results.angularVelocity
-        normalForce = contactPair.results.normalForce
-        tangentialForce = contactPair.results.tangentialForce
-        torque = contactPair.results.torque
-        positionVector = contactPair.results.positionVector
-        normalVector = contactPair.results.normalVector
-        forceVector = contactPair.results.forceVector
-        torqueVector = contactPair.results.torqueVector
+        pair::ContactPair{F} = contactPair
+        penetration = pair.results.penetration
+        penetrationVelocity = pair.results.penetrationVelocity
+        tangentialVelocity = pair.results.tangentialVelocity
+        angularVelocity = pair.results.angularVelocity
+        normalForce = pair.results.normalForce
+        tangentialForce = pair.results.tangentialForce
+        torque = pair.results.torque
+        positionVector = pair.results.positionVector
+        normalVector = pair.results.normalVector
+        forceVector = pair.results.forceVector
+        torqueVector = pair.results.torqueVector
         if converse
             normalVector = -normalVector
             forceVector = -forceVector
