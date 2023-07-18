@@ -126,7 +126,7 @@ at time `time`.
 """
 function responseCalculation(material::ElasticContactPairResponseMaterial, obj1::Object3D{F}, obj2::Object3D{F},
                              rContact::SVector{3,F}, e_n::SVector{3,F},
-                             s::F, time, file, sim)::Tuple{SVector{3,F},SVector{3,F},SVector{3,F},SVector{3,F}} where F <: Modia3D.VarFloatType
+                             s::F, time, file, sim)::Tuple{SVector{3,F},SVector{3,F},SVector{3,F},SVector{3,F},ContactResults{F}} where F <: Modia3D.VarFloatType
     # Material
     c_res    = F(material.c_res)
     c_geo    = F(material.c_geo)
@@ -140,23 +140,32 @@ function responseCalculation(material::ElasticContactPairResponseMaterial, obj1:
 
     ### signed velocity and relative velocity ####
     # Contact points and distances to local part frame (in world frame)
+    # r_rel1 ... position vector from obj1 to average contact point, resolved in world
+    # r_rel2 ... position vector from obj2 to average contact point, resolved in world
     r_rel1 = rContact - obj1.r_abs
     r_rel2 = rContact - obj2.r_abs
 
     # Velocities and angular velocities of contact frames in world frame
+
     w1 = obj1.R_abs'*obj1.w
     w2 = obj2.R_abs'*obj2.w
     v1 = obj1.v0 + cross(w1,r_rel1)
     v2 = obj2.v0 + cross(w2,r_rel2)
 
     # Velocities and angular velocities in normal and tangential direction
+    # w_rel   ... angular velocity vector of obj2 relative to obj1, resolved in world
+    # e_w_reg ... regularised direction vector of w_rel, resolved in world
+    # v_rel   ... velocity vector at average contact point on obj2 relative to obj1, resolved in world
     w_rel   = w2 - w1
     e_w_reg = w_rel/Modia3D.regularize(norm(w_rel),wsmall)
     v_rel   = v2 - v1
 
-    # delta_dot ... signed relative velocity in normal direction
-    # v_t       ... relative velocity vector in tangential direction
-    # delta     ... signed distance
+    # e_n       ... points from contact point on obj2 to contact point on obj1, i.e. normal direction into obj2
+    # s         ... signed distance of the contact points, negative during contact
+    # delta_dot ... signed relative velocity in normal direction, positive for expansion (sign inconsistent with delta!)
+    # v_t       ... tangential velocity vector at average contact point on obj2 relative to obj1, resolved in world
+    # e_t_reg   ... regularised direction vector of v_t, resolved in world
+    # delta     ... penetration, positive during contact
     delta_dot = dot(v_rel,e_n)
     v_t       = v_rel - delta_dot*e_n
     e_t_reg   = v_t/Modia3D.regularize(norm(v_t),vsmall)
@@ -165,16 +174,27 @@ function responseCalculation(material::ElasticContactPairResponseMaterial, obj1:
     delta_comp = delta * sqrt(abs(delta))
 
     #fn = -max(F(0.0), c_res * c_geo * delta_comp * (1 - d_res*delta_dot) )
-    fn = -c_res * c_geo * delta_comp * (1 - d_res*delta_dot)
-    ft = -mu_k*fn*e_t_reg
-    f1 = fn * e_n + ft
-    f2 = -f1
+    fn = -c_res * c_geo * delta_comp * (1 - d_res*delta_dot)  # normal force, negative for pressure!
+    ft = -mu_k*fn*e_t_reg                                     # tangential force vector acting on obj1, resolved in world
+    f1 = fn * e_n + ft                                        # total force vector acting on obj1, resolved in world
+    f2 = -f1                                                  # total force vector acting on obj2, resolved in world
 
-    tau = -mu_r * mu_r_geo * fn * e_w_reg
-    t1  = cross(r_rel1,f1) + tau
-    t2  = cross(r_rel2,f2) - tau
+    tau = -mu_r * mu_r_geo * fn * e_w_reg                     # torque vector acting at average contact point on obj1, resolved in world
+    t1  = cross(r_rel1,f1) + tau                              # torque vector acting at obj1, resolved in world
+    t2  = cross(r_rel2,f2) - tau                              # torque vector acting at obj2, resolved in world
 
-    return (f1,f2,t1,t2)
+    return (f1, f2, t1, t2,
+            ContactResults(delta,        # normal contact penetration (positive during contact)
+                           -delta_dot,   # normal contact penetration velocity (positive for compression)
+                           norm(v_t),    # absolute value of the tangential relative velocity
+                           norm(w_rel),  # absolute value of the relative angular velocity
+                           -fn,          # normal contact force (positive for pressure)
+                           norm(ft),     # absolute value of the tangential contact force
+                           norm(tau),    # absolute value of the contact torque
+                           rContact,     # absolute position vector of the contact point, resolved in world
+                           -e_n,         # unit vector in contact normal direction, pointing into obj1, resolved in world
+                           f1,           # total contact force vector acting at the contact point on obj1, resolved in world
+                           tau))         # total contact torque vector acting at the contact point on obj1, resolved in world
 end
 
 responseCalculation(material::Nothing, obj1::Object3D{F}, obj2::Object3D{F},

@@ -11,6 +11,22 @@ using OrderedCollections
 const PairID = Int64
 
 
+# Struct for contact results, used by ContactResult element
+struct ContactResults{F <: Modia3D.VarFloatType}
+    penetration::F                # normal contact penetration (positive during contact)
+    penetrationVelocity::F        # normal contact penetration velocity (positive for compression)
+    tangentialVelocity::F         # absolute value of the tangential relative velocity
+    angularVelocity::F            # absolute value of the relative angular velocity
+    normalForce::F                # normal contact force (positive for pressure)
+    tangentialForce::F            # absolute value of the tangential contact force
+    torque::F                     # absolute value of the contact torque
+    positionVector::SVector{3,F}  # absolute position vector of the contact point, resolved in world
+    normalVector::SVector{3,F}    # unit vector in contact normal direction, pointing into obj1, resolved in world
+    forceVector::SVector{3,F}     # total contact force vector acting at the contact point on obj1, resolved in world
+    torqueVector::SVector{3,F}    # total contact torque vector acting at the contact point on obj1, resolved in world
+end
+
+
 """
     ContactPair(contactPointA, contactPointB,
         contactNormal, objA, objB,
@@ -21,23 +37,25 @@ const PairID = Int64
 Generate a new `ContactPair` object of two objects that have `contact = true`.
 """
 mutable struct ContactPair{F <: Modia3D.VarFloatType}
-    contactPoint1::SVector{3,F}
-    contactPoint2::SVector{3,F}
-    contactNormal::SVector{3,F}
+    contactPoint1::SVector{3,F}     # absolute position of contact point on object1 resolved in world
+    contactPoint2::SVector{3,F}     # absolute position of contact point on object2 resolved in world
+    contactNormal::SVector{3,F}     # vector pointing from contactPoint2 to contactPoint1 resolved in world
     obj1::Object3D{F}
     obj2::Object3D{F}
-    distanceWithHysteresis::F
+    distanceWithHysteresis::F       # signed distance: positive: Euclidean distance (no contact), negative: penetration depth (contact)
 
     supportPointsDefined::Bool
-    support1A::SVector{3,F}
-    support2A::SVector{3,F}
-    support3A::SVector{3,F}
-    support1B::SVector{3,F}
-    support2B::SVector{3,F}
-    support3B::SVector{3,F}
+    support1A::SVector{3,F}         # absolute position of support point 1 on obj1 resolved in world
+    support2A::SVector{3,F}         # absolute position of support point 2 on obj1 resolved in world
+    support3A::SVector{3,F}         # absolute position of support point 3 on obj1 resolved in world
+    support1B::SVector{3,F}         # absolute position of support point 1 on obj2 resolved in world
+    support2B::SVector{3,F}         # absolute position of support point 2 on obj2 resolved in world
+    support3B::SVector{3,F}         # absolute position of support point 3 on obj2 resolved in world
 
     pairKind::Shapes.PairMaterialKind
     contactPairMaterial::Union{Modia3D.AbstractContactPairMaterial,Nothing}  # only if contact = true, otherwise not defined
+
+    results::ContactResults{F}
 
     ContactPair{F}(contactPoint1::SVector{3,F}, contactPoint2::SVector{3,F},
             contactNormal::SVector{3,F},

@@ -117,6 +117,7 @@ include("scene.jl") # must be included after superObjects.jl
 include(joinpath("joints", "joints.jl"))
 include(joinpath("joints", "changeJointState.jl"))
 
+include(joinpath("ResultElements", "ContactResult.jl"))
 include("sensors.jl")
 include("frameMeasurements.jl")
 include("frameForceTorque.jl")
