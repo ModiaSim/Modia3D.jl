@@ -71,6 +71,7 @@ end
 Test.@testset "Collision" begin
     include(joinpath("Collision", "BouncingSphere.jl"))
     include(joinpath("Collision", "BouncingSphereFree.jl"))
+    include(joinpath("Collision", "BouncingSphereContactResults.jl"))
     include(joinpath("Collision", "BouncingEllipsoid.jl"))
     include(joinpath("Collision", "BouncingEllipsoidOnSphere.jl"))
     include(joinpath("Collision", "TwoCollidingBalls.jl"))
