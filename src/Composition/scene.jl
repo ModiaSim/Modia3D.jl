@@ -420,6 +420,7 @@ mutable struct Scene{F <: Modia3D.VarFloatType} <: Modia3D.AbstractScene
     AABB::Vector{Vector{Basics.BoundingBox{F}}}  # Bounding boxes of elements that can collide
     zStartIndex::Int                          # start index of collision zero crossing functions
     forceElements::Vector{Modia3D.AbstractForceElement}
+    resultElements::Vector{Modia3D.AbstractResultElement}
     provideAnimationData::Bool                # = true, if animation data shall be provided
     exportAnimation::Bool                     # animation file export is enabled
     animation::Vector{animationStep}          # animation data of visible Object3Ds
@@ -516,6 +517,7 @@ mutable struct Scene{F <: Modia3D.VarFloatType} <: Modia3D.AbstractScene
             Vector{Vector{Basics.BoundingBox{F}}}[],
             1,
             Vector{Modia3D.AbstractForceElement}[],
+            Vector{Modia3D.AbstractResultElement}[],
             provideAnimationData,
             exportAnimation,
             Vector{animationStep}[],

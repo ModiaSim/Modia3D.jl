@@ -22,6 +22,7 @@ makedocs(
         "Components/Materials.md"
         "Components/GravityField.md"
         "Components/ForceElements.md"
+        "Components/ResultElements.md"
      ],
      "Functions" => "Functions.md",
      "Internal" => [

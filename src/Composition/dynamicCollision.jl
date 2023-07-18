@@ -49,8 +49,8 @@ function dealWithContacts!(sim::Modia.InstantiatedModel{F, T}, scene::Scene{F}, 
 
     for (pairID::Int64, pair::ContactPair{F}) in ch.contactDict
         obj1 = pair.obj1
-        obj2= pair.obj2
-        rContact= (pair.contactPoint1 + pair.contactPoint2)/F(2.0)
+        obj2 = pair.obj2
+        rContact = (pair.contactPoint1 + pair.contactPoint2)/F(2.0)
         contactNormal = pair.contactNormal
         if Modia.isEvent(sim)
             # println("$(sim.time): ", obj1.path, " ", obj2.path)
@@ -65,7 +65,7 @@ function dealWithContacts!(sim::Modia.InstantiatedModel{F, T}, scene::Scene{F}, 
                             pair.distanceWithHysteresis, time, file, sim)
             elseif pair.pairKind == Modia3D.ElasticContactPairKind
                 elasticContactPairMaterial::Composition.ElasticContactPairResponseMaterial = pair.contactPairMaterial
-                (f1,f2,t1,t2) = responseCalculation(elasticContactPairMaterial, obj1, obj2,
+                (f1,f2,t1,t2,pair.results) = responseCalculation(elasticContactPairMaterial, obj1, obj2,
                     rContact, contactNormal,
                     pair.distanceWithHysteresis, time, file, sim)
             elseif pair.pairKind == Modia3D.ObserverContactPairKind
@@ -244,4 +244,22 @@ function setVisualizationContactProperties!(obj::Composition.Object3D{F}, transp
     obj.r_abs = point
     obj.feature.visualMaterial.transparency = transparency
     return nothing
+end
+
+
+function getElasticContactPair(scene::Scene{F}, obj1::Composition.Object3D{F}, obj2::Composition.Object3D{F}) where F <: Modia3D.VarFloatType
+
+    if scene.options.enableContactDetection
+        for (pairID::Int64, pair::ContactPair{F}) in scene.options.contactDetection.contactDict
+            if pair.pairKind == Modia3D.ElasticContactPairKind
+                if (obj1 === pair.obj1 && obj2 === pair.obj2)
+                    return (pair, false)  # object 1/2 assignment consistent
+                elseif (obj2 === pair.obj1 && obj1 === pair.obj2)
+                    return (pair, true)  # object 1/2 assignment converse
+                end
+            end
+        end
+    end
+
+    return (nothing, false)
 end
