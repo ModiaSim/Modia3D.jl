@@ -22,6 +22,7 @@ abstract type AbstractObject3D                                       end
 abstract type AbstractTwoObject3DObject <: AbstractObject3D          end  # Object related to two Object3Ds
 abstract type AbstractJoint             <: AbstractTwoObject3DObject end  # Constraint between two Object3Ds
 abstract type AbstractForceElement      <: AbstractObject3D          end
+abstract type AbstractResultElement     <: AbstractObject3D          end
 
 abstract type AbstractScene                   end
 abstract type AbstractMassProperties          end
