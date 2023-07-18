@@ -39,7 +39,8 @@ simulate!(bouncingSphere, stopTime=stopTime, tolerance=tolerance, dtmax=dtmax, l
           requiredFinalStates_atol=1e-6, requiredFinalStates=requiredFinalStates)
 
 @usingModiaPlot
-plot(bouncingSphere, ["result.penetration", "result.penetrationVelocity", "result.tangentialVelocity", "result.angularVelocity", "result.normalForce", "result.tangentialForce", "result.torque"], figure=1)
-plot(bouncingSphere, ["result.positionVector", "result.normalVector", "result.forceVector", "result.torqueVector"], figure=2)
+plot(bouncingSphere, ["result.penetration", "result.penetrationVelocity", "result.tangentialVelocity", "result.angularVelocity"], figure=1)
+plot(bouncingSphere, ["result.normalForce", "result.tangentialForce", "result.torque"], figure=2)
+plot(bouncingSphere, ["result.positionVector", "result.normalVector", "result.forceVector", "result.torqueVector"], figure=3)
 
 end
