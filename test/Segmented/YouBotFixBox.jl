@@ -545,14 +545,14 @@ Scenario = Model3D(
     sphere = Object3D(parent=:world, fixedToParent=false,
                       assemblyRoot=true,
                       translation=[-0.78, 0.0, 0.1792],
-                    feature=Solid(shape=Box(lengthX=diameter, lengthY=diameter,lengthZ=diameter),
-                    visualMaterial=VisualMaterial(color = "Green"),
-                    solidMaterial="DryWood",
-                    collision=false)),
+                      feature=Solid(shape=Box(lengthX=diameter, lengthY=diameter,lengthZ=diameter),
+                      visualMaterial=VisualMaterial(color = "Green"),
+                      solidMaterial="DryWood",
+                      collision=false)),
     sphereLock = Object3D(parent=:sphere,
-                      lockable=true,
-                      translation=[0.0,diameter/2,0.0],
-                      feature=Visual(shape=Sphere(diameter=diameterLock)) ),
+                          lockable=true,
+                          translation=[0.0,diameter/2,0.0],
+                          feature=Visual(shape=Sphere(diameter=diameterLock))),
     youbot1 = YouBot("world", pathIndexOffset=0)
 )
 
@@ -578,8 +578,7 @@ youbot = @instantiateModel(youbotModel, unitless=true, logCode=false, log=false)
 
 stopTime = 11
 tolerance = 1e-7
-# use boxes instead of FileMesh for better performance
-requiredFinalStates = [3.141593775489957, 5.9989326589325e-6, 0.20679769715729607, -0.6786005008484068, 1.364000813040533, 0.6786011932366904, 0.278331295511574, -0.913264592834633, -6.505706693389618e-8, -9.268359426910878e-9, 0.028566988633905537, -0.07750746417952278, -0.3865365349653897, -0.1396163028344321, 0.0010287528390861536, -6.158768321133448e-5, 0.05115467727030946, -0.010363154368422436]
+requiredFinalStates = [3.1415926496583433, 1.0042133974314075e-8, 0.20679231560743255, -0.678611893171294, 1.364001110627563, 0.6786007884442663, 0.2783310416711431, -0.9132639724487994, -1.926685342755406e-8, 1.424354415442874e-8, -1.0059973709677222e-5, -0.41121440225119926, -0.3873564052219396, -0.1407710255094298, 0.00042250381079649447, -6.15864944731144e-5, 0.051154674365589244, -0.010363185451413967]
 
 simulate!(youbot, stopTime=stopTime, tolerance=tolerance, requiredFinalStates_atol=0.002, log=true, logStates=false, logParameters=false, requiredFinalStates=requiredFinalStates, logEvents=false)
 
