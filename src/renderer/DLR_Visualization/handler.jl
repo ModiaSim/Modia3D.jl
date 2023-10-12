@@ -60,15 +60,9 @@ end
 
 
 function Composition.isVisible(feature::Shapes.Solid{F}, renderer::Modia3D.AbstractDLR_VisualizationRenderer) where F <: Modia3D.VarFloatType
-    return !isnothing(feature.visualMaterial) && !isnothing(feature.shape)
+    return !isnothing(feature.shape) && !isnothing(feature.visualMaterial)
 end
 
 function Composition.isVisible(feature::Shapes.Visual, renderer::Modia3D.AbstractDLR_VisualizationRenderer)
-    if isnothing(feature.shape)
-        return false
-    elseif typeof(feature.shape) == Shapes.TextShape
-        return typeof(renderer) != CommunityEdition
-    else
-        return !isnothing(feature.visualMaterial)
-    end
+    return !isnothing(feature.shape) && !isnothing(feature.visualMaterial)
 end

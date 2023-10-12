@@ -123,7 +123,7 @@ function visualizeObject(obj::Composition.Object3D{F}, id::Ptr{Nothing}, simVis:
                              fileMesh.filename, Cint(fileMesh.smoothNormals), fileMesh.useMaterialColor, MVector{3,Cint}(obj.visualMaterial.color),
                              Cint(obj.visualMaterial.shadowMask), emptyShaderName)
 
-    elseif shapeKind == Modia3D.TextKind
+    elseif shapeKind == Modia3D.TextKind && simVis.isProfessionalEdition  # function setTextObject is not available in community edition
         textShape::Modia3D.Shapes.TextShape = obj.shape
         SimVis_setTextObject(simVis, id, Cint(textShape.axisAlignment), textShape.text, 0.0, Cint(0), r_abs, R_abs,
                              textShape.font.charSize, textShape.font.fontFileName, MVector{3,Cint}(textShape.font.color), textShape.font.transparency,

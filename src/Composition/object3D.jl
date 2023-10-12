@@ -640,9 +640,11 @@ featureHasMass(feature::Modia3D.AbstractScene) = false
 featureHasMass(feature::Shapes.Solid{F}) where F <: Modia3D.VarFloatType = !isnothing(feature.massProperties)
 
 isVisible(obj::Object3D{F}, renderer::Modia3D.AbstractRenderer) where F <: Modia3D.VarFloatType = isVisible(obj.feature, renderer)
+isVisible(obj::Object3D{F}, exportAnimation::Bool) where F <: Modia3D.VarFloatType = isVisible(obj.feature, exportAnimation)
 isVisible(feature::Modia3D.AbstractObject3DFeature, renderer::Modia3D.AbstractRenderer) = false
-
+isVisible(feature::Modia3D.AbstractObject3DFeature, exportAnimation::Bool) = false
 isVisible(feature::Modia3D.AbstractScene, renderer::Modia3D.AbstractRenderer) = false
+isVisible(feature::Modia3D.AbstractScene, exportAnimation::Bool) = false
 
 canCollide(feature::Modia3D.AbstractObject3DFeature) = false
 

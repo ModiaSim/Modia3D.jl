@@ -35,8 +35,8 @@ end
 
 function assignObj(scene::Scene{F}, superObjType::SuperObjVisu{F}, obj::Object3D{F}, actPos::Int64)::Nothing where F <: Modia3D.VarFloatType
     renderer = Modia3D.renderer[1]
-    if ( isVisible(obj, renderer) || !isnothing(obj.visualizationFrame)  ) && !hasJoint(obj) && !canCollide(obj) && !hasForceElement(obj) && !hasChildJoint(obj) #&& !hasCutJoint(obj) && !featureHasMass(obj)
-        # if an Object3D is for visualization only it is stored in updateVisuElements
+    if ( isVisible(obj, renderer) || isVisible(obj, scene.exportAnimation) || !isnothing(obj.visualizationFrame)  ) && !hasJoint(obj) && !canCollide(obj) && !hasForceElement(obj) && !hasChildJoint(obj) #&& !hasCutJoint(obj) && !featureHasMass(obj)
+        # if an Object3D is for visualization/animation export only it is stored in updateVisuElements
         if !(obj in scene.updateVisuElements)
             push!(scene.updateVisuElements, obj)
         end
@@ -72,7 +72,7 @@ function fillVisuElements!(scene::Scene{F}, obj::Object3D{F}, world::Object3D{F}
                 push!(scene.updateVisuElements, obj)
             end
         end
-        if isVisible(obj, Modia3D.renderer[1])  # todo: should not affect animation export; move to initializeVisualization?
+        if isVisible(obj, Modia3D.renderer[1]) || isVisible(obj, scene.exportAnimation)  # visible in visualization or animation export
             push!(scene.allVisuElements, obj)
         end
     end
