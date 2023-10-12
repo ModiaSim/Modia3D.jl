@@ -58,7 +58,11 @@ Test.@testset "Robot" begin
     include(joinpath("Robot", "ServoWithRampAndRevolute.jl"))
     include(joinpath("Robot", "ServoWithPathAndRevolute.jl"))
     if testsExtend >= normalTests
-        include(joinpath("Robot", "YouBotWithSphere.jl"))
+        if Sys.islinux()
+            Test.@test_broken include(joinpath("Robot", "YouBotWithSphere.jl"))  # LinearAlgebra.SingularException
+        else
+            include(joinpath("Robot", "YouBotWithSphere.jl"))
+        end
         include(joinpath("Robot", "YouBotGripping.jl"))
         include(joinpath("Robot", "YouBotSphereTransport.jl"))
     end
