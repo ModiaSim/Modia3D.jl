@@ -436,16 +436,16 @@ end
 
 
 function exportAnimation(scene)
-    animationFile = scene.options.animationFile
     allVisuElements = scene.allVisuElements
-    animation = scene.animation
-    if length(allVisuElements) > 0 && !isnothing(animationFile)
+    if scene.exportAnimation && length(allVisuElements) > 0
+        animationFile = scene.options.animationFile
         (head,ext) = splitext(animationFile)
         if ext != ".json"
             @warn("The path of an animationFile=$animationFile must end with .json.")
             return nothing
         end
         print("Export animation to $animationFile ... ")
+        animation = scene.animation
         elements = (; geometries=[], materials=[], shapes=[])
         metadata = (; generator = "Modia3D", type = "Object")
         name = scene.name
@@ -490,4 +490,13 @@ function exportAnimation(scene)
 
         println("done.")
     end
+end
+
+
+function Composition.isVisible(feature::Shapes.Solid{F}, exportAnimation::Bool) where F <: Modia3D.VarFloatType
+    return exportAnimation && !isnothing(feature.shape) && !isnothing(feature.visualMaterial)
+end
+
+function Composition.isVisible(feature::Shapes.Visual, exportAnimation::Bool)
+    return exportAnimation && !isnothing(feature.visualMaterial) && !isnothing(feature.shape)
 end
