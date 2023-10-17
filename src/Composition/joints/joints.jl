@@ -549,8 +549,9 @@ function computeObject3DForcesTorquesAndGenForces!(mbs::MultibodyData{F,TimeType
             parent.t += obj.t + cross(obj.r_rel, obj.f)
 
         elseif jointKind == FixKind
-            parent.f += obj.R_rel'*obj.f
-            parent.t += obj.R_rel'*obj.t + cross(obj.r_rel, obj.f)
+            f = obj.R_rel'*obj.f
+            parent.f += f
+            parent.t += obj.R_rel'*obj.t + cross(obj.r_rel, f)
 
         else
             error("Bug in Modia3D/src/Composition/joints/joints.jl (computeGeneralizedForces!): jointKind = $jointKind is not known.")
