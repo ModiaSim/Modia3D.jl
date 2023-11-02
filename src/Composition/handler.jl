@@ -67,18 +67,20 @@ function createAABB_noCPairs(scene::Scene{F}, superObjsRow::SuperObjsRow{F})::No
 end
 
 
+# re-attach obj from obj.parent to newParent
+# relative kinematics where obj.parent is defined relative to newParent
 function changeParentToRootObj(newParent::Object3D{F}, obj::Object3D{F})::Nothing where F <: Modia3D.VarFloatType
     if !isRootObject(newParent)
         error("from changeParentToRootObj: new parent is not a root object!")
     end
+    # c = child, o = old parent, n = new parent = root object
+    child_r_rel  = obj.r_rel         # o_r_oc
+    child_R_rel  = obj.R_rel         # R_co
+    parent_r_rel = obj.parent.r_rel  # n_r_no
+    parent_R_rel = obj.parent.R_rel  # R_on
 
-    child_r_rel  = obj.r_rel
-    child_R_rel  = obj.R_rel
-    parent_r_rel = obj.parent.r_rel
-    parent_R_rel = obj.parent.R_rel
-
-    obj.r_rel = parent_r_rel + parent_R_rel' * child_r_rel
-    obj.R_rel = child_R_rel * parent_R_rel
+    obj.r_rel = parent_r_rel + parent_R_rel' * child_r_rel  # n_r_nc := n_r_no + R_no*o_r_oc
+    obj.R_rel = child_R_rel * parent_R_rel                  # R_cn := R_co*R_on
 
     # Basics.deleteItem(obj.parent.children, obj) # klappt an dieser Stelle nicht
     # Reverse obj, so that newParent is the new parent
@@ -88,15 +90,18 @@ function changeParentToRootObj(newParent::Object3D{F}, obj::Object3D{F})::Nothin
 end
 
 
+# re-attach obj from obj.parent to newParent or newParent.parent
+# absolute kinematics
 function changeParent(newParent::Object3D{F}, obj::Object3D{F})::Nothing where F <: Modia3D.VarFloatType
     if isRootObject(newParent)
-        child_r_abs  = obj.r_abs
-        child_R_abs  = obj.R_abs
-        parent_r_abs_new = newParent.r_abs
-        parent_R_abs_new = newParent.R_abs
+        # c = child, n = new parent = root object
+        child_r_abs  = obj.r_abs            # 0_r_0c
+        child_R_abs  = obj.R_abs            # R_c0
+        parent_r_abs_new = newParent.r_abs  # 0_r_0n
+        parent_R_abs_new = newParent.R_abs  # R_n0
 
-        obj.r_rel = parent_R_abs_new * (child_r_abs -parent_r_abs_new)
-        obj.R_rel = child_R_abs * parent_R_abs_new'
+        obj.r_rel = parent_R_abs_new * (child_r_abs - parent_r_abs_new)  # n_r_nc := R_n0*(0_r_0c - 0_r_0n)
+        obj.R_rel = child_R_abs * parent_R_abs_new'                      # R_cn := R_c0*R_0n
 
         Basics.deleteItem(obj.parent.children, obj)
         obj.parent = newParent
@@ -136,10 +141,11 @@ function fillStackOrBuffer!(scene::Scene{F}, superObj::SuperObjsRow{F}, obj::Obj
         child = obj.children[i]
         if isNotWorld(child)
             if isNotFixed(child)
+                # joint with at least one dof between obj and child
                 push!(scene.buffer, child)
                 child.isRootObj = true
                 child.computeAcceleration = true
-                if !child.canCollide    # !isFree(child) &&  !( typeof(child.joint) <: Modia3D.AbstractPrismatic )
+                if !child.canCollide
                     push!(superObj.noCPair, length(scene.buffer))
                 end
             else
@@ -148,9 +154,11 @@ function fillStackOrBuffer!(scene::Scene{F}, superObj::SuperObjsRow{F}, obj::Obj
                     child.isRootObj = true
                     child.computeAcceleration = true
                 else
+                    # child is fixed to obj
                     push!(scene.stack, child)
                     assignAccVelo(scene.treeAccVelo, child)
                     if !(obj == rootSuperObj)
+                        # re-attach child from obj to rootSuperObj
                         changeParentToRootObj(rootSuperObj, child)
                         help[i] = true
     end; end; end; end; end
@@ -173,128 +181,128 @@ end
 #     these elements are excluded from the collision list
 function build_superObjs!(scene::Scene{F}, world::Object3D{F})::Nothing where F <: Modia3D.VarFloatType
     if !scene.initSuperObj
-    stack = scene.stack
-    buffer = scene.buffer
-    treeAccVelo  = scene.treeAccVelo
-    empty!(stack)
-    empty!(buffer)
-    empty!(scene.allVisuElements)
-    empty!(treeAccVelo)
+        stack = scene.stack
+        buffer = scene.buffer
+        treeAccVelo  = scene.treeAccVelo
+        empty!(stack)
+        empty!(buffer)
+        empty!(scene.allVisuElements)
+        empty!(treeAccVelo)
 
-    world.computeAcceleration = true
-    world.isRootObj = true # all objs stored in buffer are root objs
-    push!(buffer, world)
-    actPos = 1
-    nPos   = 1
+        world.computeAcceleration = true
+        world.isRootObj = true # all objs stored in buffer are root objs
+        push!(buffer, world)
+        actPos = 1
+        nPos   = 1
 
-    hasOneCollisionSuperObj  = false
-    hasMoreCollisionSuperObj = false
+        hasOneCollisionSuperObj  = false
+        hasMoreCollisionSuperObj = false
 
-    while actPos <= nPos
-        superObjsRow = SuperObjsRow{F}()
-        AABBrow      = Vector{Basics.BoundingBox{F}}[]
-        rootSuperObj = buffer[actPos]
+        while actPos <= nPos
+            superObjsRow = SuperObjsRow{F}()
+            AABBrow      = Vector{Basics.BoundingBox{F}}[]
+            rootSuperObj = buffer[actPos]
 
-        fillVisuElements!(scene, rootSuperObj, world)
-        if rootSuperObj != world
-            assignAll(scene, superObjsRow, rootSuperObj, world, actPos)
-            push!(treeAccVelo, rootSuperObj)
+            fillVisuElements!(scene, rootSuperObj, world)
+            if rootSuperObj != world
+                assignAll(scene, superObjsRow, rootSuperObj, world, actPos)
+                push!(treeAccVelo, rootSuperObj)
+            end
+            fillStackOrBuffer!(scene, superObjsRow, rootSuperObj, rootSuperObj)
+
+            if isMovable(rootSuperObj)
+                push!(scene.allowedToMove, true)
+            else
+                push!(scene.allowedToMove, nothing)
+            end
+
+            while length(stack) > 0
+                frameChild = pop!(stack)
+                fillVisuElements!(scene, frameChild, world)
+                assignAll(scene, superObjsRow, frameChild, world, actPos)
+                fillStackOrBuffer!(scene, superObjsRow, frameChild, rootSuperObj)
+            end
+
+            if length(superObjsRow.superObjCollision.superObj) > 0 && hasOneCollisionSuperObj == true
+                hasMoreCollisionSuperObj = true
+            elseif length(superObjsRow.superObjCollision.superObj) > 0
+                hasOneCollisionSuperObj = true
+            end
+
+            createAABB_noCPairs(scene, superObjsRow)
+            push!(scene.superObjs, superObjsRow)
+            nPos = length(buffer)
+            actPos += 1
         end
-        fillStackOrBuffer!(scene, superObjsRow, rootSuperObj, rootSuperObj)
-
-        if isMovable(rootSuperObj)
-            push!(scene.allowedToMove, true)
-        else
-            push!(scene.allowedToMove, nothing)
-        end
-
-        while length(stack) > 0
-            frameChild = pop!(stack)
-            fillVisuElements!(scene, frameChild, world)
-            assignAll(scene, superObjsRow, frameChild, world, actPos)
-            fillStackOrBuffer!(scene, superObjsRow, frameChild, rootSuperObj)
-        end
-
-        if length(superObjsRow.superObjCollision.superObj) > 0 && hasOneCollisionSuperObj == true
-            hasMoreCollisionSuperObj = true
-        elseif length(superObjsRow.superObjCollision.superObj) > 0
-            hasOneCollisionSuperObj = true
-        end
-
-        createAABB_noCPairs(scene, superObjsRow)
-        push!(scene.superObjs, superObjsRow)
-        nPos = length(buffer)
-        actPos += 1
-    end
-    addIndicesOfCutJointsToSuperObj(scene)
-    @assert(length(scene.noCPairs) == length(scene.superObjs))
+        addIndicesOfCutJointsToSuperObj(scene)
+        @assert(length(scene.noCPairs) == length(scene.superObjs))
 
 
 
-    #=
-    println("first elements of tree")
-    println("[")
-    for a in scene.treeAccVelo
-        println("parent = ", Modia3D.fullName(a.parent))
-        println(Modia3D.fullName(a))
+        #=
+        println("first elements of tree")
         println("[")
-        for b in a.children
-        println("children = ", Modia3D.fullName(b))
+        for a in scene.treeAccVelo
+            println("parent = ", Modia3D.fullName(a.parent))
+            println(Modia3D.fullName(a))
+            println("[")
+            for b in a.children
+            println("children = ", Modia3D.fullName(b))
+            end
+            println("]")
         end
         println("]")
-    end
-    println("]")
-    =#
-    #=
-    println("superObjRow.superObjCollision.superObj")
-    for superObjRow in scene.superObjs
-    println("[")
-    for a in superObjRow.superObjCollision.superObj
-        println(Modia3D.fullName(a))
-    end
-    println("]")
-    println(" ")
-    end
-    =#
-
-    #=
-    println("allowedToMove")
-    for a in scene.allowedToMove
-        show(a)
+        =#
+        #=
+        println("superObjRow.superObjCollision.superObj")
+        for superObjRow in scene.superObjs
+        println("[")
+        for a in superObjRow.superObjCollision.superObj
+            println(Modia3D.fullName(a))
+        end
+        println("]")
         println(" ")
-    end
-    =#
+        end
+        =#
 
-    #=
-    println("superObjRow.superObjMovable.superObj")
-    for superObjRow in scene.superObjs
-    println("[")
-    for a in superObjRow.superObjMovable.superObj
-        println(Modia3D.fullName(a))
-    end
-    println("]")
-    println(" ")
-    end
-    =#
-    #=
-    println("superObjRow.superObjMass.superObj")
-    for superObjRow in scene.superObjs
-    println("[")
-    for a in superObjRow.superObjMass.superObj
-        println(Modia3D.fullName(a))
-    end
-    println("]")
-    println(" ")
-    end
-    =#
+        #=
+        println("allowedToMove")
+        for a in scene.allowedToMove
+            show(a)
+            println(" ")
+        end
+        =#
+
+        #=
+        println("superObjRow.superObjMovable.superObj")
+        for superObjRow in scene.superObjs
+        println("[")
+        for a in superObjRow.superObjMovable.superObj
+            println(Modia3D.fullName(a))
+        end
+        println("]")
+        println(" ")
+        end
+        =#
+        #=
+        println("superObjRow.superObjMass.superObj")
+        for superObjRow in scene.superObjs
+        println("[")
+        for a in superObjRow.superObjMass.superObj
+            println(Modia3D.fullName(a))
+        end
+        println("]")
+        println(" ")
+        end
+        =#
 
 
-    if hasMoreCollisionSuperObj
-        scene.collide = true
-    else
-        scene.collide = false
-    end
-    scene.initSuperObj = true
+        if hasMoreCollisionSuperObj
+            scene.collide = true
+        else
+            scene.collide = false
+        end
+        scene.initSuperObj = true
     end
     return nothing
 end

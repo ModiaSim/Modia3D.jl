@@ -2,4 +2,4 @@
 docs/build/
 docs/site/
 .vscode/
-*.json
+/*.json

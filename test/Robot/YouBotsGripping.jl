@@ -1,6 +1,6 @@
 module YouBotsGripping
 
-using  Modia3D
+using Modia3D
 
 include("$(Modia3D.modelsPath)/Blocks.jl")
 include("$(Modia3D.modelsPath)/Electric.jl")

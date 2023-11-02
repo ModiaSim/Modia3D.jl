@@ -1,0 +1,71 @@
+{
+	"metadata": {
+		"version": 4.5,
+		"type": "Object",
+		"generator": "Object3D.toJSON"
+	},
+	"geometries": [
+		{
+			"uuid": "C6FA521A-A69D-4A1A-9699-24E1BA170179",
+			"type": "BufferGeometry",
+			"data": {
+				"attributes": {
+					"position": {
+						"itemSize": 3,
+						"type": "Float32Array",
+						"array": [0,0,0,1,1,0.5,-1,1,0.5,0,0,0,-1,1,0.5,-1,-1,0.5,0,0,0,-1,-1,0.5,1,-1,0.5,0,0,0,1,-1,0.5,1,1,0.5],
+						"normalized": false
+					},
+					"normal": {
+						"itemSize": 3,
+						"type": "Float32Array",
+						"array": [0,-0.4472135901451111,0.8944271802902222,0,-0.4472135901451111,0.8944271802902222,0,-0.4472135901451111,0.8944271802902222,0.4472135901451111,0,0.8944271802902222,0.4472135901451111,0,0.8944271802902222,0.4472135901451111,0,0.8944271802902222,0,0.4472135901451111,0.8944271802902222,0,0.4472135901451111,0.8944271802902222,0,0.4472135901451111,0.8944271802902222,-0.4472135901451111,0,0.8944271802902222,-0.4472135901451111,0,0.8944271802902222,-0.4472135901451111,0,0.8944271802902222],
+						"normalized": false
+					}
+				},
+				"boundingSphere": {
+					"center": [0,0,0.25],
+					"radius": 1.4361406616345072
+				}
+			}
+		}],
+	"materials": [
+		{
+			"uuid": "D93115E2-AFCD-43D5-8D57-D4EC0DAA5CF0",
+			"type": "MeshPhongMaterial",
+			"color": 16777215,
+			"emissive": 0,
+			"specular": 1118481,
+			"shininess": 30,
+			"reflectivity": 1,
+			"refractionRatio": 0.98,
+			"depthFunc": 3,
+			"depthTest": true,
+			"depthWrite": true,
+			"colorWrite": true,
+			"stencilWrite": false,
+			"stencilWriteMask": 255,
+			"stencilFunc": 519,
+			"stencilRef": 0,
+			"stencilFuncMask": 255,
+			"stencilFail": 7680,
+			"stencilZFail": 7680,
+			"stencilZPass": 7680
+		}],
+	"object": {
+		"uuid": "09D405B0-87A3-4DE1-8DFB-182EDCB3220F",
+		"type": "Group",
+		"name": "funnel.obj",
+		"layers": 1,
+		"matrix": [1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],
+		"children": [
+			{
+				"uuid": "3330825D-68E7-4565-8CEB-14A126DF0008",
+				"type": "Mesh",
+				"layers": 1,
+				"matrix": [1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1],
+				"geometry": "C6FA521A-A69D-4A1A-9699-24E1BA170179",
+				"material": "D93115E2-AFCD-43D5-8D57-D4EC0DAA5CF0"
+			}]
+	}
+}
