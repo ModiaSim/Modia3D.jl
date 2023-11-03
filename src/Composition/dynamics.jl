@@ -153,7 +153,7 @@ function initSegment_Model3D!(partiallyInstantiatedModel::Modia.InstantiatedMode
                         scene.collide = scene.gripPair.enableContactDetection
                     end
                 else
-                    @error("Andrea: print warning für gripping features")
+                    @error("Print warning für gripping features")
                     # printWarnGrip(robotOrDepot, movableObj, waitingPeriod)
                 end
             end
