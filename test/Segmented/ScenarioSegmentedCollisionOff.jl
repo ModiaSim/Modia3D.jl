@@ -527,7 +527,7 @@ Scenario = Model3D(
     gravField = UniformGravityField(g=9.81, n=[0,0,-1]),
     world = Object3D(feature=Scene(gravityField=:gravField, visualizeFrames=false, nominalLength=tableX, gap=0.2,
         enableContactDetection=true, maximumContactDamping=1000, elasticContactReductionFactor=1e-3, enableVisualization=true)),   #, animationFile="YouBotDynamicState.json")),
-#   worldFrame = Object3D(parent=:world, feature=Visual(shape=CoordinateSystem(length=0.2))),
+    # worldFrame = Object3D(parent=:world, feature=Visual(shape=CoordinateSystem(length=0.2))),
 
 
     ground = Ground,
@@ -569,13 +569,13 @@ youbot = @instantiateModel(youbotModel, unitless=true, logCode=false, log=false)
 stopTime = 13.5
 tolerance = 1e-7
 # use boxes instead of FileMesh for better collision performance
-requiredFinalStates = [3.1415926313235216, 2.227704607451224e-8, -2.8441240591542057e-7, 2.844479623947795e-7, -6.300618493694368e-7, 6.301438745162919e-7, -3.8367060940761664e-7, 3.8373222528068616e-7, 2.9773366458646674e-9, -2.9778176373587e-9, -0.00017011927750574103, 0.2394616012878047, -0.003881746258204947, -0.002274156117355221, 1.0356446209926906e-5, -8.985047184676908e-11, 0.047999999998151396, 1.8748871907289576e-12, -0.7616251395986522, 0.00025213516122149976, 0.18419327722973222, 1.2698578611388089e-9, 2.2444158136065587e-12, -1.772988910724902e-11, 3.141474457755385, 1.0187988505971024, 3.141041134037263, -8.150376270957884e-11, 4.6108853365504784e-8, 8.826370248608988e-22]
+requiredFinalStates = [3.1415921741564143, 1.1955106283153446e-7, 0.6805919652838498, -0.09565658114367705, 0.7909092176133838, 0.10951940810027615, 1.0327020647791874, -0.145010847265314, 2.259247708251684e-7, -1.9741430416860724e-7, 0.028546003581824412, -0.07925467651812873, -0.3613840032918982, -0.10919851158919243, 0.0016270711594961662, -0.04583765473394904, 0.047072862725141544, 0.0014855277166491237]
 
-simulate!(youbot, stopTime=stopTime, tolerance=tolerance, requiredFinalStates_atol=0.002, log=true, logStates=false, logParameters=false, requiredFinalStates=missing, logEvents=false)
+simulate!(youbot, stopTime=stopTime, tolerance=tolerance, requiredFinalStates_atol=0.002, log=true, logStates=false, logParameters=false, requiredFinalStates=requiredFinalStates, logEvents=false)
 
 # showInfo(youbot)
 
-@usingModiaPlot
+# @usingModiaPlot
 # plot(youbot, ["sphere.translation",
 #               ("youbot1.rev1.phi",
 #                "youbot1.rev2.phi",
@@ -583,12 +583,12 @@ simulate!(youbot, stopTime=stopTime, tolerance=tolerance, requiredFinalStates_at
 #                "youbot1.rev4.phi",
 #                "youbot1.rev5.phi")], figure=1)
 
-plot(youbot, [ "sphere.translation[1]",
-"sphere.translation[2]",
-"sphere.translation[3]"], reuse=true, prefix="S3: ", figure=1)
+# plot(youbot, [ "sphere.translation[1]",
+# "sphere.translation[2]",
+# "sphere.translation[3]"], reuse=true, prefix="S3: ", figure=1)
 
-plot(youbot, [ "sphere.r_abs[1]",
-    "sphere.r_abs[2]",
-    "sphere.r_abs[3]"], reuse=true, prefix="S3: ", figure=2)
+# plot(youbot, [ "sphere.r_abs[1]",
+#     "sphere.r_abs[2]",
+#     "sphere.r_abs[3]"], reuse=true, prefix="S3: ", figure=2)
 
 end

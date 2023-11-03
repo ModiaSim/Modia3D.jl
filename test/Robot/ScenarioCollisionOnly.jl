@@ -500,8 +500,8 @@ Scenario = Model3D(
     world = Object3D(feature=Scene(gravityField=:gravField, visualizeFrames=false, nominalLength=tableX, gap=0.2,
     enableContactDetection=true, maximumContactDamping=1000, elasticContactReductionFactor=1e-3, enableVisualization=true)),
 
-    worldFrame = Object3D(parent=:world,
-                          feature=Visual(shape=CoordinateSystem(length=1.0))),
+    # worldFrame = Object3D(parent=:world,
+    #                       feature=Visual(shape=CoordinateSystem(length=1.0))),
 
     # table = Table,
     ground = Ground,
@@ -540,7 +540,8 @@ stopTime = 13.5
 tolerance = 1e-7
 # use boxes instead of FileMesh for better performance
 if Sys.iswindows()
-    requiredFinalStates = [3.1415947353156977, 2.4404618792441014e-6, 0.06413101847025342, -0.38051837261409877, 1.5066656031419667, 0.38051766101104056, 0.08493817930077076, -0.5038810237109801, -4.6660513554873775e-7, 3.752739122664999e-7, 0.02640050697959681, -0.05767990246020697, -0.38561153991690283, -0.13530700791021252, 0.003352929911771347, -0.1332188913735816, 0.04978725220079851, -6.996407090545839e-6, -0.7775608475001248, 0.005107163857175746, 0.38015816381775924, 0.04903299043458591, 4.3039218890990144e-6, 0.10223649086921456, -0.23251977356265563, 0.5671780375371024, 6.409469280850812, 5.535728438671193e-7, 0.5044004851046952, -2.473504004121177e-6]
+    requiredFinalStates = [3.1415918452296103, 3.0247029956502424e-7, 0.6805918807359593, -0.09565685952807047, 0.7909091454335595, 0.10951995771372612, 1.0327017770452882, -0.14501110594130628, -3.613403077522777e-7, 1.7722424221528134e-7, 0.02892581810809196, -0.07918395248553552, -0.36125810000007835, -0.10904804871112947, 0.001897921781670574, -0.06875145688237284, 0.049788789706814565, -4.140738295574155e-6, -0.7842801128047748,
+    0.005105300046456846, 0.21862283801441873, -0.009658480717735566, 2.1757108400615252e-6, 0.021108086393876627, -0.1984193860002232, 0.11865862428464358, 0.02379631583255704, -3.096054388354263e-7, 0.1304890475949812, -4.4594322363919364e-7]
 elseif Sys.isapple()
     requiredFinalStates = missing
 else
@@ -548,16 +549,16 @@ else
 end
 
 
-simulate!(youbot, stopTime=stopTime, tolerance=tolerance, requiredFinalStates_rtol=0.01, requiredFinalStates_atol=0.01, log=true, logStates=false, logParameters=false, requiredFinalStates=missing, logEvents=false)
+simulate!(youbot, stopTime=stopTime, tolerance=tolerance, requiredFinalStates_rtol=0.01, requiredFinalStates_atol=0.01, log=true, logStates=false, logParameters=false, requiredFinalStates=requiredFinalStates, logEvents=false)
 
 @usingModiaPlot
 plot(youbot, [ "sphere.translation[1]",
 "sphere.translation[2]",
 "sphere.translation[3]"], reuse=true, prefix="S1: ", figure=1)
 
-plot(youbot, [ "sphere.r_abs[1]",
-    "sphere.r_abs[2]",
-    "sphere.r_abs[3]"], reuse=true, prefix="S1: ", figure=2)
+# plot(youbot, [ "sphere.r_abs[1]",
+#     "sphere.r_abs[2]",
+#     "sphere.r_abs[3]"], reuse=true, prefix="S1: ", figure=2)
 
 
 # plot(youbot, ["sphere.translation",

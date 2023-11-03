@@ -61,6 +61,7 @@ Test.@testset "Robot" begin
         Test.@test_broken include(joinpath("Robot", "YouBotWithSphere.jl"))  # LinearAlgebra.SingularException
         include(joinpath("Robot", "YouBotGripping.jl"))
         include(joinpath("Robot", "YouBotSphereTransport.jl"))
+        include(joinpath("Robot", "ScenarioCollisionOnly.jl"))
     end
     if testsExtend == completeTests
         include(joinpath("Robot", "YouBotPingPong.jl"))  # long computation time
@@ -105,6 +106,9 @@ Test.@testset "Segmented" begin
         include(joinpath("Segmented", "YouBotDynamicState.jl"))
         include(joinpath("Segmented", "YouBotFixBox.jl"))
         include(joinpath("Segmented", "YouBotFixSphere.jl"))
+        include(joinpath("Segmented", "ScenarioSegmentedCollisionOff.jl"))
+        include(joinpath("Segmented", "ScenarioSegmentedCollisionOn.jl"))
+        include(joinpath("Segmented", "ScenarioSegmentedOnly.jl"))
     end
 end
 

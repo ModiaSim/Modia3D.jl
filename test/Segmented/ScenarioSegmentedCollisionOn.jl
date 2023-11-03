@@ -567,13 +567,13 @@ youbot = @instantiateModel(youbotModel, unitless=true, logCode=false, log=false)
 stopTime = 13.5
 tolerance = 1e-7
 # use boxes instead of FileMesh for better collision performance
-requiredFinalStates = [3.1415926313235216, 2.227704607451224e-8, -2.8441240591542057e-7, 2.844479623947795e-7, -6.300618493694368e-7, 6.301438745162919e-7, -3.8367060940761664e-7, 3.8373222528068616e-7, 2.9773366458646674e-9, -2.9778176373587e-9, -0.00017011927750574103, 0.2394616012878047, -0.003881746258204947, -0.002274156117355221, 1.0356446209926906e-5, -8.985047184676908e-11, 0.047999999998151396, 1.8748871907289576e-12, -0.7616251395986522, 0.00025213516122149976, 0.18419327722973222, 1.2698578611388089e-9, 2.2444158136065587e-12, -1.772988910724902e-11, 3.141474457755385, 1.0187988505971024, 3.141041134037263, -8.150376270957884e-11, 4.6108853365504784e-8, 8.826370248608988e-22]
+requiredFinalStates = [3.141591818383938, 1.0335725977173708e-6, 0.6805919657593686, -0.09565660198844163, 0.7909092191050598, 0.10951941774642412, 1.0327020645468628, -0.14501085658793922, 2.186064148392944e-7, -1.879592613709152e-7, 0.02883998021248762, -0.07925163267233755, -0.36137151574752563, -0.1091942688913675, 0.0016238609193932954, -0.06877780254544075, 0.04978954142146488, -2.2444357924892364e-6]
 
-simulate!(youbot, stopTime=stopTime, tolerance=tolerance, requiredFinalStates_atol=0.002, log=true, logStates=false, logParameters=false, requiredFinalStates=missing, logEvents=false)
+simulate!(youbot, stopTime=stopTime, tolerance=tolerance, requiredFinalStates_atol=0.002, log=true, logStates=false, logParameters=false, requiredFinalStates=requiredFinalStates, logEvents=false)
 
 # showInfo(youbot)
 
-@usingModiaPlot
+# @usingModiaPlot
 # plot(youbot, ["sphere.translation",
 #               ("youbot1.rev1.phi",
 #                "youbot1.rev2.phi",
@@ -581,12 +581,12 @@ simulate!(youbot, stopTime=stopTime, tolerance=tolerance, requiredFinalStates_at
 #                "youbot1.rev4.phi",
 #                "youbot1.rev5.phi")], figure=1)
 
-plot(youbot, [ "sphere.translation[1]",
-"sphere.translation[2]",
-"sphere.translation[3]"], reuse=true, prefix="S2: ", figure=1)
+# plot(youbot, [ "sphere.translation[1]",
+# "sphere.translation[2]",
+# "sphere.translation[3]"], reuse=true, prefix="S2: ", figure=1)
 
-plot(youbot, [ "sphere.r_abs[1]",
-    "sphere.r_abs[2]",
-    "sphere.r_abs[3]"], reuse=true, prefix="S2: ", figure=2)
+# plot(youbot, [ "sphere.r_abs[1]",
+#     "sphere.r_abs[2]",
+#     "sphere.r_abs[3]"], reuse=true, prefix="S2: ", figure=2)
 
 end
