@@ -205,8 +205,8 @@ function initSegment_Model3D!(partiallyInstantiatedModel::Modia.InstantiatedMode
 
         # objIndices[i,1]: Index of r_abs of Object3D i
         #           [i,2]: Index of R_abs of Object3D i
-        objIndices = Matrix{Int}(undef, length(scene.allVisuElements), 2)
-        for (i,obj) in enumerate(scene.allVisuElements)
+        objIndices = Matrix{Int}(undef, length(scene.updateVisuElements), 2)
+        for (i,obj) in enumerate(scene.updateVisuElements)
             if typeof(obj.feature) == Modia3D.Composition.EmptyObject3DFeature
                 objIndices[i,1] = 0
                 objIndices[i,2] = 0
@@ -561,7 +561,7 @@ function computeGeneralizedForces!(mbs::MultibodyData{F,TimeType}, qdd_hidden::V
                 # objects can have interactionManner (need to rename updateVisuElements)
                 if scene.options.useOptimizedStructure
                     objIndices = mbs.objIndices
-                    for (i,obj) in enumerate(scene.allVisuElements)
+                    for (i,obj) in enumerate(scene.updateVisuElements)
                         parent = obj.parent
                         obj.r_abs = obj.r_rel ≡ Modia3D.ZeroVector3D(F) ? parent.r_abs : parent.r_abs + parent.R_abs'*obj.r_rel
                         obj.R_abs = obj.R_rel ≡ Modia3D.NullRotation(F) ? parent.R_abs : obj.R_rel*parent.R_abs
