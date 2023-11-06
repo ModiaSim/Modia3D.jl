@@ -60,7 +60,7 @@ Test.@testset "Robot" begin
     if testsExtend >= normalTests
         Test.@test_broken include(joinpath("Robot", "YouBotWithSphere.jl"))  # LinearAlgebra.SingularException
         include(joinpath("Robot", "YouBotGripping.jl"))
-        Test.@test_broken include(joinpath("Robot", "YouBotSphereTransport.jl"))
+        include(joinpath("Robot", "YouBotSphereTransport.jl"))
         include(joinpath("Robot", "ScenarioCollisionOnly.jl"))
     end
     if testsExtend == completeTests
