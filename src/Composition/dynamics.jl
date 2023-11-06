@@ -154,7 +154,6 @@ function initSegment_Model3D!(partiallyInstantiatedModel::Modia.InstantiatedMode
                     end
                 else
                     @error("Print warning für gripping features")
-                    # printWarnGrip(robotOrDepot, movableObj, waitingPeriod)
                 end
             end
 
