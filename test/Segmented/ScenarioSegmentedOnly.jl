@@ -566,12 +566,12 @@ youbot = @instantiateModel(youbotModel, unitless=true, logCode=false, log=false)
 stopTime = 13.5
 tolerance = 1e-7
 # use boxes instead of FileMesh for better performance
-requiredFinalStates = [3.1415920364553855, 2.7428136813418614e-7, 0.6805920818714688, -0.09565666285888169, 0.790909491205814, 0.10951932389708785, 1.0327026276867144, -0.14501108875418495, 2.273931612905906e-8, -6.523005228871711e-8, 0.027854397659264934, -0.0802102064050292, -0.3629121280113591, -0.11128538667241196, 0.0008842091487311585, 6.0035452726848865e-5, 0.04800122496867457, -1.227967289312977e-6]
+requiredFinalStates = [3.1415926553482936, 3.940308425576264e-9, 0.6805942761756493, -0.0956576899775176, 0.7909095290954901, 0.10951977177943406, 1.0327025673843655, -0.14501159844620148, 1.9286175287484307e-8, -3.283069277920548e-8, -4.1609409172268536e-6, -0.41631100515552766, -0.36361306819749833, -0.1122726475747107, 0.0003657180323440799, 6.003535500656957e-5, 0.04800122492323228, -1.2243878275181126e-6]
 
 simulate!(youbot, stopTime=stopTime, tolerance=tolerance, requiredFinalStates_atol=0.002, log=true, logStates=false, logParameters=false, requiredFinalStates=requiredFinalStates, logEvents=false)
 
 
-@usingModiaPlot
+# @usingModiaPlot
 # plot(youbot, ["sphere.translation",
 #               ("youbot1.rev1.phi",
 #                "youbot1.rev2.phi",
@@ -580,11 +580,11 @@ simulate!(youbot, stopTime=stopTime, tolerance=tolerance, requiredFinalStates_at
 #                "youbot1.rev5.phi")
 #                ], figure=1)
 
-plot(youbot, [ "sphere.translation[1]",
-"sphere.translation[2]",
-"sphere.translation[3]"], reuse=true, prefix="S4: ", figure=1)
+# plot(youbot, [ "sphere.translation[1]",
+# "sphere.translation[2]",
+# "sphere.translation[3]"], reuse=true, prefix="S4: ", figure=1)
 
-plot(youbot, [ "sphere.r_abs[1]",
-    "sphere.r_abs[2]",
-    "sphere.r_abs[3]"], reuse=true, prefix="S4: ", figure=2)
+# plot(youbot, [ "sphere.r_abs[1]",
+#     "sphere.r_abs[2]",
+#     "sphere.r_abs[3]"], reuse=true, prefix="S4: ", figure=2)
 end
