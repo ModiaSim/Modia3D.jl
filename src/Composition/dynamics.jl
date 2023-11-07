@@ -146,11 +146,15 @@ function initSegment_Model3D!(partiallyInstantiatedModel::Modia.InstantiatedMode
             scene::Scene{F} = mbsBuild.mbs.scene
             #instantiatedModel = mbsBuild.mbs.instantiatedModel
             #gripPair = scene.gripPair
-            if Modia3D.checkGrippingFeatures(scene, scene.gripPair)
-                Modia3D.changeParentOfMovableUnit!(scene, world, scene.gripPair)
-            else
-                @error("Andrea: print warning für gripping features")
-                # printWarnGrip(robotOrDepot, movableObj, waitingPeriod)
+            if isdefined(scene, :gripPair)
+                if Modia3D.checkGrippingFeatures(scene, scene.gripPair)
+                    Modia3D.changeParentOfMovableUnit!(scene, world, scene.gripPair)
+                    if isdefined(scene.gripPair, :enableContactDetection)
+                        scene.collide = scene.gripPair.enableContactDetection
+                    end
+                else
+                    @error("Print warning für gripping features")
+                end
             end
 
             (worldDummy, revoluteObjects, prismaticObjects, freeMotionObjects, hiddenJointObjects, forceElements, resultElements) = checkMultibodySystemAndGetWorldAndJointsAndForceElementsAndResultElements(partiallyInstantiatedModel.modelName, parameters, modelPath, F)
@@ -166,6 +170,17 @@ function initSegment_Model3D!(partiallyInstantiatedModel::Modia.InstantiatedMode
             # rebuild MKS
             if scene.options.useOptimizedStructure
                 rebuild_superObjs!(scene, world)
+
+                if isdefined(scene, :gripPair)
+                    if Modia3D.checkGrippingFeatures(scene, scene.gripPair)
+                        if isdefined(scene.gripPair, :enableContactDetection)
+                            if scene.options.enableContactDetection && scene.collide
+                                scene.collide = scene.gripPair.enableContactDetection
+                            end
+                        end
+                    end
+                end
+
             else
                 error("Full restart is possible only if useOptimizedStructure is enabled in SceneOptions.")
             end

@@ -1,4 +1,4 @@
-module YouBotFixSphere
+module ScenarioSegmentedCollisionOn
 
 using  Modia3D
 
@@ -97,34 +97,49 @@ function robotProgram(robotActions)
         names =    ["bot1angle1", "bot1angle2", "bot1angle3", "bot1angle4", "bot1angle5", "bot1gripper"],
         position = initPosition,
         v_max =    [2.68512, 2.68512, 4.8879, 5.8997, 5.8997, 2.0],
-        a_max =    [1.5, 1.5, 1.5, 1.5, 1.5, 0.5])
-
-    ActionAttach(robotActions, "sphereLock", "youbot1.base.plateLock",waitingPeriod=0.0)
-
+        a_max =    [1.5, 1.5, 1.5, 1.5, 1.5, 0.5]
+    )
+    # Attach sphere to plate
+    ActionAttach(robotActions, "sphereLock", "youbot1.base.plateLock", waitingPeriod=0.0)
     EventAfterPeriod(robotActions, 1e-10)
-
     ptpJointSpace(robotActions, [
         pi   pi/4   pi/4      0.0   0.0  diameter+0.01; # start top of ball
         pi   pi/4   pi/4      1.04  0.0  diameter+0.01; # go to plate
-        pi   pi/4   pi/4      1.04  0.0  diameter-0.002; # grip
-            ])
+    ])
+    ActionRelease(robotActions, "sphereLock", waitingPeriod=0.0)
 
+    # gripping via collision handling
+    ptpJointSpace(robotActions, [
+        pi   pi/4          pi/4      1.04  0.0  diameter-0.002; # grip
+        pi   pi/4 - 0.1    pi/4      1.04  0.0  diameter-0.002; # grip + transport a bit
+    ])
+
+    # Attach sphere to gripper
     ActionAttach(robotActions, "sphereLock", "youbot1.gripper.gripperLock", waitingPeriod=0.0)
-
     ptpJointSpace(robotActions, [
-        pi   0.0    pi/2      0.0   0.0  diameter-0.002; # grip + top
-        pi   pi/4   pi/4      1.04  0.0  diameter-0.002;  # grip + plate
-        pi   pi/4   pi/4      1.04  0.0  diameter+0.01;  # release + plate
-            ])
-
-    ActionReleaseAndAttach(robotActions, "sphereLock", "youbot1.base.plateLock", waitingPeriod=0.0)
-
+        pi   0.0            pi/2    0.0   0.0  diameter-0.002; # grip + top
+        pi   pi/4 - 0.015   pi/4    1.04  0.0  diameter-0.002;  # release + plate
+        pi   pi/4 - 0.015   pi/4    1.04  0.0  diameter+0.01;  # release + plate
+    ])
+    ActionRelease(robotActions, "sphereLock", waitingPeriod=0.0)
     ptpJointSpace(robotActions, [
-        pi   0.0    pi/2      0.0   0.0  diameter+0.01; # open + top
-    pi   pi/4   pi/4      1.04  0.0  diameter+0.01;  # open + plate
-    pi   pi/4   pi/4      1.04  0.0  diameter-0.002; # grip
-        ])
+        pi   pi/4     pi/4      1.04  0.0  diameter+0.01;  # release + plate
+    ])
 
+    ActionAttach(robotActions, "sphereLock", "youbot1.base.plateLock", waitingPeriod=0.0)
+    ptpJointSpace(robotActions, [
+        pi   0.0      pi/2      0.0   0.0  diameter+0.01; # open + top
+        pi   pi/4     pi/4      1.04  0.0  diameter+0.01;  # open + plate
+    ])
+    ActionRelease(robotActions, "sphereLock", waitingPeriod=0.0)
+
+    # gripping via collision handling
+    ptpJointSpace(robotActions, [
+        pi   pi/4          pi/4      1.04  0.0  diameter-0.002; # grip
+        pi   pi/4 - 0.1    pi/4      1.04  0.0  diameter-0.002; # grip + transport a bit
+    ])
+
+    # Attach sphere to gripper
     ActionAttach(robotActions, "sphereLock", "youbot1.gripper.gripperLock", waitingPeriod=0.0)
 
     ptpJointSpace(robotActions, [
@@ -268,20 +283,6 @@ Ground = Model(
         translation=[0.0, 0.0, -0.005], feature = Solid(shape =Box(lengthX=2.5, lengthY=2.5, lengthZ=0.01), solidMaterial="DryWood", visualMaterial=vmatYellow))
 )
 
-Table = Model(
-    plate = Object3D(parent=:world, translation=[0.0, 0.0, heigthLeg],
-        feature=Solid(shape=Box(lengthX=tableX, lengthY=tableY, lengthZ=tableZ),
-        collisionSmoothingRadius=0.001, solidMaterial="DryWood",  visualMaterial=vmatBlue)),
-    leg1  = Object3D(parent=:plate, translation=[ tableX/2-widthLeg/2,  tableY/2-widthLeg/2, -heigthLeg/2],
-        feature=Solid(shape=Box(lengthX=widthLeg, lengthY=widthLeg, lengthZ=heigthLeg),
-        solidMaterial="DryWood", visualMaterial=vmatBlue)),
-    leg2  = Object3D(parent=:plate, translation=[-tableX/2+widthLeg/2,  tableY/2-widthLeg/2, -heigthLeg/2],
-        feature=Solid(shape=Box(lengthX=widthLeg, lengthY=widthLeg, lengthZ=heigthLeg), solidMaterial="DryWood", visualMaterial=vmatBlue)),
-    leg3  = Object3D(parent=:plate, translation=[ tableX/2-widthLeg/2, -tableY/2+widthLeg/2, -heigthLeg/2],
-        feature=Solid(shape=Box(lengthX=widthLeg, lengthY=widthLeg, lengthZ=heigthLeg), solidMaterial="DryWood", visualMaterial=vmatBlue)),
-    leg4  = Object3D(parent=:plate, translation=[-tableX/2+widthLeg/2, -tableY/2+widthLeg/2, -heigthLeg/2],
-        feature=Solid(shape=Box(lengthX=widthLeg, lengthY=widthLeg, lengthZ=heigthLeg), solidMaterial="DryWood", visualMaterial=vmatBlue))
-)
 
 Base = Model(
     position = [0.0, 0.0, 0.0],
@@ -289,13 +290,14 @@ Base = Model(
     base_frame = Object3D(parent=:world, translation=:position, rotation=:orientation,
         feature=Solid(shape=FileMesh(filename = base_frame_obj), massProperties=MassPropertiesFromShapeAndMass(mass=19.803))),
     plate = Object3D(parent=:base_frame, translation=[-0.159, 0, 0.046],
-        feature=Solid(shape=FileMesh(filename = plate_obj), massProperties=MassPropertiesFromShapeAndMass(mass=2.397), contactMaterial="DryWood")),
+        feature=Solid(shape=FileMesh(filename = plate_obj), massProperties=MassPropertiesFromShapeAndMass(mass=2.397), collision=false)),
     plateLock = Object3D(parent=:base_frame,
         lockable=true,
         translation=[-0.19,0.0,0.0702],
         feature=Visual(shape=Sphere(diameter=diameterLock)) ),
     plate_box = Object3D(parent=:base_frame, translation=[-0.16, 0, 0.0702],# 0.06514],
-        feature=Solid(shape=Box(lengthX=0.22, lengthY=0.22, lengthZ=0.01), massProperties=MassPropertiesFromShapeAndMass(mass=1.0e-9), visualMaterial=vmatInvisible, contactMaterial="DryWood", collision=false)),
+        feature=Solid(shape=Box(lengthX=0.22, lengthY=0.22, lengthZ=0.01), massProperties=MassPropertiesFromShapeAndMass(mass=1.0e-9), visualMaterial=vmatInvisible,
+        solidMaterial="DryWood", collision=true)),
     front_right_wheel = Object3D(parent=:base_frame, translation=[0.228, -0.158, -0.034],
         feature=Solid(shape=FileMesh(filename = front_right_wheel_obj), massProperties=MassPropertiesFromShapeAndMass(mass=1.4))),
     front_left_wheel = Object3D(parent=:base_frame, translation=[0.228, 0.158, -0.034],
@@ -444,15 +446,15 @@ MyGripper = Model(
         FileMesh(filename = gripper_base_frame_obj), massProperties=MassPropertiesFromShapeAndMass(mass=0.199))),
     gripper_left_finger_a = Object3D(),
     gripper_left_finger = Object3D(parent=:gripper_left_finger_a, translation=[0, 0.0082, 0],
-        feature=Solid(shape= FileMesh(filename = gripper_left_finger_obj), massProperties=MassPropertiesFromShapeAndMass(mass=0.010), contactMaterial="DryWood")),
+        feature=Solid(shape= FileMesh(filename = gripper_left_finger_obj), massProperties=MassPropertiesFromShapeAndMass(mass=0.010), collision=false)),
     gripper_left_finger_box = Object3D(parent=:gripper_left_finger_a, translation=[0.0, 0.0051, 0.0135],
-        feature = Solid(shape=Box(lengthX=0.012, lengthY=0.01, lengthZ=0.045), massProperties=MassPropertiesFromShapeAndMass(mass=1.0e-9), visualMaterial=vmatInvisible, contactMaterial="DryWood", collision=false)),
+        feature = Solid(shape=Box(lengthX=0.012, lengthY=0.01, lengthZ=0.045), massProperties=MassPropertiesFromShapeAndMass(mass=1.0e-9), visualMaterial=vmatInvisible, solidMaterial="DryWood", collision=true)),
     gripper_right_finger_a = Object3D(parent=:gripper_base_frame,
         translation=[0,-rightFingerOffset,0]),
     gripper_right_finger = Object3D(parent=:gripper_right_finger_a, translation=[0, -0.0082, 0],
-        feature = Solid(shape = FileMesh(filename = gripper_right_finger_obj), massProperties=MassPropertiesFromShapeAndMass(mass=0.010), contactMaterial="DryWood")),
+        feature = Solid(shape = FileMesh(filename = gripper_right_finger_obj), massProperties=MassPropertiesFromShapeAndMass(mass=0.010), collision=false)),
     gripper_right_finger_box = Object3D(parent=:gripper_right_finger_a, translation=[0.0, -0.0051, 0.0135],
-        feature = Solid(shape=Box(lengthX=0.012, lengthY=0.01, lengthZ=0.045), massProperties=MassPropertiesFromShapeAndMass(mass=1.0e-9), visualMaterial=vmatInvisible, contactMaterial="DryWood")),
+        feature = Solid(shape=Box(lengthX=0.012, lengthY=0.01, lengthZ=0.045), massProperties=MassPropertiesFromShapeAndMass(mass=1.0e-9), visualMaterial=vmatInvisible, solidMaterial="DryWood", collision=true)),
     gripperLock = Object3D(parent=:gripper_right_finger_a,
         lockable=true,
         translation=[0.012/2,0.01/2,0.045/2],
@@ -522,18 +524,19 @@ YouBot(worldName;pathIndexOffset) = Model(
 Scenario = Model3D(
     gravField = UniformGravityField(g=9.81, n=[0,0,-1]),
     world = Object3D(feature=Scene(gravityField=:gravField, visualizeFrames=false, nominalLength=tableX, gap=0.2,
-        enableContactDetection=false, maximumContactDamping=1000, elasticContactReductionFactor=1e-3, enableVisualization=true)),
+        enableContactDetection=true, maximumContactDamping=1000, elasticContactReductionFactor=1e-3, enableVisualization=true)),   #, animationFile="YouBotDynamicState.json")),
+#   worldFrame = Object3D(parent=:world, feature=Visual(shape=CoordinateSystem(length=0.2))),
 
-    table = Table,
+
     ground = Ground,
 
     sphere = Object3D(parent=:world, fixedToParent=false,
                       assemblyRoot=true,
-                      translation=[-0.78, 0.0, 0.1792],
-                    feature=Solid(shape=Sphere(diameter=diameter),
-                    visualMaterial=VisualMaterial(color = "Green"),
-                    solidMaterial="DryWood",
-                    collision=false)),
+                      translation=[-0.78, 0.0, 0.1845], #[-0.78, 0.0, 0.1792],
+                      feature=Solid(shape=Sphere(diameter=diameter),
+                      visualMaterial=vmatGrey,
+                      solidMaterial="DryWood",
+                      collision=true)),
     sphereLock = Object3D(parent=:sphere,
                       lockable=true,
                       translation=[0.0,diameter/2,0.0],
@@ -563,10 +566,12 @@ youbot = @instantiateModel(youbotModel, unitless=true, logCode=false, log=false)
 
 stopTime = 13.5
 tolerance = 1e-7
-requiredFinalStates = [3.1415926520586592, 5.686031281508212e-9, 0.06412362163909635, -0.3805226293938952, 1.50666605638018, 0.3805172766429968, 0.08493911074550455, -0.5038817608300088, -2.2152092866639697e-8, 1.3239270185771387e-8, 8.717940146436583e-7, -0.3769087845467734, -0.39014966339476387, -0.14159770836684699, 0.00041636157883075207, 2.9200010867799453e-5, 0.04800059578682383, -5.955842412850578e-7]
+# use boxes instead of FileMesh for better collision performance
+requiredFinalStates = [3.1415926561937666, 3.180307603613472e-9, 0.6805942902151595, -0.09565769212815624, 0.7909095547559756, 0.10951974466588697, 1.0327025949882498, -0.14501161390073966, 4.834365439536424e-8, -5.083589168175532e-8, 9.482986225093542e-7, -0.41623125840706904, -0.3635339629899328, -0.11224029745945692, 0.000283221896408894, -0.06877832213561617, 0.04978954930374486, -2.2467894719281828e-6]
 
 simulate!(youbot, stopTime=stopTime, tolerance=tolerance, requiredFinalStates_atol=0.002, log=true, logStates=false, logParameters=false, requiredFinalStates=requiredFinalStates, logEvents=false)
 
+# showInfo(youbot)
 
 # @usingModiaPlot
 # plot(youbot, ["sphere.translation",
@@ -575,4 +580,13 @@ simulate!(youbot, stopTime=stopTime, tolerance=tolerance, requiredFinalStates_at
 #                "youbot1.rev3.phi",
 #                "youbot1.rev4.phi",
 #                "youbot1.rev5.phi")], figure=1)
+
+# plot(youbot, [ "sphere.translation[1]",
+# "sphere.translation[2]",
+# "sphere.translation[3]"], reuse=true, prefix="S2: ", figure=1)
+
+# plot(youbot, [ "sphere.r_abs[1]",
+#     "sphere.r_abs[2]",
+#     "sphere.r_abs[3]"], reuse=true, prefix="S2: ", figure=2)
+
 end

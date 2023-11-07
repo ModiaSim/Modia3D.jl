@@ -3,7 +3,7 @@
 
 function ptpJointSpace(ref::ModelActions{F,TimeType}, positions::Union{Matrix{Float64}, Vector{Float64}, Float64}, iargs...; kwargs...) where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
     checkErrorPtpJointSpace(iargs, kwargs)
-    push!(ref.refMotion, ArbitraryMotion(ptpJointSpace!, positions, nothing, nothing))
+    push!(ref.refMotion, ArbitraryMotion(ptpJointSpace!, positions, nothing, nothing, nothing))
     return nothing
 end
 ptpJointSpace(;referencePath, positions) =
@@ -39,7 +39,7 @@ function executeActions(modelActions::ModelActions{F,TimeType}) where {F <: Modi
             # Execute next command in referenceMotion
             if !isempty(modelActions.refMotion)
                 item = popfirst!(modelActions.refMotion)
-                item.func(modelActions, item.inputArg1, item.inputArg2, item.inputArg3)
+                item.func(modelActions, item.inputArg1, item.inputArg2, item.inputArg3, item.inputArg4)
     end; end; end
 
     # only if a ptp path is defined getPosition! can be executed
@@ -57,7 +57,7 @@ end
 ### ------------------------- ActionWait ------------------------------
 function ActionWait(ref::ModelActions{F,TimeType}, waitingPeriod::Float64=0.0, iargs...;  kwargs...)::Nothing where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
     checkErrorExplicitRobotFunc("ActionWait", "waitingPeriod", iargs, kwargs, refPathExists=true)
-    push!(ref.refMotion, ArbitraryMotion(ActionWait!, waitingPeriod, nothing, nothing))
+    push!(ref.refMotion, ArbitraryMotion(ActionWait!, waitingPeriod, nothing, nothing, nothing))
     return nothing
 end
 ActionWait(iargs...; kwargs...)::Nothing =
@@ -65,9 +65,9 @@ ActionWait(iargs...; kwargs...)::Nothing =
 
 
 ### --------------------- ActionReleaseAndAttach -------------------------
-function ActionReleaseAndAttach(ref::ModelActions{F,TimeType}, movablePart::String="", robotOrDepot::String="", iargs...; waitingPeriod::Float64=0.0, kwargs...)::Nothing where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
+function ActionReleaseAndAttach(ref::ModelActions{F,TimeType}, movablePart::String="", robotOrDepot::String="", iargs...; waitingPeriod::Float64=0.0, enableContactDetection::Bool=true, kwargs...)::Nothing where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
     checkErrorExplicitRobotFunc("ActionReleaseAndAttach", "robotOrDepot, movablePart, and waitingPeriod", iargs, kwargs, refPathExists=true)
-    push!(ref.refMotion, ArbitraryMotion(ActionReleaseAndAttach!, robotOrDepot, movablePart, waitingPeriod))
+    push!(ref.refMotion, ArbitraryMotion(ActionReleaseAndAttach!, robotOrDepot, movablePart, waitingPeriod, enableContactDetection))
     return nothing
 end
 ActionReleaseAndAttach(iargs...; kwargs...)::Nothing =
@@ -75,7 +75,7 @@ ActionReleaseAndAttach(iargs...; kwargs...)::Nothing =
 
 function EventAfterPeriod(ref::ModelActions{F,TimeType}, waitingPeriod::Float64=0.0, iargs...;  kwargs...)::Nothing where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
     checkErrorExplicitRobotFunc("EventAfterPeriod", "waitingPeriod", iargs, kwargs, refPathExists=true)
-    push!(ref.refMotion, ArbitraryMotion(robotEventAfterPeriod!, waitingPeriod, nothing, nothing))
+    push!(ref.refMotion, ArbitraryMotion(robotEventAfterPeriod!, waitingPeriod, nothing, nothing, nothing))
     return nothing
 end
 EventAfterPeriod(iargs...; kwargs...)::Nothing =
@@ -83,9 +83,9 @@ EventAfterPeriod(iargs...; kwargs...)::Nothing =
 
 
 ### --------------------- ActionAttach ------------------------------------
-function ActionAttach(ref::ModelActions{F,TimeType}, movablePart::String="", robotOrDepot::String="", iargs...; waitingPeriod::Float64=0.0, kwargs...)::Nothing where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
+function ActionAttach(ref::ModelActions{F,TimeType}, movablePart::String="", robotOrDepot::String="", iargs...; waitingPeriod::Float64=0.0, enableContactDetection::Bool=true, kwargs...)::Nothing where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
     checkErrorExplicitRobotFunc("ActionAttach", "robotOrDepot, movablePart, and waitingPeriod", iargs, kwargs, refPathExists=true)
-    push!(ref.refMotion, ArbitraryMotion(ActionAttach!, robotOrDepot, movablePart, waitingPeriod))
+    push!(ref.refMotion, ArbitraryMotion(ActionAttach!, robotOrDepot, movablePart, waitingPeriod, enableContactDetection))
     return nothing
 end
 ActionAttach(iargs...; kwargs...)::Nothing =
@@ -93,9 +93,9 @@ ActionAttach(iargs...; kwargs...)::Nothing =
 
 
 ### --------------------- ActionRelease -----------------------------------
-function ActionRelease(ref::ModelActions{F,TimeType}, movablePart::String="", robotOrDepot::String="", iargs...; waitingPeriod::Float64=0.0, kwargs...)::Nothing where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
+function ActionRelease(ref::ModelActions{F,TimeType}, movablePart::String="", robotOrDepot::String="", iargs...; waitingPeriod::Float64=0.0, enableContactDetection::Bool=true, kwargs...)::Nothing where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
     checkErrorExplicitRobotFunc("ActionRelease", "robotOrDepot, movablePart, and waitingPeriod", iargs, kwargs, refPathExists=true)
-    push!(ref.refMotion, ArbitraryMotion(ActionRelease!, movablePart, waitingPeriod, nothing))
+    push!(ref.refMotion, ArbitraryMotion(ActionRelease!, movablePart, waitingPeriod, enableContactDetection, nothing))
     return nothing
 end
 ActionRelease(iargs...; kwargs...)::Nothing =
@@ -106,7 +106,7 @@ ActionRelease(iargs...; kwargs...)::Nothing =
 ### --------------------- ActionRelease -----------------------------------
 function ActionDelete(ref::ModelActions{F,TimeType}, movablePart::String="", robotOrDepot::String="", iargs...; waitingPeriod::Float64=0.0, kwargs...)::Nothing where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
     checkErrorExplicitRobotFunc("ActionDelete", "robotOrDepot, movablePart, and waitingPeriod", iargs, kwargs, refPathExists=true)
-    push!(ref.refMotion, ArbitraryMotion(ActionDelete!, movablePart, waitingPeriod, nothing))
+    push!(ref.refMotion, ArbitraryMotion(ActionDelete!, movablePart, waitingPeriod, nothing, nothing))
     return nothing
 end
 ActionDelete(iargs...; kwargs...)::Nothing =

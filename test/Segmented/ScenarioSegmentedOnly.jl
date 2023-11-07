@@ -1,4 +1,4 @@
-module YouBotFixSphere
+module ScenarioSegmentedOnly
 
 using  Modia3D
 
@@ -99,36 +99,38 @@ function robotProgram(robotActions)
         v_max =    [2.68512, 2.68512, 4.8879, 5.8997, 5.8997, 2.0],
         a_max =    [1.5, 1.5, 1.5, 1.5, 1.5, 0.5])
 
+
     ActionAttach(robotActions, "sphereLock", "youbot1.base.plateLock",waitingPeriod=0.0)
-
     EventAfterPeriod(robotActions, 1e-10)
-
     ptpJointSpace(robotActions, [
-        pi   pi/4   pi/4      0.0   0.0  diameter+0.01; # start top of ball
-        pi   pi/4   pi/4      1.04  0.0  diameter+0.01; # go to plate
-        pi   pi/4   pi/4      1.04  0.0  diameter-0.002; # grip
-            ])
-
-    ActionAttach(robotActions, "sphereLock", "youbot1.gripper.gripperLock", waitingPeriod=0.0)
-
-    ptpJointSpace(robotActions, [
-        pi   0.0    pi/2      0.0   0.0  diameter-0.002; # grip + top
-        pi   pi/4   pi/4      1.04  0.0  diameter-0.002;  # grip + plate
-        pi   pi/4   pi/4      1.04  0.0  diameter+0.01;  # release + plate
-            ])
-
-    ActionReleaseAndAttach(robotActions, "sphereLock", "youbot1.base.plateLock", waitingPeriod=0.0)
-
-    ptpJointSpace(robotActions, [
-        pi   0.0    pi/2      0.0   0.0  diameter+0.01; # open + top
-    pi   pi/4   pi/4      1.04  0.0  diameter+0.01;  # open + plate
-    pi   pi/4   pi/4      1.04  0.0  diameter-0.002; # grip
+        pi   pi/4           pi/4    0.0   0.0  diameter+0.01; # start top of ball
+        pi   pi/4           pi/4    1.04  0.0  diameter+0.01; # go to plate
+        pi   pi/4           pi/4    1.04  0.0  diameter-0.002; # grip
         ])
 
     ActionAttach(robotActions, "sphereLock", "youbot1.gripper.gripperLock", waitingPeriod=0.0)
 
     ptpJointSpace(robotActions, [
-        pi   0.0    pi/2      0.0   0.0  diameter-0.002; # grip + top
+        pi   pi/4 - 0.1     pi/4    1.04  0.0  diameter-0.002; # grip + transport a bit
+        pi   0.0            pi/2    0.0   0.0  diameter-0.002; # grip + top
+        pi   pi/4 - 0.015   pi/4    1.04  0.0  diameter-0.002;  # release + plate
+        pi   pi/4 - 0.015   pi/4    1.04  0.0  diameter+0.01;  # release + plate
+        pi   pi/4           pi/4    1.04  0.0  diameter+0.01;  # release + plate
+        ])
+
+    ActionReleaseAndAttach(robotActions, "sphereLock", "youbot1.base.plateLock", waitingPeriod=0.0)
+
+    ptpJointSpace(robotActions, [
+        pi   0.0            pi/2    0.0   0.0  diameter+0.01; # open + top
+        pi   pi/4           pi/4    1.04  0.0  diameter+0.01;  # open + plate
+        pi   pi/4           pi/4    1.04  0.0  diameter-0.002; # grip
+        ])
+
+    ActionAttach(robotActions, "sphereLock", "youbot1.gripper.gripperLock", waitingPeriod=0.0)
+
+    ptpJointSpace(robotActions, [
+        pi   pi/4 - 0.1     pi/4    1.04  0.0  diameter-0.002; # grip + transport a bit
+        pi   0.0    pi/2    0.0     0.0  diameter-0.002; # grip + top
         ])
     return nothing
 end
@@ -524,12 +526,12 @@ Scenario = Model3D(
     world = Object3D(feature=Scene(gravityField=:gravField, visualizeFrames=false, nominalLength=tableX, gap=0.2,
         enableContactDetection=false, maximumContactDamping=1000, elasticContactReductionFactor=1e-3, enableVisualization=true)),
 
-    table = Table,
+    # table = Table,
     ground = Ground,
 
     sphere = Object3D(parent=:world, fixedToParent=false,
-                      assemblyRoot=true,
-                      translation=[-0.78, 0.0, 0.1792],
+                    assemblyRoot=true,
+                    translation=[-0.78, 0.0, 0.1845], #[-0.78, 0.0, 0.1792],
                     feature=Solid(shape=Sphere(diameter=diameter),
                     visualMaterial=VisualMaterial(color = "Green"),
                     solidMaterial="DryWood",
@@ -563,7 +565,8 @@ youbot = @instantiateModel(youbotModel, unitless=true, logCode=false, log=false)
 
 stopTime = 13.5
 tolerance = 1e-7
-requiredFinalStates = [3.1415926520586592, 5.686031281508212e-9, 0.06412362163909635, -0.3805226293938952, 1.50666605638018, 0.3805172766429968, 0.08493911074550455, -0.5038817608300088, -2.2152092866639697e-8, 1.3239270185771387e-8, 8.717940146436583e-7, -0.3769087845467734, -0.39014966339476387, -0.14159770836684699, 0.00041636157883075207, 2.9200010867799453e-5, 0.04800059578682383, -5.955842412850578e-7]
+# use boxes instead of FileMesh for better performance
+requiredFinalStates = [3.1415926553482936, 3.940308425576264e-9, 0.6805942761756493, -0.0956576899775176, 0.7909095290954901, 0.10951977177943406, 1.0327025673843655, -0.14501159844620148, 1.9286175287484307e-8, -3.283069277920548e-8, -4.1609409172268536e-6, -0.41631100515552766, -0.36361306819749833, -0.1122726475747107, 0.0003657180323440799, 6.003535500656957e-5, 0.04800122492323228, -1.2243878275181126e-6]
 
 simulate!(youbot, stopTime=stopTime, tolerance=tolerance, requiredFinalStates_atol=0.002, log=true, logStates=false, logParameters=false, requiredFinalStates=requiredFinalStates, logEvents=false)
 
@@ -574,5 +577,14 @@ simulate!(youbot, stopTime=stopTime, tolerance=tolerance, requiredFinalStates_at
 #                "youbot1.rev2.phi",
 #                "youbot1.rev3.phi",
 #                "youbot1.rev4.phi",
-#                "youbot1.rev5.phi")], figure=1)
+#                "youbot1.rev5.phi")
+#                ], figure=1)
+
+# plot(youbot, [ "sphere.translation[1]",
+# "sphere.translation[2]",
+# "sphere.translation[3]"], reuse=true, prefix="S4: ", figure=1)
+
+# plot(youbot, [ "sphere.r_abs[1]",
+#     "sphere.r_abs[2]",
+#     "sphere.r_abs[3]"], reuse=true, prefix="S4: ", figure=2)
 end

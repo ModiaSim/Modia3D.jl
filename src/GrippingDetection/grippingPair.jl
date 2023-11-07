@@ -5,6 +5,7 @@ mutable struct GrippingPair{F <: Modia3D.VarFloatType}
     movableObj::Composition.Object3D{F}    # must be part of a movable unit
     # is set for Attach and ReleaseAndAttach
     robotOrDepot::Composition.Object3D{F}  # must be part of a gripper unit or part of a depot (like bottom or other movable unit)
+    enableContactDetection::Bool
     GrippingPair{F}(gripStatus::GripStatus, movableObj::Composition.Object3D{F}) where {F <: Modia3D.VarFloatType} = new(gripStatus, movableObj)
     GrippingPair{F}(gripStatus::GripStatus, movableObj::Composition.Object3D{F}, robotOrDepot::Composition.Object3D{F}) where {F <: Modia3D.VarFloatType}  = new(gripStatus, movableObj, robotOrDepot)
 end
