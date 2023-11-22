@@ -435,7 +435,7 @@ function createAnimationQuaternionTrack(object, animation, obj, iobj, R_obj::Not
 end
 
 
-function exportAnimation(scene)
+function exportAnimation(scene::Modia3D.Composition.Scene{F}) where F <: Modia3D.VarFloatType
     visualObject3Ds = scene.visualObject3Ds
     if scene.exportAnimation && length(visualObject3Ds) > 0
         animationFile = scene.options.animationFile
@@ -490,4 +490,5 @@ function exportAnimation(scene)
 
         println("done.")
     end
+    return nothing
 end
