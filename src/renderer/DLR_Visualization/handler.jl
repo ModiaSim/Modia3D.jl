@@ -7,7 +7,7 @@
 
 function Composition.initializeVisualization(renderer::Modia3D.AbstractDLR_VisualizationRenderer, scene::Composition.Scene{F})::Nothing where F <: Modia3D.VarFloatType
     simVis::SimVis_Renderer = renderer.simVis
-    velements = scene.allVisuElements
+    velements = scene.visualObject3Ds
     @assert(length(velements) > 0)
     if simVis.isInitialized
         Composition.closeVisualization(renderer)
@@ -56,13 +56,4 @@ function Composition.closeVisualization(renderer::Modia3D.AbstractDLR_Visualizat
     empty!(simVis.velements)
     simVis.isInitialized = false
     return nothing
-end
-
-
-function Composition.isVisible(feature::Shapes.Solid{F}, renderer::Modia3D.AbstractDLR_VisualizationRenderer) where F <: Modia3D.VarFloatType
-    return !isnothing(feature.shape) && !isnothing(feature.visualMaterial)
-end
-
-function Composition.isVisible(feature::Shapes.Visual, renderer::Modia3D.AbstractDLR_VisualizationRenderer)
-    return !isnothing(feature.shape) && !isnothing(feature.visualMaterial)
 end

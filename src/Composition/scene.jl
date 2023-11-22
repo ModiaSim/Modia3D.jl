@@ -406,14 +406,15 @@ mutable struct Scene{F <: Modia3D.VarFloatType} <: Modia3D.AbstractScene
     superObjs::Vector{SuperObjsRow}           # super objects
 
     treeAccVelo::Vector{Object3D{F}}
-    tree::Vector{Object3D{F}}                    # Spanning tree of the frames in depth-first order (without world)
-    treeForComputation::Vector{Object3D{F}}      # Tree that is used for the computation
+    tree::Vector{Object3D{F}}                 # Spanning tree of the frames in depth-first order (without world)
+    treeForComputation::Vector{Object3D{F}}   # Tree that is used for the computation
                                               # treeForComputation = options.useOptimizedStructure ? treeAccVelo : tree
 
-    #cutJoints::Vector{Modia3D.AbstractJoint}  # Vector of all cut-joints
-    allVisuElements::Vector{Object3D{F}}         # all Object3Ds that should be visualized (for communiating with SimVis)
-    updateVisuElements::Vector{Object3D{F}}      # all Object3Ds that are visibly only e.g. visualization frames (must be updated first)
-    allCollisionElements::Vector{Object3D{F}}    # all Object3Ds, which are allowed to collide (no order, no super objects)
+    #cutJoints::Vector{Modia3D.AbstractJoint} # Vector of all cut-joints
+    userDefinedObject3Ds::Vector{Object3D{F}} # all Object3Ds defined by the user (i.e. no internally generated visualization frame, contact/support point, bounding box, convex partition member object)
+    visualObject3Ds::Vector{Object3D{F}}      # all Object3Ds required for visualization (i.e. obj.feature = Solid/Visual/Light/Camera, includes visualization frames, contact points and bounding boxes)
+    pureResultObject3Ds::Vector{Object3D{F}}  # all pure result or visualization Object3Ds which are not part of the equations of motion and therefore need extra calculation of r_abs and R_abs (includes visualization frames)
+    allCollisionElements::Vector{Object3D{F}} # all Object3Ds, which are allowed to collide (no order, no super objects)
     noCPairs::Vector{Vector{Int64}}           # Indices of frames (with respect to collSuperObjs) that can't collide in general (e.g. objects are connected via joints)
     noCPairsHelp::Dict{Modia3D.AbstractJoint,Vector{Int64}}
     allowedToMove::Vector{Union{Bool,Nothing}}
@@ -505,6 +506,7 @@ mutable struct Scene{F <: Modia3D.VarFloatType} <: Modia3D.AbstractScene
             false,
             Modia3D.KinematicAnalysis,
             Vector{SuperObjsRow}[],
+            Vector{Object3D{F}}[],
             Vector{Object3D{F}}[],
             Vector{Object3D{F}}[],
             Vector{Object3D{F}}[],

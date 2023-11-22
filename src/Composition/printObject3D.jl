@@ -5,7 +5,7 @@ end
 
 
 function printAllVisuElements(scene::Scene)
-    printTree(scene.allVisuElements)
+    printTree(scene.visualObject3Ds)
 end
 
 

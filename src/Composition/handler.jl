@@ -7,12 +7,14 @@
 
 
 function build_tree!(scene::Scene{F}, world::Object3D{F})::Nothing where F <: Modia3D.VarFloatType
-    tree                = scene.tree
-    stack               = scene.stack
+    tree                 = scene.tree
+    stack                = scene.stack
     allCollisionElements = scene.allCollisionElements
     empty!(tree)
     empty!(stack)
-    empty!(scene.allVisuElements)
+    empty!(scene.userDefinedObject3Ds)
+    empty!(scene.visualObject3Ds)
+    empty!(scene.pureResultObject3Ds)
     empty!(allCollisionElements)
 
     fillVisuElements!(scene, world, world)
@@ -186,8 +188,10 @@ function build_superObjs!(scene::Scene{F}, world::Object3D{F})::Nothing where F 
         treeAccVelo  = scene.treeAccVelo
         empty!(stack)
         empty!(buffer)
-        empty!(scene.allVisuElements)
         empty!(treeAccVelo)
+        empty!(scene.userDefinedObject3Ds)
+        empty!(scene.visualObject3Ds)
+        empty!(scene.pureResultObject3Ds)
 
         world.computeAcceleration = true
         world.isRootObj = true # all objs stored in buffer are root objs
@@ -434,19 +438,19 @@ function chooseAndBuildUpTree(world::Object3D{F}, scene::Scene{F}) where F <: Mo
         if scene.options.enableContactDetection && scene.collide
             initializeContactDetection!(world, scene)
             if length(world.contactVisuObj1) > 0
-                append!(scene.allVisuElements, world.contactVisuObj1)
-                append!(scene.allVisuElements, world.contactVisuObj2)
+                append!(scene.visualObject3Ds, world.contactVisuObj1)
+                append!(scene.visualObject3Ds, world.contactVisuObj2)
             end
             if length(world.supportVisuObj1A) > 0
-                append!(scene.allVisuElements, world.supportVisuObj1A)
-                append!(scene.allVisuElements, world.supportVisuObj2A)
-                append!(scene.allVisuElements, world.supportVisuObj3A)
-                append!(scene.allVisuElements, world.supportVisuObj1B)
-                append!(scene.allVisuElements, world.supportVisuObj2B)
-                append!(scene.allVisuElements, world.supportVisuObj3B)
+                append!(scene.visualObject3Ds, world.supportVisuObj1A)
+                append!(scene.visualObject3Ds, world.supportVisuObj2A)
+                append!(scene.visualObject3Ds, world.supportVisuObj3A)
+                append!(scene.visualObject3Ds, world.supportVisuObj1B)
+                append!(scene.visualObject3Ds, world.supportVisuObj2B)
+                append!(scene.visualObject3Ds, world.supportVisuObj3B)
             end
             if length(world.AABBVisu) > 0
-                append!(scene.allVisuElements, world.AABBVisu)
+                append!(scene.visualObject3Ds, world.AABBVisu)
             end
         end
         initializeMassComputation!(scene)
@@ -463,7 +467,7 @@ function chooseAndBuildUpTree(world::Object3D{F}, scene::Scene{F}) where F <: Mo
         scene.visualize = false
         scene.exportAnimation = false
     else
-        if length(scene.allVisuElements) > 0
+        if length(scene.visualObject3Ds) > 0
             scene.visualize = scene.options.enableVisualization
         else
             scene.visualize = false
@@ -503,13 +507,13 @@ end
 function emptyScene!(scene::Scene{F})::Nothing where F <: Modia3D.VarFloatType
     empty!(scene.stack)
     empty!(scene.buffer)
-
     empty!(scene.superObjs)
-    empty!(scene.updateVisuElements)
+    empty!(scene.userDefinedObject3Ds)
+    empty!(scene.visualObject3Ds)
+    empty!(scene.pureResultObject3Ds)
+    empty!(scene.allCollisionElements)
     empty!(scene.treeAccVelo)
     empty!(scene.tree)
-    empty!(scene.allVisuElements)
-    empty!(scene.allCollisionElements)
     empty!(scene.noCPairs)
     empty!(scene.noCPairsHelp)
     empty!(scene.allowedToMove)
@@ -527,7 +531,7 @@ end
 function closeAnalysis!(scene::Scene{F})::Nothing where F <: Modia3D.VarFloatType
     # Close Visualisation
     closeVisualization(Modia3D.renderer[1])
-    empty!(scene.allVisuElements)
+    empty!(scene.visualObject3Ds)
     scene.visualize = false
     # Close Collision detection
     if scene.collide

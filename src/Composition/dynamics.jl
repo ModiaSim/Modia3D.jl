@@ -202,17 +202,13 @@ function initSegment_Model3D!(partiallyInstantiatedModel::Modia.InstantiatedMode
             zStartIndex = 0
         end
 
+        # add r_abs and rot123_abs of all user-defined Object3Ds to results
         # objIndices[i,1]: Index of r_abs of Object3D i
-        #           [i,2]: Index of R_abs of Object3D i
-        objIndices = Matrix{Int}(undef, length(scene.updateVisuElements), 2)
-        for (i,obj) in enumerate(scene.updateVisuElements)
-            if typeof(obj.feature) == Modia3D.Composition.EmptyObject3DFeature
-                objIndices[i,1] = 0
-                objIndices[i,2] = 0
-            else
-                objIndices[i,1] = Modia.new_w_segmented_variable!(partiallyInstantiatedModel, obj.path*".r_abs", Modia3D.ZeroVector3D(F), "m")
-                objIndices[i,2] = Modia.new_w_segmented_variable!(partiallyInstantiatedModel, obj.path*".R_abs", Modia3D.NullRotation(F), "")
-            end
+        #           [i,2]: Index of rot123_abs of Object3D i
+        objIndices = Matrix{Int}(undef, length(scene.userDefinedObject3Ds), 2)
+        for (i,obj) in enumerate(scene.userDefinedObject3Ds)
+            objIndices[i,1] = Modia.new_w_segmented_variable!(partiallyInstantiatedModel, obj.path*".r_abs", Modia3D.ZeroVector3D(F), "m")
+            objIndices[i,2] = Modia.new_w_segmented_variable!(partiallyInstantiatedModel, obj.path*".rot123_abs", Modia3D.ZeroVector3D(F), "rad")
         end
 
         mbsBuild.mbs = MultibodyData{F,TimeType}(partiallyInstantiatedModel, modelPath, world, scene,
@@ -233,7 +229,7 @@ function initSegment_Model3D!(partiallyInstantiatedModel::Modia.InstantiatedMode
         if scene.visualize && firstSegment
             TimerOutputs.@timeit partiallyInstantiatedModel.timer "Modia3D_0 initializeVisualization" Modia3D.Composition.initializeVisualization(Modia3D.renderer[1], scene)
             if partiallyInstantiatedModel.options.log
-                println(    "        Modia3D: nVisualShapes = ", length(scene.allVisuElements))
+                println(    "        Modia3D: nVisualShapes = ", length(scene.visualObject3Ds))
                 if scene.options.enableContactDetection
                     println("                 mprTolerance  = ", scene.options.contactDetection.tol_rel)
                     println("                 contact_eps   = ", scene.options.contactDetection.contact_eps)
@@ -557,18 +553,12 @@ function computeGeneralizedForces!(mbs::MultibodyData{F,TimeType}, qdd_hidden::V
         elseif leq_mode == -2
             # Compute only terms needed at a communication point (currently: Only visualization + export animation)
             TimerOutputs.@timeit instantiatedModel.timer "Modia3D_3" begin
-                # objects can have interactionManner (need to rename updateVisuElements)
+                # objects can have interactionManner
                 if scene.options.useOptimizedStructure
-                    objIndices = mbs.objIndices
-                    for (i,obj) in enumerate(scene.updateVisuElements)
+                    for obj in scene.pureResultObject3Ds
                         parent = obj.parent
                         obj.r_abs = obj.r_rel ≡ Modia3D.ZeroVector3D(F) ? parent.r_abs : parent.r_abs + parent.R_abs'*obj.r_rel
                         obj.R_abs = obj.R_rel ≡ Modia3D.NullRotation(F) ? parent.R_abs : obj.R_rel*parent.R_abs
-
-                        if objIndices[i,1] > 0
-                            Modia.copy_w_segmented_value_to_result(instantiatedModel, objIndices[i,1], obj.r_abs)
-                            Modia.copy_w_segmented_value_to_result(instantiatedModel, objIndices[i,2], obj.R_abs)
-                        end
 
                         # is executed only if an internal Object3D called
                         if length( obj.visualizationFrame ) == 1
@@ -583,6 +573,15 @@ function computeGeneralizedForces!(mbs::MultibodyData{F,TimeType}, qdd_hidden::V
                 end
 
                 if storeResult && !isTerminalOfAllSegments
+                    # copy r_abs and rot123_abs of all user-defined Object3Ds to results
+                    objIndices = mbs.objIndices
+                    for (i, obj) in enumerate(scene.userDefinedObject3Ds)
+                        if objIndices[i,1] > 0
+                            Modia.copy_w_segmented_value_to_result(instantiatedModel, objIndices[i,1], obj.r_abs)
+                            Modia.copy_w_segmented_value_to_result(instantiatedModel, objIndices[i,2], Modia3D.rot123fromR(obj.R_abs))
+                        end
+                    end
+
                     # evaluate result elements
                     for result in resultElements
                         evaluateResultElement(instantiatedModel, scene, result, time)
@@ -606,7 +605,7 @@ function computeGeneralizedForces!(mbs::MultibodyData{F,TimeType}, qdd_hidden::V
                         if provideAnimationData
                             TimerOutputs.@timeit instantiatedModel.timer "Modia3D_3 provideAnimationData" begin
                                 objectData = []
-                                for obj in scene.allVisuElements
+                                for obj in scene.visualObject3Ds
                                     pos = Modia3D.convertToFloat64(obj.r_abs)
                                     ori = Modia3D.from_R(Modia3D.convertToFloat64(obj.R_abs))
                                     dat = animationData(pos, ori)

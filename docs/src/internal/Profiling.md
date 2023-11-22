@@ -63,7 +63,7 @@ see next section.
 ## logTiming
 
 Function `simulate!(..., logTiming=true, ...)` has keyword argument `logTiming`. When set to true,
-the result of the `@timeit` macro of the [TimerOutputs](https://github.com/KristofferC/TimerOutputs.jl) package is shown. Function `simulate!(..)` and `Modia3D` are instrumented with this timer. 
+the result of the `@timeit` macro of the [TimerOutputs](https://github.com/KristofferC/TimerOutputs.jl) package is shown. Function `simulate!(..)` and `Modia3D` are instrumented with this timer.
 Example:
 
 ```julia
@@ -164,16 +164,16 @@ is the following:
 
 1. `1.363270 seconds` is the time for the first evaluation of `getDerivatives!`.
    This time is nearly completely used for compilation of this function
-   
+
 2. `0.002773 seconds` is the time for the second evaluation of `getDerivatives!`.
    This time is nearly irrelevant for the timing of `@instantiateModel.`
-   
+
 3. `2.540190` seconds is the total time spent in `@instantiateModel`, including the
    two calls of `getDerivatives!`. This time, together with (1.) shows the following:
    - `0.47*2.5 = 1.1` seconds are used to process the model, generate `getDerivatives!` and
      process `getDerivatives!` twice.
    - `0.53*2.5 = 1.32` seconds are used to compile `getDerivatives!`.
-   
+
 
 The meaning of column `Section` is the following:
 
@@ -208,8 +208,8 @@ The meaning of column `Section` is the following:
 | `Modia3D_2 computeKinematics!`           | Time to compute accelerations with qdd = unit vector. |
 | `Modia3D_2 computeForcesAndResiduals`    | Time to compute forces/torques/residuals for M(q)*qdd. |
 | `Modia3D_3`                              | Time of `leq_mode == -1`. |
-| `Modia3D_3 visualize!`                   | Time of `for obj in updateVisuElements ... visualize(..)`. |
-| `Modia3D_3 exportAnimation`              | Time of `for obj in allVisuElements ... push!(objectData, dat)`  |
+| `Modia3D_3 visualize!`                   | Time of `for obj in visualObject3Ds ... visualize(..)`. |
+| `Modia3D_3 exportAnimation`              | Time of `for obj in visualObject3Ds ... push!(objectData, dat)`  |
 | `Modia3D_4 isTerminal`                   | Time of `exportAnimation` and `closeVisualization` during termination. |
 
 

@@ -155,6 +155,7 @@ mutable struct Object3D{F <: Modia3D.VarFloatType} <: Modia3D.AbstractObject3D
     # Additional information associated with Object3D
     feature::Union{Modia3D.AbstractObject3DFeature, Modia3D.AbstractScene}  # Optional feature associated with Object3D
     twoObject3Dobject::Vector{Modia3D.AbstractTwoObject3DObject}  # Optional AbstractTwoObject3DObject object associated with Object3D
+    isUserDefined::Bool        # true if defined by the user (i.e. no internally generated visualization frame, contact/support point, bounding box, convex partition member object)
     hasCutJoint::Bool          # true if it has a cut joint
     hasForceElement::Bool      # true if it has a force element
     hasChildJoint::Bool        # true if its child has a joint
@@ -269,7 +270,7 @@ mutable struct Object3D{F <: Modia3D.VarFloatType} <: Modia3D.AbstractObject3D
                 Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F),
                 false, F(0.0), Modia3D.ZeroVector3D(F), SMatrix{3,3,F,9}(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
                 feature, Modia3D.AbstractTwoObject3DObject[],
-                false, false, false, false,
+                true, false, false, false, false,
                 shapeKind, shape, visualMaterial, centroid,
                 visualizeFrame2,
                 Vector{Object3D{F}}[],
@@ -295,9 +296,10 @@ mutable struct Object3D{F <: Modia3D.VarFloatType} <: Modia3D.AbstractObject3D
             end
 
             # obj = Object3D{F}(feature, visualizeFrame=visualizeFrame, path=path)
-            obj = Object3DWithoutParent(new(), visualizeFrame = visualizeFrame, lockable=lockable, assemblyRoot=assemblyRoot, path=path)
+            obj = Object3DWithoutParent(new(), visualizeFrame=visualizeFrame, lockable=lockable, assemblyRoot=assemblyRoot, path=path)
             obj.feature = feature
             (obj.shapeKind, obj.shape, obj.visualMaterial, obj.centroid) = setShapeKind(F, feature)
+            obj.isUserDefined = true
         end
 
         if typeof(feature) <: Modia3D.Shapes.Visual && typeof(feature.shape) <: Modia3D.Shapes.FileMesh && feature.shape.convexPartition
@@ -366,7 +368,7 @@ mutable struct Object3D{F <: Modia3D.VarFloatType} <: Modia3D.AbstractObject3D
               Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F),
               false, F(0.0), Modia3D.ZeroVector3D(F), SMatrix{3,3,F,9}(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
               feature, Modia3D.AbstractTwoObject3DObject[],
-              false, false, false, false,
+              false, false, false, false, false,
               shapeKind, shape, visualMaterial, centroid,
               visualizeFrame2,
               Vector{Object3D{F}}[],
@@ -374,7 +376,6 @@ mutable struct Object3D{F <: Modia3D.VarFloatType} <: Modia3D.AbstractObject3D
               Vector{Object3D{F}}[], Vector{Object3D{F}}[], Vector{Object3D{F}}[], Vector{Object3D{F}}[],
               Vector{Object3D{F}}[], Vector{Object3D{F}}[], Vector{Object3D{F}}[], Vector{Object3D{F}}[],
               path)
-
 
         if fixed
             push!(parent.children, obj)
@@ -414,7 +415,7 @@ mutable struct Object3D{F <: Modia3D.VarFloatType} <: Modia3D.AbstractObject3D
         Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F), Modia3D.ZeroVector3D(F),
         false, F(0.0), Modia3D.ZeroVector3D(F), SMatrix{3,3,F,9}(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
         feature, Modia3D.AbstractTwoObject3DObject[],
-        false, false, false, false,
+        false, false, false, false, false,
         shapeKind, shape, visualMaterial, centroid,
         visualizeFrame,
         Vector{Object3D{F}}[],
@@ -632,19 +633,23 @@ hasChildJoint(        obj::Object3D{F}) where F <: Modia3D.VarFloatType = obj.ha
 needsAcceleration(    obj::Object3D{F}) where F <: Modia3D.VarFloatType = obj.computeAcceleration
 objectHasMass(        obj::Object3D{F}) where F <: Modia3D.VarFloatType = obj.hasMass
 isRootObject(         obj::Object3D{F}) where F <: Modia3D.VarFloatType = obj.isRootObj
+isUserDefined(        obj::Object3D{F}) where F <: Modia3D.VarFloatType = obj.isUserDefined
 objectHasMovablePos(  obj::Object3D{F}) where F <: Modia3D.VarFloatType = isdefined(obj.interactionManner, :movablePos)
+isSolid(              obj::Object3D{F}) where F <: Modia3D.VarFloatType = typeof(obj.feature) <: Modia3D.Shapes.Solid{F}
+isVisual(             obj::Object3D{F}) where F <: Modia3D.VarFloatType = typeof(obj.feature) <: Modia3D.Shapes.Visual
 
 featureHasMass(obj::Object3D{F}) where F <: Modia3D.VarFloatType = featureHasMass(obj.feature)
 featureHasMass(feature::Modia3D.AbstractObject3DFeature) = false
 featureHasMass(feature::Modia3D.AbstractScene) = false
 featureHasMass(feature::Shapes.Solid{F}) where F <: Modia3D.VarFloatType = !isnothing(feature.massProperties)
 
-isVisible(obj::Object3D{F}, renderer::Modia3D.AbstractRenderer) where F <: Modia3D.VarFloatType = isVisible(obj.feature, renderer)
-isVisible(obj::Object3D{F}, exportAnimation::Bool) where F <: Modia3D.VarFloatType = isVisible(obj.feature, exportAnimation)
-isVisible(feature::Modia3D.AbstractObject3DFeature, renderer::Modia3D.AbstractRenderer) = false
-isVisible(feature::Modia3D.AbstractObject3DFeature, exportAnimation::Bool) = false
-isVisible(feature::Modia3D.AbstractScene, renderer::Modia3D.AbstractRenderer) = false
-isVisible(feature::Modia3D.AbstractScene, exportAnimation::Bool) = false
+function isVisible(obj::Object3D{F})::Bool where F <: Modia3D.VarFloatType
+    if isSolid(obj) || isVisual(obj)
+        return !isnothing(obj.feature.visualMaterial) && !isnothing(obj.feature.shape)
+    else
+        return false
+    end
+end
 
 canCollide(feature::Modia3D.AbstractObject3DFeature) = false
 

@@ -15,6 +15,6 @@ simulate!(pendulum, stopTime=3.0, log=true, requiredFinalStates = requiredFinalS
 showInfo(pendulum)
 
 @usingModiaPlot
-plot(pendulum, ["rev.phi", "body.r_abs", "body.R_abs"])
+plot(pendulum, ["rev.phi", "body.r_abs", "body.rot123_abs"])
 
 end
