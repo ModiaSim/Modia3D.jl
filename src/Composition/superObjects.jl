@@ -26,9 +26,9 @@ mutable struct SuperObjForce{F <: Modia3D.VarFloatType}
     end
 end
 
-mutable struct SuperObjVisu{F <: Modia3D.VarFloatType}
+mutable struct SuperObjResult{F <: Modia3D.VarFloatType}
     superObj::Vector{Object3D{F}}
-    function SuperObjVisu{F}() where F <: Modia3D.VarFloatType
+    function SuperObjResult{F}() where F <: Modia3D.VarFloatType
         new(Vector{Object3D{F}}[])
     end
 end
@@ -40,9 +40,9 @@ mutable struct SuperObjsRow{F <: Modia3D.VarFloatType}
     superObjMass::SuperObjMass{F}
     superObjMovable::SuperObjMovable{F}
     superObjForce::SuperObjForce{F}
-    superObjVisu::SuperObjVisu{F}
+    superObjResult::SuperObjResult{F}
     noCPair::Vector{Int64}
     function SuperObjsRow{F}() where F <: Modia3D.VarFloatType
-        new(SuperObjCollision{F}(), SuperObjMass{F}(), SuperObjMovable{F}(), SuperObjForce{F}(), SuperObjVisu{F}(),  Vector{Int64}[])
+        new(SuperObjCollision{F}(), SuperObjMass{F}(), SuperObjMovable{F}(), SuperObjForce{F}(), SuperObjResult{F}(), Vector{Int64}[])
     end
 end

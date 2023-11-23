@@ -57,7 +57,11 @@ Cradle = Model3D(
                                    enableContactDetection=true,
                                    elasticContactReductionFactor=1.0,
                                    animationFile="NewtonsCradle.json",
-                                   visualizeBoundingBox=true)),
+                                   enableVisualization=true,
+                                   visualizeFrames=false,
+                                   visualizeBoundingBox=true,
+                                   visualizeContactPoints=false,
+                                   visualizeSupportPoints=false)),
     box = Object3D(parent=:world,
                    feature=Visual(shape=Box(lengthX=Lx, lengthY=Ly, lengthZ=Lz),
                                   visualMaterial=vmatVisual)),
@@ -88,7 +92,10 @@ tolerance = 1e-8
 requiredFinalStates = [-1.180791527568564, -1.033934458288708, 0.04982982739055273, 0.018466029517559813, 0.049844032881367094, 0.018471344490359712, 0.04986127142907837, 0.018476465719447804, 0.04987561416137295, 0.018481494292598495]
 simulate!(newtonsCradle, stopTime=stopTime, tolerance=tolerance, log=true, logStates=false, logEvents=false, requiredFinalStates=requiredFinalStates)
 
+#showInfo(newtonsCradle)
+
 @usingModiaPlot
 plot(newtonsCradle, ["rev1.phi" "rev5.phi"; "rev1.w" "rev5.w"], figure=1)
+plot(newtonsCradle, ["pendulum1.sphere.r_abs"; "pendulum1.sphere.rot123_abs"], figure=2)
 
 end

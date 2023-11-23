@@ -538,7 +538,7 @@ youbot = @instantiateModel(youbotModel, unitless=true, logCode=false, log=false)
 
 stopTime = 13.5
 tolerance = 1e-7
-# use boxes instead of FileMesh for better performance
+
 if Sys.iswindows()
     requiredFinalStates = [3.141592656083914, 3.2955210650043794e-9, 0.6805942885295763, -0.09565767441181468, 0.7909095511209971, 0.10951974347893331, 1.032702582672235, -0.14501159330773356, 4.843043035569045e-8, -5.084066106605599e-8, 9.463525418080984e-8, -0.4161958225397787, -0.3634865106392557, -0.11218698258440177, 0.00028351378391616364, -0.0687518903928338, 0.04978878983770011, -4.140566109957699e-6, -0.7842800497816398, 0.005105609550611603, 0.21862295671355367, -0.0096585351122136, 2.0689584764943053e-6, 0.02110845828012153, -0.19785528209242548, 0.1186760937422613, 0.02372051044718875, -6.533396584593705e-8, 0.13049051323039967, 4.26642489125089e-8]
 elseif Sys.isapple()
@@ -549,24 +549,13 @@ end
 
 simulate!(youbot, stopTime=stopTime, tolerance=tolerance, requiredFinalStates_rtol=0.01, requiredFinalStates_atol=0.01, log=true, logStates=false, logParameters=false, requiredFinalStates=requiredFinalStates, logEvents=false)
 
-# @usingModiaPlot
-# plot(youbot, [ "sphere.translation[1]",
-# "sphere.translation[2]",
-# "sphere.translation[3]"], reuse=true, prefix="S1: ", figure=1)
+@usingModiaPlot
+plot(youbot, [ "sphere.translation[1]",
+    "sphere.translation[2]",
+    "sphere.translation[3]"], reuse=true, prefix="S1: ", figure=1)
 
-# plot(youbot, [ "sphere.r_abs[1]",
-#     "sphere.r_abs[2]",
-#     "sphere.r_abs[3]"], reuse=true, prefix="S1: ", figure=2)
-
-
-# plot(youbot, ["sphere.translation",
-#             #   ("youbot1.rev1.phi",
-#             #    "youbot1.rev2.phi",
-#             #    "youbot1.rev3.phi",
-#             #    "youbot1.rev4.phi",
-#             #    "youbot1.rev5.phi")
-#             ], figure=1)
-
-
+plot(youbot, [ "sphere.r_abs[1]",
+    "sphere.r_abs[2]",
+    "sphere.r_abs[3]"], reuse=true, prefix="S1: ", figure=2)
 
 end

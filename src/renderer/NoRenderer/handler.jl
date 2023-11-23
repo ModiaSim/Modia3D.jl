@@ -15,6 +15,3 @@ end
 
 function Composition.closeVisualization(renderer::DummyRenderer)
 end
-
-
-Composition.isVisible(feature::Modia3D.AbstractVisualElement, renderer::DummyRenderer) = false

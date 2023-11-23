@@ -99,6 +99,7 @@ julia -JModia3D_sysimage.so  (otherwise)
 - Add Result Element infrastructure and Result Element ContactResult
 - Bugfix: Correct parent Object3D torque calculation for Fix Joint with non-zero rotation
 - Bugfix: Enable AnimationExport in case of no renderer available
+- Bugfix: Enable position/orientation result signals independent of visualization/animation configuration
 
 
 ### Version 0.12.1

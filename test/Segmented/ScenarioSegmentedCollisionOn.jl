@@ -566,27 +566,21 @@ youbot = @instantiateModel(youbotModel, unitless=true, logCode=false, log=false)
 
 stopTime = 13.5
 tolerance = 1e-7
-# use boxes instead of FileMesh for better collision performance
+
 requiredFinalStates = [3.1415926561937666, 3.180307603613472e-9, 0.6805942902151595, -0.09565769212815624, 0.7909095547559756, 0.10951974466588697, 1.0327025949882498, -0.14501161390073966, 4.834365439536424e-8, -5.083589168175532e-8, 9.482986225093542e-7, -0.41623125840706904, -0.3635339629899328, -0.11224029745945692, 0.000283221896408894, -0.06877832213561617, 0.04978954930374486, -2.2467894719281828e-6]
 
 simulate!(youbot, stopTime=stopTime, tolerance=tolerance, requiredFinalStates_atol=0.002, log=true, logStates=false, logParameters=false, requiredFinalStates=requiredFinalStates, logEvents=false)
 
 # showInfo(youbot)
 
-# @usingModiaPlot
-# plot(youbot, ["sphere.translation",
-#               ("youbot1.rev1.phi",
-#                "youbot1.rev2.phi",
-#                "youbot1.rev3.phi",
-#                "youbot1.rev4.phi",
-#                "youbot1.rev5.phi")], figure=1)
+@usingModiaPlot
 
-# plot(youbot, [ "sphere.translation[1]",
-# "sphere.translation[2]",
-# "sphere.translation[3]"], reuse=true, prefix="S2: ", figure=1)
+plot(youbot, [ "sphere.translation[1]",
+    "sphere.translation[2]",
+    "sphere.translation[3]"], reuse=true, prefix="S2: ", figure=1)
 
-# plot(youbot, [ "sphere.r_abs[1]",
-#     "sphere.r_abs[2]",
-#     "sphere.r_abs[3]"], reuse=true, prefix="S2: ", figure=2)
+plot(youbot, [ "sphere.r_abs[1]",
+    "sphere.r_abs[2]",
+    "sphere.r_abs[3]"], reuse=true, prefix="S2: ", figure=2)
 
 end

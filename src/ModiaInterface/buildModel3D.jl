@@ -68,7 +68,7 @@ equations = :[
 ]
 ```
 """
-function build_Model3D!(model::AbstractDict, modelModule, FloatType::Type, TimeType::Type, 
+function build_Model3D!(model::AbstractDict, modelModule, FloatType::Type, TimeType::Type,
                         instantiateModelOptions::OrderedDict{Symbol,Any},
                         ID, modelPath::Union{Expr,Symbol,Nothing},
                         buildOption::String = "ComputeGeneralizedForces")   # ComputeJointAccelerations, ComputeJointAccelerationsOn
@@ -79,7 +79,7 @@ function build_Model3D!(model::AbstractDict, modelModule, FloatType::Type, TimeT
     if !unitless
         source    = instantiateModelOptions[:source]
         modelName = instantiateModelOptions[:modelName]
-        error("\nError from Model3D(..) in model $modelName at $source:\n@instantiatedModel(..., unitless=true, ...) required, because units not yet fully supported by Model3D.\n")   
+        error("\nError from Model3D(..) in model $modelName at $source:\n@instantiatedModel(..., unitless=true, ...) required, because units not yet fully supported by Model3D.\n")
     end
     jointInfo = []
     getJointInfo!(model, jointInfo)
@@ -350,13 +350,13 @@ function get_animationHistory(instantiatedModel::Modia.InstantiatedModel{FloatTy
 
     mbs::Modia3D.Composition.MultibodyData{FloatType,TimeType} = instantiatedModel.buildDict[modelPathAsString].mbs
     scene = mbs.scene
-    allVisuElements = scene.allVisuElements
+    visualObject3Ds = scene.visualObject3Ds
     animation = scene.animation
     animationHistory = OrderedDict{String,Any}()
 
-    if length(allVisuElements) > 0 && scene.provideAnimationData
+    if length(visualObject3Ds) > 0 && scene.provideAnimationData
         if log
-            println("get_animationHistory(..): Return animation history of ", length(allVisuElements), " Object3Ds at ",
+            println("get_animationHistory(..): Return animation history of ", length(visualObject3Ds), " Object3Ds at ",
                     length(animation), " time instants")
         end
 
@@ -366,7 +366,7 @@ function get_animationHistory(instantiatedModel::Modia.InstantiatedModel{FloatTy
         end
         animationHistory["time"] = timeVector
 
-        for (iobj,obj) in enumerate(allVisuElements)
+        for (iobj,obj) in enumerate(visualObject3Ds)
             positions   = SVector{3,Float64}[]
             quaternions = SVector{4,Float64}[]
             for animationStep in animation

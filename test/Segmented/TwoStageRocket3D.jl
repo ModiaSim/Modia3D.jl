@@ -78,4 +78,5 @@ plot(rocket, [("stage2.body.translation[2]", "stage1.body.translation[2]" ),
               ("stage1.thrust.forceVector[2]", "stage2.thrust.forceVector[2]")])
 
 plot(rocket, ["stage1.body.r_abs[2]", "stage2.body.r_abs[2]"], figure=2)
+
 end

@@ -435,9 +435,9 @@ function createAnimationQuaternionTrack(object, animation, obj, iobj, R_obj::Not
 end
 
 
-function exportAnimation(scene)
-    allVisuElements = scene.allVisuElements
-    if scene.exportAnimation && length(allVisuElements) > 0
+function exportAnimation(scene::Modia3D.Composition.Scene{F}) where F <: Modia3D.VarFloatType
+    visualObject3Ds = scene.visualObject3Ds
+    if scene.exportAnimation && length(visualObject3Ds) > 0
         animationFile = scene.options.animationFile
         (head,ext) = splitext(animationFile)
         if ext != ".json"
@@ -467,7 +467,7 @@ function exportAnimation(scene)
         if !isnothing(animation) && length(animation) != 0
             iobj = 0
             tracks = []
-            for obj in allVisuElements
+            for obj in visualObject3Ds
                 iobj = iobj + 1
                 (r_obj, R_obj) = printObjectToJSON(object, elements, obj, initPos=animation[1].objectData[iobj].position, initRot=Modia3D.from_q(animation[1].objectData[iobj].quaternion))
                 if !isnothing(R_obj)
@@ -478,7 +478,7 @@ function exportAnimation(scene)
             animations = [(; name="Simulation", uuid=uuid, tracks)]
             scene = (; metadata, elements.geometries, elements.materials, elements.shapes, object, animations)
         else
-            for obj in allVisuElements
+            for obj in visualObject3Ds
                 (r_obj, R_obj) = printObjectToJSON(object, elements, obj)
             end
             scene = (; metadata, elements.geometries, elements.materials, elements.shapes, object)
@@ -490,13 +490,5 @@ function exportAnimation(scene)
 
         println("done.")
     end
-end
-
-
-function Composition.isVisible(feature::Shapes.Solid{F}, exportAnimation::Bool) where F <: Modia3D.VarFloatType
-    return exportAnimation && !isnothing(feature.shape) && !isnothing(feature.visualMaterial)
-end
-
-function Composition.isVisible(feature::Shapes.Visual, exportAnimation::Bool)
-    return exportAnimation && !isnothing(feature.visualMaterial) && !isnothing(feature.shape)
+    return nothing
 end
