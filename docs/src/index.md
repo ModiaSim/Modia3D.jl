@@ -90,16 +90,18 @@ julia -JModia3D_sysimage.so  (otherwise)
 | [7a] |*[Modia – Equation Based Modeling and Domain Specific Algorithms](https://doi.org/10.3384/ecp2118173)*|[14th International Modelica Conference 2021, September](http://www.modelica.org/)| [10.3384/ecp2118173](https://doi.org/10.3384/ecp2118173) |
 | [7b] |*[Modia – Equation Based Modeling and Domain Specific Algorithms](https://doi.org/10.3384/ecp2118173)*|[14th International Modelica Conference 2021, September](http://www.modelica.org/)|  |
 | [8] |*[Modelling and Simulation of Physical Systems with Dynamically Changing Degrees of Freedom](https://doi.org/10.3390/electronics12030500)*| Electronics 2023, 12(3), 500 | [10.3390/electronics12030500](https://doi.org/10.3390/electronics12030500) |
+| [9] | Variable Structure System Simulation via Predefined Acausal Components | 15th International Modelica Conference 2023, October | to be published |
 
 ## Release Notes
 
-### Forthcoming version
+### Version 0.12.2
 
 - Add Force Element PolygonalContactModel and tests
 - Add Result Element infrastructure and Result Element ContactResult
 - Bugfix: Correct parent Object3D torque calculation for Fix Joint with non-zero rotation
 - Bugfix: Enable AnimationExport in case of no renderer available
 - Bugfix: Enable position/orientation result signals independent of visualization/animation configuration
+- Segmented Simulation: add flag `enableContactDetection` to action commands (`ActionAttach`, `ActionReleaseAndAttach`, `ActionRelease`, `ActionDelete`) to enable or disable collision handling for the whole model in the actual segment
 
 
 ### Version 0.12.1
@@ -107,7 +109,7 @@ julia -JModia3D_sysimage.so  (otherwise)
 - Adapted to Modia 0.12.0 (arguments of buildFunction in ModiaInterface had been changed,
   as well as function names to define/access variables of built-in components)
 - Absolute position (`r_abs`) and orientation (`R_abs`) of visible shapes are stored in the result
-  data structure and can be plotted (see Modia3D/test/Basid/Pendulum.jl, Modia3D/test/Segmented/TwoStageRocket3D.jl)
+  data structure and can be plotted (see Modia3D/test/Basic/Pendulum.jl, Modia3D/test/Segmented/TwoStageRocket3D.jl)
 - Manifest.toml file removed
 
 
