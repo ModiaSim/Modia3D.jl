@@ -22,7 +22,7 @@ export WorldForce, WorldTorque, Bushing, SpringDamperPtP, PolygonalContactModel
 export ContactResult
 export FreeMotion2
 
-export ModelActions, ActionAttach, ActionRelease, ActionReleaseAndAttach, ActionDelete, EventAfterPeriod, ActionWait
+export ModelActions, ActionAttach, ActionRelease, ActionReleaseAndAttach, ActionDelete, EventAfterPeriod, ActionWait, ActionFlipChain
 export addReferencePath
 
 export build_Model3D!, get_animationHistory

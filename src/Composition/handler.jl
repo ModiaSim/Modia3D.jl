@@ -6,6 +6,7 @@
 #
 
 
+
 function build_tree!(scene::Scene{F}, world::Object3D{F})::Nothing where F <: Modia3D.VarFloatType
     tree                 = scene.tree
     stack                = scene.stack
@@ -116,6 +117,88 @@ function changeParent(newParent::Object3D{F}, obj::Object3D{F})::Nothing where F
     return nothing
 end
 
+
+"""define new parent for an obj
+
+param:
+    newParent: the new parent of the object
+    obj: the object whos parent is to be changed
+"""
+function invertParentChild!(newParent::Object3D{F}, obj::Object3D{F}, ind = "") where F <: Modia3D.VarFloatType
+
+    oldParent = obj.parent
+
+    # add obj as children to new parent (blue line)
+    push!(newParent.children, obj)
+
+    # def new parent for obj (green line)
+    obj.parent = newParent
+
+    # delete obj from oldParent (del old blue line)
+    Basics.deleteItem(oldParent.children, obj)
+
+    # update r_rel and R_rel (red line)
+    obj.r_rel =  newParent.R_abs * (obj.r_abs - newParent.r_abs)
+    obj.R_rel =  obj.R_abs * newParent.R_abs'
+
+    # following formula might be more precise but does not work in all cases
+    # obj.r_rel =  -newParent.R_rel' * newParent.r_rel
+    # obj.R_rel =  newParent.R_rel'
+
+    isBeginOfChain = obj == oldParent
+    if isBeginOfChain
+        deleteJointInfo(obj)
+    else
+        # trigger recursion
+        invertParentChild!(obj, oldParent, ind*"  ")
+    end
+
+    revertJointInfo!(newParent, obj)
+
+    return nothing
+end
+
+"""revertJointInfo!
+Revert joint info between the old and the new child
+
+param:
+    oldChild: the old child i.e. it contains all joint info
+    newChild: the old child i.e. all joint info is to be mover here
+"""
+function revertJointInfo!(oldChild::Object3D{F}, newChild::Object3D{F}) where F <: Modia3D.VarFloatType
+    newChild.jointKind = oldChild.jointKind
+
+    newChild.joint = oldChild.joint
+
+    # joint specific treatment
+    jointSpecificTreatment!(newChild, oldChild)
+
+    oldChild.hasChildJoint = oldChild.hasChildJoint || newChild.hasChildJoint
+
+    newChild.fixedToParent = oldChild.fixedToParent
+
+    newChild.jointIndex = oldChild.jointIndex
+
+    newChild.ndof = oldChild.ndof
+
+    return nothing
+end
+
+"""deleteJointInfo
+Delete joint info of an object
+
+param:
+    obj: the object whos join info shall be deleted
+"""
+function deleteJointInfo(obj::Object3D{F}) where F <: Modia3D.VarFloatType
+    obj.joint     = FixedJoint{F}()
+    obj.jointKind = FixKind
+    obj.jointIndex = 0
+    obj.ndof       = 0
+    obj.fixedToParent = true
+
+    return nothing
+end
 
 function getRootObj(obj::Object3D{F}) where F <: Modia3D.VarFloatType
     if isRootObject(obj)
@@ -539,4 +622,57 @@ function closeAnalysis!(scene::Scene{F})::Nothing where F <: Modia3D.VarFloatTyp
     end
     emptyScene!(scene)
     return nothing
+end
+
+
+function dispTree(root, ind="")
+    if ind == ""
+        println("\nT R E E\n")
+
+        err_r_abs = 0
+        err_R_abs = 0
+    else
+        err_r_abs = norm(root.r_abs - (root.parent.r_abs + root.parent.R_abs' * root.r_rel))
+        err_R_abs = norm(root.R_abs - (root.R_rel * root.parent.R_abs))
+    end
+
+    # println(ind, Modia3D.fullName(root), " ", err_r_abs, " ", err_R_abs)#, " ", root.r_abs)
+
+    println(ind, Modia3D.fullName(root), " ", Modia3D.fullName(root.parent), " ", root.jointKind)
+
+    # migth be interesting too:
+    # root.r_abs, root.r_rel, root.fixedToParent
+    # root.jointIndex, root.ndof
+    # root.hasChildJoint,
+
+    for child in root.children
+        dispTree(child, ind * "  ")
+    end
+
+    if ind == ""
+        println("\n")
+    end
+end
+
+function dispSceneTree(root, ind="")
+    if ind == ""
+        println("\n\n\nxxxxxxxxxxxxxxxxxxxxxx\n\n\n")
+
+    #     err_r_abs = 0
+    #     err_R_abs = 0
+    # else
+    #     err_r_abs = norm(root.r_abs - (root.parent.r_abs + root.parent.R_abs' * root.r_rel))
+    #     err_R_abs = norm(root.R_abs - (root.R_rel * root.parent.R_abs))
+    end
+
+    # println(ind, Modia3D.fullName(root), " ", err_r_abs, " ", err_R_abs, " ", root.r_abs)
+    # println(ind, Modia3D.fullName(root), root.r_abs, " ", err_r_abs)
+
+    for child in root
+        dispTree(child, ind * "  ")
+    end
+
+    if ind == ""
+        println("\n\n\nxxxxxxxxxxxxxxxxxxxxxx\n\n\n")
+    end
 end

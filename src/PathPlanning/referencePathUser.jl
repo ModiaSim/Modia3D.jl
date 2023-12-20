@@ -102,6 +102,15 @@ ActionRelease(iargs...; kwargs...)::Nothing =
     checkErrorExplicitRobotFunc("ActionRelease", "robotOrDepot, movablePart, and waitingPeriod", iargs, kwargs, refPathExists=false)
 
 
+### --------------------- ActionFlipChain -----------------------------------
+function ActionFlipChain(ref::ModelActions{F,TimeType}, movablePartNew::String="", robotOrDepot::String="", movablePartOld::String="", iargs...; kwargs...)::Nothing where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
+    checkErrorExplicitRobotFunc("ActionFlipChain", "robotOrDepot, movablePart, and waitingPeriod", iargs, kwargs, refPathExists=true)
+    push!(ref.refMotion, ArbitraryMotion(ActionFlipChain!, movablePartNew, robotOrDepot, movablePartOld, nothing))
+    return nothing
+end
+ActionFlipChain(iargs...; kwargs...)::Nothing =
+    checkErrorExplicitRobotFunc("ActionFlipChain", "movablePartNew, movablePartOld, and robotOrDepot", iargs, kwargs, refPathExists=false)
+
 
 ### --------------------- ActionRelease -----------------------------------
 function ActionDelete(ref::ModelActions{F,TimeType}, movablePart::String="", robotOrDepot::String="", iargs...; waitingPeriod::Float64=0.0, kwargs...)::Nothing where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}

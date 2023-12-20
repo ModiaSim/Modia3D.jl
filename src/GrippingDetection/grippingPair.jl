@@ -6,8 +6,14 @@ mutable struct GrippingPair{F <: Modia3D.VarFloatType}
     # is set for Attach and ReleaseAndAttach
     robotOrDepot::Composition.Object3D{F}  # must be part of a gripper unit or part of a depot (like bottom or other movable unit)
     enableContactDetection::Bool
+    movableObjOld::Composition.Object3D{F}  # must be part of a movable unit
     GrippingPair{F}(gripStatus::GripStatus, movableObj::Composition.Object3D{F}) where {F <: Modia3D.VarFloatType} = new(gripStatus, movableObj)
     GrippingPair{F}(gripStatus::GripStatus, movableObj::Composition.Object3D{F}, robotOrDepot::Composition.Object3D{F}) where {F <: Modia3D.VarFloatType}  = new(gripStatus, movableObj, robotOrDepot)
+    function GrippingPair{F}(gripStatus::GripStatus, movableObj::Composition.Object3D{F}, robotOrDepot::Composition.Object3D{F}, movableObjOld::Composition.Object3D{F}) where {F <: Modia3D.VarFloatType}
+        obj = new(gripStatus, movableObj, robotOrDepot)
+        obj.movableObjOld = movableObjOld
+        return obj
+    end
 end
 
 
@@ -47,7 +53,7 @@ function checkGrippingFeatures(scene::Composition.Scene{F}, gripPair::GrippingPa
     # the so-called movableObj must belong to a movable unit
     movableObjIsMovable = Composition.objectHasMovablePos(movableObj)
     if !movableObjIsMovable
-        error("das movable obj gehört nicht zu movable")
+        error("movable obj gehört nicht zu movable")
         printWarnMovableUnit(movableObj)
         allowedToChange = false
         return false
@@ -77,6 +83,27 @@ function checkGrippingFeatures(scene::Composition.Scene{F}, gripPair::GrippingPa
             @error("For ActionAttach and ActionReleaseAndAttach a second lockabe Object3D must be defined.")
             return false
         end
+    end
+
+    if gripPair.gripStatus == FlipChain
+        movableObjOld::Composition.Object3D{F} = gripPair.movableObjOld
+        # movableObj must be lockable
+        if !movableObjOld.interactionManner.lockable
+            error("movableObjOld is not lockable")
+            #printWarnLockable(robotOrDepot, movableObj)
+            allowedToChange = false
+            return false
+        end
+
+        # the so-called movableObj must belong to a movable unit
+        movableObjIsMovableOld = Composition.objectHasMovablePos(movableObjOld)
+        if !movableObjIsMovableOld
+            error("$(Modia3D.fullName(movableObjOld )) does not belong to a movable unit.")
+            printWarnMovableUnit(movableObjIsMovableOld)
+            allowedToChange = false
+            return false
+        end
+        return true
     end
     return true
 end
@@ -125,7 +152,7 @@ function changeParentOfMovableUnit!(scene::Composition.Scene{F}, world::Composit
     end
 
     # new parent is robotOrDepot
-    if gripPair.gripStatus == ReleaseAndSetDown ||  gripPair.gripStatus == Grip
+    if gripPair.gripStatus == ReleaseAndSetDown ||  gripPair.gripStatus == Grip || gripPair.gripStatus == FlipChain
         if isdefined(gripPair, :robotOrDepot)
             robotOrDepot::Composition.Object3D{F} = gripPair.robotOrDepot
         else
@@ -150,6 +177,24 @@ function changeParentOfMovableUnit!(scene::Composition.Scene{F}, world::Composit
         if gripPair.gripStatus == Grip && Composition.isFree(movableObjRoot)
             Composition.changeJointFromFreeMotionToFix!(newParent, movableObjRoot)
         end
+        return nothing
+    end
+
+    if gripPair.gripStatus == FlipChain
+        # 1. like == Release with movableObjOld
+        movableObjsOld = getSuperObjsMovable(scene,
+        gripPair.movableObjOld.interactionManner.movablePos)
+        movableObjRootOld::Composition.Object3D{F} = movableObjsOld[1]
+        # new parent is obj
+        Basics.deleteItem(movableObjRootOld.parent.children, movableObjRootOld)
+        movableObjRootOld.parent = movableObjRootOld
+
+        # 2. like == Grip
+        robotOrDepotPos = robotOrDepot.interactionManner.originPos
+        newParent = Composition.getRootObj(scene.buffer[robotOrDepotPos])
+
+
+        Composition.invertParentChild!(newParent, movableObjRoot)
         return nothing
     end
     return nothing

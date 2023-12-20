@@ -77,3 +77,10 @@ mutable struct Revolute{F <: Modia3D.VarFloatType} <: Modia3D.AbstractJoint
     end
 end
 Revolute(; kwargs...) = Revolute{Float64}(; kwargs...)
+
+
+function revertRevoluteKind!(oldChild::Object3D{F}, newChild::Object3D{F}) where F <: Modia3D.VarFloatType
+    newChild.joint.obj1, newChild.joint.obj2 = newChild.joint.obj2, newChild.joint.obj1
+    newChild.joint.eAxis = -newChild.joint.eAxis
+    return nothing
+end

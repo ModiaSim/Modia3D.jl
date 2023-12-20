@@ -165,6 +165,16 @@ function ActionRelease!(ref::ModelActions{F,TimeType}, movableObj::String, waiti
 end
 
 
+###------------------------- ActionFlipChain! -------------------------------
+function ActionFlipChain!(ref::ModelActions{F,TimeType}, movablePartNew::String, robotOrDepot::String, movablePartOld::String, nothing) where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
+    # @assert(waitingPeriod >= 0.0) # waitingPeriod must be positive
+    ref.scene.gripPair = Modia3D.GrippingPair{F}(Modia3D.FlipChain,  getComponent(ref, movablePartNew), getComponent(ref, robotOrDepot), getComponent(ref, movablePartOld))
+
+    setAttributesReferencePathRestart!(ref, Modia.getTime(ref.instantiatedModel))
+    return nothing
+end
+
+
 ###------------------------- ActionDelete! -------------------------------
 function ActionDelete!(ref::ModelActions{F,TimeType}, movableObj::String, waitingPeriod::Float64, enableContactDetection::Union{Bool,Nothing}, nothing) where {F <: Modia3D.VarFloatType, TimeType <: AbstractFloat}
     @assert(waitingPeriod >= 0.0) # waitingPeriod must be positive
