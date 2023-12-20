@@ -96,6 +96,8 @@ julia -JModia3D_sysimage.so  (otherwise)
 
 ### Forthcoming version
 
+- Enable kinematic chain flipping for structure variable systems
+
 
 ### Version 0.12.2
 
