@@ -61,9 +61,9 @@ Test.@testset "Robot" begin
         Test.@test_broken include(joinpath("Robot", "YouBotWithSphere.jl"))  # LinearAlgebra.SingularException
         include(joinpath("Robot", "YouBotGripping.jl"))
         include(joinpath("Robot", "YouBotSphereTransport.jl"))
-        include(joinpath("Robot", "ScenarioCollisionOnly.jl"))
     end
     if testsExtend == completeTests
+        include(joinpath("Robot", "ScenarioCollisionOnly.jl"))  # long computation time
         include(joinpath("Robot", "YouBotPingPong.jl"))  # long computation time
         include(joinpath("Robot", "YouBotsGripping.jl"))  # long computation time
     end

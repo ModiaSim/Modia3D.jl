@@ -94,14 +94,17 @@ julia -JModia3D_sysimage.so  (otherwise)
 
 ## Release Notes
 
+### Forthcoming version
+
+
 ### Version 0.12.2
 
 - Add Force Element PolygonalContactModel and tests
 - Add Result Element infrastructure and Result Element ContactResult
+- Segmented Simulation: add flag `enableContactDetection` to action commands (`ActionAttach`, `ActionReleaseAndAttach`, `ActionRelease`, `ActionDelete`) to enable or disable collision handling for the whole model in the actual segment
 - Bugfix: Correct parent Object3D torque calculation for Fix Joint with non-zero rotation
 - Bugfix: Enable AnimationExport in case of no renderer available
 - Bugfix: Enable position/orientation result signals independent of visualization/animation configuration
-- Segmented Simulation: add flag `enableContactDetection` to action commands (`ActionAttach`, `ActionReleaseAndAttach`, `ActionRelease`, `ActionDelete`) to enable or disable collision handling for the whole model in the actual segment
 
 
 ### Version 0.12.1

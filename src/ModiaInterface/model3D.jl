@@ -41,6 +41,7 @@ ModelActions(; kwargs...) = Par(; _constructor = :(Modia3D.PathPlanning.ModelAct
 ActionAttach(args...; kwargs...) = Modia3D.PathPlanning.ActionAttach(args...; kwargs...)
 ActionRelease(args...; kwargs...) = Modia3D.PathPlanning.ActionRelease(args...; kwargs...)
 ActionReleaseAndAttach(args...; kwargs...) = Modia3D.PathPlanning.ActionReleaseAndAttach(args...; kwargs...)
+ActionFlipChain(args...; kwargs...) = Modia3D.PathPlanning.ActionFlipChain(args...; kwargs...)
 ActionDelete(args...; kwargs...) = Modia3D.PathPlanning.ActionDelete(args...; kwargs...)
 EventAfterPeriod(args...; kwargs...) = Modia3D.PathPlanning.EventAfterPeriod(args...; kwargs...)
 ActionWait(args...; kwargs...) = Modia3D.PathPlanning.ActionWait(args...; kwargs...)

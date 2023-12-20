@@ -859,3 +859,18 @@ function setDistance!(prismatic::Prismatic, s::F) where F <: Modia3D.VarFloatTyp
    obj.r_abs   = parent.r_abs + parent.R_abs'*obj.r_rel
    return prismatic
 end
+
+
+function jointSpecificTreatment!(oldChild::Object3D{F}, newChild::Object3D{F})::Nothing where F <: Modia3D.VarFloatType
+    if newChild.jointKind == Modia3D.Composition.RevoluteKind
+        revertRevoluteKind!(oldChild, newChild)
+        return nothing
+    elseif newChild.jointKind == Modia3D.Composition.FixKind
+        # nothing needs to be done here
+        return nothing
+    else
+        @error(newChild.jointKind, " is not implemented yet")
+        return nothing
+    end
+    return nothing
+end

@@ -9,9 +9,9 @@ using LinearAlgebra
 
 const NOTHING = Nothing
 
-export GripStatus, Grip, Release, ReleaseAndSetDown, Delete, NoAction
+export GripStatus, Grip, Release, ReleaseAndSetDown, Delete, FlipChain, NoAction
 
-@enum GripStatus Grip Release ReleaseAndSetDown Delete NoAction
+@enum GripStatus Grip Release ReleaseAndSetDown Delete FlipChain NoAction
 
 include("grippingPair.jl")
 
