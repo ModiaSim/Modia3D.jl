@@ -67,21 +67,21 @@ mutable struct SpringDamperPtP{F <: Modia3D.VarFloatType} <: Modia3D.AbstractFor
         nomLength = Modia3D.convertAndStripUnit(F, u"m", nominalLength)
         nomForce  = Modia3D.convertAndStripUnit(F, u"N", nominalForce)
 
-        if (!isa(springForceLaw, Function))
+        if (isa(springForceLaw, Function))
+            springForceFunction = springForceLaw
+        else
             stiffness = Modia3D.convertAndStripUnit(F, u"N/m", springForceLaw)
-            fkt1(_x) = stiffness*_x
-        else
-            fkt1 = springForceLaw
+            springForceFunction(pos::F) = stiffness * pos
         end
 
-        if (!isa(damperForceLaw, Function))
+        if (isa(damperForceLaw, Function))
+            damperForceFunction = damperForceLaw
+        else
             damping = Modia3D.convertAndStripUnit(F, u"N*s/m", damperForceLaw)
-            fkt2(_x) = damping*_x
-        else
-            fkt2 = damperForceLaw
+            damperForceFunction(vel::F) = damping * vel
         end
 
-        return new(path, obj1, obj2, nomLength, nomForce, fkt1, fkt2)
+        return new(path, obj1, obj2, nomLength, nomForce, springForceFunction, damperForceFunction)
     end
 end
 SpringDamperPtP(; kwargs...) = SpringDamperPtP{Float64}(; kwargs...)
