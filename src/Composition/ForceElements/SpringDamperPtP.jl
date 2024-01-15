@@ -70,14 +70,14 @@ mutable struct SpringDamperPtP{F <: Modia3D.VarFloatType} <: Modia3D.AbstractFor
         if (isa(springForceLaw, Function))
             springForceFunction = springForceLaw
         else
-            stiffness = Modia3D.convertAndStripUnit(F, u"N/m", springForceLaw)
+            stiffness::F = Modia3D.convertAndStripUnit(F, u"N/m", springForceLaw)
             springForceFunction(pos::F) = stiffness * pos
         end
 
         if (isa(damperForceLaw, Function))
             damperForceFunction = damperForceLaw
         else
-            damping = Modia3D.convertAndStripUnit(F, u"N*s/m", damperForceLaw)
+            damping::F = Modia3D.convertAndStripUnit(F, u"N*s/m", damperForceLaw)
             damperForceFunction(vel::F) = damping * vel
         end
 
