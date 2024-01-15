@@ -122,30 +122,30 @@ mutable struct Bushing{F <: Modia3D.VarFloatType} <: Modia3D.AbstractForceElemen
             if (isa(springForceLaw[dir], Function))
                 springForceFunction[dir] = springForceLaw[dir]
             else
-                stiffness = Modia3D.convertAndStripUnit(F, u"N/m", springForceLaw[dir])
-                fsymb = Symbol(path, "_", "fc", dir)
-                springForceFunction[dir] = eval(:($fsymb(pos) = $stiffness * pos))
+                stiffness::F = Modia3D.convertAndStripUnit(F, u"N/m", springForceLaw[dir])
+                stiffnessFunction(pos::F) = stiffness * pos
+                springForceFunction[dir] = stiffnessFunction
             end
             if (isa(damperForceLaw[dir], Function))
                 damperForceFunction[dir] = damperForceLaw[dir]
             else
-                damping = Modia3D.convertAndStripUnit(F, u"N*s/m", damperForceLaw[dir])
-                fsymb = Symbol(path, "_", "fd", dir)
-                damperForceFunction[dir] = eval(:($fsymb(vel) = $damping * vel))
+                damping::F = Modia3D.convertAndStripUnit(F, u"N*s/m", damperForceLaw[dir])
+                dampingFunction(vel::F) = damping * vel
+                damperForceFunction[dir] = dampingFunction
             end
             if (isa(rotSpringForceLaw[dir], Function))
                 rotSpringForceFunction[dir] = rotSpringForceLaw[dir]
             else
-                stiffness = Modia3D.convertAndStripUnit(F, u"N*m/rad", rotSpringForceLaw[dir])
-                fsymb = Symbol(path, "_", "mc", dir)
-                rotSpringForceFunction[dir] = eval(:($fsymb(ang) = $stiffness * ang))
+                rotStiffness::F = Modia3D.convertAndStripUnit(F, u"N*m/rad", rotSpringForceLaw[dir])
+                rotStiffnessFunction(ang::F) = rotStiffness * ang
+                rotSpringForceFunction[dir] = rotStiffnessFunction
             end
             if (isa(rotDamperForceLaw[dir], Function))
                 rotDamperForceFunction[dir] = rotDamperForceLaw[dir]
             else
-                damping = Modia3D.convertAndStripUnit(F, u"N*m*s/rad", rotDamperForceLaw[dir])
-                fsymb = Symbol(path, "_", "md", dir)
-                rotDamperForceFunction[dir] = eval(:($fsymb(angd) = $damping * angd))
+                rotDamping::F = Modia3D.convertAndStripUnit(F, u"N*m*s/rad", rotDamperForceLaw[dir])
+                rotDampingFunction(om::F) = rotDamping * om
+                rotDamperForceFunction[dir] = rotDampingFunction
             end
         end
 
