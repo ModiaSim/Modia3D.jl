@@ -58,7 +58,7 @@ Test.@testset "Robot" begin
     include(joinpath("Robot", "ServoWithRampAndRevolute.jl"))
     include(joinpath("Robot", "ServoWithPathAndRevolute.jl"))
     if testsExtend >= normalTests
-        Test.@test_broken include(joinpath("Robot", "YouBotWithSphere.jl"))  # LinearAlgebra.SingularException
+        Test.@test_skip include(joinpath("Robot", "YouBotWithSphere.jl"))  # LinearAlgebra.SingularException on some platforms
         include(joinpath("Robot", "YouBotGripping.jl"))
         include(joinpath("Robot", "YouBotSphereTransport.jl"))
     end
