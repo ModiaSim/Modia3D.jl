@@ -14,7 +14,7 @@ Test.@testset "Basic" begin
     include(joinpath("Basic", "AllShapes.jl"))
     include(joinpath("Basic", "PendulumWithBar1.jl"))
     include(joinpath("Basic", "PendulumWithBar2.jl"))
-    Test.@test_broken include(joinpath("Basic", "PendulumWithBar3.jl"))  # error when called from here, works when called from REPL
+    include(joinpath("Basic", "PendulumWithBar3.jl"))
     include(joinpath("Basic", "PendulumWithDamper.jl"))
     include(joinpath("Basic", "PendulumWithFix.jl"))
     include(joinpath("Basic", "PendulumWithParameterizedDamper.jl"))
@@ -58,7 +58,7 @@ Test.@testset "Robot" begin
     include(joinpath("Robot", "ServoWithRampAndRevolute.jl"))
     include(joinpath("Robot", "ServoWithPathAndRevolute.jl"))
     if testsExtend >= normalTests
-        Test.@test_broken include(joinpath("Robot", "YouBotWithSphere.jl"))  # LinearAlgebra.SingularException
+        Test.@test_skip include(joinpath("Robot", "YouBotWithSphere.jl"))  # LinearAlgebra.SingularException on some platforms
         include(joinpath("Robot", "YouBotGripping.jl"))
         include(joinpath("Robot", "YouBotSphereTransport.jl"))
     end
