@@ -111,19 +111,17 @@ function evaluateResultElement(model::Modia.InstantiatedModel{F,TimeType}, scene
         torqueVector = SVector{3,F}(0, 0, 0)
     end
 
-    if Modia.storeResults(model)
-        Modia.copy_w_segmented_value_to_result(model, result.penetrationResultIndex, penetration)
-        Modia.copy_w_segmented_value_to_result(model, result.penetrationVelocityResultIndex, penetrationVelocity)
-        Modia.copy_w_segmented_value_to_result(model, result.tangentialVelocityResultIndex, tangentialVelocity)
-        Modia.copy_w_segmented_value_to_result(model, result.angularVelocityResultIndex, angularVelocity)
-        Modia.copy_w_segmented_value_to_result(model, result.normalForceResultIndex, normalForce)
-        Modia.copy_w_segmented_value_to_result(model, result.tangentialForceResultIndex, tangentialForce)
-        Modia.copy_w_segmented_value_to_result(model, result.torqueResultIndex, torque)
-        Modia.copy_w_segmented_value_to_result(model, result.positionVectorResultIndex, positionVector)
-        Modia.copy_w_segmented_value_to_result(model, result.normalVectorResultIndex, normalVector)
-        Modia.copy_w_segmented_value_to_result(model, result.forceVectorResultIndex, forceVector)
-        Modia.copy_w_segmented_value_to_result(model, result.torqueVectorResultIndex, torqueVector)
-    end
+    Modia.copy_w_segmented_value_to_result(model, result.penetrationResultIndex, penetration)
+    Modia.copy_w_segmented_value_to_result(model, result.penetrationVelocityResultIndex, penetrationVelocity)
+    Modia.copy_w_segmented_value_to_result(model, result.tangentialVelocityResultIndex, tangentialVelocity)
+    Modia.copy_w_segmented_value_to_result(model, result.angularVelocityResultIndex, angularVelocity)
+    Modia.copy_w_segmented_value_to_result(model, result.normalForceResultIndex, normalForce)
+    Modia.copy_w_segmented_value_to_result(model, result.tangentialForceResultIndex, tangentialForce)
+    Modia.copy_w_segmented_value_to_result(model, result.torqueResultIndex, torque)
+    Modia.copy_w_segmented_value_to_result(model, result.positionVectorResultIndex, positionVector)
+    Modia.copy_w_segmented_value_to_result(model, result.normalVectorResultIndex, normalVector)
+    Modia.copy_w_segmented_value_to_result(model, result.forceVectorResultIndex, forceVector)
+    Modia.copy_w_segmented_value_to_result(model, result.torqueVectorResultIndex, torqueVector)
 
     return nothing
 end

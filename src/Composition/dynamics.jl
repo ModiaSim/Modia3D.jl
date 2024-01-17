@@ -551,8 +551,10 @@ function computeGeneralizedForces!(mbs::MultibodyData{F,TimeType}, qdd_hidden::V
             end
 
         elseif leq_mode == -2
-            # Compute only terms needed at a communication point (currently: Only visualization + export animation)
+            # Compute only terms needed at a communication point (user-defined Object3D r/R_abs, result elements, visualization/animation export)
             TimerOutputs.@timeit instantiatedModel.timer "Modia3D_3" begin
+                # Compute kinematics (yields absolute accelerations for result elements)
+                TimerOutputs.@timeit instantiatedModel.timer "Modia3D_3 computePositionsVelocitiesAccelerations!" computePositionsVelocitiesAccelerations!(mbs, tree, time)
                 # objects can have interactionManner
                 if scene.options.useOptimizedStructure
                     for obj in scene.pureResultObject3Ds

@@ -19,7 +19,7 @@ export Revolute, RevoluteWithFlange
 export Prismatic, PrismaticWithFlange
 export singularRem, FreeMotion, change_rotSequenceInNextIteration!
 export WorldForce, WorldTorque, Bushing, SpringDamperPtP, PolygonalContactModel
-export ContactResult
+export SensorResult, ContactResult
 export FreeMotion2
 
 export ModelActions, ActionAttach, ActionRelease, ActionReleaseAndAttach, ActionDelete, EventAfterPeriod, ActionWait, ActionFlipChain

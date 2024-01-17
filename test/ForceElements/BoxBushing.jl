@@ -30,7 +30,8 @@ BoxBushing = Model3D(
                                  visualMaterial=:(visualMaterial))),
     force = Bushing(obj1=:world, obj2=:box,
                     springForceLaw=[fc, 100.0, 200.0], damperForceLaw=[1.0, fd, 4.0],
-                    rotSpringForceLaw=[5.0, 10.0, mc], rotDamperForceLaw=[0.1, md, 0.4], largeAngles=largeAngles)
+                    rotSpringForceLaw=[5.0, 10.0, mc], rotDamperForceLaw=[0.1, md, 0.4], largeAngles=largeAngles),
+    result = SensorResult(object=:box)
 )
 
 boxBushing = @instantiateModel(BoxBushing, unitless=true, logCode=true)
@@ -45,9 +46,10 @@ end
 simulate!(boxBushing, stopTime=stopTime, dtmax=dtmax, log=true, requiredFinalStates=requiredFinalStates)
 
 @usingModiaPlot
-plot(boxBushing, ["box.translation", "box.velocity", "box.rotation", "box.angularVelocity"], figure=1)
-plot(boxBushing, ["force.translation", "force.velocity", "force.rotation", "force.rotationVelocity"], figure=2)
-plot(boxBushing, ["force.springForce", "force.damperForce", "force.forceVector"], figure=3)
-plot(boxBushing, ["force.springTorque", "force.damperTorque", "force.torque", "force.torqueVector"], figure=4)
+plot(boxBushing, ["result.translation", "result.velocity", "result.acceleration"], figure=1)
+plot(boxBushing, ["result.rotation", "result.angularVelocity", "result.angularAcceleration"], figure=2)
+plot(boxBushing, ["force.translation", "force.velocity", "force.rotation", "force.rotationVelocity"], figure=3)
+plot(boxBushing, ["force.springForce", "force.damperForce", "force.forceVector"], figure=4)
+plot(boxBushing, ["force.springTorque", "force.damperTorque", "force.torque", "force.torqueVector"], figure=5)
 
 end
