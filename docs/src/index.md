@@ -96,6 +96,7 @@ julia -JModia3D_sysimage.so  (otherwise)
 
 ### Forthcoming version
 
+- Add Result Element SensorResult
 - Enable kinematic chain flipping for structure variable systems
 - Avoid function code generation for linear stiffness and damping in SpringDamperPtP and Bushing
 

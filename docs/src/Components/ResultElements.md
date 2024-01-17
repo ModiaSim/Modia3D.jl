@@ -4,6 +4,12 @@
 CurrentModule = Modia3D.Composition
 ```
 
+## SensorResult
+
+```@docs
+SensorResult
+```
+
 ## ContactResult
 
 ```@docs

@@ -132,7 +132,7 @@ If `frameObsrv` is omitted `wd` is observed in world frame.
 function measFrameRotAcceleration(frameMeas::Object3D{F}; frameOrig::Union{Object3D{F}, Nothing}=nothing, frameCoord::Union{Object3D{F}, Nothing}=nothing, frameObsrv::Union{Object3D{F}, Nothing}=nothing) where F <: Modia3D.VarFloatType
     wd_OrigMeas = frameMeas.R_abs' * copy(frameMeas.z)  # World_wd_WorldMeas := R_MeasWorld^T * Meas_wd_WorldMeas
     if !isnothing(frameOrig)
-        wd_OrigMeas = wd_OrigMeas - (frame.Orig.R_abs' * frameOrig.z)  # World_wd_OrigMeas := World_wd_WorldMeas - R_OrigWorld^T * Orig_wd_WorldOrig
+        wd_OrigMeas = wd_OrigMeas - (frameOrig.R_abs' * frameOrig.z)  # World_wd_OrigMeas := World_wd_WorldMeas - R_OrigWorld^T * Orig_wd_WorldOrig
     end
     if !isnothing(frameObsrv)
         w_OrigMeas = measFrameRotVelocity(frameMeas; frameOrig=frameOrig)

@@ -41,6 +41,7 @@ Test.@testset "Force Elements" begin
     include(joinpath("ForceElements", "BoxBushing.jl"))
     include(joinpath("ForceElements", "BoxSpringDamperPtP.jl"))
     include(joinpath("ForceElements", "BoxNonLinearSpringDamperPtP.jl"))
+    include(joinpath("ForceElements", "BoxForceSensorResult.jl"))
     if testsExtend >= normalTests
         include(joinpath("ForceElements", "PCMBubbleFunnel.jl"))
     end
