@@ -79,8 +79,8 @@ end
 Revolute(; kwargs...) = Revolute{Float64}(; kwargs...)
 
 
-function revertRevoluteKind!(newChild::Object3D{F}) where F <: Modia3D.VarFloatType
-    newChild.joint.obj1, newChild.joint.obj2 = newChild.joint.obj2, newChild.joint.obj1
-    newChild.joint.eAxis = -newChild.joint.eAxis
+function revertRevoluteKind!(joint::Revolute{F}) where F <: Modia3D.VarFloatType
+    joint.obj1, joint.obj2 = joint.obj2, joint.obj1
+    joint.eAxis = -joint.eAxis
     return nothing
 end
