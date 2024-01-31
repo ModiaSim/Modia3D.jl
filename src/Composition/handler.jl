@@ -171,7 +171,7 @@ function revertJointInfo!(oldChild::Object3D{F}, newChild::Object3D{F}) where F 
     newChild.joint = oldChild.joint
 
     # joint specific treatment
-    jointSpecificTreatment!(newChild, oldChild)
+    jointSpecificTreatment!(oldChild, newChild)
 
     oldChild.hasChildJoint = oldChild.hasChildJoint || newChild.hasChildJoint
 

@@ -863,7 +863,8 @@ end
 
 function jointSpecificTreatment!(oldChild::Object3D{F}, newChild::Object3D{F})::Nothing where F <: Modia3D.VarFloatType
     if newChild.jointKind == Modia3D.Composition.RevoluteKind
-        revertRevoluteKind!(oldChild, newChild)
+        joint::Revolute{F} = newChild.joint
+        revertRevoluteKind!(joint)
         return nothing
     elseif newChild.jointKind == Modia3D.Composition.FixKind
         # nothing needs to be done here
