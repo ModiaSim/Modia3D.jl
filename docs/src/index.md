@@ -99,6 +99,7 @@ julia -JModia3D_sysimage.so  (otherwise)
 - Add Result Element SensorResult
 - Enable kinematic chain flipping for structure variable systems
 - Avoid function code generation for linear stiffness and damping in SpringDamperPtP and Bushing
+- Enable FileMesh support in AnimationExport for other mesh file formats than obj
 
 
 ### Version 0.12.2

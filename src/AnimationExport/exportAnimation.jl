@@ -255,15 +255,12 @@ function exportObject(object, elements, obj::Modia3D.Composition.Object3D, fileM
     (head,ext) = splitext(filenameOld)
     if ext == ".json"
         filename = filenameOld
-    elseif ext == ".obj"
+    else
         filename = head * ".json"
         if !isfile(filename)
-            @warn("Please convert $filenameOld into a .json file.")
-            return nothing
+            @warn("Only FileMeshes in three.js json object scene format are supported by AnimationExport.\nPlease convert $filenameOld into a .json file and move it to the same folder.")
+            return (nothing, nothing)
         end
-    else
-        @warn("Please convert $filenameOld into a .json file.")
-        return nothing
     end
 
     io = open(filename, "r")
