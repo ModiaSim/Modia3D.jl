@@ -40,7 +40,7 @@ pendulumWithDamper = @instantiateModel(PendulumWithDamp, unitless=true, log=fals
 
 stopTime = 10.0
 requiredFinalStates = missing
-simulate!(pendulumWithDamper, QBDF(autodiff=false), stopTime=stopTime, log=true, logStates=false, requiredFinalStates=requiredFinalStates)
+simulate!(pendulumWithDamper, QBDF(autodiff = AutoFiniteDiff()), stopTime=stopTime, log=true, logStates=false, requiredFinalStates=requiredFinalStates)
 
 @usingModiaPlot
 plot(pendulumWithDamper, ["pendulum.rev.flange.phi"], figure=1)
