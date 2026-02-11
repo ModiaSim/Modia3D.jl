@@ -22,13 +22,10 @@ BouncingSphere = Model3D(
 
 bouncingSphere = @instantiateModel(BouncingSphere, unitless=true, logCode=true)
 
-simulate!(bouncingSphere, stopTime=0.2, dtmax=0.1, log=true, logStates=true) 
+simulate!(bouncingSphere, stopTime=0.2, dtmax=0.1, log=true, logStates=true)
 showInfo(bouncingSphere)
 
 @usingModiaPlot
 plot(bouncingSphere, "free.r", figure=1)
-
-simulate!(bouncingSphere, IDA(), nlinearMinForDAE=1, stopTime=2.2, dtmax=0.1, log=true, logStates=true)  #, requiredFinalStates=requiredFinalStates)
-showInfo(bouncingSphere)
 
 end
