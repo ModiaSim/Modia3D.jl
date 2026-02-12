@@ -44,14 +44,14 @@ simulate!(bouncingSphere, stopTime=stopTime, tolerance=tolerance, dtmax=dtmax, l
 @usingModiaPlot
 plot(bouncingSphere, ["prism.s", "prism.v"], figure=1)
 
-simulate!(bouncingSphere, QBDF(autodiff = AutoFiniteDiff()), stopTime=stopTime, tolerance=tolerance, dtmax=dtmax, log=true,
-          requiredFinalStates_atol = 1e-7, requiredFinalStates=requiredFinalStates)
-plot(bouncingSphere, ["prism.s", "prism.v"], figure=2)
+# simulate!(bouncingSphere, QBDF(autodiff = AutoFiniteDiff()), stopTime=stopTime, tolerance=tolerance, dtmax=dtmax, log=true,
+#           requiredFinalStates_atol = 1e-7, requiredFinalStates=requiredFinalStates)
+# plot(bouncingSphere, ["prism.s", "prism.v"], figure=2)
 
-simulate!(bouncingSphere, Tsit5(), stopTime=stopTime, tolerance=tolerance, dtmax=dtmax, log=true,
-          merge = Map(world = Map(feature = Map(maximumContactDamping=1000))),   # Demonstrate how to change Modia3D data
-          requiredFinalStates_atol = 1e-7, requiredFinalStates=requiredFinalStates)
-plot(bouncingSphere, ["prism.s", "prism.v"], figure=3)
+# simulate!(bouncingSphere, QBDF(), stopTime=stopTime, tolerance=tolerance, dtmax=dtmax, log=true,
+#           merge = Map(world = Map(feature = Map(maximumContactDamping=1000))),   # Demonstrate how to change Modia3D data
+#           requiredFinalStates_atol = 1e-7, requiredFinalStates=requiredFinalStates)
+# plot(bouncingSphere, ["prism.s", "prism.v"], figure=3)
 
 
 end

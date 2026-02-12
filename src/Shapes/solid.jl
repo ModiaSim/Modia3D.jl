@@ -135,11 +135,11 @@ end
 Solid(args...; kwargs...) = Solid{Float64}(args...; kwargs...)
 
 
-function JSON.show_json(io::JSON.StructuralContext, s::JSON.CommonSerialization, solid::Solid)
-   JSON.begin_object(io)
-      JSON.show_pair(io, s, "shape"          , solid.shape)
-      JSON.show_pair(io, s, "massProperties" , solid.massProperties)
-      JSON.show_pair(io, s, "material"       , solid.visualMaterial)
-      JSON.show_pair(io, s, "contactMaterial", solid.contactMaterial)
-   JSON.end_object(io)
-end
+# function JSON.show_json(io::JSON.StructuralContext, s::JSON.CommonSerialization, solid::Solid)
+#    JSON.begin_object(io)
+#       JSON.show_pair(io, s, "shape"          , solid.shape)
+#       JSON.show_pair(io, s, "massProperties" , solid.massProperties)
+#       JSON.show_pair(io, s, "material"       , solid.visualMaterial)
+#       JSON.show_pair(io, s, "contactMaterial", solid.contactMaterial)
+#    JSON.end_object(io)
+# end

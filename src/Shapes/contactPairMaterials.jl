@@ -26,7 +26,7 @@ mutable struct ElasticContactPairMaterial <: Modia3D.AbstractContactPairMaterial
                                           slidingFrictionCoefficient=0.0,
                                           rotationalResistanceCoefficient=0.0,
                                           vsmall=0.01,
-                                          wsmall=0.01)
+                                          wsmall=0.01)::Modia3D.AbstractContactPairMaterial
         @assert(coefficientOfRestitution >= 0.0)
         @assert(coefficientOfRestitution <= 1.0)
         @assert(slidingFrictionCoefficient >= 0.0)
@@ -41,7 +41,7 @@ end
 mutable struct ObserverContactPairMaterial <: Modia3D.AbstractContactPairMaterial
     printAlarm::Bool
 
-    function ObserverContactPairMaterial(; printAlarm=false)
+    function ObserverContactPairMaterial(; printAlarm=false)::Modia3D.AbstractContactPairMaterial
         new(printAlarm)
 end; end
 
@@ -53,7 +53,7 @@ end
 
 @enum ResponseType ElasticResponse ObserverResponse ImpulseResponse WheelRailResponse NoResponse
 
-function getResponseMaterial(responseType::String)
+function getResponseMaterial(responseType::String)::Modia3D.AbstractContactPairMaterial
     if responseType == "ElasticResponse"
         return ElasticContactPairMaterial()
     end
@@ -69,6 +69,7 @@ function getResponseMaterial(responseType::String)
     if responseType == "NoResponse"
         return NoContactPairMaterial()
     end
+    return NoContactPairMaterial()
 end
 
 """
@@ -110,19 +111,22 @@ return a `Dict{String, ContactPairMaterial}` dictionary.
 function readContactPairMaterialFromJSON(filename::AbstractString)
     dataJSON = JSON.parsefile(filename)
     palette = OrderedCollections.OrderedDict{TwoNamesKey, Modia3D.AbstractContactPairMaterial}()
-    for (namesPair,dataPair) in dataJSON
-        # Split a key "name1,name2" in two parts
+    for (namesPair, dataPair) in dataJSON
+        # Split a key "name1, name2" in two parts
         i = findfirst(",", namesPair)
         if isnothing(i) || i.start < 2 || i.start >= length(namesPair)
             println("... Wrong key \"", namesPair,"\" not included in contactPairMaterialPalette.")
         else
             namesKey = TwoNamesKey( namesPair[1:i.start-1], namesPair[i.start+1:end] )
-            responseMat = getResponseMaterial(pop!(dataPair, "responseType", NoResponse))
-            for (propName,propData) in dataPair
-                if isdefined(responseMat, Symbol(propName))
-                    setfield!(responseMat, Symbol(propName), propData)
-                else
-                    error("... from key: ", namesKey, " . There might be spelling mistakes. Check ", propName, ".")
+            helper = get(dataPair, "responseType", NoResponse)
+            responseMat::Modia3D.AbstractContactPairMaterial = getResponseMaterial(helper)
+            for (propName, propData) in dataPair
+                if propName != "responseType"
+                    if isdefined(responseMat, Symbol(propName))
+                        setfield!(responseMat, Symbol(propName), propData)
+                    else
+                        @warn("... from key: ", namesKey, " . There might be spelling mistakes. Check ", propName, ".")
+                    end
                 end
             end
             palette[namesKey] = responseMat
