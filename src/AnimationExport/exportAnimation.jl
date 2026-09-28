@@ -271,16 +271,17 @@ function exportObject(object, elements, obj::Modia3D.Composition.Object3D, fileM
         # overwrite materials of mesh object children
         materialName = Modia3D.fullName(obj) * ".material"
         for material in meshObject["materials"]
-            push!(material, "name" => materialName, "uuid" => name2uuid(materialName))
+            material["name"] = materialName
+            material["uuid"] = name2uuid(materialName)
             if fileMesh.useMaterialColor
-                push!(material, "color" => colorNum(obj.visualMaterial.color[1], obj.visualMaterial.color[2], obj.visualMaterial.color[3]))
+                material["color"] = colorNum(obj.visualMaterial.color[1], obj.visualMaterial.color[2], obj.visualMaterial.color[3])
             end
             if fileMesh.doubleSided
-                push!(material, "side" => 2)  # THREE.DoubleSide
+                material["side"] = 2  # THREE.DoubleSide
             end
         end
         for child in (meshObject["object"])["children"]
-            push!(child, "material" => name2uuid(materialName))
+            child["material"] = name2uuid(materialName)
         end
     end
 
@@ -293,11 +294,11 @@ function exportObject(object, elements, obj::Modia3D.Composition.Object3D, fileM
 end
 
 function getObjectInfoMesh(obj, initPos, initRot, scale, R_obj, meshInfo)
-    push!(meshInfo, "name" => Modia3D.fullName(obj) )
+    meshInfo["name"] = Modia3D.fullName(obj)
     delete!(meshInfo, "matrix")
-    push!(meshInfo, "position" => initPos )
-    push!(meshInfo, "rotation" => Modia3D.rot123fromR(R_obj*initRot) )
-    push!(meshInfo, "scale" => scale )
+    meshInfo["position"] = initPos
+    meshInfo["rotation"] = Modia3D.rot123fromR(R_obj*initRot)
+    meshInfo["scale"] = scale
 
     return meshInfo
 end

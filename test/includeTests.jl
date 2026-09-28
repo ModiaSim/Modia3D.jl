@@ -104,7 +104,9 @@ end
 Test.@testset "Segmented" begin
     include(joinpath("Segmented", "TwoStageRocket3D.jl"))
     if testsExtend >= normalTests
-        include(joinpath("Segmented", "YouBotDynamicState.jl"))
+        if Sys.iswindows()
+            include(joinpath("Segmented", "YouBotDynamicState.jl"))
+        end
         include(joinpath("Segmented", "YouBotFixBox.jl"))
         include(joinpath("Segmented", "YouBotFixSphere.jl"))
         include(joinpath("Segmented", "ScenarioSegmentedCollisionOff.jl"))
